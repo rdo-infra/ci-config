@@ -1,0 +1,128 @@
+- builder:
+    name: phase-test-build-mitaka
+    builders:
+        - multijob:
+            name: "INSTALL / TEST (BUILD IMAGES)"
+            condition: UNSTABLE
+            projects:
+                - name: tripleo-quickstart-promote-mitaka-delorean-build-images
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_mitaka_hash
+                - name: packstack-promote-rdo-mitaka
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_mitaka_hash
+
+- builder:
+    name: phase-test-import-mitaka
+    builders:
+        - multijob:
+            name: "INSTALL / TEST (IMPORT IMAGES)"
+            condition: UNSTABLE
+            projects:
+                - name: tripleo-quickstart-promote-mitaka-delorean-minimal
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_mitaka_hash
+                - name: tripleo-quickstart-promote-mitaka-delorean-ha
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_mitaka_hash
+
+- job-template:
+    name: rdo-delorean-promote-mitaka
+    project-type: multijob
+    triggers:
+        - timed: "H */4 * * *"
+    defaults: parent-promote-defaults
+    builders:
+        - phase-get-hash-mitaka
+        - phase-test-build-mitaka
+        - phase-test-import-mitaka
+        - phase-upload-mitaka
+        - phase-repo-promote-mitaka
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- builder:
+    name: phase-get-hash-mitaka
+    builders:
+        - multijob:
+            name: "GET THE LATEST DELOREAN YUM REPOSITORY HASH"
+            condition: SUCCESSFUL
+            projects:
+              - name: promote-get-hash-mitaka
+
+- builder:
+    name: phase-upload-mitaka
+    builders:
+        - multijob:
+            name: "UPLOAD IMAGES TO FILE SERVER"
+            condition: SUCCESSFUL
+            projects:
+              - name: promote-upload-mitaka
+                property-file: /tmp/delorean_mitaka_hash
+
+- builder:
+    name: phase-repo-promote-mitaka
+    builders:
+        - multijob:
+            name: "UPLOAD IMAGES TO FILE SERVER"
+            condition: SUCCESSFUL
+            projects:
+              - name: promote-repo-promote-mitaka
+                property-file: /tmp/delorean_mitaka_hash
+
+- job-template:
+    name: 'rdo-promote-get-hash-mitaka'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-mitaka.sh
+                - scripts/promote-get-hash.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- job-template:
+    name: 'rdo-promote-upload-mitaka'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-mitaka.sh
+                - scripts/promote-upload-images.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- job-template:
+    name: 'rdo-promote-repo-promote-mitaka'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-mitaka.sh
+                - scripts/promote-repo-promote.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- project:
+    name: rdo-delorean-promote-jobs-mitaka
+    jobs:
+        - 'rdo-delorean-promote-mitaka'
+
+- project:
+    name: rdo-promote-get-hash-mitaka
+    jobs:
+        - 'rdo-promote-get-hash-mitaka'
+
+- project:
+    name: rdo-promote-upload-mitaka
+    jobs:
+        - 'rdo-promote-upload-mitaka'
+
+- project:
+    name: rdo-promote-repo-promote-mitaka
+    jobs:
+        - 'rdo-promote-repo-promote-mitaka'
