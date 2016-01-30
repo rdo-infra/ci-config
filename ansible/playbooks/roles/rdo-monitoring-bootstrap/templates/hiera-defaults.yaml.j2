@@ -1,0 +1,178 @@
+---
+# Variables pulled from ansible
+master_host: '{{ master_host }}'
+api_host: '{{ api_host }}'
+bot_host: '{{ bot_host }}'
+rabbitmq_username: '{{ rabbitmq_username }}'
+rabbitmq_password: '{{ rabbitmq_password }}'
+rabbitmq_erlang_cookie: '{{ rabbitmq_erlang_cookie }}'
+sensu_username: '{{ sensu_username }}'
+sensu_password: '{{ sensu_password }}'
+
+# RabbitMQ
+rabbitmq::delete_guest_user: true
+rabbitmq::node_ip_address: '0.0.0.0'
+rabbitmq::package_source: undef
+rabbitmq::repos_ensure: false
+rabbitmq::erlang_cookie: "%{hiera('rabbitmq_erlang_cookie')}"
+rabbitmq::wipe_db_on_cookie_change: true
+rabbitmq::default_user: "%{hiera('rabbitmq_username')}"
+rabbitmq::default_pass: "%{hiera('rabbitmq_password')}"
+rabbitmq::ssl: true
+rabbitmq::ssl_only: true
+rabbitmq::ssl_cert: '/etc/ssl/sensu/server/cert.pem'
+rabbitmq::ssl_key: '/etc/ssl/sensu/server/key.pem'
+rabbitmq::tcp_keepalive: true
+rabbitmq::admin_enable: false
+
+# Uchiwa
+uchiwa::install_repo: false
+uchiwa::sensu_api_endpoints:
+  - name: 'rdo-monitoring'
+    host: "%{hiera('api_host')}"
+    ssl: false
+    insecure: false
+    port: '80'
+    user: "%{hiera('sensu_username')}"
+    pass: "%{hiera('sensu_password')}"
+    path: ''
+    timeout: '5000'
+{{ uchiwa_users }}
+
+# Sensu core config
+sensu::server: true
+sensu::install_repo: true
+sensu::manage_services: true
+sensu::manage_user: true
+sensu::rabbitmq_ssl: true
+sensu::rabbitmq_ssl_cert_chain: '/etc/ssl/sensu/client/cert.pem'
+sensu::rabbitmq_ssl_private_key: '/etc/ssl/sensu/client/key.pem'
+sensu::rabbitmq_reconnect_on_error: true
+sensu::rabbitmq_host: "%{hiera('master_host')}"
+sensu::rabbitmq_port: '5671'
+sensu::rabbitmq_vhost: '/'
+sensu::rabbitmq_user: "%{hiera('rabbitmq_username')}"
+sensu::rabbitmq_password: "%{hiera('rabbitmq_password')}"
+sensu::api: true
+sensu::api_bind: '127.0.0.1'
+sensu::api_user: "%{hiera('sensu_username')}"
+sensu::api_password: "%{hiera('sensu_password')}"
+sensu::manage_handlers_dir: false
+sensu::purge:
+  handlers: false
+  config: true
+
+# Sensu client, check, handler and check config
+sensu::client_keepalive:
+  thresholds:
+    warning: 180
+    critical: 300
+  handlers:
+    - 'errbot'
+  custom:
+    broadcast: '#rdo-dev'
+sensu::client_custom:
+  datacenter: 'rdo-monitoring'
+sensu::handlers:
+  errbot:
+    type: 'pipe'
+    command: "/etc/sensu/handlers/errbot.py --endpoint http://%{hiera('bot_host')}/sensu_event"
+    filters:
+      - check_retry_occurrences
+sensu::check_defaults:
+  occurrences: '3'
+  interval: 60
+  standalone: false
+  subscribers: 'default'
+  handlers:
+    - 'errbot'
+  custom:
+    broadcast: '#rdo-dev'
+    retry_occurrences: 30
+sensu::checks:
+  # Default checks
+  check-cpu:
+    command: '/usr/local/bin/check-cpu.rb'
+  check-load:
+    command: '/usr/local/bin/check-load.rb'
+  check-disk-usage:
+    command: '/usr/local/bin/check-disk-usage.rb'
+  check-ram:
+    command: '/usr/local/bin/check-ram.rb'
+  check-fstab:
+    command: '/usr/local/bin/check-fstab-mounts.rb'
+  check-dns:
+    command: '/usr/local/bin/check-dns.rb -d rdoproject.org'
+  # Default metrics
+  metric-interfaces:
+    command: '/usr/local/bin/metrics-interface.rb'
+    type: 'metric'
+    handlers: 'none'
+  metric-network:
+    command: '/usr/local/bin/metrics-net.rb'
+    type: 'metric'
+    handlers: 'none'
+  metric-network-throughput:
+    command: '/usr/local/bin/metrics-netif.rb'
+    type: 'metric'
+    handlers: 'none'
+  metric-cpu:
+    command: '/usr/local/bin/metrics-cpu.rb'
+    type: 'metric'
+    handlers: 'none'
+  # Master checks
+  check-sensu-api:
+    command: '/usr/local/bin/check-process.rb -p "sensu-api" -C 1'
+    subscribers: 'master'
+  check-rabbitmq:
+    command: '/usr/local/bin/check-process.rb -p "rabbitmq" -C 1'
+    subscribers: 'master'
+  check-sensu-server:
+    command: '/usr/local/bin/check-process.rb -p "sensu-server" -C 1'
+    subscribers: 'master'
+  check-nginx:
+    command: '/usr/local/bin/check-process.rb -p "nginx" -C 1'
+    subscribers: 'master'
+  check-domain-registration:
+    command: '/usr/local/bin/check-whois-domain-expiration.rb -d rdoproject.org -c 60'
+    subscribers: 'master'
+    interval: '14400'
+  check-uchiwa:
+    command: "/usr/local/bin/check-uchiwa-health.rb -h uchiwa.monitoring.rdoproject.org -u rdo -p rdo -P 80"
+    subscribers: 'master'
+  check-weirdo-jobs:
+    command: "/usr/local/bin/check-jenkins-job-status.rb -u https://ci.centos.org -j '^weirdo'"
+    subscribers: 'master'
+  check-quickstart-jobs:
+    command: "/usr/local/bin/check-jenkins-job-status.rb -u https://ci.centos.org -j '^tripleo-quickstart'"
+    subscribers: 'master'
+  check-delorean-mitaka-current-passed-ci:
+    command: "/usr/local/bin/check-delorean-builds.py http://trunk.rdoproject.org/centos7/current-passed-ci/versions.csv"
+    subscribers: 'master'
+    custom:
+      retry_occurrences: 90
+  check-delorean-mitaka-current:
+    command: "/usr/local/bin/check-delorean-builds.py http://trunk.rdoproject.org/centos7/current/versions.csv"
+    subscribers: 'master'
+    custom:
+      retry_occurrences: 90
+  check-delorean-mitaka-consistent:
+    command: "/usr/local/bin/check-delorean-builds.py http://trunk.rdoproject.org/centos7/consistent/versions.csv"
+    subscribers: 'master'
+    custom:
+      retry_occurrences: 90
+  check-delorean-liberty-current-passed-ci:
+    command: "/usr/local/bin/check-delorean-builds.py http://trunk.rdoproject.org/centos7-liberty/current-passed-ci/versions.csv"
+    subscribers: 'master'
+    custom:
+      retry_occurrences: 90
+  check-delorean-liberty-current:
+    command: "/usr/local/bin/check-delorean-builds.py http://trunk.rdoproject.org/centos7-liberty/current/versions.csv"
+    subscribers: 'master'
+    custom:
+      retry_occurrences: 90
+  check-delorean-liberty-consistent:
+    command: "/usr/local/bin/check-delorean-builds.py http://trunk.rdoproject.org/centos7-liberty/consistent/versions.csv"
+    subscribers: 'master'
+    custom:
+      retry_occurrences: 90

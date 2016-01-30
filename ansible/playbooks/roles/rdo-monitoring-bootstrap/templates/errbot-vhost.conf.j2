@@ -1,0 +1,22 @@
+server {
+    listen 80;
+
+    server_name {{ bot_host }};
+    access_log /var/log/nginx/bot.access.log;
+    error_log /var/log/nginx/bot.error.log;
+
+    location / {
+        # Restrict bot access to sensu clients
+        allow 127.0.0.1;
+        {% for host in groups['all'] %}
+        allow {{ hostvars[host]['inventory_hostname'] }};
+        {% endfor %}
+        deny all;
+
+        proxy_pass http://localhost:3142;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+    }
+}
