@@ -1,0 +1,49 @@
+---
+rabbitmq_username: 'rabbitmq_username'
+rabbitmq_password: 'rabbitmq_password'
+sensu_username: 'sensu_username'
+sensu_password: 'sensu_password'
+
+rabbitmq::delete_guest_user: true
+rabbitmq::node_ip_address: '0.0.0.0'
+rabbitmq::package_source: undef
+rabbitmq::repos_ensure: false
+rabbitmq::erlang_cookie: 'a-cookie'
+rabbitmq::wipe_db_on_cookie_change: true
+rabbitmq::default_user: "%{hiera('rabbitmq_username')}"
+rabbitmq::default_pass: "%{hiera('rabbitmq_password')}"
+rabbitmq::ssl: true
+rabbitmq::ssl_only: true
+rabbitmq::ssl_cert: '/etc/ssl/sensu/server/cert.pem'
+rabbitmq::ssl_key: '/etc/ssl/sensu/server/key.pem'
+rabbitmq::tcp_keepalive: true
+rabbitmq::admin_enable: false
+
+uchiwa::install_repo: false
+uchiwa::sensu_api_endpoints:
+  - name: 'RDO Monitoring'
+    host: '127.0.0.1'
+    ssl: false
+    insecure: false
+    port: '4567'
+    user: "%{hiera('sensu_username')}"
+    pass: "%{hiera('sensu_password')}"
+    path: ''
+    timeout: '5000'
+
+sensu::server: true
+sensu::install_repo: true
+sensu::manage_services: true
+sensu::manage_user: true
+sensu::rabbitmq_ssl: true
+sensu::rabbitmq_ssl_cert_chain: '/etc/ssl/sensu/client/cert.pem'
+sensu::rabbitmq_ssl_private_key: '/etc/ssl/sensu/client/key.pem'
+sensu::rabbitmq_reconnect_on_error: true
+sensu::rabbitmq_host: '127.0.0.1'
+sensu::rabbitmq_port: '5671'
+sensu::rabbitmq_vhost: '/'
+sensu::rabbitmq_user: "%{hiera('rabbitmq_username')}"
+sensu::rabbitmq_password: "%{hiera('rabbitmq_password')}"
+sensu::api: true
+sensu::api_user: "%{hiera('sensu_username')}"
+sensu::api_password: "%{hiera('sensu_password')}"
