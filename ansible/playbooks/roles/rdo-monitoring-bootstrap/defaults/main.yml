@@ -1,0 +1,95 @@
+---
+#   Copyright Red Hat, Inc. All Rights Reserved.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+#   not use this file except in compliance with the License. You may obtain
+#   a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#   License for the specific language governing permissions and limitations
+#   under the License.
+#
+
+delorean_url: "http://trunk.rdoproject.org/centos7/current/delorean.repo"
+delorean_deps_url: "http://trunk.rdoproject.org/centos7/delorean-deps.repo"
+
+extra_repositories:
+  - epel-release
+  - https://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm
+
+base_packages:
+  - deltarpm
+  - "@Development tools"
+  - git
+  - python-setuptools
+  - python-pip
+  - ruby-devel
+  - libffi-devel
+  - libxml2-devel
+  - wget
+  - redhat-lsb-core
+  - libselinux-python
+  - net-tools
+  - lsof
+  - tcpdump
+  - sysstat
+  - psmisc
+  - puppet
+  - htop
+  - openstack-puppet-modules
+
+puppet_module_path: "/usr/share/openstack-puppet/modules"
+
+sensu_plugins:
+  cpu-checks:
+    creates: "/usr/local/bin/check-cpu.rb"
+  process-checks:
+    creates: "/usr/local/bin/check-process.rb"
+  disk-checks:
+    creates: "/usr/local/bin/check-disk-usage.rb"
+  memory-checks:
+    creates: "/usr/local/bin/check-ram.rb"
+  http:
+    creates: "/usr/local/bin/check-http.rb"
+  uptime-checks:
+    creates: "/usr/local/bin/metrics-uptime.rb"
+  jenkins:
+    creates: "/usr/local/bin/check-jenkins.rb"
+  load-checks:
+    creates: "/usr/local/bin/check-load.rb"
+  io-checks:
+    creates: "/usr/local/bin/metrics-iostat-extended.rb"
+  uchiwa:
+    creates: "/usr/local/bin/check-uchiwa-health.rb"
+
+sensu_checks:
+  check-cpu:
+    command: '/usr/local/bin/check-cpu.rb'
+    subscribers: 'default'
+  check-disk-usage:
+    command: '/usr/local/bin/check-disk-usage.rb'
+    subscribers: 'default'
+  check-ram:
+    command: '/usr/local/bin/check-ram.rb'
+    subscribers: 'default'
+  check-swap:
+    command: '/usr/local/bin/check-swap.rb'
+    subscribers: 'default'
+  check-load:
+    command: '/usr/local/bin/check-load.rb'
+    subscribers: 'default'
+  check-uchiwa:
+    command: "/usr/local/bin/check-uchiwa-health.rb"
+    subscribers: 'master'
+  check-weirdo-jobs:
+    command: "/usr/local/bin/check-jenkins-job-status.rb -u https://ci.centos.org -j '^weirdo'"
+    subscribers: 'master'
+    interval: '120'
+  check-quickstart-jobs:
+    command: "/usr/local/bin/check-jenkins-job-status.rb -u https://ci.centos.org -j '^tripleo-quickstart'"
+    subscribers: 'master'
+    interval: '120'
