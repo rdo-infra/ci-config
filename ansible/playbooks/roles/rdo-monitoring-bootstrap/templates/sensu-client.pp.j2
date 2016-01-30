@@ -1,0 +1,9 @@
+# groups.master.0 is the first host of the master group
+# of which there would hopefully only be one (aka, find a better way)
+
+class { 'sensu':
+  server => false,
+  api => false,
+  rabbitmq_host => "{{ groups.master.0 }}",
+  subscriptions => ['default']
+}
