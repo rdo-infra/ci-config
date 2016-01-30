@@ -1,0 +1,15 @@
+server {
+    listen 80;
+
+    server_name {{ api_host }};
+    access_log /var/log/nginx/api.access.log;
+    error_log /var/log/nginx/api.error.log;
+
+    location / {
+        proxy_pass http://localhost:4567;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+    }
+}

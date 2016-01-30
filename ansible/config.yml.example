@@ -1,0 +1,22 @@
+---
+# We don't really want to version real credentials or more sensitive config.
+# This file can be used to easily tweak these sensitive settings by passing it
+# as an extra-vars file like so:
+# ansible-playbook -i hosts -e @config.yml playbooks/bootstrap_monitoring.yml
+# The config.yml file is gitignored and can be used safely.
+
+master_host: 'master.monitoring.rdoproject.org'
+rabbitmq_host: "{{ master_host }}"
+api_host: 'api.monitoring.rdoproject.org'
+uchiwa_host: 'uchiwa.monitoring.rdoproject.org'
+bot_host: 'bot.monitoring.rdoproject.org'
+rabbitmq_username: 'rabbitmq_username'
+rabbitmq_password: 'rabbitmq_password'
+rabbitmq_erlang_cookie: 'a-cookie'
+sensu_username: 'sensu_username'
+sensu_password: 'sensu_password'
+uchiwa_users: |
+  uchiwa::users:
+    - username: 'rdo'
+      password: 'rdo'
+      readonly: 'true'
