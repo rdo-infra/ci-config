@@ -1,0 +1,101 @@
+---
+#   Copyright Red Hat, Inc. All Rights Reserved.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+#   not use this file except in compliance with the License. You may obtain
+#   a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#   License for the specific language governing permissions and limitations
+#   under the License.
+#
+
+master_host: 'master.monitoring.rdoproject.org'
+rabbitmq_host: "{{ master_host }}"
+api_host: 'api.monitoring.rdoproject.org'
+uchiwa_host: 'uchiwa.monitoring.rdoproject.org'
+bot_host: 'bot.monitoring.rdoproject.org'
+rabbitmq_username: 'rabbitmq_username'
+rabbitmq_password: 'rabbitmq_password'
+sensu_username: 'sensu_username'
+sensu_password: 'sensu_password'
+uchiwa_users: |
+  uchiwa::users:
+    - username: 'rdo'
+      password: 'rdo'
+      readonly: 'true'
+
+delorean_url: "http://trunk.rdoproject.org/centos7/current/delorean.repo"
+delorean_deps_url: "http://trunk.rdoproject.org/centos7/delorean-deps.repo"
+
+extra_repositories:
+  - epel-release
+
+base_packages:
+  - deltarpm
+  - "@Development tools"
+  - git
+  - python-setuptools
+  - python-requests
+  - python-pip
+  - python-devel
+  - python-virtualenv
+  - ruby-devel
+  - libffi-devel
+  - libxml2-devel
+  - openssl-devel
+  - wget
+  - redhat-lsb-core
+  - libselinux-python
+  - net-tools
+  - lsof
+  - tcpdump
+  - sysstat
+  - psmisc
+  - puppet
+  - screen
+  - htop
+  - openstack-puppet-modules
+
+puppet_module_path: "/usr/share/openstack-puppet/modules"
+
+sensu_plugins:
+  cpu-checks:
+    creates: "/usr/local/bin/check-cpu.rb"
+  process-checks:
+    creates: "/usr/local/bin/check-process.rb"
+  disk-checks:
+    creates: "/usr/local/bin/check-disk-usage.rb"
+  filesystem-checks:
+    creates: "/usr/local/bin/check-mtime.rb"
+  memory-checks:
+    creates: "/usr/local/bin/check-ram.rb"
+  network-checks:
+    creates: "/usr/local/bin/check-ping.rb"
+  dns:
+    creates: "/usr/local/bin/check-dns.rb"
+  http:
+    creates: "/usr/local/bin/check-http.rb"
+  uptime-checks:
+    creates: "/usr/local/bin/metrics-uptime.rb"
+  jenkins:
+    creates: "/usr/local/bin/check-jenkins.rb"
+  load-checks:
+    creates: "/usr/local/bin/check-load.rb"
+  io-checks:
+    creates: "/usr/local/bin/metrics-iostat-extended.rb"
+  uchiwa:
+    creates: "/usr/local/bin/check-uchiwa-health.rb"
+
+custom_sensu_plugins:
+  - check-delorean-builds.py
+
+custom_sensu_handlers:
+  - errbot.py
+
+custom_sensu_extensions:
+  - check_retry_occurrences.rb

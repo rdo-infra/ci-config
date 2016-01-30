@@ -1,0 +1,55 @@
+---
+#   Copyright Red Hat, Inc. All Rights Reserved.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License"); you may
+#   not use this file except in compliance with the License. You may obtain
+#   a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#   License for the specific language governing permissions and limitations
+#   under the License.
+#
+
+- name: Create hiera properties file
+  template:
+    src: "templates/hiera-defaults.yaml.j2"
+    dest: "/var/lib/hiera/defaults.yaml"
+
+- name: Copy default hiera file to /etc/puppet
+  copy:
+    src: "/etc/hiera.yaml"
+    remote_src: "yes"
+    dest: "/etc/puppet/hiera.yaml"
+
+- name: Create puppet manifest directory
+  file:
+    dest: "/etc/puppet/manifests"
+    state: "directory"
+
+- name: Create server manifest
+  copy:
+    src: "sensu-server.pp"
+    dest: "/etc/puppet/manifests/sensu-server.pp"
+  when: inventory_hostname in groups.master
+
+- name: Create client manifest
+  template:
+    src: "templates/sensu-client.pp.j2"
+    dest: "/etc/puppet/manifests/sensu-client.pp"
+  when: inventory_hostname in groups.client
+
+- name: Run puppet manifest for sensu server
+  command: |
+    puppet apply /etc/puppet/manifests/sensu-server.pp \
+      --modulepath={{ puppet_module_path }}
+  when: inventory_hostname in groups.master
+
+- name: Run puppet manifest for sensu client
+  command: |
+    puppet apply /etc/puppet/manifests/sensu-client.pp \
+      --modulepath={{ puppet_module_path }}
+  when: inventory_hostname in groups.client
