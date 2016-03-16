@@ -29,11 +29,11 @@
             fail: true
 
 - scm:
-    name: 'rdo-infra-gate-repository'
+    name: 'ci-config-gate-repository'
     scm:
         - git:
-            basedir: 'rdo-infra'
-            url: 'ssh://rdo-ci-centos@review.gerrithub.io:29418/redhat-openstack/rdo-infra.git'
+            basedir: 'ci-config'
+            url: 'ssh://rdo-ci-centos@review.gerrithub.io:29418/rdo-infra/ci-config.git'
             branches:
                 - "$GERRIT_BRANCH"
             credentials-id: 'aeb3af4f-6985-4c8f-8261-ec37cacad10b'
@@ -44,7 +44,7 @@
             skip-tag: true
 
 - trigger:
-    name: 'rdo-infra-gate-trigger'
+    name: 'ci-config-gate-trigger'
     triggers:
         - gerrit:
             server-name: 'rdo-ci-centos'
@@ -55,7 +55,7 @@
                     comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck)'
             projects:
                 - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/rdo-infra'
+                  project-pattern: 'rdo-infra/ci-config'
                   branches:
                       - branch-compare-type: 'PLAIN'
                         branch-pattern: 'master'

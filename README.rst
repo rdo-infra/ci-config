@@ -1,4 +1,3 @@
-rdo-infra
+ci-config
 =========
-Repository for hosting common bits used across different RDO infrastructure
-related projects.
+Repository for Jenkins and general CI configuration for RDO.

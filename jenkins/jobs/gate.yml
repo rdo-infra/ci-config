@@ -1,5 +1,5 @@
 - builder:
-    name: 'rdo-infra-gate-tox'
+    name: 'ci-config-gate-tox'
     builders:
         - shining-panda:
             build-environment: 'virtualenv'
@@ -14,25 +14,25 @@
               pip install tox
 
               # Run {test} from provided jenkins scm gerrit commit ref
-              pushd rdo-infra
+              pushd ci-config
               git log -n 5 --oneline
               tox -e {test}
               result=$?
               exit $result
 
 - job-template:
-    name: 'rdo-infra-gate-tox-{test}'
+    name: 'ci-config-gate-tox-{test}'
     defaults: 'parent-promote-defaults'
     description: |
         <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
         <br>
-        <p>This job gates against commits done to <a href="https://github.com/redhat-openstack/rdo-infra" target="_blank">rdo-infra</a>.</p>
+        <p>This job gates against commits done to <a href="https://github.com/rdo-infra/ci-config" target="_blank">ci-config</a>.</p>
         <p>It leverages tox for testing.</p>
         <br>
         This is what this job runs:
         <pre>
         # Run {test} from provided jenkins scm gerrit commit ref
-        pushd rdo-infra
+        pushd ci-config
         git log -n 5 --oneline
         tox -e {test}
         result=$?
@@ -40,16 +40,16 @@
         </pre>
 
     triggers:
-        - rdo-infra-gate-trigger
+        - ci-config-gate-trigger
     scm:
-        - rdo-infra-gate-repository
+        - ci-config-gate-repository
     builders:
-        - rdo-infra-gate-tox:
+        - ci-config-gate-tox:
             test: '{test}'
 
 - project:
-    name: 'rdo-infra-gate-tox-jobs'
+    name: 'ci-config-gate-tox-jobs'
     test:
         - 'jjb'
     jobs:
-        - rdo-infra-gate-tox-{test}
+        - ci-config-gate-tox-{test}
