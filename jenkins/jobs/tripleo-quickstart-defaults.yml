@@ -8,7 +8,6 @@
         daysToKeep: 5
         artifactDaysToKeep: 5
     publishers:
-        - email-cores
         - cleanup
     wrappers:
         - ansicolor
@@ -16,126 +15,116 @@
         - workspace-cleanup
         - timeout:
             type: absolute
-            timeout: 120
+            timeout: 150
             fail: true
 
 - trigger:
     name: 'trigger-tripleo-quickstart-gate-build-images'
     triggers:
         - gerrit:
-            server-name: 'rdo-ci-centos'
+            server-name: 'rdo-ci-openstack.org'
             trigger-on:
                 - comment-added-contains-event:
                     comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(images-ci-check)'
             projects:
                 - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/tripleo-quickstart'
+                  project-pattern: 'openstack/tripleo-quickstart'
                   branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
+                      - branch-compare-type: 'ANT'
+                        branch-pattern: '**'
             skip-vote:
                 successful: false
                 failed: false
                 unstable: false
                 notbuilt: false
-            failure-message: 'Test failed'
-            successful-message: 'Test ran successfully'
-            unstable-message: 'Test is unstable'
+            gerrit-build-started-verified-value: 0
+            gerrit-build-started-codereview-value: 0
+            gerrit-build-successful-verified-value: 1
+            gerrit-build-successful-codereview-value: 0
+            gerrit-build-failed-verified-value: -1
+            gerrit-build-failed-codereview-value: 0
+            failure-message: 'FAIL'
+            successful-message: 'SUCCESS'
+            unstable-message: 'UNSTABLE'
+            custom-url: '* $JOB_NAME https://ci.centos.org/artifacts/rdo/$BUILD_TAG/'
             silent: false
-            silent-start: true
+            silent-start: false
 
 - trigger:
     name: 'trigger-tripleo-quickstart-gate-full'
     triggers:
         - gerrit:
-            server-name: 'rdo-ci-centos'
+            server-name: 'rdo-ci-openstack.org'
             trigger-on:
                 - comment-added-contains-event:
                     comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(full-ci-check)'
             projects:
                 - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/tripleo-quickstart'
+                  project-pattern: 'openstack/tripleo-quickstart'
                   branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
+                      - branch-compare-type: 'ANT'
+                        branch-pattern: '**'
             skip-vote:
                 successful: false
                 failed: false
                 unstable: false
                 notbuilt: false
-            failure-message: 'Test failed'
-            successful-message: 'Test ran successfully'
-            unstable-message: 'Test is unstable'
+            gerrit-build-started-verified-value: 0
+            gerrit-build-started-codereview-value: 0
+            gerrit-build-successful-verified-value: 1
+            gerrit-build-successful-codereview-value: 0
+            gerrit-build-failed-verified-value: -1
+            gerrit-build-failed-codereview-value: 0
+            failure-message: 'FAIL'
+            successful-message: 'SUCCESS'
+            unstable-message: 'UNSTABLE'
+            custom-url: '* $JOB_NAME https://ci.centos.org/artifacts/rdo/$BUILD_TAG/'
             silent: false
-            silent-start: true
+            silent-start: false
 
 
 - trigger:
     name: 'trigger-tripleo-quickstart-gate-quick'
     triggers:
         - gerrit:
-            server-name: 'rdo-ci-centos'
+            server-name: 'rdo-ci-openstack.org'
             trigger-on:
                 - patchset-created-event
-                - draft-published-event
                 - comment-added-contains-event:
                     comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck)'
             projects:
                 - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/tripleo-quickstart'
+                  project-pattern: 'openstack/tripleo-quickstart'
                   branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
+                      - branch-compare-type: 'ANT'
+                        branch-pattern: '**'
             skip-vote:
                 successful: false
                 failed: false
                 unstable: false
                 notbuilt: false
-            failure-message: 'Test failed'
-            successful-message: 'Test ran successfully'
-            unstable-message: 'Test is unstable'
+            gerrit-build-started-verified-value: 0
+            gerrit-build-started-codereview-value: 0
+            gerrit-build-successful-verified-value: 1
+            gerrit-build-successful-codereview-value: 0
+            gerrit-build-failed-verified-value: -1
+            gerrit-build-failed-codereview-value: 0
+            failure-message: 'FAIL'
+            successful-message: 'SUCCESS'
+            unstable-message: 'UNSTABLE'
+            custom-url: '* $JOB_NAME https://ci.centos.org/artifacts/rdo/$BUILD_TAG/'
             silent: false
-            silent-start: true
-
-- trigger:
-    name: 'trigger-tripleo-quickstart-gate-jjb'
-    triggers:
-        - gerrit:
-            server-name: 'rdo-ci-centos'
-            trigger-on:
-                - patchset-created-event
-                - draft-published-event
-                - comment-added-contains-event:
-                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck)'
-            projects:
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/tripleo-quickstart'
-                  branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
-                  file-paths:
-                      - compare-type: 'REG_EXP'
-                        pattern: 'jenkins/jobs/.*'
-            skip-vote:
-                successful: false
-                failed: false
-                unstable: false
-                notbuilt: false
-            failure-message: 'Test failed'
-            successful-message: 'Test ran successfully'
-            unstable-message: 'Test is unstable'
-            silent: false
-            silent-start: true
+            silent-start: false
 
 - scm:
     name: 'repo-tripleo-quickstart-gerrit'
     scm:
         - git:
             basedir: 'tripleo-quickstart'
-            url: 'ssh://rdo-ci-centos@review.gerrithub.io:29418/redhat-openstack/tripleo-quickstart.git'
+            url: 'ssh://rdo-ci@review.openstack.org:29418/openstack/tripleo-quickstart.git'
             branches:
                 - "$GERRIT_BRANCH"
-            credentials-id: 'aeb3af4f-6985-4c8f-8261-ec37cacad10b'
+            credentials-id: '68c0bffe-4663-47aa-9134-abcae35ace47'
             branches:
                 - '$GERRIT_BRANCH'
             refspec: '$GERRIT_REFSPEC'
@@ -146,7 +135,7 @@
     scm:
         - git:
             basedir: 'tripleo-quickstart'
-            url: 'https://github.com/redhat-openstack/tripleo-quickstart.git'
+            url: 'https://github.com/openstack/tripleo-quickstart.git'
             branches:
                 - master
 
@@ -158,12 +147,6 @@
             url: 'https://github.com/redhat-openstack/khaleesi.git'
             branches:
                 - master
-
-- publisher:
-    name: 'email-cores'
-    publishers:
-        - email:
-            recipients: 'trown@redhat.com'
 
 - publisher:
     name: 'cleanup'
