@@ -231,25 +231,3 @@
                 cat $WORKSPACE/cleanup.txt
               fi
               exit $result
-
-- builder:
-    name: 'tripleo-quickstart-tox-builder'
-    builders:
-        - shining-panda:
-            build-environment: 'virtualenv'
-            python-version: 'system-CPython-2.7'
-            nature: 'shell'
-            clear: true
-            use-distribute: false
-            system-site-packages: false
-            ignore-exit-code: false
-            command: |
-              # Ensure tox is installed
-              pip install tox
-
-              # Run {test} from provided jenkins scm gerrit commit ref
-              pushd tripleo-quickstart
-              git log -n 5 --oneline
-              tox -e {test}
-              result=$?
-              exit $result
