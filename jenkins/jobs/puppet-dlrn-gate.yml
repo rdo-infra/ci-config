@@ -1,0 +1,34 @@
+- job-template:
+    name: 'ci-puppet-dlrn-gate'
+    defaults: 'script-defaults'
+    description: |
+        <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
+        <br>
+        <p>This job gates against commits done to <a href="https://github.com/rdo-infra/puppet-dlrn" target="_blank">puppet-dlrn</a>.</p>
+        <p>It leverages tox for testing.</p>
+        <br>
+        This is what this job runs:
+        <pre>
+        # Run lint and spec tests from provided jenkins scm gerrit commit ref
+        pushd puppet-dlrn
+        mkdir .bundled_gems
+        export GEM_HOME=.bundled_gems
+        bundle install
+        bundle exec rake lint && bundle exec rake spec
+        output=$?
+        rm -rf .bundled_gems
+        exit $output
+        </pre>
+    triggers:
+        - puppet-dlrn-gate-trigger
+    scm: 
+        - puppet-dlrn-gate-repository
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/puppet-dlrn-gate.sh
+
+- project:
+    name: 'ci-puppet-dlrn-jobs'
+    jobs:
+        - ci-puppet-dlrn-gate
