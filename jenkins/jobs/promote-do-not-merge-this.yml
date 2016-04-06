@@ -1,0 +1,67 @@
+- builder:
+    name: 'generic-hash-builder'
+    builders:
+        - shell: |
+            new_hash=`curl $delorean_url | grep baseurl | awk -F '/' '{ print $5"/"$6"/"$7 }'`
+            old_hash=`curl $last_promoted_url | grep baseurl | awk -F '/' '{ print $5"/"$6"/"$7 }'`
+
+            # No need to run the whole promote pipeline if there is nothing new to promote
+            if [ $old_hash == $new_hash ]; then
+                exit 23
+            fi
+
+            echo "delorean_current_hash = $new_hash" > $hash_file
+
+- builder:
+    name: 'generic-promote-image-builder'
+    builders:
+        - shell: |
+            rdo_version=$(echo $delorean_url |awk -F/ '{print $4}')
+
+            mkdir -p stable
+            rsync -av rdo@artifacts.ci.centos.org::rdo/images/$rdo_version/delorean/testing/ stable/
+            rsync -av stable/ rdo@artifacts.ci.centos.org::rdo/images/$rdo_version/delorean/stable/
+            rm -rf stable
+
+- builder:
+    name: 'generic-promote-repo-builder'
+    builders:
+        - shell: |
+            promote_hash=$(echo $delorean_current_hash |awk -F/ '{ print $3}')
+            rdo_version=$(echo $delorean_url |awk -F/ '{print $4}')
+
+            ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ~/.ssh/rhos-ci -p 3300 promoter@$delorean_host "sudo /usr/local/bin/promote.sh $promote_hash" $rdo_version
+
+- job-template:
+    name: 'tripleo-quickstart-generic-image-builder'
+    defaults: 'tripleo-quickstart-defaults'
+    description: |
+        <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
+    parameters:
+        - string:
+            name: delorean_url
+            default: http://trunk.rdoproject.org/centos7-mitaka/consistent/delorean.repo
+            description: The URL of the delorean .repo file tested against
+        - string:
+            name: last_promoted_url
+            default: http://trunk.rdoproject.org/centos7-mitaka/current-passed-ci/delorean.repo
+            description: The URL to the last promoted url in current-passed-ci
+        - string:
+            name: hash_file
+            default: /tmp/generic-hash
+            description: Persistent jenkins properties file written to carry over different jobs
+    scm:
+        - repo-tripleo-quickstart
+        - repo-khaleesi
+    builders:
+        - generic-hash-builder
+        - tripleo-quickstart-images-promote-builder:
+            release: '{release}'
+            build_system: '{build_system}'
+        - generic-promote-repo-builder
+        - generic-promote-image-builder
+    properties:
+        - ownership:
+            owner: dms@redhat.com
+    publishers:
+        - email-cores
