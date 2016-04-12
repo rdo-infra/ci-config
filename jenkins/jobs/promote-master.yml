@@ -1,0 +1,143 @@
+- builder:
+    name: phase-test-build-master
+    builders:
+        - multijob:
+            name: "INSTALL / TEST (BUILD IMAGES)"
+            condition: UNSTABLE
+            projects:
+                - name: tripleo-quickstart-promote-master-delorean-build-images
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_master_hash
+
+- builder:
+    name: phase-test-import-master
+    builders:
+        - multijob:
+            name: "INSTALL / TEST (IMPORT IMAGES)"
+            condition: UNSTABLE
+            projects:
+                - name: tripleo-quickstart-promote-master-delorean-minimal
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_master_hash
+                - name: tripleo-quickstart-promote-master-delorean-ha
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_master_hash
+                - name: weirdo-master-promote-packstack-scenario001
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_master_hash
+                - name: weirdo-master-promote-packstack-scenario002
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_master_hash
+                - name: weirdo-master-promote-packstack-scenario003
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_master_hash
+                - name: weirdo-master-promote-puppet-openstack-scenario001
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_master_hash
+                - name: weirdo-master-promote-puppet-openstack-scenario002
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_master_hash
+                - name: weirdo-master-promote-puppet-openstack-scenario003
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_master_hash
+
+- job-template:
+    name: rdo-delorean-promote-master
+    project-type: multijob
+    triggers:
+        - timed: "H */4 * * *"
+    defaults: parent-promote-defaults
+    builders:
+        - phase-get-hash-master
+        - phase-test-build-master
+        - phase-test-import-master
+        - phase-upload-master
+        - phase-repo-promote-master
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- builder:
+    name: phase-get-hash-master
+    builders:
+        - multijob:
+            name: "GET THE LATEST DELOREAN YUM REPOSITORY HASH"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-get-hash-master
+
+- builder:
+    name: phase-upload-master
+    builders:
+        - multijob:
+            name: "UPLOAD IMAGES TO FILE SERVER"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-upload-master
+                property-file: /tmp/delorean_master_hash
+
+- builder:
+    name: phase-repo-promote-master
+    builders:
+        - multijob:
+            name: "UPLOAD IMAGES TO FILE SERVER"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-repo-promote-master
+                property-file: /tmp/delorean_master_hash
+
+- job-template:
+    name: 'rdo-promote-get-hash-master'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-master.sh
+                - scripts/promote-get-hash.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- job-template:
+    name: 'rdo-promote-upload-master'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-master.sh
+                - scripts/promote-upload-images.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- job-template:
+    name: 'rdo-promote-repo-promote-master'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-master.sh
+                - scripts/promote-repo-promote.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- project:
+    name: rdo-delorean-promote-jobs-master
+    jobs:
+        - 'rdo-delorean-promote-master'
+
+- project:
+    name: rdo-promote-get-hash-master
+    jobs:
+        - 'rdo-promote-get-hash-master'
+
+- project:
+    name: rdo-promote-upload-master
+    jobs:
+        - 'rdo-promote-upload-master'
+
+- project:
+    name: rdo-promote-repo-promote-master
+    jobs:
+        - 'rdo-promote-repo-promote-master'
