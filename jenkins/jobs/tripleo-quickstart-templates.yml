@@ -176,7 +176,7 @@
         --extra-vars virthost=$VIRTHOST \
         --extra-vars release={release} \
         --extra-vars build_system={build_system} \
-        --extra-vars url="file:///tmp/oooq-images/undercloud.qcow2" \
+        --extra-vars url="file:///var/lib/oooq-images/undercloud.qcow2" \
         --extra-vars @$HOME/.quickstart/tripleo-quickstart/playbooks/centosci/{topology}.yml
 
         </pre>
@@ -184,7 +184,8 @@
     triggers:
         - trigger-tripleo-quickstart-gate-build-images
     scm:
-        - repo-tripleo-quickstart-gerrit
+        - repo-tripleo-quickstart
+        - repo-ansible-role-tripleo-image-build-gerrit
         - repo-khaleesi
     builders:
         - tripleo-quickstart-images-gate-builder:
