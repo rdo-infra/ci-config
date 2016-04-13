@@ -69,6 +69,13 @@
               export ANSIBLE_SSH_CONTROL_PATH=$socketdir/%%h-%%r
 
               ansible --version
+
+              # Get image building role
+              ansible-galaxy install \
+                  -p $WORKSPACE/tripleo-quickstart/playbooks/roles/ \
+                  -r $WORKSPACE/tripleo-quickstart/ansible-role-requirements.yml \
+                  --force
+
               anscmd="stdbuf -oL -eL ansible-playbook -vv"
               ansible --version
               $anscmd -i local_hosts $WORKSPACE/tripleo-quickstart/playbooks/build-images.yml \
