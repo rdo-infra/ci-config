@@ -1,11 +1,11 @@
 - job-template:
-    name: 'weirdo-{openstack_release}-gate-ansible-{playbook}'
+    name: 'weirdo-{openstack_release}-gate-kolla-{scenario}'
     defaults: 'weirdo-defaults'
     description: |
         <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
         <br>
-        <p>This job gates against commits done to <a href="https://github.com/redhat-openstack/weirdo" target="_blank">WeIRDO</a>.</p>
-        <p>It runs the playbook <a href="https://github.com/redhat-openstack/weirdo/blob/master/playbooks/{playbook}.yml" target="_blank">{playbook}.yml</a></p>
+        <p>This job gates against commits done to <a href="https://github.com/redhat-openstack/ansible-role-weirdo-kolla" target="_blank">WeIRDO</a>.</p>
+        <p>It runs the playbook <a href="https://github.com/redhat-openstack/weirdo/blob/master/playbooks/kolla-{scenario}.yml" target="_blank">kolla-{scenario}.yml</a></p>
         <br>
         This is what this job runs:
         <pre>
@@ -13,18 +13,89 @@
         cd weirdo
         git log -n 5 --oneline
 
-        tox -e ansible-playbook -- -vv playbooks/{playbook}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release}
+        tox -e ansible-playbook -- -vv playbooks/kolla-{scenario}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release}
         </pre>
 
     triggers:
-          - weirdo-gate-integration-trigger
+        - weirdo-kolla-gate-integration-trigger
     scm:
-        - weirdo-gate-repository
+        - weirdo-core-master-repository
+        - weirdo-kolla-gate-repository
     builders:
         - weirdo-generate-log-redirection
         - weirdo-ansible-playbook-builder:
             openstack_release: '{openstack_release}'
-            playbook: '{playbook}'
+            playbook: 'kolla-{scenario}'
+    properties:
+        - ownership:
+            owner: dms@redhat.com
+    publishers:
+        - weirdo-email-cores
+        - weirdo-archive-logs
+
+- job-template:
+    name: 'weirdo-{openstack_release}-gate-packstack-{scenario}'
+    defaults: 'weirdo-defaults'
+    description: |
+        <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
+        <br>
+        <p>This job gates against commits done to <a href="https://github.com/redhat-openstack/ansible-role-weirdo-packstack" target="_blank">WeIRDO</a>.</p>
+        <p>It runs the playbook <a href="https://github.com/redhat-openstack/weirdo/blob/master/playbooks/packstack-{scenario}.yml" target="_blank">packstack-{scenario}.yml</a></p>
+        <br>
+        This is what this job runs:
+        <pre>
+        # Use WeIRDO provided by jenkins scm
+        cd weirdo
+        git log -n 5 --oneline
+
+        tox -e ansible-playbook -- -vv playbooks/packstack-{scenario}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release}
+        </pre>
+
+    triggers:
+        - weirdo-packstack-gate-integration-trigger
+    scm:
+        - weirdo-core-master-repository
+        - weirdo-packstack-gate-repository
+    builders:
+        - weirdo-generate-log-redirection
+        - weirdo-ansible-playbook-builder:
+            openstack_release: '{openstack_release}'
+            playbook: 'packstack-{scenario}'
+    properties:
+        - ownership:
+            owner: dms@redhat.com
+    publishers:
+        - weirdo-email-cores
+        - weirdo-archive-logs
+
+- job-template:
+    name: 'weirdo-{openstack_release}-gate-puppet-openstack-{scenario}'
+    defaults: 'weirdo-defaults'
+    description: |
+        <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
+        <br>
+        <p>This job gates against commits done to <a href="https://github.com/redhat-openstack/ansible-role-weirdo-puppet-openstack" target="_blank">WeIRDO</a>.</p>
+        <p>It runs the playbook <a href="https://github.com/redhat-openstack/weirdo/blob/master/playbooks/puppet-openstack-{scenario}.yml" target="_blank">puppet-openstack-{scenario}.yml</a></p>
+        <br>
+        This is what this job runs:
+        <pre>
+        # Use WeIRDO provided by jenkins scm
+        cd weirdo
+        git log -n 5 --oneline
+
+        tox -e ansible-playbook -- -vv playbooks/puppet-openstack-{scenario}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release}
+        </pre>
+
+    triggers:
+        - weirdo-puppet-openstack-gate-integration-trigger
+    scm:
+        - weirdo-core-master-repository
+        - weirdo-puppet-openstack-gate-repository
+    builders:
+        - weirdo-generate-log-redirection
+        - weirdo-ansible-playbook-builder:
+            openstack_release: '{openstack_release}'
+            playbook: 'puppet-openstack-{scenario}'
     properties:
         - ownership:
             owner: dms@redhat.com
@@ -50,9 +121,9 @@
         </pre>
 
     triggers:
-          - weirdo-gate-trigger
+          - weirdo-core-gate-trigger
     scm:
-        - weirdo-gate-repository
+        - weirdo-core-gate-repository
     builders:
         - weirdo-gate-tox:
             test: '{test}'
@@ -83,7 +154,7 @@
     triggers:
           - weirdo-periodic-trigger
     scm:
-        - weirdo-master-repository
+        - weirdo-core-master-repository
     builders:
         - weirdo-generate-log-redirection
         - weirdo-ansible-playbook-builder:
@@ -119,7 +190,7 @@
         </pre>
 
     scm:
-        - weirdo-master-repository
+        - weirdo-core-master-repository
     builders:
         - weirdo-generate-log-redirection
         - weirdo-promote-ansible-playbook-builder:
@@ -161,7 +232,7 @@
             default: http://trunk.rdoproject.org/centos7-mitaka/delorean-deps.repo
             description: The URL of the delorean-deps .repo file tested against
     scm:
-        - weirdo-master-repository
+        - weirdo-core-master-repository
     builders:
         - weirdo-generate-log-redirection
         - weirdo-generic-ansible-playbook-builder:
