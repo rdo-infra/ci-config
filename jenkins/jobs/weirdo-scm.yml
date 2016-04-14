@@ -1,5 +1,14 @@
 - scm:
-    name: 'weirdo-gate-repository'
+    name: 'weirdo-core-master-repository'
+    scm:
+        - git:
+            basedir: 'weirdo'
+            url: 'https://github.com/redhat-openstack/weirdo.git'
+            branches:
+                - 'master'
+
+- scm:
+    name: 'weirdo-core-gate-repository'
     scm:
         - git:
             basedir: 'weirdo'
@@ -14,10 +23,71 @@
             skip-tag: true
 
 - scm:
-    name: 'weirdo-master-repository'
+    name: 'weirdo-ci-centos-gate-repository'
     scm:
         - git:
-            basedir: 'weirdo'
-            url: 'https://github.com/redhat-openstack/weirdo.git'
+            basedir: 'weirdo/playbooks/roles/ci-centos'
+            url: 'ssh://rdo-ci-centos@review.gerrithub.io:29418/redhat-openstack/ansible-role-ci-centos.git'
             branches:
-                - 'master'
+                - "$GERRIT_BRANCH"
+            credentials-id: 'aeb3af4f-6985-4c8f-8261-ec37cacad10b'
+            branches:
+                - '$GERRIT_BRANCH'
+            refspec: '$GERRIT_REFSPEC'
+            choosing-strategy: gerrit
+
+- scm:
+    name: 'weirdo-common-gate-repository'
+    scm:
+        - git:
+            basedir: 'weirdo/playbooks/roles/common'
+            url: 'ssh://rdo-ci-centos@review.gerrithub.io:29418/redhat-openstack/ansible-role-weirdo-common.git'
+            branches:
+                - "$GERRIT_BRANCH"
+            credentials-id: 'aeb3af4f-6985-4c8f-8261-ec37cacad10b'
+            branches:
+                - '$GERRIT_BRANCH'
+            refspec: '$GERRIT_REFSPEC'
+            choosing-strategy: gerrit
+
+- scm:
+    name: 'weirdo-kolla-gate-repository'
+    scm:
+        - git:
+            basedir: 'weirdo/playbooks/roles/kolla'
+            url: 'ssh://rdo-ci-centos@review.gerrithub.io:29418/redhat-openstack/ansible-role-weirdo-kolla.git'
+            branches:
+                - "$GERRIT_BRANCH"
+            credentials-id: 'aeb3af4f-6985-4c8f-8261-ec37cacad10b'
+            branches:
+                - '$GERRIT_BRANCH'
+            refspec: '$GERRIT_REFSPEC'
+            choosing-strategy: gerrit
+
+- scm:
+    name: 'weirdo-packstack-gate-repository'
+    scm:
+        - git:
+            basedir: 'weirdo/playbooks/roles/packstack'
+            url: 'ssh://rdo-ci-centos@review.gerrithub.io:29418/redhat-openstack/ansible-role-weirdo-packstack.git'
+            branches:
+                - "$GERRIT_BRANCH"
+            credentials-id: 'aeb3af4f-6985-4c8f-8261-ec37cacad10b'
+            branches:
+                - '$GERRIT_BRANCH'
+            refspec: '$GERRIT_REFSPEC'
+            choosing-strategy: gerrit
+
+- scm:
+    name: 'weirdo-puppet-openstack-gate-repository'
+    scm:
+        - git:
+            basedir: 'weirdo/playbooks/roles/puppet-openstack'
+            url: 'ssh://rdo-ci-centos@review.gerrithub.io:29418/redhat-openstack/ansible-role-weirdo-puppet-openstack.git'
+            branches:
+                - "$GERRIT_BRANCH"
+            credentials-id: 'aeb3af4f-6985-4c8f-8261-ec37cacad10b'
+            branches:
+                - '$GERRIT_BRANCH'
+            refspec: '$GERRIT_REFSPEC'
+            choosing-strategy: gerrit

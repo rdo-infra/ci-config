@@ -1,19 +1,37 @@
 - project:
-    name: 'weirdo-gate-ansible-jobs'
+    name: 'weirdo-gate-kolla-jobs'
     openstack_release:
         - 'mitaka'
         - 'master'
-    playbook:
-        - 'puppet-openstack-scenario001'
-        - 'puppet-openstack-scenario002'
-        - 'puppet-openstack-scenario003'
-        - 'packstack-scenario001'
-        - 'packstack-scenario002'
-        - 'packstack-scenario003'
-        - 'kolla-build-centos-binary'
-        - 'kolla-deploy-centos-binary'
+    scenario:
+        - 'build-centos-binary'
+        - 'deploy-centos-binary'
     jobs:
-        - weirdo-{openstack_release}-gate-ansible-{playbook}
+        - weirdo-{openstack_release}-gate-kolla-{scenario}
+
+- project:
+    name: 'weirdo-gate-packstack-jobs'
+    openstack_release:
+        - 'mitaka'
+        - 'master'
+    scenario:
+        - 'scenario001'
+        - 'scenario002'
+        - 'scenario003'
+    jobs:
+        - weirdo-{openstack_release}-gate-packstack-{scenario}
+
+- project:
+    name: 'weirdo-gate-puppet-openstack-jobs'
+    openstack_release:
+        - 'mitaka'
+        - 'master'
+    scenario:
+        - 'scenario001'
+        - 'scenario002'
+        - 'scenario003'
+    jobs:
+        - weirdo-{openstack_release}-gate-puppet-openstack-{scenario}
 
 - project:
     name: 'weirdo-gate-tox-jobs'

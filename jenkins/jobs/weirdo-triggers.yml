@@ -4,7 +4,7 @@
       - timed: "H H * * *"
 
 - trigger:
-    name: 'weirdo-gate-trigger'
+    name: 'weirdo-core-gate-trigger'
     triggers:
         - gerrit:
             server-name: 'rdo-ci-centos'
@@ -19,26 +19,199 @@
                   branches:
                       - branch-compare-type: 'PLAIN'
                         branch-pattern: 'master'
+            skip-vote:
+                successful: false
+                failed: false
+                unstable: false
+                notbuilt: false
+            failure-message: 'Test failed'
+            successful-message: 'Test ran successfully'
+            unstable-message: 'Test is unstable'
+            silent: false
+            silent-start: true
+
+- trigger:
+    name: 'weirdo-core-kolla-gate-integration-trigger'
+    triggers:
+        - gerrit:
+            server-name: 'rdo-ci-centos'
+            trigger-on:
+                - patchset-created-event
+                - draft-published-event
+                - comment-added-contains-event:
+                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck)'
+            projects:
                 - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/ansible-role-ci-centos'
+                  project-pattern: 'redhat-openstack/weirdo'
                   branches:
                       - branch-compare-type: 'PLAIN'
                         branch-pattern: 'master'
+                  file-paths:
+                      - compare-type: 'REG_EXP'
+                        pattern: '^playbooks/kolla-.*$'
+            skip-vote:
+                successful: false
+                failed: false
+                unstable: false
+                notbuilt: false
+            failure-message: 'Test failed'
+            successful-message: 'Test ran successfully'
+            unstable-message: 'Test is unstable'
+            silent: false
+            silent-start: true
+
+- trigger:
+    name: 'weirdo-core-packstack-gate-integration-trigger'
+    triggers:
+        - gerrit:
+            server-name: 'rdo-ci-centos'
+            trigger-on:
+                - patchset-created-event
+                - draft-published-event
+                - comment-added-contains-event:
+                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck)'
+            projects:
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'redhat-openstack/weirdo'
+                  branches:
+                      - branch-compare-type: 'PLAIN'
+                        branch-pattern: 'master'
+                  file-paths:
+                      - compare-type: 'REG_EXP'
+                        pattern: '^playbooks/packstack-.*$'
+            skip-vote:
+                successful: false
+                failed: false
+                unstable: false
+                notbuilt: false
+            failure-message: 'Test failed'
+            successful-message: 'Test ran successfully'
+            unstable-message: 'Test is unstable'
+            silent: false
+            silent-start: true
+
+- trigger:
+    name: 'weirdo-core-puppet-openstack-gate-integration-trigger'
+    triggers:
+        - gerrit:
+            server-name: 'rdo-ci-centos'
+            trigger-on:
+                - patchset-created-event
+                - draft-published-event
+                - comment-added-contains-event:
+                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck)'
+            projects:
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'redhat-openstack/weirdo'
+                  branches:
+                      - branch-compare-type: 'PLAIN'
+                        branch-pattern: 'master'
+                  file-paths:
+                      - compare-type: 'REG_EXP'
+                        pattern: '^playbooks/puppet-openstack-.*$'
+            skip-vote:
+                successful: false
+                failed: false
+                unstable: false
+                notbuilt: false
+            failure-message: 'Test failed'
+            successful-message: 'Test ran successfully'
+            unstable-message: 'Test is unstable'
+            silent: false
+            silent-start: true
+
+- trigger:
+    name: 'weirdo-common-gate-integration-trigger'
+    triggers:
+        - gerrit:
+            server-name: 'rdo-ci-centos'
+            trigger-on:
+                - patchset-created-event
+                - draft-published-event
+                - comment-added-contains-event:
+                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck)'
+            projects:
                 - project-compare-type: 'PLAIN'
                   project-pattern: 'redhat-openstack/ansible-role-weirdo-common'
                   branches:
                       - branch-compare-type: 'PLAIN'
                         branch-pattern: 'master'
+            skip-vote:
+                successful: false
+                failed: false
+                unstable: false
+                notbuilt: false
+            failure-message: 'Test failed'
+            successful-message: 'Test ran successfully'
+            unstable-message: 'Test is unstable'
+            silent: false
+            silent-start: true
+
+- trigger:
+    name: 'weirdo-packstack-gate-integration-trigger'
+    triggers:
+        - gerrit:
+            server-name: 'rdo-ci-centos'
+            trigger-on:
+                - patchset-created-event
+                - draft-published-event
+                - comment-added-contains-event:
+                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck)'
+            projects:
                 - project-compare-type: 'PLAIN'
                   project-pattern: 'redhat-openstack/ansible-role-weirdo-packstack'
                   branches:
                       - branch-compare-type: 'PLAIN'
                         branch-pattern: 'master'
+            skip-vote:
+                successful: false
+                failed: false
+                unstable: false
+                notbuilt: false
+            failure-message: 'Test failed'
+            successful-message: 'Test ran successfully'
+            unstable-message: 'Test is unstable'
+            silent: false
+            silent-start: true
+
+- trigger:
+    name: 'weirdo-puppet-openstack-gate-integration-trigger'
+    triggers:
+        - gerrit:
+            server-name: 'rdo-ci-centos'
+            trigger-on:
+                - patchset-created-event
+                - draft-published-event
+                - comment-added-contains-event:
+                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck)'
+            projects:
                 - project-compare-type: 'PLAIN'
                   project-pattern: 'redhat-openstack/ansible-role-weirdo-puppet-openstack'
                   branches:
                       - branch-compare-type: 'PLAIN'
                         branch-pattern: 'master'
+            skip-vote:
+                successful: false
+                failed: false
+                unstable: false
+                notbuilt: false
+            failure-message: 'Test failed'
+            successful-message: 'Test ran successfully'
+            unstable-message: 'Test is unstable'
+            silent: false
+            silent-start: true
+
+- trigger:
+    name: 'weirdo-kolla-gate-integration-trigger'
+    triggers:
+        - gerrit:
+            server-name: 'rdo-ci-centos'
+            trigger-on:
+                - patchset-created-event
+                - draft-published-event
+                - comment-added-contains-event:
+                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck)'
+            projects:
                 - project-compare-type: 'PLAIN'
                   project-pattern: 'redhat-openstack/ansible-role-weirdo-kolla'
                   branches:
@@ -56,7 +229,7 @@
             silent-start: true
 
 - trigger:
-    name: 'weirdo-gate-integration-trigger'
+    name: 'weirdo-ci-centos-gate-integration-trigger'
     triggers:
         - gerrit:
             server-name: 'rdo-ci-centos'
@@ -67,13 +240,10 @@
                     comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck)'
             projects:
                 - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/weirdo'
+                  project-pattern: 'redhat-openstack/ansible-role-ci-centos'
                   branches:
                       - branch-compare-type: 'PLAIN'
                         branch-pattern: 'master'
-                  file-paths:
-                      - compare-type: 'REG_EXP'
-                        pattern: '^playbooks/(?!.*\.rst).*$'
             skip-vote:
                 successful: false
                 failed: false
