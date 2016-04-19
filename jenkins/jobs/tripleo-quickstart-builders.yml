@@ -76,6 +76,8 @@
                   -r $WORKSPACE/tripleo-quickstart/ansible-role-requirements.yml \
                   --force
 
+              result=0
+
               anscmd="stdbuf -oL -eL ansible-playbook -vv"
               ansible --version
               $anscmd -i local_hosts $WORKSPACE/tripleo-quickstart/playbooks/build-images.yml \
@@ -85,9 +87,7 @@
               --extra-vars artib_release={release} \
               --extra-vars artib_build_system={build_system} \
               --extra-vars artib_delorean_hash=$delorean_current_hash \
-              --extra-vars publish=true
-
-              result=$?
+              --extra-vars publish=true || result=1
 
               infra_result=0
 
@@ -213,6 +213,8 @@
               socketdir=$(mktemp -d /tmp/sockXXXXXX)
               export ANSIBLE_SSH_CONTROL_PATH=$socketdir/%%h-%%r
 
+              result=0
+
               ansible --version
               anscmd="stdbuf -oL -eL ansible-playbook -vv"
               $anscmd -i local_hosts $WORKSPACE/tripleo-quickstart/playbooks/build-images-and-quickstart.yml \
@@ -222,9 +224,7 @@
               --extra-vars image_url="file:///var/lib/oooq-images/undercloud.qcow2" \
               --extra-vars artib_release={release} \
               --extra-vars artib_build_system={build_system} \
-              --extra-vars @$WORKSPACE/tripleo-quickstart/playbooks/centosci/{topology}.yml
-
-              result=$?
+              --extra-vars @$WORKSPACE/tripleo-quickstart/playbooks/centosci/{topology}.yml || result=1
 
               infra_result=0
 
