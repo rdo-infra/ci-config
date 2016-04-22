@@ -13,7 +13,7 @@
         cd weirdo
         git log -n 5 --oneline
 
-        tox -e ansible-playbook -- -vv playbooks/kolla-{scenario}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release}
+        tox -e ansible-playbook -- -vv -i hosts playbooks/kolla-{scenario}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release}
         </pre>
 
     triggers:
@@ -21,6 +21,7 @@
     builders:
         - weirdo-checkout-gate-repositories
         - weirdo-generate-log-redirection
+        - weirdo-get-node
         - weirdo-ansible-playbook-builder:
             openstack_release: '{openstack_release}'
             playbook: 'kolla-{scenario}'
@@ -30,6 +31,7 @@
     publishers:
         - weirdo-email-cores
         - weirdo-archive-logs
+        - weirdo-release-node
 
 - job-template:
     name: 'weirdo-{openstack_release}-gate-packstack-{scenario}'
@@ -46,7 +48,7 @@
         cd weirdo
         git log -n 5 --oneline
 
-        tox -e ansible-playbook -- -vv playbooks/packstack-{scenario}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release}
+        tox -e ansible-playbook -- -vv -i hosts playbooks/packstack-{scenario}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release}
         </pre>
 
     triggers:
@@ -54,6 +56,7 @@
     builders:
         - weirdo-checkout-gate-repositories
         - weirdo-generate-log-redirection
+        - weirdo-get-node
         - weirdo-ansible-playbook-builder:
             openstack_release: '{openstack_release}'
             playbook: 'packstack-{scenario}'
@@ -63,6 +66,7 @@
     publishers:
         - weirdo-email-cores
         - weirdo-archive-logs
+        - weirdo-release-node
 
 - job-template:
     name: 'weirdo-{openstack_release}-gate-puppet-openstack-{scenario}'
@@ -79,7 +83,7 @@
         cd weirdo
         git log -n 5 --oneline
 
-        tox -e ansible-playbook -- -vv playbooks/puppet-openstack-{scenario}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release}
+        tox -e ansible-playbook -- -vv -i hosts playbooks/puppet-openstack-{scenario}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release}
         </pre>
 
     triggers:
@@ -87,6 +91,7 @@
     builders:
         - weirdo-checkout-gate-repositories
         - weirdo-generate-log-redirection
+        - weirdo-get-node
         - weirdo-ansible-playbook-builder:
             openstack_release: '{openstack_release}'
             playbook: 'puppet-openstack-{scenario}'
@@ -96,6 +101,7 @@
     publishers:
         - weirdo-email-cores
         - weirdo-archive-logs
+        - weirdo-release-node
 
 - job-template:
     name: 'weirdo-gate-tox-{test}'
@@ -141,7 +147,7 @@
         cd weirdo
         git log -n 5 --oneline
 
-        tox -e ansible-playbook -- -vv playbooks/{playbook}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release}
+        tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release}
         </pre>
 
     triggers:
@@ -150,6 +156,7 @@
         - weirdo-core-master-repository
     builders:
         - weirdo-generate-log-redirection
+        - weirdo-get-node
         - weirdo-ansible-playbook-builder:
             openstack_release: '{openstack_release}'
             playbook: '{playbook}'
@@ -159,6 +166,7 @@
     publishers:
         - weirdo-email-cores
         - weirdo-archive-logs
+        - weirdo-release-node
 
 - job-template:
     name: 'weirdo-{openstack_release}-promote-{playbook}'
@@ -179,13 +187,14 @@
         cd weirdo
         git log -n 5 --oneline
 
-        tox -e ansible-playbook -- -vv playbooks/{playbook}.yml -e ci_environment=ci-centos -e delorean_url=$delorean_url -e openstack_release={openstack_release}
+        tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e ci_environment=ci-centos -e delorean_url=$delorean_url -e openstack_release={openstack_release}
         </pre>
 
     scm:
         - weirdo-core-master-repository
     builders:
         - weirdo-generate-log-redirection
+        - weirdo-get-node
         - weirdo-promote-ansible-playbook-builder:
             openstack_release: '{openstack_release}'
             playbook: '{playbook}'
@@ -195,6 +204,7 @@
     publishers:
         - weirdo-email-cores
         - weirdo-archive-logs
+        - weirdo-release-node
 
 - job-template:
     name: 'weirdo-generic-{playbook}'
@@ -212,7 +222,7 @@
         cd weirdo
         git log -n 5 --oneline
 
-        tox -e ansible-playbook -- -vv playbooks/{playbook}.yml -e ci_environment=ci-centos -e delorean_url=${{delorean_url}} -e delorean_deps_url=${{delorean_deps_url}}
+        tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e delorean_url=${{delorean_url}} -e delorean_deps_url=${{delorean_deps_url}}
         </pre>
 
     parameters:
@@ -228,6 +238,7 @@
         - weirdo-core-master-repository
     builders:
         - weirdo-generate-log-redirection
+        - weirdo-get-node
         - weirdo-generic-ansible-playbook-builder:
             playbook: '{playbook}'
     properties:
@@ -236,3 +247,4 @@
     publishers:
         - weirdo-email-cores
         - weirdo-archive-logs
+        - weirdo-release-node

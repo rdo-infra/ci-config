@@ -30,3 +30,15 @@
         - archive:
             artifacts: 'logs.html'
             allow-empty: true
+
+# "Building remotely" should always be in the build console output
+- publisher:
+    name: 'weirdo-release-node'
+    publishers:
+        - post-tasks:
+            - matches:
+                - log-text: Building remotely
+              script:
+                !include-raw:
+                    - scripts/weirdo-vars.sh
+                    - scripts/cico-node-done-from-ansible.sh
