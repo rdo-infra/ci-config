@@ -1,4 +1,23 @@
 - builder:
+    name: 'weirdo-get-node'
+    builders:
+      - shell: |
+          export ANSIBLE_HOSTS=$WORKSPACE/weirdo/hosts
+          export SSID_FILE=$WORKSPACE/weirdo/cico-ssid
+
+          !include-raw:
+            - scripts/cico-node-get-to-ansible.sh
+
+- builder:
+    name: 'weirdo-release-node'
+    builders:
+      - shell: |
+          export SSID_FILE=$WORKSPACE/weirdo/cico-ssid
+
+          !include-raw:
+            - scripts/cico-node-done-from-ansible.sh
+
+- builder:
     name: 'weirdo-gate-tox'
     builders:
         - shell: |

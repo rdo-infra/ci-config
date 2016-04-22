@@ -212,7 +212,7 @@
         cd weirdo
         git log -n 5 --oneline
 
-        tox -e ansible-playbook -- -vv playbooks/{playbook}.yml -e ci_environment=ci-centos -e delorean_url=${{delorean_url}} -e delorean_deps_url=${{delorean_deps_url}}
+        tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e delorean_url=${{delorean_url}} -e delorean_deps_url=${{delorean_deps_url}}
         </pre>
 
     parameters:
@@ -227,9 +227,11 @@
     scm:
         - weirdo-core-master-repository
     builders:
+        - weirdo-get-node
         - weirdo-generate-log-redirection
         - weirdo-generic-ansible-playbook-builder:
             playbook: '{playbook}'
+        - weirdo-release-node
     properties:
         - ownership:
             owner: dms@redhat.com
