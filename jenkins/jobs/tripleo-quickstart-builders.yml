@@ -78,6 +78,9 @@
 
               result=0
 
+              # TODO(trown) The publish variables (release, build_system) are not namespaced, and
+              # could probably be cleaned up in to a single 'publish_dir' variable.
+
               anscmd="stdbuf -oL -eL ansible-playbook -vv"
               ansible --version
               $anscmd -i local_hosts $WORKSPACE/tripleo-quickstart/playbooks/build-images.yml \
@@ -85,7 +88,9 @@
               --extra-vars virthost=$VIRTHOST \
               --extra-vars local_working_dir=$WORKSPACE/ \
               --extra-vars artib_release={release} \
+              --extra-vars release={release} \
               --extra-vars artib_build_system={build_system} \
+              --extra-vars build_system={build_system} \
               --extra-vars artib_delorean_hash=$delorean_current_hash \
               --extra-vars publish=true || result=1
 
