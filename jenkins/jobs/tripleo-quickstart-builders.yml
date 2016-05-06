@@ -25,11 +25,12 @@
 
               bash $WORKSPACE/tripleo-quickstart/quickstart.sh \
               --tags all \
-              --undercloud-image-url "http://artifacts.ci.centos.org/artifacts/rdo/images/{release}/{build_system}/testing/undercloud.qcow2" \
-              --config $WORKSPACE/tripleo-quickstart/playbooks/centosci/{topology}.yml \
+              -e image_url "http://artifacts.ci.centos.org/artifacts/rdo/images/{release}/{build_system}/testing/undercloud.qcow2" \
+              --config $WORKSPACE/tripleo-quickstart/config/general_config/{topology}.yml \
               --working-dir $WORKSPACE/ \
               --no-clone \
-              $VIRTHOST || result=1
+              $VIRTHOST \
+              $RELEASE || result=1
 
               infra_result=0
 
@@ -72,7 +73,7 @@
 
               # Get image building role
               ansible-galaxy install \
-                  -p $WORKSPACE/tripleo-quickstart/playbooks/roles/ \
+                  -p $WORKSPACE/tripleo-quickstart/roles/ \
                   -r $WORKSPACE/tripleo-quickstart/ansible-role-requirements.yml \
                   --force
 
@@ -175,11 +176,12 @@
 
               bash $WORKSPACE/tripleo-quickstart/quickstart.sh \
               --tags all \
-              --undercloud-image-url "http://artifacts.ci.centos.org/artifacts/rdo/images/{release}/{build_system}/stable/undercloud.qcow2" \
-              --config $WORKSPACE/tripleo-quickstart/playbooks/centosci/{topology}.yml \
+              -e image_url "http://artifacts.ci.centos.org/artifacts/rdo/images/{release}/{build_system}/stable/undercloud.qcow2" \
+              --config $WORKSPACE/tripleo-quickstart/config/general_config/{topology}.yml \
               --working-dir $WORKSPACE/ \
               --no-clone \
-              $VIRTHOST || result=1
+              $VIRTHOST \
+              $RELEASE || result=1
 
               infra_result=0
 
@@ -229,7 +231,7 @@
               --extra-vars image_url="file:///var/lib/oooq-images/undercloud.qcow2" \
               --extra-vars artib_release={release} \
               --extra-vars artib_build_system={build_system} \
-              --extra-vars @$WORKSPACE/tripleo-quickstart/playbooks/centosci/{topology}.yml || result=1
+              --extra-vars @$WORKSPACE/tripleo-quickstart/config/general_config/{topology}.yml || result=1
 
               infra_result=0
 
