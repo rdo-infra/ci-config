@@ -27,12 +27,18 @@
     name: 'weirdo-ansible-playbook-builder'
     builders:
         - shell: |
+            if [[ "{openstack_release}" != "master" ]]; then
+                version="stable/{openstack_release}"
+            else
+                version="{openstack_release}"
+            fi
+
             # Use WeIRDO provided by jenkins scm
             export ARA_DATABASE="sqlite:///$WORKSPACE/$JOB_NAME.sqlite"
             cd weirdo
             git log -n 5 --oneline
 
-            tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release}
+            tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release} -e version=$version
 
 - builder:
     name: 'weirdo-generic-ansible-playbook-builder'
@@ -49,6 +55,12 @@
     name: 'weirdo-promote-ansible-playbook-builder'
     builders:
         - shell: |
+            if [[ "{openstack_release}" != "master" ]]; then
+                version="stable/{openstack_release}"
+            else
+                version="{openstack_release}"
+            fi
+
             # Use variables provided by a job earlier in the pipeline, if available
             delorean_hash=${{delorean_current_hash:-current}}
             delorean_url="http://trunk.rdoproject.org/centos7-{openstack_release}/${{delorean_hash}}/delorean.repo"
@@ -58,7 +70,7 @@
             cd weirdo
             git log -n 5 --oneline
 
-            tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e ci_environment=ci-centos -e delorean_url=$delorean_url -e openstack_release={openstack_release}
+            tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e ci_environment=ci-centos -e delorean_url=$delorean_url -e openstack_release={openstack_release} -e version=$version
 
 - builder:
     name: 'weirdo-generate-log-redirection'
