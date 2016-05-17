@@ -248,7 +248,7 @@
         cd weirdo
         git log -n 5 --oneline
 
-        tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e delorean_url=${{delorean_url}} -e delorean_deps_url=${{delorean_deps_url}}
+        tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e delorean_url=${{delorean_url}} -e delorean_deps_url=${{delorean_deps_url}} -e version=${{version}}
         </pre>
 
     parameters:
@@ -260,6 +260,10 @@
             name: delorean_deps_url
             default: http://trunk.rdoproject.org/centos7-mitaka/delorean-deps.repo
             description: The URL of the delorean-deps .repo file tested against
+        - string:
+            name: version
+            default: master
+            description: Version of integration tests used (master, stable/mitaka, etc.)
     scm:
         - weirdo-core-master-repository
     builders:
