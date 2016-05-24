@@ -1,5 +1,5 @@
 - job-template:
-    name: 'tripleo-quickstart-gate-{release}-{build_system}-quick-{test}'
+    name: 'tripleo-quickstart-periodic-{release}-{build_system}-quick-{test}'
     defaults: 'tripleo-quickstart-defaults'
     description: |
         <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
@@ -17,18 +17,18 @@
         </pre>
     concurrent: true
     triggers:
-        - trigger-tripleo-quickstart-gate-quick
+        - trigger-tripleo-quickstart-periodic
     scm:
-        - repo-tripleo-quickstart-gerrit
+        - repo-tripleo-quickstart
         - repo-khaleesi
     builders:
-        - tripleo-quickstart-quick-gate-builder:
+        - tripleo-quickstart-quick-periodic-builder:
             release: '{release}'
             build_system: '{build_system}'
             test: '{test}'
 
 - job-template:
-    name: 'tripleo-quickstart-gate-{release}-{build_system}-full-{topology}'
+    name: 'tripleo-quickstart-periodic-{release}-{build_system}-full-{topology}'
     defaults: 'tripleo-quickstart-defaults'
     description: |
         <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
@@ -48,18 +48,18 @@
 
         </pre>
     triggers:
-        - trigger-tripleo-quickstart-gate-full
+        - trigger-tripleo-quickstart-periodic
     scm:
-        - repo-tripleo-quickstart-gerrit
+        - repo-tripleo-quickstart
         - repo-khaleesi
     builders:
-        - tripleo-quickstart-full-gate-builder:
+        - tripleo-quickstart-full-periodic-builder:
             release: '{release}'
             build_system: '{build_system}'
             topology: '{topology}'
 
 - job-template:
-    name: 'tripleo-quickstart-gate-{release}-{build_system}-full-images-and-{topology}'
+    name: 'tripleo-quickstart-periodic-{release}-{build_system}-full-images-and-{topology}'
     defaults: 'tripleo-quickstart-defaults'
     description: |
         <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
@@ -86,13 +86,13 @@
         </pre>
 
     triggers:
-        - trigger-tripleo-quickstart-gate-build-images
+        - trigger-tripleo-quickstart-periodic
     scm:
         - repo-tripleo-quickstart
-        - repo-ansible-role-tripleo-image-build-gerrit
+        - repo-ansible-role-tripleo-image-build
         - repo-khaleesi
     builders:
-        - tripleo-quickstart-images-gate-builder:
+        - tripleo-quickstart-images-periodic-builder:
             release: '{release}'
             build_system: '{build_system}'
             topology: '{topology}'
