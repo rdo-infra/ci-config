@@ -68,3 +68,21 @@
     topology: 'images'
     jobs:
         - tripleo-quickstart-promote-{release}-{build_system}-build-images
+
+- project:
+    name: 'tripleo-quickstart-periodic-jobs'
+    test:
+        - 'images'
+        - 'full-deploy'
+    job_type: 'periodic'
+    release:
+        - 'liberty'
+        - 'mitaka'
+        - 'master'
+    build_system:
+        - 'delorean'
+    topology:
+        - 'minimal'
+        - 'ha'
+    jobs:
+        - tripleo-quickstart-periodic-{release}-{build_system}-{test}-{topology}

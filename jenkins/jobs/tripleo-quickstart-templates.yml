@@ -75,3 +75,20 @@
             release: '{release}'
             build_system: '{build_system}'
             topology: '{topology}'
+
+- job-template:
+    name: 'tripleo-quickstart-periodic-{release}-{build_system}-{test}-{topology}'
+    defaults: 'tripleo-quickstart-defaults'
+    triggers:
+        - trigger-tripleo-quickstart-periodic
+    scm:
+        - repo-tripleo-quickstart
+        - repo-ansible-role-tripleo-image-build
+        - repo-khaleesi
+    builders:
+        - tripleo-quickstart-builder:
+            test: '{test}'
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
