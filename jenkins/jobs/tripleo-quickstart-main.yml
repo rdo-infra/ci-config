@@ -29,9 +29,48 @@
     release:
         - 'liberty'
         - 'mitaka'
-    topology: 'minimal'
+    topology:
+        - 'minimal'
     jobs:
-        - tripleo-quickstart-gate-{release}-{build_system}-full-images
+        - tripleo-quickstart-gate-{release}-{build_system}-full-images-{topology}
+
+- project:
+    name: 'tripleo-quickstart-periodic-quick-jobs'
+    build_system:
+        - 'delorean'
+    release:
+        - 'liberty'
+        - 'mitaka'
+    test:
+        - 'basic'
+    jobs:
+        - tripleo-quickstart-periodic-{release}-{build_system}-quick-{test}
+
+- project:
+    name: 'tripleo-quickstart-periodic-full-jobs'
+    build_system:
+        - 'delorean'
+    release:
+        - 'liberty'
+        - 'mitaka'
+    topology:
+        - 'minimal'
+        - 'ha'
+    jobs:
+        - tripleo-quickstart-periodic-{release}-{build_system}-full-{topology}
+
+- project:
+    name: 'tripleo-quickstart-periodic-images-jobs'
+    build_system:
+        - 'delorean'
+    release:
+        - 'liberty'
+        - 'mitaka'
+    topology:
+        - 'minimal'
+        - 'ha'
+    jobs:
+        - tripleo-quickstart-periodic-{release}-{build_system}-full-images-{topology}
 
 - project:
     name: 'tripleo-quickstart-promote-jobs'
