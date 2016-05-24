@@ -1,170 +1,61 @@
 - defaults:
     name: 'tripleo-quickstart-defaults'
     description: |
-        Managed by Jenkins Job Builder. Do not edit via web.
+        <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
+        <br>
+        <p>This job runs the script <a href="https://github.com/openstack/tripleo-quickstart/blob/master/ci-scripts/{test}.sh" target="_blank">{test}.sh</a></p>
+        <br>
+        In order to run this job locally:
+        <pre>
+
+        export VIRTHOST='my-cool-virthost.example.com'
+
+        bash ci-scripts/{test}.sh \
+            {release} \
+            {build_system} \
+            {topology} \
+            {job_type}
+
+        </pre>
     concurrent: false
     node: 'rdo'
     logrotate:
         daysToKeep: 5
         artifactDaysToKeep: 5
     publishers:
-        - cleanup
+        - tripleo-quickstart-cleanup
+        - tripleo-quickstart-full-logs-link
     wrappers:
         - ansicolor
         - timestamps
         - workspace-cleanup
         - timeout:
             type: absolute
-            timeout: 150
+            timeout: 180
             fail: true
 
-- trigger:
-    name: 'trigger-tripleo-quickstart-gate-build-images'
-    triggers:
-        - gerrit:
-            server-name: 'rdo-ci-centos'
-            trigger-on:
-                - comment-added-contains-event:
-                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(images-ci-check)'
-            projects:
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/ansible-role-tripleo-image-build'
-                  branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
-            skip-vote:
-                successful: false
-                failed: false
-                unstable: false
-                notbuilt: false
-            silent: false
-            silent-start: false
-
-- trigger:
-    name: 'trigger-tripleo-quickstart-gate-full'
-    triggers:
-        - gerrit:
-            server-name: 'rdo-ci-openstack.org'
-            trigger-on:
-                - comment-added-contains-event:
-                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(full-ci-check)'
-            projects:
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'openstack/tripleo-quickstart'
-                  branches:
-                      - branch-compare-type: 'ANT'
-                        branch-pattern: '**'
-            skip-vote:
-                successful: false
-                failed: false
-                unstable: false
-                notbuilt: false
-            gerrit-build-started-verified-value: 0
-            gerrit-build-started-codereview-value: 0
-            gerrit-build-successful-verified-value: 1
-            gerrit-build-successful-codereview-value: 0
-            gerrit-build-failed-verified-value: -1
-            gerrit-build-failed-codereview-value: 0
-            failure-message: 'FAILURE'
-            successful-message: 'SUCCESS'
-            unstable-message: 'UNSTABLE'
-            custom-url: '* $JOB_NAME https://ci.centos.org/artifacts/rdo/$BUILD_TAG/'
-            silent: false
-            silent-start: false
-
-
-- trigger:
-    name: 'trigger-tripleo-quickstart-gate-quick'
-    triggers:
-        - gerrit:
-            server-name: 'rdo-ci-openstack.org'
-            trigger-on:
-                - patchset-created-event
-                - comment-added-contains-event:
-                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck)'
-            projects:
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'openstack/tripleo-quickstart'
-                  branches:
-                      - branch-compare-type: 'ANT'
-                        branch-pattern: '**'
-            skip-vote:
-                successful: false
-                failed: false
-                unstable: false
-                notbuilt: false
-            gerrit-build-started-verified-value: 0
-            gerrit-build-started-codereview-value: 0
-            gerrit-build-successful-verified-value: 1
-            gerrit-build-successful-codereview-value: 0
-            gerrit-build-failed-verified-value: -1
-            gerrit-build-failed-codereview-value: 0
-            failure-message: 'FAILURE'
-            successful-message: 'SUCCESS'
-            unstable-message: 'UNSTABLE'
-            custom-url: '* $JOB_NAME https://ci.centos.org/artifacts/rdo/$BUILD_TAG/'
-            silent: false
-            silent-start: false
-
-- scm:
-    name: 'repo-tripleo-quickstart-gerrit'
-    scm:
-        - git:
-            basedir: 'tripleo-quickstart'
-            url: 'ssh://rdo-ci@review.openstack.org:29418/openstack/tripleo-quickstart.git'
-            branches:
-                - "$GERRIT_BRANCH"
-            credentials-id: '68c0bffe-4663-47aa-9134-abcae35ace47'
-            branches:
-                - '$GERRIT_BRANCH'
-            refspec: '$GERRIT_REFSPEC'
-            choosing-strategy: gerrit
-
-- scm:
-    name: 'repo-ansible-role-tripleo-image-build-gerrit'
-    scm:
-        - git:
-            basedir: 'tripleo-quickstart/playbooks/roles/image-build'
-            url: 'ssh://rdo-ci-centos@review.gerrithub.io:29418/redhat-openstack/ansible-role-tripleo-image-build.git'
-            branches:
-                - "$GERRIT_BRANCH"
-            credentials-id: 'aeb3af4f-6985-4c8f-8261-ec37cacad10b'
-            branches:
-                - '$GERRIT_BRANCH'
-            refspec: '$GERRIT_REFSPEC'
-            choosing-strategy: gerrit
-
-- scm:
-    name: 'repo-tripleo-quickstart'
-    scm:
-        - git:
-            basedir: 'tripleo-quickstart'
-            url: 'https://github.com/openstack/tripleo-quickstart.git'
-            branches:
-                - master
-
-- scm:
-    name: 'repo-khaleesi'
-    scm:
-        - git:
-            basedir: 'khaleesi'
-            url: 'https://github.com/redhat-openstack/khaleesi.git'
-            branches:
-                - master
-
+# "Building remotely" should always be in the build console output
 - publisher:
-    name: 'cleanup'
+    name: 'tripleo-quickstart-cleanup'
     publishers:
         - post-tasks:
             - matches:
-                - log-text: Build was aborted
-                  operator: AND
+                - log-text: Building remotely
               escalate-status: false
               command: |
-                bash $WORKSPACE/tripleo-quickstart/ci-scripts/return-node.sh
+                infra_result=0
+                bash $WORKSPACE/tripleo-quickstart/ci-scripts/collect-logs.sh &> $WORKSPACE/collect_logs.txt || infra_result=1
+                bash $WORKSPACE/tripleo-quickstart/ci-scripts/return-node.sh &> $WORKSPACE/cleanup.txt || infra_result=2
+
+                if [[ "$infra_result" != "0" && "$result" = "0" ]]; then
+                  # if the job/test was ok, but collect_logs/cleanup failed,
+                  # print out why the collect_logs/cleanup failed
+                  cat $WORKSPACE/collect_logs.txt
+                  cat $WORKSPACE/cleanup.txt
+                fi
 
 - publisher:
-    name: 'full-logs-link'
+    name: 'tripleo-quickstart-full-logs-link'
     publishers:
         - archive:
             artifacts: '**/full_logs.html'
