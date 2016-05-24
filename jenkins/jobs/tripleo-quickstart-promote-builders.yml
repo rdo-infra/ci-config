@@ -1,0 +1,108 @@
+- builder:
+    name: 'tripleo-quickstart-promote-builder'
+    builders:
+        - shining-panda:
+            build-environment: 'virtualenv'
+            python-version: 'system-CPython-2.7'
+            nature: 'shell'
+            clear: true
+            use-distribute: false
+            system-site-packages: false
+            ignore-exit-code: false
+            command: |
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
+              export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
+              echo $VIRTHOST
+
+              pushd $WORKSPACE/tripleo-quickstart
+
+              result=0
+              # (trown) This is so that we ensure seperate ssh sockets for
+              # concurrent jobs. Without this, two jobs running in parallel
+              # would try to use the same undercloud-stack socket.
+              socketdir=$(mktemp -d /tmp/sockXXXXXX)
+              export ANSIBLE_SSH_CONTROL_PATH=$socketdir/%%h-%%r
+
+              bash $WORKSPACE/tripleo-quickstart/quickstart.sh \
+              --tags all \
+              --undercloud-image-url "http://artifacts.ci.centos.org/artifacts/rdo/images/{release}/{build_system}/testing/undercloud.qcow2" \
+              --config $WORKSPACE/tripleo-quickstart/playbooks/centosci/{topology}.yml \
+              --working-dir $WORKSPACE/ \
+              --no-clone \
+              $VIRTHOST {release} || result=1
+
+              infra_result=0
+
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/collect-logs.sh &> $WORKSPACE/collect_logs.txt || infra_result=1
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/return-node.sh &> $WORKSPACE/cleanup.txt || infra_result=2
+
+              if [[ "$infra_result" != "0" && "$result" = "0" ]]; then
+                # if the job/test was ok, but collect_logs/cleanup failed,
+                # print out why the collect_logs/cleanup failed
+                cat $WORKSPACE/collect_logs.txt
+                cat $WORKSPACE/cleanup.txt
+              fi
+              exit $result
+
+- builder:
+    name: 'tripleo-quickstart-images-promote-builder'
+    builders:
+        - shining-panda:
+            build-environment: 'virtualenv'
+            python-version: 'system-CPython-2.7'
+            nature: 'shell'
+            clear: true
+            use-distribute: false
+            system-site-packages: false
+            ignore-exit-code: false
+            command: |
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
+              export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
+              echo $VIRTHOST
+
+              pushd $WORKSPACE/tripleo-quickstart
+              pip install -r requirements.txt
+              # (trown) This is so that we ensure seperate ssh sockets for
+              # concurrent jobs. Without this, two jobs running in parallel
+              # would try to use the same undercloud-stack socket.
+              socketdir=$(mktemp -d /tmp/sockXXXXXX)
+              export ANSIBLE_SSH_CONTROL_PATH=$socketdir/%%h-%%r
+
+              ansible --version
+
+              # Get image building role
+              ansible-galaxy install \
+                  -p $WORKSPACE/tripleo-quickstart/playbooks/roles/ \
+                  -r $WORKSPACE/tripleo-quickstart/ansible-role-requirements.yml \
+                  --force
+
+              result=0
+
+              # TODO(trown) The publish variables (release, build_system) are not namespaced, and
+              # could probably be cleaned up in to a single 'publish_dir' variable.
+
+              anscmd="stdbuf -oL -eL ansible-playbook -vv"
+              ansible --version
+              $anscmd -i local_hosts $WORKSPACE/tripleo-quickstart/playbooks/build-images.yml \
+              --extra-vars ansible_python_interpreter=/usr/bin/python \
+              --extra-vars virthost=$VIRTHOST \
+              --extra-vars local_working_dir=$WORKSPACE/ \
+              --extra-vars artib_release={release} \
+              --extra-vars release={release} \
+              --extra-vars artib_build_system={build_system} \
+              --extra-vars build_system={build_system} \
+              --extra-vars artib_delorean_hash=$delorean_current_hash \
+              --extra-vars publish=true || result=1
+
+              infra_result=0
+
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/collect-logs.sh &> $WORKSPACE/collect_logs.txt || infra_result=1
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/return-node.sh &> $WORKSPACE/cleanup.txt || infra_result=2
+
+              if [[ "$infra_result" != "0" && "$result" = "0" ]]; then
+                # if the job/test was ok, but collect_logs/cleanup failed,
+                # print out why the collect_logs/cleanup failed
+                cat $WORKSPACE/collect_logs.txt
+                cat $WORKSPACE/cleanup.txt
+              fi
+              exit $result
