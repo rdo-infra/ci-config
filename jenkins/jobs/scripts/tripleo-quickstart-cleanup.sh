@@ -9,5 +9,5 @@ scripts_dir=$WORKSPACE/tripleo-quickstart/ci-scripts/
 # We are only interested in output from the collect-logs script if it fails
 bash $scripts_dir/collect-logs.sh &> $WORKSPACE/collect_logs.txt ||
      cat $WORKSPACE/collect_logs.txt
-bash $scripts_dir/ci-scripts/return-node.sh
+bash $scripts_dir/return-node.sh
 popd
