@@ -4,14 +4,10 @@
 set -eux
 
 pushd $WORKSPACE/tripleo-quickstart
-infra_result=0
-bash $WORKSPACE/tripleo-quickstart/ci-scripts/collect-logs.sh &> $WORKSPACE/collect_logs.txt || infra_result=1
-bash $WORKSPACE/tripleo-quickstart/ci-scripts/return-node.sh &> $WORKSPACE/cleanup.txt || infra_result=2
 
-if [[ "$infra_result" != "0" ]]; then
-  # if the job/test was ok, but collect_logs/cleanup failed,
-  # print out why the collect_logs/cleanup failed
-  cat $WORKSPACE/collect_logs.txt
-  cat $WORKSPACE/cleanup.txt
-fi
+scripts_dir=$WORKSPACE/tripleo-quickstart/ci-scripts/
+# We are only interested in output from the collect-logs script if it fails
+bash $scripts_dir/collect-logs.sh &> $WORKSPACE/collect_logs.txt ||
+     cat $WORKSPACE/collect_logs.txt
+bash $scripts_dir/ci-scripts/return-node.sh
 popd

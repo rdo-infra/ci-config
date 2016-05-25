@@ -61,13 +61,30 @@
             topology: '{topology}'
 
 - job-template:
+    name: 'artib-gate-{release}-{build_system}-full-images'
+    defaults: 'tripleo-quickstart-defaults'
+    triggers:
+        - trigger-artib-gate
+    scm:
+        - repo-tripleo-quickstart
+        - repo-ansible-role-tripleo-image-build-gerrit
+        - repo-khaleesi
+    builders:
+        - tripleo-quickstart-builder:
+            test: '{test}'
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
+
+- job-template:
     name: 'tripleo-quickstart-gate-{release}-{build_system}-full-images'
     defaults: 'tripleo-quickstart-defaults'
     triggers:
         - trigger-tripleo-quickstart-gate-build-images
     scm:
-        - repo-tripleo-quickstart
-        - repo-ansible-role-tripleo-image-build-gerrit
+        - repo-tripleo-quickstart-gerrit
+        - repo-ansible-role-tripleo-image-build
         - repo-khaleesi
     builders:
         - tripleo-quickstart-builder:
