@@ -31,7 +31,6 @@ CORE_MAP = {
 }
 
 ROLE_MAP = {
-    'redhat-openstack/ansible-role-ci-centos': 'weirdo/playbooks/roles/ci-centos',
     'redhat-openstack/ansible-role-weirdo-common': 'weirdo/playbooks/roles/common',
     'redhat-openstack/ansible-role-weirdo-kolla': 'weirdo/playbooks/roles/kolla',
     'redhat-openstack/ansible-role-weirdo-packstack': 'weirdo/playbooks/roles/packstack',
