@@ -7,3 +7,8 @@ if [ $OLD_HASH == $NEW_HASH ]; then
 fi
 
 echo "delorean_current_hash = $NEW_HASH" > $HASH_FILE
+
+# This is needed to make the promote image building job runnable outside of CI in the
+# same way as the other tripleo-quickstart jobs.
+echo "PUBLISH = true" >> $HASH_FILE
+
