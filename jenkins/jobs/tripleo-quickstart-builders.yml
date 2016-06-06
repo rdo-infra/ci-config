@@ -1,15 +1,7 @@
 - builder:
     name: 'tripleo-quickstart-builder'
     builders:
-        - shining-panda:
-            build-environment: 'virtualenv'
-            python-version: 'system-CPython-2.7'
-            nature: 'shell'
-            clear: true
-            use-distribute: false
-            system-site-packages: false
-            ignore-exit-code: false
-            command: |
+        - shell: |
               bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
               export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
               echo $VIRTHOST
