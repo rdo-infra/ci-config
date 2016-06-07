@@ -7,23 +7,6 @@
                 - scripts/cico-node-get-to-ansible.sh
 
 - builder:
-    name: 'weirdo-gate-tox'
-    builders:
-        - shell: |
-            # Use WeIRDO provided by jenkins scm
-            cd weirdo
-            git log -n 5 --oneline
-
-            tox -e {test}
-
-- builder:
-    name: 'weirdo-checkout-gate-repositories'
-    builders:
-      - python:
-          !include-raw:
-            - scripts/checkout-weirdo-gate-repositories.py
-
-- builder:
     name: 'weirdo-ansible-playbook-builder'
     builders:
         - shell: |
