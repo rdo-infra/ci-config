@@ -10,6 +10,7 @@
             release: '{release}'
             build_system: '{build_system}'
             topology: '{topology}'
+            extra_setup: '{extra_setup}'
 
 - job-template:
     name: 'tripleo-quickstart-promote-{release}-{build_system}-build-images'
@@ -24,6 +25,7 @@
             release: '{release}'
             build_system: '{build_system}'
             topology: '{topology}'
+            extra_setup: '{extra_setup}'
 
 - job-template:
     name: 'tripleo-quickstart-gate-{release}-{build_system}-quick-{test}'
@@ -35,6 +37,27 @@
         - repo-tripleo-quickstart-gerrit
     builders:
         - tripleo-quickstart-builder:
+            test: '{test}'
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
+            extra_setup: '{extra_setup}'
+
+- job-template:
+    name: 'tripleo-quickstart-roles-gate-{release}'
+    defaults: 'tripleo-quickstart-defaults'
+    concurrent: true
+    triggers:
+        - trigger-tripleo-quickstart-gate-quick
+        - trigger-gate-roles
+    scm:
+        - repo-tripleo-quickstart
+        - repo-ansible-role-tripleo-gate
+    builders:
+        - tripleo-quickstart-builder:
+            extra_setup: |
+                sed -i \"s|git+https://github.com/redhat-openstack/ansible-role-tripleo-gate.git#egg=ansible-role-tripleo-gate|file://$WORKSPACE/ansible-role-tripleo-gate/#egg=ansible-role-tripleo-gate|\" quickstart-role-requirements.txt
             test: '{test}'
             job_type: '{job_type}'
             release: '{release}'
@@ -55,6 +78,7 @@
             release: '{release}'
             build_system: '{build_system}'
             topology: '{topology}'
+            extra_setup: '{extra_setup}'
 
 - job-template:
     name: 'artib-gate-{release}-{build_system}-full-images'
@@ -71,6 +95,7 @@
             release: '{release}'
             build_system: '{build_system}'
             topology: '{topology}'
+            extra_setup: '{extra_setup}'
 
 - job-template:
     name: 'tripleo-quickstart-gate-{release}-{build_system}-full-images'
@@ -87,6 +112,7 @@
             release: '{release}'
             build_system: '{build_system}'
             topology: '{topology}'
+            extra_setup: '{extra_setup}'
 
 - job-template:
     name: 'tripleo-quickstart-periodic-{release}-{build_system}-{test}-{topology}'
@@ -103,3 +129,4 @@
             release: '{release}'
             build_system: '{build_system}'
             topology: '{topology}'
+            extra_setup: '{extra_setup}'
