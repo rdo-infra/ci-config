@@ -46,7 +46,6 @@
     defaults: 'tripleo-quickstart-defaults'
     concurrent: true
     triggers:
-        - trigger-tripleo-quickstart-gate-full
         - trigger-gate-roles
     scm:
         - repo-tripleo-quickstart
@@ -60,6 +59,21 @@
 
 - job-template:
     name: 'tripleo-quickstart-gate-{release}-{build_system}-full-{topology}'
+    defaults: 'tripleo-quickstart-defaults'
+    triggers:
+        - trigger-tripleo-quickstart-gate-full
+    scm:
+        - repo-tripleo-quickstart-gerrit
+    builders:
+        - tripleo-quickstart-builder:
+            test: '{test}'
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
+
+- job-template:
+    name: 'tripleo-quickstart-gate-{release}-{build_system}-roles-{topology}'
     defaults: 'tripleo-quickstart-defaults'
     triggers:
         - trigger-tripleo-quickstart-gate-full

@@ -26,8 +26,7 @@
         - tripleo-quickstart-roles-gate-{release}
 
 - project:
-    name: 'tripleo-quickstart-gate-full-jobs'
-    test: 'full-deploy'
+    name: 'tripleo-quickstart-gate-full-and-roles-jobs'
     job_type: 'gate'
     release:
         - 'liberty'
@@ -37,7 +36,10 @@
     topology:
         - 'minimal'
     jobs:
-        - tripleo-quickstart-gate-{release}-{build_system}-full-{topology}
+        - tripleo-quickstart-gate-{release}-{build_system}-full-{topology}:
+            test: 'full-deploy'
+        - tripleo-quickstart-gate-{release}-{build_system}-roles-{topology}:
+            test: 'roles-deploy'
 
 - project:
     name: 'tripleo-quickstart-gate-images-jobs'
