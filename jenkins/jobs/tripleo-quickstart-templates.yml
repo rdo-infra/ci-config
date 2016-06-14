@@ -103,3 +103,26 @@
             release: '{release}'
             build_system: '{build_system}'
             topology: '{topology}'
+
+- job-template:
+    name: 'tripleo-quickstart-periodic-tempest-{release}-{build_system}-{topology}'
+    defaults: 'tripleo-quickstart-defaults'
+    description: |
+        <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
+        <br>
+        <p>This job runs the periodic tests for release:{release} and topology:{topology}</p>
+        <br>
+
+        </pre>
+    triggers:
+        - trigger-tripleo-quickstart-periodic
+    scm:
+        - repo-tripleo-quickstart
+        - repo-ansible-role-tripleo-image-build
+        - repo-ansible-role-tripleo-tempest
+    builders:
+        - tripleo-quickstart-tempest-builder:
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
