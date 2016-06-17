@@ -15,3 +15,24 @@
                 {job_type}
 
               popd
+
+- builder:
+    name: 'tripleo-quickstart-upgrade-builder'
+    builders:
+        - shell: |
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
+              export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
+              echo $VIRTHOST
+
+              pushd $WORKSPACE/tripleo-quickstart
+
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/{test}.sh \
+                {release} \
+                {build_system} \
+                {topology} \
+                {job_type} \
+                {upgrade_delorean_hash} \
+                {major_upgrade} \
+                {enable_pacemaker}
+
+              popd
