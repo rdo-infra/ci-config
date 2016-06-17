@@ -100,3 +100,27 @@
         - 'ha'
     jobs:
         - tripleo-quickstart-periodic-{release}-{build_system}-{test}-{topology}
+
+- project:
+    name: 'tripleo-quickstart-upgrade-full-jobs'
+    job_type: 'periodic'
+    release: 'liberty'
+    upgrade_type: 'major'
+    upgrade_delorean_hash: 'current-passed-ci'
+    jobs:
+        - tripleo-quickstart-upgrade-{upgrade_type}-{release}-to-{upgrade_version}:
+            upgrade_version: mitaka
+            upgrade_delorean_hash: current-passed-ci
+            major_upgrade: true
+        - tripleo-quickstart-upgrade-{upgrade_type}-{release}-to-{upgrade_version}:
+            upgrade_type: minor
+            release: mitaka
+            upgrade_version: mitaka
+            upgrade_delorean_hash: current
+            major_upgrade: false
+        - tripleo-quickstart-upgrade-{upgrade_type}-{release}-to-{upgrade_version}:
+            upgrade_type: major
+            release: mitaka
+            upgrade_version: master
+            upgrade_delorean_hash: current
+            major_upgrade: true
