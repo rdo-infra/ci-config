@@ -15,3 +15,35 @@
                 {job_type}
 
               popd
+
+- builder:
+    name: 'tripleo-quickstart-upgrade-builder'
+    builders:
+        - shell: |
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
+              export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
+              echo $VIRTHOST
+
+              pushd $WORKSPACE/tripleo-quickstart
+
+                cat <<EOF > playbooks/upgrade.yml
+                ---
+                - include: quickstart.yml
+
+                - name:  Upgrade Tripleo
+                  hosts: undercloud
+                  gather_facts: no
+                  roles:
+                    - role: tripleo-overcloud-upgrade
+                EOF
+
+              ./quickstart.sh --config config/general_config/minimal_pcs.yml \
+                              --extra-vars upgrade_delorean_hash={upgrade_delorean_hash} \
+                              --extra-vars major_upgrade={major_upgrade} \
+                              --playbook upgrade.yml \
+                              --working-dir $WORKING_DIR \
+                              --tags all \
+                              $VIRTHOST \
+                              {release}
+
+              popd
