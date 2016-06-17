@@ -134,3 +134,21 @@
             release: '{release}'
             build_system: '{build_system}'
             topology: '{topology}'
+
+- job-template:
+    name: 'tripleo-quickstart-{test}-{upgrade_type}-{release}-to-{upgrade_version}'
+    defaults: 'tripleo-quickstart-defaults'
+    triggers:
+        - trigger-tripleo-quickstart-periodic
+    scm:
+        - repo-tripleo-quickstart
+        - repo-ansible-role-tripleo-overcloud-upgrade
+    builders:
+        - tripleo-quickstart-upgrade-builder:
+            test: '{test}'
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
+            major_upgrade: '{major_upgrade}'
+            upgrade_delorean_hash: '{upgrade_delorean_hash}'
