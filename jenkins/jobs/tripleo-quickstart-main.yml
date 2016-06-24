@@ -1,11 +1,22 @@
 - project:
-    name: 'tripleo-quickstart-gate-quick-jobs'
-    test:
-        - 'basic'
-        - 'ooo-usbkey'
+    name: 'tripleo-quickstart-gate-quick-basic-jobs'
+    test: 'basic'
     job_type: 'gate'
     release:
         - 'liberty'
+        - 'mitaka'
+        - 'master'
+    build_system:
+        - 'delorean'
+    topology: 'quick'
+    jobs:
+        - tripleo-quickstart-gate-{release}-{build_system}-quick-{test}
+
+- project:
+    name: 'tripleo-quickstart-gate-quick-usbkey-jobs'
+    test: 'ooo-usbkey'
+    job_type: 'gate'
+    release: 
         - 'mitaka'
     build_system:
         - 'delorean'
