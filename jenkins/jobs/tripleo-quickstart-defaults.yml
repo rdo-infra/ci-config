@@ -1,4 +1,4 @@
-- defaults:
+- defaults: &def-tripleo-quickstart-defaults
     name: 'tripleo-quickstart-defaults'
     description: |
         <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
@@ -33,6 +33,14 @@
             type: absolute
             timeout: 180
             fail: true
+
+- defaults:
+    name: 'tripleo-quickstart-defaults-junit'
+    <<: *def-tripleo-quickstart-defaults
+    publishers:
+        - tripleo-quickstart-cleanup
+        - tripleo-quickstart-full-logs-link
+        - tripleo-quickstart-junit-results
 
 - defaults:
     name: 'tripleo-quickstart-upgrade-defaults'
@@ -90,3 +98,12 @@
     publishers:
         - archive:
             artifacts: '**/full_logs.html'
+
+- publisher:
+    name: 'tripleo-quickstart-junit-results'
+    publishers:
+        - junit:
+            results: '*/nosetests.xml'
+            keep-long-stdio: false
+            health-scale-factor: 1.0
+            allow-empty-results: true
