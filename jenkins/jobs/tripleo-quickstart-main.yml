@@ -157,6 +157,14 @@
         - 'scale_compute'
     jobs:
         - tripleo-quickstart-periodic-{release}-{build_system}-{test}-{topology}
+    wrappers:
+        - ansicolor
+        - timestamps
+        - workspace-cleanup
+        - timeout:
+            type: absolute
+            timeout: 240
+            fail: true
 
 - project:
     name: 'tripleo-quickstart-upgrade-full-jobs'
