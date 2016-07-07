@@ -136,6 +136,30 @@
             topology: '{topology}'
 
 - job-template:
+    name: 'tripleo-quickstart-periodic-feature-{release}-{build_system}-{test}-{topology}'
+    defaults: 'tripleo-quickstart-defaults'
+    triggers:
+        - trigger-tripleo-quickstart-periodic
+    scm:
+        - repo-tripleo-quickstart
+        - repo-ansible-role-tripleo-image-build
+    builders:
+        - tripleo-quickstart-builder:
+            test: '{test}'
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
+    wrappers:
+        - ansicolor
+        - timestamps
+        - workspace-cleanup
+        - timeout:
+            type: absolute
+            timeout: 240
+            fail: true
+
+- job-template:
     name: 'tripleo-quickstart-{test}-{upgrade_type}-{release}-to-{upgrade_version}'
     defaults: 'tripleo-quickstart-upgrade-defaults'
     triggers:
