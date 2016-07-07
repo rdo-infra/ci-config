@@ -45,7 +45,12 @@
     name: rdo-delorean-promote-master
     project-type: multijob
     triggers:
-        - timed: "H 0,4,8,12,16,20 * * *"
+        - pollurl:
+            cron: "H 0,4,8,12,16,20 * * *"
+            urls:
+                - url: "http://trunk-primary.rdoproject.org/centos7-master/consistent/delorean.repo"
+                  check-content:
+                    - simple: true
     defaults: parent-promote-defaults
     builders:
         - phase-get-hash-master

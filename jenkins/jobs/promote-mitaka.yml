@@ -48,7 +48,13 @@
     name: rdo-delorean-promote-mitaka
     project-type: multijob
     triggers:
-        - timed: "H 2,14 * * *"
+        - pollurl:
+            cron: "H 2,14 * * *"
+            urls:
+                - url: "http://trunk-primary.rdoproject.org/centos7-mitaka/consistent/delorean.repo"
+                  check-content:
+                    - simple: true
+
     defaults: parent-promote-defaults
     builders:
         - phase-get-hash-mitaka

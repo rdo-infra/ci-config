@@ -30,7 +30,12 @@
     name: rdo-delorean-promote-liberty
     project-type: multijob
     triggers:
-        - timed: "H 6,18 * * *"
+        - pollurl:
+            cron: "H 6,18 * * *"
+            urls:
+                - url: "http://trunk-primary.rdoproject.org/centos7-liberty/consistent/delorean.repo"
+                  check-content:
+                    - simple: true
     defaults: parent-promote-defaults
     builders:
         - phase-get-hash-liberty
