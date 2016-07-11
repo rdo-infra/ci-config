@@ -25,6 +25,7 @@
     publishers:
         - tripleo-quickstart-cleanup
         - tripleo-quickstart-full-logs-link
+        - tripleo-quickstart-junit-results
     wrappers:
         - ansicolor
         - timestamps
@@ -90,3 +91,12 @@
     publishers:
         - archive:
             artifacts: '**/full_logs.html'
+
+- publisher:
+    name: 'tripleo-quickstart-junit-results'
+    publishers:
+        - junit:
+            results: '*/nosetests.xml'
+            keep-long-stdio: false
+            health-scale-factor: 1.0
+            allow-empty-results: true
