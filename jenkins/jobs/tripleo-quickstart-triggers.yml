@@ -124,6 +124,58 @@
             silent-start: false
 
 - trigger:
+    name: 'trigger-thirdparty-gate'
+    triggers:
+        - gerrit:
+            server-name: 'rdo-ci-openstack.org'
+            trigger-on:
+                - comment-added-contains-event:
+                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(rdo-ci-check)'
+            projects:
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'openstack/ironic'
+                  branches:
+                      - branch-compare-type: 'REG_EXP'
+                        branch-pattern: '(stable/)?{release}'
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'openstack/python-mistralclient'
+                  branches:
+                      - branch-compare-type: 'REG_EXP'
+                        branch-pattern: '(stable/)?{release}'
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'openstack/python-tripleoclient'
+                  branches:
+                      - branch-compare-type: 'REG_EXP'
+                        branch-pattern: '(stable/)?{release}'
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'openstack/tripleo-common'
+                  branches:
+                      - branch-compare-type: 'REG_EXP'
+                        branch-pattern: '(stable/)?{release}'
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'openstack/tripleo-heat-templates'
+                  branches:
+                      - branch-compare-type: 'REG_EXP'
+                        branch-pattern: '(stable/)?{release}'
+            skip-vote:
+                successful: false
+                failed: false
+                unstable: false
+                notbuilt: false
+            gerrit-build-started-verified-value: 0
+            gerrit-build-started-codereview-value: 0
+            gerrit-build-successful-verified-value: 1
+            gerrit-build-successful-codereview-value: 0
+            gerrit-build-failed-verified-value: -1
+            gerrit-build-failed-codereview-value: 0
+            failure-message: 'FAILURE'
+            successful-message: 'SUCCESS'
+            unstable-message: 'UNSTABLE'
+            custom-url: '* $JOB_NAME https://ci.centos.org/artifacts/rdo/$BUILD_TAG/'
+            silent: false
+            silent-start: true
+
+- trigger:
     name: trigger-gate-roles
     triggers:
         - gerrit:
