@@ -3,7 +3,6 @@
 NODE_COUNT=${NODE_COUNT:-1}
 ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
 SSID_FILE=${SSID_FILE:-$WORKSPACE/cico-ssid}
-ANSIBLE_SSH_KEY=${ANSIBLE_SSH_KEY:-/home/rhos-ci/.ssh/id_rsa}
 
 # Write the header of the hosts file
 cat << EOF > ${ANSIBLE_HOSTS}
@@ -24,7 +23,7 @@ do
     address=$(echo "${node}" |cut -f2 -d " ")
     ssid=$(echo "${node}" |cut -f3 -d " ")
 
-    line="${host} ansible_host=${address} ansible_user=root ansible_ssh_private_key_file=${ANSIBLE_SSH_KEY} cico_ssid=${ssid}"
+    line="${host} ansible_host=${address} ansible_user=root cico_ssid=${ssid}"
     echo "${line}" >> ${ANSIBLE_HOSTS}
 
     # Write unique SSIDs to the SSID file
