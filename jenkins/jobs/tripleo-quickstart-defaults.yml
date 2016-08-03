@@ -35,6 +35,42 @@
             fail: true
 
 - defaults:
+    name: 'tripleo-quickstart-promote-defaults'
+    description: |
+        <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
+        <br>
+        <p>This job runs the script <a href="https://github.com/openstack/tripleo-quickstart/blob/master/ci-scripts/{test}.sh" target="_blank">{test}.sh</a></p>
+        <br>
+        In order to run this job locally:
+        <pre>
+
+        export VIRTHOST='my-cool-virthost.example.com'
+
+        bash ci-scripts/{test}.sh \
+            {release} \
+            {build_system} \
+            {topology} \
+            {job_type}
+
+        </pre>
+    concurrent: false
+    node: 'rdo-promote'
+    logrotate:
+        daysToKeep: 5
+        artifactDaysToKeep: 5
+    publishers:
+        - tripleo-quickstart-cleanup
+        - tripleo-quickstart-full-logs-link
+    wrappers:
+        - ansicolor
+        - timestamps
+        - workspace-cleanup
+        - timeout:
+            type: absolute
+            timeout: 180
+            fail: true
+
+- defaults:
     name: 'tripleo-quickstart-upgrade-defaults'
     description: |
         <p>Managed by Jenkins Job Builder. Do not edit via web.</p>

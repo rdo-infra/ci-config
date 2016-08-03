@@ -18,6 +18,26 @@
             timeout: 90
             fail: true
 
+- defaults:
+    name: 'weirdo-promote-defaults'
+    description: |
+        Managed by Jenkins Job Builder. Do not edit via web.
+    concurrent: false
+    node: 'rdo-promote'
+    logrotate:
+        artifactDaysToKeep: 31
+    publishers:
+        - email-cores
+        - archive-logs
+    wrappers:
+        - ansicolor
+        - timestamps
+        - workspace-cleanup
+        - timeout:
+            type: absolute
+            timeout: 90
+            fail: true
+
 - publisher:
     name: 'weirdo-email-cores'
     publishers:
