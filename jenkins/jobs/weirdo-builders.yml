@@ -12,8 +12,13 @@
         - shell: |
             if [[ "{openstack_release}" != "master" ]]; then
                 version="stable/{openstack_release}"
+                openstack_release="{openstack_release}"
+            elif [[ "{openstack_release}" == "new" ]]; then
+                version="master"
+                openstack_release="master"
             else
                 version="{openstack_release}"
+                openstack_release="{openstack_release}"
             fi
 
             # Use WeIRDO provided by jenkins scm
@@ -22,7 +27,7 @@
             git log -n 5 --oneline
 
             tox -e ansible-playbook -- -vv -i hosts playbooks/remove-firewalld-networkmanager.yml
-            tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release} -e version=$version
+            tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e ci_environment=ci-centos -e openstack_release=$openstack_release -e version=$version
 
 - builder:
     name: 'weirdo-generic-ansible-playbook-builder'
