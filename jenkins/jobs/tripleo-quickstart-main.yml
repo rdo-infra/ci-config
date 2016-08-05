@@ -81,7 +81,6 @@
 - project:
     name: 'tripleo-quickstart-thirdparty-gate-jobs'
     test: 'roles-deploy'
-    job_type: 'dlrn-gate'
     release:
         - 'liberty'
         - 'mitaka'
@@ -89,7 +88,10 @@
     build_system: 'delorean'
     topology: 'minimal'
     jobs:
-        - 'tripleo-quickstart-thirdparty-gate-{release}'
+        - 'tripleo-quickstart-thirdparty-gate-{release}':
+            job_type: 'dlrn-gate'
+        - 'tripleo-quickstart-thirdparty-gate-{release}-testing':
+            job_type: 'dlrn-gate-testing'
 
 - project:
     name: 'tripleo-quickstart-promote-full-jobs'
