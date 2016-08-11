@@ -12,3 +12,5 @@ echo "delorean_current_hash = $NEW_HASH" > $HASH_FILE
 # same way as the other tripleo-quickstart jobs.
 echo "PUBLISH = true" >> $HASH_FILE
 
+# Set the $LOCATION where quickstart will expect the images while testing in the pipeline
+echo "LOCATION = $LOCATION" >> $HASHFILE
