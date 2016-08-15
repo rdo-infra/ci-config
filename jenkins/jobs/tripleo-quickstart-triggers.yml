@@ -33,12 +33,17 @@
             trigger-on:
                 - comment-added-contains-event:
                     comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(images-ci-check)'
+                - patchset-created-event
+                - draft-published-event
             projects:
                 - project-compare-type: 'PLAIN'
                   project-pattern: 'openstack/tripleo-quickstart'
                   branches:
                       - branch-compare-type: 'ANT'
                         branch-pattern: '**'
+                  file-paths:
+                      - compare-type: 'REG_EXP'
+                        pattern: '(ci-scripts)/images.sh'
             skip-vote:
                 successful: false
                 failed: false
