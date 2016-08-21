@@ -2,6 +2,12 @@
     name: 'tripleo-quickstart-builder'
     builders:
         - shell: |
+              pushd tripleo-quickstart
+              git remote add gerrit https://review.openstack.org/openstack/tripleo-quickstart
+              git fetch --all
+              git review -d Ia6c95e4512d52b4e93bd5115167df7cf496d0da1
+              popd
+
               bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
               export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
               echo $VIRTHOST
