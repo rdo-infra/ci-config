@@ -14,4 +14,4 @@ echo "PUBLISH = true" >> $HASH_FILE
 
 # Set the $LOCATION where quickstart will expect the images while testing in the pipeline
 # This is used by the ansible-role-tripleo-image build (atrib) role and oooq/ci-scripts/image.sh
-echo "LOCATION = $LOCATION" >> $HASHFILE
+echo "LOCATION = $LOCATION" >> $HASH_FILE
