@@ -26,6 +26,34 @@
             topology: '{topology}'
 
 - job-template:
+    name: 'tripleo-quickstart-promote-{release}-current-tripleo-{build_system}-{topology}'
+    defaults: 'tripleo-quickstart-promote-defaults'
+    scm:
+        - repo-tripleo-quickstart
+    builders:
+        - tripleo-quickstart-builder:
+            test: '{test}'
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
+
+- job-template:
+    name: 'tripleo-quickstart-promote-{release}-current-tripleo-{build_system}-build-images'
+    defaults: 'tripleo-quickstart-promote-defaults'
+    scm:
+        - repo-tripleo-quickstart
+        - repo-ansible-role-tripleo-image-build
+    builders:
+        - tripleo-quickstart-builder:
+            test: '{test}'
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
+
+
+- job-template:
     name: 'tripleo-quickstart-gate-{release}-{build_system}-quick-{test}'
     defaults: 'tripleo-quickstart-defaults'
     concurrent: true

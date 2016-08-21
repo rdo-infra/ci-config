@@ -16,7 +16,7 @@
     name: 'tripleo-quickstart-gate-quick-usbkey-jobs'
     test: 'ooo-usbkey'
     job_type: 'gate'
-    release: 
+    release:
         - 'mitaka'
     build_system:
         - 'delorean'
@@ -101,7 +101,6 @@
         - 'liberty'
         - 'mitaka'
         - 'master'
-        - 'master-current-tripleo'
     build_system:
         - 'delorean'
     topology:
@@ -119,12 +118,37 @@
         - 'liberty'
         - 'mitaka'
         - 'master'
-        - 'master-current-tripleo'
     build_system:
         - 'delorean'
     topology: 'minimal'
     jobs:
         - tripleo-quickstart-promote-{release}-{build_system}-build-images
+
+- project:
+    name: 'tripleo-quickstart-promote-pipeline-full-jobs'
+    test: 'full-deploy'
+    job_type: 'promote'
+    release:
+        - 'master'
+    build_system:
+        - 'delorean'
+    topology:
+        - 'minimal'
+        - 'minimal_pacemaker'
+    jobs:
+        - tripleo-quickstart-promote-{release}-current-tripleo-{build_system}-{topology}
+
+- project:
+    name: 'tripleo-quickstart-promote-pipeline-images-jobs'
+    test: 'images'
+    job_type: 'promote'
+    release:
+        - 'master'
+    build_system:
+        - 'delorean'
+    topology: 'minimal'
+    jobs:
+        - tripleo-quickstart-promote-{release}-current-tripleo-{build_system}-build-images
 
 - project:
     name: 'tripleo-quickstart-periodic-jobs'
