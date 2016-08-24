@@ -1,8 +1,13 @@
 export NEW_HASH=`curl $DELOREAN_URL | grep baseurl | awk -F '/' '{ print $5"/"$6"/"$7 }'`
 export OLD_HASH=`curl $LAST_PROMOTED_URL | grep baseurl | awk -F '/' '{ print $5"/"$6"/"$7 }'`
 
-# No need to run the whole promote pipeline if there is nothing new to promote
-if [ $OLD_HASH == $NEW_HASH ]; then
+# RDO Promotion
+# No need to test for RDO promotion if there is nothing new to promote
+#
+# Delivery Chain Pipeline
+# The current-tripleo pin only updates as tripleo-ci promotes
+# Allow the RDO tripleo promote pipeline to retest current-tripleo when manually executed
+if [[ $OLD_HASH == $NEW_HASH ]] && [[ $DELOREAN_PIN != 'current-tripleo' ]]; then
     exit 23
 fi
 
