@@ -1,6 +1,7 @@
 set -e
 export RDO_VERSION='centos-newton'
 export DELOREAN_HOST='trunk-primary.rdoproject.org'
+export DELOREAN_PUBLIC_HOST='trunk.rdoproject.org'
 export DELOREAN_URL="http://$DELOREAN_HOST/centos7-master/current-tripleo/delorean.repo"
 # The softlinks used in promotion should be cumulative. This job starts w/ current-tripleo
 # If the job passes at the rdo level, rdo is appended to the new softlink name.
