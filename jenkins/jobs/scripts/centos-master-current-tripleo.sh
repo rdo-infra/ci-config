@@ -10,5 +10,5 @@ export LINKNAME='current-tripleo-rdo'
 export LAST_PROMOTED_URL="http://$DELOREAN_HOST/centos7-master/$LINKNAME/delorean.repo"
 export RDO_VERSION_DIR='master'
 # The LOCATION var is handed off to the ansible-role-tripleo-image build (atrib) role to define where testing/staged images are uploaded
-export LOCATION='testing'
+export LOCATION='current-tripleo'
 export HASH_FILE='/tmp/delorean_master_current_tripleo_hash'
