@@ -10,5 +10,5 @@ export RDO_VERSION_DIR='master'
 # centos-master is using the "consistent" soft link in trunk-primary.
 # This image is never used outside of CI. RDO TripleO users should only ever use content that was also
 # vetted by TripleO-CI
-export LOCATION='testing-consistent'
+export LOCATION='consistent'
 export HASH_FILE='/tmp/delorean_master_hash'
