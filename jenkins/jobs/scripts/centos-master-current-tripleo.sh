@@ -11,4 +11,7 @@ export LAST_PROMOTED_URL="http://$DELOREAN_HOST/centos7-master/$LINKNAME/delorea
 export RDO_VERSION_DIR='master'
 # The LOCATION var is handed off to the ansible-role-tripleo-image build (atrib) role to define where testing/staged images are uploaded
 export LOCATION='current-tripleo'
+# The BUILD_SYS var stores what build system was used. It becomes part of the
+# path where images are stored.
+export BUILD_SYS='delorean'
 export HASH_FILE='/tmp/delorean_master_current_tripleo_hash'
