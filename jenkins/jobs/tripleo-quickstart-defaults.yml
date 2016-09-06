@@ -119,8 +119,18 @@
                 - log-text: Building remotely
               escalate-status: false
               script:
-                !include-raw:
-                    - scripts/tripleo-quickstart-cleanup.sh
+                # Collects logs and return the node
+		set -eux
+
+		pushd $WORKSPACE/tripleo-quickstart
+
+		scripts_dir=$WORKSPACE/tripleo-quickstart/ci-scripts/
+                # We are only interested in output from the collect-logs script if it fails
+		bash $scripts_dir/collect-logs.sh {topology} &> $WORKSPACE/collect_logs.txt ||
+		    cat $WORKSPACE/collect_logs.txt
+		bash $scripts_dir/return-node.sh
+		popd
+
 
 - publisher:
     name: 'tripleo-quickstart-full-logs-link'
