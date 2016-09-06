@@ -8,10 +8,6 @@ fi
 
 echo "delorean_current_hash = $NEW_HASH" > $HASH_FILE
 
-# This is needed to make the promote image building job runnable outside of CI in the
-# same way as the other tripleo-quickstart jobs.
-echo "PUBLISH = true" >> $HASH_FILE
-
 # Set the $LOCATION where quickstart will expect the images while testing in the pipeline
 # This is used by the ansible-role-tripleo-image build (atrib) role and oooq/ci-scripts/image.sh
 echo "LOCATION = $LOCATION" >> $HASH_FILE

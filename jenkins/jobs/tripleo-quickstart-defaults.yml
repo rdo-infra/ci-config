@@ -127,3 +127,15 @@
     publishers:
         - archive:
             artifacts: '**/full_logs.html'
+
+# "Building remotely" should always be in the build console output
+- publisher:
+    name: 'tripleo-quickstart-publish-testing-images'
+    publishers:
+        - post-tasks:
+            - matches:
+                - log-text: Building remotely
+              escalate-status: false
+              script:
+                !include-raw:
+                    - scripts/tripleo-quickstart-publish-testing-images.sh
