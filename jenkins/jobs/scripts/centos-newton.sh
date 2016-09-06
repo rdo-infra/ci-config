@@ -6,9 +6,10 @@ export DELOREAN_URL="http://$DELOREAN_HOST/centos7-newton/consistent/delorean.re
 export LINKNAME='current-passed-ci'
 export LAST_PROMOTED_URL="http://$DELOREAN_HOST/centos7-newton/$LINKNAME/delorean.repo"
 export RDO_VERSION_DIR='newton'
-# The LOCATION var is handed off to the atrib role to define where testing/staged images are uploaded
-# centos-newton is using the "consistent" soft link in trunk-primary.
-# This image is never used outside of CI. RDO TripleO users should only ever use content that was also
-# vetted by TripleO-CI
+# The LOCATION var stores what repo symlink was used. It becomes part of the
+# path where images are stored.
 export LOCATION='consistent'
+# The BUILD_SYS var stores what build system was used. It becomes part of the
+# path where images are stored.
+export BUILD_SYS='delorean'
 export HASH_FILE='/tmp/delorean_newton_hash'
