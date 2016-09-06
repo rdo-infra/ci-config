@@ -1,3 +1,6 @@
+export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
+echo $VIRTHOST
+
 image_path="$RDO_VERSION_DIR/$BUILD_SYS/$LOCATION/testing/"
 
 mkdir -p testing
