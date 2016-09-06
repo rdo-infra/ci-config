@@ -23,7 +23,8 @@
         daysToKeep: 31
         artifactDaysToKeep: 31
     publishers:
-        - tripleo-quickstart-cleanup
+        - tripleo-quickstart-cleanup:
+            topology: '{topology}'
         - tripleo-quickstart-full-logs-link
     wrappers:
         - ansicolor
@@ -59,7 +60,8 @@
         daysToKeep: 31
         artifactDaysToKeep: 31
     publishers:
-        - tripleo-quickstart-cleanup
+        - tripleo-quickstart-cleanup:
+            topology: '{topology}'
         - tripleo-quickstart-full-logs-link
     wrappers:
         - ansicolor
@@ -99,7 +101,8 @@
         daysToKeep: 31
         artifactDaysToKeep: 31
     publishers:
-        - tripleo-quickstart-cleanup
+        - tripleo-quickstart-cleanup:
+            topology: '{topology}'
         - tripleo-quickstart-full-logs-link
     wrappers:
         - ansicolor
@@ -118,9 +121,16 @@
             - matches:
                 - log-text: Building remotely
               escalate-status: false
-              script:
-                !include-raw:
-                    - scripts/tripleo-quickstart-cleanup.sh
+              script: |
+                # Collects logs and return the node
+                set -eux
+
+                pushd $WORKSPACE/tripleo-quickstart
+                # We are only interested in output from the collect-logs script if it fails
+                bash ci-scripts/collect-logs.sh {topology} &> $WORKSPACE/collect_logs.txt ||
+                    cat $WORKSPACE/collect_logs.txt
+                bash ci-scripts/return-node.sh
+                popd
 
 - publisher:
     name: 'tripleo-quickstart-full-logs-link'
