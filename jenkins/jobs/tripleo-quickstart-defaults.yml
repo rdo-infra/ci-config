@@ -129,13 +129,15 @@
             artifacts: '**/full_logs.html'
 
 # "Building remotely" should always be in the build console output
+# We want to escalate-status on this publisher because if it fails we do not
+# want to continue with the promotion pipeline.
 - publisher:
     name: 'tripleo-quickstart-publish-testing-images'
     publishers:
         - post-tasks:
             - matches:
                 - log-text: Building remotely
-              escalate-status: false
+              escalate-status: true
               script:
                 !include-raw:
                     - scripts/tripleo-quickstart-publish-testing-images.sh
