@@ -8,6 +8,8 @@ fi
 
 echo "delorean_current_hash = $NEW_HASH" > $HASH_FILE
 
-# Set the $LOCATION where quickstart will expect the images while testing in the pipeline
-# This is used by the ansible-role-tripleo-image build (atrib) role and oooq/ci-scripts/image.sh
+# These variables are used for the tripleo-quickstart-publish-testing-images
+# script to put images in the correct location.
 echo "LOCATION = $LOCATION" >> $HASH_FILE
+echo "BUILD_SYS = $BUILD_SYS" >> $HASH_FILE
+echo "RDO_VERSION_DIR = $RDO_VERSION_DIR" >> $HASH_FILE
