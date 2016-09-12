@@ -1,5 +1,5 @@
 image_path="$RDO_VERSION_DIR/$BUILD_SYS/$LOCATION"
-scp_cmd='scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+ssh_cmd='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
 mkdir -p stable
 
@@ -10,7 +10,7 @@ rsync -av rdo@artifacts.ci.centos.org::rdo/images/$image_path/testing/ stable/
 rsync -av stable/ rdo@artifacts.ci.centos.org::rdo/images/$image_path/stable/
 
 # push images to RDO file server
-$scp_cmd stable/* images.rdoproject.org:/var/www/html/images/$image_path/stable/
+$ssh_cmd images.rdoproject.org "cp -f /var/www/html/images/$image_path/testing/* /var/www/html/images/$image_path/stable/"
 
 # remove images from jenkins slave
 rm -rf stable
