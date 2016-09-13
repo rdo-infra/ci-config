@@ -5,10 +5,11 @@
     concurrent: false
     node: 'rdo'
     logrotate:
+        daysToKeep: 31
         artifactDaysToKeep: 31
     publishers:
-        - email-cores
-        - archive-logs
+        - weirdo-email-cores
+        - weirdo-archive-logs
     wrappers:
         - ansicolor
         - timestamps
@@ -25,10 +26,11 @@
     concurrent: false
     node: 'rdo-promote'
     logrotate:
+        daysToKeep: 31
         artifactDaysToKeep: 31
     publishers:
-        - email-cores
-        - archive-logs
+        - weirdo-email-cores
+        - weirdo-archive-logs
     wrappers:
         - ansicolor
         - timestamps
@@ -48,7 +50,7 @@
     name: 'weirdo-archive-logs'
     publishers:
         - archive:
-            artifacts: 'logs.html,**/*.sqlite'
+            artifacts: 'properties,logs.html,**/*.sqlite'
             allow-empty: true
 
 # "Building remotely" should always be in the build console output
