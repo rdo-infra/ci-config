@@ -1,0 +1,83 @@
+- job:
+    name: weirdo-promote-puppet-properties
+    description: |
+      <h3> Documentation: <a href=http://www.rdoproject.org/>http://www.rdoproject.org/</a> </h3>
+      <h3> Known issues: <a href=https://etherpad.openstack.org/p/delorean_master_current_issues>link</a> </h3>
+      <br>
+      This job's purpose is to write a persistent properties file that can be shared across different jobs.
+    node: rdo
+    logrotate:
+        daysToKeep: 31
+        artifactDaysToKeep: 31
+    triggers:
+        - pollurl:
+            cron: "H 4,16 * * *"
+            urls:
+                - url: "https://trunk.rdoproject.org/centos7-master/consistent/delorean.repo"
+                  check-content:
+                    - simple: true
+    parameters:
+        - string:
+            name: delorean_url
+            default: https://trunk.rdoproject.org/centos7-master/consistent/delorean.repo
+            description: The URL of the delorean .repo file tested against
+        - string:
+            name: delorean_deps_url
+            default: https://trunk.rdoproject.org/centos7-master/delorean-deps.repo
+            description: The URL of the delorean-deps .repo file tested against
+        - string:
+            name: version
+            default: master
+            description: Version of integration tests used (master, stable/mitaka, etc.)
+        - string:
+            name: delorean_internal_host
+            default: trunk-primary.rdoproject.org
+            description: (For promotion purposes only) Internal delorean server
+        - string:
+            name: delorean_public_host
+            default: trunk.rdoproject.org
+            description: (For promotion purposes only) Public delorean server
+        - string:
+            name: delorean_builder
+            default: centos-master
+            description: (For promotion purposes only) Delorean builder
+        - string:
+            name: promotion_symlink
+            default: puppet-passed-ci
+            description: (For promotion purposes only) Symlink to promote
+    builders:
+      - shell: |
+          #!/bin/bash
+          set -xe
+          delorean_baseurl="$(curl -s ${delorean_url} |awk -F= '/baseurl/ {print $2}')"
+          cat << EOF > properties
+          #!/bin/bash
+          export delorean_url=${delorean_baseurl}
+          export delorean_deps_url=${delorean_deps_url}
+          export version=${version}
+          export delorean_internal_host=${delorean_internal_host}
+          export delorean_public_host=${delorean_public_host}
+          export delorean_builder=${delorean_builder}
+          export promotion_symlink=${promotion_symlink}
+          EOF
+    publishers:
+        - archive:
+            artifacts: 'properties'
+            allow-empty: true
+        - trigger-parameterized-builds:
+            - project: 'weirdo-generic-puppet-openstack-scenario001'
+              predefined-parameters: properties=https://ci.centos.org/job/${JOB_NAME}/${BUILD_NUMBER}/artifact/properties
+              current-parameters: false
+              condition: SUCCESS
+            - project: 'weirdo-generic-puppet-openstack-scenario002'
+              predefined-parameters: properties=https://ci.centos.org/job/${JOB_NAME}/${BUILD_NUMBER}/artifact/properties
+              current-parameters: false
+              condition: SUCCESS
+            - project: 'weirdo-generic-puppet-openstack-scenario003'
+              predefined-parameters: properties=https://ci.centos.org/job/${JOB_NAME}/${BUILD_NUMBER}/artifact/properties
+              current-parameters: false
+              condition: SUCCESS
+    wrappers:
+        - ansicolor
+        - timestamps
+        - workspace-cleanup
