@@ -58,11 +58,21 @@
         cd weirdo
         git log -n 5 --oneline
 
+        # If a properties file is specified, it should overwrite and have priority over other parameters
+        if [[ -n "${{properties}}" ]]; then
+          curl -s -O "${{properties}}"
+          source $(basename ${{properties}})
+        fi
+
         tox -e ansible-playbook -- -vv -i hosts playbooks/remove-firewalld-networkmanager.yml
         tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e delorean_url=${{delorean_url}} -e delorean_deps_url=${{delorean_deps_url}} -e version=${{version}}
         </pre>
 
     parameters:
+        - string:
+            name: properties
+            default:
+            description: The URL to a properties file to be sourced prior to the build
         - string:
             name: delorean_url
             default: http://trunk.rdoproject.org/centos7-master/current-passed-ci/delorean.repo

@@ -33,6 +33,12 @@
             cd weirdo
             git log -n 5 --oneline
 
+            # If a properties file is specified, it should overwrite and have priority over other parameters
+            if [[ -n "${{properties}}" ]]; then
+              curl -s -O ${{properties}}
+              source $(basename ${{properties}})
+            fi
+
             tox -e ansible-playbook -- -vv -i hosts playbooks/remove-firewalld-networkmanager.yml
             tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e ci_environment=ci-centos -e delorean_url=${{delorean_url}} -e delorean_deps_url=${{delorean_deps_url}} -e version=${{version}}
 
