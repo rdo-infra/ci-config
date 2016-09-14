@@ -28,15 +28,15 @@
     name: 'tripleo-quickstart-gate-full-jobs'
     test: 'full-deploy'
     job_type: 'gate'
-    release:
-        - 'liberty'
-        - 'mitaka'
     build_system:
         - 'delorean'
-    topology:
-        - 'minimal'
     jobs:
-        - tripleo-quickstart-gate-{release}-{build_system}-full-{topology}
+        - 'tripleo-quickstart-gate-{release}-{build_system}-full-{topology}':
+            release: 'newton'
+            topology: 'minimal_pacemaker'
+        - 'tripleo-quickstart-gate-{release}-{build_system}-full-{topology}':
+            release: 'mitaka'
+            topology: 'minimal'
 
 - project:
     name: 'tripleo-quickstart-gate-images-jobs'
@@ -47,7 +47,7 @@
         - 'mitaka'
     build_system:
         - 'delorean'
-    topology: 'minimal'
+    topology: 'minimal_pacemaker'
     jobs:
         - tripleo-quickstart-gate-{release}-{build_system}-full-images
 
