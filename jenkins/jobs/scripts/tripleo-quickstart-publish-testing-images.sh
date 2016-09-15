@@ -11,13 +11,13 @@ echo $LOCATION
 PROMOTE_HASH=`echo $delorean_current_hash | awk -F '/' '{ print $3}'`
 
 # relative path used to publish images
-dest_image_path="$RDO_VERSION_DIR/$BUILD_SYS/$LOCATION/$PROMOTE_HASH/"
+dest_image_path="$RDO_VERSION_DIR/$BUILD_SYS/$LOCATION/"
 
 # ci.centos *MUST* use rsync (note "::", see rsync man page)
-dest_centos_artifacts="rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path"
+dest_centos_artifacts="rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path/$PROMOTE_HASH/"
 
 # images.rdoproject will use rsync as well, but via ssh
-dest_rdo_filer="fedora@images.rdoproject.org:/var/www/html/images/$dest_image_path"
+dest_rdo_filer="fedora@images.rdoproject.org:/var/www/html/images/$dest_image_path/$PROMOTE_HASH/"
 
 ssh_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
@@ -47,6 +47,11 @@ ssh $ssh_args root@$VIRTHOST "yum install -y rsync"
 
 # push --> artifacts server (rsync)
 ssh $ssh_args root@$VIRTHOST "cd $virthost_source_location && echo $delorean_current_hash > delorean_hash.txt && $rsync_artifacts_cmd $artifact_list $dest_centos_artifacts"
+
+# push testing symlink so sub-jobs know what to test
+mkdir $PROMOTE_HASH
+ln -s $PROMOTE_HASH testing
+rsynk -av testing rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path/testing
 
 # TODO: we've talked about using ssh agent fwd'ing here, but it involves a number of config steps
 # TODO: on multiple hosts/nodes.  For now just doing the slightly less awesome "copy key and use it"
