@@ -13,6 +13,8 @@ rsync -av stable rdo@artifacts.ci.centos.org::rdo/images/$image_path/stable
 mkdir $LOCATION
 rsync -av --delete --exclude stable --exclude $PROMOTE_HASH $LOCATION/ rdo@artifacts.ci.centos.org::rdo/images/$image_path/
 
-# push images to RDO file server
-$ssh_cmd images.rdoproject.org "cp -f /var/www/html/images/$image_path/testing/* /var/www/html/images/$image_path/stable/"
+# push symlink to RDO file server
+rsync -av stable fedora@images.rdoproject.org:/var/www/html/images/$image_path/stable
+# delete old images from RDO file server
+rsync -av --delete --exclude stable --exclude $PROMOTE_HASH $LOCATION/ fedora@images.rdoproject.org:/var/www/html/images/$image_path/
 

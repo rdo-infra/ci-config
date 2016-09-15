@@ -52,6 +52,7 @@ ssh $ssh_args root@$VIRTHOST "cd $virthost_source_location && echo $delorean_cur
 mkdir $PROMOTE_HASH
 ln -s $PROMOTE_HASH testing
 rsync -av testing rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path/testing
+rsync -av testing fedora@images.rdoproject.org:/var/www/html/images/$dest_image_path/testing
 
 # TODO: we've talked about using ssh agent fwd'ing here, but it involves a number of config steps
 # TODO: on multiple hosts/nodes.  For now just doing the slightly less awesome "copy key and use it"
