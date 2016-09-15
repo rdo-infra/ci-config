@@ -51,7 +51,7 @@ ssh $ssh_args root@$VIRTHOST "cd $virthost_source_location && echo $delorean_cur
 # push testing symlink so sub-jobs know what to test
 mkdir $PROMOTE_HASH
 ln -s $PROMOTE_HASH testing
-rsynk -av testing rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path/testing
+rsync -av testing rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path/testing
 
 # TODO: we've talked about using ssh agent fwd'ing here, but it involves a number of config steps
 # TODO: on multiple hosts/nodes.  For now just doing the slightly less awesome "copy key and use it"
