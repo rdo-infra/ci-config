@@ -11,7 +11,7 @@ echo $LOCATION
 PROMOTE_HASH=`echo $delorean_current_hash | awk -F '/' '{ print $3}'`
 
 # relative path used to publish images
-dest_image_path="$RDO_VERSION_DIR/$BUILD_SYS/$LOCATION/"
+dest_image_path="$RDO_VERSION_DIR/$BUILD_SYS/$LOCATION"
 
 # ci.centos *MUST* use rsync (note "::", see rsync man page)
 dest_centos_artifacts="rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path/$PROMOTE_HASH/"
@@ -48,12 +48,6 @@ ssh $ssh_args root@$VIRTHOST "yum install -y rsync"
 # push --> artifacts server (rsync)
 ssh $ssh_args root@$VIRTHOST "cd $virthost_source_location && echo $delorean_current_hash > delorean_hash.txt && $rsync_artifacts_cmd $artifact_list $dest_centos_artifacts"
 
-# push testing symlink so sub-jobs know what to test
-mkdir $PROMOTE_HASH
-ln -s $PROMOTE_HASH testing
-rsync -av testing rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path/testing
-rsync -av testing fedora@images.rdoproject.org:/var/www/html/images/$dest_image_path/testing
-
 # TODO: we've talked about using ssh agent fwd'ing here, but it involves a number of config steps
 # TODO: on multiple hosts/nodes.  For now just doing the slightly less awesome "copy key and use it"
 
@@ -62,4 +56,15 @@ scp $ssh_args ~/.ssh/rdo-ci-public.pem root@$VIRTHOST:$virthost_source_location
 
 # use key to rsync to images.rdoproject.org
 ssh $ssh_args root@$VIRTHOST "cd $virthost_source_location && $rsync_base_cmd -e 'ssh $ssh_args -i rdo-ci-public.pem' $artifact_list $dest_rdo_filer"
+
+# Delete old testing symlink
+mkdir $LOCATION
+rsync -av --delete --include testing --exclude '*' $LOCATION/ rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path/
+rsync -av --delete --include testing --exclude '*' $LOCATION/ fedora@images.rdoproject.org:/var/www/html/images/$dest_image_path/
+
+# push testing symlink so sub-jobs know what to test
+mkdir $PROMOTE_HASH
+ln -s $PROMOTE_HASH testing
+rsync -av testing rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path/testing
+rsync -av testing fedora@images.rdoproject.org:/var/www/html/images/$dest_image_path/testing
 

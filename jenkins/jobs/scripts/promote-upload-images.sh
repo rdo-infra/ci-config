@@ -6,15 +6,14 @@ PROMOTE_HASH=`echo $delorean_current_hash | awk -F '/' '{ print $3}'`
 mkdir $PROMOTE_HASH
 ln -s $PROMOTE_HASH stable
 
+# Delete old stable symlink and old images
+mkdir $LOCATION
+rsync -av --delete --exclude $PROMOTE_HASH $LOCATION/ rdo@artifacts.ci.centos.org::rdo/images/$image_path/
+rsync -av --delete --exclude $PROMOTE_HASH $LOCATION/ fedora@images.rdoproject.org:/var/www/html/images/$image_path/
+
 # push symlink to ci.centos artifacts server
 rsync -av stable rdo@artifacts.ci.centos.org::rdo/images/$image_path/stable
 
-# delete old images from artifacts server
-mkdir $LOCATION
-rsync -av --delete --exclude stable --exclude $PROMOTE_HASH $LOCATION/ rdo@artifacts.ci.centos.org::rdo/images/$image_path/
-
 # push symlink to RDO file server
 rsync -av stable fedora@images.rdoproject.org:/var/www/html/images/$image_path/stable
-# delete old images from RDO file server
-rsync -av --delete --exclude stable --exclude $PROMOTE_HASH $LOCATION/ fedora@images.rdoproject.org:/var/www/html/images/$image_path/
 
