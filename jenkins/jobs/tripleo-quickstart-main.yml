@@ -13,9 +13,9 @@
         - tripleo-quickstart-gate-{release}-{build_system}-quick-{test}
 
 - project:
-    name: 'tripleo-quickstart-role-gate-quick-jobs'
-    test: 'roles-deploy'
-    job_type: 'gate'
+    name: 'tripleo-quickstart-role-gate-jobs'
+    test: 'full-deploy'
+    job_type: 'roles-gate'
     release:
         - 'liberty'
         - 'mitaka'
@@ -25,7 +25,8 @@
         - tripleo-quickstart-roles-gate-{release}
 
 - project:
-    name: 'tripleo-quickstart-gate-full-and-roles-jobs'
+    name: 'tripleo-quickstart-gate-full-jobs'
+    test: 'full-deploy'
     job_type: 'gate'
     release:
         - 'liberty'
@@ -35,10 +36,7 @@
     topology:
         - 'minimal'
     jobs:
-        - tripleo-quickstart-gate-{release}-{build_system}-full-{topology}:
-            test: 'full-deploy'
-        - tripleo-quickstart-gate-{release}-{build_system}-roles-{topology}:
-            test: 'roles-deploy'
+        - tripleo-quickstart-gate-{release}-{build_system}-full-{topology}
 
 - project:
     name: 'tripleo-quickstart-gate-images-jobs'
@@ -68,7 +66,8 @@
 
 - project:
     name: 'tripleo-quickstart-thirdparty-gate-jobs'
-    test: 'roles-deploy'
+    test: 'full-deploy'
+    job_type: 'dlrn-gate'
     release:
         - 'liberty'
         - 'mitaka'
@@ -77,10 +76,7 @@
     build_system: 'delorean'
     topology: 'minimal'
     jobs:
-        - 'tripleo-quickstart-thirdparty-gate-{release}':
-            job_type: 'dlrn-gate'
-        - 'tripleo-quickstart-thirdparty-gate-{release}-testing':
-            job_type: 'dlrn-gate-testing'
+        - tripleo-quickstart-thirdparty-gate-{release}
 
 - project:
     name: 'tripleo-quickstart-promote-full-jobs'
@@ -148,7 +144,6 @@
     test:
         - 'images'
         - 'full-deploy'
-        - 'roles-deploy'
     job_type: 'periodic'
     release:
         - 'liberty'

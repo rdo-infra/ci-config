@@ -259,10 +259,33 @@
             server-name: 'rdo-ci-centos'
             trigger-on:
                 - patchset-created-event
-                - draft-published-event
                 - comment-added-contains-event:
                     comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(rdo)? ?(recheck)'
             projects:
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'redhat-openstack/ansible-role-tripleo-overcloud-prep-config'
+                  branches:
+                      - branch-compare-type: 'PLAIN'
+                        branch-pattern: 'master'
+
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'redhat-openstack/ansible-role-tripleo-overcloud-prep-flavors'
+                  branches:
+                      - branch-compare-type: 'PLAIN'
+                        branch-pattern: 'master'
+
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'redhat-openstack/ansible-role-tripleo-overcloud-prep-images'
+                  branches:
+                      - branch-compare-type: 'PLAIN'
+                        branch-pattern: 'master'
+
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'redhat-openstack/ansible-role-tripleo-overcloud-prep-network'
+                  branches:
+                      - branch-compare-type: 'PLAIN'
+                        branch-pattern: 'master'
+
                 - project-compare-type: 'PLAIN'
                   project-pattern: 'redhat-openstack/ansible-role-tripleo-overcloud'
                   branches:
@@ -277,24 +300,6 @@
 
                 - project-compare-type: 'PLAIN'
                   project-pattern: 'redhat-openstack/ansible-role-tripleo-tempest'
-                  branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
-
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/ansible-role-tripleo-overcloud-upgrade'
-                  branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
-
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/ansible-role-tripleo-inventory'
-                  branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
-
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/ansible-role-tripleo-undercloud-post'
                   branches:
                       - branch-compare-type: 'PLAIN'
                         branch-pattern: 'master'
