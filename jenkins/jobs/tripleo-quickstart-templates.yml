@@ -62,6 +62,39 @@
             topology: '{topology}'
         - tripleo-quickstart-full-logs-link
 
+#cloudsig
+- job-template:
+    name: 'tripleo-quickstart-promote-cloudsig-{release}-{build_system}-{topology}'
+    defaults: 'tripleo-quickstart-promote-defaults'
+    scm:
+        - repo-tripleo-quickstart
+    builders:
+        - tripleo-quickstart-builder:
+            test: '{test}'
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
+
+- job-template:
+    name: 'tripleo-quickstart-promote-cloudsig-{release}-{build_system}-build-images'
+    defaults: 'tripleo-quickstart-promote-defaults'
+    scm:
+        - repo-tripleo-quickstart
+        - repo-ansible-role-tripleo-image-build
+    builders:
+        - tripleo-quickstart-builder:
+            test: '{test}'
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
+    publishers:
+        - tripleo-quickstart-publish-testing-images
+        - tripleo-quickstart-cleanup:
+            topology: '{topology}'
+        - tripleo-quickstart-full-logs-link
+
 
 - job-template:
     name: 'tripleo-quickstart-gate-{release}-{build_system}-quick-{test}'
