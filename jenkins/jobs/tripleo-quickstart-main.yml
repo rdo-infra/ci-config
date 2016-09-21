@@ -139,6 +139,36 @@
     jobs:
         - tripleo-quickstart-promote-{release}-current-tripleo-{build_system}-build-images
 
+#cloudsig
+- project:
+    name: 'tripleo-quickstart-promote-cloudsig-pipeline-full-jobs'
+    test: 'full-deploy'
+    job_type: 'promote'
+    release:
+        - 'newton'
+        - 'mitaka'
+    build_system:
+        - 'cloudsig-testing'
+    topology:
+        - 'minimal'
+        - 'minimal_pacemaker'
+    jobs:
+        - tripleo-quickstart-promote-{release}-{build_system}-{topology}
+
+- project:
+    name: 'tripleo-quickstart-promote-cloudsig-pipeline-images-jobs'
+    test: 'images'
+    job_type: 'promote'
+    release:
+        - 'newton'
+        - 'mitaka'
+    build_system:
+        - 'cloudsig-testing'
+    topology: 'minimal'
+    jobs:
+        - tripleo-quickstart-promote-{release}-{build_system}-build-images
+
+
 - project:
     name: 'tripleo-quickstart-periodic-jobs'
     test:
