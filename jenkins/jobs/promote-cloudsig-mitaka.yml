@@ -1,0 +1,143 @@
+- builder:
+    name: phase-test-build-cloudsig-mitaka
+    builders:
+        - multijob:
+            name: "INSTALL / TEST (BUILD IMAGES)"
+            condition: UNSTABLE
+            projects:
+                - name: tripleo-quickstart-promote-mitaka-cloudsig-testing-build-images
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_cloudsig_mitaka_hash
+
+- builder:
+    name: phase-test-import-cloudsig-mitaka
+    builders:
+        - multijob:
+            name: "INSTALL / TEST (IMPORT IMAGES)"
+            condition: UNSTABLE
+            projects:
+                - name: tripleo-quickstart-promote-mitaka-cloudsig-testing-minimal
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_cloudsig_mitaka_hash
+                - name: tripleo-quickstart-promote-mitaka-cloudsig-testing-minimal_pacemaker
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_cloudsig_mitaka_hash
+                - name: weirdo-cloudsig-mitaka-promote-packstack-scenario001
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_cloudsig_mitaka_hash
+                - name: weirdo-cloudsig-mitaka-promote-packstack-scenario002
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_cloudsig_mitaka_hash
+                - name: weirdo-cloudsig-mitaka-promote-packstack-scenario003
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_cloudsig_mitaka_hash
+                - name: weirdo-cloudsig-mitaka-promote-puppet-openstack-scenario001
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_cloudsig_mitaka_hash
+                - name: weirdo-cloudsig-mitaka-promote-puppet-openstack-scenario002
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_cloudsig_mitaka_hash
+                - name: weirdo-cloudsig-mitaka-promote-puppet-openstack-scenario003
+                  kill-phase-on: NEVER
+                  property-file: /tmp/delorean_cloudsig_mitaka_hash
+
+- job-template:
+    name: rdo-delorean-promote-cloudsig-mitaka
+    project-type: multijob
+    defaults: parent-promote-defaults
+    builders:
+        - phase-get-hash-cloudsig-mitaka
+        - phase-test-build-cloudsig-mitaka
+        - phase-test-import-cloudsig-mitaka
+        - phase-upload-cloudsig-mitaka
+        #- phase-repo-promote-cloudsig-mitaka
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- builder:
+    name: phase-get-hash-cloudsig-mitaka
+    builders:
+        - multijob:
+            name: "GET THE LATEST DELOREAN YUM REPOSITORY HASH"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-get-hash-cloudsig-mitaka
+
+- builder:
+    name: phase-upload-cloudsig-mitaka
+    builders:
+        - multijob:
+            name: "UPLOAD IMAGES TO FILE SERVER"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-upload-cloudsig-mitaka
+                property-file: /tmp/delorean_cloudsig_mitaka_hash
+
+# not sure how cloudsig-testing will promote, leaving for now
+# - builder:
+#     name: phase-repo-promote-cloudsig-mitaka
+#     builders:
+#         - multijob:
+#             name: "UPLOAD IMAGES TO FILE SERVER"
+#             condition: SUCCESSFUL
+#             projects:
+#               - name: rdo-promote-repo-promote-cloudsig-mitaka
+#                 property-file: /tmp/delorean_cloudsig_mitaka_hash
+
+- job-template:
+    name: 'rdo-promote-get-hash-cloudsig-mitaka'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-cloudsig-testing-mitaka.sh
+                - scripts/promote-get-hash.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- job-template:
+    name: 'rdo-promote-upload-cloudsig-mitaka'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-cloudsig-testing-mitaka.sh
+                - scripts/promote-upload-images.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- job-template:
+    name: 'rdo-promote-repo-promote-cloudsig-mitaka'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-cloudsig-testing-mitaka.sh
+                - scripts/promote-repo-promote.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- project:
+    name: rdo-delorean-promote-jobs-cloudsig-mitaka
+    jobs:
+        - 'rdo-delorean-promote-cloudsig-mitaka'
+
+- project:
+    name: rdo-promote-get-hash-cloudsig-mitaka
+    jobs:
+        - 'rdo-promote-get-hash-cloudsig-mitaka'
+
+- project:
+    name: rdo-promote-upload-cloudsig-mitaka
+    jobs:
+        - 'rdo-promote-upload-cloudsig-mitaka'
+
+# DO NOT PROMOTE, not a delorean repo
+# - project:
+#     name: rdo-promote-repo-promote-cloudsig-mitaka
+#     jobs:
+#         - 'rdo-promote-repo-promote-cloudsig-mitaka'
