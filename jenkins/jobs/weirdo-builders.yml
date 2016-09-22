@@ -22,7 +22,10 @@
             git log -n 5 --oneline
 
             tox -e ansible-playbook -- -vv -i hosts playbooks/remove-firewalld-networkmanager.yml
-            tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e ci_environment=ci-centos -e openstack_release={openstack_release} -e version=$version
+            tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml \
+              -e ci_environment=ci-centos \
+              -e openstack_release={openstack_release} \
+              -e version=$version
 
 - builder:
     name: 'weirdo-generic-ansible-playbook-builder'
@@ -40,7 +43,12 @@
             git log -n 5 --oneline
 
             tox -e ansible-playbook -- -vv -i hosts playbooks/remove-firewalld-networkmanager.yml
-            tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e ci_environment=ci-centos -e delorean_url=${{delorean_url}} -e delorean_deps_url=${{delorean_deps_url}} -e version=${{version}}
+            tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml \
+              -e ci_environment=ci-centos \
+              -e delorean_url=${{delorean_url}} \
+              -e delorean_deps_url=${{delorean_deps_url}} \
+              -e version=${{version}} \
+              -e release_rpm=${{release_rpm}}
 
 - builder:
     name: 'weirdo-promote-ansible-playbook-builder'
