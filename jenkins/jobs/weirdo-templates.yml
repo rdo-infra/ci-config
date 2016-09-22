@@ -23,7 +23,11 @@
         cd weirdo
         git log -n 5 --oneline
         tox -e ansible-playbook -- -vv -i hosts playbooks/remove-firewalld-networkmanager.yml
-        tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e ci_environment=ci-centos -e delorean_url=$delorean_url -e openstack_release={openstack_release} -e version=$version
+        tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml \
+          -e ci_environment=ci-centos \
+          -e delorean_url=$delorean_url \
+          -e openstack_release={openstack_release} \
+          -e version=$version
         </pre>
 
     scm:
@@ -65,7 +69,11 @@
         git log -n 5 --oneline
 
         tox -e ansible-playbook -- -vv -i hosts playbooks/remove-firewalld-networkmanager.yml
-        tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml -e delorean_url=${{delorean_url}} -e delorean_deps_url=${{delorean_deps_url}} -e version=${{version}}
+        tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml \
+          -e delorean_url=${{delorean_url}} \
+          -e delorean_deps_url=${{delorean_deps_url}} \
+          -e version=${{version}}
+          -e release_rpm=${{release_rpm}}
         </pre>
 
     parameters:
@@ -73,6 +81,9 @@
             name: properties
             default:
             description: The URL to a properties file to be sourced prior to the build
+        - string:
+            name: release_rpm
+            description: Release package or RPM to test against. Has precedence if trunk repositories are specified. Can be an URL.
         - string:
             name: delorean_url
             default: http://trunk.rdoproject.org/centos7-master/current-passed-ci/delorean.repo
