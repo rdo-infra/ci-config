@@ -72,18 +72,15 @@
         tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml \
           -e delorean_url=${{delorean_url}} \
           -e delorean_deps_url=${{delorean_deps_url}} \
-          -e version=${{version}}
+          -e openstack_release=${{openstack_release}} \
+          -e version=${{version}} \
           -e release_rpm=${{release_rpm}}
         </pre>
-
     parameters:
         - string:
             name: properties
             default:
             description: The URL to a properties file to be sourced prior to the build
-        - string:
-            name: release_rpm
-            description: Release package or RPM to test against. Has precedence if trunk repositories are specified. Can be an URL.
         - string:
             name: delorean_url
             default: http://trunk.rdoproject.org/centos7-master/current-passed-ci/delorean.repo
@@ -93,9 +90,16 @@
             default: http://trunk.rdoproject.org/centos7-master/delorean-deps.repo
             description: The URL of the delorean-deps .repo file tested against
         - string:
+            name: openstack_release
+            default: master
+            description: The name of the OpenStack release to use (newton, mitaka, etc.)
+        - string:
             name: version
             default: master
-            description: Version of integration tests used (master, stable/mitaka, etc.)
+            description: The version of integration tests to use (stable/newton, stable/mitaka, etc.)
+        - string:
+            name: release_rpm
+            description: Release package or RPM to test against. Has precedence if trunk repositories are specified. Can be an URL.
     scm:
         - weirdo-core-master-repository
     builders:

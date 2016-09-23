@@ -6,13 +6,17 @@
         This job runs WeIRDO scenarios against a stable release every two days.
     parameters:
         - string:
-            name: release_rpm
-            default: 'centos-release-openstack-{openstack_release}'
-            description: Release package/RPM used for testing (can also be an URL)
+            name: openstack_release
+            default: '{openstack_release}'
+            description: The name of the OpenStack release to use (newton, mitaka, etc.)
         - string:
             name: version
             default: 'stable/{openstack_release}'
-            description: Version of integration tests used (stable/newton, stable/mitaka, etc.)
+            description: The version of integration tests to use (stable/newton, stable/mitaka, etc.)
+        - string:
+            name: release_rpm
+            default: 'centos-release-openstack-{openstack_release}'
+            description: Release package/RPM to use (can also be an URL)
     triggers:
         - timed: 'H H H/2 * *'
     builders:
@@ -22,6 +26,7 @@
             echo "| Scheduling jobs to test:"
             echo "|   - release_rpm: $release_rpm"
             echo "|   - version: $version"
+            echo "|   - openstack_release: $openstack_release"
             echo "+===============================================+"
         - trigger-builds:
             - project:
@@ -32,8 +37,9 @@
                 - 'weirdo-generic-packstack-scenario002'
                 - 'weirdo-generic-packstack-scenario003'
               predefined-parameters: |
-                  release_rpm=$release_rpm
+                  openstack_release=$openstack_release
                   version=$version
+                  release_rpm=$release_rpm
               block: true
               block-thresholds:
                 build-step-failure-threshold: 'FAILURE'
@@ -42,4 +48,3 @@
     publishers:
         - email:
             recipients: 'rdo-infra-list@redhat.com'
-
