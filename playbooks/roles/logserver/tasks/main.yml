@@ -1,0 +1,89 @@
+- become: true
+  block:
+    - name: Upgrade all packages
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Install packages required for os-loganalyze
+      yum:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - epel-release
+        - gcc
+        - git
+        - httpd
+        - mod_wsgi
+        - python-devel
+
+    - name: Install mod_ssl
+      yum:
+        name: mod_ssl
+        state: present
+      when: logserver_ssl|bool
+
+    - name: Also install python-pip after EPEL is enabled
+      yum:
+        name: "python-pip"
+        state: present
+
+    - name: Install libsemanage-python for the seboolean module
+      yum:
+        name: libsemanage-python
+        state: present
+
+    - name: Let the os-loganalyze to connect to external swift server
+      seboolean:
+        name: httpd_can_network_connect
+        state: yes
+        persistent: yes
+
+    - name: Clone os-loganalyze from github
+      git:
+        repo: https://github.com/openstack-infra/os-loganalyze
+        dest: /var/www/cgi-bin/os-loganalyze
+
+    - name: Create os-loganalyze config directory
+      file:
+        path: /etc/os_loganalyze
+        state: directory
+
+    - name: Create os-loganalyze config file
+      template:
+        src: wsgi.conf.j2
+        dest: /etc/os_loganalyze/wsgi.conf
+
+    - name: Install requirements for os-loganalyze
+      pip:
+        requirements: /var/www/cgi-bin/os-loganalyze/requirements.txt
+
+    - name: Install os-loganalyze
+      command: python setup.py install
+      args:
+        chdir: /var/www/cgi-bin/os-loganalyze
+
+    - name: Turn off all other (default) apache site configs
+      command: find /etc/httpd/conf.d -type f -name '*.conf' -execdir mv {} {}-off ;
+
+    - name: Create a config for apache
+      template:
+        src: os-loganalyze.conf.j2
+        dest: /etc/httpd/conf.d/os-loganalyze.conf
+
+    - name: Enable and restart apache
+      service:
+        name: httpd
+        enabled: yes
+        state: restarted
+
+    - name: Install certbot
+      yum:
+        name: python-certbot-apache
+        state: present
+      when: logserver_ssl|bool
+
+    - name: Run certbot
+      debug:
+        msg: "Run `certbot --apache` interactively to install a proper SSL certificate. Then add a cronjob to run `certbot renew --quiet` twice a day."
+      when: logserver_ssl|bool
