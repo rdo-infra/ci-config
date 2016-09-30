@@ -74,7 +74,8 @@
           -e delorean_deps_url=${{delorean_deps_url}} \
           -e openstack_release=${{openstack_release}} \
           -e version=${{version}} \
-          -e stable_repositories=${{stable_repositories}}
+          -e stable_repositories=${{stable_repositories}} \
+          -e testing_repositories=${{testing_repositories}}
         </pre>
     concurrent: true
     parameters:
@@ -100,6 +101,9 @@
             description: The version of integration tests to use (master, stable/newton, stable/mitaka, etc.)
         - string:
             name: stable_repositories
+            description: Comma separated list of release packages or RPMs (can be an URL) to test against. Has precedence if trunk repositories are specified.
+        - string:
+            name: testing_repositories
             description: Comma separated list of release packages or RPMs (can be an URL) to test against. Has precedence if trunk repositories are specified.
     scm:
         - weirdo-core-master-repository
