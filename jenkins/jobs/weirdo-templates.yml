@@ -74,7 +74,7 @@
           -e delorean_deps_url=${{delorean_deps_url}} \
           -e openstack_release=${{openstack_release}} \
           -e version=${{version}} \
-          -e release_rpm=${{release_rpm}}
+          -e stable_repositories=${{stable_repositories}}
         </pre>
     parameters:
         - string:
@@ -98,8 +98,8 @@
             default: master
             description: The version of integration tests to use (master, stable/newton, stable/mitaka, etc.)
         - string:
-            name: release_rpm
-            description: Release package or RPM to test against. Has precedence if trunk repositories are specified. Can be an URL.
+            name: stable_repositories
+            description: Comma separated list of release packages or RPMs (can be an URL) to test against. Has precedence if trunk repositories are specified.
     scm:
         - weirdo-core-master-repository
     builders:

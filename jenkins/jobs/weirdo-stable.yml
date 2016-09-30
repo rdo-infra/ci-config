@@ -14,8 +14,8 @@
             default: 'stable/{openstack_release}'
             description: The version of integration tests to use (stable/newton, stable/mitaka, etc.)
         - string:
-            name: release_rpm
-            default: 'centos-release-openstack-{openstack_release}'
+            name: stable_repositories
+            default: 'https://rdoproject.org/repos/openstack-{openstack_release}/rdo-release-{openstack_release}.rpm'
             description: Release package/RPM to use (can also be an URL)
     triggers:
         - timed: 'H H H/2 * *'
@@ -26,7 +26,7 @@
             echo "| Scheduling jobs to test:"
             echo "|   - release_rpm: $release_rpm"
             echo "|   - version: $version"
-            echo "|   - openstack_release: $openstack_release"
+            echo "|   - stable_repositories: $stable_repositories"
             echo "+===============================================+"
         - trigger-builds:
             - project:
@@ -39,7 +39,7 @@
               predefined-parameters: |
                   openstack_release=$openstack_release
                   version=$version
-                  release_rpm=$release_rpm
+                  stable_repositories=$stable_repositories
               block: true
               block-thresholds:
                 build-step-failure-threshold: 'FAILURE'
