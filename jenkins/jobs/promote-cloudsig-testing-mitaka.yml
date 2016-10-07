@@ -1,5 +1,5 @@
 - builder:
-    name: phase-test-build-cloudsig-mitaka
+    name: phase-test-build-cloudsig-testing-mitaka
     builders:
         - multijob:
             name: "INSTALL / TEST (BUILD IMAGES)"
@@ -10,7 +10,7 @@
                   property-file: /tmp/cloudsig-testing_mitaka_hash
 
 - builder:
-    name: phase-test-import-cloudsig-mitaka
+    name: phase-test-import-cloudsig-testing-mitaka
     builders:
         - multijob:
             name: "INSTALL / TEST (IMPORT IMAGES)"
@@ -26,39 +26,41 @@
                   kill-phase-on: NEVER
 
 - job-template:
-    name: rdo-promote-cloudsig-mitaka
+    name: rdo-promote-cloudsig-testing-mitaka
     project-type: multijob
+    triggers:
+        - timed: "H H * * 6"
     defaults: parent-promote-defaults
     builders:
-        - phase-get-hash-cloudsig-mitaka
-        - phase-test-build-cloudsig-mitaka
-        - phase-test-import-cloudsig-mitaka
-        - phase-upload-cloudsig-mitaka
+        - phase-get-hash-cloudsig-testing-mitaka
+        - phase-test-build-cloudsig-testing-mitaka
+        - phase-test-import-cloudsig-testing-mitaka
+        - phase-upload-cloudsig-testing-mitaka
     properties:
         - ownership:
             owner: trown@redhat.com
 
 - builder:
-    name: phase-get-hash-cloudsig-mitaka
+    name: phase-get-hash-cloudsig-testing-mitaka
     builders:
         - multijob:
             name: "GET THE LATEST DELOREAN YUM REPOSITORY HASH"
             condition: SUCCESSFUL
             projects:
-              - name: rdo-promote-get-hash-cloudsig-mitaka
+              - name: rdo-promote-get-hash-cloudsig-testing-mitaka
 
 - builder:
-    name: phase-upload-cloudsig-mitaka
+    name: phase-upload-cloudsig-testing-mitaka
     builders:
         - multijob:
             name: "UPLOAD IMAGES TO FILE SERVER"
             condition: SUCCESSFUL
             projects:
-              - name: rdo-promote-upload-cloudsig-mitaka
+              - name: rdo-promote-upload-cloudsig-testing-mitaka
                 property-file: /tmp/cloudsig-testing_mitaka_hash
 
 - job-template:
-    name: 'rdo-promote-get-hash-cloudsig-mitaka'
+    name: 'rdo-promote-get-hash-cloudsig-testing-mitaka'
     defaults: script-defaults
     builders:
         - shell:
@@ -70,7 +72,7 @@
             owner: trown@redhat.com
 
 - job-template:
-    name: 'rdo-promote-upload-cloudsig-mitaka'
+    name: 'rdo-promote-upload-cloudsig-testing-mitaka'
     defaults: script-defaults
     builders:
         - shell:
@@ -82,16 +84,16 @@
             owner: trown@redhat.com
 
 - project:
-    name: rdo-promote-cloudsig-mitaka
+    name: rdo-promote-cloudsig-testing-mitaka
     jobs:
-        - 'rdo-promote-cloudsig-mitaka'
+        - 'rdo-promote-cloudsig-testing-mitaka'
 
 - project:
-    name: rdo-promote-get-hash-cloudsig-mitaka
+    name: rdo-promote-get-hash-cloudsig-testing-mitaka
     jobs:
-        - 'rdo-promote-get-hash-cloudsig-mitaka'
+        - 'rdo-promote-get-hash-cloudsig-testing-mitaka'
 
 - project:
-    name: rdo-promote-upload-cloudsig-mitaka
+    name: rdo-promote-upload-cloudsig-testing-mitaka
     jobs:
-        - 'rdo-promote-upload-cloudsig-mitaka'
+        - 'rdo-promote-upload-cloudsig-testing-mitaka'
