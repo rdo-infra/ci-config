@@ -1,0 +1,97 @@
+- builder:
+    name: phase-test-build-cloudsig-stable-mitaka
+    builders:
+        - multijob:
+            name: "INSTALL / TEST (BUILD IMAGES)"
+            condition: UNSTABLE
+            projects:
+                - name: tripleo-quickstart-promote-mitaka-cloudsig-stable-build-images
+                  kill-phase-on: NEVER
+                  property-file: /tmp/cloudsig-stable_mitaka_hash
+
+- builder:
+    name: phase-test-import-cloudsig-stable-mitaka
+    builders:
+        - multijob:
+            name: "INSTALL / TEST (IMPORT IMAGES)"
+            condition: UNSTABLE
+            projects:
+                - name: tripleo-quickstart-promote-mitaka-cloudsig-stable-minimal
+                  kill-phase-on: NEVER
+                  property-file: /tmp/cloudsig-stable_mitaka_hash
+                - name: tripleo-quickstart-promote-mitaka-cloudsig-stable-minimal_pacemaker
+                  kill-phase-on: NEVER
+                  property-file: /tmp/cloudsig-stable_mitaka_hash
+                - name: weirdo-stable-mitaka
+                  kill-phase-on: NEVER
+
+- job-template:
+    name: rdo-promote-cloudsig-stable-mitaka
+    project-type: multijob
+    defaults: parent-promote-defaults
+    builders:
+        - phase-get-hash-cloudsig-stable-mitaka
+        - phase-test-build-cloudsig-stable-mitaka
+        - phase-test-import-cloudsig-stable-mitaka
+        - phase-upload-cloudsig-stable-mitaka
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- builder:
+    name: phase-get-hash-cloudsig-stable-mitaka
+    builders:
+        - multijob:
+            name: "GET THE LATEST DELOREAN YUM REPOSITORY HASH"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-get-hash-cloudsig-stable-mitaka
+
+- builder:
+    name: phase-upload-cloudsig-stable-mitaka
+    builders:
+        - multijob:
+            name: "UPLOAD IMAGES TO FILE SERVER"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-upload-cloudsig-stable-mitaka
+                property-file: /tmp/cloudsig-stable_mitaka_hash
+
+- job-template:
+    name: 'rdo-promote-get-hash-cloudsig-stable-mitaka'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-cloudsig-stable-mitaka.sh
+                - scripts/promote-get-hash-cbs.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- job-template:
+    name: 'rdo-promote-upload-cloudsig-stable-mitaka'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-cloudsig-stable-mitaka.sh
+                - scripts/promote-upload-images.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- project:
+    name: rdo-promote-cloudsig-stable-mitaka
+    jobs:
+        - 'rdo-promote-cloudsig-stable-mitaka'
+
+- project:
+    name: rdo-promote-get-hash-cloudsig-stable-mitaka
+    jobs:
+        - 'rdo-promote-get-hash-cloudsig-stable-mitaka'
+
+- project:
+    name: rdo-promote-upload-cloudsig-stable-mitaka
+    jobs:
+        - 'rdo-promote-upload-cloudsig-stable-mitaka'
