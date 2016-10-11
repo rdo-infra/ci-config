@@ -235,22 +235,19 @@
     enable_pacemaker: 'false'
     jobs:
         - tripleo-quickstart-{test}-{upgrade_type}-{release}-to-{target_upgrade_version}:
+            upgrade_type: major
+            release: liberty
             target_upgrade_version: mitaka
             upgrade_delorean_hash: current-passed-ci
             major_upgrade: 'true'
             enable_pacemaker: 'true'
         - tripleo-quickstart-{test}-{upgrade_type}-{release}-to-{target_upgrade_version}:
-            upgrade_type: minor
-            release: mitaka
-            target_upgrade_version: mitaka
+            upgrade_type: major
+            release: newton
+            target_upgrade_version: master
             upgrade_delorean_hash: current
-            major_upgrade: 'false'
-        - tripleo-quickstart-{test}-{upgrade_type}-{release}-to-{target_upgrade_version}:
-            upgrade_type: minor
-            release: master
-            target_upgrade_version: newton
-            upgrade_delorean_hash: current
-            major_upgrade: 'false'
+            major_upgrade: 'true'
+            enable_pacemaker: 'true'
         - tripleo-quickstart-{test}-{upgrade_type}-{release}-to-{target_upgrade_version}:
             upgrade_type: major
             release: mitaka
@@ -258,3 +255,21 @@
             upgrade_delorean_hash: current
             major_upgrade: 'true'
             enable_pacemaker: 'true'
+        - tripleo-quickstart-{test}-{upgrade_type}-{release}-to-{target_upgrade_version}:
+            upgrade_type: minor
+            release: mitaka
+            target_upgrade_version: mitaka
+            upgrade_delorean_hash: current
+            major_upgrade: 'false'
+        - tripleo-quickstart-{test}-{upgrade_type}-{release}-to-{target_upgrade_version}:
+            upgrade_type: minor
+            release: newton
+            target_upgrade_version: newton
+            upgrade_delorean_hash: current
+            major_upgrade: 'false'
+        - tripleo-quickstart-{test}-{upgrade_type}-{release}-to-{target_upgrade_version}:
+            upgrade_type: minor
+            release: master
+            target_upgrade_version: master
+            upgrade_delorean_hash: current
+            major_upgrade: 'false'
