@@ -231,3 +231,83 @@
         - ansicolor
         - timestamps
         - workspace-cleanup
+
+- job:
+    name: 'weirdo-generic-wrapper'
+    defaults: weirdo-defaults
+    description: |
+        <h3> Documentation: <a href=http://www.rdoproject.org/>http://www.rdoproject.org/</a> </h3>
+        This job is used to trigger all generic jobs with a given set of parameters.
+    parameters:
+        - string:
+            name: properties
+            default:
+            description: The URL to a properties file to be sourced prior to the build
+        - string:
+            name: delorean_url
+            default: http://trunk.rdoproject.org/centos7-master/current-passed-ci/delorean.repo
+            description: The URL of the delorean .repo file tested against
+        - string:
+            name: delorean_deps_url
+            default: http://trunk.rdoproject.org/centos7-master/delorean-deps.repo
+            description: The URL of the delorean-deps .repo file tested against
+        - string:
+            name: openstack_release
+            default: master
+            description: The name of the OpenStack release to use (master, newton, mitaka, etc.)
+        - string:
+            name: version
+            default: master
+            description: The version of integration tests to use (master, stable/newton, stable/mitaka, etc.)
+        - string:
+            name: stable_repositories
+            description: Comma separated list of release packages or RPMs (can be an URL) to test against. Has precedence if trunk repositories are specified.
+        - string:
+            name: testing_repositories
+            description: Comma separated list of release packages or RPMs (can be an URL) to test against. Has precedence if trunk repositories are specified.
+        - string:
+            name: trunk_repositories
+            description: Comma separated list of URLs to ".repo" files to use. This defaults to delorean_url and delorean_deps url. Has precedence if delorean_url and delorean_deps_url are specified.
+    builders:
+        - shell: |
+            #!/bin/bash
+            echo "+===============================================+"
+            echo "| Scheduling jobs to test:"
+            echo "|   - properties: $properties"
+            echo "|   - delorean_url: $delorean_url"
+            echo "|   - delorean_deps_url: $delorean_deps_url"
+            echo "|   - openstack_release: $openstack_release"
+            echo "|   - version: $version"
+            echo "|   - stable_repositories: $stable_repositories"
+            echo "|   - testing_repositories: $testing_repositories"
+            echo "|   - trunk_repositories: $trunk_repositories"
+            echo "+===============================================+"
+        - trigger-builds:
+            - project:
+                - 'weirdo-generic-puppet-openstack-scenario001'
+                - 'weirdo-generic-puppet-openstack-scenario002'
+                - 'weirdo-generic-puppet-openstack-scenario003'
+                - 'weirdo-generic-packstack-scenario001'
+                - 'weirdo-generic-packstack-scenario002'
+                - 'weirdo-generic-packstack-scenario003'
+              predefined-parameters: |
+                  properties=$properties
+                  delorean_url=$delorean_url
+                  delorean_deps_url=$delorean_deps_url
+                  openstack_release=$openstack_release
+                  version=$version
+                  stable_repositories=$stable_repositories
+                  testing_repositories=$testing_repositories
+                  trunk_repositories=$trunk_repositories
+              block: true
+              block-thresholds:
+                build-step-failure-threshold: 'FAILURE'
+                unstable-threshold: 'FAILURE'
+                failure-threshold: 'FAILURE'
+    publishers:
+        - email:
+            recipients: 'rdo-infra-list@redhat.com'
+    wrappers:
+        - ansicolor
+        - timestamps
+        - workspace-cleanup
