@@ -75,7 +75,8 @@
           -e openstack_release=${{openstack_release}} \
           -e version=${{version}} \
           -e stable_repositories=${{stable_repositories}} \
-          -e testing_repositories=${{testing_repositories}}
+          -e testing_repositories=${{testing_repositories}} \
+          -e trunk_repositories=${{trunk_repositories}}
         </pre>
     concurrent: true
     parameters:
@@ -105,6 +106,9 @@
         - string:
             name: testing_repositories
             description: Comma separated list of release packages or RPMs (can be an URL) to test against. Has precedence if trunk repositories are specified.
+        - string:
+            name: trunk_repositories
+            description: Comma separated list of URLs to ".repo" files to use. This defaults to delorean_url and delorean_deps url. Has precedence if delorean_url and delorean_deps_url are specified.
     scm:
         - weirdo-core-master-repository
     builders:
