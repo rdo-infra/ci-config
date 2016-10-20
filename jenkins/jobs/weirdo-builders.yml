@@ -37,6 +37,17 @@
               source "./$(basename ${{properties}})"
             fi
 
+            # Set up ansible-playbook extra vars because we don't want to override
+            # the defaults if they're not set
+            extra_vars=""
+            [[ -n ${{delorean_url}} ]] && extra_vars="${{extra_vars}} -e delorean_url=${{delorean_url}}"
+            [[ -n ${{delorean_deps_url}} ]] && extra_vars="${{extra_vars}} -e delorean_deps_url=${{delorean_deps_url}}"
+            [[ -n ${{version}} ]] && extra_vars="${{version}} -e version=${{version}}"
+            [[ -n ${{openstack_release}} ]] && extra_vars="${{openstack_release}} -e openstack_release=${{openstack_release}}"
+            [[ -n ${{stable_repositories}} ]] && extra_vars="${{extra_vars}} -e stable_repositories=${{stable_repositories}}"
+            [[ -n ${{testing_repositories}} ]] && extra_vars="${{extra_vars}} -e testing_repositories=${{testing_repositories}}"
+            [[ -n ${{trunk_repositories}} ]] && extra_vars="${{extra_vars}} -e trunk_repositories=${{trunk_repositories}}"
+
             # Use WeIRDO provided by jenkins scm
             export ARA_DATABASE="sqlite:///$WORKSPACE/$JOB_NAME.sqlite"
             cd weirdo
@@ -45,13 +56,7 @@
             tox -e ansible-playbook -- -vv -i hosts playbooks/remove-firewalld-networkmanager.yml
             tox -e ansible-playbook -- -vv -i hosts playbooks/{playbook}.yml \
               -e ci_environment=ci-centos \
-              -e delorean_url=${{delorean_url}} \
-              -e delorean_deps_url=${{delorean_deps_url}} \
-              -e version=${{version}} \
-              -e openstack_release=${{openstack_release}} \
-              -e stable_repositories=${{stable_repositories}} \
-              -e testing_repositories=${{testing_repositories}} \
-              -e trunk_repositories=${{trunk_repositories}}
+              ${{extra_vars}}
 
 - builder:
     name: 'weirdo-promote-ansible-playbook-builder'
