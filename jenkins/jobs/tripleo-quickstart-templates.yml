@@ -226,6 +226,24 @@
             topology: '{topology}'
 
 - job-template:
+    name: 'tripleo-quickstart-periodic-full-tempest-{release}-{build_system}-{test}-{topology}'
+    defaults: 'tripleo-quickstart-defaults'
+    triggers:
+        - trigger-tripleo-quickstart-periodic
+    scm:
+        - repo-tripleo-quickstart
+        - repo-ansible-role-tripleo-image-build
+    builders:
+        - tripleo-quickstart-full-tempest-builder:
+            test: '{test}'
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
+
+
+
+- job-template:
     name: 'tripleo-quickstart-periodic-feature-{release}-{build_system}-{test}-{topology}'
     defaults: 'tripleo-quickstart-defaults'
     triggers:

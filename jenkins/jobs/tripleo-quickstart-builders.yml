@@ -37,3 +37,23 @@
                 {target_upgrade_version}
 
               popd
+
+- builder:
+    name: 'tripleo-quickstart-full-tempest-builder'
+    builders:
+        - shell: |
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
+              export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
+              echo $VIRTHOST
+
+              pushd $WORKSPACE/tripleo-quickstart
+
+              export OPT_ADDITIONAL_PARAMETERS=" -e test_ping=false -e tempest_config=true -e run_tempest=true -e test_regex=.*"
+
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/{test}.sh \
+                {release} \
+                {build_system} \
+                {topology} \
+                {job_type}
+
+              popd
