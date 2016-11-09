@@ -74,7 +74,8 @@
           -e version=${{version}} \
           -e stable_repositories=${{stable_repositories}} \
           -e testing_repositories=${{testing_repositories}} \
-          -e trunk_repositories=${{trunk_repositories}}
+          -e trunk_repositories=${{trunk_repositories}} \
+          -e pending_repository=${{pending_repository}}
         </pre>
     concurrent: true
     parameters:
@@ -107,6 +108,9 @@
         - string:
             name: trunk_repositories
             description: Comma separated list of URLs to ".repo" files to use. This defaults to delorean_url and delorean_deps url. Has precedence if delorean_url and delorean_deps_url are specified.
+        - string:
+            name: pending_repository
+            description: Boolean (true|false) to enable the -pending repository. Defaults to false.
     scm:
         - weirdo-core-master-repository
     builders:
@@ -141,6 +145,9 @@
             name: testing_repositories
             default: 'https://rdoproject.org/repos/openstack-{openstack_release}/rdo-release-{openstack_release}.rpm'
             description: Release package/RPM to use (can also be an URL)
+        - string:
+            name: pending_repository
+            description: Boolean (true|false) to enable the -pending repository. Defaults to false.
     builders:
         - shell: |
             #!/bin/bash
@@ -149,6 +156,7 @@
             echo "|   - openstack_release: $openstack_release"
             echo "|   - version: $version"
             echo "|   - testing_repositories: $testing_repositories"
+            echo "|   - pending_repository: $pending_repository"
             echo "+===============================================+"
         - trigger-builds:
             - project:
@@ -162,6 +170,7 @@
                   openstack_release=$openstack_release
                   version=$version
                   testing_repositories=$testing_repositories
+                  pending_repository=$pending_repository
               block: true
               block-thresholds:
                 build-step-failure-threshold: 'FAILURE'
@@ -266,6 +275,9 @@
         - string:
             name: trunk_repositories
             description: Comma separated list of URLs to ".repo" files to use. This defaults to delorean_url and delorean_deps url. Has precedence if delorean_url and delorean_deps_url are specified.
+        - string:
+            name: pending_repository
+            description: Boolean (true|false) to enable the -pending repository. Defaults to false.
     builders:
         - shell: |
             #!/bin/bash
@@ -279,6 +291,7 @@
             echo "|   - stable_repositories: $stable_repositories"
             echo "|   - testing_repositories: $testing_repositories"
             echo "|   - trunk_repositories: $trunk_repositories"
+            echo "|   - pending_repository: $pending_repository"
             echo "+===============================================+"
         - trigger-builds:
             - project:
@@ -297,6 +310,7 @@
                   stable_repositories=$stable_repositories
                   testing_repositories=$testing_repositories
                   trunk_repositories=$trunk_repositories
+                  pending_repository=$pending_repository
               block: true
               block-thresholds:
                 build-step-failure-threshold: 'FAILURE'
