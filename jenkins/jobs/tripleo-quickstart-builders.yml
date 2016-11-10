@@ -50,7 +50,8 @@
               git review -d I0eccf093f6ca12ca6ff1d4697b6d64f20dca2e69
               popd
 
-              sed -i 's/git+https:\/\/github.com\/redhat-openstack\/ansible-role-tripleo-collect-logs.git\/#egg=ansible-role-tripleo-collect-logs/file:\/\/$WORKSPACE\/ansible-role-tripleo-collect-logs\/#egg=ansible-role-tripleo-collect-logs/g' $WORKSPACE/tripleo-quickstart/quickstart-extras-requirements.txt
+              sed -i 's/git+https:\/\/github.com\/redhat-openstack\/ansible-role-tripleo-collect-logs.git\/#egg=ansible-role-tripleo-collect-logs//g' $WORKSPACE/tripleo-quickstart/quickstart-extras-requirements.txt
+              echo "file://$WORKSPACE/ansible-role-tripleo-collect-logs/#egg=ansible-role-tripleo-collect-logs" >> $WORKSPACE/tripleo-quickstart/quickstart-extras-requirements.txt
 
               bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
               export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
