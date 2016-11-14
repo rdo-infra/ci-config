@@ -13,3 +13,4 @@ echo "delorean_current_hash = $NEW_HASH" > $HASH_FILE
 echo "LOCATION = $LOCATION" >> $HASH_FILE
 echo "BUILD_SYS = $BUILD_SYS" >> $HASH_FILE
 echo "RDO_VERSION_DIR = $RDO_VERSION_DIR" >> $HASH_FILE
+echo "tempest_version = $TEMPEST_VERSION" >> $HASH_FILE
