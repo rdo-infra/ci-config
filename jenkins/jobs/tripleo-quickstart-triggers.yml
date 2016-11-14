@@ -89,7 +89,6 @@
             silent: false
             silent-start: false
 
-
 - trigger:
     name: 'trigger-tripleo-quickstart-gate-quick'
     triggers:
@@ -102,6 +101,39 @@
             projects:
                 - project-compare-type: 'PLAIN'
                   project-pattern: 'openstack/tripleo-quickstart'
+                  branches:
+                      - branch-compare-type: 'ANT'
+                        branch-pattern: '**'
+            skip-vote:
+                successful: false
+                failed: false
+                unstable: false
+                notbuilt: false
+            gerrit-build-started-verified-value: 0
+            gerrit-build-started-codereview-value: 0
+            gerrit-build-successful-verified-value: 1
+            gerrit-build-successful-codereview-value: 0
+            gerrit-build-failed-verified-value: -1
+            gerrit-build-failed-codereview-value: 0
+            failure-message: 'FAILURE'
+            successful-message: 'SUCCESS'
+            unstable-message: 'UNSTABLE'
+            custom-url: '* $JOB_NAME https://ci.centos.org/artifacts/rdo/$BUILD_TAG/'
+            silent: false
+            silent-start: false
+
+- trigger:
+    name: 'trigger-tripleo-quickstart-extras-gate'
+    triggers:
+        - gerrit:
+            server-name: 'rdo-ci-openstack.org'
+            trigger-on:
+                - patchset-created-event
+                - comment-added-contains-event:
+                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck)'
+            projects:
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'openstack/tripleo-quickstart-extras'
                   branches:
                       - branch-compare-type: 'ANT'
                         branch-pattern: '**'
@@ -251,91 +283,3 @@
             custom-url: '* $JOB_NAME https://ci.centos.org/artifacts/rdo/$BUILD_TAG/'
             silent: false
             silent-start: true
-
-- trigger:
-    name: trigger-gate-roles
-    triggers:
-        - gerrit:
-            server-name: 'rdo-ci-centos'
-            trigger-on:
-                - patchset-created-event
-                - comment-added-contains-event:
-                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(rdo)? ?(recheck)'
-            projects:
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/ansible-role-tripleo-overcloud-prep-config'
-                  branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
-
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/ansible-role-tripleo-overcloud-prep-flavors'
-                  branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
-
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/ansible-role-tripleo-overcloud-prep-images'
-                  branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
-
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/ansible-role-tripleo-overcloud-prep-network'
-                  branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
-
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/ansible-role-tripleo-overcloud'
-                  branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
-
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/ansible-role-tripleo-overcloud-validate'
-                  branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
-
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/ansible-role-tripleo-tempest'
-                  branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
-
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/ansible-role-tripleo-collect-logs'
-                  branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
-
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/ansible-role-tripleo-gate'
-                  branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
-                - project-compare-type: 'PLAIN'
-                  project-pattern: 'redhat-openstack/ansible-role-tripleo-ssl'
-                  branches:
-                      - branch-compare-type: 'PLAIN'
-                        branch-pattern: 'master'
-
-            skip-vote:
-                successful: false
-                failed: false
-                unstable: false
-                notbuilt: false
-            gerrit-build-started-verified-value: 0
-            gerrit-build-started-codereview-value: 0
-            gerrit-build-successful-verified-value: 1
-            gerrit-build-successful-codereview-value: 0
-            gerrit-build-failed-verified-value: -1
-            gerrit-build-failed-codereview-value: 0
-            failure-message: 'FAILURE'
-            successful-message: 'SUCCESS'
-            unstable-message: 'UNSTABLE'
-            custom-url: '* $JOB_NAME https://ci.centos.org/artifacts/rdo/$BUILD_TAG/'
-            silent: false
-            silent-start: false
-
