@@ -12,4 +12,5 @@ export LOCATION='consistent'
 # The BUILD_SYS var stores what build system was used. It becomes part of the
 # path where images are stored.
 export BUILD_SYS='delorean'
+export TEMPEST_VERSION='origin/master'
 export HASH_FILE='/tmp/delorean_newton_hash'
