@@ -75,7 +75,8 @@
           -e stable_repositories=${{stable_repositories}} \
           -e testing_repositories=${{testing_repositories}} \
           -e trunk_repositories=${{trunk_repositories}} \
-          -e pending_repository=${{pending_repository}}
+          -e pending_repository=${{pending_repository}} \
+          -e tempest_version=${{tempest_version}}
         </pre>
     concurrent: true
     parameters:
@@ -111,6 +112,9 @@
         - string:
             name: pending_repository
             description: Boolean (true|false) to enable the -pending repository. Defaults to false.
+        - string:
+            name: tempest_version
+            description: Tempest version (git tag, branch or commit) to be used for tempest tests. Defaults to the version defined in upstream p-o-i.
     scm:
         - weirdo-core-master-repository
     builders:
@@ -148,6 +152,9 @@
         - string:
             name: pending_repository
             description: Boolean (true|false) to enable the -pending repository. Defaults to false.
+        - string:
+            name: tempest_version
+            description: Tempest version (git tag, branch or commit) to be used for tempest tests. Defaults to the version defined in upstream p-o-i.
     builders:
         - shell: |
             #!/bin/bash
@@ -157,6 +164,7 @@
             echo "|   - version: $version"
             echo "|   - testing_repositories: $testing_repositories"
             echo "|   - pending_repository: $pending_repository"
+            echo "|   - tempest_version: $tempest_version"
             echo "+===============================================+"
         - trigger-builds:
             - project:
@@ -171,6 +179,7 @@
                   version=$version
                   testing_repositories=$testing_repositories
                   pending_repository=$pending_repository
+                  tempest_version=$tempest_version
               block: true
               block-thresholds:
                 build-step-failure-threshold: 'FAILURE'
@@ -278,6 +287,10 @@
         - string:
             name: pending_repository
             description: Boolean (true|false) to enable the -pending repository. Defaults to false.
+        - string:
+            name: tempest_version
+            description: Tempest version (git tag, branch or commit) to be used for tempest tests. Defaults to the version defined in upstream p-o-i.
+
     builders:
         - shell: |
             #!/bin/bash
@@ -292,6 +305,7 @@
             echo "|   - testing_repositories: $testing_repositories"
             echo "|   - trunk_repositories: $trunk_repositories"
             echo "|   - pending_repository: $pending_repository"
+            echo "|   - tempest_version: $tempest_version"
             echo "+===============================================+"
         - trigger-builds:
             - project:
@@ -311,6 +325,7 @@
                   testing_repositories=$testing_repositories
                   trunk_repositories=$trunk_repositories
                   pending_repository=$pending_repository
+                  tempest_version=$tempest_version
               block: true
               block-thresholds:
                 build-step-failure-threshold: 'FAILURE'
