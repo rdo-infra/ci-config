@@ -39,5 +39,6 @@ do
     #
     # TODO: Remove me!
     #####
-    ssh "root@${address}" "curl https://trunk.rdoproject.org/qemu-kvm-ev-7.3/qemu-kvm-ev-7.3.repo |tee /etc/yum.repos.d/qemu-kvm-ev-7.3.repo"
+
+    ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "root@${address}" "curl https://trunk.rdoproject.org/qemu-kvm-ev-7.3/qemu-kvm-ev-7.3.repo |tee /etc/yum.repos.d/qemu-kvm-ev-7.3.repo"
 done
