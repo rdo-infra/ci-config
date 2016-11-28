@@ -12,7 +12,7 @@ localhost ansible_connection=local
 EOF
 
 # Get nodes
-nodes=$(cico -q node get --count ${NODE_COUNT} --column hostname --column ip_address --column comment -f value)
+nodes=$(cico -q node get --retry-count 6 --retry-interval 60  --count ${NODE_COUNT} --column hostname --column ip_address --column comment -f value)
 
 # Write nodes to inventory file and persist the SSID separately for simplicity
 touch ${SSID_FILE}
