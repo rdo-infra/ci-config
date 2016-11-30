@@ -256,12 +256,13 @@
         daysToKeep: 31
         artifactDaysToKeep: 31
     builders:
-        - tripleo-quickstart-full-tempest-builder:
+        - tripleo-quickstart-tempest-builder:
             test: '{test}'
             job_type: '{job_type}'
             release: '{release}'
             build_system: '{build_system}'
             topology: '{topology}'
+            test_regex: '.*'
     publishers:
         - tripleo-quickstart-cleanup:
             topology: '{topology}'
@@ -280,8 +281,6 @@
             type: absolute
             timeout: 330
             fail: true
-
-
 
 - job-template:
     name: 'tripleo-quickstart-periodic-feature-{release}-{build_system}-{test}-{topology}'

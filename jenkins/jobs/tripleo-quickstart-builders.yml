@@ -39,19 +39,9 @@
               popd
 
 - builder:
-    name: 'tripleo-quickstart-full-tempest-builder'
+    name: 'tripleo-quickstart-tempest-builder'
     builders:
         - shell: |
-
-              git clone https://github.com/redhat-openstack/ansible-role-tripleo-collect-logs.git
-              pushd ansible-role-tripleo-collect-logs
-              git remote add gerrit https://review.gerrithub.io/redhat-openstack/ansible-role-tripleo-collect-logs
-              git fetch --all
-              git review -d I0eccf093f6ca12ca6ff1d4697b6d64f20dca2e69
-              popd
-
-              sed -i 's/git+https:\/\/github.com\/redhat-openstack\/ansible-role-tripleo-collect-logs.git\/#egg=ansible-role-tripleo-collect-logs//g' $WORKSPACE/tripleo-quickstart/quickstart-extras-requirements.txt
-              echo "file://$WORKSPACE/ansible-role-tripleo-collect-logs/#egg=ansible-role-tripleo-collect-logs" >> $WORKSPACE/tripleo-quickstart/quickstart-extras-requirements.txt
 
               bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
               export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
@@ -59,7 +49,7 @@
 
               pushd $WORKSPACE/tripleo-quickstart
 
-              export OPT_ADDITIONAL_PARAMETERS=" -e test_ping=false -e tempest_config=true -e run_tempest=true -e test_regex=.*"
+              export OPT_ADDITIONAL_PARAMETERS=" -e enable_cinder_backup=true -e test_ping=false -e tempest_config=true -e run_tempest=true -e test_regex={test_regex}"
 
               bash $WORKSPACE/tripleo-quickstart/ci-scripts/{test}.sh \
                 {release} \
@@ -72,4 +62,3 @@
               # when running tempest, do not fail the job based on the deployment
               # the result will be determined by tempest results file and will go red if it's not present
               exit 0
-
