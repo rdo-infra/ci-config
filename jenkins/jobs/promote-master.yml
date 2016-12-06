@@ -5,7 +5,7 @@
             name: "INSTALL / TEST (BUILD IMAGES)"
             condition: UNSTABLE
             projects:
-                - name: tripleo-quickstart-promote-master-delorean-build-images
+                - name: rdo-promote-build-images-master
                   kill-phase-on: NEVER
                   property-file: /tmp/delorean_master_hash
 
@@ -104,6 +104,18 @@
             owner: trown@redhat.com
 
 - job-template:
+    name: 'rdo-promote-build-images-master'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-master.sh
+                - scripts/promote-build-images-master.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- job-template:
     name: 'rdo-promote-upload-master'
     defaults: script-defaults
     builders:
@@ -123,6 +135,11 @@
             !include-raw-escape:
                 - scripts/centos-master.sh
                 - scripts/promote-repo-promote.sh
+    publishers:
+        - tripleo-quickstart-publish-testing-images
+        - tripleo-quickstart-cleanup:
+            topology: 'minimal'
+        - tripleo-quickstart-full-logs-link
     properties:
         - ownership:
             owner: trown@redhat.com
