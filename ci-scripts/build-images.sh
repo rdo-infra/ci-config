@@ -153,7 +153,7 @@ rm -f undercloud.qcow2
 mv undercloud-compressed.qcow2 undercloud.qcow2
 
 # tar and create md5s for all images
-tar -cf ironic-python-agent.tar ironic-python-agent.initramfs ironic-python-agent.vmlinuz
+tar -cf ironic-python-agent.tar ironic-python-agent.initramfs ironic-python-agent.kernel
 tar -cf overcloud-full.tar overcloud-full.qcow2 overcloud-full.initrd overcloud-full.vmlinuz
 
 md5sum ironic-python-agent.tar > ironic-python-agent.tar.md5

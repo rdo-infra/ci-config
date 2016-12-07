@@ -114,6 +114,19 @@
     properties:
         - ownership:
             owner: trown@redhat.com
+    wrappers:
+        - ansicolor
+        - timestamps
+        - workspace-cleanup
+        - timeout:
+            type: absolute
+            timeout: 90
+            fail: true
+    publishers:
+        - tripleo-quickstart-publish-testing-images
+        - tripleo-quickstart-cleanup:
+            topology: 'minimal'
+        - tripleo-quickstart-full-logs-link
 
 - job-template:
     name: 'rdo-promote-upload-master'
