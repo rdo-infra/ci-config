@@ -30,14 +30,4 @@ do
     if ! grep -q ${ssid} ${SSID_FILE}; then
         echo ${ssid} >> ${SSID_FILE}
     fi
-
-    #####
-    # CentOS 7.3 packages are now available but the corresponding
-    # qemu-kvm-ev packages have not yet been released.
-    # As such, temporarily enable alternative repository sourced from
-    # http://jenkins.ovirt.org/job/qemu_master_create-rpms-el7-x86_64_created/26/
-    #
-    # TODO: Remove me!
-    #####
-    ssh "root@${address}" "curl https://trunk.rdoproject.org/qemu-kvm-ev-7.3/qemu-kvm-ev-7.3.repo |tee /etc/yum.repos.d/qemu-kvm-ev-7.3.repo"
 done
