@@ -155,6 +155,49 @@
             silent: false
             silent-start: false
 
+# Note, the containers feature in upstream tripleo is still in heavy development.
+# Only trigger on changes to the roles directly involved in deploying containers.
+# This will save on resources and thrash in the quickstart gates.
+- trigger:
+    name: 'trigger-tripleo-quickstart-extras-containers-gate'
+    triggers:
+        - gerrit:
+            server-name: 'rdo-ci-openstack.org'
+            trigger-on:
+                - patchset-created-event
+                - comment-added-contains-event:
+                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck)'
+            projects:
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'openstack/tripleo-quickstart-extras'
+                  branches:
+                      - branch-compare-type: 'ANT'
+                        branch-pattern: '**'
+                  file-paths:
+                      - compare-type: 'REG_EXP'
+                        pattern: 'roles/overcloud-prep-containers/.*'
+                      - compare-type: 'REG_EXP'
+                        pattern: 'roles/overcloud-deploy/.*'
+                      - compare-type: 'REG_EXP'
+                        pattern: 'roles/extras-common/.*'
+            skip-vote:
+                successful: false
+                failed: false
+                unstable: false
+                notbuilt: false
+            gerrit-build-started-verified-value: 0
+            gerrit-build-started-codereview-value: 0
+            gerrit-build-successful-verified-value: 1
+            gerrit-build-successful-codereview-value: 0
+            gerrit-build-failed-verified-value: -1
+            gerrit-build-failed-codereview-value: 0
+            failure-message: 'FAILURE'
+            successful-message: 'SUCCESS'
+            unstable-message: 'UNSTABLE'
+            custom-url: '* $JOB_NAME https://ci.centos.org/artifacts/rdo/$BUILD_TAG/'
+            silent: false
+            silent-start: false
+
 - trigger:
     name: 'trigger-thirdparty-gate'
     triggers:
