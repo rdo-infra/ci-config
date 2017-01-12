@@ -13,3 +13,4 @@ export LOCATION='consistent'
 # path where images are stored.
 export BUILD_SYS='delorean'
 export HASH_FILE='/tmp/delorean_mitaka_hash'
+export RERUN_ON_SAME_HASH=0

@@ -2,7 +2,8 @@ export NEW_HASH=`curl $DELOREAN_URL | grep baseurl | awk -F '/' '{ print $5"/"$6
 export OLD_HASH=`curl $LAST_PROMOTED_URL | grep baseurl | awk -F '/' '{ print $5"/"$6"/"$7 }'`
 
 # No need to run the whole promote pipeline if there is nothing new to promote
-if [ $OLD_HASH == $NEW_HASH ]; then
+# unless overridden by RERUN_ON_SAME_HASH
+if [[ $OLD_HASH == $NEW_HASH ]] && [[ $RERUN_ON_SAME_HASH == 0 ]]; then
     exit 23
 fi
 

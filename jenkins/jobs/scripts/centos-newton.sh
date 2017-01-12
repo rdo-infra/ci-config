@@ -14,3 +14,4 @@ export LOCATION='consistent'
 export BUILD_SYS='delorean'
 export TEMPEST_VERSION='origin/master'
 export HASH_FILE='/tmp/delorean_newton_hash'
+export RERUN_ON_SAME_HASH=0

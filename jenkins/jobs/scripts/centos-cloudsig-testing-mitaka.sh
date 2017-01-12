@@ -7,3 +7,4 @@ export LOCATION='cloudsig-testing'
 # path where images are stored.
 export BUILD_SYS='cbs'
 export HASH_FILE='/tmp/cloudsig-testing_mitaka_hash'
+export RERUN_ON_SAME_HASH=0

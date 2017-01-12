@@ -15,3 +15,4 @@ export LOCATION='current-tripleo'
 # path where images are stored.
 export BUILD_SYS='delorean'
 export HASH_FILE='/tmp/delorean_master_current_tripleo_hash'
+export RERUN_ON_SAME_HASH=1
