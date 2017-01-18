@@ -15,15 +15,16 @@
 - project:
     name: 'tripleo-quickstart-extras-gate-jobs'
     test: 'full-deploy'
-    job_type: 'gate'
     build_system: 'delorean'
     jobs:
         - 'tripleo-quickstart-extras-gate-{release}-{build_system}-full-{topology}':
             release: 'mitaka'
             topology: 'minimal'
+            job_type: 'gate'
         - 'tripleo-quickstart-extras-gate-{release}-{build_system}-full-{topology}':
-            release: 'master'
+            release: 'master-tripleo-ci'
             topology: 'minimal_pacemaker'
+            job_type: 'dlrn-gate-check'
 
 - project:
     name: 'tripleo-quickstart-extras-containers-gate-jobs'
