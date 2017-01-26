@@ -25,6 +25,7 @@
     publishers:
         - tripleo-quickstart-cleanup:
             topology: '{topology}'
+            job_type: '{job_type}'
         - tripleo-quickstart-full-logs-link
     wrappers:
         - ansicolor
@@ -62,6 +63,7 @@
     publishers:
         - tripleo-quickstart-cleanup:
             topology: '{topology}'
+            job_type: '{job_type}'
         - tripleo-quickstart-full-logs-link
     wrappers:
         - ansicolor
@@ -102,6 +104,7 @@
     publishers:
         - tripleo-quickstart-cleanup:
             topology: '{topology}'
+            job_type: '{job_type}'
         - tripleo-quickstart-full-logs-link
     wrappers:
         - ansicolor
@@ -143,6 +146,7 @@
     publishers:
         - tripleo-quickstart-cleanup:
             topology: '{topology}'
+            job_type: '{job_type}'
         - tripleo-quickstart-full-logs-link
     wrappers:
         - ansicolor
@@ -167,7 +171,7 @@
 
                 pushd $WORKSPACE/tripleo-quickstart
                 # We are only interested in output from the collect-logs script if it fails
-                bash ci-scripts/collect-logs.sh {topology} centosci &> $WORKSPACE/collect_logs.txt ||
+                bash ci-scripts/collect-logs.sh {topology} centosci {job_type} &> $WORKSPACE/collect_logs.txt ||
                     cat $WORKSPACE/collect_logs.txt
                 bash ci-scripts/return-node.sh
                 popd
