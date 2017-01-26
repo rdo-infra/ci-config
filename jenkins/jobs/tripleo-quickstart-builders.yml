@@ -17,6 +17,25 @@
               popd
 
 - builder:
+    name: 'tripleo-quickstart-rdo-infra-builder'
+    builders:
+        - shell: |
+              bash $WORKSPACE/ci-config/ci-scripts/checkout-patches.sh
+
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
+              export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
+              echo $VIRTHOST
+
+              pushd $WORKSPACE/ci-config
+
+              bash $WORKSPACE/ci-config/ci-scripts/{test}.sh \
+                {release} \
+                {topology} \
+                {job_type}
+
+              popd
+
+- builder:
     name: 'tripleo-quickstart-upgrade-builder'
     builders:
         - shell: |
