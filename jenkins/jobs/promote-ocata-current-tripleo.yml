@@ -1,0 +1,149 @@
+- builder:
+    name: phase-test-build-ocata-current-tripleo
+    builders:
+        - multijob:
+            name: "INSTALL / TEST (BUILD IMAGES)"
+            condition: UNSTABLE
+            projects:
+                - name: tripleo-quickstart-promote-ocata-build-images
+                  kill-phase-on: NEVER
+                  property-file: /tmp/ocata_current_tripleo_hash
+
+- builder:
+    name: phase-test-import-ocata-current-tripleo
+    builders:
+        - multijob:
+            name: "INSTALL / TEST (IMPORT IMAGES)"
+            condition: UNSTABLE
+            projects:
+                - name: tripleo-quickstart-promote-ocata-rdo_trunk-minimal
+                  kill-phase-on: NEVER
+                  property-file: /tmp/ocata_current_tripleo_hash
+                - name: tripleo-quickstart-promote-ocata-rdo_trunk-minimal_pacemaker
+                  kill-phase-on: NEVER
+                  property-file: /tmp/ocata_current_tripleo_hash
+                - name: weirdo-ocata-promote-packstack-scenario001
+                  kill-phase-on: NEVER
+                  property-file: /tmp/ocata_current_tripleo_hash
+                - name: weirdo-ocata-promote-packstack-scenario002
+                  kill-phase-on: NEVER
+                  property-file: /tmp/ocata_current_tripleo_hash
+                - name: weirdo-ocata-promote-packstack-scenario003
+                  kill-phase-on: NEVER
+                  property-file: /tmp/ocata_current_tripleo_hash
+                - name: weirdo-ocata-promote-puppet-openstack-scenario001
+                  kill-phase-on: NEVER
+                  property-file: /tmp/ocata_current_tripleo_hash
+                - name: weirdo-ocata-promote-puppet-openstack-scenario002
+                  kill-phase-on: NEVER
+                  property-file: /tmp/ocata_current_tripleo_hash
+                - name: weirdo-ocata-promote-puppet-openstack-scenario003
+                  kill-phase-on: NEVER
+                  property-file: /tmp/ocata_current_tripleo_hash
+
+
+- job-template:
+    name: rdo_trunk-promote-ocata-current-tripleo
+    project-type: multijob
+    triggers:
+        - pollurl:
+            cron: "H 0,4,8,12,16,20 * * *"
+            urls:
+                - url: "http://trunk-primary.rdoproject.org/centos7-ocata/current-tripleo/delorean.repo"
+                    - simple: true
+        - timed: '@daily'
+    defaults: parent-promote-defaults
+    builders:
+        - phase-get-hash-ocata-current-tripleo
+        - phase-test-build-ocata-current-tripleo
+        - phase-test-import-ocata-current-tripleo
+        - phase-upload-ocata-current-tripleo
+        - phase-repo-promote-ocata-current-tripleo
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- builder:
+    name: phase-get-hash-ocata-current-tripleo
+    builders:
+        - multijob:
+            name: "GET THE LATEST rdo_trunk YUM REPOSITORY HASH"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-get-hash-ocata-current-tripleo
+
+- builder:
+    name: phase-upload-ocata-current-tripleo
+    builders:
+        - multijob:
+            name: "UPLOAD IMAGES TO FILE SERVER"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-upload-ocata-current-tripleo
+                property-file: /tmp/ocata_current_tripleo_hash
+
+- builder:
+    name: phase-repo-promote-ocata-current-tripleo
+    builders:
+        - multijob:
+            name: "UPLOAD IMAGES TO FILE SERVER"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-repo-promote-ocata-current-tripleo
+                property-file: /tmp/ocata_current_tripleo_hash
+
+- job-template:
+    name: 'rdo-promote-get-hash-ocata-current-tripleo'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-ocata-current-tripleo.sh
+                - scripts/promote-get-hash.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- job-template:
+    name: 'rdo-promote-upload-ocata-current-tripleo'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-ocata-current-tripleo.sh
+                - scripts/promote-upload-images.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- job-template:
+    name: 'rdo-promote-repo-promote-ocata-current-tripleo'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-ocata-current-tripleo.sh
+                - scripts/promote-repo-promote.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- project:
+    name: rdo_trunk-promote-jobs-ocata-current-tripleo
+    jobs:
+        - 'rdo_trunk-promote-ocata-current-tripleo'
+
+- project:
+    name: rdo-promote-get-hash-ocata-current-tripleo
+    jobs:
+        - 'rdo-promote-get-hash-ocata-current-tripleo'
+
+- project:
+    name: rdo-promote-upload-ocata-current-tripleo
+    jobs:
+        - 'rdo-promote-upload-ocata-current-tripleo'
+
+- project:
+    name: rdo-promote-repo-promote-ocata-current-tripleo
+    jobs:
+        - 'rdo-promote-repo-promote-ocata-current-tripleo'

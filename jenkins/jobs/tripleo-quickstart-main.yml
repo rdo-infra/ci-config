@@ -94,6 +94,7 @@
     jobs:
         - tripleo-quickstart-thirdparty-gate-{release}
 
+# deprecated jobs
 - project:
     name: 'tripleo-quickstart-promote-full-jobs'
     test: 'full-deploy'
@@ -108,6 +109,21 @@
         - 'minimal'
         - 'minimal_pacemaker'
         - 'ha'
+    jobs:
+        - tripleo-quickstart-promote-{release}-{build_system}-{topology}
+
+# new naming convention
+- project:
+    name: 'tripleo-quickstart-promote-new-full-jobs'
+    test: 'full-deploy'
+    job_type: 'promote'
+    release:
+        - 'ocata'
+    build_system:
+        - 'rdo_trunk'
+    topology:
+        - 'minimal'
+        - 'minimal_pacemaker'
     jobs:
         - tripleo-quickstart-promote-{release}-{build_system}-{topology}
 
