@@ -46,7 +46,10 @@ echo $artifact_list
 ssh $ssh_args root@$VIRTHOST "yum install -y rsync"
 
 # push --> artifacts server (rsync)
-ssh $ssh_args root@$VIRTHOST "cd $virthost_source_location && echo $delorean_current_hash > delorean_hash.txt && $rsync_artifacts_cmd $artifact_list $dest_centos_artifacts"
+ssh $ssh_args root@$VIRTHOST "cd $virthost_source_location &&
+                              echo $delorean_current_hash > delorean_hash.txt &&
+                              touch $artifact_list &&
+                              $rsync_artifacts_cmd $artifact_list $dest_centos_artifacts"
 
 # TODO: we've talked about using ssh agent fwd'ing here, but it involves a number of config steps
 # TODO: on multiple hosts/nodes.  For now just doing the slightly less awesome "copy key and use it"
