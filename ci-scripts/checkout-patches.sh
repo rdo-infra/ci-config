@@ -6,7 +6,7 @@ set -eux
 
 # TODO(trown): Actually merge needed patches for new image building role.
 pushd tripleo-quickstart
-git fetch https://git.openstack.org/openstack/tripleo-quickstart refs/changes/19/424319/2 && git checkout FETCH_HEAD
+git fetch https://git.openstack.org/openstack/tripleo-quickstart refs/changes/19/424319/3 && git checkout FETCH_HEAD
 popd
 
 pushd tripleo-quickstart-extras
