@@ -47,7 +47,14 @@
               export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
               echo $VIRTHOST
 
+              # Temporary workaround while https://review.openstack.org/#/c/423340/
+              # isn't merged.
+              git clone https://github.com/openstack/tripleo-quickstart-extras
+              pushd $WORKSPACE/tripleo-quickstart-extras
+              git pull git://git.openstack.org/openstack/tripleo-quickstart-extras refs/changes/40/423340/8
+
               pushd $WORKSPACE/tripleo-quickstart
+              echo 'file://$WORKSPACE/tripleo-quickstart-extras' > $WORKSPACE/tripleo-quickstart/quickstart-extras-requirements.txt
 
               export OPT_ADDITIONAL_PARAMETERS=" -e enable_cinder_backup=true -e test_ping=false -e tempest_config=true -e run_tempest=true -e test_regex={test_regex}"
 
