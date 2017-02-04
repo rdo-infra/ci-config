@@ -68,12 +68,14 @@
 
               # Temporary workaround while https://review.openstack.org/#/c/423340/
               # isn't merged.
-              git clone https://github.com/openstack/tripleo-quickstart-extras
-              pushd $WORKSPACE/tripleo-quickstart-extras
-              git pull git://git.openstack.org/openstack/tripleo-quickstart-extras refs/changes/40/423340/8
+              pushd tripleo-quickstart-extras
+              git remote add gerrit https://review.openstack.org/openstack/tripleo-quickstart-extras
+              git fetch --all
+              git review -d I57f5f0928e5efec106c793b71e335af1ac77fa91
+              popd
 
               pushd $WORKSPACE/tripleo-quickstart
-              echo 'file://$WORKSPACE/tripleo-quickstart-extras' > $WORKSPACE/tripleo-quickstart/quickstart-extras-requirements.txt
+              echo "file://$WORKSPACE/tripleo-quickstart-extras/#egg=tripleo-quickstart-extras" > $WORKSPACE/tripleo-quickstart/quickstart-extras-requirements.txt
 
               export OPT_ADDITIONAL_PARAMETERS=" -e enable_cinder_backup=true -e test_ping=false -e tempest_config=true -e run_tempest=true -e test_regex={test_regex}"
 
