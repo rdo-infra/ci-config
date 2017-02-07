@@ -61,18 +61,22 @@
     name: 'tripleo-quickstart-tempest-builder'
     builders:
         - shell: |
-
-              bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
-              export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
-              echo $VIRTHOST
-
               # Temporary workaround while https://review.openstack.org/#/c/423340/
               # isn't merged.
+              git clone https://github.com/openstack/tripleo-quickstart-extras
               pushd tripleo-quickstart-extras
               git remote add gerrit https://review.openstack.org/openstack/tripleo-quickstart-extras
               git fetch --all
               git review -d I57f5f0928e5efec106c793b71e335af1ac77fa91
               popd
+
+              pushd $WORKSPACE/tripleo-quickstart
+              echo "file://$WORKSPACE/tripleo-quickstart-extras/#egg=tripleo-quickstart-extras" > $WORKSPACE/tripleo-quickstart/quickstart-extras-requirements.txt
+              popd
+
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
+              export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
+              echo $VIRTHOST
 
               pushd $WORKSPACE/tripleo-quickstart
               echo "file://$WORKSPACE/tripleo-quickstart-extras/#egg=tripleo-quickstart-extras" > $WORKSPACE/tripleo-quickstart/quickstart-extras-requirements.txt
