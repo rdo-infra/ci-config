@@ -235,19 +235,20 @@
             topology: '{topology}'
 
 - job-template:
-    name: 'tripleo-quickstart-gate-{release}-{build_system}-full-images'
-    defaults: 'tripleo-quickstart-defaults'
+    name: 'tripleo-quickstart-gate-{release}-full-images'
+    defaults: 'tripleo-quickstart-rdo-infra-defaults'
     triggers:
-        - trigger-tripleo-quickstart-gate-build-images
+        - trigger-tripleo-quickstart-gate-build-images-comment
+        - trigger-tripleo-quickstart-gate-build-images-regex
     scm:
-        - repo-tripleo-quickstart-gerrit
-        - repo-ansible-role-tripleo-image-build
+        - repo-tripleo-quickstart
+        - repo-tripleo-quickstart-extras-gerrit
+        - repo-rdo-infra-ci-config
     builders:
-        - tripleo-quickstart-builder:
+        - tripleo-quickstart-rdo-infra-builder:
             test: '{test}'
             job_type: '{job_type}'
             release: '{release}'
-            build_system: '{build_system}'
             topology: '{topology}'
 
 - job-template:
