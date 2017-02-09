@@ -35,10 +35,15 @@
                     comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(images-ci-check)'
             projects:
                 - project-compare-type: 'PLAIN'
-                  project-pattern: 'openstack/tripleo-quickstart'
+                  project-pattern: 'openstack/tripleo-quickstart-extras'
                   branches:
                       - branch-compare-type: 'ANT'
                         branch-pattern: '**'
+                  file-paths:
+                      - compare-type: 'REG_EXP'
+                        pattern: 'roles/build-images/.*'
+                      - compare-type: 'PLAIN'
+                        pattern: 'playbooks/build-images-v2.yml'
             skip-vote:
                 successful: false
                 failed: false
