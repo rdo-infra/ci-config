@@ -76,7 +76,8 @@
           -e trunk_repositories=${{trunk_repositories}} \
           -e pending_repository=${{pending_repository}} \
           -e testing_repository=${{testing_repository}} \
-          -e tempest_version=${{tempest_version}}
+          -e tempest_version=${{tempest_version}} \
+          -e tempest_from_source=${{tempest_from_source}}
         </pre>
     concurrent: true
     parameters:
@@ -115,6 +116,9 @@
         - string:
             name: tempest_version
             description: Specifying a tempest version (git tag, branch or commit) will override the default provided in puppet-openstack-integration scenarios.
+        - string:
+            name: tempest_from_source
+            description:  Boolean (true|false) to enable the tempest from source. Deafults to true (we can change it to false for using tempest rpm in puppet-openstack-integration).
     scm:
         - weirdo-core-master-repository
     builders:
@@ -160,6 +164,11 @@
             name: tempest_version
             description: Specifying a tempest version (git tag, branch or commit) will override the default provided in puppet-openstack-integration scenarios.
             default: '{tempest_version}'
+        - string:
+            name: tempest_from_source
+            description: Boolean (true|false) to enable the tempest from source. Deafults to true (we can change it to false for using tempest rpm in puppet-openstack-integration).
+            default: '{tempest_from_source}'
+
     builders:
         - shell: |
             #!/bin/bash
@@ -171,6 +180,7 @@
             echo "|   - pending_repository: $pending_repository"
             echo "|   - testing_repository: $testing_repository"
             echo "|   - tempest_version: $tempest_version"
+            echo "|   - tempest_from_source: $tempest_from_source"
             echo "+===============================================+"
         - trigger-builds:
             - project:
@@ -187,6 +197,7 @@
                   pending_repository=$pending_repository
                   testing_repository=$testing_repository
                   tempest_version=$tempest_version
+                  tempest_from_source=$tempest_from_source
               block: true
               block-thresholds:
                 build-step-failure-threshold: 'FAILURE'
@@ -297,6 +308,9 @@
         - string:
             name: tempest_version
             description: Specifying a tempest version (git tag, branch or commit) will override the default provided in puppet-openstack-integration scenarios.
+        - string:
+            name: tempest_from_source
+            description: Boolean (true|false) to enable the tempest from source. Deafults to true (we can change it to false for using tempest rpm in puppet-openstack-integration).
 
     builders:
         - shell: |
@@ -313,6 +327,7 @@
             echo "|   - pending_repository: $pending_repository"
             echo "|   - testing_repository: $testing_repository"
             echo "|   - tempest_version: $tempest_version"
+            echo "|   - tempest_from_source: $tempest_from_source"
             echo "+===============================================+"
         - trigger-builds:
             - project:
@@ -333,6 +348,7 @@
                   pending_repository=$pending_repository
                   testing_repository=$testing_repository
                   tempest_version=$tempest_version
+                  tempest_from_source=$tempest_from_source
               block: true
               block-thresholds:
                 build-step-failure-threshold: 'FAILURE'
