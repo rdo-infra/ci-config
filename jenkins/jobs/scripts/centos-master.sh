@@ -13,3 +13,5 @@ export LOCATION='consistent'
 # path where images are stored.
 export BUILD_SYS='delorean'
 export HASH_FILE='/tmp/delorean_master_hash'
+# use tempest rpm
+export TEMPEST_FROM_SOURCE=false
