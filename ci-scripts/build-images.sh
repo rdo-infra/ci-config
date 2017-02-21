@@ -11,6 +11,12 @@ CONFIG=$2
 JOB_TYPE=$3
 WORKSPACE=${WORKSPACE:-"~/"}
 
+if [ $# -eq 4 ]; then
+    BUILD_SYSTEM=$4
+else
+    BUILD_SYSTEM=''
+fi
+
 if [ "$JOB_TYPE" = "gate" ] || [ "$JOB_TYPE" = "periodic" ]; then
     dlrn_hash='current-passed-ci'
 elif [ "$JOB_TYPE" = "promote" ]; then
@@ -18,6 +24,12 @@ elif [ "$JOB_TYPE" = "promote" ]; then
 else
     echo "Job type must be one of gate, periodic, or promote"
     exit 1
+fi
+
+if [ -z $BUILD_SYSTEM ] || [ $BUILD_SYSTEM = 'delorean' ] || [ $BUILD_SYSTEM = 'rdo_trunk' ]; then
+    RELEASE_CONFIG=$RELEASE
+else
+    RELEASE_CONFIG=${RELEASE}-${BUILD_SYSTEM}
 fi
 
 mkdir -p $WORKSPACE
@@ -37,7 +49,7 @@ bash tripleo-quickstart/quickstart.sh \
     -e images_working_dir=/var/lib/oooq-images \
     --playbook build-images-v2.yml \
     --no-clone \
-    --release ${CI_ENV:+$CI_ENV/}$RELEASE \
+    --release ${CI_ENV:+$CI_ENV/}$RELEASE_CONFIG \
     $VIRTHOST
 
 if [ "$JOB_TYPE" = "gate" ] || [ "$JOB_TYPE" = "periodic" ]; then
@@ -46,7 +58,7 @@ if [ "$JOB_TYPE" = "gate" ] || [ "$JOB_TYPE" = "periodic" ]; then
         --no-clone \
         --config $WORKSPACE/.quickstart/config/general_config/$CONFIG.yml \
         --working-dir $WORKSPACE/.quickstart \
-        --release ${CI_ENV:+$CI_ENV/}$RELEASE \
+        --release ${CI_ENV:+$CI_ENV/}$RELEASE_CONFIG \
         --extra-vars undercloud_image_url="file:///var/lib/oooq-images/undercloud.qcow2" \
         $VIRTHOST
 fi

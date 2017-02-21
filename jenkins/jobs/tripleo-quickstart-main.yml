@@ -152,6 +152,19 @@
         - tripleo-quickstart-promote-{release}-build-images
 
 - project:
+    name: 'tripleo-quickstart-promote-images-cloudsig-jobs-v2'
+    test: 'build-images'
+    job_type: 'promote'
+    release:
+        - 'ocata'
+    topology: 'minimal'
+    build_system:
+        - 'cloudsig-testing'
+        - 'cloudsig-stable'
+    jobs:
+        - tripleo-quickstart-promote-{release}-{build_system}-build-images-v2
+
+- project:
     name: 'tripleo-quickstart-promote-pipeline-full-jobs'
     test: 'full-deploy'
     job_type: 'promote'
@@ -185,6 +198,7 @@
     test: 'full-deploy'
     job_type: 'promote'
     release:
+        - 'ocata'
         - 'newton'
         - 'mitaka'
     build_system:
