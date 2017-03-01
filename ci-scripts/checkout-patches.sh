@@ -9,7 +9,7 @@ pushd tripleo-quickstart
 popd
 
 pushd tripleo-quickstart-extras
-git fetch https://git.openstack.org/openstack/tripleo-quickstart-extras refs/changes/36/414336/23 && git checkout FETCH_HEAD
+git fetch https://git.openstack.org/openstack/tripleo-quickstart-extras refs/changes/36/414336/20 && git checkout FETCH_HEAD
 popd
 
 cp $WORKSPACE/tripleo-quickstart/requirements.txt $WORKSPACE/local-requires.txt
