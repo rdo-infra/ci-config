@@ -3,7 +3,7 @@
     description: |
         Managed by Jenkins Job Builder. Do not edit via web.
     concurrent: false
-    node: 'rdo'
+    node: 'rdo-virtualized'
     logrotate:
         daysToKeep: 31
         artifactDaysToKeep: 31
@@ -51,7 +51,7 @@
     name: 'weirdo-archive-logs'
     publishers:
         - archive:
-            artifacts: 'properties,logs.html,**/*.sqlite'
+            artifacts: 'properties,logs.html'
             allow-empty: true
 
 # "Building remotely" should always be in the build console output
@@ -66,3 +66,14 @@
                     - scripts/weirdo-vars.sh
                     - scripts/weirdo-collect-logs.sh
                     - scripts/cico-node-done-from-ansible.sh
+
+# "Building remotely" should always be in the build console output
+- publisher:
+    name: 'weirdo-destroy-vm'
+    publishers:
+        - post-tasks:
+            - matches:
+                - log-text: Building remotely
+              script:
+                !include-raw:
+                    - scripts/weirdo-destroy-vm.sh
