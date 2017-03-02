@@ -66,3 +66,14 @@
                     - scripts/weirdo-vars.sh
                     - scripts/weirdo-collect-logs.sh
                     - scripts/cico-node-done-from-ansible.sh
+
+# "Building remotely" should always be in the build console output
+- publisher:
+    name: 'weirdo-destroy-vm'
+    publishers:
+        - post-tasks:
+            - matches:
+                - log-text: Building remotely
+              script:
+                !include-raw:
+                    - scripts/weirdo-destroy-vm.sh
