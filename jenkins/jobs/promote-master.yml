@@ -58,6 +58,7 @@
         - phase-test-import-master
         - phase-upload-master
         - phase-repo-promote-master
+        - phase-trigger-distributed-ci
     properties:
         - ownership:
             owner: trown@redhat.com
@@ -89,6 +90,16 @@
             condition: SUCCESSFUL
             projects:
               - name: rdo-promote-repo-promote-master
+                property-file: /tmp/delorean_master_hash
+
+- builder:
+    name: phase-trigger-distributed-ci
+    builders:
+        - multijob:
+            name: "TRIGGER Distributed-CI"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-trigger-distributed-ci
                 property-file: /tmp/delorean_master_hash
 
 - job-template:
@@ -127,6 +138,17 @@
         - ownership:
             owner: trown@redhat.com
 
+- job-template:
+    name: 'rdo-promote-trigger-distributed-ci'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - foo
+    properties:
+        - ownership:
+            owner: goneri@redhat.com
+
 - project:
     name: rdo-delorean-promote-jobs-master
     jobs:
@@ -146,3 +168,8 @@
     name: rdo-promote-repo-promote-master
     jobs:
         - 'rdo-promote-repo-promote-master'
+
+- project:
+    name: rdo-promote-trigger-distributed-ci
+    jobs:
+        - 'rdo-promote-trigger-distributed-ci'
