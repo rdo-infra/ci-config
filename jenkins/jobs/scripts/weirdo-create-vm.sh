@@ -62,9 +62,6 @@ cat <<EOF >create-vm.yml
             network: "${NETWORK}"
             reuse_ips: "no"
             timeout: "${TIMEOUT}"
-            boot_from_volume: "yes"
-            terminate_volume: "yes"
-            volume_size: 100
             wait: "yes"
             meta:
               hostname: "${NAME}"
