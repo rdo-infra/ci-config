@@ -116,20 +116,36 @@ EOF
 
 ansible-playbook -i "${ANSIBLE_HOSTS}" destroy-vm.yml
 
-# Generate and upload ARA report
+# Recover console log, generate and upload ARA report
 ara generate html "${WORKSPACE}/ara"
-cat <<EOF >ara.yml
+cat <<EOF >wrap-up.yml
 - name: Upload ARA report
   hosts: logserver
   gather_facts: false
   tasks:
+    - name: Fetch and gzip the console log
+      vars:
+        build_url: "{{ lookup('env', 'BUILD_URL') }}"
+      shell: |
+        curl "{{ build_url }}/consoleText" | gzip > ${WORKSPACE}/console.txt.gz
+      args:
+        creates: "${WORKSPACE}/console.txt.gz"
+      ignore_errors: True
+      register: console
+
+    - name: Upload the console log
+      synchronize:
+        src: "${WORKSPACE}/console.txt.gz"
+        dest: "/var/www/html/${JOB_NAME}/${BUILD_NUMBER}/"
+      when: console | succeeded
+
     - name: Upload ARA report
       synchronize:
         src: "${WORKSPACE}/ara"
         dest: "/var/www/html/${JOB_NAME}/${BUILD_NUMBER}/"
 EOF
 
-ansible-playbook -i "${ANSIBLE_HOSTS}" ara.yml
+ansible-playbook -i "${ANSIBLE_HOSTS}" wrap-up.yml
 
 deactivate
 popd
