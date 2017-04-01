@@ -31,7 +31,8 @@ EOF
 # Set up pre-installed package list and include them inside centos-minimal element
 package_list="https://review.rdoproject.org/r/gitweb?p=config.git;a=blob_plain;f=nodepool/weirdo-packages.txt;h=5210a7a7aea9a4c28c07ba30e12da63a3259d6a8;hb=HEAD"
 curl -q -s ${package_list} |sed -e "s/\$/:/" > ${TMPDIR}/package-installs.yaml
-export DIB_LOCATION=$(python -c "import os,diskimage_builder; ntos-minimal/package-installs.yaml
+export DIB_LOCATION=$(python -c "import os,diskimage_builder; print(os.path.dirname(diskimage_builder.__file__))")
+cp ${TMPDIR}/package-installs.yaml ${DIB_LOCATION}/elements/centos-minimal/
 
 disk-image-create -o centos7-weirdo \
     rpm-distro \
@@ -51,6 +52,7 @@ disk-image-create -o centos7-weirdo \
     runtime-ssh-host-keys \
     pkg-map \
     centos-minimal \
+    selinux-permissive \
     element-manifest \
     devuser
 popd
