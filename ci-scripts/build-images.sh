@@ -35,6 +35,7 @@ bash tripleo-quickstart/quickstart.sh \
     -e dlrn_hash=$dlrn_hash \
     --working-dir $WORKSPACE/.quickstart \
     -e images_working_dir=/var/lib/oooq-images \
+    -e overcloud_as_undercloud=true \
     --playbook build-images-v2.yml \
     --no-clone \
     --release ${CI_ENV:+$CI_ENV/}$RELEASE \
