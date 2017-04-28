@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "baa201ad_6aabdb89",
+        "filename": "jenkins/jobs/weirdo-defaults.yml",
+        "patchSetId": 2
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 16
+      },
+      "writtenOn": "2017-04-28T13:54:43Z",
+      "side": 1,
+      "message": "I don\u0027t see commit.yaml files in dlrn repos yet ?",
+      "revId": "eccfb5cb70a2714c66a910d4621cf1dc5b3781e5",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "baa201ad_8ab0fff5",
+        "filename": "jenkins/jobs/weirdo-defaults.yml",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 16
+      },
+      "writtenOn": "2017-04-28T13:54:43Z",
+      "side": 1,
+      "message": "Can you split this into multi-lines \\\n with \\\n backslashes ?\n\nOtherwise, an alternative implementation comes to mind although I\u0027m not crazy about it I thought I\u0027d at least bring it up.\n\nThere could be a (standalone) playbook in weirdo that uses the dlrn api module, not unlike the single-purpose playbook for ci.centos.org logs: https://github.com/rdo-infra/weirdo/blob/master/playbooks/logs-ci-centos.yml\n\nYou could run, say,\n\ntox -e ansible-playbook -- -i ${{WORKSPACE}}/hosts playbooks/dlrn-report.yml (with a way to pass vars, we can discuss there\u0027s different ways)\n\nThe reason why I mention this is that we\u0027d get to see the dlrn-api update in the ARA report.\n\nAnother thing I could see happening is a simple ansible role that sets up the dlrn-api client and comes with a set of sane defaults. For example the URL should be fairly static (trunk-api.rdoproject.org?) but then the \"endpoint\" (api-centos-master-uc) varies and should definitely be set.",
+      "revId": "eccfb5cb70a2714c66a910d4621cf1dc5b3781e5",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
