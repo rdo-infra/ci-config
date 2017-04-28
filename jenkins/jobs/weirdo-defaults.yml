@@ -76,3 +76,34 @@
               script:
                 !include-raw:
                     - scripts/weirdo-destroy-vm.sh
+
+# "Building remotely" should always be in the build console output
+- publisher:
+    name: 'weirdo-report-dlrn-api'
+    publishers:
+        - post-tasks:
+            - matches:
+                - log-text: Building remotely
+              run-if-job-successful: true
+              script: |
+                # Use variables provided by a job earlier in the pipeline, if available
+                delorean_hash=${{delorean_current_hash:-current}}
+                delorean_commit_url="http://trunk-primary.rdoproject.org/centos7-{openstack_release}/${{delorean_hash}}/commit.yaml"
+                if [[ "{openstack_release}" != "master" ]]; then
+                    api_worker="api-centos-master-uc"
+                else
+                    api_worker="api-centos-{openstack_release}"
+                fi
+                api_url="http://trunk-primary.rdoproject.org/api-$api_worker"
+                commit_hash=$(echo $delorean_hash | awk -F/ '{{print $3}}' |awk -F_ '{{print $1}}')
+                distro_hash=`curl $delorean_commit_url | grep distro_hash |  awk -F: '{{print $2}}' |xargs echo`
+                info_url="https://ci.centos.org/artifacts/rdo/${{JOB_NAME}}/${{BUILD_NUMBER}}"
+                timestamp=`date +%s`
+
+                # Install dependencies
+                [[ ! -d report_venv ]] && virtualenv report_venv
+                source report_venv/bin/activate
+                pip install git+https://github.com/javierpena/dlrnapi_client
+
+                # Report
+                dlrnapi --url $api_url -u -p report-result --job-id {playbook} --commit-hash $commit_hash --distro-hash $distro_hash --info-url $info_url --timestamp $timestamp --success true
