@@ -78,3 +78,32 @@
                 !include-raw:
                     - scripts/weirdo-vm-vars.sh
                     - scripts/destroy-vm.sh
+
+# "Building remotely" should always be in the build console output
+- publisher:
+    name: 'weirdo-report-dlrn-api'
+    publishers:
+        - post-tasks:
+            - matches:
+                - log-text: Building remotely
+              run-if-job-successful: true
+              script: |
+                # Use variables provided by a job earlier in the pipeline, if available
+                delorean_hash=${{delorean_current_hash:-current}}
+                delorean_commit_url="http://trunk-primary.rdoproject.org/centos7-${{RDO_VERSION_DIR}}/${{delorean_hash}}/commit.yaml"
+                if [[ "${{RDO_VERSION_DIR}}" == "master" ]]; then
+                    api_worker="api-centos-master-uc"
+                else
+                    api_worker="api-centos-${{RDO_VERSION_DIR}}"
+                fi
+                export DLRNAPI_URL="http://trunk-primary.rdoproject.org/api-$api_worker"
+                export COMMIT_HASH=$(echo $delorean_hash | awk -F/ '{{print $3}}' |awk -F_ '{{print $1}}')
+                export DISTRO_HASH=`curl $delorean_commit_url | grep distro_hash |  awk -F: '{{print $2}}' |xargs echo`
+                export INFO_URL="https://ci.centos.org/artifacts/rdo/${{JOB_NAME}}/${{BUILD_NUMBER}}"
+                # TODO(jpena): we are only reporting if the job is successful
+                # Find a way to fetch the job status and pass it to the playbook
+                export JOB_SUCCESS="true"
+
+                # Report
+                # DLRNAPI_USER and DLRNAPI_PASSWD are set as part of JJB / jenkins config
+                tox -e ansible-playbook -- -i ${{WORKSPACE}}/hosts playbooks/dlrn-api-report.yml
