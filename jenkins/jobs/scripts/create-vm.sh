@@ -11,9 +11,9 @@ LOGSERVER="logs.rdoproject.org ansible_user=uploader"
 CLOUD=${CLOUD:-rdo-cloud}
 NETWORK=${NETWORK:-private}
 NAME="${JOB_NAME}-${BUILD_NUMBER}"
-IMAGE="template-centos7-weirdo"
-TIMEOUT="120"
-FLAVOR="rdo.m1.nodepool"
+IMAGE=${IMAGE:-template-centos7-weirdo}
+TIMEOUT=${TIMEOUT:-120}
+FLAVOR=${FLAVOR:-rdo.m1.nodepool}
 VM_INFO="${WORKSPACE}/vminfo.json"
 
 if [ ! -f "${CLOUD_CONFIG}" ]; then
@@ -26,7 +26,7 @@ pushd $WORKSPACE
 # Install dependencies
 [[ ! -d provision_venv ]] && virtualenv provision_venv
 source provision_venv/bin/activate
-pip install ansible==2.2.2.0 ara shade
+pip install ansible==2.3.0.0 ara shade
 
 ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
 export ANSIBLE_HOST_KEY_CHECKING=False
