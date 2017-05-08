@@ -1,0 +1,157 @@
+- builder:
+    name: 'rdo-tripleo-containers-generic'
+    builders:
+        - shell: |
+            # Set up ansible-playbook extra vars because we don't want to override
+            # the defaults if they're not set
+            extra_vars=""
+
+            # Variable that might be set up through environment variable (promote pipeline)
+            if [ -n "${{delorean_current_hash}}" ]; then
+              trunk_repository="http://trunk.rdoproject.org/centos7-{openstack_release}/${{delorean_hash}}/delorean.repo"
+            fi
+
+            [[ -n ${{trunk_repository}} ]] && extra_vars="${{extra_vars}} -e trunk_repository=${{trunk_repository}}"
+            [[ -n ${{trunk_deps_repository}} ]] && extra_vars="${{extra_vars}} -e trunk_deps_repository=${{trunk_deps_repository}}"
+            [[ -n ${{kolla_build}} ]] && extra_vars="${{extra_vars}} -e kolla_build=${{kolla_build}}"
+            [[ -n ${{kolla_push}} ]] && extra_vars="${{extra_vars}} -e kolla_push=${{kolla_push}}"
+            [[ -n ${{kolla_registry}} ]] && extra_vars="${{extra_vars}} -e kolla_registry=${{kolla_registry}}"
+            [[ -n ${{kolla_insecure_registry}} ]] && extra_vars="${{extra_vars}} -e kolla_insecure_registry=${{kolla_insecure_registry}}"
+            [[ -n ${{kolla_rdo_images}} ]] && extra_vars="${{extra_vars}} -e kolla_rdo_images=${{kolla_rdo_images}}"
+            [[ -n ${{kolla_base}} ]] && extra_vars="${{extra_vars}} -e kolla_base=${{kolla_base}}"
+            [[ -n ${{kolla_base_image}} ]] && extra_vars="${{extra_vars}} -e kolla_base_image=${{kolla_base_image}}"
+            [[ -n ${{kolla_base_tag}} ]] && extra_vars="${{extra_vars}} -e kolla_base_tag=${{kolla_base_tag}}"
+            [[ -n ${{kolla_debug}} ]] && extra_vars="${{extra_vars}} -e kolla_debug=${{kolla_debug}}"
+            [[ -n ${{kolla_tag}} ]] && extra_vars="${{extra_vars}} -e kolla_tag=${{kolla_tag}}"
+            [[ -n ${{kolla_template_only}} ]] && extra_vars="${{extra_vars}} -e kolla_template_only=${{kolla_template_only}}"
+            [[ -n ${{kolla_template_override}} ]] && extra_vars="${{extra_vars}} -e kolla_template_override=${{kolla_template_override}}"
+
+            ANSIBLE_HOSTS="${{WORKSPACE}}/hosts"
+
+            pushd $WORKSPACE
+            # Retrieve role
+            mkdir -p $WORKSPACE/roles
+            pushd $WORKSPACE/roles
+                git clone https://github.com/rdo-infra/ansible-role-rdo-kolla-build kolla-build
+            popd
+
+            # Install dependencies
+            [[ ! -d provision_venv ]] && virtualenv provision_venv
+            source provision_venv/bin/activate
+            pip install ansible==2.3.0.0 ara
+
+            ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
+            export ANSIBLE_HOST_KEY_CHECKING=False
+            export ANSIBLE_CALLBACK_PLUGINS="${{ara_location}}/plugins/callbacks"
+            export ANSIBLE_ACTION_PLUGINS="${{ara_location}}/plugins/actions"
+            export ANSIBLE_LIBRARY="${{ara_location}}/plugins/modules"
+            export ANSIBLE_ROLES_PATH="${{WORKSPACE}}/roles"
+            export ARA_DATABASE="sqlite:///${{WORKSPACE}}/${{JOB_NAME}}.sqlite"
+
+            cat << EOF > $WORKSPACE/playbook.yml
+            ---
+            - name: Build Kolla images
+              hosts: openstack_nodes
+              become: yes
+              become_user: root
+              tasks:
+                - include_role:
+                    name: "kolla-build"
+                    static: "no"
+            EOF
+
+            ansible-playbook -i $WORKSPACE/hosts $WORKSPACE/playbook.yml ${{extra_vars}}
+            deactivate
+            popd
+
+# "Building remotely" should always be in the build console output
+- publisher:
+    name: 'rdo-tripleo-containers-destroy-vm'
+    publishers:
+        - post-tasks:
+            - matches:
+                - log-text: Building remotely
+              script:
+                !include-raw:
+                    - scripts/destroy-vm.sh
+
+- job:
+    name: 'rdo-build-tripleo-containers'
+    description: |
+        <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
+        <br>
+        <p>
+          This job leverages the <a href="https://github.com/rdo-infra/ansible-role-rdo-kolla-build" target="_blank">ansible-role-rdo-kolla-build</a>
+          Ansible role to setup dependencies, build, tag and publish containers.
+        </p>
+
+        This job is parameterized but priorizes environment variables if they are available.
+        Only specify parameters if you wish to override the default parameters provided by the role.
+
+        For more information about the parameters of this job,
+        refer to the <a href="https://github.com/rdo-infra/ansible-role-rdo-kolla-build" target="_blank">GitHub Repository</a>.
+    concurrent: true
+    node: 'rdo-virtualized'
+    parameters:
+        - string:
+            name: kolla_setup_method
+            description: How to set up Kolla, can be binary (RDO package) or source (from git)
+        - string:
+            name: openstack_release
+            description: "The version of OpenStack (ex: master, ocata, newton, etc.)"
+        - string:
+            name: trunk_repository
+            description: The URL of the trunk repository to use
+        - string:
+            name: trunk_deps_repository
+            description: The URL of the trunk repository dependencies to use
+        - string:
+            name: kolla_build
+            description: Whether or not to build the containers
+        - string:
+            name: kolla_push
+            description: Whether or not to push the containers (requires valid registry parameters)
+        - string:
+            name: kolla_rdo_images
+            description: The image tags to build (comma separated)
+        - string:
+            name: kolla_base
+        - string:
+            name: kolla_base_image
+        - string:
+            name: kolla_base_tag
+        - string:
+            name: kolla_debug
+        - string:
+            name: kolla_tag
+        - string:
+            name: kolla_template_only
+        - string:
+            name: kolla_template_override
+        - string:
+            name: kolla_registry
+        - string:
+            name: kolla_insecure_registry
+    builders:
+        - rdo-generate-log-rdoproject-org-redirection
+        - rdo-create-vm
+        - rdo-tripleo-containers-generic
+    properties:
+        - ownership:
+            owner: dms@redhat.com
+    logrotate:
+        daysToKeep: 31
+        artifactDaysToKeep: 31
+    wrappers:
+        - ansicolor
+        - timestamps
+        - workspace-cleanup
+        - timeout:
+            type: absolute
+            timeout: 120
+            fail: true
+    publishers:
+        - archive:
+            artifacts: 'logs.html'
+            allow-empty: true
+        - rdo-tripleo-containers-destroy-vm

@@ -6,13 +6,6 @@
                 - scripts/cico-node-get-to-ansible.sh
 
 - builder:
-    name: 'weirdo-create-vm'
-    builders:
-        - shell:
-            !include-raw:
-                - scripts/create-vm.sh
-
-- builder:
     name: 'weirdo-ansible-playbook-builder'
     builders:
         - shell: |
@@ -97,29 +90,6 @@
     builders:
         - shell: |
             ARTIFACT_URL="https://ci.centos.org/artifacts/rdo"
-
-            cat << EOF > "${WORKSPACE}/logs.html"
-            <!DOCTYPE HTML>
-            <html lang="en-US">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta http-equiv="refresh" content="1;url=${ARTIFACT_URL}/${JOB_NAME}/${BUILD_NUMBER}">
-                    <script type="text/javascript">
-                        window.location.href = "${ARTIFACT_URL}/${JOB_NAME}/${BUILD_NUMBER}"
-                    </script>
-                    <title>Redirection to logs</title>
-                </head>
-                <body>
-                    If you are not redirected automatically, follow the <a href="${ARTIFACT_URL}/${JOB_NAME}/${BUILD_NUMBER}">link to the logs</a>.
-                </body>
-            </html>
-            EOF
-
-- builder:
-    name: 'weirdo-generate-log-rdoproject-org-redirection'
-    builders:
-        - shell: |
-            ARTIFACT_URL="https://logs.rdoproject.org"
 
             cat << EOF > "${WORKSPACE}/logs.html"
             <!DOCTYPE HTML>
