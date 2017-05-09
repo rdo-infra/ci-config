@@ -1,5 +1,5 @@
 - builder:
-    name: 'rdo-tripleo-containers-generic'
+    name: 'rdo-tripleo-containers-generic-builder'
     builders:
         - shell: |
             # Set up ansible-playbook extra vars because we don't want to override
@@ -7,26 +7,26 @@
             extra_vars=""
 
             # Variable that might be set up through environment variable (promote pipeline)
-            if [ -n "${{delorean_current_hash}}" ]; then
-              trunk_repository="http://trunk.rdoproject.org/centos7-{openstack_release}/${{delorean_hash}}/delorean.repo"
+            if [ -n "$delorean_current_hash" ]; then
+              trunk_repository="https://trunk.rdoproject.org/centos7-$openstack_release/$delorean_current_hash/delorean.repo"
             fi
 
-            [[ -n ${{trunk_repository}} ]] && extra_vars="${{extra_vars}} -e trunk_repository=${{trunk_repository}}"
-            [[ -n ${{trunk_deps_repository}} ]] && extra_vars="${{extra_vars}} -e trunk_deps_repository=${{trunk_deps_repository}}"
-            [[ -n ${{kolla_build}} ]] && extra_vars="${{extra_vars}} -e kolla_build=${{kolla_build}}"
-            [[ -n ${{kolla_push}} ]] && extra_vars="${{extra_vars}} -e kolla_push=${{kolla_push}}"
-            [[ -n ${{kolla_registry}} ]] && extra_vars="${{extra_vars}} -e kolla_registry=${{kolla_registry}}"
-            [[ -n ${{kolla_insecure_registry}} ]] && extra_vars="${{extra_vars}} -e kolla_insecure_registry=${{kolla_insecure_registry}}"
-            [[ -n ${{kolla_rdo_images}} ]] && extra_vars="${{extra_vars}} -e kolla_rdo_images=${{kolla_rdo_images}}"
-            [[ -n ${{kolla_base}} ]] && extra_vars="${{extra_vars}} -e kolla_base=${{kolla_base}}"
-            [[ -n ${{kolla_base_image}} ]] && extra_vars="${{extra_vars}} -e kolla_base_image=${{kolla_base_image}}"
-            [[ -n ${{kolla_base_tag}} ]] && extra_vars="${{extra_vars}} -e kolla_base_tag=${{kolla_base_tag}}"
-            [[ -n ${{kolla_debug}} ]] && extra_vars="${{extra_vars}} -e kolla_debug=${{kolla_debug}}"
-            [[ -n ${{kolla_tag}} ]] && extra_vars="${{extra_vars}} -e kolla_tag=${{kolla_tag}}"
-            [[ -n ${{kolla_template_only}} ]] && extra_vars="${{extra_vars}} -e kolla_template_only=${{kolla_template_only}}"
-            [[ -n ${{kolla_template_override}} ]] && extra_vars="${{extra_vars}} -e kolla_template_override=${{kolla_template_override}}"
+            [[ -n "$trunk_repository" ]] && extra_vars="$extra_vars -e trunk_repository=$trunk_repository"
+            [[ -n "$trunk_deps_repository" ]] && extra_vars="$extra_vars -e trunk_deps_repository=$trunk_deps_repository"
+            [[ -n "$kolla_build" ]] && extra_vars="$extra_vars -e kolla_build=$kolla_build"
+            [[ -n "$kolla_push" ]] && extra_vars="$extra_vars -e kolla_push=$kolla_push"
+            [[ -n "$kolla_registry" ]] && extra_vars="$extra_vars -e kolla_registry=$kolla_registry"
+            [[ -n "$kolla_insecure_registry" ]] && extra_vars="$extra_vars -e kolla_insecure_registry=$kolla_insecure_registry"
+            [[ -n "$kolla_rdo_images" ]] && extra_vars="$extra_vars -e kolla_rdo_images=$kolla_rdo_images"
+            [[ -n "$kolla_base" ]] && extra_vars="$extra_vars -e kolla_base=$kolla_base"
+            [[ -n "$kolla_base_image" ]] && extra_vars="$extra_vars -e kolla_base_image=$kolla_base_image"
+            [[ -n "$kolla_base_tag" ]] && extra_vars="$extra_vars -e kolla_base_tag=$kolla_base_tag"
+            [[ -n "$kolla_debug" ]] && extra_vars="$extra_vars -e kolla_debug=$kolla_debug"
+            [[ -n "$kolla_tag" ]] && extra_vars="$extra_vars -e kolla_tag=$kolla_tag"
+            [[ -n "$kolla_template_only" ]] && extra_vars="$extra_vars -e kolla_template_only=$kolla_template_only"
+            [[ -n "$kolla_template_override" ]] && extra_vars="$extra_vars -e kolla_template_override=$kolla_template_override"
 
-            ANSIBLE_HOSTS="${{WORKSPACE}}/hosts"
+            ANSIBLE_HOSTS="$WORKSPACE/hosts"
 
             pushd $WORKSPACE
             # Retrieve role
@@ -42,11 +42,11 @@
 
             ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
             export ANSIBLE_HOST_KEY_CHECKING=False
-            export ANSIBLE_CALLBACK_PLUGINS="${{ara_location}}/plugins/callbacks"
-            export ANSIBLE_ACTION_PLUGINS="${{ara_location}}/plugins/actions"
-            export ANSIBLE_LIBRARY="${{ara_location}}/plugins/modules"
-            export ANSIBLE_ROLES_PATH="${{WORKSPACE}}/roles"
-            export ARA_DATABASE="sqlite:///${{WORKSPACE}}/${{JOB_NAME}}.sqlite"
+            export ANSIBLE_CALLBACK_PLUGINS="$ara_location/plugins/callbacks"
+            export ANSIBLE_ACTION_PLUGINS="$ara_location/plugins/actions"
+            export ANSIBLE_LIBRARY="$ara_location/plugins/modules"
+            export ANSIBLE_ROLES_PATH="$WORKSPACE/roles"
+            export ARA_DATABASE="sqlite:///$WORKSPACE/$JOB_NAME.sqlite"
 
             cat << EOF > $WORKSPACE/playbook.yml
             ---
@@ -60,7 +60,7 @@
                     static: "no"
             EOF
 
-            ansible-playbook -i $WORKSPACE/hosts $WORKSPACE/playbook.yml ${{extra_vars}}
+            ansible-playbook -i $WORKSPACE/hosts $WORKSPACE/playbook.yml $extra_vars
             deactivate
             popd
 
@@ -75,8 +75,8 @@
                 !include-raw:
                     - scripts/destroy-vm.sh
 
-- job:
-    name: 'rdo-build-tripleo-containers'
+- job-template:
+    name: 'rdo-tripleo-containers-{type}'
     description: |
         <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
         <br>
@@ -98,6 +98,7 @@
             description: How to set up Kolla, can be binary (RDO package) or source (from git)
         - string:
             name: openstack_release
+            default: master
             description: "The version of OpenStack (ex: master, ocata, newton, etc.)"
         - string:
             name: trunk_repository
@@ -135,7 +136,7 @@
     builders:
         - rdo-generate-log-rdoproject-org-redirection
         - rdo-create-vm
-        - rdo-tripleo-containers-generic
+        - rdo-tripleo-containers-generic-builder
     properties:
         - ownership:
             owner: dms@redhat.com
@@ -155,3 +156,10 @@
             artifacts: 'logs.html'
             allow-empty: true
         - rdo-tripleo-containers-destroy-vm
+
+- project:
+    name: 'rdo-tripleo-containers-jobs'
+    type:
+      - build
+    jobs:
+        - rdo-tripleo-containers-{type}
