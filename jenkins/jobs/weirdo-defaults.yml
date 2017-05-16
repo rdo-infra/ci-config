@@ -18,6 +18,10 @@
             type: absolute
             timeout: 120
             fail: true
+        - credentials-binding:
+          - file:
+             credential-id: d31fc651-105c-4af6-a2a5-ed486a5897ca
+             variable: DLRNAPI_PASSWD
     tempest_version: ''
     tempest_from_source: ''
 
@@ -41,6 +45,10 @@
             type: absolute
             timeout: 120
             fail: true
+        - credentials-binding:
+          - file:
+             credential-id: d31fc651-105c-4af6-a2a5-ed486a5897ca
+             variable: DLRNAPI_PASSWD
 
 - publisher:
     name: 'weirdo-email-cores'
@@ -107,8 +115,9 @@
                 . ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
                 rm -rf ${WORKSPACE}/${BUILD_ID}
                 export JOB_SUCCESS="false"
+                export DLRNAPI_USER="ciuser"
                 # Report
-                # DLRNAPI_USER and DLRNAPI_PASSWD are set as part of JJB / jenkins config
+                # DLRNAPI_PASSWD is provided by a credential binding
                 cd weirdo
                 tox -e ansible-playbook -- -i ${WORKSPACE}/hosts playbooks/dlrn-api-report.yml
         - post-tasks:
@@ -118,7 +127,8 @@
                 . ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
                 rm -rf ${WORKSPACE}/${BUILD_ID}
                 export JOB_SUCCESS="true"
+                export DLRNAPI_USER="ciuser"
                 # Report
-                # DLRNAPI_USER and DLRNAPI_PASSWD are set as part of JJB / jenkins config
+                # DLRNAPI_PASSWD is provided by a credential binding
                 cd weirdo
                 tox -e ansible-playbook -- -i ${WORKSPACE}/hosts playbooks/dlrn-api-report.yml
