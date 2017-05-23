@@ -11,12 +11,15 @@
               trunk_repository="https://trunk.rdoproject.org/centos7-$openstack_release/$delorean_current_hash/delorean.repo"
             fi
 
+            [[ -n "$kolla_registry" ]] && extra_vars="$extra_vars -e kolla_registry=$kolla_registry"
+            [[ -n "$kolla_registry_username" ]] && extra_vars="$extra_vars -e kolla_registry_username=$kolla_registry_username"
+            [[ -n "$kolla_registry_password" ]] && extra_vars="$extra_vars -e kolla_registry_password=$kolla_registry_password"
+            [[ -n "$kolla_registry_email" ]] && extra_vars="$extra_vars -e kolla_registry_email=$kolla_registry_email"
+            [[ -n "$kolla_insecure_registry" ]] && extra_vars="$extra_vars -e kolla_insecure_registry=$kolla_insecure_registry"
+
             [[ -n "$trunk_repository" ]] && extra_vars="$extra_vars -e trunk_repository=$trunk_repository"
             [[ -n "$trunk_deps_repository" ]] && extra_vars="$extra_vars -e trunk_deps_repository=$trunk_deps_repository"
-            [[ -n "$kolla_build" ]] && extra_vars="$extra_vars -e kolla_build=$kolla_build"
             [[ -n "$kolla_push" ]] && extra_vars="$extra_vars -e kolla_push=$kolla_push"
-            [[ -n "$kolla_registry" ]] && extra_vars="$extra_vars -e kolla_registry=$kolla_registry"
-            [[ -n "$kolla_insecure_registry" ]] && extra_vars="$extra_vars -e kolla_insecure_registry=$kolla_insecure_registry"
             [[ -n "$kolla_rdo_images" ]] && extra_vars="$extra_vars -e kolla_rdo_images=$kolla_rdo_images"
             [[ -n "$kolla_base" ]] && extra_vars="$extra_vars -e kolla_base=$kolla_base"
             [[ -n "$kolla_base_image" ]] && extra_vars="$extra_vars -e kolla_base_image=$kolla_base_image"
@@ -109,8 +112,8 @@
             name: trunk_deps_repository
             description: The URL of the trunk repository dependencies to use
         - string:
-            name: kolla_build
-            description: Whether or not to build the containers
+            name: kolla_registry
+            description: The URL of the registry to push to
         - string:
             name: kolla_push
             description: Whether or not to push the containers (requires valid registry parameters)
@@ -132,9 +135,17 @@
         - string:
             name: kolla_template_override
         - string:
-            name: kolla_registry
-        - string:
             name: kolla_insecure_registry
+            description: Set to 'true' if the registry is insecure
+        - string:
+            name: kolla_registry_username
+            description: Override to set a custom registry username
+        - string:
+            name: kolla_registry_password
+            dsecription: Override to set a custom registry password
+        - string:
+            name: kolla_registry_email
+            description: Override to set a custom registry email
     builders:
         - rdo-generate-log-rdoproject-org-redirection
         - rdo-create-vm
@@ -153,6 +164,10 @@
             type: absolute
             timeout: 120
             fail: true
+        - credentials-binding:
+          - text:
+             credential-id: bd06088f-7ceb-4187-a8f9-62b8819c6e19
+             variable: REGISTRY_PASSWORD
     publishers:
         - archive:
             artifacts: 'logs.html'
