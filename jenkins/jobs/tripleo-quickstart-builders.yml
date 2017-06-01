@@ -2,6 +2,8 @@
     name: 'tripleo-quickstart-builder'
     builders:
         - shell: |
+              echo "git+https://review.rdoproject.org/r/rdo-infra/ci-config/#egg=ci-conf" >> $WORKSPACE/quickstart-extras-requirements.txt
+
               bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
               export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
               echo $VIRTHOST
@@ -20,6 +22,8 @@
     name: 'tripleo-quickstart-rdo-infra-builder'
     builders:
         - shell: |
+              echo "git+https://review.rdoproject.org/r/rdo-infra/ci-config/#egg=ci-conf" >> $WORKSPACE/quickstart-extras-requirements.txt
+
               bash $WORKSPACE/ci-config/ci-scripts/checkout-patches.sh
 
               bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
@@ -39,6 +43,8 @@
     name: 'tripleo-quickstart-upgrade-builder'
     builders:
         - shell: |
+              echo "git+https://review.rdoproject.org/r/rdo-infra/ci-config/#egg=ci-conf" >> $WORKSPACE/quickstart-extras-requirements.txt
+
               bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
               export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
               echo $VIRTHOST
@@ -61,6 +67,8 @@
     name: 'tripleo-quickstart-tempest-builder'
     builders:
         - shell: |
+              echo "git+https://review.rdoproject.org/r/rdo-infra/ci-config/#egg=ci-conf" >> $WORKSPACE/quickstart-extras-requirements.txt
+
               # Temporary workaround while https://review.openstack.org/#/c/423340/
               # isn't merged.
               git clone https://github.com/openstack/tripleo-quickstart-extras
