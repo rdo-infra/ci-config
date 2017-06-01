@@ -67,6 +67,53 @@
             deactivate
             popd
 
+- builder:
+    name: 'rdo-tripleo-containers-promotion-builder'
+    builders:
+        - shell: |
+            # Set up ansible-playbook extra vars because we don't want to override
+            # the defaults if they're not set
+            extra_vars=""
+
+            # Variable configuration and validation
+            if [ -n "$delorean_current_hash" ]; then
+              source_tag=$(echo "${delorean_current_hash}" |awk -F/ '{print $3}')
+            fi
+            if [ -z "$source_tag" ]; then
+              echo "The source_tag parameter must be set"
+              exit 1
+            fi
+            if [ -z "$destination_tag" ]; then
+              echo "The destination tag must be set"
+              exit 1
+            fi
+
+            extra_vars="$extra_vars -e source_tag=$destination_tag"
+            extra_vars="$extra_vars -e destination_tag=$destination_tag"
+
+            ANSIBLE_HOSTS="$WORKSPACE/hosts"
+
+            pushd $WORKSPACE
+            # Retrieve the ansible-role-rdo-kolla-build role for the promotion playbook
+            git clone https://github.com/rdo-infra/ansible-role-rdo-kolla-build rdo-kolla-build
+
+            # Install dependencies
+            [[ ! -d provision_venv ]] && virtualenv provision_venv
+            source provision_venv/bin/activate
+            pip install ansible==2.3.0.0 ara
+
+            ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
+            export ANSIBLE_HOST_KEY_CHECKING=False
+            export ANSIBLE_CALLBACK_PLUGINS="$ara_location/plugins/callbacks"
+            export ANSIBLE_ACTION_PLUGINS="$ara_location/plugins/actions"
+            export ANSIBLE_LIBRARY="$ara_location/plugins/modules"
+            export ANSIBLE_ROLES_PATH="$WORKSPACE/roles"
+            export ARA_DATABASE="sqlite:///$WORKSPACE/$JOB_NAME.sqlite"
+
+            ansible-playbook -i $WORKSPACE/hosts $WORKSPACE/rdo-kolla-build/tag-promotion.yml $extra_vars
+            deactivate
+            popd
+
 # "Building remotely" should always be in the build console output
 - publisher:
     name: 'rdo-tripleo-containers-destroy-vm'
@@ -78,8 +125,8 @@
                 !include-raw:
                     - scripts/destroy-vm.sh
 
-- job-template:
-    name: 'rdo-tripleo-containers-{type}'
+- job:
+    name: 'rdo-tripleo-containers-build'
     description: |
         <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
         <br>
@@ -174,9 +221,68 @@
             allow-empty: true
         - rdo-tripleo-containers-destroy-vm
 
-- project:
-    name: 'rdo-tripleo-containers-jobs'
-    type:
-      - build
-    jobs:
-        - rdo-tripleo-containers-{type}
+- job:
+    name: 'rdo-tripleo-containers-promote'
+    description: |
+        <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
+        <br>
+        <p>
+          This job promotes a given tag for a set of container images.
+        </p>
+        <p>
+          It takes two parameters:<br>
+          <ul>
+            <li>source_tag (<i>defaults to 'delorean_current_hash' if provided by the environment</i>)</li>
+            <li>destination_tag (<i>defaults to 'latest-passed-ci'</i>)</li>
+          </ul>
+          <br>
+          So, for example, pretend you want to tag all the images which are tagged
+          after the delorean hash '<pre>38471d4ccf3914805fafaa56b21db2cc83755e95_5d6d179f</pre>'
+          to '<pre>latest-passed-ci</pre>', you'd set:
+          <br>
+          <ul>
+            <li>source_tag: <b>38471d4ccf3914805fafaa56b21db2cc83755e95_5d6d179f</b></li>
+            <li>destination_tag: <b>latest-passed-ci</b></li>
+          </ul>
+          <br>
+          This would retrieve all images which are tagged
+          <pre>38471d4ccf3914805fafaa56b21db2cc83755e95_5d6d179f</pre> and tag
+          them <pre>latest-passed-ci</pre>.
+        </p>
+    concurrent: true
+    node: 'rdo-virtualized'
+    parameters:
+        - string:
+            name: source_tag
+            description: The source image tag you want to use to create or update a tag
+        - string:
+            name: destination_tag
+            default: 'latest-passed-ci'
+            description: The destination image tag you want to create to update
+    builders:
+        - rdo-generate-log-rdoproject-org-redirection
+        - rdo-create-vm
+        - rdo-tripleo-containers-promotion-builder
+    properties:
+        - ownership:
+            owner: dms@redhat.com
+    logrotate:
+        daysToKeep: 31
+        artifactDaysToKeep: 31
+    wrappers:
+        - ansicolor
+        - timestamps
+        - workspace-cleanup
+        - timeout:
+            type: absolute
+            timeout: 120
+            fail: true
+        - credentials-binding:
+          - text:
+             credential-id: bd06088f-7ceb-4187-a8f9-62b8819c6e19
+             variable: REGISTRY_PASSWORD
+    publishers:
+        - archive:
+            artifacts: 'logs.html'
+            allow-empty: true
+        - rdo-tripleo-containers-destroy-vm
