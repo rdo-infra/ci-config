@@ -109,7 +109,7 @@ cat <<EOF >destroy-vm.yml
             cloud: "${CLOUD}"
             name: "${NAME}"
             timeout: "${TIMEOUT}"
-	    delete_fip: True
+            delete_fip: True
             wait: "yes"
       rescue:
         - name: Handling virtual machine deletion failure
@@ -122,7 +122,7 @@ cat <<EOF >destroy-vm.yml
             cloud: "${CLOUD}"
             name: "${NAME}"
             timeout: "${TIMEOUT}"
-	    delete_fip: True
+            delete_fip: True
             wait: "yes"
             ignore_errors: "yes"
 EOF
