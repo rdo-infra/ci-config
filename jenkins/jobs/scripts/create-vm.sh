@@ -44,11 +44,44 @@ EOF
 cat <<EOF >create-vm.yml
 - name: Create job virtual machine
   hosts: localhost
-  gather_facts: false
+  gather_facts: true
+  vars:
+    fmt: '%Y-%m-%dT%H:%M:%SZ'
   tasks:
     - name: Validate cloud authentication
       os_auth:
         cloud: "${CLOUD}"
+    - name: Gather tenant facts
+      os_server_facts:
+        cloud: "${CLOUD}"
+    - block:
+        - name: Delete VMs in ERROR state or too old
+          os_server:
+            state: "absent"
+            cloud: "${CLOUD}"
+            name: "{{ item.name }}"
+            timeout: "${TIMEOUT}"
+            delete_fip: True
+            wait: "yes"
+          when: item.status == "ERROR" or ((ansible_date_time.iso8601|to_datetime(fmt)) - (item.created|to_datetime(fmt))).seconds > 21600
+          with_items:
+            - "{{ openstack_servers }}"
+      rescue:
+        - name: Handling virtual machine deletion failure
+          debug:
+            msg: "The stale VM cleanup failed, trying again ..."
+        - name: Delete VMs in ERROR state or too old, take 2
+          os_server:
+            state: "absent"
+            cloud: "${CLOUD}"
+            name: "{{ item.name }}"
+            timeout: "${TIMEOUT}"
+            delete_fip: True
+            wait: "yes"
+            ignore_errors: "yes"
+          when: item.status == "ERROR"  or ((ansible_date_time.iso8601|to_datetime(fmt)) - (item.created|to_datetime(fmt))).seconds > 21600
+          with_items:
+            - "{{ openstack_servers }}"
 
     # Be a bit resilient to failures by trying at least twice
     - block:
