@@ -72,6 +72,11 @@
             name: promotion_symlink
             default: puppet-passed-ci
             description: (For promotion purposes only) Symlink to promote
+        - string:
+            name: enable_puppet_modules_rpm
+            default: false
+            description: Boolean (true|false) to use tempest modules from rpm packages in puppet-openstack-integration scenarios. Defaults to true.
+
     builders:
         - shell: |
             #!/bin/bash
@@ -95,6 +100,8 @@
             export delorean_builder=${delorean_builder}
             # (For promotion purposes only) Symlink to promote
             export promotion_symlink=${promotion_symlink}
+            # For puppet promotion pipeline we deploy puppet from source as done in upstream gates
+            export enable_puppet_modules_rpm=${enable_puppet_modules_rpm}
             EOF
     publishers:
         - archive:
