@@ -82,7 +82,8 @@
           -e pending_repository=${{pending_repository}} \
           -e testing_repository=${{testing_repository}} \
           -e tempest_version=${{tempest_version}} \
-          -e tempest_from_source=${{tempest_from_source}}
+          -e tempest_from_source=${{tempest_from_source}} \
+          -e enable_puppet_modules_rpm=${{enable_puppet_modules_rpm}}
         </pre>
     concurrent: true
     parameters:
@@ -125,6 +126,10 @@
             name: tempest_from_source
             default: 'true'
             description: Boolean (true|false) to use tempest from source in puppet-openstack-integration scenarios. Defaults to true.
+        - string:
+            name: enable_puppet_modules_rpm
+            default: 'true'
+            description: Boolean (true|false) to use puppet modules from rpm packages in puppet-openstack-integration scenarios. Defaults to true.
     scm:
         - weirdo-core-master-repository
     builders:
@@ -175,6 +180,10 @@
             name: tempest_from_source
             default: 'true'
             description: Boolean (true|false) to use tempest from source in puppet-openstack-integration scenarios. Defaults to true.
+        - string:
+            name: enable_puppet_modules_rpm
+            default: 'true'
+            description: Boolean (true|false) to use tempest modules from rpm packages in puppet-openstack-integration scenarios. Defaults to true.
 
     builders:
         - shell: |
@@ -188,6 +197,7 @@
             echo "|   - testing_repository: $testing_repository"
             echo "|   - tempest_version: $tempest_version"
             echo "|   - tempest_from_source: $tempest_from_source"
+            echo "|   - enable_puppet_modules_rpm: $enable_puppet_modules_rpm"
             echo "+===============================================+"
         - trigger-builds:
             - project:
@@ -206,6 +216,7 @@
                   testing_repository=$testing_repository
                   tempest_version=$tempest_version
                   tempest_from_source=$tempest_from_source
+                  enable_puppet_modules_rpm=$enable_puppet_modules_rpm
               block: true
               block-thresholds:
                 build-step-failure-threshold: 'FAILURE'
@@ -321,6 +332,10 @@
             name: tempest_from_source
             default: 'true'
             description: Boolean (true|false) to use tempest from source in puppet-openstack-integration scenarios. Defaults to true.
+        - string:
+            name: enable_puppet_modules_rpm
+            default: 'true'
+            description: Boolean (true|false) to use tempest modules from rpm packages in puppet-openstack-integration scenarios. Defaults to true.
 
     builders:
         - shell: |
@@ -338,6 +353,7 @@
             echo "|   - testing_repository: $testing_repository"
             echo "|   - tempest_version: $tempest_version"
             echo "|   - tempest_from_source: $tempest_from_source"
+            echo "|   - enable_puppet_modules_rpm: $enable_puppet_modules_rpm"
             echo "+===============================================+"
         - trigger-builds:
             - project:
@@ -360,6 +376,7 @@
                   testing_repository=$testing_repository
                   tempest_version=$tempest_version
                   tempest_from_source=$tempest_from_source
+                  enable_puppet_modules_rpm=$enable_puppet_modules_rpm
               block: true
               block-thresholds:
                 build-step-failure-threshold: 'FAILURE'
