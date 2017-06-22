@@ -6,6 +6,22 @@
                 - scripts/cico-node-get-to-ansible.sh
 
 - builder:
+    name: 'weirdo-puppet-compat-check'
+    builders:
+        - shell: |
+            if [[ "{playbook}" == "puppet-openstack-scenario004" ]]; then
+              case "{openstack_release}" in
+                mitaka|newton)
+                  echo "puppet-openstack-scenario004 was introduced in ocata."
+                  exit 1
+                  ;;
+                *)
+                  exit 0
+                  ;;
+              esac
+            fi
+
+- builder:
     name: 'weirdo-ansible-playbook-builder'
     builders:
         - shell: |

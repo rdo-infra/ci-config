@@ -1,7 +1,20 @@
 - project:
-    name: 'weirdo-promote-jobs'
+    name: 'weirdo-promote-jobs-newton'
     openstack_release:
         - 'newton'
+    playbook:
+        - 'puppet-openstack-scenario001'
+        - 'puppet-openstack-scenario002'
+        - 'puppet-openstack-scenario003'
+        - 'packstack-scenario001'
+        - 'packstack-scenario002'
+        - 'packstack-scenario003'
+    jobs:
+        - weirdo-{openstack_release}-promote-{playbook}
+
+- project:
+    name: 'weirdo-promote-jobs'
+    openstack_release:
         - 'ocata':
             tempest_from_source: 'false'
         - 'master':
@@ -10,6 +23,7 @@
         - 'puppet-openstack-scenario001'
         - 'puppet-openstack-scenario002'
         - 'puppet-openstack-scenario003'
+        - 'puppet-openstack-scenario004'
         - 'packstack-scenario001'
         - 'packstack-scenario002'
         - 'packstack-scenario003'
@@ -31,6 +45,7 @@
         - 'puppet-openstack-scenario001'
         - 'puppet-openstack-scenario002'
         - 'puppet-openstack-scenario003'
+        - 'puppet-openstack-scenario004'
     jobs:
         - weirdo-generic-{playbook}
 
