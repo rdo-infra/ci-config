@@ -79,7 +79,7 @@ cat <<EOF >create-vm.yml
             timeout: "${TIMEOUT}"
             delete_fip: True
             wait: "yes"
-            ignore_errors: "yes"
+          ignore_errors: "yes"
           when: item.status == "ERROR"  or ((ansible_date_time.iso8601|to_datetime(fmt)) - (item.created|to_datetime(fmt))).seconds > 21600
           with_items:
             - "{{ openstack_servers }}"

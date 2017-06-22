@@ -124,7 +124,7 @@ cat <<EOF >destroy-vm.yml
             timeout: "${TIMEOUT}"
             delete_fip: True
             wait: "yes"
-            ignore_errors: "yes"
+          ignore_errors: "yes"
 EOF
 
 ansible-playbook -i "${ANSIBLE_HOSTS}" destroy-vm.yml
