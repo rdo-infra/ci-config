@@ -14,4 +14,7 @@ export LOCATION='current-tripleo'  #update to current-tripleo
 # The BUILD_SYS var stores what build system was used. It becomes part of the
 # path where images are stored.
 export BUILD_SYS='rdo_trunk'
+# When ENABLE_PUPPET_MODULES_RPM is true, puppet modules are installed from
+# rpm instead of git repo in p-o-i jobs
+export ENABLE_PUPPET_MODULES_RPM=true
 export HASH_FILE='/tmp/ocata_current_tripleo_hash'
