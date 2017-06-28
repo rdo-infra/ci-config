@@ -56,7 +56,7 @@ cat <<EOF >prep-logs.yml
     - block:
         - name: Create log destination directory
           file:
-            path: "/var/www/html/${JOB_NAME}/${BUILD_NUMBER}"
+            path: "/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
             state: "directory"
             recurse: "yes"
 EOF
@@ -149,13 +149,13 @@ cat <<EOF >wrap-up.yml
     - name: Upload the console log
       synchronize:
         src: "${WORKSPACE}/console.txt.gz"
-        dest: "/var/www/html/${JOB_NAME}/${BUILD_NUMBER}/"
+        dest: "/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}/"
       when: console | succeeded
 
     - name: Upload ARA report
       synchronize:
         src: "${WORKSPACE}/ara"
-        dest: "/var/www/html/${JOB_NAME}/${BUILD_NUMBER}/"
+        dest: "/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}/"
 EOF
 
 ansible-playbook -i "${ANSIBLE_HOSTS}" wrap-up.yml
