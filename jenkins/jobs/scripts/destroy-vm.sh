@@ -79,7 +79,7 @@ cat <<EOF >weirdo-logs.yml
             ssh_opts: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
             src: "/var/log/weirdo/./"
             host: "{{ hostvars[item]['ansible_user'] }}@{{ vm.openstack.accessIPv4 }}"
-            path: "/var/www/html/${JOB_NAME}/${BUILD_NUMBER}"
+            path: "/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
           shell: |
             rsync -e "{{ ssh_opts }}" -avzR {{ host }}:{{ src }} {{ path }}
           with_items: "{{ groups['openstack_nodes'] }}"
