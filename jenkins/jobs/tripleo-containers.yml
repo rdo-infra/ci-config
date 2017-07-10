@@ -229,22 +229,20 @@
         <p>
           This job promotes a given tag for a set of container images.
         </p>
-        <p>
-          It takes two parameters:<br>
-          <ul>
-            <li>source_tag (<i>defaults to 'delorean_current_hash' if provided by the environment</i>)</li>
-            <li>destination_tag (<i>defaults to 'latest-passed-ci'</i>)</li>
-          </ul>
-          <br>
-          So, for example, pretend you want to tag all the images which are tagged after the delorean hash '<pre>38471d4ccf3914805fafaa56b21db2cc83755e95_5d6d179f</pre>' to '<pre>latest-passed-ci</pre>', you'd set:
-          <br>
-          <ul>
-            <li>source_tag: <b>38471d4ccf3914805fafaa56b21db2cc83755e95_5d6d179f</b></li>
-            <li>destination_tag: <b>latest-passed-ci</b></li>
-          </ul>
-          <br>
-          This would retrieve all images which are tagged <pre>38471d4ccf3914805fafaa56b21db2cc83755e95_5d6d179f</pre> and tag them <pre>latest-passed-ci</pre>.
-        </p>
+        It takes two parameters:<br>
+        <ul>
+          <li>source_tag (<i>defaults to 'delorean_current_hash' if provided by the environment</i>)</li>
+          <li>destination_tag (<i>defaults to 'current-tripleo'</i>)</li>
+        </ul>
+        <br>
+        So, for example, pretend you want to tag all the images which are tagged after the delorean hash '<pre>38471d4ccf3914805fafaa56b21db2cc83755e95_5d6d179f</pre>' to '<pre>current-tripleo</pre>', you'd set:
+        <br>
+        <ul>
+          <li>source_tag: <b>38471d4ccf3914805fafaa56b21db2cc83755e95_5d6d179f</b></li>
+          <li>destination_tag: <b>current-tripleo</b></li>
+        </ul>
+        <br>
+        This would retrieve all images which are tagged <pre>38471d4ccf3914805fafaa56b21db2cc83755e95_5d6d179f</pre> and tag them <pre>current-tripleo</pre>.
     concurrent: true
     node: 'rdo-virtualized'
     parameters:
@@ -253,7 +251,7 @@
             description: The source image tag you want to use to create or update a tag
         - string:
             name: destination_tag
-            default: 'latest-passed-ci'
+            default: 'current-tripleo'
             description: The destination image tag you want to create to update
     builders:
         - rdo-generate-log-rdoproject-org-redirection
