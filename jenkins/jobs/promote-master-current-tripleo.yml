@@ -66,6 +66,7 @@
         - phase-test-import-master-current-tripleo
         - phase-upload-master-current-tripleo
         - phase-repo-promote-master-current-tripleo
+        - phase-repo-promote-container-tag
     properties:
         - ownership:
             owner: trown@redhat.com
@@ -98,6 +99,18 @@
             projects:
               - name: rdo-promote-repo-promote-master-current-tripleo
                 property-file: /tmp/delorean_master_current_tripleo_hash
+
+- builder:
+    name: phase-repo-promote-container-tag
+    builders:
+        - multijob:
+            name: "TAG CONTAINERS"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-tripleo-containers-promote
+                property-file: /tmp/delorean_master_current_tripleo_hash
+                predefined-parameters: destination_tag=current-tripleo-rdo
+                node-parameters: true
 
 - job-template:
     name: 'rdo-promote-get-hash-master-current-tripleo'
