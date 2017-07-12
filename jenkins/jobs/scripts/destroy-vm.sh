@@ -6,7 +6,6 @@ BUILD_NUMBER=${BUILD_NUMBER:-001}
 ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
 CLOUD_CONFIG=${CLOUD_CONFIG:-~/.config/openstack/clouds.yaml}
 LOGSERVER="logs.rdoproject.org ansible_user=uploader"
-WEIRDO_JOB=${WEIRDO_JOB:-false}
 
 # Ansible config
 CLOUD=${CLOUD:-rdo-cloud}
@@ -62,7 +61,8 @@ cat <<EOF >prep-logs.yml
 EOF
 ansible-playbook -i "${ANSIBLE_HOSTS}" prep-logs.yml
 
-cat <<EOF >weirdo-logs.yml
+# TODO: Fix this log collection madness
+cat <<EOF >logs.yml
 - name: Collect logs
   hosts: logserver
   gather_facts: false
@@ -74,7 +74,7 @@ cat <<EOF >weirdo-logs.yml
 
         # Synchronize doesn't prefix the username to the dest when using delegate_to
         # https://github.com/ansible/ansible/issues/16215
-        - name: Pull logs from VM to logserver
+        - name: Pull weirdo logs from VM to logserver
           vars:
             ssh_opts: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
             src: "/var/log/weirdo/./"
@@ -84,12 +84,21 @@ cat <<EOF >weirdo-logs.yml
             rsync -e "{{ ssh_opts }}" -avzR {{ host }}:{{ src }} {{ path }}
           with_items: "{{ groups['openstack_nodes'] }}"
           when: vm is defined
+
+        - name: Pull kolla logs from VM to logserver
+          vars:
+            ssh_opts: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+            src: "/tmp/kolla/logs/./"
+            host: "{{ hostvars[item]['ansible_user'] }}@{{ vm.openstack.accessIPv4 }}"
+            path: "/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
+          shell: |
+            rsync -e "{{ ssh_opts }}" -avzR {{ host }}:{{ src }} {{ path }}
+          with_items: "{{ groups['openstack_nodes'] }}"
+          when: vm is defined
       ignore_errors: "yes"
 EOF
 
-if [ "${WEIRDO_JOB}" = true ]; then
-    ansible-playbook -i "${ANSIBLE_HOSTS}" weirdo-logs.yml
-fi
+ansible-playbook -i "${ANSIBLE_HOSTS}" logs.yml
 
 cat <<EOF >destroy-vm.yml
 - name: Destroy job virtual machine
