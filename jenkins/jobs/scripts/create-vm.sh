@@ -145,6 +145,20 @@ cat <<EOF >create-vm.yml
         search_regex: "OpenSSH"
         delay: "10"
 
+    - name: Add server to inventory
+      add_host:
+        hostname: "{{ vm.openstack.name }}"
+        ansible_ssh_host: "{{ vm.openstack.accessIPv4 }}"
+        ansible_user: "centos"
+        ansible_become: "yes"
+        ansible_become_user: "root"
+
+    - name: Ensure the server is reachable
+      ping:
+      retries: 6
+      delay: 5
+      delegate_to: "{{ vm.openstack.name }}"
+
     - name: Write inventory
       vars:
         ansible_python_interpreter: "/usr/bin/python"
@@ -159,9 +173,6 @@ cat <<EOF >create-vm.yml
 EOF
 
 ansible-playbook -i 'localhost' create-vm.yml
-
-# Test VM connectivity
-ansible -i ${ANSIBLE_HOSTS} openstack_nodes -m ping
 
 deactivate
 popd
