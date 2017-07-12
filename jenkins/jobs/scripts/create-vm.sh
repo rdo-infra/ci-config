@@ -145,6 +145,11 @@ cat <<EOF >create-vm.yml
         search_regex: "OpenSSH"
         delay: "10"
 
+    - name: Ensure the server is reachable
+      ping:
+      retries: 6
+      delay: 5
+
     - name: Write inventory
       vars:
         ansible_python_interpreter: "/usr/bin/python"
@@ -159,9 +164,6 @@ cat <<EOF >create-vm.yml
 EOF
 
 ansible-playbook -i 'localhost' create-vm.yml
-
-# Test VM connectivity
-ansible -i ${ANSIBLE_HOSTS} openstack_nodes -m ping
 
 deactivate
 popd
