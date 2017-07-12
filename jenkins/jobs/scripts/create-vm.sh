@@ -32,6 +32,8 @@ ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
 export ANSIBLE_HOST_KEY_CHECKING=False
 export ANSIBLE_CALLBACK_PLUGINS="${ara_location}/plugins/callbacks"
 export ANSIBLE_GATHERING="implicit"
+# Unreachable tasks may not be handled: https://github.com/ansible/ansible/issues/18287
+export ANSIBLE_SSH_RETRIES=6
 export ARA_DATABASE="sqlite:///${WORKSPACE}/${JOB_NAME}.sqlite"
 
 # Write the header of the hosts file
@@ -145,6 +147,22 @@ cat <<EOF >create-vm.yml
         search_regex: "OpenSSH"
         delay: "10"
 
+    - name: Add server to inventory
+      add_host:
+        hostname: "{{ vm.openstack.name }}"
+        ansible_ssh_host: "{{ vm.openstack.accessIPv4 }}"
+        ansible_user: "centos"
+        ansible_become: "yes"
+        ansible_become_user: "root"
+
+    - name: Ensure the server is reachable
+      ping:
+      register: ping
+      until: ping | success
+      retries: 6
+      delay: 5
+      delegate_to: "{{ vm.openstack.name }}"
+
     - name: Write inventory
       vars:
         ansible_python_interpreter: "/usr/bin/python"
@@ -159,9 +177,6 @@ cat <<EOF >create-vm.yml
 EOF
 
 ansible-playbook -i 'localhost' create-vm.yml
-
-# Test VM connectivity
-ansible -i ${ANSIBLE_HOSTS} openstack_nodes -m ping
 
 deactivate
 popd
