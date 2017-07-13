@@ -17,7 +17,7 @@ dest_image_path="$RDO_VERSION_DIR/$BUILD_SYS/$LOCATION"
 dest_centos_artifacts="rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path/$PROMOTE_HASH/"
 
 # images.rdoproject will use rsync as well, but via ssh
-dest_rdo_filer="fedora@images.rdoproject.org:/var/www/html/images/$dest_image_path/$PROMOTE_HASH/"
+dest_rdo_filer="uploader@images.rdoproject.org:/var/www/html/images/$dest_image_path/$PROMOTE_HASH/"
 
 ssh_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
