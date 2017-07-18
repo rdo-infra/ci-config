@@ -111,6 +111,10 @@
             type: absolute
             timeout: 300
             fail: true
+        - credentials-binding:
+          - text:
+              credential-id: d31fc651-105c-4af6-a2a5-ed486a5897ca
+              variable: DLRNAPI_PASSWD
 
 - defaults:
     name: 'tripleo-quickstart-rdo-infra-promote-defaults'
@@ -233,3 +237,24 @@
               script:
                 !include-raw:
                     - scripts/tripleo-quickstart-publish-testing-images.sh
+
+- publisher:
+    name: 'quickstart-report-dlrn-api'
+    publishers:
+        - post-tasks:
+            - matches:
+                - log-text: marked build as failure
+              script: |
+                export JOB_SUCCESS="false"
+                !include-raw:
+                    - scripts/centos-master-current-tripleo.sh
+                    - scripts/dlrn-api-promote.sh
+        - post-tasks:
+            - matches:
+                - log-text: Virtual Environment Setup Complete
+              run-if-job-successful: true
+              script: |
+                export JOB_SUCCESS="true"
+                !include-raw:
+                    - scripts/centos-master-current-tripleo.sh
+                    - scripts/dlrn-api-promote.sh
