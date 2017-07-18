@@ -94,6 +94,27 @@
               - name: rdo-promote-repo-promote-ocata-current-tripleo
                 property-file: /tmp/ocata_current_tripleo_hash
 
+- publisher:
+    name: 'tripleo-quickstart-report-dlrn-api-ocata-current-tripleo'
+    publishers:
+        - post-tasks:
+            - matches:
+                - log-text: marked build as failure
+              script:
+                !include-raw:
+                    - scripts/centos-ocata-current-tripleo.sh
+                    - scripts/export-success-false.sh
+                    - scripts/dlrn-api-report.sh
+        - post-tasks:
+            - matches:
+                - log-text: Virtual Environment Setup Complete
+              run-if-job-successful: true
+              script:
+                !include-raw:
+                    - scripts/centos-ocata-current-tripleo.sh
+                    - scripts/export-success-true.sh
+                    - scripts/dlrn-api-report.sh
+
 - job-template:
     name: 'rdo-promote-get-hash-ocata-current-tripleo'
     defaults: script-defaults
@@ -149,3 +170,34 @@
     name: rdo-promote-repo-promote-ocata-current-tripleo
     jobs:
         - 'rdo-promote-repo-promote-ocata-current-tripleo'
+
+- job-template:
+    name: 'tripleo-quickstart-promote-ocata-{build_system}-{topology}'
+    defaults: 'tripleo-quickstart-promote-defaults'
+    scm:
+        - repo-tripleo-quickstart
+    builders:
+        - tripleo-quickstart-builder:
+            test: '{test}'
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
+    publishers:
+        - tripleo-quickstart-cleanup:
+            topology: '{topology}'
+            job_type: '{job_type}'
+        - tripleo-quickstart-full-logs-link
+        - tripleo-quickstart-report-dlrn-api-ocata-current-tripleo
+
+- project:
+    name: 'tripleo-quickstart-promote-ocata-new-full-jobs'
+    test: 'full-deploy'
+    job_type: 'promote'
+    release: 'ocata'
+    build_system: 'rdo_trunk'
+    topology:
+        - 'minimal'
+        - 'minimal_pacemaker'
+    jobs:
+        - 'tripleo-quickstart-promote-ocata-{build_system}-{topology}'
