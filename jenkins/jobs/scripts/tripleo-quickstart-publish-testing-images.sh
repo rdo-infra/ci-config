@@ -63,11 +63,11 @@ ssh $ssh_args root@$VIRTHOST "cd $virthost_source_location && $rsync_base_cmd -e
 # Delete old testing symlink
 mkdir $LOCATION
 rsync -av --delete --include 'testing**' --exclude '*' $LOCATION/ rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path/
-rsync -av --delete --include 'testing**' --exclude '*' $LOCATION/ fedora@images.rdoproject.org:/var/www/html/images/$dest_image_path/
+rsync -av --delete --include 'testing**' --exclude '*' $LOCATION/ uploader@images.rdoproject.org:/var/www/html/images/$dest_image_path/
 
 # push testing symlink so sub-jobs know what to test
 mkdir $PROMOTE_HASH
 ln -s $PROMOTE_HASH testing
 rsync -av testing rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path/testing
-rsync -av testing fedora@images.rdoproject.org:/var/www/html/images/$dest_image_path/testing
+rsync -av testing uploader@images.rdoproject.org:/var/www/html/images/$dest_image_path/testing
 
