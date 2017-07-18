@@ -112,6 +112,27 @@
                 predefined-parameters: destination_tag=current-tripleo-rdo
                 node-parameters: true
 
+- publisher:
+    name: 'tripleo-quickstart-report-dlrn-api-pike-current-tripleo'
+    publishers:
+        - post-tasks:
+            - matches:
+                - log-text: marked build as failure
+              script:
+                !include-raw:
+                    - scripts/centos-pike-current-tripleo.sh
+                    - scripts/export-success-false.sh
+                    - scripts/dlrn-api-report.sh
+        - post-tasks:
+            - matches:
+                - log-text: Virtual Environment Setup Complete
+              run-if-job-successful: true
+              script:
+                !include-raw:
+                    - scripts/centos-pike-current-tripleo.sh
+                    - scripts/export-success-true.sh
+                    - scripts/dlrn-api-report.sh
+
 - job-template:
     name: 'rdo-promote-get-hash-pike-current-tripleo'
     defaults: script-defaults
@@ -167,3 +188,34 @@
     name: rdo-promote-repo-promote-pike-current-tripleo
     jobs:
         - 'rdo-promote-repo-promote-pike-current-tripleo'
+
+- job-template:
+    name: 'tripleo-quickstart-promote-pike-{build_system}-{topology}'
+    defaults: 'tripleo-quickstart-promote-defaults'
+    scm:
+        - repo-tripleo-quickstart
+    builders:
+        - tripleo-quickstart-builder:
+            test: '{test}'
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
+    publishers:
+        - tripleo-quickstart-cleanup:
+            topology: '{topology}'
+            job_type: '{job_type}'
+        - tripleo-quickstart-full-logs-link
+        - tripleo-quickstart-report-dlrn-api-pike-current-tripleo
+
+- project:
+    name: 'tripleo-quickstart-promote-pike-new-full-jobs'
+    test: 'full-deploy'
+    job_type: 'promote'
+    release: 'pike'
+    build_system: 'rdo_trunk'
+    topology:
+        - 'minimal'
+        - 'minimal_pacemaker'
+    jobs:
+        - 'tripleo-quickstart-promote-pike-{build_system}-{topology}'
