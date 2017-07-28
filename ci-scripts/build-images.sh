@@ -9,7 +9,11 @@ set -eux
 RELEASE=$1
 CONFIG=$2
 JOB_TYPE=$3
-WORKSPACE=${WORKSPACE:-"~/"}
+
+export ANSIBLE_INVENTORY=$WORKSPACE/hosts
+export ANSIBLE_CONFIG=$WORKSPACE/tripleo-quickstart/ansible.cfg
+export SSH_CONFIG=$WORKSPACE/ssh.config.ansible
+export ANSIBLE_SSH_ARGS="-F ${SSH_CONFIG}"
 
 if [ "$JOB_TYPE" = "gate" ] || [ "$JOB_TYPE" = "periodic" ]; then
     dlrn_hash='current-passed-ci'
