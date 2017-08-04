@@ -1,0 +1,151 @@
+- builder:
+    name: phase-test-build-pike-current-tripleo
+    builders:
+        - multijob:
+            name: "INSTALL / TEST (BUILD IMAGES)"
+            condition: UNSTABLE
+            projects:
+                - name: tripleo-quickstart-promote-pike-build-images
+                  kill-phase-on: NEVER
+                  property-file: /tmp/pike_current_tripleo_hash
+
+- builder:
+    name: phase-test-import-pike-current-tripleo
+    builders:
+        - multijob:
+            name: "INSTALL / TEST (IMPORT IMAGES)"
+            condition: UNSTABLE
+            projects:
+                - name: tripleo-quickstart-promote-pike-rdo_trunk-minimal
+                  kill-phase-on: NEVER
+                  property-file: /tmp/pike_current_tripleo_hash
+                - name: tripleo-quickstart-promote-pike-rdo_trunk-minimal_pacemaker
+                  kill-phase-on: NEVER
+                  property-file: /tmp/pike_current_tripleo_hash
+                - name: weirdo-pike-promote-packstack-scenario001
+                  kill-phase-on: NEVER
+                  property-file: /tmp/pike_current_tripleo_hash
+                - name: weirdo-pike-promote-packstack-scenario002
+                  kill-phase-on: NEVER
+                  property-file: /tmp/pike_current_tripleo_hash
+                - name: weirdo-pike-promote-packstack-scenario003
+                  kill-phase-on: NEVER
+                  property-file: /tmp/pike_current_tripleo_hash
+                - name: weirdo-pike-promote-puppet-openstack-scenario001
+                  kill-phase-on: NEVER
+                  property-file: /tmp/pike_current_tripleo_hash
+                - name: weirdo-pike-promote-puppet-openstack-scenario002
+                  kill-phase-on: NEVER
+                  property-file: /tmp/pike_current_tripleo_hash
+                - name: weirdo-pike-promote-puppet-openstack-scenario003
+                  kill-phase-on: NEVER
+                  property-file: /tmp/pike_current_tripleo_hash
+                - name: weirdo-pike-promote-puppet-openstack-scenario004
+                  kill-phase-on: NEVER
+                  property-file: /tmp/pike_current_tripleo_hash
+
+- job-template:
+    name: rdo_trunk-promote-pike-current-tripleo
+    project-type: multijob
+    triggers:
+        - pollurl:
+            cron: "H 2,6,10,14,18,22 * * *"
+            urls:
+                - url: "http://trunk-primary.rdoproject.org/centos7-pike/current-tripleo/delorean.repo"
+                  check-content:
+                    - simple: true
+    defaults: parent-promote-defaults
+    builders:
+        - phase-get-hash-pike-current-tripleo
+        - phase-test-build-pike-current-tripleo
+        - phase-test-import-pike-current-tripleo
+        - phase-upload-pike-current-tripleo
+        - phase-repo-promote-pike-current-tripleo
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- builder:
+    name: phase-get-hash-pike-current-tripleo
+    builders:
+        - multijob:
+            name: "GET THE LATEST rdo_trunk YUM REPOSITORY HASH"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-get-hash-pike-current-tripleo
+
+- builder:
+    name: phase-upload-pike-current-tripleo
+    builders:
+        - multijob:
+            name: "UPLOAD IMAGES TO FILE SERVER"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-upload-pike-current-tripleo
+                property-file: /tmp/pike_current_tripleo_hash
+
+- builder:
+    name: phase-repo-promote-pike-current-tripleo
+    builders:
+        - multijob:
+            name: "UPLOAD IMAGES TO FILE SERVER"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-repo-promote-pike-current-tripleo
+                property-file: /tmp/pike_current_tripleo_hash
+
+- job-template:
+    name: 'rdo-promote-get-hash-pike-current-tripleo'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-pike-current-tripleo.sh
+                - scripts/promote-get-hash.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- job-template:
+    name: 'rdo-promote-upload-pike-current-tripleo'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-pike-current-tripleo.sh
+                - scripts/promote-upload-images.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- job-template:
+    name: 'rdo-promote-repo-promote-pike-current-tripleo'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos-pike-current-tripleo.sh
+                - scripts/promote-repo-promote.sh
+    properties:
+        - ownership:
+            owner: trown@redhat.com
+
+- project:
+    name: rdo_trunk-promote-jobs-pike-current-tripleo
+    jobs:
+        - 'rdo_trunk-promote-pike-current-tripleo'
+
+- project:
+    name: rdo-promote-get-hash-pike-current-tripleo
+    jobs:
+        - 'rdo-promote-get-hash-pike-current-tripleo'
+
+- project:
+    name: rdo-promote-upload-pike-current-tripleo
+    jobs:
+        - 'rdo-promote-upload-pike-current-tripleo'
+
+- project:
+    name: rdo-promote-repo-promote-pike-current-tripleo
+    jobs:
+        - 'rdo-promote-repo-promote-pike-current-tripleo'
