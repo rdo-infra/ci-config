@@ -6,22 +6,6 @@
                 - scripts/cico-node-get-to-ansible.sh
 
 - builder:
-    name: 'weirdo-puppet-compat-check'
-    builders:
-        - shell: |
-            if [[ "{playbook}" == "puppet-openstack-scenario004" ]]; then
-              case "{openstack_release}" in
-                mitaka|newton)
-                  echo "puppet-openstack-scenario004 was introduced in ocata."
-                  exit 1
-                  ;;
-                *)
-                  exit 0
-                  ;;
-              esac
-            fi
-
-- builder:
     name: 'weirdo-ansible-playbook-builder'
     builders:
         - shell: |
@@ -50,6 +34,12 @@
             if [[ -n "${{properties}}" ]]; then
               curl -s -O "${{properties}}"
               source "./$(basename ${{properties}})"
+            fi
+
+            # Scenario004 was introduced in ocata and is skip in previous releases
+            if [[ ${{openstack_release}} == "newton" -a {playbook} == "puppet-openstack-scenario004" ]; then
+                echo "INFO: puppet-openstack-scenario004 is skipped for newton release"
+                exit 0
             fi
 
             # Set up ansible-playbook extra vars because we don't want to override
