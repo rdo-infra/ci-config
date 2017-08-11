@@ -28,6 +28,7 @@
             [[ -n "$kolla_tag" ]] && extra_vars="$extra_vars -e kolla_tag=$kolla_tag"
             [[ -n "$kolla_template_only" ]] && extra_vars="$extra_vars -e kolla_template_only=$kolla_template_only"
             [[ -n "$kolla_template_override" ]] && extra_vars="$extra_vars -e kolla_template_override=$kolla_template_override"
+            [[ -n "$openstack_release" ]] && extra_vars="$extra_vars -e kolla_namespace=$openstack_release"
 
             ANSIBLE_HOSTS="$WORKSPACE/hosts"
 
@@ -90,6 +91,7 @@
 
             extra_vars="$extra_vars -e source_tag=$source_tag"
             extra_vars="$extra_vars -e destination_tag=$destination_tag"
+            [[ -n "$openstack_release" ]] && extra_vars="$extra_vars -e kolla_namespace=$openstack_release"
 
             ANSIBLE_HOSTS="$WORKSPACE/hosts"
 
@@ -125,8 +127,8 @@
                 !include-raw:
                     - scripts/destroy-vm.sh
 
-- job:
-    name: 'rdo-tripleo-containers-build'
+- job-template:
+    name: 'rdo-tripleo-{openstack_release}-containers-build'
     description: |
         <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
         <br>
@@ -150,8 +152,8 @@
             description: How to set up Kolla, can be binary (RDO package) or source (from git)
         - string:
             name: openstack_release
-            default: master
-            description: "The version of OpenStack (ex: master, ocata, newton, etc.)"
+            default: '{openstack_release}'
+            description: "The version of OpenStack (ex: master, pike, ocata, newton, etc.)"
         - string:
             name: trunk_repository
             description: The URL of the trunk repository to use
@@ -221,8 +223,8 @@
             allow-empty: true
         - rdo-tripleo-containers-destroy-vm
 
-- job:
-    name: 'rdo-tripleo-containers-promote'
+- job-template:
+    name: 'rdo-tripleo-{openstack_release}-containers-promote'
     description: |
         <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
         <br>
@@ -233,6 +235,7 @@
         <ul>
           <li>source_tag (<i>defaults to 'delorean_current_hash' if provided by the environment</i>)</li>
           <li>destination_tag (<i>defaults to 'current-tripleo'</i>)</li>
+          <li>openstack_release (<i>defaults to '{openstack_release}'</i>)</li>
         </ul>
         <br>
         So, for example, pretend you want to tag all the images which are tagged after the delorean hash '<pre>38471d4ccf3914805fafaa56b21db2cc83755e95_5d6d179f</pre>' to '<pre>current-tripleo</pre>', you'd set:
@@ -253,6 +256,10 @@
             name: destination_tag
             default: 'current-tripleo'
             description: The destination image tag you want to create to update
+        - string:
+            name: openstack_release
+            default: '{openstack_release}'
+            description: "The version of OpenStack (ex: master, pike, ocata, newton, etc.)"
     builders:
         - rdo-generate-log-rdoproject-org-redirection
         - rdo-create-vm
@@ -280,3 +287,20 @@
             artifacts: 'logs.html'
             allow-empty: true
         - rdo-tripleo-containers-destroy-vm
+
+- project:
+    name: 'rdo-tripleo-containers-build'
+    openstack_release:
+        - 'pike'
+        - 'master'
+    jobs:
+        - rdo-tripleo-{openstack_release}-containers-build
+
+- project:
+    name: 'rdo-tripleo-containers-promote'
+    openstack_release:
+        - 'pike'
+        - 'master'
+    jobs:
+        - rdo-tripleo-{openstack_release}-containers-promote
+
