@@ -28,31 +28,37 @@ ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDYmpEuiWLuUFftIu+vQQmTC8m86GkNQXeNlrY9TRZt
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCzSWK0/apjniWnXflcSQE+XNFDc4bWvgWnhhXj++Woc9/O7w/TrPh+3GPh7YUaNX01DVB6YgXevGTN3qm1abrKDDhlUKfuI3HTACnrd8eZQhcoyJ/SQUspbnrbQXFDU9QEmPcvZqHXtkt0Y0ihfN04Y3ba1iYkHfysFqxMvJiwYzdOcV8JD5kULkvd5hXYRxj/rSHl1k83XwKwL6adtabhgzSrsxYhCJ0LzecGN+3l3vZvhkfzV6m8YgGFMS9UpXsLzk1rbwKr8zVnj4sTgk817kGqnyrEkbCYFfiOduDnkvTSY34bJ3+LW7dsgwOiKi9KyIFt9YqVYqnIR5xovMF1 amoralej@hostname
 EOF
 
-# Set up pre-installed package list and include them inside centos-minimal element
-package_list="https://review.rdoproject.org/r/gitweb?p=config.git;a=blob_plain;f=nodepool/weirdo-packages.txt;h=5210a7a7aea9a4c28c07ba30e12da63a3259d6a8;hb=HEAD"
-curl -q -s ${package_list} |sed -e "s/\$/:/" > ${TMPDIR}/package-installs.yaml
+# This is a hack so we don't have to set up extra elements for something temporary
 export DIB_LOCATION=$(python -c "import os,diskimage_builder; print(os.path.dirname(diskimage_builder.__file__))")
+# Set up pre-installed package list and include them inside centos-minimal element
+package_list="https://raw.githubusercontent.com/rdo-infra/review.rdoproject.org-config/master/nodepool/elements/rdo-base/package-installs.yaml"
+curl -o ${TMPDIR}/package-installs.yaml -q -s ${package_list}
 cp ${TMPDIR}/package-installs.yaml ${DIB_LOCATION}/elements/centos-minimal/
+# Enable CentOS CR (Continuous Release) repository for upcoming 7.4
+cat << EOF > ${DIB_LOCATION}/elements/centos-minimal/yum.repos.d/yum.repo
+[base]
+name=CentOS-\$releasever - Base
+mirrorlist=http://mirrorlist.centos.org/?release=\$releasever&arch=\$basearch&repo=os&infra=\$infra
+#baseurl=http://mirror.centos.org/centos/\$releasever/os/\$basearch/
+gpgcheck=0
+#gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+enabled=1
 
-disk-image-create -o centos7-weirdo \
-    rpm-distro \
-    dib-run-parts \
+[cr]
+name=CentOS-\$releasever - cr
+baseurl=http://mirror.centos.org/centos/\$releasever/cr/\$basearch/
+gpgcheck=0
+#gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+enabled=1
+EOF
+
+disk-image-create -t raw -o centos7-weirdo \
+    centos-minimal \
     simple-init \
     vm \
     growroot \
-    yum-minimal \
-    package-installs \
-    dib-python \
-    yum \
+    pip-and-virtualenv \
     openssh-server \
-    base \
-    dib-init-system \
-    bootloader \
-    redhat-common \
-    runtime-ssh-host-keys \
-    pkg-map \
-    centos-minimal \
     selinux-permissive \
-    element-manifest \
     devuser
 popd
