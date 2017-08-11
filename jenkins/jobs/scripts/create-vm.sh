@@ -98,6 +98,7 @@ cat <<EOF >create-vm.yml
             network: "${NETWORK}"
             reuse_ips: "no"
             timeout: "${TIMEOUT}"
+            config_drive: "yes"
             boot_from_volume: "yes"
             terminate_volume: "yes"
             volume_size: 80
@@ -122,6 +123,7 @@ cat <<EOF >create-vm.yml
             network: "${NETWORK}"
             reuse_ips: "no"
             timeout: "${TIMEOUT}"
+            config_drive: "yes"
             boot_from_volume: "yes"
             terminate_volume: "yes"
             volume_size: 100
