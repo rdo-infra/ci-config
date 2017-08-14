@@ -2,6 +2,7 @@
 set -ex
 WORKSPACE=${WORKSPACE:-/tmp}
 JOB_NAME=${JOB_NAME:-rdo-ci}
+JOB_NAME_SIMPLIFIED=$((sed 's/scenario//' | sed 's/weirdo-//') <<< $JOB_NAME)
 BUILD_NUMBER=${BUILD_NUMBER:-001}
 ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
 CLOUD_CONFIG=${CLOUD_CONFIG:-~/.config/openstack/clouds.yaml}
@@ -10,7 +11,7 @@ LOGSERVER="logs.rdoproject.org ansible_user=uploader"
 # Ansible config
 CLOUD=${CLOUD:-rdo-cloud}
 NETWORK=${NETWORK:-private}
-NAME="${JOB_NAME}-${BUILD_NUMBER}"
+NAME="${JOB_NAME_SIMPLIFIED}-${BUILD_NUMBER}"
 IMAGE=${IMAGE:-template-centos7-weirdo-cr}
 TIMEOUT=${TIMEOUT:-120}
 FLAVOR=${FLAVOR:-rdo.m1.nodepool}
