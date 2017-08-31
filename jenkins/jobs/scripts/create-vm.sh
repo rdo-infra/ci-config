@@ -148,7 +148,7 @@ cat <<EOF >create-vm.yml
         port: "22"
         host: "{{ vm.openstack.accessIPv4 }}"
         search_regex: "OpenSSH"
-        delay: "10"
+        delay: "30"
 
     - name: Add server to inventory
       add_host:
