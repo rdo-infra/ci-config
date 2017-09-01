@@ -1,6 +1,7 @@
 set -e
 echo ======== UPLOAD CLOUD IMAGES
-source /tmp/hash_info.sh
+
+export FULL_HASH=$(grep -o -E '[0-9a-f]{40}_[0-9a-f]{8}' < /etc/yum.repos.d/delorean.repo)
 
 # If I try to build images as upstream ( in /home/jenkins ) something will go wrong
 # we leave quickstart build in the default location. it proved to work
