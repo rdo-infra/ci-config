@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3a961159_d202c4b3",
+        "filename": "ci-scripts/promoter/promoter.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 163
+      },
+      "writtenOn": "2017-09-12T12:34:00Z",
+      "side": 1,
+      "message": "This seems to be working already, so I\u0027m going to rewrite this function to use the API.",
+      "parentUuid": "3a961159_2f364504",
+      "revId": "5314985d8f914997ee2695696d326aeba56e1f9a",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3a961159_4f3b91eb",
         "filename": "ci-scripts/promoter/promoter.py",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2017-09-12T01:04:25Z",
       "side": 1,
       "message": "One potential race: if \"current_name\" jobs are faster than \"promote_name\" jobs, conditions for \"promote_name\" with new_hashes might never be reached before it gets updated.\nIt is probably not going to happen with current-tripleo-rdo: current-tripleo combination so we can ignore it in first iteration but think about how to avoid fetching via actual symlink and instead get this info via dlrn-api future extension.",
+      "revId": "5314985d8f914997ee2695696d326aeba56e1f9a",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a961159_b2f538cd",
+        "filename": "ci-scripts/promoter/promoter.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 163
+      },
+      "writtenOn": "2017-09-12T12:34:00Z",
+      "side": 1,
+      "message": "This script will run every 5-10 minutes vs. the quickstart promotion of 4h upstream, so I think this will not happen.\n\nHowever when we have history with the promotions query, I can imagine an improvement where we step through the older hashes on the current_name and check for the jobs until we hit old_hashes \u003d\u003d new_hashes. This would avoid the problem when we promote too fast and could never promote the older hashes.",
+      "parentUuid": "3a961159_4f3b91eb",
       "revId": "5314985d8f914997ee2695696d326aeba56e1f9a",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": false
