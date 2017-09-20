@@ -1,0 +1,108 @@
+- name: Set up the promoter-server on rdocloud
+  hosts: localhost
+  tasks:
+    - name: Create the promoter-server instance
+      os_server:
+        state: present
+        name: promoter-server
+        auto_ip: yes
+        flavor: m1.medium
+        image: 8f41e8ce-cacc-4354-a481-9b9dba4f6de7
+        key_name: tripleo-cd-admins-and-adarazs-trown
+        network: private
+        security_groups: default
+        timeout: 300
+      register: 'os_host'
+    - name: add hosts to inventory
+      add_host:
+        name: '{{ os_host.openstack.name }}'
+        ansible_user: centos
+        ansible_host: '{{ os_host.openstack.accessIPv4 }}'
+        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+
+- name: Set up the promoter-server
+  hosts: promoter-server
+  tasks:
+    - name: Update packages on the server
+      become: true
+      yum:
+        name: '*'
+        state: latest
+    - name: Install required packages
+      become: true
+      yum:
+        name: 'ansible,docker,docker-python,git,httpd,python-virtualenv'
+        state: latest
+    - name: Create a directory for the promoter logs
+      file:
+        path: '~/promoter_logs'
+        state: directory
+        setype: httpd_sys_content_t
+    - name: Fix home directory permission
+      file:
+        path: '~'
+        mode: 0755
+    - name: Disable the default welcome page
+      become: true
+      copy:
+        content: ''
+        dest: '/etc/httpd/conf.d/welcome.conf'
+        backup: yes
+    - name: Add config file for Apache to expose the logs
+      become: true
+      blockinfile:
+        path: '/etc/httpd/conf.d/promoter_logs.conf'
+        create: yes
+        block: |
+          <VirtualHost *:80>
+              ServerAdmin rdo-ci-admins@redhat.com
+              DocumentRoot "{{ ansible_env.HOME }}/promoter_logs"
+
+              <Directory {{ ansible_env.HOME }}/promoter_logs>
+                  Options Indexes MultiViews
+                  AllowOverride None
+                  Require all granted
+              </Directory>
+          </VirtualHost>
+    - name: Start and enable Apache
+      become: true
+      service:
+        name: httpd
+        state: restarted
+        enabled: yes
+    - name: Start and enable Docker
+      become: true
+      service:
+        name: docker
+        state: started
+        enabled: yes
+    - name: Clone to the ci-config repo
+      git:
+        repo: 'https://review.rdoproject.org/r/p/rdo-infra/ci-config.git'
+        dest: '~/ci-config'
+    - name: Add secret for DLRNAPI_PASSWORD
+      blockinfile:
+        path: '~/dlrnapi_secret'
+        create: yes
+        mode: 0600
+        block: |
+          export DLRNAPI_PASSWORD={{ dlrnapi_password }}
+    - name: Create a virtualenv for the promoter script
+      pip:
+        requirements: ~/ci-config/ci-scripts/promoter/requirements.txt
+        virtualenv: ~/promoter_venv
+    - name: Add a cron jobs to periodically fetch the new version of the promoter script
+      cron:
+        name: 'fetch the latest ci-config'
+        minute: '0,10,20,30,40,50'
+        job: 'cd ~/ci-config; git pull >/dev/null'
+    - name: Add a cron jobs to run the promotion script
+      cron:
+        name: 'promoter script for the {{ item.release }} branch'
+        minute: '{{ item.minute }}'
+        job: 'source ~/dlrnapi_secret; ~/promoter_venv/bin/python ~/ci-config/ci-scripts/promoter/promoter.py ~/ci-config/ci-scripts/promoter/config/{{ item.release }}.ini'
+      with_items:
+        - { release: 'master', minute: '1,11,21,31,41,51' }
+        - { release: 'pike', minute: '2,12,22,32,42,52' }
+        - { release: 'ocata', minute: '3,13,23,33,43,53' }
+        - { release: 'newton', minute: '4,14,24,34,44,54' }
