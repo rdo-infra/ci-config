@@ -1,0 +1,59 @@
+- name: Set up the promoter-server on rdocloud
+  hosts: localhost
+  tasks:
+    - name: Create the promoter-server instance
+      os_server:
+        state: present
+        name: promoter-server
+        auto_ip: yes
+        flavor: m1.small
+        image: 8f41e8ce-cacc-4354-a481-9b9dba4f6de7
+        key_name: tripleo-cd-admins-and-adarazs-trown
+        network: private
+        security_groups: default
+        timeout: 300
+      register: 'os_host'
+    - name: add hosts to inventory
+      add_host:
+        name: '{{ os_host.openstack.name }}'
+        ansible_user: centos
+        ansible_host: '{{ os_host.openstack.accessIPv4 }}'
+
+- name: Set up the promoter-server
+  hosts: promoter-server
+  tasks:
+    - name: Update packages on the server
+      become: true
+      yum:
+        name: '*'
+        state: latest
+    - name: Install required packages
+      become: true
+      yum:
+        name: 'docker,git,python-virtualenv'
+        state: latest
+    - name: Clone to the ci-config repo
+      git:
+        repo: 'https://review.rdoproject.org/r/p/rdo-infra/ci-config.git'
+        dest: '~/ci-config'
+    - name: Add secret for DLRNAPI_PASSWORD
+      blockinfile:
+        path: '~/dlrnapi_secret'
+        create: yes
+        mode: 0600
+        block: |
+          export DLRNAPI_PASSWORD={{ dlrnapi_password }}
+    - name: Create a virtualenv for the promoter script
+      pip:
+        requirements: ~/ci-config/ci-scripts/promoter/requirements.txt
+        virtualenv: ~/promoter_venv
+    - name: Add a cron jobs to run the promotion script
+      cron:
+        name: 'promoter script for the {{ item }} branch'
+        minute: '*/10'
+        job: 'source ~/dlrnapi_secret; ~/promoter_venv/bin/python ~/ci-config/ci-scripts/promoter/promoter.py ~/ci-config/ci-scripts/promoter/config/{{ item }}.ini >> ~/promoter-{{ item }}.log'
+      with_items:
+        - master
+        - pike
+        - ocata
+        - newton
