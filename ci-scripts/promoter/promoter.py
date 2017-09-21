@@ -69,6 +69,7 @@ def promote_link(dlrn, hash_values, link):
                      ApiException)
         return False
 
+<<<<<<< HEAD
 
 def setup_logging(log_file):
     '''Setup logging for the script'''
@@ -81,6 +82,11 @@ def setup_logging(log_file):
     log_handler.setFormatter(log_formatter)
     logger.addHandler(log_handler)
 
+def tag_containers(commit_hash, release)
+    return None
+
+def tag_qcow_images(commit_hash, release)
+    return None
 
 def promote_all_links(api, promote_from, job_reqs, dry_run):
     '''Promote DLRN API links as a different one when all jobs are
@@ -149,6 +155,7 @@ def promoter(config_file):
                        'promotion attempt will fail!')
     dlrnapi_client.configuration.password = os.getenv('DLRNAPI_PASSWORD', None)
     api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
+    release = config.get('main', 'release')
     config.remove_section('main')
     logger.info('Using API URL: %s', api_client.host)
 
@@ -166,7 +173,8 @@ def promoter(config_file):
     logger.debug('Promotion requirements loaded: %s', job_reqs)
 
     promote_all_links(api_instance, promote_from, job_reqs, dry_run)
-
+    tag_containers(new_hashes['commit_hash'], release)
+    tag_qcow_images(new_hashes['commit_hash'], release)
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
