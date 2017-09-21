@@ -82,7 +82,42 @@ def setup_logging(log_file):
     logger.addHandler(log_handler)
 
 
-def promote_all_links(api, promote_from, job_reqs, dry_run):
+def tag_containers(full_hash, release, promote_name):
+    env = os.environ
+    env['RELEASE'] = release
+    promote_playbook = (
+        '/home/centos/ci-config/ci-scripts/container-push/container-push.yml'
+    )
+    try:
+        logger.info('Promoting the container images for dlrn hash %s on '
+                    '%s to %s', commit_hash, release, promote_name)
+        container_logs = subprocess.check_output(
+                         ['ansible-playbook', promote_playbook]).split("\n"))
+        for line in container_logs:
+            logger.info(line)
+    except subprocess.CalledProcessError as ex:
+        logger.error('CONTAINER IMAGE UPLOAD FAILED LOGS BELOW:'
+        logger.exception(ex)
+        logger.error('END OF CONTAINER IMAGE UPLOAD FAILURE')
+
+
+def tag_qcow_images(full_hash, release, promote_name):
+    promote_script = '/home/centos/ci-config/ci-scripts/promote-images.sh'
+    try:
+        logger.info('Promoting the qcow image for dlrn hash %s on %s to %s',
+                    full_hash, release, promote_name)
+        qcow_logs = subprocess.check_output(['bash', promote_script,
+                                            release, full_hash,
+                                            promote_name]).split("\n"))
+        for line in qcow_logs:
+            logger.info(line)
+    except subprocess.CalledProcessError as ex:
+        logger.error('QCOW IMAGE UPLOAD FAILED LOGS BELOW:'
+        logger.exception(ex)
+        logger.error('END OF QCOW IMAGE UPLOAD FAILURE')
+
+
+def promote_all_links(api, promote_from, job_reqs, dry_run, release):
     '''Promote DLRN API links as a different one when all jobs are
     successful'''
     logger = logging.getLogger('promoter')
@@ -91,6 +126,8 @@ def promote_all_links(api, promote_from, job_reqs, dry_run):
         logger.info('Trying to promote %s to %s', current_name, promote_name)
         old_hashes = fetch_hashes(api, promote_name)
         new_hashes = fetch_hashes(api, current_name)
+        full_new_hash='{0}_{1}'.format(new_hashes['commit_hash'],
+                                       new_hashes['distro_hash'])
         if new_hashes is None:
             logger.error('Failed to fetch hashes for %s, skipping promotion',
                          current_name)
@@ -119,6 +156,8 @@ def promote_all_links(api, promote_from, job_reqs, dry_run):
             if promote_link(api, new_hashes, promote_name):
                 logger.info('SUCCESS promoting %s as %s (old: %s, new: %s)',
                             current_name, promote_name, old_hashes, new_hashes)
+                tag_containers(full_new_hash, release, promote_name)
+                tag_qcow_images(full_new_hash, release, promote_name)
             else:
                 logger.info('FAILED promoting %s as %s (old: %s, new: %s)',
                             current_name, promote_name, old_hashes, new_hashes)
@@ -154,6 +193,7 @@ def promoter(config_file):
                        'promotion attempt will fail!')
     dlrnapi_client.configuration.password = os.getenv('DLRNAPI_PASSWORD', None)
     api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
+    release = config.get('main', 'release')
     config.remove_section('main')
     logger.info('Using API URL: %s', api_client.host)
 
@@ -170,7 +210,7 @@ def promoter(config_file):
         job_reqs[section] = [k for k, v in config.items(section)]
     logger.debug('Promotion requirements loaded: %s', job_reqs)
 
-    promote_all_links(api_instance, promote_from, job_reqs, dry_run)
+    promote_all_links(api_instance, promote_from, job_reqs, dry_run, release)
     logger.info("FINISHED promotion process")
 
 
