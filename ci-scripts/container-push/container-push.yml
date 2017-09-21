@@ -1,0 +1,98 @@
+---
+# other than installing docker, need to install docker-python and ansible
+# also need to start docker
+
+
+# This playbook can be used to download the container images which
+# passed CI and tag them back to rdoproject registry.
+# It will also mirror the images to docker.io.
+- name: Download and repush container images
+  hosts: localhost
+  become: yes
+  become_user: root
+  vars:
+    dockerhub_namespace: "tripleo{{ lookup('env','RELEASE') }}"
+    dockerhub_username: "{{ lookup('env','DOCKERHUB_USERNAME') }}"
+    dockerhub_password: "{{ lookup('env','DOCKERHUB_PASSWORD') }}"
+    rdoproject_namespace: "{{ lookup('env','RELEASE') }}"
+    rdoproject_username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
+    rdoproject_password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
+  tasks:
+
+# NOTE(trown): need to figure out how this list is generated,
+# but just took it from the promote artifacts for now:
+# https://logs.rdoproject.org/openstack-periodic-4hr/periodic-tripleo-centos-7-pike-containers-build/95e9d60/kolla/parsed_containers.txt
+# I manually deleted tacker and ceph containers from the list because we dont need to push those.
+# ceph is maintained by ceph team
+# tacker container implementation was incomplete in pike
+    - name: Retrieve list of built images
+      shell: >
+        cat /home/centos/container-push/parsed_containers.txt
+      register: built_images
+      tags:
+        - rdoproject_pull
+        - rdoproject_push
+        - dockerhub_push
+        - remove_local_containers
+
+    - name: Pull the images from rdoproject registry
+      docker_image:
+        name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/centos-binary-{{ item }}"
+        tag: "tripleo-ci-testing"
+      with_items: "{{ built_images.stdout_lines }}"
+      retries: 3
+      tags:
+        - rdoproject_pull
+
+# Need to get credentials for this
+    - name: Login to rdoproject registry
+      docker_login:
+        registry_url: "trunk.registry.rdoproject.org"
+        username: "{{ rdoproject_username }}"
+        password: "{{ rdoproject_password }}"
+        reauthorize: "yes"
+      no_log: "yes"
+      tags:
+        - rdoproject_push
+
+    - name: Tag and push images to rdoproject registry
+      docker_image:
+        name: "{{ rdoproject_namespace }}/centos-binary-{{ item }}"
+        tag: "passed-ci"
+        push: yes
+      with_items: "{{ built_images.stdout_lines }}"
+      retries: 3
+      tags:
+        - rdoproject_push
+
+    - name: Login to dockerhub
+      docker_login:
+        registry_url: "docker.io"
+        username: "{{ dockerhub_username }}"
+        password: "{{ dockerhub_password }}"
+        reauthorize: "yes"
+      no_log: "yes"
+      tags:
+        - dockerhub_push
+
+    - name: Tag and push images to docker hub
+      docker_image:
+        name: "{{ dockerhub_namespace }}/centos-binary-{{ item }}"
+        tag: "passed-ci"
+        push: yes
+      with_items: "{{ built_images.stdout_lines }}"
+      retries: 3
+      tags:
+        - dockerhub_push
+
+    - name: Delete local images when done
+      docker_image:
+        name: "{{ dockerhub_namespace }}/centos-binary-{{ item }}"
+        tag: "passed-ci"
+        state: absent
+        force: true
+      with_items: "{{ built_images.stdout_lines }}"
+      retries: 3
+      tags:
+        - remove_local_containers
+
