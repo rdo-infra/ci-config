@@ -82,7 +82,15 @@ def setup_logging(log_file):
     logger.addHandler(log_handler)
 
 
-def promote_all_links(api, promote_from, job_reqs, dry_run):
+def tag_containers(commit_hash, release):
+    return None
+
+
+def tag_qcow_images(commit_hash, release):
+    return None
+
+
+def promote_all_links(api, promote_from, job_reqs, dry_run, release):
     '''Promote DLRN API links as a different one when all jobs are
     successful'''
     logger = logging.getLogger('promoter')
@@ -119,6 +127,8 @@ def promote_all_links(api, promote_from, job_reqs, dry_run):
             if promote_link(api, new_hashes, promote_name):
                 logger.info('SUCCESS promoting %s as %s (old: %s, new: %s)',
                             current_name, promote_name, old_hashes, new_hashes)
+                tag_containers(new_hashes['commit_hash'], release)
+                tag_qcow_images(new_hashes['commit_hash'], release)
             else:
                 logger.info('FAILED promoting %s as %s (old: %s, new: %s)',
                             current_name, promote_name, old_hashes, new_hashes)
@@ -154,6 +164,7 @@ def promoter(config_file):
                        'promotion attempt will fail!')
     dlrnapi_client.configuration.password = os.getenv('DLRNAPI_PASSWORD', None)
     api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
+    release = config.get('main', 'release')
     config.remove_section('main')
     logger.info('Using API URL: %s', api_client.host)
 
@@ -170,7 +181,7 @@ def promoter(config_file):
         job_reqs[section] = [k for k, v in config.items(section)]
     logger.debug('Promotion requirements loaded: %s', job_reqs)
 
-    promote_all_links(api_instance, promote_from, job_reqs, dry_run)
+    promote_all_links(api_instance, promote_from, job_reqs, dry_run, release)
     logger.info("FINISHED promotion process")
 
 
