@@ -100,7 +100,7 @@
       cron:
         name: 'promoter script for the {{ item.release }} branch'
         minute: '{{ item.minute }}'
-        job: 'source ~/dlrnapi_secret; ~/promoter_venv/bin/python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/{{ item.release }}.ini'
+        job: 'source ~/registry_secret; source ~/dlrnapi_secret; ~/promoter_venv/bin/python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/{{ item.release }}.ini'
       with_items:
         - { release: 'master', minute: '1,11,21,31,41,51' }
         - { release: 'pike', minute: '2,12,22,32,42,52' }
