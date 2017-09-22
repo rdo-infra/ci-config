@@ -86,10 +86,10 @@
         create: yes
         mode: 0600
         block: |
-          export DLRNAPI_PASSWORD={{ dlrnapi_password }}
+          export DLRNAPI_PASSWORD='{{ dlrnapi_password }}'
     - name: Create a virtualenv for the promoter script
       pip:
-        requirements: ~/ci-config/ci-scripts/promoter/requirements.txt
+        requirements: ~/ci-config/ci-scripts/dlrnapi_promoter/requirements.txt
         virtualenv: ~/promoter_venv
     - name: Add a cron jobs to periodically fetch the new version of the promoter script
       cron:
@@ -100,7 +100,7 @@
       cron:
         name: 'promoter script for the {{ item.release }} branch'
         minute: '{{ item.minute }}'
-        job: 'source ~/dlrnapi_secret; ~/promoter_venv/bin/python ~/ci-config/ci-scripts/promoter/promoter.py ~/ci-config/ci-scripts/promoter/config/{{ item.release }}.ini'
+        job: 'source ~/dlrnapi_secret; ~/promoter_venv/bin/python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/{{ item.release }}.ini'
       with_items:
         - { release: 'master', minute: '1,11,21,31,41,51' }
         - { release: 'pike', minute: '2,12,22,32,42,52' }

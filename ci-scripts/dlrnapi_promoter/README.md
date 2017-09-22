@@ -61,8 +61,8 @@ Installation
 Create a virtualenv to run the script and install the requirements before the
 first run:
 
-    virtualenv /tmp/promoter
-    source /tmp/promoter/bin/activate
+    virtualenv /tmp/dlrnapi_promoter
+    source /tmp/dlrnapi_promoter/bin/activate
     pip install -r requirements.txt
 
 Running
@@ -72,4 +72,4 @@ It's recommended to run the script with various release configurations
 periodically from crontab, specifying the config file as the first argument of
 the script:
 
-    python promoter.py config/master.ini
+    python dlrnapi_promoter.py config/master.ini

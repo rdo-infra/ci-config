@@ -116,9 +116,12 @@ def promote_all_links(api, promote_from, job_reqs, dry_run):
                         'skipping promotion of %s to %s (old: %s, new: %s)',
                         current_name, promote_name, old_hashes, new_hashes)
         else:
-            promote_link(api, new_hashes, promote_name)
-            logger.info('Promoting %s as %s (old: %s, new: %s)',
-                        current_name, promote_name, old_hashes, new_hashes)
+            if promote_link(api, new_hashes, promote_name):
+                logger.info('SUCCESS promoting %s as %s (old: %s, new: %s)',
+                            current_name, promote_name, old_hashes, new_hashes)
+            else:
+                logger.info('FAILED promoting %s as %s (old: %s, new: %s)',
+                            current_name, promote_name, old_hashes, new_hashes)
 
 
 def promoter(config_file):
@@ -127,6 +130,8 @@ def promoter(config_file):
 
     setup_logging(config.get('main', 'log_file'))
     logger = logging.getLogger('promoter')
+
+    logger.info('STARTED promotion process with config %s', config_file)
 
     try:
         git_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
@@ -138,7 +143,7 @@ def promoter(config_file):
                      'git is installed.')
     except subprocess.CalledProcessError:
         logger.debug('Failed to get the current git repo hash, probably not '
-                     'running inside a git repository')
+                     'running inside a git repository.')
 
     # setup the API connection
     dry_run = config.getboolean('main', 'dry_run')
@@ -166,6 +171,7 @@ def promoter(config_file):
     logger.debug('Promotion requirements loaded: %s', job_reqs)
 
     promote_all_links(api_instance, promote_from, job_reqs, dry_run)
+    logger.info("FINISHED promotion process")
 
 
 if __name__ == '__main__':
