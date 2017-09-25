@@ -18,6 +18,7 @@ Set the following variables in the `[main]` section:
   the `DLRNAPI_PASSWORD` environment variable to avoid exposing it in the logs.
 * `dry_run` -- When true, skip promotion even if all the promotion requirements
   are satisfied.
+* `log_file` -- The path for a file where the script logs its activities.
 
 `[promote_from]` section:
 
@@ -29,6 +30,9 @@ Create pairs as `promotion_link_name: current_link_name`. The script will try
 to check the successfully finished jobs of `current_link_name` and if all the
 listed jobs from the `[promotion_link_name]` section (see below) are present,
 it will promote the repository as `promotion_link_name`.
+
+Tip: It is easy to disable a specific promotion step by commenting out a line
+here, the promotion requirements can stay in the file.
 
 Example:
 
