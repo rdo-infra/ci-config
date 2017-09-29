@@ -1,3 +1,4 @@
+# TODO(arxcruz) This file is marked to be deleted
 set -eux
 
 export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
