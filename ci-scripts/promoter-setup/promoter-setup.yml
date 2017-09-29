@@ -31,7 +31,7 @@
     - name: Install required packages
       become: true
       yum:
-        name: 'ansible,docker,docker-python,git,httpd,python-virtualenv'
+        name: 'ansible,docker,docker-python,git,httpd,python-virtualenv,vim'
         state: latest
     - name: Create a directory for the promoter logs
       file:
@@ -87,10 +87,32 @@
         mode: 0600
         block: |
           export DLRNAPI_PASSWORD='{{ dlrnapi_password }}'
+    - name: Add secrets for the registries
+      blockinfile:
+        path: '~/registry_secret'
+        create: yes
+        mode: 0600
+        block: |
+          export DOCKERHUB_USERNAME='{{ dockerhub_username }}'
+          export DOCKERHUB_PASSWORD='{{ dockerhub_password }}'
+          export RDOPROJECT_USERNAME='{{ rdoproject_username }}'
+          export RDOPROJECT_PASSWORD='{{ rdoproject_password }}'
+    - name: Add keypair for the images server
+      copy:
+        src: {{ lookup('env', 'HOME') }}/promoter-server-{{ item }}
+        dest: {{ ansible_env.HOME }}/.ssh/{{ item }}
+      with_items:
+        - id_rsa
+        - id_rsa.pub
     - name: Create a virtualenv for the promoter script
       pip:
         requirements: ~/ci-config/ci-scripts/dlrnapi_promoter/requirements.txt
         virtualenv: ~/promoter_venv
+    - name: Add a cron jobs to periodically fetch the new version of the promoter script
+      cron:
+        name: 'fetch the latest dlrnapi_client and dependencies'
+        minute: '5,15,25,35,45,55'
+        job: 'source ~/promoter_venv/bin/activate; pip install -U -r ~/ci-config/ci-scripts/dlrnapi_promoter/requirements.txt'
     - name: Add a cron jobs to periodically fetch the new version of the promoter script
       cron:
         name: 'fetch the latest ci-config'
@@ -100,7 +122,8 @@
       cron:
         name: 'promoter script for the {{ item.release }} branch'
         minute: '{{ item.minute }}'
-        job: 'source ~/dlrnapi_secret; ~/promoter_venv/bin/python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/{{ item.release }}.ini'
+        # TODO(gcerami) I think the job command deserves a script on its own
+        job: 'source ~/registry_secret; source ~/dlrnapi_secret; source ~/promoter_venv/bin/activate; python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/{{ item.release }}.ini'
       with_items:
         - { release: 'master', minute: '1,11,21,31,41,51' }
         - { release: 'pike', minute: '2,12,22,32,42,52' }
