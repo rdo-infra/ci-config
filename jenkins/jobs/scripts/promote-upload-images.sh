@@ -1,3 +1,4 @@
+# TODO(arxcruz): This file is marked to be deleted
 image_path="$RDO_VERSION_DIR/$BUILD_SYS/$LOCATION"
 ssh_cmd='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 PROMOTE_HASH=`echo $delorean_current_hash | awk -F '/' '{ print $3}'`
