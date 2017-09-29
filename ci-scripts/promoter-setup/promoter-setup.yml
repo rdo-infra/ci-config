@@ -31,7 +31,12 @@
     - name: Install required packages
       become: true
       yum:
-        name: 'ansible,docker,docker-python,git,httpd,python-virtualenv'
+        name: 'ansible,docker,docker-python,git,httpd,python-virtualenv,vim,epel-release'
+        state: latest
+    - name: Install required packages from epel
+      become: true
+      yum:
+        name: 'git-review'
         state: latest
     - name: Create a directory for the promoter logs
       file:
@@ -100,7 +105,8 @@
       cron:
         name: 'promoter script for the {{ item.release }} branch'
         minute: '{{ item.minute }}'
-        job: 'source ~/dlrnapi_secret; ~/promoter_venv/bin/python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/{{ item.release }}.ini'
+        # TODO(gcerami) I think the job command deserves a script on its own
+        job: 'source ~/dlrnapi_secret; source ~/promoter_venv/bin/activate; ~/promoter_venv/bin/python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/{{ item.release }}.ini'
       with_items:
         - { release: 'master', minute: '1,11,21,31,41,51' }
         - { release: 'pike', minute: '2,12,22,32,42,52' }
