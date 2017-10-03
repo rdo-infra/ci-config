@@ -1,19 +1,25 @@
-virtualenv $WORKSPACE/venv_dlrnapi
-source $WORKSPACE/venv_dlrnapi/bin/activate
+set -e
 
-pip install dlrnapi_client shyaml
+echo ======== REPORT STATUS
 
-curl -sLo $BUILD_TAG.yaml $(echo $DELOREAN_URL | sed 's/delorean\.repo/commit.yaml/')
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $SCRIPT_DIR/dlrnapi_venv.sh
 
-commit_hash=$(cat $BUILD_TAG.yaml| shyaml get-value commits.0.commit_hash)
-distro_hash=$(cat $BUILD_TAG.yaml| shyaml get-value commits.0.distro_hash)
+trap deactivate_dlrnapi_venv EXIT
+activate_dlrnapi_venv
 
-dlrnapi --url https://$DELOREAN_HOST/api-$RDO_VERSION \
+set -u
+
+source $WORKSPACE/hash_info.sh
+
+dlrnapi --url $DLRNAPI_URL \
     --username ciuser \
     report-result \
     --job-id $JOB_NAME \
-    --commit-hash $commit_hash \
-    --distro-hash $distro_hash \
+    --commit-hash $COMMIT_HASH \
+    --distro-hash $DISTRO_HASH \
     --timestamp $(date +%s) \
     --info-url https://ci.centos.org/artifacts/rdo/$BUILD_TAG/console.txt.gz \
     --success $JOB_SUCCESS
+
+echo ======== REPORT STATUS COMPLETE
