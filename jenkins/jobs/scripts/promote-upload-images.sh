@@ -9,7 +9,8 @@ ln -s $PROMOTE_HASH stable
 # Delete old stable symlink and old images
 mkdir $LOCATION
 rsync -av --delete --exclude $PROMOTE_HASH $LOCATION/ rdo@artifacts.ci.centos.org::rdo/images/$image_path/
-rsync -av --delete --exclude $PROMOTE_HASH $LOCATION/ uploader@images.rdoproject.org:/var/www/html/images/$image_path/
+# TDOD(gcerami): implement retention of previous promoted images
+#rsync -av --delete --exclude $PROMOTE_HASH $LOCATION/ uploader@images.rdoproject.org:/var/www/html/images/$image_path/
 
 # push symlink to ci.centos artifacts server
 rsync -av stable rdo@artifacts.ci.centos.org::rdo/images/$image_path/stable
