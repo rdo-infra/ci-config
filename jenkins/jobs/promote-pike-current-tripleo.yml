@@ -1,20 +1,4 @@
 - builder:
-    name: phase-test-build-pike-current-tripleo
-    builders:
-        - multijob:
-            name: "INSTALL / TEST (BUILD IMAGES)"
-            condition: UNSTABLE
-            projects:
-                - name: tripleo-quickstart-promote-pike-build-images
-                  kill-phase-on: NEVER
-                  property-file: /tmp/pike_current_tripleo_hash
-                - name: rdo-tripleo-pike-containers-build
-                  kill-phase-on: NEVER
-                  property-file: /tmp/pike_current_tripleo_hash
-                  predefined-parameters: kolla_push=true
-                  node-parameters: true
-
-- builder:
     name: phase-test-import-pike-current-tripleo
     builders:
         - multijob:
@@ -62,11 +46,7 @@
     defaults: parent-promote-defaults
     builders:
         - phase-get-hash-pike-current-tripleo
-        - phase-test-build-pike-current-tripleo
         - phase-test-import-pike-current-tripleo
-        - phase-upload-pike-current-tripleo
-        - phase-repo-promote-pike-current-tripleo
-        - phase-repo-promote-pike-container-tag
     properties:
         - ownership:
             owner: trown@redhat.com
@@ -79,38 +59,6 @@
             condition: SUCCESSFUL
             projects:
               - name: rdo-promote-get-hash-pike-current-tripleo
-
-- builder:
-    name: phase-upload-pike-current-tripleo
-    builders:
-        - multijob:
-            name: "UPLOAD IMAGES TO FILE SERVER"
-            condition: SUCCESSFUL
-            projects:
-              - name: rdo-promote-upload-pike-current-tripleo
-                property-file: /tmp/pike_current_tripleo_hash
-
-- builder:
-    name: phase-repo-promote-pike-current-tripleo
-    builders:
-        - multijob:
-            name: "UPLOAD IMAGES TO FILE SERVER"
-            condition: SUCCESSFUL
-            projects:
-              - name: rdo-promote-repo-promote-pike-current-tripleo
-                property-file: /tmp/pike_current_tripleo_hash
-
-- builder:
-    name: phase-repo-promote-pike-container-tag
-    builders:
-        - multijob:
-            name: "TAG CONTAINERS"
-            condition: SUCCESSFUL
-            projects:
-              - name: rdo-tripleo-pike-containers-promote
-                property-file: /tmp/pike_current_tripleo_hash
-                predefined-parameters: destination_tag=current-tripleo-rdo
-                node-parameters: true
 
 - publisher:
     name: 'tripleo-quickstart-report-dlrn-api-pike-current-tripleo'
@@ -145,30 +93,6 @@
         - ownership:
             owner: trown@redhat.com
 
-- job-template:
-    name: 'rdo-promote-upload-pike-current-tripleo'
-    defaults: script-defaults
-    builders:
-        - shell:
-            !include-raw-escape:
-                - scripts/centos-pike-current-tripleo.sh
-                - scripts/promote-upload-images.sh
-    properties:
-        - ownership:
-            owner: trown@redhat.com
-
-- job-template:
-    name: 'rdo-promote-repo-promote-pike-current-tripleo'
-    defaults: script-defaults
-    builders:
-        - shell:
-            !include-raw-escape:
-                - scripts/centos-pike-current-tripleo.sh
-                - scripts/promote-repo-promote.sh
-    properties:
-        - ownership:
-            owner: trown@redhat.com
-
 - project:
     name: rdo_trunk-promote-jobs-pike-current-tripleo
     jobs:
@@ -178,16 +102,6 @@
     name: rdo-promote-get-hash-pike-current-tripleo
     jobs:
         - 'rdo-promote-get-hash-pike-current-tripleo'
-
-- project:
-    name: rdo-promote-upload-pike-current-tripleo
-    jobs:
-        - 'rdo-promote-upload-pike-current-tripleo'
-
-- project:
-    name: rdo-promote-repo-promote-pike-current-tripleo
-    jobs:
-        - 'rdo-promote-repo-promote-pike-current-tripleo'
 
 - job-template:
     name: 'tripleo-quickstart-promote-pike-{build_system}-{topology}'

@@ -1,15 +1,4 @@
 - builder:
-    name: phase-test-build-ocata-current-tripleo
-    builders:
-        - multijob:
-            name: "INSTALL / TEST (BUILD IMAGES)"
-            condition: UNSTABLE
-            projects:
-                - name: tripleo-quickstart-promote-ocata-build-images
-                  kill-phase-on: NEVER
-                  property-file: /tmp/ocata_current_tripleo_hash
-
-- builder:
     name: phase-test-import-ocata-current-tripleo
     builders:
         - multijob:
@@ -57,10 +46,7 @@
     defaults: parent-promote-defaults
     builders:
         - phase-get-hash-ocata-current-tripleo
-        - phase-test-build-ocata-current-tripleo
         - phase-test-import-ocata-current-tripleo
-        - phase-upload-ocata-current-tripleo
-        - phase-repo-promote-ocata-current-tripleo
     properties:
         - ownership:
             owner: trown@redhat.com
@@ -73,26 +59,6 @@
             condition: SUCCESSFUL
             projects:
               - name: rdo-promote-get-hash-ocata-current-tripleo
-
-- builder:
-    name: phase-upload-ocata-current-tripleo
-    builders:
-        - multijob:
-            name: "UPLOAD IMAGES TO FILE SERVER"
-            condition: SUCCESSFUL
-            projects:
-              - name: rdo-promote-upload-ocata-current-tripleo
-                property-file: /tmp/ocata_current_tripleo_hash
-
-- builder:
-    name: phase-repo-promote-ocata-current-tripleo
-    builders:
-        - multijob:
-            name: "UPLOAD IMAGES TO FILE SERVER"
-            condition: SUCCESSFUL
-            projects:
-              - name: rdo-promote-repo-promote-ocata-current-tripleo
-                property-file: /tmp/ocata_current_tripleo_hash
 
 - publisher:
     name: 'tripleo-quickstart-report-dlrn-api-ocata-current-tripleo'
@@ -127,30 +93,6 @@
         - ownership:
             owner: trown@redhat.com
 
-- job-template:
-    name: 'rdo-promote-upload-ocata-current-tripleo'
-    defaults: script-defaults
-    builders:
-        - shell:
-            !include-raw-escape:
-                - scripts/centos-ocata-current-tripleo.sh
-                - scripts/promote-upload-images.sh
-    properties:
-        - ownership:
-            owner: trown@redhat.com
-
-- job-template:
-    name: 'rdo-promote-repo-promote-ocata-current-tripleo'
-    defaults: script-defaults
-    builders:
-        - shell:
-            !include-raw-escape:
-                - scripts/centos-ocata-current-tripleo.sh
-                - scripts/promote-repo-promote.sh
-    properties:
-        - ownership:
-            owner: trown@redhat.com
-
 - project:
     name: rdo_trunk-promote-jobs-ocata-current-tripleo
     jobs:
@@ -160,16 +102,6 @@
     name: rdo-promote-get-hash-ocata-current-tripleo
     jobs:
         - 'rdo-promote-get-hash-ocata-current-tripleo'
-
-- project:
-    name: rdo-promote-upload-ocata-current-tripleo
-    jobs:
-        - 'rdo-promote-upload-ocata-current-tripleo'
-
-- project:
-    name: rdo-promote-repo-promote-ocata-current-tripleo
-    jobs:
-        - 'rdo-promote-repo-promote-ocata-current-tripleo'
 
 - job-template:
     name: 'tripleo-quickstart-promote-ocata-{build_system}-{topology}'
