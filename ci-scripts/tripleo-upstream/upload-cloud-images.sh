@@ -12,8 +12,7 @@ rsync_cmd="rsync --verbose --archive --delay-updates --relative"
 UPLOAD_URL=uploader@images.rdoproject.org:/var/www/html/images/$RELEASE/rdo_trunk
 mkdir $FULL_HASH
 mv overcloud-full.tar overcloud-full.tar.md5 $FULL_HASH
-mv ironic-python-agent.tar $FULL_HASH/ipa_images.tar
-mv ironic-python-agent.tar.md5 $FULL_HASH/ipa_images.tar.md5
+mv ironic-python-agent.tar ironic-python-agent.tar.md5 $FULL_HASH
 
 $rsync_cmd $FULL_HASH $UPLOAD_URL
 $rsync_cmd --delete --include 'tripleo-ci-testing**' --exclude '*' ./ $UPLOAD_URL/
