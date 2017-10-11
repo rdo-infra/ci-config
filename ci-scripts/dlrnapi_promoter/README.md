@@ -13,7 +13,8 @@ Configuration
 
 Set the following variables in the `[main]` section:
 
-* `api_url` -- The full URL for the DLRN API
+* `api_url` -- The full URL for the DLRN API. It can be a list of URLs separated
+  by commas.
 * `username` -- The username to access the DLRN API. The password is taken from
   the `DLRNAPI_PASSWORD` environment variable to avoid exposing it in the logs.
 * `dry_run` -- When true, skip promotion even if all the promotion requirements
