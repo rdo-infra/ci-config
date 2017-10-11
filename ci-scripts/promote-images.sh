@@ -13,7 +13,7 @@ image_path="$RELEASE/rdo_trunk/$LINK_NAME"
 ssh_cmd='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
 # Create local symlink
-pushd $(mktemp -d)
+pushd /tmp/
 mkdir -p $PROMOTED_HASH
 ln -s $PROMOTED_HASH stable
 
