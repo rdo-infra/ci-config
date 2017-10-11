@@ -9,20 +9,13 @@ RELEASE=$1
 PROMOTED_HASH=$2
 LINK_NAME=$3
 
-image_path="$RELEASE/rdo_trunk/$LINK_NAME"
-ssh_cmd='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+# note: without --no-derefence the link gets created inside the $LINK_NAME
+# directory named as $PROMOTED_HASH instead of a link named $LINK_NAME pointing
+# to $PROMOTED_HASH
+# the --force is also necessary to overwrite an existing link
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+    uploader@images.rdoproject.org
+    ln --symbolic --no-dereference --force \
+    $PROMOTED_HASH /var/www/html/images/$RELEASE/rdo_trunk/$LINK_NAME
 
-# Create local symlink
-pushd $(mktemp -d)
-mkdir -p $PROMOTED_HASH
-ln -s $PROMOTED_HASH stable
-
-# Delete old stable symlink and old images
-# TODO(gcerami) we are not deleting old images anymore to give time to the downstream server to download and cache the images
-#mkdir $LINK_NAME
-#rsync -av --delete --exclude $PROMOTED_HASH $LINK_NAME/ uploader@images.rdoproject.org:/var/www/html/images/$image_path/
-
-# push symlink to RDO file server
-rsync -av stable uploader@images.rdoproject.org:/var/www/html/images/$image_path/stable
-rmdir $PROMOTED_HASH
-popd
+# cleaning up old images should happen on server side
