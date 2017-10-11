@@ -204,33 +204,37 @@ def promoter(config_file):
         logger.debug('Failed to get the current git repo hash, probably not '
                      'running inside a git repository.')
 
-    # setup the API connection
-    dry_run = config.getboolean('main', 'dry_run')
-    api_client = dlrnapi_client.ApiClient(host=config.get('main', 'api_url'))
-    dlrnapi_client.configuration.username = config.get('main', 'username')
-    if os.getenv('DLRNAPI_PASSWORD', None) is None:
-        logger.warning('DLRNAPI_PASSWORD env variable is missing or empty, '
-                       'promotion attempt will fail!')
-    dlrnapi_client.configuration.password = os.getenv('DLRNAPI_PASSWORD', None)
-    api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
-    release = config.get('main', 'release')
-    config.remove_section('main')
-    logger.info('Using API URL: %s', api_client.host)
+    api_hosts = config.get('main', 'api_url').split(',')
+    for api_host in api_hosts:
+        # setup the API connection
+        dry_run = config.getboolean('main', 'dry_run')
+        api_client = dlrnapi_client.ApiClient(host=api_host)
+        dlrnapi_client.configuration.username = config.get('main', 'username')
+        if os.getenv('DLRNAPI_PASSWORD', None) is None:
+            logger.warning('DLRNAPI_PASSWORD env variable is missing or empty'
+                           ', promotion attempt will fail!')
+        dlrnapi_client.configuration.password = os.getenv('DLRNAPI_PASSWORD',
+                                                          None)
+        api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
+        release = config.get('main', 'release')
+        config.remove_section('main')
+        logger.info('Using API URL: %s', api_client.host)
 
-    # load the promote_from data
-    promote_from = {k: v for k, v in config.items('promote_from')}
-    logger.debug('Attempting to promote these DLRN links: %s',
-                 promote_from)
-    config.remove_section('promote_from')
+        # load the promote_from data
+        promote_from = {k: v for k, v in config.items('promote_from')}
+        logger.debug('Attempting to promote these DLRN links: %s',
+                     promote_from)
+        config.remove_section('promote_from')
 
-    # load the promotion requirements
-    job_reqs = {}
-    sections = config.sections()
-    for section in sections:
-        job_reqs[section] = [k for k, v in config.items(section)]
-    logger.debug('Promotion requirements loaded: %s', job_reqs)
+        # load the promotion requirements
+        job_reqs = {}
+        sections = config.sections()
+        for section in sections:
+            job_reqs[section] = [k for k, v in config.items(section)]
+        logger.debug('Promotion requirements loaded: %s', job_reqs)
 
-    promote_all_links(api_instance, promote_from, job_reqs, dry_run, release)
+        promote_all_links(api_instance, promote_from, job_reqs, dry_run,
+                          release)
     logger.info("FINISHED promotion process")
 
 
