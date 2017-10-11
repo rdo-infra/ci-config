@@ -145,13 +145,10 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release):
         old_hashes = fetch_hashes(api, promote_name)
         new_hashes = fetch_hashes(api, current_name)
         logger.info('new hash found for %s: %s', str(new_hashes), current_name)
-        full_new_hash='{0}_{1}'.format(new_hashes['commit_hash'],
-                                       new_hashes['distro_hash'][:8])
         if new_hashes is None:
             logger.error('Failed to fetch hashes for %s, skipping promotion',
                          current_name)
             continue
-        new_hashes['full_hash'] = full_new_hash
         if old_hashes is None:
             logger.warning('Failed to fetch hashes for %s, no previous '
                            'promotion or typo in the link name',
@@ -160,6 +157,8 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release):
             logger.info('Same hashes for %s and %s %s, skipping promotion',
                         current_name, promote_name, old_hashes)
             continue
+        new_hashes['full_hash'] = '{0}_{1}'.format(new_hashes['commit_hash'],
+                                       new_hashes['distro_hash'][:8])
         successful_jobs = Set(fetch_jobs(api, new_hashes))
         required_jobs = Set(job_reqs[promote_name])
         missing_jobs = list(required_jobs - successful_jobs)
