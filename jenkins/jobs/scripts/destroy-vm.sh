@@ -72,6 +72,7 @@ cat <<EOF >logs.yml
         - name: Look up job virtual machine
           set_fact:
             vm: "{{ lookup('file', '${VM_INFO}') | from_json }}"
+          no_log: yes
 
         # Synchronize doesn't prefix the username to the dest when using delegate_to
         # https://github.com/ansible/ansible/issues/16215
