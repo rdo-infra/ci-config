@@ -55,9 +55,13 @@ cat <<EOF >create-vm.yml
     - name: Validate cloud authentication
       os_auth:
         cloud: "${CLOUD}"
+      no_log: yes
+
     - name: Gather tenant facts
       os_server_facts:
         cloud: "${CLOUD}"
+      no_log: yes
+
     - block:
         - name: Delete VMs in ERROR state or too old
           os_server:
@@ -67,6 +71,7 @@ cat <<EOF >create-vm.yml
             timeout: "${TIMEOUT}"
             delete_fip: True
             wait: "yes"
+          no_log: yes
           when: item.status == "ERROR" or ((ansible_date_time.iso8601|to_datetime(fmt)) - (item.created|to_datetime(fmt))).days >= 1
           with_items:
             - "{{ openstack_servers }}"
@@ -83,6 +88,7 @@ cat <<EOF >create-vm.yml
             delete_fip: True
             wait: "yes"
           ignore_errors: "yes"
+          no_log: yes
           when: item.status == "ERROR" or ((ansible_date_time.iso8601|to_datetime(fmt)) - (item.created|to_datetime(fmt))).days >= 1
           with_items:
             - "{{ openstack_servers }}"
@@ -106,6 +112,7 @@ cat <<EOF >create-vm.yml
               hostname: "${NAME}"
               job_name: "${JOB_NAME}"
               build_number: "${BUILD_NUMBER}"
+          no_log: yes
           register: vm
       rescue:
         - name: Handling virtual machine creation failure
@@ -129,6 +136,7 @@ cat <<EOF >create-vm.yml
               hostname: "${NAME}"
               job_name: "${JOB_NAME}"
               build_number: "${BUILD_NUMBER}"
+          no_log: yes
           register: vm
 
     - name: Dump complete virtual machine info
@@ -137,6 +145,7 @@ cat <<EOF >create-vm.yml
       copy:
         content: "{{ vm | to_nice_json }}"
         dest: "${VM_INFO}"
+      no_log: yes
 
     - name: Wait until server is up and runnning
       local_action:
