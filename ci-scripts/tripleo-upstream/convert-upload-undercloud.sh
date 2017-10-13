@@ -1,6 +1,10 @@
 set -e
 echo ======== CONVERT OVERCLOUD IMAGE TO UNDERCLOUD IMAGE
 
+
+: ${WORKSPACE:=$HOME}
+export QUICKSTART_VENV=$WORKSPACE/.quickstart
+
 pushd $HOME
 ls *.tar
 tar -xf overcloud-full.tar
@@ -24,11 +28,11 @@ cat << EOF > convert-overcloud-undercloud.yml
         name: "convert-image"
 EOF
 
-export ANSIBLE_ROLES_PATH="$HOME/.quickstart/usr/local/share/tripleo-quickstart/roles/"
-ANSIBLE_ROLES_PATH="$ANSIBLE_ROLES_PATH:$HOME/.quickstart/usr/local/share/ansible/roles/"
+export ANSIBLE_ROLES_PATH="$QUICKSTART_VENV/usr/local/share/tripleo-quickstart/roles/"
+ANSIBLE_ROLES_PATH="$ANSIBLE_ROLES_PATH:$QUICKSTART_VENV/usr/local/share/ansible/roles/"
 
-export REPO_CONFIG="$HOME/.quickstart/config/release/tripleo-ci/$RELEASE.yml"
-. .quickstart/bin/activate
+export REPO_CONFIG="$QUICKSTART_VENV/config/release/tripleo-ci/$RELEASE.yml"
+. $QUICKSTART_VENV/bin/activate
 ansible-playbook convert-overcloud-undercloud.yml
 deactivate
 
