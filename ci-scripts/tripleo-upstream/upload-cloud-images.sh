@@ -10,7 +10,10 @@ chmod 600 $SSH_KEY
 export RSYNC_RSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i $SSH_KEY"
 rsync_cmd="rsync --verbose --archive --delay-updates --relative"
 UPLOAD_URL=uploader@images.rdoproject.org:/var/www/html/images/$RELEASE/rdo_trunk
-mkdir $FULL_HASH
+# Check if directory $FULL_HASH exists, if not create it.
+if [ ! -d $FULL_HASH ]; then
+    mkdir $FULL_HASH
+fi
 mv overcloud-full.tar overcloud-full.tar.md5 $FULL_HASH
 mv ironic-python-agent.tar ironic-python-agent.tar.md5 $FULL_HASH
 
