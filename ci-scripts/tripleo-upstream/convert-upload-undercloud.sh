@@ -42,7 +42,7 @@ ANSIBLE_ROLES_PATH="$ANSIBLE_ROLES_PATH:$QUICKSTART_VENV/usr/local/share/ansible
 
 export REPO_CONFIG="$QUICKSTART_VENV/config/release/tripleo-ci/$RELEASE.yml"
 . $QUICKSTART_VENV/bin/activate
-ansible-playbook convert-overcloud-undercloud.yml
+ansible-playbook convert-overcloud-undercloud.yml -e @$REPO_CONFIG
 deactivate
 
 md5sum undercloud.qcow2 > undercloud.qcow2.md5
