@@ -26,6 +26,15 @@ cat << EOF > convert-overcloud-undercloud.yml
         name: "repo-setup"
     - include_role:
         name: "convert-image"
+    # Inject updated overcloud and ipa images into our converted undercloud
+    # image
+    - name: Inject additional images
+      command: >
+        virt-customize -a {{ working_dir }}/undercloud.qcow2
+        --upload {{ working_dir }}/{{ item }}:/home/stack/{{ item }}
+        --run-command 'chown stack:stack /home/stack/{{ item }}'
+      changed_when: true
+      with_items: "{{ inject_images | default('') }}"
 EOF
 
 export ANSIBLE_ROLES_PATH="$QUICKSTART_VENV/usr/local/share/tripleo-quickstart/roles/"
