@@ -33,6 +33,9 @@ cat << EOF > convert-overcloud-undercloud.yml
         virt-customize -a {{ working_dir }}/undercloud.qcow2
         --upload {{ working_dir }}/{{ item }}:/home/stack/{{ item }}
         --run-command 'chown stack:stack /home/stack/{{ item }}'
+      environment:
+        LIBGUESTFS_BACKEND: direct
+        LIBVIRT_DEFAULT_URI: qemu:///session
       changed_when: true
       with_items: "{{ inject_images | default('') }}"
 EOF
