@@ -142,6 +142,11 @@ ansible-playbook -i "${ANSIBLE_HOSTS}" destroy-vm.yml
 
 # Recover console log, generate and upload ARA report
 ara generate html "${WORKSPACE}/ara"
+
+# Copy database (experimental)
+mkdir ${WORKSPACE}/ara-database
+cp ${WORKSPACE}/${JOB_NAME}.sqlite ${WORKSPACE}/ara-database/ansible.sqlite
+
 cat <<EOF >wrap-up.yml
 - name: Upload ARA report and console log
   hosts: logserver
@@ -166,6 +171,11 @@ cat <<EOF >wrap-up.yml
     - name: Upload ARA report
       synchronize:
         src: "${WORKSPACE}/ara"
+        dest: "/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}/"
+
+    - name: Upload ARA database
+      synchronize:
+        src: "${WORKSPACE}/ara-database"
         dest: "/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}/"
 EOF
 
