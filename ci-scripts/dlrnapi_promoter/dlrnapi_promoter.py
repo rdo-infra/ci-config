@@ -74,8 +74,8 @@ def setup_logging(log_file):
     '''Setup logging for the script'''
     logger = logging.getLogger('promoter')
     logger.setLevel(logging.DEBUG)
-    log_handler = logging.handlers.TimedRotatingFileHandler(
-        os.path.expanduser(log_file), when='d', interval=1, backupCount=7)
+    log_handler = logging.handlers.WatchedFileHandler(
+        os.path.expanduser(log_file))
     log_formatter = logging.Formatter('%(asctime)s %(process)d '
                                       '%(levelname)-8s %(name)s %(message)s')
     log_handler.setFormatter(log_formatter)

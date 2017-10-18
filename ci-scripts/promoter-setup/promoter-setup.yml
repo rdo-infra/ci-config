@@ -128,3 +128,20 @@
         - { release: 'master', minute: '1,11,21,31,41,51' }
         - { release: 'pike', minute: '2,12,22,32,42,52' }
         - { release: 'ocata', minute: '3,13,23,33,43,53' }
+    - name: add configuration for the log rotation
+      copy:
+        content: |
+            /home/centos/promoter_logs/*.log {
+                missingok
+                su centos centos
+                dateext
+                dateyesterday
+                notifempty
+                delaycompress
+                rotate 60
+            }
+        dest: /etc/logrotate.d/promoter
+        owner: root
+        group: root
+        mode: 0644
+
