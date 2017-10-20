@@ -111,7 +111,6 @@ def tag_containers(new_hashes, release, promote_name):
         logger.exception(ex)
         logger.error('END OF CONTAINER IMAGE UPLOAD FAILURE')
 
-
 def tag_qcow_images(new_hashes, release, promote_name):
     logger = logging.getLogger('promoter')
     relpath = "ci-scripts/dlrnapi_promoter"
