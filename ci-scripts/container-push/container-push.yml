@@ -20,6 +20,7 @@
     rdoproject_namespace: "{{ lookup('env','RELEASE') }}"
     rdoproject_username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
     rdoproject_password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
+    images_list_url: "{{ lookup('env', 'IMAGES_LIST_URL') }}"
   tasks:
 
 # NOTE(trown): need to figure out how this list is generated,
@@ -30,13 +31,18 @@
 # tacker container implementation was incomplete in pike
     - name: Retrieve list of built images
       shell: >
-        cat "{{ script_root }}/ci-scripts/container-push/parsed_containers.txt"
+        curl -L -o - "{{ images_list_url }}"
       register: built_images
+      check_mode: no
       tags:
         - rdoproject_pull
         - rdoproject_push
         - dockerhub_push
         - remove_local_containers
+
+    - name: set list of built images
+      set_fact:
+        images: images_list|from_json
 
     - name: Pull the images from rdoproject registry
       docker_image:
@@ -44,6 +50,7 @@
         tag: "{{ full_hash }}"
       with_items: "{{ built_images.stdout_lines }}"
       retries: 3
+      check_mode: no
       tags:
         - rdoproject_pull
 
@@ -54,6 +61,7 @@
         password: "{{ rdoproject_password }}"
         reauthorize: "yes"
       no_log: "yes"
+      check_mode: no
       tags:
         - rdoproject_push
 
@@ -63,6 +71,7 @@
         trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/centos-binary-{{ item }}:{{ full_hash }}
         trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/centos-binary-{{ item }}:{{ named_label }}
       with_items: "{{ built_images.stdout_lines }}"
+      check_mode: no
       tags:
         - rdoproject_push
 
@@ -84,6 +93,7 @@
         password: "{{ dockerhub_password }}"
         reauthorize: "yes"
       no_log: "yes"
+      check_mode: no
       tags:
         - dockerhub_push
 
@@ -110,6 +120,7 @@
         - "{{ built_images.stdout_lines }}"
         - ["{{ full_hash }}", "{{ named_label }}"]
       retries: 3
+      check_mode: no
       tags:
         - remove_local_containers
 
@@ -122,6 +133,7 @@
         - "{{ built_images.stdout_lines }}"
         - ["{{ full_hash }}", "{{ named_label }}"]
       retries: 3
+      check_mode: no
       tags:
         - remove_local_containers
 
