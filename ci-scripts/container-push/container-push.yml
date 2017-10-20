@@ -101,27 +101,3 @@
       tags:
         - dockerhub_push
 
-    - name: Delete the local images from rdoproject registry
-      docker_image:
-        name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/centos-binary-{{ item[0] }}"
-        tag: "{{ item[1] }}"
-        state: absent
-      with_nested:
-        - "{{ built_images.stdout_lines }}"
-        - ["{{ full_hash }}", "{{ named_label }}"]
-      retries: 3
-      tags:
-        - remove_local_containers
-
-    - name: Delete the local images from docker hub
-      docker_image:
-        name: "docker.io/{{ dockerhub_namespace }}/centos-binary-{{ item[0] }}"
-        tag: "{{ item[1] }}"
-        state: absent
-      with_nested:
-        - "{{ built_images.stdout_lines }}"
-        - ["{{ full_hash }}", "{{ named_label }}"]
-      retries: 3
-      tags:
-        - remove_local_containers
-

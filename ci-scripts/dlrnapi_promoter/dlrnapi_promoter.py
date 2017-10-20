@@ -96,12 +96,28 @@ def tag_containers(new_hashes, release, promote_name):
     promote_playbook = (
         script_root + 'ci-scripts/container-push/container-push.yml'
     )
+    cleanup_playbook = (
+        script_root + 'ci-scripts/container-push/container-cleanup.yml'
+    )
     commit_hash = new_hashes['commit_hash']
     try:
         logger.info('Promoting the container images for dlrn hash %s on '
                     '%s to %s', commit_hash, release, promote_name)
         container_logs = subprocess.check_output(
                          ['ansible-playbook', promote_playbook],
+                         env=env, stderr=subprocess.STDOUT).split("\n")
+        for line in container_logs:
+            logger.info(line)
+    except subprocess.CalledProcessError as ex:
+        logger.error('CONTAINER IMAGE UPLOAD FAILED LOGS BELOW:')
+        logger.error(ex.output)
+        logger.exception(ex)
+        logger.error('END OF CONTAINER IMAGE UPLOAD FAILURE')
+    try:
+        logger.info('Cleaning up the container images for dlrn hash %s on '
+                    '%s to %s', commit_hash, release, promote_name)
+        container_logs = subprocess.check_output(
+                         ['ansible-playbook', cleanup_playbook],
                          env=env, stderr=subprocess.STDOUT).split("\n")
         for line in container_logs:
             logger.info(line)
