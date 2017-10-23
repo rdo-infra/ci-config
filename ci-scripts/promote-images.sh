@@ -15,5 +15,10 @@ function sftp_command {
         uploader@images.rdoproject.org
 }
 
-sftp_command "rm /var/www/html/images/$RELEASE/rdo_trunk/$LINK_NAME"
-sftp_command "ln -s $PROMOTED_HASH /var/www/html/images/$RELEASE/rdo_trunk/$LINK_NAME"
+if [[ "$DRY_RUN" != 1 && -n "$RELEASE" && -n "$PROMOTED_HASH" && -n "$LINK_NAME" ]]; then
+    sftp_command "rm /var/www/html/images/$RELEASE/rdo_trunk/$LINK_NAME"
+    sftp_command "ln -s $PROMOTED_HASH /var/www/html/images/$RELEASE/rdo_trunk/$LINK_NAME"
+else
+    sftp_command "ls /var/www/html/images/$RELEASE/rdo_trunk/$LINK_NAME"
+    echo "ln -s $PROMOTED_HASH /var/www/html/images/$RELEASE/rdo_trunk/$LINK_NAME"
+fi
