@@ -14,7 +14,7 @@ NETWORK=${NETWORK:-private}
 NAME="${JOB_NAME_SIMPLIFIED}-${BUILD_NUMBER}"
 IMAGE=${IMAGE:-template-centos7-weirdo-cr}
 TIMEOUT=${TIMEOUT:-120}
-FLAVOR=${FLAVOR:-ci.m1.nodepool}
+FLAVOR=${FLAVOR:-rdo.m1.nodepool}
 VM_INFO="${WORKSPACE}/vminfo.json"
 
 if [ ! -f "${CLOUD_CONFIG}" ]; then
@@ -106,7 +106,9 @@ cat <<EOF >create-vm.yml
             reuse_ips: "no"
             timeout: "${TIMEOUT}"
             config_drive: "yes"
-            boot_from_volume: "no"
+            boot_from_volume: "yes"
+            terminate_volume: "yes"
+            volume_size: 80
             wait: "yes"
             meta:
               hostname: "${NAME}"
@@ -130,7 +132,9 @@ cat <<EOF >create-vm.yml
             reuse_ips: "no"
             timeout: "${TIMEOUT}"
             config_drive: "yes"
-            boot_from_volume: "no"
+            boot_from_volume: "yes"
+            terminate_volume: "yes"
+            volume_size: 80
             wait: "yes"
             meta:
               hostname: "${NAME}"
