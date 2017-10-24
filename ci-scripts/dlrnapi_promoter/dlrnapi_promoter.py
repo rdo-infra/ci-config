@@ -238,3 +238,39 @@ if __name__ == '__main__':
         print("Usage: %s <config-file>" % sys.argv[0])
     else:
         promoter(sys.argv[1])
+
+# sftp cleanup Notes
+#
+# pk = paramiko.rsakey.RSAKey.from_private_key_file("/home/gcerami/.ssh/id_rsa")
+# t = paramiko.trasport.Trasmport((hostname, port))
+# t.connect(username=username, pkey=pk)
+# sc = t.open_sftp_client()
+# sc.stat
+
+
+# dockerhub cleanup draft
+
+import request
+import json
+
+for repository in images_list:
+    times = {}
+    r = requests.get("https://auth.docker.io/token?service=registry.docker.io&scope=repository:tripleopike/centos-binary-heat-api:pull,push", auth=('',''))
+    if r.status_code != 200:
+        raise
+    token = r.json()['token']
+    header = { 'Authorization' : 'Bearer %s' % token  }
+    r = requests.get("https://registry.hub.docker.com/v2/%s/tags/list" % repository)
+    if r.status_code != 200:
+        raise
+    tags = r.json()['tags']
+    for tag in tags:
+        r = requests.get("https://registry.hub.docker.com/v2/%s/manifests/%s" % (repo,tag))
+        if r.status_code != 200:
+            raise
+         infos = json.loads(r.json()['history'][0]['v1Compatibility'])
+        times[tag] = infos['created']
+
+    if criteria(times):
+        for tag in tag_delete:
+            r = requests.delete("https://registry.hub.docker.com/v2/%s/manifests/%s" % (repo,tag))
