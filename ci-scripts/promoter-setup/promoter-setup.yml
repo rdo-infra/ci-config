@@ -38,6 +38,13 @@
         path: '~/promoter_logs'
         state: directory
         setype: httpd_sys_content_t
+    - name: copy logrotate selinux policy
+      copy:
+        src: logrotate-promoter.pp
+        dest: /tmp/logrotate-promoter.pp
+    - name: permanently install policy
+      command: semodule -i /tmp/logrotate-promoter.pp
+      become: true
     - name: Fix home directory permission
       file:
         path: '~'
@@ -132,6 +139,7 @@
       copy:
         content: |
             /home/centos/promoter_logs/*.log {
+                daily
                 missingok
                 su centos centos
                 dateext
