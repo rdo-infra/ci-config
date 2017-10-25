@@ -16,4 +16,4 @@ function sftp_command {
 }
 
 sftp_command "rm /var/www/html/images/$RELEASE/rdo_trunk/$LINK_NAME"
-sftp_command "ln -s $PROMOTED_HASH /var/www/html/images/$RELEASE/rdo_trunk/$LINK_NAME"
+sftp_command "ln -s /var/www/html/images/$RELEASE/rdo_trunk/$PROMOTED_HASH /var/www/html/images/$RELEASE/rdo_trunk/$LINK_NAME"
