@@ -31,7 +31,6 @@ cat << EOF > $WORKSPACE/playbook.yml
   tasks:
     - include_role:
         name: "rdo-kolla-build"
-        static: "no"
 EOF
 
 ansible-playbook $WORKSPACE/playbook.yml -e kolla_threads=16
