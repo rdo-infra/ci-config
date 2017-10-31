@@ -38,6 +38,12 @@ cat << EOF > convert-overcloud-undercloud.yml
         LIBVIRT_DEFAULT_URI: qemu:///session
       changed_when: true
       with_items: "{{ inject_images | default('') }}"
+    - name: Compress the undercloud image
+      shell: |
+        qemu-img convert -c -O qcow2 {{ working_dir }}/undercloud.qcow2 \
+            {{working_dir }}/undercloud-compressed.qcow2
+        mv {{ working_dir }}/undercloud-compressed.qcow2 \
+            {{ working_dir }}/undercloud.qcow2
 EOF
 
 export ANSIBLE_ROLES_PATH="$QUICKSTART_VENV/usr/local/share/tripleo-quickstart/roles/"
