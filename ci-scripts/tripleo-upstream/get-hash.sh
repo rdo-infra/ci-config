@@ -23,6 +23,9 @@ if [ "$RELEASE" = "master" ]; then
     # for master we have two DLRN builders, use the "upper constraint" one that
     # places restrictions on the maximum version of all dependencies
     export DLRNAPI_URL="${DLRNAPI_URL}-uc"
+    COMMIT_HASH=3b718f3fecc866332ec0663fa77e758f8346ab93
+    DISTRO_HASH=4204ba89997cae739e41526b575027e333a2277d
+    FULL_HASH=3b718f3fecc866332ec0663fa77e758f8346ab93_4204ba89
 fi
 
 cat > $WORKSPACE/hash_info.sh << EOF
