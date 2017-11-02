@@ -10,6 +10,11 @@ activate_dlrnapi_venv
 
 source $WORKSPACE/hash_info.sh
 
+if [ "$RELEASE" = "master" ]; then
+    COMMIT_HASH=3b718f3fecc866332ec0663fa77e758f8346ab93
+    DISTRO_HASH=4204ba89997cae739e41526b575027e333a2277d
+fi
+
 set -u
 
 # Assign label to the specific hash using the DLRN API
