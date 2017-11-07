@@ -15,3 +15,6 @@ echo "BUILD_SYS = $BUILD_SYS" >> $HASH_FILE
 echo "RDO_VERSION_DIR = $RDO_VERSION_DIR" >> $HASH_FILE
 echo "tempest_version = $TEMPEST_VERSION" >> $HASH_FILE
 echo "enable_puppet_modules_rpm = $ENABLE_PUPPET_MODULES_RPM" >> $HASH_FILE
+echo "DELOREAN_URL = https://$DELOREAN_PUBLIC_HOST/centos7-${RDO_VERSION_DIR}/$NEW_HASH/delorean.repo" >> $HASH_FILE
+echo "DELOREAN_HOST = $DELOREAN_HOST" >> $HASH_FILE
+echo "RDO_VERSION = $RDO_VERSION" >> $HASH_FILE
