@@ -69,11 +69,8 @@
             - rdoproject_push
 
         - name: Push images to rdoproject registry with named label
-          docker_image:
-            name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/centos-binary-{{ item }}"
-            tag: "{{ named_label }}"
-            repository: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/centos-binary-{{ item }}"
-            push: yes
+          shell: >
+            docker push trunk.registry.rdoproject.org/{{ rdoproject_namespace  }}/centos-binary-{{ item  }}:{{ named_label  }}
           with_items: "{{ built_images.stdout_lines }}"
           retries: 3
           tags:
