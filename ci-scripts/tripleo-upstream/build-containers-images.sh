@@ -8,6 +8,12 @@ pushd $WORKSPACE/roles
     git clone https://github.com/rdo-infra/ansible-role-rdo-kolla-build rdo-kolla-build
 popd
 
+# Install ansible in a virtualenv
+
+virtualenv --system-site-packages $WORKSPACE/ansible
+source $WORKSPACE/ansible/bin/activate
+pip install ansible==2.3.1.0
+
 # Delete any leftover configuration ansible
 rm -f $WORKSPACE/ansible.cfg
 TESTING_TAG="tripleo-ci-testing"
