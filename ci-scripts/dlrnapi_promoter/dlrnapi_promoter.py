@@ -15,7 +15,24 @@ from dlrnapi_client.rest import ApiException
 import dlrnapi_client
 
 
-def fetch_hashes(dlrn, link):
+def check_promoted(dlrn, link, hashes):
+    ''' check if hashes has ever been promoted to link'''
+    logger = logging.getLogger('promoter')
+    params = dlrnapi_client.PromotionQuery()
+    params.commit_hash = hashes.commit_hash
+    params.distro_hash = hashes.distro_hash
+    try:
+        api_response = dlrn.api_promotions_get(params)
+    except ApiException:
+        logger.error('Exception when calling api_promotions_get: %s',
+                     ApiException)
+        raise
+    for promotion in api_response:
+        if promotion.link == api_response.promote_name:
+            return True
+    return False
+
+def fetch_hashes(dlrn, link, count=1):
     '''Get the commit and distro hashes for a specific promotion link'''
     logger = logging.getLogger('promoter')
     params = dlrnapi_client.PromotionQuery()
@@ -26,12 +43,20 @@ def fetch_hashes(dlrn, link):
         logger.error('Exception when calling api_promotions_get: %s',
                      ApiException)
         return None
-    try:
-        return {'commit_hash': api_response[0].commit_hash,
-                'distro_hash': api_response[0].distro_hash}
-    except IndexError:
+    if len(api_response) == 0:
         return None
-
+    if count <= 1:
+        return api_response[0]
+    else:
+        unduplicated_response = []
+        for hashes in api_response:
+            if unduplicated_response == []:
+                unduplicated_response.append(hashes)
+            else:
+                for existing_hashes in unduplicated_response:
+                    if existing_hashes.commit_hash != hashes.commit_hash and existing_hashes.distro_hash != hashes.distro_hash:
+                        unduplicated_response.append(hashes)
+        return unduplicated_response
 
 def fetch_jobs(dlrn, hash_values):
     '''Fetch the successfully finished jobs for a specific DLRN hash'''
@@ -112,7 +137,6 @@ def tag_containers(new_hashes, release, promote_name):
         logger.error('END OF CONTAINER IMAGE UPLOAD FAILURE')
         raise
 
-
 def tag_qcow_images(new_hashes, release, promote_name):
     logger = logging.getLogger('promoter')
     relpath = "ci-scripts/dlrnapi_promoter"
@@ -143,46 +167,58 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release):
     logger = logging.getLogger('promoter')
 
     for promote_name, current_name in promote_from.items():
+        # number of hashes to consider
+        latest_hashes_count = 5
         logger.info('Trying to promote %s to %s', current_name, promote_name)
         old_hashes = fetch_hashes(api, promote_name)
-        new_hashes = fetch_hashes(api, current_name)
-        logger.info('new hash found for %s: %s', str(new_hashes), current_name)
-        if new_hashes is None:
-            logger.error('Failed to fetch hashes for %s, skipping promotion',
-                         current_name)
-            continue
         if old_hashes is None:
             logger.warning('Failed to fetch hashes for %s, no previous '
-                           'promotion or typo in the link name',
-                           promote_name)
-        if new_hashes == old_hashes:
+                        'promotion or typo in the link name',
+                        promote_name)
+        latest_hashes = fetch_hashes(api, current_name, count=latest_hashes_count)
+        if latest_hashes is None:
+            logger.error('Failed to fetch hashes for %s, skipping promotion',
+                        current_name)
+            continue
+        # check if very latest hash has already been promoted
+        # and skip
+        if latest_hashes[0] == old_hashes:
             logger.info('Same hashes for %s and %s %s, skipping promotion',
                         current_name, promote_name, old_hashes)
             continue
-        new_hashes['full_hash'] = '{0}_{1}'.format(new_hashes['commit_hash'],
-                                       new_hashes['distro_hash'][:8])
-        successful_jobs = Set(fetch_jobs(api, new_hashes))
-        required_jobs = Set(job_reqs[promote_name])
-        missing_jobs = list(required_jobs - successful_jobs)
-        if missing_jobs:
-            logger.info('Skipping promotion of %s to %s, missing successful '
-                        'jobs: %s',
-                        current_name, promote_name, missing_jobs)
-            continue
-        if dry_run:
-            logger.info('DRY RUN: promotion conditions satisfied, '
-                        'skipping promotion of %s to %s (old: %s, new: %s)',
-                        current_name, promote_name, old_hashes, new_hashes)
-        else:
-            try:
-                tag_containers(new_hashes, release, promote_name)
-                tag_qcow_images(new_hashes, release, promote_name)
-                promote_link(api, new_hashes, promote_name)
-                logger.info('SUCCESS promoting %s as %s (old: %s, new: %s)',
+        # Eliminate already promoted hashes
+        for new_hashes in latest_hashes:
+            if check_promoted(new_hashes):
+                latest_hashes.remove(new_hashes)
+        # Cycle over latest unpromoted hashes
+        for new_hashes in latest_hashes:
+            logger.info('new hash found for %s: %s', str(new_hashes), current_name)
+            new_hashes['full_hash'] = '{0}_{1}'.format(new_hashes['commit_hash'],
+                                        new_hashes['distro_hash'][:8])
+            successful_jobs = Set(fetch_jobs(api, new_hashes))
+            required_jobs = Set(job_reqs[promote_name])
+            missing_jobs = list(required_jobs - successful_jobs)
+            if missing_jobs:
+                logger.info('Skipping promotion of %s to %s, missing successful '
+                            'jobs: %s',
+                            current_name, promote_name, missing_jobs)
+                continue
+            if dry_run:
+                logger.info('DRY RUN: promotion conditions satisfied, '
+                            'skipping promotion of %s to %s (old: %s, new: %s)',
                             current_name, promote_name, old_hashes, new_hashes)
-            except:
-                logger.info('FAILED promoting %s as %s (old: %s, new: %s)',
-                            current_name, promote_name, old_hashes, new_hashes)
+            else:
+                try:
+                    tag_containers(new_hashes, release, promote_name)
+                    tag_qcow_images(new_hashes, release, promote_name)
+                    promote_link(api, new_hashes, promote_name)
+                    logger.info('SUCCESS promoting %s as %s (old: %s, new: %s)',
+                                current_name, promote_name, old_hashes, new_hashes)
+                    # stop here, don't try to promote other hashes
+                    break
+                except:
+                    logger.info('FAILED promoting %s as %s (old: %s, new: %s)',
+                                current_name, promote_name, old_hashes, new_hashes)
 
 # Use atomic abstract socket creation as process lock
 # no pid files to deal with
