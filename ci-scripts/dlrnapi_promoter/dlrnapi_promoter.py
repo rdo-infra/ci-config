@@ -7,6 +7,7 @@ import ConfigParser
 import logging
 import logging.handlers
 import os
+import socket
 import subprocess
 import sys
 
@@ -63,11 +64,10 @@ def promote_link(dlrn, hash_values, link):
     params.promote_name = link
     try:
         dlrn.api_promote_post(params)
-        return True
     except ApiException:
         logger.error('Exception when calling api_promote_post: %s',
                      ApiException)
-        return False
+        raise
 
 
 def setup_logging(log_file):
@@ -110,6 +110,7 @@ def tag_containers(new_hashes, release, promote_name):
         logger.error(ex.output)
         logger.exception(ex)
         logger.error('END OF CONTAINER IMAGE UPLOAD FAILURE')
+        raise
 
 
 def tag_qcow_images(new_hashes, release, promote_name):
@@ -133,6 +134,7 @@ def tag_qcow_images(new_hashes, release, promote_name):
         logger.error(ex.output)
         logger.exception(ex)
         logger.error('END OF QCOW IMAGE UPLOAD FAILURE')
+        raise
 
 
 def promote_all_links(api, promote_from, job_reqs, dry_run, release):
@@ -172,15 +174,30 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release):
                         'skipping promotion of %s to %s (old: %s, new: %s)',
                         current_name, promote_name, old_hashes, new_hashes)
         else:
-            if promote_link(api, new_hashes, promote_name):
-                logger.info('SUCCESS promoting %s as %s (old: %s, new: %s)',
-                            current_name, promote_name, old_hashes, new_hashes)
+            try:
                 tag_containers(new_hashes, release, promote_name)
                 tag_qcow_images(new_hashes, release, promote_name)
-            else:
+                promote_link(api, new_hashes, promote_name)
+                logger.info('SUCCESS promoting %s as %s (old: %s, new: %s)',
+                            current_name, promote_name, old_hashes, new_hashes)
+            except:
                 logger.info('FAILED promoting %s as %s (old: %s, new: %s)',
                             current_name, promote_name, old_hashes, new_hashes)
 
+# Use atomic abstract socket creation as process lock
+# no pid files to deal with
+def get_lock(process_name):
+    logger = logging.getLogger('promoter')
+    # Without holding a reference to our socket somewhere it gets garbage
+    # collected when the function exits
+    get_lock._lock_socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+
+    try:
+        get_lock._lock_socket.bind('\0' + process_name)
+        logger.debug('No other promoters running')
+    except socket.error:
+        logger.error('Another promoter process is running')
+        sys.exit(1)
 
 def promoter(config_file):
     config = ConfigParser.SafeConfigParser(allow_no_value=True)
@@ -188,6 +205,8 @@ def promoter(config_file):
 
     setup_logging(config.get('main', 'log_file'))
     logger = logging.getLogger('promoter')
+
+    get_lock('promoter')
 
     logger.info('STARTED promotion process with config %s', config_file)
 
@@ -231,6 +250,7 @@ def promoter(config_file):
 
     promote_all_links(api_instance, promote_from, job_reqs, dry_run, release)
     logger.info("FINISHED promotion process")
+
 
 
 if __name__ == '__main__':
