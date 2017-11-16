@@ -19,6 +19,23 @@
     },
     {
       "key": {
+        "uuid": "da86d52c_35269bbb",
+        "filename": "ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 63
+      },
+      "writtenOn": "2017-11-16T11:51:07Z",
+      "side": 1,
+      "message": "Oh, didn\u0027t know any(). Nice, although this loop becomes O(n) in every case, not only in the worst case. Also corrected an error in the logic.",
+      "revId": "d20b60e65750123f58331991dc2d46516fbe860e",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da86d52c_92ecbdc9",
         "filename": "ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py",
         "patchSetId": 1
@@ -30,6 +47,23 @@
       "writtenOn": "2017-11-15T21:01:17Z",
       "side": 1,
       "message": "A bit complex to understand.",
+      "revId": "d20b60e65750123f58331991dc2d46516fbe860e",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da86d52c_552b0f82",
+        "filename": "ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 63
+      },
+      "writtenOn": "2017-11-16T11:51:07Z",
+      "side": 1,
+      "message": "DLRN api returns all the promotions for a name, ieven if it\u0027s the same hash over and over, so if there are no new hashes for some days, api_response may contain a list of dictionaries all equal to each other, except for the timestamp. and I don\u0027t want to loop over the same hash over and over again in the main promoter code. So I add a dict of hashes if the final list is empty, and for every hashes in api response I check if it exist in the final list, and if it doesn\u0027t, add it. I\u0027m not sure there\u0027s an easier way to do it. If I start using sets, then I lose the order of hashes (newer to older) unless I use OrderedDicts, but then it just becomes differently complex.",
       "revId": "d20b60e65750123f58331991dc2d46516fbe860e",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": false
@@ -53,6 +87,23 @@
     },
     {
       "key": {
+        "uuid": "da86d52c_7520139c",
+        "filename": "ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 63
+      },
+      "writtenOn": "2017-11-16T11:51:07Z",
+      "side": 1,
+      "message": "Ok, this may *SOUND* simple, but it\u0027s not. If I don\u0027t hardcode it here, I have to move it to the config file, which is not handled in this function. I cannot pass the config object to this function either, because the config object gets stripped of the main section before calling this function. The only way is to get this value in the calling function promoter() then add the variable to the arguments for this function. The result is so ugly I\u0027ll probably add it to show it in its full uglyness, to show how ugly it is.",
+      "revId": "d20b60e65750123f58331991dc2d46516fbe860e",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "da86d52c_52e245d6",
         "filename": "ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py",
         "patchSetId": 1
@@ -64,6 +115,23 @@
       "writtenOn": "2017-11-15T21:01:17Z",
       "side": 1,
       "message": "More pythonic and readable:\nlatest_hashes \u003d [hash for hash in latest_hashes if not check_promoted(hash)]",
+      "revId": "d20b60e65750123f58331991dc2d46516fbe860e",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da86d52c_952587ad",
+        "filename": "ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 63
+      },
+      "writtenOn": "2017-11-16T11:51:07Z",
+      "side": 1,
+      "message": "I usually try to avoid using lvalues in rvalues, and like to modify the existing instead of overwriting it, but ok",
       "revId": "d20b60e65750123f58331991dc2d46516fbe860e",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": false
