@@ -19,8 +19,8 @@ def check_promoted(dlrn, link, hashes):
     ''' check if hashes has ever been promoted to link'''
     logger = logging.getLogger('promoter')
     params = dlrnapi_client.PromotionQuery()
-    params.commit_hash = hashes.commit_hash
-    params.distro_hash = hashes.distro_hash
+    params.commit_hash = hashes['commit_hash']
+    params.distro_hash = hashes['distro_hash']
     try:
         api_response = dlrn.api_promotions_get(params)
     except ApiException:
@@ -28,6 +28,7 @@ def check_promoted(dlrn, link, hashes):
                      ApiException)
         raise
     return any([(promotion.promote_name == link) for promotion in api_response])
+
 
 def fetch_hashes(dlrn, link, count=1):
     '''Get the commit and distro hashes for a specific promotion link'''
@@ -43,15 +44,17 @@ def fetch_hashes(dlrn, link, count=1):
     if len(api_response) == 0:
         return None
     if count <= 1:
-        return api_response[0]
+        return api_response[0].to_dict()
     else:
         unduplicated_response = []
-        unduplicated_response.append(api_response[0])
-        for hashes in api_response[1:]:
-            for existing_hashes in unduplicated_response:
-                if existing_hashes.commit_hash != hashes.commit_hash or existing_hashes.distro_hash != hashes.distro_hash:
-                    unduplicated_response.append(hashes)
+        for hashes in api_response:
+            hashes = hashes.to_dict()
+            existing_hashes = [(ex_hashes['commit_hash'], ex_hashes['distro_hash']) for ex_hashes in unduplicated_response]
+            if (hashes['commit_hash'], hashes['distro_hash']) not in existing_hashes:
+                unduplicated_response.append(hashes)
+
         return unduplicated_response
+
 
 def fetch_jobs(dlrn, hash_values):
     '''Fetch the successfully finished jobs for a specific DLRN hash'''
@@ -132,6 +135,7 @@ def tag_containers(new_hashes, release, promote_name):
         logger.error('END OF CONTAINER IMAGE UPLOAD FAILURE')
         raise
 
+
 def tag_qcow_images(new_hashes, release, promote_name):
     logger = logging.getLogger('promoter')
     relpath = "ci-scripts/dlrnapi_promoter"
@@ -180,7 +184,7 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hash
                         current_name, promote_name, old_hashes)
             continue
         # Eliminate already promoted hashes
-        latest_hashes = [new_hashes for new_hashes in latest_hashes if not check_promoted(new_hashes)]
+        latest_hashes = [new_hashes for new_hashes in latest_hashes if not check_promoted(api, promote_name, new_hashes)]
         # Cycle over latest unpromoted hashes
         for new_hashes in latest_hashes:
             logger.info('new hash found for %s: %s', str(new_hashes), current_name)
@@ -198,6 +202,7 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hash
                 logger.info('DRY RUN: promotion conditions satisfied, '
                             'skipping promotion of %s to %s (old: %s, new: %s)',
                             current_name, promote_name, old_hashes, new_hashes)
+                break
             else:
                 try:
                     tag_containers(new_hashes, release, promote_name)
