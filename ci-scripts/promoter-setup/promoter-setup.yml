@@ -23,6 +23,14 @@
 - name: Set up the promoter-server
   hosts: promoter-server
   tasks:
+    - name: Create persistent journal
+      file:
+        path: /var/log/journal/
+        state: directory
+    - name: Restart journal
+      service:
+        name: systemd-journald
+        state: restarted
     - name: Update packages on the server
       become: true
       yum:
