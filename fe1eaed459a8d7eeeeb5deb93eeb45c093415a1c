@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba7be1f8_1737deb1",
+        "filename": "ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 163
+      },
+      "writtenOn": "2017-11-28T15:31:36Z",
+      "side": 1,
+      "message": "I just realized we don\u0027t limit the maximum amount of steps backwards.\n\nThis should be something like:\n\n        if count \u003c len(unduplicated_response):\n            return unduplicated_response[:count]\n        else:\n            unduplicated_response",
+      "revId": "fe1eaed459a8d7eeeeb5deb93eeb45c093415a1c",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba7be1f8_974aee25",
+        "filename": "ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 163
+      },
+      "writtenOn": "2017-11-28T15:31:36Z",
+      "side": 1,
+      "message": "We need to bring this inside the latest_hashes loop because this way the promotion doesn\u0027t stop when we see the same hash in a later result. In effect we could promote something that was not promoted but now the promotion rules are true for it.",
+      "range": {
+        "startLine": 182,
+        "startChar": 0,
+        "endLine": 185,
+        "endChar": 20
+      },
+      "revId": "fe1eaed459a8d7eeeeb5deb93eeb45c093415a1c",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba7be1f8_b747f21c",
+        "filename": "ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 163
+      },
+      "writtenOn": "2017-11-28T15:31:36Z",
+      "side": 1,
+      "message": "We might skip already promoted hashes, but we will try to promote older ones. We don\u0027t really need this function for this functionality (will be useful for cleaning up the registry though). Just bring the \"same hash\" check inside the loop in 189.",
+      "revId": "fe1eaed459a8d7eeeeb5deb93eeb45c093415a1c",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba7be1f8_f7516ad9",
+        "filename": "ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 163
+      },
+      "writtenOn": "2017-11-28T15:31:36Z",
+      "side": 1,
+      "message": "This needs to be `config.getint()` -- currently we parse it as a string.",
+      "revId": "fe1eaed459a8d7eeeeb5deb93eeb45c093415a1c",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
