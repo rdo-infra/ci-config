@@ -23,6 +23,19 @@
 - name: Set up the promoter-server
   hosts: promoter-server
   tasks:
+    - name: Create persistent journal
+      file:
+        path: /var/log/journal/
+        state: directory
+      become: true
+    - name: Run systemd-tmpfs on journal directory
+      shell: systemd-tmpfiles --create --prefix /var/log/journal
+      become: true
+    - name: Restart journal
+      service:
+        name: systemd-journald
+        state: restarted
+      become: true
     - name: Update packages on the server
       become: true
       yum:
