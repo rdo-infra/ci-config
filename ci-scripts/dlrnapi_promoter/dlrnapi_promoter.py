@@ -207,7 +207,10 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hash
                 break
             else:
                 try:
-                    tag_containers(new_hashes, release, promote_name)
+                    # ocata does not have containers to upload
+                    # this can be removed once ocata is EOL
+                    if release not in ['ocata']:
+                        tag_containers(new_hashes, release, promote_name)
                     tag_qcow_images(new_hashes, release, promote_name)
                     promote_link(api, new_hashes, promote_name)
                     logger.info('SUCCESS promoting %s as %s (old: %s, new: %s)',
