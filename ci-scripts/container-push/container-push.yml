@@ -20,6 +20,7 @@
     rdoproject_namespace: "{{ lookup('env','RELEASE') }}"
     rdoproject_username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
     rdoproject_password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
+    containers_file: "{{ script_root }}/ci-scripts/container-push/parsed_containers-{{ lookup('env','RELEASE') }}.txt"
   tasks:
 
 # NOTE(trown): need to figure out how this list is generated,
@@ -32,7 +33,7 @@
       block:
         - name: Retrieve list of built images
           shell: >
-            cat "{{ script_root }}/ci-scripts/container-push/parsed_containers.txt"
+            cat {{containers_file }}
           register: built_images
           tags:
             - rdoproject_pull
