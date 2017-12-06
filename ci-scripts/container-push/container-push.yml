@@ -23,12 +23,24 @@
     containers_file: "{{ script_root }}/ci-scripts/container-push/parsed_containers-{{ lookup('env','RELEASE') }}.txt"
   tasks:
 
-# NOTE(trown): need to figure out how this list is generated,
-# but just took it from the promote artifacts for now:
-# https://logs.rdoproject.org/openstack-periodic-4hr/periodic-tripleo-centos-7-pike-containers-build/95e9d60/kolla/parsed_containers.txt
-# I manually deleted tacker and ceph containers from the list because we dont need to push those.
-# ceph is maintained by ceph team
-# tacker container implementation was incomplete in pike
+    - name: Generate list of containers to push
+      shell: |
+        export LOCAL_RELEASE={% if 'master' == lookup('env', 'RELEASE') %}master{% else %}stable/{{ lookup('env', 'RELEASE') }}{% endif %};
+        export RELEASE_URL=https://raw.githubusercontent.com/openstack/tripleo-common/$LOCAL_RELEASE/container-images/overcloud_containers.yaml;
+        export REGISTRY_API=https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/{{ lookup('env', 'RELEASE') }}/imagestreamtags;
+
+        echo -n > {{containers_file }};
+        for image in $(curl -fk $RELEASE_URL 2>/dev/null | grep imagename: | grep tripleo | sed "s@.*/\(.\+\):.*@\1@g"); do
+            echo -n "Checking $REGISTRY_API/$image:tripleo-ci-testing ... ";
+            if curl -fk "$REGISTRY_API/$image:tripleo-ci-testing" &>/dev/null; then
+                echo $image | sed "s/centos-binary-//g" >> {{containers_file }};
+                echo "OK";
+            else
+                echo "FAIL";
+                echo "ERROR ========== $image IS NOT BUILT! FIX THIS ASAP! ==========";
+            fi
+        done
+
     - name: run container tagging and always cleanup at the end
       block:
         - name: Retrieve list of built images
