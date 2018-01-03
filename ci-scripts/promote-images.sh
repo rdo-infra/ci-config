@@ -15,5 +15,10 @@ function sftp_command {
         uploader@images.rdoproject.org
 }
 
-sftp_command "rm /var/www/html/images/$RELEASE/rdo_trunk/$LINK_NAME"
+# sftp rename oldpath newpath
+# remove n-1 image soft link
+sftp_command "rm /var/www/html/images/$RELEASE/rdo_trunk/previous-${LINK_NAME}"
+# rename the current link to previous-$LINK_NAME to keep n-1 copy of image
+sftp_command "rename /var/www/html/images/$RELEASE/rdo_trunk/$LINK_NAME /var/www/html/images/$RELEASE/rdo_trunk/previous-${LINK_NAME}"
+# promote new hash with link
 sftp_command "ln -s /var/www/html/images/$RELEASE/rdo_trunk/$PROMOTED_HASH /var/www/html/images/$RELEASE/rdo_trunk/$LINK_NAME"
