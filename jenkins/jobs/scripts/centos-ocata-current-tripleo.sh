@@ -17,4 +17,7 @@ export BUILD_SYS='rdo_trunk'
 # When ENABLE_PUPPET_MODULES_RPM is true, puppet modules are installed from
 # rpm instead of git repo in p-o-i jobs
 export ENABLE_PUPPET_MODULES_RPM=true
+# When MANAGE_PUPPET_MODULES is false, puppet modules defined in Puppetfile of p-o-i are not installed. This should be false
+# when ENABLE_PUPPET_MODULES_RPM=true.
+export MANAGE_PUPPET_MODULES=false
 export HASH_FILE='/tmp/ocata_current_tripleo_hash'

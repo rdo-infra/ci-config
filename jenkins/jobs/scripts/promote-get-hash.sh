@@ -15,3 +15,4 @@ echo "BUILD_SYS = $BUILD_SYS" >> $HASH_FILE
 echo "RDO_VERSION_DIR = $RDO_VERSION_DIR" >> $HASH_FILE
 echo "tempest_version = $TEMPEST_VERSION" >> $HASH_FILE
 echo "enable_puppet_modules_rpm = $ENABLE_PUPPET_MODULES_RPM" >> $HASH_FILE
+echo "manage_puppet_modules = $MANAGE_PUPPET_MODULES" >> $HASH_FILE

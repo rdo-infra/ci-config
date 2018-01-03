@@ -84,6 +84,7 @@
           -e tempest_version=${{tempest_version}} \
           -e tempest_from_source=${{tempest_from_source}} \
           -e enable_puppet_modules_rpm=${{enable_puppet_modules_rpm}}
+          -e manage_puppet_modules=${{manage_puppet_modules}}
         </pre>
     concurrent: true
     parameters:
@@ -130,6 +131,10 @@
             name: enable_puppet_modules_rpm
             default: 'true'
             description: Boolean (true|false) to use puppet modules from rpm packages in puppet-openstack-integration scenarios. Defaults to true.
+        - string:
+            name: manage_puppet_modules
+            default: 'false'
+            description: Boolean (true|false) to manage installation of puppet modules defined in Puppetfile of puppet-openstack-integration. This should be false when enable_puppet_modules_rpm is set to true. Defaults to false.
     scm:
         - weirdo-core-master-repository
     builders:
@@ -183,6 +188,10 @@
             name: enable_puppet_modules_rpm
             default: 'true'
             description: Boolean (true|false) to use tempest modules from rpm packages in puppet-openstack-integration scenarios. Defaults to true.
+        - string:
+            name: manage_puppet_modules
+            default: 'false'
+            description: Boolean (true|false) to manage installation of puppet modules defined in Puppetfile of puppet-openstack-integration. This should be false when enable_puppet_modules_rpm is set to true. Defaults to false.
 
     builders:
         - shell: |
@@ -197,6 +206,7 @@
             echo "|   - tempest_version: $tempest_version"
             echo "|   - tempest_from_source: $tempest_from_source"
             echo "|   - enable_puppet_modules_rpm: $enable_puppet_modules_rpm"
+            echo "|   - manage_puppet_modules: $manage_puppet_modules"
             echo "+===============================================+"
         - trigger-builds:
             - project:
@@ -216,6 +226,7 @@
                   tempest_version=$tempest_version
                   tempest_from_source=$tempest_from_source
                   enable_puppet_modules_rpm=$enable_puppet_modules_rpm
+                  manage_puppet_modules=$manage_puppet_modules
               block: true
               block-thresholds:
                 build-step-failure-threshold: 'FAILURE'
@@ -256,6 +267,10 @@
             name: enable_puppet_modules_rpm
             default: 'true'
             description: Boolean (true|false) to use tempest modules from rpm packages in puppet-openstack-integration scenarios. Defaults to true.
+        - string:
+            name: manage_puppet_modules
+            default: 'false'
+            description: Boolean (true|false) to manage installation of puppet modules defined in Puppetfile of puppet-openstack-integration. This should be false when enable_puppet_modules_rpm is set to true. Defaults to false.
     triggers:
         - timed: 'H H H/2 * *'
     builders:
@@ -268,6 +283,7 @@
             echo "|   - stable_repositories: $stable_repositories"
             echo "|   - tempest_from_source: $tempest_from_source"
             echo "|   - enable_puppet_modules_rpm: $enable_puppet_modules_rpm"
+            echo "|   - manage_puppet_modules: $manage_puppet_modules"
             echo "+===============================================+"
         - trigger-builds:
             - project:
@@ -284,6 +300,7 @@
                   stable_repositories=$stable_repositories
                   tempest_from_source=$tempest_from_source
                   enable_puppet_modules_rpm=$enable_puppet_modules_rpm
+                  manage_puppet_modules=$manage_puppet_modules
               block: true
               block-thresholds:
                 build-step-failure-threshold: 'FAILURE'
@@ -347,6 +364,10 @@
             name: enable_puppet_modules_rpm
             default: 'true'
             description: Boolean (true|false) to use tempest modules from rpm packages in puppet-openstack-integration scenarios. Defaults to true.
+        - string:
+            name: manage_puppet_modules
+            default: 'false'
+            description: Boolean (true|false) to manage installation of puppet modules defined in Puppetfile of puppet-openstack-integration. This should be false when enable_puppet_modules_rpm is set to true. Defaults to false.
 
     builders:
         - shell: |
@@ -365,6 +386,7 @@
             echo "|   - tempest_version: $tempest_version"
             echo "|   - tempest_from_source: $tempest_from_source"
             echo "|   - enable_puppet_modules_rpm: $enable_puppet_modules_rpm"
+            echo "|   - manage_puppet_modules: $manage_puppet_modules"
             echo "+===============================================+"
         - trigger-builds:
             - project:
@@ -388,6 +410,7 @@
                   tempest_version=$tempest_version
                   tempest_from_source=$tempest_from_source
                   enable_puppet_modules_rpm=$enable_puppet_modules_rpm
+                  manage_puppet_modules=$manage_puppet_modules
               block: true
               block-thresholds:
                 build-step-failure-threshold: 'FAILURE'
