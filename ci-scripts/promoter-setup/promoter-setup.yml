@@ -23,19 +23,23 @@
 - name: Set up the promoter-server
   hosts: promoter-server
   tasks:
-    - name: Create persistent journal
-      file:
-        path: /var/log/journal/
-        state: directory
+    - name: Enable journald persistence
+      ini_file:
+        dest: "/etc/systemd/journald.conf"
+        section: Journal
+        option: Storage
+        value: "Persistent"
+        no_extra_spaces: yes
+      register: journal_config
       become: true
-    - name: Run systemd-tmpfs on journal directory
-      shell: systemd-tmpfiles --create --prefix /var/log/journal
-      become: true
-    - name: Restart journal
-      service:
+
+    - name: Restart journald
+      systemd:
         name: systemd-journald
         state: restarted
+      when: journal_config.changed|bool
       become: true
+
     - name: Update packages on the server
       become: true
       yum:
@@ -88,12 +92,14 @@
                   Require all granted
               </Directory>
           </VirtualHost>
+      register: apache_config
     - name: Start and enable Apache
       become: true
       service:
         name: httpd
         state: restarted
         enabled: yes
+      when: apache_config.changed|bool
     - name: Start and enable Docker
       become: true
       service:
@@ -124,10 +130,11 @@
     - name: Add keypair for the images server
       copy:
         content: '{{ uploader_ssh_priv_key }}'
-        dest: {{ ansible_env.HOME }}/.ssh/id_rsa
+        dest: "{{ ansible_env.HOME }}/.ssh/id_rsa"
     - name: Geneerate public key from private key for uploader user
       shell: >
         ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+      creates:  ~/.ssh/id_rsa.pub
     - name: Create a virtualenv for the promoter script
       pip:
         requirements: ~/ci-config/ci-scripts/dlrnapi_promoter/requirements.txt
