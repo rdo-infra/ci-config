@@ -1,0 +1,146 @@
+---
+- name: Enable journald persistence
+  ini_file:
+    dest: "/etc/systemd/journald.conf"
+    section: Journal
+    option: Storage
+    value: "Persistent"
+    no_extra_spaces: yes
+  register: journal_config
+  become: true
+
+- name: Restart journald
+  systemd:
+    name: systemd-journald
+    state: restarted
+  when: journal_config.changed|bool
+  become: true
+
+- name: Update packages on the server
+  become: true
+  yum:
+    name: '*'
+    state: latest
+
+- name: Install EPEL (for pip)
+  become: true
+  yum:
+    name: epel-release
+    state: latest
+
+- name: Install required packages
+  become: true
+  yum:
+    name: '{{ item }}'
+    state: latest
+  with_items:
+    - python-pip
+    - docker
+    - ansible
+    - vim
+    - docker-python
+    - git
+    - python-virtualenv
+
+- name: Upgrade pip
+  pip:
+    name: pip
+    state: latest
+  become: yes
+
+- name: Install python packages with pip
+  pip:
+    name: "{{ item }}"
+    state: present
+  become: yes
+  with_items:
+    - docker-compose
+    - grafyaml
+
+- name: Clone ci-config repo
+  git:
+    repo: '{{ git_repo }}'
+    dest: '{{ git_repo_path }}'
+    force: yes
+    version: '{{ git_branch }}'
+
+- name: Set up local running update script for the system
+  cron:
+    name: 'update system'
+    minute: '*/5'
+    job: '/bin/bash {{ project_root }}/local_update.sh'
+
+- name: Find out docker group name
+  shell: grep docker /etc/group | cut -d":" -f1 | head -1
+  register: docker_group
+  changed_when: false
+
+- name: Check if user is in docker group
+  command: groups
+  register: user_groups
+  changed_when: false
+
+- when: "docker_group.stdout not in user_groups.stdout"
+  block:
+
+  - name: Add user to docker group
+    user:
+      name: '{{ ansible_user }}'
+      groups: '{{ docker_group.stdout }}'
+      append: yes
+    become: yes
+    register: groupadd
+
+  # Use this dirty hack to relogin the user
+  # https://github.com/ansible/ansible-modules-core/issues/921
+  - name: Kill SSH to relogin the user for changed group
+    shell: |
+      sleep 1
+      ps ux | grep ssh | grep pts | grep -v grep | awk {'print $2'} | xargs kill
+    async: 3
+    poll: 2
+    when: groupadd|changed
+
+- name: Create docker configuration file
+  copy:
+    content: |
+      {
+      "live-restore": true,
+      "group": "{{ docker_group.stdout }}",
+      }
+    dest: /etc/docker/daemon.json
+  become: yes
+  register: docker_config
+
+- name: Reload docker if config was changed
+  service:
+    name: docker
+    state: reloaded
+  become: yes
+  when: docker_config|changed
+
+- name: Start and enable docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+  become: yes
+
+# Uncomment this when you have docker-compose.yaml in repo
+#- name: Run docker-compose from repo
+#  docker_service:
+#    project_src: '{{ project_root }}'
+#    state: present
+#    pull: yes
+#
+#- name: Test if deployment was successful
+#  shell: |
+#    set -e
+#    set -o pipefail
+#    # Check that containers are up
+#    {% for container in docker_container_names %}
+#    docker ps | grep {{ container }}
+#    {% endfor %}
+#    # Check that web service is up
+#    # curl --fail http://localhost > /dev/null
+#  changed_when: false

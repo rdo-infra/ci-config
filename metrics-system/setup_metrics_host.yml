@@ -1,0 +1,26 @@
+- name: Set up the grafana server on rdocloud
+  hosts: localhost
+  tasks:
+
+    - name: Create the grafana server instance
+      os_server:
+        state: present
+        name: grafana
+        auto_ip: yes
+        flavor: m1.medium
+        image: "{{ image_id }}"
+        key_name: "{{ cloud_key_name }}"
+        network: private
+        security_groups: "{{ sec_groups }}"
+        timeout: 300
+      register: 'os_host'
+
+    - name: add hosts to inventory
+      add_host:
+        name: grafana
+        ansible_user: centos
+        ansible_host: '{{ os_host.openstack.accessIPv4 }}'
+        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+
+    - name: Wait a little to host go up
+      pause: seconds=20
