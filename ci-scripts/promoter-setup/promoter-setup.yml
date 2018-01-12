@@ -147,7 +147,7 @@
         name: 'promoter script for the {{ item.release }} branch'
         minute: '{{ item.minute }}'
         # TODO(gcerami) I think the job command deserves a script on its own
-        job: 'source ~/registry_secret; source ~/dlrnapi_secret; source ~/promoter_venv/bin/activate; python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/{{ item.release }}.ini'
+        job: 'source ~/registry_secret; source ~/dlrnapi_secret; source ~/promoter_venv/bin/activate; /usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/{{ item.release }}.ini'
       with_items:
         - { release: 'master', minute: '1,11,21,31,41,51' }
         - { release: 'pike', minute: '2,12,22,32,42,52' }
