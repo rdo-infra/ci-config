@@ -11,8 +11,8 @@ import socket
 import subprocess
 import sys
 
-from dlrnapi_client.rest import ApiException
-import dlrnapi_client
+#from dlrnapi_client.rest import ApiException
+#import dlrnapi_client
 
 
 def check_promoted(dlrn, link, hashes):
@@ -247,7 +247,8 @@ def promoter(config_file):
     get_lock('promoter-%s' % release)
 
     logger.info('STARTED promotion process with config %s', config_file)
-
+    import time
+    time.sleep(30)
     try:
         git_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
                                            cwd=os.path.abspath(sys.path[0]))
