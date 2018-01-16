@@ -141,13 +141,28 @@ def tag_qcow_images(new_hashes, release, promote_name):
     relpath = "ci-scripts/dlrnapi_promoter"
     script_root = os.path.abspath(sys.path[0]).replace(relpath,"")
     promote_script = script_root + 'ci-scripts/promote-images.sh'
+    clear_script = script_root + 'ci-scripts/clear_images.sh'
     full_hash = new_hashes['full_hash']
+    try:
+        logger.info('Clearing the old images from server for release %s',
+                    release)
+        clearing_logs = subprocess.check_output(['bash', clear_script,
+                                                 release],
+                                                stderr=subprocess.STDOUT
+                                                ).split("\n")
+        for line in clearing_logs:
+            logger.info(line)
+    except subprocess.CalledProcessError as ex:
+        logger.error('CLEAR IMAGES FAILED, LOGS ARE BELOW:')
+        logger.error(ex.output)
+        logger.exception(ex)
+        logger.error('END OF CLEAR IMAGES FAILURE')
     try:
         logger.info('Promoting the qcow image for dlrn hash %s on %s to %s',
                     full_hash, release, promote_name)
         qcow_logs = subprocess.check_output(['bash', promote_script,
-                                            release, full_hash,
-                                            promote_name],
+                                             release, full_hash,
+                                             promote_name],
                                             stderr=subprocess.STDOUT
                                             ).split("\n")
         for line in qcow_logs:
@@ -158,6 +173,7 @@ def tag_qcow_images(new_hashes, release, promote_name):
         logger.exception(ex)
         logger.error('END OF QCOW IMAGE UPLOAD FAILURE')
         raise
+
 
 
 def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hashes_count):
