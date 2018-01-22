@@ -21,6 +21,8 @@ cat << EOF > convert-overcloud-undercloud.yml
     repo_run_live: false
     working_dir: ./
     overcloud_as_undercloud: true
+    modify_image_vc_verbose: true
+    modify_image_vc_trace: true
   tasks:
     - include_role:
         name: "repo-setup"
