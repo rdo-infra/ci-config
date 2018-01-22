@@ -21,6 +21,8 @@ cat << EOF > convert-overcloud-undercloud.yml
     repo_run_live: false
     working_dir: ./
     overcloud_as_undercloud: true
+    modify_image_vc_verbose: true
+    modify_image_vc_trace: true
   tasks:
     - include_role:
         name: "repo-setup"
@@ -52,6 +54,9 @@ ANSIBLE_ROLES_PATH="$ANSIBLE_ROLES_PATH:$QUICKSTART_VENV/usr/local/share/ansible
 export REPO_CONFIG="$QUICKSTART_VENV/config/release/tripleo-ci/promotion-testing-hash-${RELEASE}.yml"
 . $QUICKSTART_VENV/bin/activate
 rm -rf $QUICKSTART_VENV/ansible_facts_cache
+
+# Install kernel 3.10.0-693.el7.x86_64 required by workaround https://review.openstack.org/#/c/535293/
+sudo yum install -y kernel-3.10.0-693.el7.x86_64
 ansible-playbook -vv convert-overcloud-undercloud.yml -e @$REPO_CONFIG
 deactivate
 
