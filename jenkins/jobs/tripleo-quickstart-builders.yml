@@ -2,6 +2,13 @@
     name: 'tripleo-quickstart-builder'
     builders:
         - shell: |
+              # (TODO - amoralej) Dirty hack until https://review.openstack.org/#/c/536366/ is merged
+              git clone https://git.openstack.org/openstack/tripleo-quickstart-extras $WORKSPACE/tripleo-quickstart-extras
+              pushd $WORKSPACE/tripleo-quickstart-extras
+              git fetch https://git.openstack.org/openstack/tripleo-quickstart-extras refs/changes/66/536366/3 && git checkout FETCH_HEAD
+              popd
+              echo "$WORKSPACE/tripleo-quickstart-extras" > $WORKSPACE/tripleo-quickstart/quickstart-extras-requirements.txt
+              #
               bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
               export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
               echo $VIRTHOST
