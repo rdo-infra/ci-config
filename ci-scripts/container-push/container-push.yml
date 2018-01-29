@@ -21,11 +21,26 @@
     rdoproject_username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
     rdoproject_password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
     containers_file: "parsed_containers-{{ lookup('env','RELEASE') }}.txt"
-    local_release: "{% if 'master' == lookup('env', 'RELEASE') %}master{% else %}stable/{{ lookup('env', 'RELEASE') }}{% endif %}"
-    release_url: "https://raw.githubusercontent.com/openstack/tripleo-common/{{ local_release }}/container-images/overcloud_containers.yaml.j2"
     registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/{{ lookup('env', 'RELEASE') }}/imagestreamtags"
     image_tag: tripleo-ci-testing
   tasks:
+    - name: Construct dlrn_dir from full_hash (turn xxyyz* into xx/yy/xxyyz*)
+      set_fact:
+        dlrn_dir: "{{ full_hash | regex_replace('^(?P<first>.{2})(?P<second>.{2})(?P<third>.+)$', '\\g<first>/\\g<second>/\\g<first>\\g<second>\\g<third>') }}"
+
+    - name: Construct the DLRN URL for the promoted hash
+      set_fact:
+        dlrn_url: "https://trunk.rdoproject.org/centos7-{{ lookup('env','RELEASE') }}/{{ dlrn_dir }}/versions.csv"
+
+    - name: Get the tripleo-common commit in the promoted hash
+      shell: >
+        curl {{ dlrn_url }} | grep tripleo-common | cut -f3 -d','
+      register: local_release
+
+    - name: Set the release_url
+      set_fact:
+        release_url: "https://raw.githubusercontent.com/openstack/tripleo-common/{{ local_release.stdout }}/container-images/overcloud_containers.yaml.j2"
+
     - name: Generate list of containers to push
       shell: |
         echo -n > {{ containers_file }};
