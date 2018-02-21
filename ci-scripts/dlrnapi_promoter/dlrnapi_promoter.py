@@ -160,6 +160,41 @@ def tag_qcow_images(new_hashes, release, promote_name):
         raise
 
 
+def get_latest_hashes(api, promote_name, current_name, latest_hashes_count):
+    '''Get and filter eligible hashes for promotion'''
+    logger = logging.getLogger('promoter')
+
+    old_hashes = fetch_hashes(api, promote_name)
+    if old_hashes is None:
+        logger.warning('Failed to fetch hashes for %s, no previous '
+                       'promotion or typo in the link name',
+                       promote_name)
+    else:
+        logger.info('The currently promoted hash is %s', old_hashes)
+    latest_hashes = fetch_hashes(api, current_name, count=latest_hashes_count)
+    if latest_hashes is None:
+        logger.error('Failed to fetch any hashes for %s, skipping promotion',
+                     current_name)
+        return []
+    else:
+        logger.debug('Hashes fetched (tried to get the last %d): %s',
+                     latest_hashes_count, latest_hashes)
+    if latest_hashes[0] == old_hashes:
+        logger.info('Same hashes for %s and %s %s, skipping promotion',
+                    current_name, promote_name, old_hashes)
+        return []
+    # Eliminate already promoted hashes
+    latest_hashes = [new_hashes for new_hashes in latest_hashes
+                     if not check_promoted(api, promote_name, new_hashes)]
+    logger.debug('Remaining hashes after removing already promoted ones: %s',
+                 latest_hashes)
+    latest_hashes = [new_hashes for new_hashes in latest_hashes
+                     if new_hashes['timestamp'] > old_hashes['timestamp']]
+    logger.debug('Remaining hashes after removing ones older than the '
+                 'currently promoted: %s', latest_hashes)
+    return latest_hashes
+
+
 def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hashes_count):
     '''Promote DLRN API links as a different one when all jobs are
     successful'''
@@ -167,29 +202,11 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hash
 
     for promote_name, current_name in promote_from.items():
         logger.info('Trying to promote %s to %s', current_name, promote_name)
-        old_hashes = fetch_hashes(api, promote_name)
-        if old_hashes is None:
-            logger.warning('Failed to fetch hashes for %s, no previous '
-                        'promotion or typo in the link name',
-                        promote_name)
-        latest_hashes = fetch_hashes(api, current_name, count=latest_hashes_count)
-        if latest_hashes is None:
-            logger.error('Failed to fetch hashes for %s, skipping promotion',
-                        current_name)
-            continue
-        # check if very latest hash has already been promoted
-        # and skip
-        if latest_hashes[0] == old_hashes:
-            logger.info('Same hashes for %s and %s %s, skipping promotion',
-                        current_name, promote_name, old_hashes)
-            continue
-        # Eliminate already promoted hashes
-        latest_hashes = [new_hashes for new_hashes in latest_hashes
-                         if not check_promoted(api, promote_name, new_hashes) and
-                         new_hashes['timestamp'] > old_hashes['timestamp']]
         # Cycle over latest unpromoted hashes
-        for new_hashes in latest_hashes:
-            logger.info('new hash found for %s: %s', str(new_hashes), current_name)
+        for new_hashes in get_latest_hashes(api, promote_name, current_name,
+                                            latest_hashes_count):
+            logger.info('Checking hash %s from %s for promotion criteria',
+                        new_hashes, current_name)
             new_hashes['full_hash'] = '{0}_{1}'.format(new_hashes['commit_hash'],
                                         new_hashes['distro_hash'][:8])
             successful_jobs = Set(fetch_jobs(api, new_hashes))
@@ -202,8 +219,8 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hash
                 continue
             if dry_run:
                 logger.info('DRY RUN: promotion conditions satisfied, '
-                            'skipping promotion of %s to %s (old: %s, new: %s)',
-                            current_name, promote_name, old_hashes, new_hashes)
+                            'skipping promotion of %s to %s (%s)',
+                            current_name, promote_name, new_hashes)
                 break
             else:
                 try:
@@ -213,13 +230,14 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hash
                         tag_containers(new_hashes, release, promote_name)
                     tag_qcow_images(new_hashes, release, promote_name)
                     promote_link(api, new_hashes, promote_name)
-                    logger.info('SUCCESS promoting %s as %s (old: %s, new: %s)',
-                                current_name, promote_name, old_hashes, new_hashes)
+                    logger.info('SUCCESS promoting %s as %s (%s)',
+                                current_name, promote_name, new_hashes)
                     # stop here, don't try to promote other hashes
                     break
                 except:
-                    logger.info('FAILED promoting %s as %s (old: %s, new: %s)',
-                                current_name, promote_name, old_hashes, new_hashes)
+                    logger.info('FAILED promoting %s as %s (%s)',
+                                current_name, promote_name, new_hashes)
+
 
 # Use atomic abstract socket creation as process lock
 # no pid files to deal with
@@ -235,6 +253,7 @@ def get_lock(process_name):
     except socket.error:
         logger.error('Another promoter process is running')
         sys.exit(1)
+
 
 def promoter(config_file):
     config = ConfigParser.SafeConfigParser(allow_no_value=True)
@@ -288,7 +307,6 @@ def promoter(config_file):
 
     promote_all_links(api_instance, promote_from, job_reqs, dry_run, release, latest_hashes_count)
     logger.info("FINISHED promotion process")
-
 
 
 if __name__ == '__main__':
