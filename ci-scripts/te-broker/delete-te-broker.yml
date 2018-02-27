@@ -1,0 +1,15 @@
+---
+- name: Delete previous server if exists
+  hosts: localhost
+  tasks:
+    - name: Delete a port with fixed IP
+      os_port:
+        name: te-broker-port
+        network: private
+        state: absent
+
+    - name: Delete te-broker if exists
+      os_server:
+        state: absent
+        name: te-broker
+        delete_fip: true

@@ -1,0 +1,38 @@
+- name: Set up the te-broker server on rdocloud
+  hosts: localhost
+  tasks:
+
+    - name: Create a port with fixed IP
+      os_port:
+        name: te-broker-port
+        network: private
+        state: present
+        fixed_ips:
+          - ip_address: 192.168.103.254
+        security_groups:
+          - default
+          - sshnaidm_secgroup
+          - http-https
+
+    - name: Create the te-broker server instance
+      os_server:
+        state: present
+        name: te-broker
+        auto_floating_ip: yes
+        flavor: m1.medium
+        image: CentOS-7-x86_64-GenericCloud-1801-01
+        #key_name: tripleo-cd-admins-and-adarazs-trown
+        key_name: sshnaidm_keys
+        nics:
+          - port-name: te-broker-port
+        timeout: 300
+      register: 'os_host'
+    - name: add hosts to inventory
+      add_host:
+        name: '{{ os_host.openstack.name }}'
+        ansible_user: centos
+        ansible_host: '{{ os_host.openstack.accessIPv4 }}'
+        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+
+    - name: Let it be up
+      pause: seconds=60
