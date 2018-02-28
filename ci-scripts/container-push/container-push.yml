@@ -34,7 +34,7 @@
 
     - name: Get the tripleo-common commit in the promoted hash
       shell: >
-        curl {{ dlrn_url }} | grep tripleo-common | cut -f3 -d','
+        curl {{ dlrn_url }} | grep ',openstack-tripleo-common-[0-9]' | cut -f3 -d','
       register: local_release
 
     - name: Set the release_url
@@ -54,6 +54,12 @@
                 echo "ERROR ========== centos-binary-$image IS NOT BUILT! FIX THIS ASAP! ==========";
             fi
         done
+        # fail the script and exit with error if the container list is empty
+        if [ ! -s {{ containers_file }} ]; then
+            echo "FAIL";
+            echo "ERROR =========== container list is empty THIS IS A CRITICAL BUG in the container push playbook";
+            exit 1
+        fi
 
     - name: run container tagging and always cleanup at the end
       block:
