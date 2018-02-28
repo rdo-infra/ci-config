@@ -314,4 +314,7 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("Usage: %s <config-file>" % sys.argv[0])
     else:
-        promoter(sys.argv[1])
+        try:
+            promoter(sys.argv[1])
+        except Exception as e:
+            logger.exception(e)
