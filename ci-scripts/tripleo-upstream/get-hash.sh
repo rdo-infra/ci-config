@@ -18,6 +18,15 @@ COMMIT_HASH=$(shyaml get-value commits.0.commit_hash < $WORKSPACE/commit.yaml)
 DISTRO_HASH=$(shyaml get-value commits.0.distro_hash < $WORKSPACE/commit.yaml)
 FULL_HASH=${COMMIT_HASH}_${DISTRO_HASH:0:8}
 
+
+## REMOVE ME, EMERGENCY PINNING FOR QUEENS PROMOTION
+
+if [ $RELEASE == "queens" ] && [ $PROMOTE_NAME == "consistent" ]; then
+    COMMIT_HASH=6f5ea2266845fbc95354233e626b5f46ebbe5da8
+    DISTRO_HASH=ca3f9388602f90d1d1b8252e74c8ea3286cb90a6
+    FULL_HASH=6f5ea2266845fbc95354233e626b5f46ebbe5da8_ca3f9388
+fi
+
 export DLRNAPI_URL="https://trunk.rdoproject.org/api-centos-$RELEASE"
 if [ "$RELEASE" = "master" ]; then
     # for master we have two DLRN builders, use the "upper constraint" one that
