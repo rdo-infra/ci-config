@@ -188,8 +188,9 @@ def get_latest_hashes(api, promote_name, current_name, latest_hashes_count):
                      if not check_promoted(api, promote_name, new_hashes)]
     logger.debug('Remaining hashes after removing already promoted ones: %s',
                  latest_hashes)
-    latest_hashes = [new_hashes for new_hashes in latest_hashes
-                     if new_hashes['timestamp'] > old_hashes['timestamp']]
+    if old_hashes is not None:
+        latest_hashes = [new_hashes for new_hashes in latest_hashes
+                         if new_hashes['timestamp'] > old_hashes['timestamp']]
     logger.debug('Remaining hashes after removing ones older than the '
                  'currently promoted: %s', latest_hashes)
     return latest_hashes
