@@ -256,11 +256,7 @@ def get_lock(process_name):
         sys.exit(1)
 
 
-def promoter(config_file):
-    config = ConfigParser.SafeConfigParser(allow_no_value=True)
-    config.read(config_file)
-
-    setup_logging(config.get('main', 'log_file'))
+def promoter(config):
     logger = logging.getLogger('promoter')
 
     release = config.get('main', 'release')
@@ -314,4 +310,11 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("Usage: %s <config-file>" % sys.argv[0])
     else:
-        promoter(sys.argv[1])
+        config = ConfigParser.SafeConfigParser(allow_no_value=True)
+        config.read(sys.argv[1])
+        setup_logging(config.get('main', 'log_file'))
+        logger = logging.getLogger('promoter')
+        try:
+            promoter(config)
+        except Exception as e:
+            logger.exception(e)
