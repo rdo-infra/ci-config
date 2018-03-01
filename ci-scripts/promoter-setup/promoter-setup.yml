@@ -1,17 +1,26 @@
 - name: Set up the promoter-server on rdocloud
   hosts: localhost
   tasks:
+
+    - name: Create volume for promoter server
+      os_volume:
+        state: present
+        size: 80
+        display_name: promoter-server-storage
+
     - name: Create the promoter-server instance
       os_server:
         state: present
         name: promoter-server
         auto_ip: yes
-        flavor: m1.medium
-        image: 8f41e8ce-cacc-4354-a481-9b9dba4f6de7
-        key_name: tripleo-cd-admins-and-adarazs-trown
+        flavor: rdo.m1.medium
+        image: CentOS-7-x86_64-GenericCloud-1801-01
+        key_name: tripleo-cd-admins
         network: private
         security_groups: default
         timeout: 300
+        volumes:
+          - promoter-server-storage
       register: 'os_host'
     - name: add hosts to inventory
       add_host:
@@ -23,6 +32,33 @@
 - name: Set up the promoter-server
   hosts: promoter-server
   tasks:
+
+    - become: true
+      block:
+
+      - name: Mount external volume - create a partition
+        parted:
+          device: /dev/vdb
+          number: 1
+          state: present
+
+      - name: Mount external volume - create a filesystem
+        filesystem:
+          fstype: xfs
+          dev: /dev/vdb1
+
+      - name: create a mount folder
+        file:
+          path: /var/lib/docker
+          state: directory
+
+      - name: Mount external volume - mount the partition
+        mount:
+          path: /var/lib/docker
+          src: /dev/vdb1
+          fstype: xfs
+          state: mounted
+
     - name: Create persistent journal
       file:
         path: /var/log/journal/
@@ -157,7 +193,9 @@
 
     - name: Generate public key from private key for uploader user
       shell: >
-        ssh-keygen -t rsa -N '' -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+        ssh-keygen -y -t rsa -N '' -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+      args:
+        creates: /home/centos/.ssh/id_rsa.pub
       when: priv_key|changed
 
     - name: Create a virtualenv for the promoter script
@@ -185,6 +223,7 @@
         job: 'source ~/registry_secret; source ~/dlrnapi_secret; source ~/promoter_venv/bin/activate; /usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/{{ item.release }}.ini'
       with_items:
         - { release: 'master', minute: '1,11,21,31,41,51' }
+        - { release: 'queens', minute: '4,14,24,34,44,54' }
         - { release: 'pike', minute: '2,12,22,32,42,52' }
         - { release: 'ocata', minute: '3,13,23,33,43,53' }
 
