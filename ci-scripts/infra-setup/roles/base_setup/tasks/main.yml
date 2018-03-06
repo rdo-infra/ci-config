@@ -1,0 +1,9 @@
+- name: partition extra volume
+  parted:
+  with_item: "{{ tenants.value.servers }}"
+
+- name: format volume
+  fstab:
+  when: item.volume is defined
+  with_item: "{{ tenants.value.servers }}"
+

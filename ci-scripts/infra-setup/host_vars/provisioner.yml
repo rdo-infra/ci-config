@@ -1,0 +1,129 @@
+# Host variables
+# Comment this if you're not runnint ansible from virtualenv
+python_interpreter: "{{ lookup('env', 'VIRTUAL_ENV') }}/bin/python"
+
+# Workflow defaults
+servers_teardown:
+    include_role: false
+    # These must be a list or "*" to include all servers
+    include_servers:
+    include_volumes:
+general_teardown:
+    include_role: false
+    include_ports:
+    include_networks:
+    include_subnets:
+    # These do not support "*" to delete all
+    include_routers:
+    include_keypairs: null
+    include_secgroups:
+
+# tenant defaults
+default_image: &default_image CentOS-7-x86_64-GenericCloud-1708
+default_flavor: &default_flavor m1.medium
+
+servers_key: &servers_key servers_key
+
+bastion_public_ip: &bastion_public_ip 38.145.33.126
+bastion_public_key: &bastion_public_key rdo-tripleo-ci-infra
+# user must provide this
+bastion_private_key: null
+
+keys_dir: "{{ lookup('env', 'HOME')}}/keys-infra-setup"
+
+external_network: &external_network 38.145.32.0/22
+internal_network: &internal_network private
+internal_network_cidr: &internal_network_cidr 192.168.100.0/22
+
+internal_nics: &internal_nics
+    - net-name: *internal_network
+
+tenants:
+    gcerami:
+        #    openstack-infra:
+        networks:
+            - name: *internal_network
+        subnets:
+            - name: "private_subnet"
+              network_name: *internal_network
+              cidr: *internal_network_cidr
+        routers:
+            - name: *internal_network
+              network: *external_network
+              interfaces:
+                  - "private_subnet"
+        security_groups:
+            - name: &test_sg test
+              rules:
+                - protocol: tcp
+                  port_range_min: 22
+                  port_range_max: 22
+                  remote_ip_prefix: *internal_network_cidr
+            - name: &bastion_sg bastion
+              rules:
+                - protocol: tcp
+                  port_range_min: 22
+                  port_range_max: 22
+                  direction: ingress
+                  remote_ip_prefix: 0.0.0.0/0
+            - name: &dns_sg dns
+              rules:
+                - protocol: tcp
+                  port_range_min: 22
+                  port_range_max: 22
+                  remote_ip_prefix: *internal_network_cidr
+                - protocol: tcp
+                  port_range_min: 53
+                  port_range_max: 53
+                  remote_ip_prefix: 0.0.0.0/0
+                - protocol: udp
+                  port_range_min: 53
+                  port_range_max: 53
+                  remote_ip_prefix: 0.0.0.0/0
+        keypairs:
+            - name: *bastion_public_key
+              public_key_file: rdo-tripleo-ci-infra.pub
+            - name: *servers_key
+              generate: true
+        servers:
+            # Fixed ip servers first
+            - name: bastion
+              image: *default_image
+              flavor: *default_flavor
+              key_name: *bastion_public_key
+              security_groups:
+                - *bastion_sg
+              nics: *internal_nics
+              floating_ips:
+                - *bastion_public_ip
+            - name: test_server
+              image: *default_image
+              flavor: *default_flavor
+              key_name: *servers_key
+              security_groups:
+                  - *test_sg
+              ports:
+                name: testserver-port
+                network: "private"
+                fixed_ip_address: 10.0.0.1
+              volumes:
+                - display_name: &test_server_volume test
+                  display_description: test
+                  size: 80
+                  #floating_ips:
+                  #- 1.2.3.4
+              nics:
+                - port-name: testserver-port
+            #- *promoter-server
+            #            - dns
+            #            - sova1
+            #            - sova2
+            #            - sova3
+            #            - bastion
+#    openstack-nodepool:
+#        networks:
+#            - internal
+#            - external
+#        servers:
+#            - te-broker
+#          remote_ip_prefix: *bastion_public_ip

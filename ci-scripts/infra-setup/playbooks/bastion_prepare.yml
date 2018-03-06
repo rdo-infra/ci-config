@@ -1,0 +1,24 @@
+- hosts: provisioner
+  tasks:
+    - name: add bastion to inventory
+      add_host:
+        name: bastion
+        ansible_user: centos
+        ansible_host: "{{ bastion_public_ip }}"
+        ansible_ssh_host: "{{ bastion_public_ip }}"
+        ansible_ssh_private_key_file: "{{ bastion_private_key }}"
+
+    - name: wait for bastion to be reachable
+      wait_for:
+        port: 22
+        host: "{{ hostvars['bastion'].ansible_ssh_host }}"
+        search_regex: OpenSSH
+        delay: 10
+      connection: local
+      when: "'bastion' in hostvars"
+
+- hosts: bastion
+  tasks:
+    - include_role:
+        name: bastion_prepare
+

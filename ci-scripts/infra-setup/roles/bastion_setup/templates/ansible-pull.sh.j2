@@ -1,0 +1,8 @@
+#!/bin/bash
+
+export ANSIBLE_ROLES_PATH="{{ infra_setup_dir }}/roles"
+source {{ venv_dir }}/bin/activate
+
+ansible-pull -i {{ inventory_dir }}/inventory.ini \
+    -U {{ infra_setup_repo }} \
+    ci-scripts/infra-setup/playbooks/servers_setup.yaml
