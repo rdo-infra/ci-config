@@ -1,0 +1,14 @@
+- name:
+  os_security_group:
+    auth:
+        tenant_name: "{{ tenant.key }}"
+  with_items: "{{ tenant.value.security_groups }}"
+
+- name:
+  os_security_group_rule:
+    auth:
+        tenant_name: "{{ tenant.key }}"
+    security_group: "{{ item.security_group }}"
+    protocol: "{{ item.iprotocol }}"
+  with_items: "{{ tenant.value.security_rules }}"
+

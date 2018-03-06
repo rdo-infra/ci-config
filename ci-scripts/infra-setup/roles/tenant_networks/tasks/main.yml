@@ -1,0 +1,25 @@
+- debug:
+    msg: "Creating network for tenant {{ tenant.key }}"
+
+- debug:
+    msg: "{{ item }}"
+  with_items: "{{ tenant.value.subnets }}"
+
+- name: "Create Neworks"
+  os_network:
+    auth:
+        tenant_name: "{{ tenant.key }}"
+    state: present
+    name: "{{ item.name }}"
+    external: false
+  with_items: "{{ tenant.value.networks }}"
+
+- name: "Create subnets"
+  os_subnet:
+    auth:
+        tenant_name: "{{ tenant.key }}"
+    state: present
+    network_name: "{{ item.network_name }}"
+    name: "{{ item.name }}"
+    cidr: "{{ item.cidr }}"
+  with_items: "{{ tenant.value.subnets }}"
