@@ -1,0 +1,37 @@
+- hosts: all:!provisioner
+  tasks:
+      # bsae from rdo-infra
+    - include_role:
+        name: base
+    - include_role:
+        name: base_setup
+    # BUG https://github.com/ansible/ansible/issues/22571
+    # we currently cannot setup a include_role with a dynamic name
+    #- import_role:
+    #    name: "{{ ansible_host }}_setup"
+
+# WIthout dynamic inclusion, we need to call roles
+# one by one
+- name: Apply te-broker role
+  hosts: te-broker
+  tasks:
+    - include_role:
+        name: te-broker
+
+- name: Apply dns role
+  hosts: dns
+  tasks:
+    - include_role:
+        name: dns
+
+- name: Apply promoter role
+  hosts: promoter
+  tasks:
+    - include_role:
+        name: promoter
+
+- name: Apply promoter role
+  hosts: bastion
+  tasks:
+    - include_role:
+        name: bastion_setup

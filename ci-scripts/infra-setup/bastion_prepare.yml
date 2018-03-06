@@ -1,0 +1,33 @@
+- hosts: provisioner
+  tasks:
+    - name: add bastion to inventory
+      add_host:
+        name: bastion
+        ansible_user: centos
+        ansible_host: "{{ bastion_public_ip }}"
+        ansible_ssh_host: "{{ bastion_public_ip }}"
+        ansible_ssh_private_key_file: "{{ bastion_private_key }}"
+
+    - name: wait for bastion to be reachable
+      wait_for:
+        port: 22
+        host: "{{ hostvars['bastion'].ansible_ssh_host }}"
+        search_regex: OpenSSH
+        delay: 10
+      connection: local
+      when: "'bastion' in hostvars"
+
+    - name: add bastion pub key to known hosts if needed
+      shell: |
+          ssh -o StrictHostKeyChecking=yes -i "{{  hostvars['bastion'].ansible_ssh_private_key_file }}" centos@{{ hostvars['bastion'].ansible_ssh_host }} /bin/true 2>&1 | grep "Host key verification failed"
+          if [ $? == 0 ] ; then
+            ssh-keyscan -H {{ hostvars['bastion'].ansible_ssh_host }} >> {{ ansible_env.HOME }}/.ssh/known_hosts
+          fi
+      args:
+          executable: /bin/bash
+
+- hosts: bastion
+  tasks:
+    - include_role:
+        name: bastion_prepare
+

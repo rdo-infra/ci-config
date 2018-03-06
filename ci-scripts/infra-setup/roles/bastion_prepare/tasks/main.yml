@@ -1,0 +1,82 @@
+# THis should be called only from the provisioner
+- name: Create dirs
+  file:
+    state: directory
+    path: "{{ item }}"
+  with_items:
+       - "{{ keys_dir }}"
+       - "{{ infra_setup_dir }}"
+       - "{{ venv_dir }}"
+       - "{{ inventory_dir }}"
+
+- name: Create empty inventory
+  file:
+    state: touch
+    path: "{{ inventory_file }}"
+
+# Ansible inventory is non standard INI
+- name: Fake ini file structure
+  replace:
+    path: "{{ inventory_file }}"
+    regexp: "^{{ item.openstack.name  }}$"
+    replace: "{{ item.openstack.name  }} = None"
+  with_items: "{{ hostvars['provisioner'].created_servers.results }}"
+  when: item.openstack.name != 'bastion'
+
+- name: add server groups for inventory
+  ini_file:
+    path: "{{ inventory_file }}"
+    section: "{{ item.openstack.name }}_group"
+    option: "{{ item.openstack.name  }}"
+  with_items: "{{ hostvars['provisioner'].created_servers.results }}"
+  when: item.openstack.name != 'bastion'
+
+- name: update inventory file ansible_host
+  ini_file:
+    path: "{{ inventory_file }}"
+    section: "{{ item.openstack.name }}_group:vars"
+    option: ansible_host
+    value: "{{ item.item.floating_ips[0] if item.item.floating_ips is defined else item.openstack.private_v4  }}"
+  with_items: "{{ hostvars['provisioner'].created_servers.results }}"
+  when: item.openstack.name != 'bastion'
+
+- name: update inventory file ansible_ssh_private_key
+  ini_file:
+    path: "{{ inventory_file }}"
+    section: "{{ item.openstack.name }}_group:vars"
+    option: ansible_ssh_private_key_file
+    value: "{{ keys_dir }}/{{ item.openstack.key_name }}"
+  with_items: "{{ hostvars['provisioner'].created_servers.results }}"
+  when: item.openstack.name != 'bastion'
+
+- name: add server groups for inventory
+  ini_file:
+    path: "{{ inventory_file }}"
+    section: "bastion_group"
+    option: "bastion"
+
+- name: update inventory file ansible_host
+  ini_file:
+    path: "{{ inventory_file }}"
+    section: "bastion_group:vars"
+    option: "ansible_connection"
+    value: "local"
+
+- name: Fix ini file structure
+  replace:
+    path: "{{ inventory_file }}"
+    regexp: " = None"
+    replace: ""
+
+- name: copy servers_key if different
+  copy:
+    src: "{{ hostvars['provisioner'].keys_dir }}/{{ hostvars['provisioner'].servers_key }}"
+    dest: "{{ keys_dir }}"
+    force: yes
+
+    #- name: Get initial infra setup shallow clone
+    #  git:
+    #    repo: "{{ infra_setup_repo }}"
+    #    dest: "{{ infra_setup_dir }}"
+    #    depth: 1
+

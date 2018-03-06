@@ -1,0 +1,11 @@
+networks:
+    - name: "{{ servers_internal_network_name }}"
+subnets:
+    - name: "{{ servers_internal_network_name  }}_subnet"
+      network_name: "{{ servers_internal_network_name  }}"
+      cidr: "{{ rdocloud_extenal_network }}"
+routers:
+    - name: "{{ servers_internal_network_name  }}_router"
+      network: "{{ servers_internal_network_name  }}"
+      interfaces:
+          - "{{ servers_internal_network_name  }}_subnet"
