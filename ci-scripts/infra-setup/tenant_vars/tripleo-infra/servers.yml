@@ -1,0 +1,26 @@
+servers:
+    # Fixed ip servers first
+    - name: jumphost
+      image: "{{ default_image }}"
+      flavor: "{{ default_flavor }}"
+      key_name: "{{ default_keypair_name }}"
+      security_groups:
+        - sec_group_jumphost
+      ports:
+        - name: jumphost-port
+          network: "{{ servers_internal_network_name  }}"
+          fixed_ip_address: "{{ jumphost_internal_network_ip }}"
+      nics:
+        - port-name: jumphost-port
+      floating_ips:
+        - "{{ jumphost_external_network_ip }}"
+    - name: test_server
+      image: "{{ default_image }}"
+      flavor: "{{ default_flavor }}"
+      key_name: "{{ default_keypair_name }}"
+      security_groups:
+        - sec_group_test
+      volumes:
+        - display_name: test_volume
+          display_description: test
+          size: 80
