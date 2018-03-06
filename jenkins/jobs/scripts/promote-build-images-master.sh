@@ -3,7 +3,7 @@ set -eux
 pushd $WORKSPACE
 
 git clone https://github.com/rdo-infra/ci-config
-git clone https://github.com/openstack/tripleo-quickstart
+git clone https://git.openstack.org/openstack/tripleo-quickstart
 
 bash tripleo-quickstart/ci-scripts/get-node.sh
 
