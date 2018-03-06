@@ -1,0 +1,9 @@
+- hosts: provisioner
+  tasks:
+    - include_role:
+        name: servers_teardown
+      with_dict: "{{ tenants }}"
+      tags:
+        - servers_teardown
+      loop_control:
+        loop_var: tenant

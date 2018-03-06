@@ -1,0 +1,46 @@
+# Teardown Networks
+- name: Gather ports
+  os_port_facts:
+    auth:
+        tenant_name: "{{ tenant.key }}"
+
+- name: Gather networks
+  os_networks_facts:
+    auth:
+        tenant_name: "{{ tenant.key }}"
+
+- name: Gather subnets
+  os_subnets_facts:
+    auth:
+        tenant_name: "{{ tenant.key }}"
+
+- name: delete ports
+  os_port:
+    auth:
+        tenant_name: "{{ tenant.key }}"
+    state: absent
+    name: "{{ item.name }}"
+  with_items: "{{ openstack_ports }}"
+
+- name: delete subnets
+  os_subnet:
+    auth:
+        tenant_name: "{{ tenant.key }}"
+    state: absent
+    name: "{{ item.name }}"
+  with_items: "{{ openstack_subnets }}"
+
+- name: delete networks
+  os_network:
+    auth:
+        tenant_name: "{{ tenant.key }}"
+    state: absent
+    name: "{{ item.name }}"
+  with_items: "{{ openstack_networks }}"
+
+# Routers have no gather module
+#
+# Teardown Security groups
+# Security groups have no gather module
+#
+# Keypairs are always replaced

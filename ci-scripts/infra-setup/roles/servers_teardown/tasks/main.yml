@@ -1,0 +1,33 @@
+- name: Gather servers
+  os_server_facts:
+    auth:
+        tenant_name: "{{ tenant.key }}"
+    server: test*
+- debug:
+    var: openstack_servers
+
+- fail: msg=stop
+
+- name: Delete Servers
+  os_server:
+    auth:
+        tenant_name: "{{ tenant.key }}"
+    name: " {{ item.name }}"
+    state: absent
+    terminate_volume: true
+    delete_fip: false
+  with_items: "{{ openstack_servers }}"
+  when: item.name not in exclude_servers|default([])
+
+# Deleting remaining volumes is difficult
+# Looping inside an item is not possible, so we cannot loop in
+# openstack_servers.item.volumes
+# Also, we can gather only ID but we must delete with names
+# and there's no module os_volume_facts
+#- name: Delete remaining volumes
+#  os_volume:
+#    auth:
+#        tenant_name: "{{ tenant.key }}"
+#    display_name: " {{ item.volumes[0] }}"
+#  with_items: "{{ openstack_servers }}"
+
