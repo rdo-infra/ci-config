@@ -1,0 +1,13 @@
+- name: create volumes for server
+  os_volume:
+  when: item.volume is defined
+  with_items: "{{ tenant.value.servers }}"
+
+- name: create the server
+  os_server:
+    name: 
+  with_items: "{{ tenant.value.servers }}"
+
+- name: add instance to inventory
+  add_host:
+

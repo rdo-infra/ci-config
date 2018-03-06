@@ -1,0 +1,25 @@
+- hosts: provisioner
+  tasks:
+    - tempfile:
+        state: directory
+        prefix: infra-setup-
+      register: temp_dir
+    - debug: var=temp_dir
+#
+
+#- import_playbook: networks.yml
+#- import_playbook: keypairs.yml
+#- import_playbook: security_groups.yml
+
+
+- import_playbook: servers_provision.yml
+  #- import_playbook: servers_setup.yml
+
+# statically save server ssh key fingerprint. use strict checking
+- import_playbook: fingerprints.yml
+
+- hosts: provisioner
+  tasks:
+    - file:
+        path: "{{ temp_dir.path }}"
+        state: absent
