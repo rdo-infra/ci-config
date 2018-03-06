@@ -1,0 +1,34 @@
+  #  - include_role:
+  #        name: continuous_delivery
+  #    with_dict: "{{ tenants }}"
+  #    loop_control:
+  #      loop_var: tenant
+
+- name: Install packages
+  yum:
+    name: virtualenv
+    state: latest
+  with_items:
+    - python-virtualenv
+    - git
+
+    # This add complexity
+    #- name: scan servers keys
+
+- name: Create virtualenv with ansible
+  pip:
+    virtualenv: "{{ venv_dir }}/ansible"
+    name: ansible
+    state: present
+
+- name: Create continuous delivery script
+    template:
+    src: ansible_pull.sh.j2
+    dest: "{{ bin_dir }}/ansible_pull.sh"
+    force: true
+
+    #- name: Configure cron for continuous deelivery
+    #  cron:
+    #    name: "Run ansible-pull for continuous delivery"
+    #    minute: "5,15,25,35,45,55"
+    #    job: "flock -n -E 2 {{ bin_dir }}/ansible_pull.sh"

@@ -1,0 +1,21 @@
+- name:
+  os_security_group:
+    name: "{{ item.name }}"
+    description: "{{ item.description|default(omit) }}"
+  with_items: "{{ tenants[tenant].security_groups }}"
+
+- name:
+  os_security_group_rule:
+    state: present
+    security_group: "{{ item.0.name }}"
+    protocol: "{{ item.1.protocol|default(omit) }}"
+    remote_ip_prefix: "{{ item.1.remote_ip_prefix|default(omit) }}"
+    port_range_min: "{{ item.1.port_range_min|default(omit) }}"
+    port_range_max: "{{ item.1.port_range_max|default(omit) }}"
+    direction: "{{ item.1.direction|default(omit) }}"
+    ethertype: "{{ item.1.ethertype|default(omit) }}"
+  with_subelements:
+      - "{{ tenants[tenant].security_groups }}"
+      - rules
+  ignore_errors: true
+

@@ -1,0 +1,64 @@
+- name: Gather servers facts
+  os_server_facts:
+
+- name: Delete All Servers
+  os_server:
+    name: "{{ item.name }}"
+    state: absent
+    terminate_volume: true
+    delete_fip: false
+  with_items: "{{ openstack_servers }}"
+  when:
+    - servers_teardown.include_servers is defined
+    - servers_teardown.include_servers is not none
+    - servers_teardown.include_servers is string
+    - servers_teardown.include_servers == "*"
+  register: deleted_servers
+
+- name: Delete Included Servers
+  os_server:
+    name: "{{ item }}"
+    state: absent
+    terminate_volume: true
+    delete_fip: false
+  with_items: "{{ servers_teardown.include_servers }}"
+  when:
+    - servers_teardown.include_servers is defined
+    - servers_teardown.include_servers is not none
+    - servers_teardown.include_servers is iterable
+    - servers_teardown.include_servers is not string
+  register: deleted_servers
+
+- name: Delete volumes previously attached to deleted servers
+  os_volume:
+    state: absent
+    display_name: "{{ item.0.volumes[0].id }}"
+  with_nested:
+    - "{{ openstack_servers }}"
+    - "{{ deleted_servers.results }}"
+  when:
+    - item.0.name == item.1.item
+
+- name: Delete all configured volumes
+  os_volume:
+    display_name: "{{ item.name }}"
+    state: absent
+  with_items: "{{ tenants[tenant].volumes }}"
+  when:
+    - servers_teardown.include_volumes is defined
+    - servers_teardown.include_volumes is not none
+    - servers_teardown.include_volumes is string
+    - servers_teardown.include_volumes == "*"
+
+- name: Delete Included Volumes
+  os_server:
+    name: "{{ item.name }}"
+    state: absent
+    terminate_volume: true
+    delete_fip: false
+  with_items: "{{ servers_teardown.include_volumes }}"
+  when:
+    - servers_teardown.include_volumes is defined
+    - servers_teardown.include_volumes is not none
+    - servers_teardown.include_volumes is not string
+    - servers_teardown.include_volumes is iterable

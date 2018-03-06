@@ -1,0 +1,33 @@
+- name: generate key
+  shell: |
+    KEY_PATH="{{ keys_dir  }}/{{ item.name  }}"
+    KEY_NAME="{{item.name}}"
+    # Don't overwrite and don't fail when key exists
+    if [ ! -e $KEY_PATH ]; then
+        ssh-keygen -q -f {{ keys_dir }}/{{ item.name }} -C "$KEY_NAME"
+    fi
+  with_items: "{{ keypairs }}"
+  when: item.generate|default(false)
+
+- name: Copy keys file
+  copy:
+    src: "{{ item.public_key_file }}"
+    dest: "{{ keys_dir }}/"
+  with_items: "{{ keypairs }}"
+  when: not item.generate|default(false)
+
+- name: Create Keypair from generated public key
+  os_keypair:
+      state: present
+      name: "{{ item.name }}"
+      public_key_file: "{{ keys_dir }}/{{ item.name }}.pub"
+  with_items: "{{ keypairs }}"
+  when: item.generate|default(false)
+
+- name: Create Keypair from existing public key
+  os_keypair:
+      state: present
+      name: "{{ item.name }}"
+      public_key_file: "{{ keys_dir }}/{{ item.public_key_file|basename }}"
+  with_items: "{{ keypairs }}"
+  when: not item.generate|default(false)
