@@ -1,0 +1,171 @@
+# Teardown Networks
+
+- name: delete included ports
+  os_port:
+    state: absent
+    name: "{{ item.name }}"
+  with_items: "{{ general_teardown.include_ports }}"
+  when:
+    - general_teardown.include_ports is defined
+    - general_teardown.include_ports is not none
+    - general_teardown.include_ports is not string
+    - general_teardown.include_ports is iterable
+
+- name: Gather ports
+  os_port_facts:
+  when:
+    - general_teardown.include_ports is defined
+    - general_teardown.include_ports is not none
+    - general_teardown.include_ports is string
+    - general_teardown.include_ports == "*"
+
+- name: delete all ports
+  os_port:
+    state: absent
+    name: "{{ item.name }}"
+  with_items: "{{ openstack_ports }}"
+  when:
+    - general_teardown.include_ports is defined
+    - general_teardown.include_ports is not none
+    - general_teardown.include_ports is string
+    - general_teardown.include_ports == "*"
+
+# Routers have no gather module so "delete all" is more difficult
+# to implement so "*" means all the router in configuration
+# This will also clear all the ports attached to the routers
+# so the subnets will be free
+- name: delete included routers
+  os_router:
+    state: absent
+    name: "{{ item.name }}"
+  with_items: "{{ general_teardown.include_routers }}"
+  when:
+    - general_teardown.include_routers is defined
+    - general_teardown.include_routers is not none
+    - general_teardown.include_routers is not string
+    - general_teardown.include_routers is iterable
+
+- name: delete all configured routers
+  os_router:
+    state: absent
+    name: "{{ item.name }}"
+  with_items: "{{ routers }}"
+  when:
+    - general_teardown.include_routers is defined
+    - general_teardown.include_routers is not none
+    - general_teardown.include_routers is string
+    - general_teardown.include_routers == "*"
+
+- name: delete included subnets
+  os_subnet:
+    state: absent
+    name: "{{ item.name }}"
+  with_items: "{{ general_teardown.include_subnets }}"
+  when:
+    - general_teardown.include_subnets is defined
+    - general_teardown.include_subnets is not none
+    - general_teardown.include_subnets is not string
+    - general_teardown.include_subnets is iterable
+
+- name: Gather subnets
+  os_subnets_facts:
+  when:
+    - general_teardown.include_subnets is defined
+    - general_teardown.include_subnets is not none
+    - general_teardown.include_subnets is string
+    - general_teardown.include_subnets == "*"
+
+- name: delete all subnets
+  os_subnet:
+    state: absent
+    name: "{{ item.name }}"
+  with_items: "{{ openstack_subnets }}"
+  when:
+    - general_teardown.include_subnets is defined
+    - general_teardown.include_subnets is not none
+    - general_teardown.include_subnets is string
+    - general_teardown.include_subnets == "*"
+  # FIXME woradound for my tenant
+  ignore_errors: true
+
+- name: delete included networks
+  os_network:
+    state: absent
+    name: "{{ item.name }}"
+  with_items: "{{ general_teardown.include_networks }}"
+  when:
+    - general_teardown.include_networks is defined
+    - general_teardown.include_networks is not none
+    - general_teardown.include_networks is not string
+    - general_teardown.include_networks is iterable
+
+- name: Gather networks
+  os_networks_facts:
+  when:
+    - general_teardown.include_networks is defined
+    - general_teardown.include_networks is not none
+    - general_teardown.include_networks is string
+    - general_teardown.include_networks == "*"
+
+- name: delete all networks
+  os_network:
+    state: absent
+    name: "{{ item.name }}"
+  with_items: "{{ openstack_networks }}"
+  when:
+    - general_teardown.include_networks is defined
+    - general_teardown.include_networks is not none
+    - general_teardown.include_networks is string
+    - general_teardown.include_networks == "*"
+    - item["router:external"]  == false
+  # FIXME woradound for my tenant
+  ignore_errors: true
+
+#
+# Security groups have no gather module so "delete all" is more
+# diffcult to implement
+- name: delete included secgroups
+  os_security_group:
+    state: absent
+    name: "{{ item.name }}"
+  with_items: "{{ general_teardown.include_secgroups }}"
+  when:
+    - general_teardown.include_secgroups is defined
+    - general_teardown.include_secgroups is not none
+    - general_teardown.include_secgroups is not string
+    - general_teardown.include_secgroups is iterable
+
+- name: delete all configured secgroups
+  os_security_group:
+    state: absent
+    name: "{{ item.name }}"
+  with_items: "{{ security_groups }}"
+  when:
+    - general_teardown.include_secgroups is defined
+    - general_teardown.include_secgroups is not none
+    - general_teardown.include_secgroups is string
+    - general_teardown.include_secgroups == "*"
+#
+# keypairs have no gather module so "delete all" is more
+# diffcult to implement
+- name: Delete included keypairs
+  os_keypair:
+      state: absent
+      name: "{{ item.name }}"
+  with_items: "{{ general_teardown.include_keypairs }}"
+  when:
+    - general_teardown.include_keypairs is defined
+    - general_teardown.include_keypairs is not none
+    - general_teardown.include_keypairs is not string
+    - general_teardown.include_keypairs is iterable
+
+- name: Delete all configured keypairs
+  os_keypair:
+      state: absent
+      name: "{{ item.name }}"
+  with_items: "{{ keypairs }}"
+  when:
+    - general_teardown.include_keypairs is defined
+    - general_teardown.include_keypairs is not none
+    - general_teardown.include_keypairs is string
+    - general_teardown.include_keypairs == "*"
