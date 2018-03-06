@@ -1,0 +1,20 @@
+# Host variables
+# Comment this if you're not running ansible from virtualenv
+python_interpreter: "{{ lookup('env', 'VIRTUAL_ENV') }}/bin/python"
+
+# Workflow defaults
+servers_teardown:
+    include_role: false
+    # These must be a list or "*" to include all servers
+    include_servers:
+    # This does not support "*" to delete all, "*" means that all the element specified in the configuration below will be removed
+    include_volumes:
+general_teardown:
+    include_role: false
+    include_ports:
+    include_networks:
+    include_subnets:
+    # These do not support "*" to delete all, "*" means that all the element specified in the configuration below will be removed
+    include_routers:
+    include_keypairs: null
+    include_secgroups:
