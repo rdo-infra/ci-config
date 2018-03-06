@@ -1,0 +1,35 @@
+- name: Install packages
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - python-virtualenv
+    - git
+
+# This add complexity and we can skip it for now
+#- name: scan servers keys
+
+- name: Create virtualenv with ansible
+  pip:
+    virtualenv: "{{ venv_dir }}/ansible"
+    name: ansible
+    state: present
+
+- name: install ansible requirements
+  shell: |
+    source {{ venv_dir  }}/bin/activate
+    ansible-galaxy install -r ansible-role-requirements.yml
+  args:
+    chdir: "{{ infra_setup_dir }}"
+
+- name: Create continuous delivery script
+    template:
+    src: ansible_pull.sh.j2
+    dest: "{{ bin_dir }}/ansible_pull.sh"
+    force: true
+
+    #- name: Configure cron for continuous deelivery
+    #  cron:
+    #    name: "Run ansible-pull for continuous delivery"
+    #    minute: "5,15,25,35,45,55"
+    #    job: "flock -n -E 2 {{ bin_dir }}/ansible_pull.sh"
