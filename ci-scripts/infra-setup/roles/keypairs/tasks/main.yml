@@ -1,0 +1,17 @@
+- name: Create temporary key file
+  tempfile:
+    state: file
+    prefix: infra-setup-
+  register: keyfile
+
+- name: generate file with public keys from users
+  shell: |
+    echo {{ item.key }} >> {{ keyfile.path }}
+  with_items: "{{ users }}"
+
+- name: Create Keypair from generated public key
+  os_keypair:
+    state: present
+    name: "{{ default_keypair_name }}"
+    public_key_file: "{{ keyfile.path }}"
+
