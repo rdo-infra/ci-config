@@ -1,0 +1,8 @@
+- host: provisioner
+  roles:
+      - {role : network provision,  network: {{ item.value }} }
+
+    with_items:
+        {{ tenants.networks }}
+include: openstack-infra-network
+include: openstack-nodepool-network

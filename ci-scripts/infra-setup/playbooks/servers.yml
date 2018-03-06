@@ -1,0 +1,10 @@
+- name: provision all the servers
+  hosts: provisioner
+    roles:
+        { role: server-provision, server: {{ item.value }}}
+        { role: base-setup, server: {{ item.value }} }
+        { role: server-setup, server: {{ item.value }} }
+        { role: cd-setup, server: {{ item.value }} }
+    with_items:
+        {{ servers }}
+

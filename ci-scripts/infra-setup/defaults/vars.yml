@@ -1,0 +1,23 @@
+promoter: &promoter-server
+    extra_volume:
+
+
+tenants:
+    openstack-infra:
+        networks:
+            - internal
+            - external
+        server:
+            # FIxed ip first
+            - *promoter-server
+            - dns
+            - sova1
+            - sova2
+            - sova3
+    openstack-nodepool:
+        networks:
+            - internal
+            - external
+        servers:
+            - te-broker
+
