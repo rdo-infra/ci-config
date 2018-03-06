@@ -1,0 +1,8 @@
+- name: provision all the servers
+  hosts: provisioner
+  tasks:
+    - include_role:
+        name: server_provision
+      with_dict: "{{ tenants }}"
+      loop_control:
+        loop_var: tenant
