@@ -1,0 +1,6 @@
+- name: Generate known hosts file
+  hosts: provisioner
+  tasks:
+    - shell: ssh-keyscan {{ item.key }} >> known_host_file
+      with_dict: "{{ hostvars }}"
+

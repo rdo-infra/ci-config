@@ -1,0 +1,33 @@
+- block:
+
+    - name: Create temp dir
+      tempfile:
+        state: directory
+        prefix: infra-setup-
+      register: temp_dir
+
+    - name: Create keys file
+      copy:
+        src: rdo-tripleo-ci-infra.keys
+        dest: "{{ temp_dir.path }}/rdo-tripleo-ci-infra.keys"
+
+    - name: remove keypairs with all the keys
+      os_keypair:
+          state: absent
+          name: "{{ item.name }}"
+      with_items: "{{ tenants[tenant].keypairs }}"
+
+    - name: replace Keypair with all the keys
+      os_keypair:
+          state: present
+          name: "{{ item.name }}"
+          public_key_file: "{{ temp_dir.path  }}/{{ item.file }}"
+      with_items: "{{ tenants[tenant].keypairs }}"
+
+  always:
+
+    - name: Remove temp dir
+      file:
+        path: "{{ temp_dir.path }}"
+        state: absent
+

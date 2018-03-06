@@ -1,0 +1,23 @@
+- hosts: provisioner
+  tasks:
+    - set_fact:
+        ansible_python_interpreter: "{{ python_interpreter|default(omit) }}"
+    - set_fact:
+        tenant: "{{ lookup('env', 'OS_TENANT_NAME')|default(omit) }}"
+    - fail:
+        msg: "No tenant specified. Source a credentials file that exports OS_TENANT_NAME"
+      when: tenant == ""
+
+    - debug: var=hostvars.provisioner.ansible_python_interpreter
+
+- import_playbook: servers_teardown.yml
+- import_playbook: general_teardown.yml
+  #- import_playbook: networks.yml
+  #- import_playbook: keypairs.yml
+
+  #- import_playbook: security_groups.yml
+- import_playbook: servers_provision.yml
+# statically save server ssh key fingerprint. use strict checking
+#- import_playbook: fingerprints.yml
+- import_playbook: servers_setup.yml
+

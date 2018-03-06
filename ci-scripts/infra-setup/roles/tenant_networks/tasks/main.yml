@@ -1,0 +1,14 @@
+- name: "Create Neworks"
+  os_network:
+    state: present
+    name: "{{ item.name }}"
+    external: false
+  with_items: "{{ tenants[tenant].networks }}"
+
+- name: "Create subnets"
+  os_subnet:
+    state: present
+    network_name: "{{ item.network_name }}"
+    name: "{{ item.name }}"
+    cidr: "{{ item.cidr }}"
+  with_items: "{{ tenants[tenant].subnets }}"

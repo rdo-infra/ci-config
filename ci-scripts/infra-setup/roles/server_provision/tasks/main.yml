@@ -1,0 +1,63 @@
+- name: create volumes for server
+  os_volume:
+    state: present
+    display_name: "{{ item.1.display_name }}"
+    display_description: "{{ item.1.display_description|default(omit) }}"
+    size: "{{ item.1.size }}"
+  with_subelements:
+      - "{{ tenants[tenant].servers }}"
+      - volumes
+      - skip_missing: True
+
+- name: create the server
+  os_server:
+    state: present
+    name: "{{ item.name }}"
+    image: "{{ item.image }}"
+    flavor: "{{ item.flavor|default(omit) }}"
+    security_groups: "{{ item.security_groups|default(omit) }}"
+    key_name: "{{ item.key_name|default(omit) }}"
+    floating_ips: "{{ item.floating_ips|default(omit) }}"
+    #    reuse_ips: "{{ true|bool if item.auto_ip is defined else false|bool }}"
+    #    auto_ip: "{{ true|bool if item.floating_ips is not defined else false|bool }}"
+    nics: "{{ item.nics|default(omit) }}"
+  with_items: "{{ tenants[tenant].servers }}"
+  register: created_servers
+
+- name: attach extra volumes
+  os_server_volume:
+    state: present
+    server: "{{ item.0.name }}"
+    volume: "{{ item.1.name }}"
+    device: "{{ item.1.device|default(omit) }}"
+  with_subelements:
+      - "{{ tenants[tenant].servers }}"
+      - volumes
+      - skip_missing: True
+
+
+- name: Start the servers
+  os_server_action:
+    action: start
+    server: "{{ item.name }}"
+  with_items: "{{ tenants[tenant].servers }}"
+
+#- name: add instance to inventory
+#  add_host:
+#    name: "{{ item.name }}"
+#    ansible_user: ??
+#    ansible_host: "{{ item.openstack.accessIPv4 }}"
+#  with_items: created_servers
+
+
+# If we use a bastion, either we configure immediately the ssh proxy command
+# or we apply security group rules at a later time
+#- name: wait for servers to be reachable
+#  wait_for:
+#    port: 22
+#    host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+#    search_regex: OpenSSH
+#    delay: 10
+#  connection: local
+#  with_items: "{{ tenants[tenant].servers }}"
+

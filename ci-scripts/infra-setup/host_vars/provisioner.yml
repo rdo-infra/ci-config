@@ -1,0 +1,79 @@
+# Host variables
+# Comment this if you're not runnint ansible from virtualenv
+python_interpreter: "{{ lookup('env', 'VIRTUAL_ENV') }}/bin/python"
+
+
+# Workflow defaults
+servers_teardown:
+    include_role: false
+    # These must be a list or "*" to include all servers
+    include_servers:
+    include_volumes:
+general_teardown:
+    include_role: false
+
+# tenant defaults
+default_image: &default_image CentOS-7-x86_64-GenericCloud-1708
+default_flavor: &default_flavor m1.medium
+default_key: &default_key rdo-tripleo-ci-infra
+
+internal-network: &internal-network
+
+bastion_public_ip: &bastion_public_ip 3.4.5.5
+promoter-server: &promoter-server
+    promoter:
+        extra_volume:
+
+setup_role: promoter
+
+tenants:
+    gcerami:
+        #    openstack-infra:
+        security_groups:
+            - name: internal_server
+              rules:
+                - protocol: tcp
+                  port_range_min: 22
+                  port_range_max: 22
+                  remote_ip_prefix: *bastion_public_ip
+        keypairs:
+            - name: rdo-tripleo-ci-infra
+              file: rdo-tripleo-ci-infra.keys
+        networks:
+            - name: "private"
+        subnets:
+            - name: "private_subnet"
+              network_name: "private"
+              cidr: 192.168.100.0/22
+        servers:
+            # Fixed ip servers first
+            - name: test_server
+              image: *default_image
+              flavor: *default_flavor
+              key_name: *default_key
+              volumes:
+                - display_name: &test_server_volume test
+                  display_description: test
+                  size: 80
+                  #floating_ips:
+                  #- 1.2.3.4
+              nics:
+                  - net-name: private
+                    #            - name: bastion
+                    #              image: *default_image
+                    #              flavor: *default_flavor
+                    #              key_name: *default_key
+                    #              floating_ips:
+                    #                - *bastion_public_ip
+            #- *promoter-server
+            #            - dns
+            #            - sova1
+            #            - sova2
+            #            - sova3
+            #            - bastion
+#    openstack-nodepool:
+#        networks:
+#            - internal
+#            - external
+#        servers:
+#            - te-broker
