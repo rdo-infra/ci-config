@@ -1,0 +1,35 @@
+- name: Delete keypair
+  os_keypair:
+      state: absent
+      name: "{{ item.name }}"
+  with_items: "{{ keypairs }}"
+
+- name: generate key
+  shell: |
+    ssh-keygen -q -f {{ generated_content.path }}/{{ item.name }} -C "$KEY_NAME"
+  with_items: "{{ keypairs }}"
+  when: item.generate|default(false)
+  register: generated_keys
+
+- name: Copy keys file
+  copy:
+    src: "{{ item.public_key_file }}"
+    dest: "{{ generated_content.path }}/"
+  with_items: "{{ keypairs }}"
+  when: not item.generate|default(false)
+
+- name: Create Keypair
+  os_keypair:
+      state: present
+      name: "{{ item.name }}"
+      public_key_file: "{{ generated_content.path }}/{{ item.name }}.pub"
+  with_items: "{{ keypairs }}"
+  when: item.generate|default(false)
+
+- name: Create Keypair
+  os_keypair:
+      state: present
+      name: "{{ item.name }}"
+      public_key_file: "{{ generated_content.path }}/{{ item.public_key_file|basename }}"
+  with_items: "{{ keypairs }}"
+  when: not item.generate|default(false)

@@ -1,0 +1,15 @@
+- hosts: provisioner
+  tasks:
+    - set_fact:
+        ansible_python_interpreter: "{{ python_interpreter|default(omit) }}"
+    - set_fact:
+        tenant: "{{ lookup('env', 'OS_TENANT_NAME')|default(omit) }}"
+    - fail:
+        msg: "No tenant specified. Source a credentials file that exports OS_TENANT_NAME"
+      when: tenant == ""
+    - name: Create generated content dir
+      tempfile:
+        state: directory
+        prefix: infra-setup-
+        path: "{{ generated_content_basedir }}"
+      register: generated_content

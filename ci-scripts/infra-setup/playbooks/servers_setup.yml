@@ -1,0 +1,39 @@
+- name: base setup of the servers
+  #  hosts: all:!provisioner
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - include_role:
+        name: base_setup
+      with_dict: "{{ tenants }}"
+      loop_control:
+        loop_var: tenant
+    - include_role:
+        name: continuous_delivery
+      with_dict: "{{ tenants }}"
+      loop_control:
+        loop_var: tenant
+    # BUG https://github.com/ansible/ansible/issues/22571
+    # we currently cannot setup a include_role with a dynamic name
+    #- import_role:
+    #    name: "{{ ansible_host }}"
+
+# WIthout dynamic inclusion, we need to call roles
+# one by one
+- name: Apply te-broker role
+  hosts: te-broker
+  tasks:
+    - include_role:
+        name: te-broker
+
+- name: Apply dns role
+  hosts: dns
+  tasks:
+    - include_role:
+        name: dns
+
+- name: Apply promoter role
+  hosts: promoter
+  tasks:
+    - include_role:
+        name: promoter
