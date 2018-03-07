@@ -1,0 +1,29 @@
+---
+# This role will then only deal with specific DNS server setup
+
+- become: true
+  block:
+
+  - name: Install dnsmasq
+    yum:
+      name: dnsmasq
+      state: latest
+
+  - name: Configure - change cache size
+    lineinfile:
+      dest: /etc/dnsmasq.conf
+      regexp: '^#cache-size=.[0-9]*$'
+      line: 'cache-size=1500'
+      backrefs: yes
+
+  - name: Start and enable dnsmasq service
+    systemd:
+      name: dnsmasq
+      state: started
+      enabled: yes
+
+- name: Test that the server works
+  command: "dig @{{ dns-server-fip }} docker.io"
+  delegate_to: localhost
+  async: 60
+  poll: 10
