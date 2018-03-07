@@ -1,0 +1,36 @@
+---
+# This role deals only with specific DNS server setup
+
+- become: true
+  block:
+
+  - name: Install dnsmasq
+    yum:
+      name: {{ item }}
+      state: present
+    with_items:
+      - dnsmasq
+      - bind-utils
+
+  - name: Configure - change cache size
+    lineinfile:
+      dest: /etc/dnsmasq.conf
+      regexp: '^#cache-size=.[0-9]*$'
+      line: 'cache-size=1500'
+      backrefs: yes
+
+  - name: Start and enable dnsmasq service
+    systemd:
+      name: dnsmasq
+      state: started
+      enabled: yes
+
+  - name: edit resolv.conf to refer to fixed ip
+    lineinfile:
+      dest: /etc/resolv.conf
+      regexp: 'nameserver .*$'
+      line: 'nameserver {{ dns_fixed_ip }}'
+      backrefs: yes
+
+- name: Test that the server works
+  command: "dig @{{ dns_public_ip }} docker.io"
