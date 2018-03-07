@@ -1,0 +1,39 @@
+---
+# assume that by the time we get to this role,
+# the server has been provisioned
+# https://review.rdoproject.org/r/#/c/12777/3/ci-scripts/infra-setup/roles/server_setup/server1-setup.yml
+# shows a base setup - assume that this deals with ssh, keys etc.
+
+# This role will then only deal with secific dns server instance
+# setup
+
+# Where do we deal with associating a sec group?
+# In the sec group role - or that role only creates the sec group
+# with roles and the secific set up assciates it with the instance?
+- name: Check that the sec group has been created
+
+# Left out specifying a fixed address here
+# Do we care to keep the same fixed address?
+- name: Assign desigated floating ip
+  os_floating_ip:
+     state: present
+     floating_ip_address: 38.145.33.91
+     server: dns-server
+     wait: true
+     timeout: 180
+
+# Install packages for DNS services
+# dnsmasq/unbound?
+#   /etc/resolv.conf?
+- name: Install
+  yum: name={{ item }} state=latest
+  with_items:
+    - dnsmasq
+
+- name: configure
+
+- name: configure iptables
+
+- name: start services
+
+- name: do quick test

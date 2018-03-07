@@ -1,0 +1,24 @@
+- name: Delete the current dns server
+  hosts: localhost
+  tasks:
+    - name: Delete a port with fixed IP
+      os_port:
+        name: dns-server-port
+        network: private
+        state: absent
+
+    - name: Delete dns-server if exists - keeping the floating ip
+      os_server:
+        state: absent
+        name: te-broker
+        delete_fip: false
+
+    - name: Ensure that the floating ip is still available
+      os_floating_ip:
+        floating_ip_address: 38.145.33.91
+        state: present
+
+    - name: Delete the associated security group
+      os_security_group:
+        state: absent
+        name: dns
