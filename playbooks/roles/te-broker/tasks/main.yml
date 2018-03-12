@@ -1,0 +1,219 @@
+---
+- become: true
+  block:
+
+  - name: Create persistent journal
+    file:
+      path: /var/log/journal/
+      state: directory
+
+  - name: Enable journald persistence
+    ini_file:
+      dest: "/etc/systemd/journald.conf"
+      section: Journal
+      option: Storage
+      value: "Persistent"
+      no_extra_spaces: yes
+    register: journal_config
+
+  - name: Restart journald
+    systemd:
+      name: systemd-journald
+      state: restarted
+    when: journal_config|changed
+
+  - name: Do a trick to update server only once
+    stat:
+      path: ~/update_server
+    register: update_file
+
+  - name: Update packages on the server only once
+    yum:
+      name: '*'
+      state: latest
+    when: not update_file.stat.exists
+
+  - name: Ensure the update file exists
+    copy:
+      dest: ~/update_server
+      content: ''
+    register: update_file
+
+  - name: Install required packages
+    yum:
+      name: 'epel-release'
+      state: present
+
+  - name: Install new dlrn repos
+    get_url:
+      url: "{{ item }}"
+      dest: "/etc/yum.repos.d/{{ item.split('/')[-1] }}"
+    with_items:
+      - https://trunk.rdoproject.org/centos7-master/current-tripleo/delorean.repo
+      - https://trunk.rdoproject.org/centos7/delorean-deps.repo
+
+  - name: Install required packages
+    yum:
+      name: '{{ item }}'
+      state: present
+    with_items:
+      - ansible
+      - git
+      - httpd
+      - vim
+      - python-pip
+      - python-heatclient
+      - python-neutronclient
+      - python-novaclient
+      - python-swiftclient
+      - python-openstackclient
+
+  - name: Install required python modules
+    pip:
+      name: gear
+      state: present
+
+  - name: Create repo directory
+    file:
+      path: /opt/stack/
+      state: directory
+
+  - name: Clone repos
+    git:
+      repo: '{{ item.repo }}'
+      dest: '{{ item.path }}'
+      version: master
+      force: yes
+    with_items:
+      - repo: https://git.openstack.org/openstack-infra/tripleo-ci
+        path: /opt/stack/tripleo-ci
+      - repo: https://github.com/cybertron/openstack-virtual-baremetal.git
+        path: /opt/stack/openstack-virtual-baremetal
+      - repo: https://review.rdoproject.org/r/p/rdo-infra/ci-config.git
+        path: /opt/stack/ci-config
+
+  - name: Copy services
+    copy:
+      src: '{{ item.file }}'
+      dest: '{{ item.path }}'
+    with_items:
+      - file: geard.service
+        path: /lib/systemd/system/geard.service
+      - file: te_workers.service
+        path: /lib/systemd/system/te_workers.service
+
+  - name: Run services
+    systemd:
+      name: '{{ item }}'
+      state: started
+      enabled: yes
+    with_items:
+      - te_workers
+      - geard
+
+  - name: Create a directory for the te-broker logs
+    file:
+      path: '{{ logsdir }}'
+      state: directory
+
+  - name: Add secrets for the registries
+    no_log: true
+    blockinfile:
+      path: /etc/nodepoolrc
+      create: yes
+      mode: 0600
+      block: |
+        export OS_USERNAME='{{ lookup('env', 'OS_USERNAME') }}'
+        export OS_TENANT_NAME='{{ lookup('env', 'OS_TENANT_NAME') }}'
+        export OS_TENANT_ID='{{ lookup('env', 'OS_TENANT_ID') }}'
+        export OS_AUTH_URL='{{ lookup('env', 'OS_AUTH_URL') }}'
+        export OS_PASSWORD='{{ lookup('env', 'OS_PASSWORD') }}'
+        export NODEPOOL_PROVIDER=rdo-cloud-tripleo
+
+  - name: Disable the default welcome page
+    copy:
+      content: ''
+      dest: '/etc/httpd/conf.d/welcome.conf'
+      backup: yes
+
+  - name: Add config file for Apache to expose the logs
+    blockinfile:
+      path: '/etc/httpd/conf.d/tebroker_logs.conf'
+      create: yes
+      block: |
+        <VirtualHost *:80>
+            ServerAdmin rdo-ci-admins@redhat.com
+            DocumentRoot "{{ logsdir }}"
+
+            <Directory {{ logsdir }}>
+                Options Indexes MultiViews
+                AllowOverride None
+                Require all granted
+            </Directory>
+        </VirtualHost>
+    register: apache_config
+
+  - name: Start and enable Apache
+    service:
+      name: httpd
+      state: restarted
+      enabled: yes
+    when: apache_config|changed
+
+  - name: add configuration for the log rotation
+    copy:
+      content: |
+          {{ logsdir }}/*.log {
+              daily
+              missingok
+              su centos centos
+              dateext
+              dateyesterday
+              notifempty
+              delaycompress
+              rotate 60
+          }
+      dest: /etc/logrotate.d/te-broker
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Create ansible directory
+    file:
+      path: /etc/ansible
+
+  - name: Create a hosts file
+    copy:
+      dest: /etc/ansible/hosts
+      content: te-broker ansible_host=localhost
+
+# Non root actions
+
+- name: Generate public key from private key for uploader user
+  shell: |
+    mkdir -p ~/.ssh
+    cd ~/.ssh
+    ssh-keygen -f id_rsa -t rsa -N ''
+    cat ~/.ssh/id_rsa.pub
+  args:
+    creates: ~/.ssh/id_rsa
+  register: pub_key
+
+- name: Ensure we can connect to localhost
+  lineinfile:
+    path: ~/.ssh/authorized_keys
+    line: pub_key.output
+  when: pub_key is defined
+
+- name: Create ansible config
+  copy:
+    dest: ~/.ansible.cfg
+    content: |
+      [defaults]
+      host_key_checking = False
+
+- name: Update repo and run ansible
+  cron:
+    name: 'fetch the latest ci-config repo and run ansible'
+    minute: '5,15,25,35,45,55'
+    job: 'cd /opt/stack/ci-config; sudo git pull >/dev/null; ansible-playbook /opt/stack/ci-config/playbooks/tebroker_playbook.yml'

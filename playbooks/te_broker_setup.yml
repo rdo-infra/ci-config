@@ -1,0 +1,62 @@
+---
+- name: Delete previous server if exists
+  hosts: localhost
+  vars:
+    tripleo_admin_pub_key: "{{ lookup('file', '../tripleo-ci-team') }}"
+    tebroker_int_ip: 192.168.103.254
+    tebroker_image: CentOS-7-x86_64-GenericCloud-1801-01
+    tebroker_flavor: ci.m1.medium
+    keypair_name: tripleo-cd-admins
+  tasks:
+
+    - name: Fail if no auth is provided
+      fail:
+        msg: 'Please source credential rc file from the tenant on cloud'
+      when: "lookup('env', 'OS_USERNAME') == ''"
+
+    - when: (delete_tebroker is defined and delete_tebroker|bool) or (cleanup_all is defined and cleanup_all|bool)
+      block:
+
+      - name: Delete a port with fixed IP
+        os_port:
+          name: te-broker-port
+          network: private
+          state: absent
+
+      - name: Delete te-broker if exists
+        os_server:
+          state: absent
+          name: te-broker
+          delete_fip: true
+
+    - name: Create a port with fixed IP
+      os_port:
+        name: te-broker-port
+        network: private
+        state: present
+        fixed_ips:
+          - ip_address: "{{ tebroker_int_ip }}"
+        security_groups:
+          - default
+
+    - name: Create the te-broker server instance
+      os_server:
+        state: present
+        name: te-broker
+        auto_floating_ip: yes
+        flavor: "{{ tebroker_flavor }}"
+        image: "{{ tebroker_image }}"
+        key_name: "{{ keypair_name }}"
+        nics:
+          - port-name: te-broker-port
+        timeout: 300
+      register: 'os_host'
+
+    - name: add hosts to inventory
+      add_host:
+        name: '{{ os_host.openstack.name }}'
+        ansible_user: centos
+        ansible_host: '{{ os_host.openstack.accessIPv4 }}'
+        ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+
+- include: tebroker_playbook.yml

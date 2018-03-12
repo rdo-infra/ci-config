@@ -1,0 +1,38 @@
+---
+- name: Delete previous server if exists
+  hosts: localhost
+  vars:
+    tripleo_admin_pub_key: "{{ lookup('file', '../tripleo-ci-team') }}"
+    keypair_name: tripleo-cd-admins
+  tasks:
+
+    - name: Fail if no auth is provided
+      fail:
+        msg: 'Please source credential rc file from the tenant on cloud'
+      when: "lookup('env', 'OS_USERNAME') == ''"
+
+    - name: Create tripleo-cd-admins keypair for bmc nodes
+      os_keypair:
+        state: present
+        name: "{{ keypair_name }}"
+        public_key: "{{ tripleo_admin_pub_key }}"
+      ignore_errors: true
+      register: key_result
+
+    # os_keypair is not idempotent and can't override
+
+    - when: key_result|failed
+      block:
+
+      - name: Delete old tripleo-cd-admins keypair
+        os_keypair:
+          state: absent
+          name: "{{ keypair_name }}"
+
+      - name: Create tripleo-cd-admins keypair for bmc nodes
+        os_keypair:
+          state: present
+          name: "{{ keypair_name }}"
+          public_key: "{{ tripleo_admin_pub_key }}"
+
+- include: te_broker_setup.yml
