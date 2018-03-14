@@ -1,1 +1,25 @@
-servers: []
+servers:
+    - name: te-broker
+      image: "{{ default_image }}"
+      flavor: "{{ default_flavor }}"
+      key_name: "{{ default_keypair_name }}"
+      security_groups:
+        - sec_group_ssh_access_external
+      ports:
+        - name: tebroker-port
+          network: "{{ servers_internal_network_name  }}"
+          fixed_ip_address: "{{ tebroker_internal_network_ip }}"
+      nics:
+        - port-name: tebroker-port
+      floating_ips:
+        - "{{ tebroker_external_network_ip }}"
+      userdata: |
+        #cloud-config
+        packages:
+            - ansible
+            - git
+        package_upgrade: true
+        runcmd:
+          - mkdir -p /etc/ansible/
+          - echo 'te-broker ansible_connection=local' >  /etc/ansible/hosts
+          - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log

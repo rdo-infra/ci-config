@@ -1,0 +1,126 @@
+---
+- become: true
+  block:
+
+  - name: Install required packages
+    yum:
+      name: 'epel-release'
+      state: present
+
+  - name: Install new dlrn repos
+    get_url:
+      url: "{{ item }}"
+      dest: "/etc/yum.repos.d/{{ item.split('/')[-1] }}"
+    with_items:
+      - https://trunk.rdoproject.org/centos7-master/current-tripleo/delorean.repo
+      - https://trunk.rdoproject.org/centos7/delorean-deps.repo
+
+  - name: Install required packages
+    yum:
+      name: '{{ item }}'
+      state: present
+    with_items:
+      - ansible
+      - git
+      - httpd
+      - vim
+      - python-pip
+      - python-heatclient
+      - python-neutronclient
+      - python-novaclient
+      - python-swiftclient
+      - python-openstackclient
+      - logrotate
+
+  - name: Install required python modules
+    pip:
+      name: gear
+      state: present
+
+  - name: Create repo directory
+    file:
+      path: /opt/stack/
+      state: directory
+
+  - name: Clone repos
+    git:
+      repo: '{{ item.repo }}'
+      dest: '{{ item.path }}'
+      version: master
+      force: yes
+    with_items:
+      - repo: https://git.openstack.org/openstack-infra/tripleo-ci
+        path: /opt/stack/tripleo-ci
+      - repo: https://github.com/cybertron/openstack-virtual-baremetal.git
+        path: /opt/stack/openstack-virtual-baremetal
+      - repo: https://review.rdoproject.org/r/p/rdo-infra/ci-config.git
+        path: /opt/stack/ci-config
+
+  - name: Copy services
+    copy:
+      src: '{{ item.file }}'
+      dest: '{{ item.path }}'
+    with_items:
+      - file: geard.service
+        path: /lib/systemd/system/geard.service
+      - file: te_workers.service
+        path: /lib/systemd/system/te_workers.service
+
+  - name: Run services
+    systemd:
+      name: '{{ item }}'
+      state: started
+      enabled: yes
+    with_items:
+      - te_workers
+      - geard
+
+  - name: Create a directory for the te-broker logs
+    file:
+      path: '{{ logsdir }}'
+      state: directory
+
+  - name: Disable the default welcome page
+    copy:
+      content: ''
+      dest: '/etc/httpd/conf.d/welcome.conf'
+      backup: yes
+
+  - name: Add config file for Apache to expose the logs
+    blockinfile:
+      path: '/etc/httpd/conf.d/tebroker_logs.conf'
+      create: yes
+      block: |
+        <VirtualHost *:80>
+            ServerAdmin rdo-ci-admins@redhat.com
+            DocumentRoot "{{ logsdir }}"
+
+            <Directory {{ logsdir }}>
+                Options Indexes MultiViews
+                AllowOverride None
+                Require all granted
+            </Directory>
+        </VirtualHost>
+    register: apache_config
+
+  - name: Start and enable Apache
+    service:
+      name: httpd
+      state: restarted
+      enabled: yes
+    when: apache_config|changed
+
+  - name: add configuration for the te-broker log rotation
+    copy:
+      content: |
+          {{ logsdir }}/testenv-worker.log {
+              rotate 7
+              daily
+              compress
+              missingok
+              notifempty
+          }
+      dest: /etc/logrotate.d/te-broker
+      owner: root
+      group: root
+      mode: 0644
