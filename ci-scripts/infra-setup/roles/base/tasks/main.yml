@@ -1,0 +1,85 @@
+---
+- name: Include required variables
+  include_vars: ../../../tenant_vars/common.yml
+
+- become: true
+  block:
+  - name: Create tripleo group
+    group:
+      name: tripleo
+      state: present
+
+  - name: Create users
+    user:
+      name: "{{ item.name }}"
+      shell: /bin/bash
+      groups: tripleo
+      append: yes
+    with_items: "{{ users }}"
+
+  - name: Set authorized keys
+    authorized_key:
+      exclusive: yes
+      user: "{{ item.name }}"
+      state: present
+      key: "{{ item.key }}"
+    with_items: "{{ users }}"
+
+  - name: Allow 'tripleo' group to have passwordless sudo
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      line: '%tripleo ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'
+
+  - name: Create persistent journal
+    file:
+      path: /var/log/journal/
+      state: directory
+
+  - name: Enable journald persistence
+    ini_file:
+      dest: "/etc/systemd/journald.conf"
+      section: Journal
+      option: Storage
+      value: "Persistent"
+      no_extra_spaces: yes
+    register: journal_config
+
+  - name: Restart journald
+    systemd:
+      name: systemd-journald
+      state: restarted
+    when: journal_config|changed
+
+  - name: Install required packages
+    yum:
+      name: "{{ item }}"
+      state: present
+    with_items: "{{ packages }}"
+
+  - name: Remove PasswordAuthentication if exists
+    lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PasswordAuthentication yes'
+        state: absent
+    notify: ssh-restart
+
+  - name: Set PasswordAuthentication as no for SSH
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '^[ #]*PasswordAuthentication .*'
+      line: 'PasswordAuthentication no'
+    notify: ssh-restart
+
+  - name: Create continuous delivery script
+    template:
+      src: ansible-pull.sh.j2
+      dest: "/usr/local/bin/ansible_pull.sh"
+      mode: "u+x"
+
+  - name: Add cron job for ansible pull
+    cron:
+      name: "Run ansible-pull for continuous delivery"
+      minute: "*/5"
+      job: "flock -n -E 2 /var/lock/ansible-pull /usr/local/bin/ansible_pull.sh"
