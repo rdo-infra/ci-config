@@ -13,6 +13,13 @@ security_groups:
           port_range_max: 22
           direction: ingress
           remote_ip_prefix: "{{ jumphost_internal_network_ip }}"
+    - name: sec_group_promoter_access_internal
+      rules:
+        - protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+          direction: ingress
+          remote_ip_prefix: "{{ promoter_internal_network_ip }}"
     - name: sec_group_http_access_external
       rules:
         - protocol: tcp
