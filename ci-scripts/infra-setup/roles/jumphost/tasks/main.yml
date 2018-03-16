@@ -1,0 +1,55 @@
+---
+# This role does the setup for the jumphost once it has been provisioned
+# Floating ip is assigned in the provision role
+# The keys and user setup, and ansible-pull, are done in the base role
+
+- become: true
+  block:
+
+  - name: Install fail2ban from epel
+    yum:
+      name: fail2ban
+      state: present
+
+  - name: Start and enable fail2ban service
+    systemd:
+      name: fail2ban
+      state: started
+      enabled: yes
+
+  - name: Create a jail.local file
+    template:
+      src: "{{ jail.local.j2 }}"
+      dest: "/etc/fail2ban/jail.local"
+      mode: 0644
+
+  - name: Restart the fail2ban service
+    systemd:
+      name: fail2ban
+      state: restarted
+
+  - name: Check that the fail2ban service is set up
+    command: "fail2ban-client status sshd"
+    register: fail2ban_output
+
+  - name: Fail if fail2ban is not setup for sshd
+    fail:
+      msg: "fail2ban is not set up for sshd."
+    when: '"Jail list:   sshd" not in fail2ban_output.stdout'
+
+  - name: Log in three times with unknown user
+    command:
+      ssh -o BatchMode=yes -o "StrictHostKeyChecking=no" test_user@{{ jumphost_external_network_ip }}
+    retries: 2
+    delay: 5
+    delegate_to: localhost
+    ignore_error: true
+
+  - name: Test the iptables rule is added after third failed login attempt
+    command: "fail2ban-client status sshd | grep 'IP list'"
+    register: f2b_ssh_output
+
+  - name: Fail if the localhost IP is not in the IP list
+    fail:
+      msg: "localhost is not banned after three failed logins."
+    when: "hostvars[localhost]['ansible_default_ipv4']['address'] not in f2b_sshd_output.stdout"
