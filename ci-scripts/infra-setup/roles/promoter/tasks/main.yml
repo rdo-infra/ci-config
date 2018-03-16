@@ -1,0 +1,220 @@
+# TODO: move this to the infra-setup vars
+- name: Create volume for promoter server
+  os_volume:
+    state: present
+    size: 80
+    display_name: promoter-server-storage
+
+# TODO: move this to the infra-setup vars
+- name: Create the promoter-server instance
+  os_server:
+    state: present
+    name: promoter-server
+    auto_ip: yes
+    flavor: rdo.m1.medium
+    image: CentOS-7-x86_64-GenericCloud-1801-01
+    key_name: tripleo-cd-admins
+    network: private
+    security_groups: default
+    timeout: 300
+    volumes:
+      - promoter-server-storage
+  register: 'os_host'
+
+# TODO: move this to the infra-setup vars
+- name: add hosts to inventory
+  add_host:
+    name: '{{ os_host.openstack.name }}'
+    ansible_user: centos
+    ansible_host: '{{ os_host.openstack.accessIPv4 }}'
+    ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+
+- become: true
+  block:
+    - name: Mount external volume - create a partition
+      parted:
+        device: /dev/vdb
+        number: 1
+        state: present
+
+    - name: Mount external volume - create a filesystem
+      filesystem:
+        fstype: xfs
+        dev: /dev/vdb1
+
+    - name: create a mount folder
+      file:
+        path: /var/lib/docker
+        state: directory
+
+    - name: Mount external volume - mount the partition
+      mount:
+        path: /var/lib/docker
+        src: /dev/vdb1
+        fstype: xfs
+        state: mounted
+
+    - name: Update packages on the server
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Install required packages
+      yum:
+        name: 'ansible,docker,docker-python,git,httpd,python-virtualenv,vim'
+        state: latest
+
+- name: Create a directory for the promoter logs
+  file:
+    path: '~/promoter_logs'
+    state: directory
+    setype: httpd_sys_content_t
+
+- name: copy logrotate selinux policy
+  copy:
+    src: logrotate-promoter.te
+    dest: /tmp/logrotate-promoter.te
+  register: policy
+
+- name: compile and permanently install policy
+  shell: |
+      checkmodule -M -m -o /tmp/logrotate-promoter.mod /tmp/logrotate-promoter.te
+      semodule_package -m /tmp/logrotate-promoter.mod -o /tmp/logrotate-promoter.pp
+      semodule -i /tmp/logrotate-promoter.pp
+      rm -f /tmp/logrotate-promoter.pp /tmp/logrotate-promoter.mod
+  become: true
+  when: policy|changed
+
+- name: Fix home directory permission
+  file:
+    path: '~'
+    mode: 0755
+
+- name: Disable the default welcome page
+  become: true
+  copy:
+    content: ''
+    dest: '/etc/httpd/conf.d/welcome.conf'
+    backup: yes
+
+- name: Add config file for Apache to expose the logs
+  become: true
+  blockinfile:
+    path: '/etc/httpd/conf.d/promoter_logs.conf'
+    create: yes
+    block: |
+      <VirtualHost *:80>
+          ServerAdmin rdo-ci-admins@redhat.com
+          DocumentRoot "{{ ansible_env.HOME }}/promoter_logs"
+
+          <Directory {{ ansible_env.HOME }}/promoter_logs>
+              Options Indexes MultiViews
+              AllowOverride None
+              Require all granted
+          </Directory>
+      </VirtualHost>
+  register: apache_config
+
+- name: Start and enable Apache
+  become: true
+  service:
+    name: httpd
+    state: restarted
+    enabled: yes
+  when: apache_config|changed
+
+- name: Start and enable Docker
+  become: true
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Clone to the ci-config repo
+  git:
+    repo: 'https://review.rdoproject.org/r/p/rdo-infra/ci-config.git'
+    dest: '~/ci-config'
+
+- name: Add secret for DLRNAPI_PASSWORD
+  blockinfile:
+    path: '~/dlrnapi_secret'
+    create: yes
+    mode: 0600
+    block: |
+      export DLRNAPI_PASSWORD='{{ dlrnapi_password }}'
+
+# TODO: move this secret creation out from here, assume it is there
+- name: Add secrets for the registries
+  blockinfile:
+    path: '~/registry_secret'
+    create: yes
+    mode: 0600
+    block: |
+      export DOCKERHUB_USERNAME='{{ dockerhub_username }}'
+      export DOCKERHUB_PASSWORD='{{ dockerhub_password }}'
+      export RDOPROJECT_USERNAME='{{ rdoproject_username }}'
+      export RDOPROJECT_PASSWORD='{{ rdoproject_password }}'
+
+- name: Add keypair for the images server
+  copy:
+    content: '{{ uploader_ssh_priv_key }}'
+    dest: '{{ ansible_env.HOME }}/.ssh/id_rsa'
+    mode: 0600
+  register: priv_key
+
+- name: Generate public key from private key for uploader user
+  shell: >
+    ssh-keygen -y -t rsa -N '' -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+  args:
+    creates: /home/centos/.ssh/id_rsa.pub
+  when: priv_key|changed
+
+- name: Create a virtualenv for the promoter script
+  pip:
+    requirements: ~/ci-config/ci-scripts/dlrnapi_promoter/requirements.txt
+    virtualenv: ~/promoter_venv
+
+# TODO: this could be done with ansible now that we will
+# periodically run this role.
+- name: Add a cron jobs to periodically fetch the new version of the promoter script
+  cron:
+    name: 'fetch the latest dlrnapi_client and dependencies'
+    minute: '5,15,25,35,45,55'
+    job: 'source ~/promoter_venv/bin/activate; pip install -U -r ~/ci-config/ci-scripts/dlrnapi_promoter/requirements.txt'
+
+- name: Add a cron jobs to periodically fetch the new version of the promoter script
+  cron:
+    name: 'fetch the latest ci-config'
+    minute: '0,10,20,30,40,50'
+    job: 'cd ~/ci-config; git pull >/dev/null'
+
+- name: Add a cron jobs to run the promotion script
+  cron:
+    name: 'promoter script for the {{ item.release }} branch'
+    minute: '{{ item.minute }}'
+    # TODO(gcerami) I think the job command deserves a script on its own
+    job: 'source ~/registry_secret; source ~/dlrnapi_secret; source ~/promoter_venv/bin/activate; /usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/{{ item.release }}.ini'
+  with_items:
+    - { release: 'master', minute: '1,11,21,31,41,51' }
+    - { release: 'queens', minute: '4,14,24,34,44,54' }
+    - { release: 'pike', minute: '2,12,22,32,42,52' }
+    - { release: 'ocata', minute: '3,13,23,33,43,53' }
+
+- name: add configuration for the log rotation
+  copy:
+    content: |
+        /home/centos/promoter_logs/*.log {
+            daily
+            missingok
+            su centos centos
+            dateext
+            dateyesterday
+            notifempty
+            delaycompress
+            rotate 60
+        }
+    dest: /etc/logrotate.d/promoter
+    owner: root
+    group: root
+    mode: 0644
+  become: true
