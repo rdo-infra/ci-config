@@ -1,1 +1,3 @@
-ansible-playbook -vvvv -i ../inventory.ini ../playbooks/teardown.yml  -e @nuke.yml
+#!/bin/bash
+
+ansible-playbook -vv -i ../inventories/inventory.ini -e @nuke.yml ../teardown.yml
