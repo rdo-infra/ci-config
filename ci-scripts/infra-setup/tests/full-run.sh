@@ -1,1 +1,3 @@
-ansible-playbook -vvvv -i ../inventory.ini ../playbooks/full-run.yml -e bastion_private_key=$1
+#!/bin/bash
+
+ansible-playbook -vvvv -i ../inventories/inventory.ini ../full-run.yml -e bastion_private_key=$1
