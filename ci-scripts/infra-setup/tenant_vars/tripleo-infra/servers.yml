@@ -23,3 +23,52 @@ servers:
           - mkdir -p /etc/ansible/
           - echo 'jumphost ansible_connection=local' >  /etc/ansible/hosts
           - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+    - name: promoter
+      image: "{{ default_image }}"
+      flavor: "{{ default_flavor }}"
+      key_name: "{{ default_keypair_name }}"
+      security_groups:
+        - sec_group_ssh_access_internal
+      ports:
+        - name: promoter-port
+          network: "{{ servers_internal_network_name  }}"
+          fixed_ip_address: "{{ promoter_internal_network_ip }}"
+      volumes:
+        - display_name: promoter-server-storage
+          size: 80
+      nics:
+        - port-name: promoter-port
+      userdata: |
+        #cloud-config
+        packages:
+            - ansible
+            - git
+            - docker-python
+            - httpd
+            - python-virtualenv
+        package_upgrade: true
+        write_files:
+            - path: /home/centos/dlrnapi_secret
+              owner: centos:centos
+              permissions: '0600'
+              content: |
+                  export DLRNAPI_PASSWORD='{{ dlrnapi_password }}'
+            - path: /home/centos/registry_secret
+              owner: centos:centos
+              permissions: '0600'
+              content: |
+                  export DOCKERHUB_USERNAME='{{ dockerhub_username }}'
+                  export DOCKERHUB_PASSWORD='{{ dockerhub_password }}'
+                  export RDOPROJECT_USERNAME='{{ rdoproject_username }}'
+                  export RDOPROJECT_PASSWORD='{{ rdoproject_password }}'
+            - path: /home/centos/.ssh/id_rsa
+              owner: centos:centos
+              permissions: '0600'
+              content: |
+                  {{ uploader_ssh_priv_key }}
+        runcmd:
+          - mkdir -p /etc/ansible/
+          - echo 'promoter ansible_connection=local' >  /etc/ansible/hosts
+          - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+          - ssh-keygen -y -t rsa -N '' -f /home/centos/.ssh/id_rsa > /home/centos/.ssh/id_rsa.pub
+          - chown centos:centos /home/centos/.ssh/id_rsa.pub
