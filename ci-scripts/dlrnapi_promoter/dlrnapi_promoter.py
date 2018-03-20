@@ -262,7 +262,7 @@ def promoter(config):
     release = config.get('main', 'release')
     get_lock('promoter-%s' % release)
 
-    logger.info('STARTED promotion process with config %s', config_file)
+    logger.info('STARTED promotion process for release: %s', release)
 
     try:
         git_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
