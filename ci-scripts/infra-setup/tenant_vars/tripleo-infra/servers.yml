@@ -23,3 +23,28 @@ servers:
           - mkdir -p /etc/ansible/
           - echo 'jumphost ansible_connection=local' >  /etc/ansible/hosts
           - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+    - name: dns
+      image: "{{ default_image }}"
+      flavor: "{{ default_flavor }}"
+      key_name: "{{ default_keypair_name }}"
+      security_groups:
+        - sec_group_ssh_access_internal
+        - sec_group_nameserver
+      ports:
+        - name: dns-port
+          network: "{{ servers_internal_network_name  }}"
+          fixed_ip_address: "{{ dns_internal_network_ip }}"
+      nics:
+        - port-name: dns-port
+      floating_ips:
+        - "{{ dns_external_network_ip }}"
+      userdata: |
+        #cloud-config
+        packages:
+            - ansible
+            - git
+        package_upgrade: true
+        runcmd:
+          - mkdir -p /etc/ansible/
+          - echo 'jumphost ansible_connection=local' >  /etc/ansible/hosts
+          - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
