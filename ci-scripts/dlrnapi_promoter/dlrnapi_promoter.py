@@ -40,7 +40,7 @@ def fetch_hashes(dlrn, link, count=1):
     except ApiException:
         logger.error('Exception when calling api_promotions_get: %s',
                      ApiException)
-        return None
+        raise
     if len(api_response) == 0:
         return None
     if count <= 1:
@@ -69,7 +69,7 @@ def fetch_jobs(dlrn, hash_values):
     except ApiException:
         logger.error('Exception when calling api_repo_status_get: %s',
                      ApiException)
-        return None
+        raise
     logger.debug('Successful jobs for %s:', hash_values)
     for result in api_response:
         logger.debug('%s at %s, logs at %s', result.job_id,
