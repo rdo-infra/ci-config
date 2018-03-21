@@ -19,7 +19,7 @@
 # Use the nuclear option with caution. All non-marked ports will be deleted.
 
 : ${LONG_RUNNING:1}
-: ${TIME_EXPIRED:=600}
+: ${TIME_EXPIRED:=300}
 : ${STACK_LIST:=""}
 : ${NUCLEAR:=0}
 : ${DRY_RUN:=0}
