@@ -17,11 +17,11 @@
     dockerhub_namespace: "tripleo{{ lookup('env','RELEASE') }}"
     dockerhub_username: "{{ lookup('env','DOCKERHUB_USERNAME') }}"
     dockerhub_password: "{{ lookup('env','DOCKERHUB_PASSWORD') }}"
-    rdoproject_namespace: "{{ lookup('env','RELEASE') }}"
+    rdoproject_namespace: "tripleo{{ lookup('env','RELEASE') }}"
     rdoproject_username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
     rdoproject_password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
     containers_file: "parsed_containers-{{ lookup('env','RELEASE') }}.txt"
-    registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/{{ lookup('env', 'RELEASE') }}/imagestreamtags"
+    registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleo{{ lookup('env', 'RELEASE') }}/imagestreamtags"
     image_tag: tripleo-ci-testing
   tasks:
     - name: Construct dlrn_dir from full_hash (turn xxyyz* into xx/yy/xxyyz*)
