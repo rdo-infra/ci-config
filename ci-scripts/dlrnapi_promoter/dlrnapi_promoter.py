@@ -81,6 +81,20 @@ def fetch_jobs(dlrn, hash_values):
 def promote_link(dlrn, hash_values, link):
     '''Promotes a set of hash values as a named link using DLRN API'''
     logger = logging.getLogger('promoter')
+    current_hashes = fetch_hashes(dlrn, link)
+    # Save current hash as previous-$link
+    if current_hashes is not None:
+        params = dlrnapi_client.Promotion()
+        params.commit_hash = current_hashes['commit_hash']
+        params.distro_hash = current_hashes['distro_hash']
+        params.promote_name = "previous-" + link
+        try:
+            dlrn.api_promote_post(params)
+        except ApiException:
+            logger.error('Exception when calling api_promote_post: %s'
+                         ' to store current hashes as previous',
+                        ApiException)
+            raise
     params = dlrnapi_client.Promotion()
     params.commit_hash = hash_values['commit_hash']
     params.distro_hash = hash_values['distro_hash']
