@@ -23,6 +23,20 @@
             job_type: 'gate'
 
 - project:
+    name: 'tripleo-quickstart-gate-jobs'
+    test: 'full-deploy'
+    build_system: 'delorean'
+    jobs:
+        - 'tripleo-quickstart-extras-gate-{release}-{build_system}-full-{topology}':
+            release: 'newton'
+            topology: 'minimal'
+            job_type: 'gate'
+        - 'tripleo-quickstart-extras-gate-{release}-{build_system}-full-{topology}':
+            release: 'ocata'
+            topology: 'minimal'
+            job_type: 'gate'
+
+- project:
     name: 'tripleo-quickstart-gate-images-jobs'
     test: 'build-images'
     job_type: 'gate'
@@ -33,18 +47,6 @@
         - 'tripleo-quickstart-gate-{release}-full-images':
             release: 'master'
             topology: 'build_images'
-
-- project:
-    name: 'tripleo-quickstart-thirdparty-gate-jobs'
-    test: 'full-deploy'
-    job_type: 'dlrn-gate'
-    release:
-        - 'newton'
-        - 'master'
-    build_system: 'delorean'
-    topology: 'minimal'
-    jobs:
-        - tripleo-quickstart-thirdparty-gate-{release}
 
 - project:
     name: 'tripleo-quickstart-promote-images-jobs'
