@@ -56,11 +56,6 @@
 - become: true
   become_user: centos
   block:
-    - name: Clone the Limnoria repo
-      git:
-        repo: 'https://github.com/ProgVal/Limnoria.git'
-        dest: '/home/centos/git/Limnoria'
-
     - name: Generate public key from private key for uploader user
       shell: >
         ssh-keygen -y -t rsa -N '' -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
@@ -75,13 +70,15 @@
 
     - name: Add Limnoria requirements
       pip:
-        requirements: /home/centos/git/Limnoria/requirements.txt
+        name: limnoria
+        state: present
         virtualenv: /home/centos/limnoria_venv
 
     - name: Create plugins directory
       file:
         path: '/opt/hubbot/plugins'
         state: directory
+
     - name: Copy GateStatus in plugins directory
       copy:
         src: 'GateStatus'

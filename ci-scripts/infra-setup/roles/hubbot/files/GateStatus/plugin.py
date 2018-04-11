@@ -19,24 +19,33 @@ class GateStatus(callbacks.Plugin):
         self.__parent.__init__(irc)
 
     def fetch_comments(self):
-        # only care about comments in the last 24 hours
-        limit = time.time() - (60*60*self.registryValue('timeLimit'))
-
+        # only care about comments in the specified timeLimit
+        query = ' OR '.join(self.registryValue('changeIDs'))
         cmd = (' '.join([self.registryValue('sshCommand'),
                          "gerrit query --format json --comments",
-                         self.registryValue('changeID')]))
+                         query]))
         output = subprocess.check_output(cmd.split(" "), stderr=subprocess.STDOUT)
-        output = json.loads(output.split("\n")[0])
 
-        comments = []
-        for comment in output['comments']:
-            if comment['reviewer']['username'] in \
-                self.registryValue('userFilter') and \
-                comment['timestamp'] > limit:
-                comments.append(comment)
-        return comments
+        query_data = {}
+        # skip the last line of output, which is a query summary
+        for line in output.split("\n")[:-1]:
+            json_data = json.loads(line)
+            query_data[json_data['id']] = json_data
+        return query_data
 
-    def check_comments(self, comments):
+    def filter_comments(self, query_data):
+        '''Filter the comments by username and timestamp'''
+
+        limit = time.time() - (60*60*self.registryValue('timeLimit'))
+
+        for change_id in query_data:
+          query_data[change_id]['comments'] = [comment for comment in
+                  query_data[change_id]['comments']
+                  if comment['reviewer']['username'] in
+                  self.registryValue('userFilter') and
+                  comment['timestamp'] > limit]
+
+    def parse_comments(self, comments):
         results = {}
         for comment in comments:
             for line in comment['message'].split('\n'):
@@ -52,8 +61,9 @@ class GateStatus(callbacks.Plugin):
         return results
 
     def job_report(self):
-        comments = self.fetch_comments()
-        results = self.check_comments(comments)
+        query_data = self.fetch_comments()
+        query_data = self.filter_comments(query_data)
+        results = self.check_comments(query_data)
         #import pprint
         #pprint.pprint(results)
 
