@@ -18,30 +18,36 @@ class GateStatus(callbacks.Plugin):
         self.__parent = super(GateStatus, self)
         self.__parent.__init__(irc)
 
-    def fetch_comments(self):
-        # only care about comments in the last 24 hours
-        limit = time.time() - (60*60*self.registryValue('timeLimit'))
-
+    def fetch_data(self):
+        query = ' OR '.join(self.registryValue('changeIDs'))
         cmd = (' '.join([self.registryValue('sshCommand'),
                          "gerrit query --format json --comments",
-                         self.registryValue('changeID')]))
+                         query]))
         output = subprocess.check_output(cmd.split(" "), stderr=subprocess.STDOUT)
-        output = json.loads(output.split("\n")[0])
 
-        comments = []
-        for comment in output['comments']:
-            if comment['reviewer']['username'] in \
-                self.registryValue('userFilter') and \
-                comment['timestamp'] > limit:
-                comments.append(comment)
-        return comments
+        query_data = []
+        # skip the last line of output, which is a query summary
+        for line in output.split("\n")[:-1]:
+            query_data.append(json.loads(line))
+        return query_data
 
-    def check_comments(self, comments):
+    def filter_comments(self, comments):
+        '''Filter the comments by username and timestamp'''
+
+        limit = time.time() - (60*60*self.registryValue('timeLimit'))
+
+        filtered = [comment for comment in comments if
+                    comment['reviewer']['username'] in
+                    self.registryValue('userFilter') and
+                    comment['timestamp'] > limit]
+        return filtered
+
+    def parse_comments(self, comments):
         results = {}
         for comment in comments:
             for line in comment['message'].split('\n'):
                 result = re.match(r'^[*-] (?P<job>.*?) (?P<url>.*?) : (?P<result>[^ ]+) '
-                                    '?(?P<comment>.*)$', line)
+                                  '?(?P<comment>.*)$', line)
                 if result:
                     success = result.group('result') == 'SUCCESS'
                     job = result.group('job')
@@ -51,24 +57,43 @@ class GateStatus(callbacks.Plugin):
                         results[job] = [success]
         return results
 
-    def job_report(self):
-        comments = self.fetch_comments()
-        results = self.check_comments(comments)
-        #import pprint
-        #pprint.pprint(results)
-
-        failing_jobs = []
-
+    def filter_failing(self, results):
+        failing = []
         for job in results.keys():
             if len(results[job]) > 1 and results[job][-2:] == [False, False]:
-                failing_jobs.append(job)
+                failing.append(job)
+        return failing
 
-        if len(failing_jobs) > 0:
-            return "FAILING CHECK JOBS: %s | check logs @ %s " \
-                   "and fix them ASAP." % \
-                   (', '.join(failing_jobs), self.registryValue('changeURL'))
-        else:
-            return "Gate jobs are working fine."
+    def process_query(self, query_data):
+        processed = {}
+        for change in query_data:
+            filtered_comments = self.filter_comments(change['comments'])
+            parsed_results = self.parse_comments(filtered_comments)
+            failing_jobs = self.filter_failing(parsed_results)
+            processed[change['id']] = {'branch': change['branch'],
+                                       'url': change['url'],
+                                       'failing': failing_jobs}
+        return processed
+
+    def job_report(self):
+        query_data = self.fetch_data()
+        processed_data = self.process_query(query_data)
+
+        failing_list = []
+        for change in processed_data:
+            failing_list += processed_data[change]['failing']
+        #failing_list = []
+        if not failing_list:
+            return "All check jobs are working fine on %s." % \
+                   (', '.join([processed_data[change]['branch']
+                                for change in processed_data]))
+        msg = "FAILING CHECK JOBS on "
+        for change in processed_data:
+            if processed_data[change]['failing']:
+                msg += processed_data[change]['branch'] + ': '
+                msg += ', '.join(processed_data[change]['failing'])
+                msg += ' @ ' + processed_data[change]['url'] + ', '
+        return msg[:-2]
 
     def user_report(self):
         limit = time.time() - (60*60*self.registryValue('timeLimit'))
