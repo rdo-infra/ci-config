@@ -12,10 +12,9 @@ def configure(advanced):
     conf.registerPlugin('GateStatus', True)
 
 GateStatus = conf.registerPlugin('GateStatus')
-conf.registerGlobalValue(GateStatus, 'changeID',
-    registry.String('', _("""Change ID used for reporting.""")))
-conf.registerGlobalValue(GateStatus, 'changeURL',
-    registry.String('', _("""URL to check the results.""")))
+conf.registerGlobalValue(GateStatus, 'changeIDs',
+    registry.SpaceSeparatedListOfStrings([], _("""Change ID list used for
+    reporting.""")))
 conf.registerGlobalValue(GateStatus, 'timeLimit',
     registry.NonNegativeInteger(24, _("""Maximum comment age in hours that gets
     parsed. Avoids reporting on old and obsolete gate jobs. Defaults to
