@@ -264,9 +264,9 @@ def get_lock(process_name):
 
     try:
         get_lock._lock_socket.bind('\0' + process_name)
-        logger.debug('No other promoters running for this release')
+        logger.debug('No other promoters running. Acquired lock and continuing with promotion')
     except socket.error:
-        logger.error('Another promoter process is running')
+        logger.error('Unable to acquire lock. Another promoter process is running. Aborting.')
         sys.exit(1)
 
 
@@ -274,7 +274,7 @@ def promoter(config):
     logger = logging.getLogger('promoter')
 
     release = config.get('main', 'release')
-    get_lock('promoter-%s' % release)
+    get_lock('promoter')
 
     logger.info('STARTED promotion process for release: %s', release)
 
