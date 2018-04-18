@@ -23,6 +23,9 @@ conf.registerGlobalValue(GateStatus, 'sshCommand',
     registry.String('', _("""Command prefix used to fetch data from Gerrit. The
     bot's user should have passwordless ssh set up. Example: ssh -p 29418
     myuser@review.openstack.org""")))
+conf.registerGlobalValue(GateStatus, 'jobFilter',
+    registry.SpaceSeparatedListOfStrings(['.*-nv$'], _("""List of regexps for job names
+    that will be filtered out of the reported failing jobs""")))
 conf.registerGlobalValue(GateStatus, 'userFilter',
     registry.SpaceSeparatedListOfStrings([], _("""Only try to parse comment
     from these users""")))
