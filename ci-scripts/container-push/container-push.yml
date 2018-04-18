@@ -81,6 +81,8 @@
             tag: "{{ full_hash }}"
           with_items: "{{ built_images.stdout_lines }}"
           retries: 3
+          register: pull_result
+          until: pull_result.failed is not defined or not pull_result.failed
           tags:
             - rdoproject_pull
 
@@ -108,6 +110,8 @@
             docker push trunk.registry.rdoproject.org/{{ rdoproject_namespace  }}/centos-binary-{{ item  }}:{{ named_label  }}
           with_items: "{{ built_images.stdout_lines }}"
           retries: 3
+          register: push_result
+          until: push_result.failed is not defined or not push_result.failed
           tags:
             - rdoproject_push
 
@@ -132,6 +136,8 @@
             - ["{{ full_hash }}", "{{ named_label }}"]
             - "{{ built_images.stdout_lines }}"
           retries: 3
+          register: tag_result
+          until: tag_result.failed is not defined or not tag_result.failed
           tags:
             - dockerhub_push
 
@@ -164,6 +170,8 @@
             - "{{ built_images.stdout_lines }}"
             - ["{{ full_hash }}", "{{ named_label }}"]
           retries: 3
+          register: delete_result
+          until: delete_result.failed is not defined or not delete_result.failed
           ignore_errors: yes
           tags:
             - remove_local_containers
@@ -178,6 +186,8 @@
             - "{{ built_images.stdout_lines }}"
             - ["{{ full_hash }}", "{{ named_label }}"]
           retries: 3
+          register: delete_result
+          until: delete_result.failed is not defined or not delete_result.failed
           ignore_errors: yes
           tags:
             - remove_local_containers
