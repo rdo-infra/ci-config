@@ -64,7 +64,18 @@ class GateStatus(callbacks.Plugin):
         for job in results.keys():
             if len(results[job]) > 1 and results[job][-2:] == [False, False]:
                 failing.append(job)
-        return failing
+
+        exclude_patterns = self.registryValue('jobFilter')
+        filtered = []
+        for job in failing:
+            exclude_job = False
+            for regexp in exclude_patterns:
+                if re.match(regexp, job):
+                    exclude_job = True
+            if not exclude_job:
+                filtered.append(job)
+
+        return filtered
 
     def process_query(self, query_data):
         processed = {}

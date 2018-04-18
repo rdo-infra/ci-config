@@ -33,7 +33,8 @@ mocked_data = [
                 'message': 'Comment from ci-bot with fresh timestamp:\n'
                     '- passing-job http://example.com/1 : SUCCESS in 1m 01s\n'
                     '- failing-job http://example.com/2 : FAILURE in 1h 01m 01s\n'
-                    '- pass-and-fail-job http://example.com/3 : SUCCESS in 1h 01m 01s'
+                    '- pass-and-fail-job http://example.com/3 : SUCCESS in 01s\n'
+                    '- filtered-job-nv http://example.com/4 : FAILURE in 02m 01s'
             },
             {
                 'timestamp': int(time.time()) - 30,
@@ -41,7 +42,8 @@ mocked_data = [
                 'message': 'Second comment from ci-bot with fresh timestamp:\n'
                     '* passing-job http://example.com/1 : SUCCESS in 1m 02s\n'
                     '* failing-job http://example.com/2 : FAILURE in 1h 01m 02s\n'
-                    '* pass-and-fail-job http://example.com/3 : FAILURE in 1h 01m 01s'
+                    '* pass-and-fail-job http://example.com/3 : FAILURE in 01s\n'
+                    '* filtered-job-nv http://example.com/4 : FAILURE in 02m 01s'
             },
         ],
     },
@@ -94,6 +96,7 @@ class GateStatusTestCase(PluginTestCase):
         gs = GateStatus.GateStatus(self.irc)
         output = gs.parse_comments(mocked_data[0]['comments'])
         self.assertEqual(output, {'failing-job': [False, False, False],
+                                  'filtered-job-nv': [False, False],
                                   'pass-and-fail-job': [True, False],
                                   'passing-job': [True, True, True]})
 
