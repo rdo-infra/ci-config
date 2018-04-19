@@ -1,19 +1,21 @@
 #!/bin/bash
 
-CHANGE_ID="I2e4b8f2db0e245bef73b99e12975ae275104f9c4"
+ALL_CHANGE_ID=$(grep "supybot.plugins.GateStatus.changeIDs:" /opt/hubbot/hubbot.conf| cut -d" " -f2-)
 
-# get the latest commit hash
-HASH=$(ssh -p 29418 adarazs@review.openstack.org gerrit query --format json --current-patch-set $CHANGE_ID |jq -r '.["currentPatchSet"]["revision"]'|head -n 1)
+for CHANGE_ID in $ALL_CHANGE_ID; do
+  # get the latest commit hash
+  HASH=$(ssh -p 29418 rdo-ci@review.openstack.org gerrit query --format json --current-patch-set $CHANGE_ID |jq -r '.["currentPatchSet"]["revision"]'|head -n 1)
 
-if [ $? != 0 ]; then
-    echo "Failed to get the latest change"
+  if [ $? != 0 ]; then
+    echo "Failed to get the latest change for $CHANGE_ID"
     exit 1
-fi
+  fi
 
-# rebase
-ssh -p 29418 adarazs@review.openstack.org gerrit review --rebase $HASH
+  # rebase
+  ssh -p 29418 rdo-ci@review.openstack.org gerrit review --rebase $HASH
 
-# if rebase failed (probably already the latest), then recheck
-if [ "$?" != "0" ]; then
-    ssh -p 29418 adarazs@review.openstack.org gerrit review --message "recheck" $HASH
-fi
+  # if rebase failed (probably already the latest), then recheck
+  if [ "$?" != "0" ]; then
+    ssh -p 29418 rdo-ci@review.openstack.org gerrit review --message "recheck" $HASH
+  fi
+done
