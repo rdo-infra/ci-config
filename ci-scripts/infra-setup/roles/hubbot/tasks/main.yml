@@ -96,3 +96,9 @@
         minute: '0'
         hour: '0-23/8'
         job: '/home/centos/gate-recheck.sh'
+
+    - name: Add a cron jobs to start the bot after reboot
+      cron:
+        name: 'start hubbot'
+        special_time: 'reboot'
+        job: '/home/centos/limnoria_venv/bin/supybot -d /opt/hubbot/hubbot.conf'
