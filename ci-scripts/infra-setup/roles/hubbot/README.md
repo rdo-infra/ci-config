@@ -62,7 +62,7 @@ working of the plugin.
 * jobFilter -- A space separated list of regular expressions that should be
   excluded from the reporting. (example: `.*experimental.*`, default: `.*-nv$`)
 
-After the configuration a new `gatecheck` command will be available, which
+After the configuration a new `gatestatus` command will be available, which
 
 * parses the comments of the specified Gerrit changes
 * selects comments from specific users
