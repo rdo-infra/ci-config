@@ -77,7 +77,10 @@ def mock_response(*args, **kwargs):
 class GateStatusTestCase(PluginTestCase):
     plugins = ('GateStatus',)
     config = {'supybot.plugins.GateStatus.userFilter': ['good-bot'],
-              'supybot.plugins.GateStatus.timeLimit': 24}
+              'supybot.plugins.GateStatus.timeLimit': 24,
+              'supybot.plugins.GateStatus.changeIDs': ['I100000', 'Ideadbeef'],
+              'supybot.plugins.GateStatus.sshCommand': 'ssh foo@bar',
+             }
 
     def testFetchData(self):
         subprocess.check_output = mock_response
@@ -114,6 +117,29 @@ class GateStatusTestCase(PluginTestCase):
             'FAILING CHECK JOBS on stable/queens: failing-job-queens @ '
             'http://review.example.com/2, master: failing-job @ '
             'http://review.example.com/1')
+
+    def testGateStatus(self):
+        subprocess.check_output = mock_response
+        self.assertNotError('gatestatus')
+        self.assertResponse('gatestatus',
+            'FAILING CHECK JOBS on stable/queens: failing-job-queens @ '
+            'http://review.example.com/2, master: failing-job @ '
+            'http://review.example.com/1')
+
+    def testUserReport(self):
+        subprocess.check_output = mock_response
+        gs = GateStatus.GateStatus(self.irc)
+        output = gs.user_report()
+        self.assertEqual(output,
+            "Current userFilter: ['good-bot']; all users and comments "
+            "within the timeLimit: foouser (1), good-bot (4)")
+
+    def testPrintUsers(self):
+        subprocess.check_output = mock_response
+        self.assertResponse('printusers',
+            "Current userFilter: ['good-bot']; all users and comments "
+            "within the timeLimit: foouser (1), good-bot (4)")
+
 
 
 # vim:set shiftwidth=4 softtabstop=4 expandtab textwidth=79:

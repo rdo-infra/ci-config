@@ -111,20 +111,17 @@ class GateStatus(callbacks.Plugin):
     def user_report(self):
         limit = time.time() - (60*60*self.registryValue('timeLimit'))
 
-        cmd = (' '.join([self.registryValue('sshCommand'),
-                         "gerrit query --format json --comments",
-                         self.registryValue('changeID')]))
-        output = subprocess.check_output(cmd.split(" "), stderr=subprocess.STDOUT)
-        output = json.loads(output.split("\n")[0])
+        query_data = self.fetch_data()
 
         users = {}
-        for comment in output['comments']:
-            if comment['timestamp'] > limit:
-                username = comment['reviewer']['username']
-                if username in users.keys():
-                    users[username] += 1
-                else:
-                    users[username] = 1
+        for change in query_data:
+            for comment in change['comments']:
+                if comment['timestamp'] > limit:
+                    username = comment['reviewer']['username']
+                    if username in users.keys():
+                        users[username] += 1
+                    else:
+                        users[username] = 1
         msg = 'Current userFilter: %s; ' % self.registryValue('userFilter')
         msg += 'all users and comments within the timeLimit: '
         for names, comments in users.items():
@@ -138,7 +135,7 @@ class GateStatus(callbacks.Plugin):
         Returns the status of the quickstart-extras gate jobs.
         """
         config_missing = []
-        for config_name in ["sshCommand", "changeID", "changeURL"]:
+        for config_name in ["sshCommand", "changeIDs"]:
             if self.registryValue(config_name) == "":
                 config_missing.append(config_name)
         if len(config_missing) > 0:
