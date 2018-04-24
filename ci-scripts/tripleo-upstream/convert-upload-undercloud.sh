@@ -5,12 +5,6 @@ echo ======== CONVERT OVERCLOUD IMAGE TO UNDERCLOUD IMAGE
 : ${WORKSPACE:=$HOME}
 export QUICKSTART_VENV=$WORKSPACE/.quickstart
 
-# Enforce TCG as kvm is not working in some environment due to
-# nested kvm issue:- https://bugzilla.redhat.com/show_bug.cgi?id=1565179
-sudo tee -a /etc/environment <<EOF
-export LIBGUESTFS_BACKEND_SETTINGS=force_tcg
-EOF
-
 pushd $HOME
 ls *.tar
 tar -xf overcloud-full.tar
@@ -63,10 +57,6 @@ rm -rf $QUICKSTART_VENV/ansible_facts_cache
 
 # Install kernel 3.10.0-693.el7.x86_64 required by workaround https://review.openstack.org/#/c/535293/
 sudo yum install -y kernel-3.10.0-693.el7.x86_64
-# Use Ansible config if it's present
-if [ -f /opt/stack/new/tripleo-quickstart/ansible.cfg ]; then
-    export ANSIBLE_CONFIG=/opt/stack/new/tripleo-quickstart/ansible.cfg
-fi
 ansible-playbook -vv convert-overcloud-undercloud.yml -e @$REPO_CONFIG
 deactivate
 
