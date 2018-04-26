@@ -163,3 +163,20 @@
         - { release: 'pike', minute: '2,12,22,32,42,52' }
         - { release: 'ocata', minute: '3,13,23,33,43,53' }
 
+- name: Copy multinode monitoring parser script
+  copy:
+    src: multinode.py
+    dest: ~/multinode.py
+
+- name: Create cron job to run multinode parser for InflusDB and Grafana
+  cron:
+    name: 'script for pulling monitoring data from multinode jobs'
+    minute: 0
+    job: '/usr/bin/python ~/multinode.py -c ~/creds'
+
+- name: Create cron job for removing multinode db every day
+  cron:
+    name: 'script for pulling monitoring data from multinode jobs'
+    minute: 30
+    hour: 03
+    job: 'rm -f ~/multionode.db'
