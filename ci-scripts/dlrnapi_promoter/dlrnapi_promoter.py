@@ -178,37 +178,50 @@ def get_latest_hashes(api, promote_name, current_name, latest_hashes_count):
     '''Get and filter eligible hashes for promotion'''
     logger = logging.getLogger('promoter')
 
-    old_hashes = fetch_hashes(api, promote_name)
-    if old_hashes is None:
-        logger.warning('Failed to fetch hashes for %s, no previous '
-                       'promotion or typo in the link name',
-                       promote_name)
-    else:
-        logger.info('The currently promoted hash is %s', old_hashes)
-    latest_hashes = fetch_hashes(api, current_name, count=latest_hashes_count)
-    if latest_hashes is None:
+    candidate_hashes_list = fetch_hashes(api, current_name, count=latest_hashes_count)
+    if candidate_hashes_list is None:
         logger.error('Failed to fetch any hashes for %s, skipping promotion',
                      current_name)
         return []
     else:
         logger.debug('Hashes fetched (tried to get the last %d): %s',
-                     latest_hashes_count, latest_hashes)
-    if latest_hashes[0] == old_hashes:
-        logger.info('Same hashes for %s and %s %s, skipping promotion',
-                    current_name, promote_name, old_hashes)
-        return []
-    # Eliminate already promoted hashes
-    latest_hashes = [new_hashes for new_hashes in latest_hashes
-                     if not check_promoted(api, promote_name, new_hashes)]
-    logger.debug('Remaining hashes after removing already promoted ones: %s',
-                 latest_hashes)
-    if old_hashes is not None:
-        latest_hashes = [new_hashes for new_hashes in latest_hashes
-                         if new_hashes['timestamp'] > old_hashes['timestamp']]
-    logger.debug('Remaining hashes after removing ones older than the '
-                 'currently promoted: %s', latest_hashes)
-    return latest_hashes
+                     latest_hashes_count, candidate_hashes_list)
 
+    # This will be a map of recent hashes candidate for promotion. We'll map here
+    # the timestamp for each promotion to promote name, if any
+    candidate_hashes = {}
+    for hashes in candidate_hashes_list:
+        full_hash = "%s_%s" % (hashes['commit_hash'], hashes['distro_hash'])
+        candidate_hashes[full_hash] = []
+        candidate_hashes[full_hash][current_name] = hashes['timestamp']
+
+    old_hashes = fetch_hashes(api, promote_name, count=latest_hashes_count)
+    if old_hashes is None:
+        logger.warning('Failed to fetch hashes for %s, no previous '
+                       'promotion or typo in the link name',
+                       promote_name)
+    else:
+        logger.info('Current "%s" hash is %s' % (promote_name, old_hashes[0]))
+
+    for hashes in old_hashes:
+        full_hash = "%s_%s" % (hashes['commit_hash'], hashes['distro_hash'])
+        # it may happen that an hash appears in this list, but it's not from
+        # our list of candindates. If this happens we're just ignoring it
+        if full_hash in candidate_hashes:
+            candidate_hashes[full_hash][promote_name] = hashes['timestamp']
+
+    # returning only the hashes younger than the latest promoted
+    # this list is already in reverse time order
+    for index, hashes in enumerate(candidate_hashes_list):
+        full_hash = "%s_%s" % (hashes['commit_hash'], hashes['distro_hash'])
+        if promote_name in candidate_hashes[full_hash]:
+            logger.info("The latest promoted hash")
+            break
+
+    logger.debug('Remaining hashes after removing ones older than the '
+                 'currently promoted: %s', candidate_hashes_list[:index])
+
+    return candidate_hashes_list[:index]
 
 def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hashes_count):
     '''Promote DLRN API links as a different one when all jobs are
