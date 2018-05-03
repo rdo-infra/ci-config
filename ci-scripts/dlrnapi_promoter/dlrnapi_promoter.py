@@ -276,27 +276,10 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hash
                                 current_name, promote_name, new_hashes)
 
 
-# Use atomic abstract socket creation as process lock
-# no pid files to deal with
-def get_lock(process_name):
-    logger = logging.getLogger('promoter')
-    # Without holding a reference to our socket somewhere it gets garbage
-    # collected when the function exits
-    get_lock._lock_socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-
-    try:
-        get_lock._lock_socket.bind('\0' + process_name)
-        logger.debug('No other promoters running. Acquired lock and continuing with promotion')
-    except socket.error:
-        logger.error('Unable to acquire lock. Another promoter process is running. Aborting.')
-        sys.exit(1)
-
-
 def promoter(config):
     logger = logging.getLogger('promoter')
 
     release = config.get('main', 'release')
-    get_lock('promoter')
 
     logger.info('STARTED promotion process for release: %s', release)
 
