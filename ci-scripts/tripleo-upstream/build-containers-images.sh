@@ -16,6 +16,14 @@ unset ANSIBLE_STDOUT_CALLBACK
 export ANSIBLE_HOST_KEY_CHECKING=False
 export ANSIBLE_ROLES_PATH="$WORKSPACE/roles"
 
+cat <<EOF >>/usr/share/openstack-tripleo-common-containers/container-images/tripleo_kolla_template_overrides.j2
+# In order to ensure that we have the last base packages, we would like to do
+# a yum update in the kolla base image. All the other images should inherit this
+# but if the base distro container is out of date (i.g. 7.4 but 7.5 is out) this
+# will pull in the updated packages available. Related issue LP#1770355
+RUN yum update -y
+EOF
+
 cat << EOF > $WORKSPACE/playbook.yml
 ---
 - name: Build Kolla images
