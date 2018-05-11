@@ -30,6 +30,7 @@ cat << EOF > convert-overcloud-undercloud.yml
     modify_image_vc_verbose: true
     modify_image_vc_trace: true
     use_non_default_kernel: false
+    libguestfs_kernel_override: 3.10.0-862.2.3.el7.x86_64
   tasks:
     - include_role:
         name: "repo-setup"
