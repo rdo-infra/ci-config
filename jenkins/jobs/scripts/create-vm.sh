@@ -12,7 +12,7 @@ LOGSERVER="logs.rdoproject.org ansible_user=uploader"
 CLOUD=${CLOUD:-rdo-cloud}
 NETWORK=${NETWORK:-private}
 NAME="${JOB_NAME_SIMPLIFIED}-${BUILD_NUMBER}"
-IMAGE=${IMAGE:-template-rdo-centos-7}
+IMAGE=${IMAGE:-template-centos7-weirdo-cr}
 TIMEOUT=${TIMEOUT:-120}
 FLAVOR=${FLAVOR:-rdo.m1.nodepool}
 VM_INFO="${WORKSPACE}/vminfo.json"
@@ -28,10 +28,6 @@ pushd $WORKSPACE
 [[ ! -d provision_venv ]] && virtualenv provision_venv
 source provision_venv/bin/activate
 pip install ansible==2.3.1.0 ara shade
-
-# Is there a better way ?
-git clone https://github.com/rdo-infra/ci-config
-nodepool_image=$(python ci-config/jenkins/jobs/scripts/get-nodepool-image.py "${CLOUD}" --pattern "${IMAGE}")
 
 ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
 export ANSIBLE_HOST_KEY_CHECKING=False
@@ -104,7 +100,7 @@ cat <<EOF >create-vm.yml
             state: "present"
             cloud: "${CLOUD}"
             name: "${NAME}"
-            image: "${nodepool_image}"
+            image: "${IMAGE}"
             flavor: "${FLAVOR}"
             network: "${NETWORK}"
             reuse_ips: "no"
@@ -128,7 +124,7 @@ cat <<EOF >create-vm.yml
             state: "present"
             cloud: "${CLOUD}"
             name: "${NAME}"
-            image: "${nodepool_image}"
+            image: "${IMAGE}"
             flavor: "${FLAVOR}"
             network: "${NETWORK}"
             reuse_ips: "no"
