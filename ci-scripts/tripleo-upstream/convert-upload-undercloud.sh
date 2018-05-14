@@ -29,8 +29,6 @@ cat << EOF > convert-overcloud-undercloud.yml
     overcloud_as_undercloud: true
     modify_image_vc_verbose: true
     modify_image_vc_trace: true
-    use_non_default_kernel: false
-    libguestfs_kernel_override: 3.10.0-862.2.3.el7.x86_64
   tasks:
     - include_role:
         name: "repo-setup"
@@ -63,6 +61,8 @@ export REPO_CONFIG="$QUICKSTART_VENV/config/release/tripleo-ci/promotion-testing
 . $QUICKSTART_VENV/bin/activate
 rm -rf $QUICKSTART_VENV/ansible_facts_cache
 
+# Install kernel 3.10.0-693.el7.x86_64 required by workaround https://review.openstack.org/#/c/535293/
+sudo yum install -y kernel-3.10.0-693.el7.x86_64
 # Use Ansible config if it's present
 if [ -f /opt/stack/new/tripleo-quickstart/ansible.cfg ]; then
     export ANSIBLE_CONFIG=/opt/stack/new/tripleo-quickstart/ansible.cfg
