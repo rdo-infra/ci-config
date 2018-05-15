@@ -135,6 +135,24 @@
           tags:
             - dockerhub_push
 
+        - name: Check if dockerhub has all images
+          shell: |
+            tag={{ full_hash }}
+            for image in $(cat {{containers_file }})
+            do
+                if curl --silent -fk -lSL "https://index.docker.io/v1/repositories/{{ dockerhub_namespace}}/centos-binary-${image}/tags/${tag}" 1>/dev/null;
+                then
+                    echo "$image OK";
+                else
+                    echo "$image ERROR";
+                fi
+            done
+          register: command_result
+          failed_when: "'ERROR' in command_result.stdout or command_result.rc != 0"
+          retries: 1
+          tags:
+            - dockerhub_push
+
       always:
         - name: Delete the local images from rdoproject registry
           docker_image:
