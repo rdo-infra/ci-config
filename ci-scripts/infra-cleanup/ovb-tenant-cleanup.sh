@@ -166,7 +166,7 @@ if [[ "$DRY_RUN" == "1" ]]; then
 else
     for STACK in $STACK_LIST; do
         echo "Deleting stack id $STACK ..."
-        openstack stack delete -y $STACK
+        openstack stack delete -y $STACK || echo "stack $STACK failed to clean up"
         # don't overwhelm the tenant with mass delete
         sleep $SLEEP_TIME
     done
