@@ -1,0 +1,1553 @@
+{
+    "dashboard": {
+        "style": "dark", 
+        "templating": {
+            "list": []
+        }, 
+        "links": [], 
+        "tags": [], 
+        "graphTooltip": 0, 
+        "title": "Ruck Rover", 
+        "editable": true, 
+        "refresh": false, 
+        "annotations": {
+            "list": [
+                {
+                    "enable": true, 
+                    "hide": true, 
+                    "name": "Annotations & Alerts", 
+                    "builtIn": 1, 
+                    "datasource": "-- Grafana --", 
+                    "type": "dashboard", 
+                    "iconColor": "rgba(0, 211, 255, 1)"
+                }
+            ]
+        }, 
+        "gnetId": null, 
+        "timepicker": {
+            "time_options": [
+                "5m", 
+                "15m", 
+                "1h", 
+                "6h", 
+                "12h", 
+                "24h", 
+                "2d", 
+                "7d", 
+                "30d"
+            ], 
+            "refresh_intervals": [
+                "5s", 
+                "10s", 
+                "30s", 
+                "1m", 
+                "5m", 
+                "15m", 
+                "30m", 
+                "1h", 
+                "2h", 
+                "1d"
+            ]
+        }, 
+        "time": {
+            "to": "now", 
+            "from": "now-6d"
+        }, 
+        "timezone": "", 
+        "schemaVersion": 16, 
+        "panels": [
+            {
+                "title": "Zuul", 
+                "collapsed": false, 
+                "gridPos": {
+                    "y": 0, 
+                    "h": 1, 
+                    "w": 24, 
+                    "x": 0
+                }, 
+                "panels": [], 
+                "type": "row", 
+                "id": 8
+            }, 
+            {
+                "links": [], 
+                "title": "Upstream job status", 
+                "content": "To look for issue check [sova gate jobs](http://cistatus.tripleo.org/gate/) and [upstream zuul](http://zuul.opentsack.org)", 
+                "mode": "markdown", 
+                "gridPos": {
+                    "y": 1, 
+                    "h": 2, 
+                    "w": 22, 
+                    "x": 0
+                }, 
+                "type": "text", 
+                "id": 27
+            }, 
+            {
+                "mappingTypes": [
+                    {
+                        "name": "value to text", 
+                        "value": 1
+                    }, 
+                    {
+                        "name": "range to text", 
+                        "value": 2
+                    }
+                ], 
+                "timeFrom": "20s", 
+                "links": [], 
+                "valueMaps": [
+                    {
+                        "text": "N/A", 
+                        "value": "null", 
+                        "op": "="
+                    }
+                ], 
+                "tableColumn": "max", 
+                "thresholds": "360,540", 
+                "rangeMaps": [
+                    {
+                        "text": "N/A", 
+                        "from": "null", 
+                        "to": "null"
+                    }
+                ], 
+                "nullPointMode": "connected", 
+                "prefix": "", 
+                "gauge": {
+                    "thresholdLabels": true, 
+                    "show": true, 
+                    "thresholdMarkers": true, 
+                    "maxValue": 600, 
+                    "minValue": 0
+                }, 
+                "gridPos": {
+                    "y": 3, 
+                    "h": 5, 
+                    "w": 4, 
+                    "x": 0
+                }, 
+                "id": 30, 
+                "maxDataPoints": 100, 
+                "mappingType": 1, 
+                "colorBackground": false, 
+                "title": "Upstream gate queue time", 
+                "sparkline": {
+                    "full": false, 
+                    "fillColor": "rgba(31, 118, 189, 0.18)", 
+                    "lineColor": "rgb(31, 120, 193)", 
+                    "show": true
+                }, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "gate", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "tripleo", 
+                                "key": "queue", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "zuul-queue-status", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "$__interval"
+                                ]
+                            }
+                        ], 
+                        "alias": "Max enqueued time", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "enqueued_time"
+                                    ]
+                                }, 
+                                {
+                                    "type": "max", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "prefixFontSize": "50%", 
+                "valueName": "current", 
+                "type": "singlestat", 
+                "valueFontSize": "50%", 
+                "format": "m", 
+                "cacheTimeout": null, 
+                "postfix": "", 
+                "interval": null, 
+                "colors": [
+                    "#299c46", 
+                    "rgba(237, 129, 40, 0.89)", 
+                    "#d44a3a"
+                ], 
+                "datasource": "telegraf", 
+                "nullText": null, 
+                "postfixFontSize": "50%", 
+                "colorValue": true
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": "20s", 
+                "links": [], 
+                "thresholds": [
+                    {
+                        "colorMode": "critical", 
+                        "line": true, 
+                        "op": "lt", 
+                        "value": 0, 
+                        "fill": true
+                    }
+                ], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "gridPos": {
+                    "y": 3, 
+                    "h": 5, 
+                    "w": 4, 
+                    "x": 4
+                }, 
+                "linewidth": 3, 
+                "steppedLine": false, 
+                "id": 15, 
+                "fill": 1, 
+                "title": "Upstream", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": false, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": false, 
+                    "max": false, 
+                    "min": false, 
+                    "current": false, 
+                    "values": false, 
+                    "avg": false
+                }, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "gate", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "tripleo", 
+                                "key": "queue", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "zuul-queue-status", 
+                        "groupBy": [], 
+                        "alias": "Tripleo gate", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result_code"
+                                    ]
+                                }, 
+                                {
+                                    "type": "min", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "C", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "min": "-1", 
+                        "max": "1", 
+                        "format": "short", 
+                        "label": "min result code", 
+                        "show": true, 
+                        "decimals": 0
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "min": "-1", 
+                        "max": "1", 
+                        "format": "short", 
+                        "label": "result code( -1: failure, 0: ongoing, 1: success)", 
+                        "show": false, 
+                        "decimals": 0
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": 360, 
+                    "show": true, 
+                    "values": [
+                        "current"
+                    ], 
+                    "mode": "series", 
+                    "name": null
+                }, 
+                "seriesOverrides": [
+                    {
+                        "alias": "Min result code", 
+                        "bars": false, 
+                        "points": true, 
+                        "yaxis": 2, 
+                        "pointradius": 5
+                    }
+                ], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "alert": {
+                    "noDataState": "no_data", 
+                    "name": "Openstack zuul's result alarms alert", 
+                    "frequency": "60s", 
+                    "notifications": [], 
+                    "handler": 1, 
+                    "executionErrorState": "alerting", 
+                    "message": "Upstream tripleo gate jobs are failing, check them at sova: http://cistatus.tripleo.org/gates/, and also at zuul: zuul.openstack.org", 
+                    "conditions": [
+                        {
+                            "operator": {
+                                "type": "or"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "C", 
+                                    "5m", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "lt", 
+                                "params": [
+                                    0
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "last", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }
+                    ]
+                }, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": false, 
+                "points": true, 
+                "datasource": "telegraf", 
+                "pointradius": 10
+            }, 
+            {
+                "sort": {
+                    "col": 3, 
+                    "desc": false
+                }, 
+                "styles": [
+                    {
+                        "alias": "Time", 
+                        "type": "date", 
+                        "pattern": "Time", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss"
+                    }, 
+                    {
+                        "type": "number", 
+                        "pattern": "enqueued_time", 
+                        "thresholds": [], 
+                        "alias": "", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "colorMode": null, 
+                        "decimals": 2, 
+                        "unit": "m"
+                    }
+                ], 
+                "timeFrom": "20s", 
+                "pageSize": null, 
+                "links": [], 
+                "title": "Upstream tripleo gate failures", 
+                "transform": "table", 
+                "showHeader": true, 
+                "scroll": true, 
+                "targets": [
+                    {
+                        "rawQuery": true, 
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "gate", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "tripleo", 
+                                "key": "queue", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "zuul-queue-status", 
+                        "refId": "A", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "enqueued_time"
+                                    ]
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "query": "SELECT \"refspec\", \"job\", \"result\", \"enqueued_time\" FROM \"zuul-queue-status\" WHERE \"pipeline\" = 'gate' AND \"queue\" = 'tripleo' AND $timeFilter AND result_code = -1", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "$__interval"
+                                ]
+                            }
+                        ], 
+                        "resultFormat": "table"
+                    }
+                ], 
+                "fontSize": "100%", 
+                "datasource": "telegraf", 
+                "gridPos": {
+                    "y": 3, 
+                    "h": 5, 
+                    "w": 14, 
+                    "x": 8
+                }, 
+                "type": "table", 
+                "id": 20, 
+                "columns": []
+            }, 
+            {
+                "links": [], 
+                "title": "RDO job status", 
+                "content": "To look for issue check [sova promotion jobs](http://cistatus.tripleo.org/promotion/) and [RDO zuul](http://review.rdoproject.org/zuul)", 
+                "mode": "markdown", 
+                "gridPos": {
+                    "y": 8, 
+                    "h": 2, 
+                    "w": 22, 
+                    "x": 0
+                }, 
+                "type": "text", 
+                "id": 28
+            }, 
+            {
+                "mappingTypes": [
+                    {
+                        "name": "value to text", 
+                        "value": 1
+                    }, 
+                    {
+                        "name": "range to text", 
+                        "value": 2
+                    }
+                ], 
+                "timeFrom": "20s", 
+                "links": [], 
+                "valueMaps": [
+                    {
+                        "text": "N/A", 
+                        "value": "null", 
+                        "op": "="
+                    }
+                ], 
+                "tableColumn": "max", 
+                "thresholds": "180,360", 
+                "rangeMaps": [
+                    {
+                        "text": "N/A", 
+                        "from": "null", 
+                        "to": "null"
+                    }
+                ], 
+                "nullPointMode": "connected", 
+                "prefix": "", 
+                "gauge": {
+                    "thresholdLabels": true, 
+                    "show": true, 
+                    "thresholdMarkers": true, 
+                    "maxValue": 600, 
+                    "minValue": 0
+                }, 
+                "gridPos": {
+                    "y": 10, 
+                    "h": 5, 
+                    "w": 4, 
+                    "x": 0
+                }, 
+                "id": 31, 
+                "maxDataPoints": 100, 
+                "mappingType": 1, 
+                "colorBackground": false, 
+                "title": "RDO zuul queue time", 
+                "sparkline": {
+                    "full": false, 
+                    "fillColor": "rgba(31, 118, 189, 0.18)", 
+                    "lineColor": "rgb(31, 120, 193)", 
+                    "show": true
+                }, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "openstack-check", 
+                                "key": "pipeline"
+                            }
+                        ], 
+                        "measurement": "zuul-queue-status", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "$__interval"
+                                ]
+                            }
+                        ], 
+                        "alias": "Max enqueued time", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "enqueued_time"
+                                    ]
+                                }, 
+                                {
+                                    "type": "max", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "prefixFontSize": "50%", 
+                "valueName": "current", 
+                "type": "singlestat", 
+                "valueFontSize": "50%", 
+                "format": "m", 
+                "cacheTimeout": null, 
+                "postfix": "", 
+                "interval": null, 
+                "colors": [
+                    "#299c46", 
+                    "rgba(237, 129, 40, 0.89)", 
+                    "#d44a3a"
+                ], 
+                "datasource": "telegraf", 
+                "nullText": null, 
+                "postfixFontSize": "50%", 
+                "colorValue": true
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": "20s", 
+                "links": [], 
+                "thresholds": [
+                    {
+                        "colorMode": "critical", 
+                        "line": true, 
+                        "op": "lt", 
+                        "value": 0, 
+                        "fill": true
+                    }
+                ], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "gridPos": {
+                    "y": 10, 
+                    "h": 5, 
+                    "w": 6, 
+                    "x": 4
+                }, 
+                "linewidth": 3, 
+                "steppedLine": false, 
+                "id": 25, 
+                "fill": 1, 
+                "title": "RDO", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": false, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "rightSide": true, 
+                    "total": false, 
+                    "min": false, 
+                    "max": false, 
+                    "show": true, 
+                    "current": false, 
+                    "values": false, 
+                    "alignAsTable": true, 
+                    "avg": false
+                }, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "openstack-check", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "https://review.rdoproject.org/zuul/status.json", 
+                                "key": "url", 
+                                "condition": "AND"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "560445", 
+                                "key": "review", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "zuul-queue-status", 
+                        "groupBy": [], 
+                        "alias": "openstack-check (560445)", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result_code"
+                                    ]
+                                }, 
+                                {
+                                    "type": "min", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "C", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "openstack-check", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "https://review.rdoproject.org/zuul/status.json", 
+                                "key": "url", 
+                                "condition": "AND"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "567224", 
+                                "key": "review", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "zuul-queue-status", 
+                        "groupBy": [], 
+                        "alias": "openstack-check (567224)", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result_code"
+                                    ]
+                                }, 
+                                {
+                                    "type": "min", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "openstack-check", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "https://review.rdoproject.org/zuul/status.json", 
+                                "key": "url", 
+                                "condition": "AND"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "564285", 
+                                "key": "review", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "zuul-queue-status", 
+                        "groupBy": [], 
+                        "alias": "openstack-check (564285)", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result_code"
+                                    ]
+                                }, 
+                                {
+                                    "type": "min", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "B", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "openstack-check", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "https://review.rdoproject.org/zuul/status.json", 
+                                "key": "url", 
+                                "condition": "AND"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "564291", 
+                                "key": "review", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "zuul-queue-status", 
+                        "groupBy": [], 
+                        "alias": "openstack-check (564291)", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result_code"
+                                    ]
+                                }, 
+                                {
+                                    "type": "min", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "D", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "min": "-1", 
+                        "max": "1", 
+                        "format": "short", 
+                        "label": "min result code", 
+                        "show": true, 
+                        "decimals": 0
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "min": "-1", 
+                        "max": "1", 
+                        "format": "short", 
+                        "label": "result code( -1: failure, 0: ongoing, 1: success)", 
+                        "show": false, 
+                        "decimals": 0
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": 360, 
+                    "show": false, 
+                    "values": [
+                        "current"
+                    ], 
+                    "mode": "series", 
+                    "name": null
+                }, 
+                "seriesOverrides": [
+                    {
+                        "alias": "Min result code", 
+                        "bars": false, 
+                        "points": true, 
+                        "yaxis": 2, 
+                        "pointradius": 5
+                    }
+                ], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "alert": {
+                    "noDataState": "no_data", 
+                    "name": "RDO alert", 
+                    "frequency": "60s", 
+                    "notifications": [], 
+                    "handler": 1, 
+                    "executionErrorState": "alerting", 
+                    "message": "RDO openstack-check pipeline is failing a noop changes, check them at sova: http://cistatus.tripleo.org/promotion/, and also at zuul:  http://review.rdoproject.org/zuul", 
+                    "conditions": [
+                        {
+                            "operator": {
+                                "type": "and"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "A", 
+                                    "5m", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "lt", 
+                                "params": [
+                                    0
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "last", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }, 
+                        {
+                            "operator": {
+                                "type": "or"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "B", 
+                                    "5m", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "lt", 
+                                "params": [
+                                    0
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "last", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }, 
+                        {
+                            "operator": {
+                                "type": "or"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "C", 
+                                    "5m", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "lt", 
+                                "params": [
+                                    0
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "last", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }, 
+                        {
+                            "operator": {
+                                "type": "or"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "D", 
+                                    "5m", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "lt", 
+                                "params": [
+                                    0
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "last", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }
+                    ]
+                }, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": false, 
+                "points": true, 
+                "datasource": "telegraf", 
+                "pointradius": 10
+            }, 
+            {
+                "sort": {
+                    "col": 4, 
+                    "desc": true
+                }, 
+                "styles": [
+                    {
+                        "alias": "Time", 
+                        "type": "date", 
+                        "pattern": "Time", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss"
+                    }, 
+                    {
+                        "type": "number", 
+                        "pattern": "enqueued_time", 
+                        "thresholds": [], 
+                        "alias": "", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "colorMode": null, 
+                        "decimals": 2, 
+                        "unit": "m"
+                    }
+                ], 
+                "timeFrom": "20s", 
+                "pageSize": null, 
+                "links": [], 
+                "title": "RDO openstack-check noop failures", 
+                "transform": "table", 
+                "showHeader": true, 
+                "scroll": true, 
+                "targets": [
+                    {
+                        "rawQuery": true, 
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "openstack-check", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "https://review.rdoproject.org/zuul/status.json", 
+                                "key": "url", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "zuul-queue-status", 
+                        "refId": "A", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result_code"
+                                    ]
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "query": "SELECT \"job\", \"review\", \"patch_set\", \"result\" FROM \"zuul-queue-status\" WHERE result_code=-1 AND \"pipeline\" = 'openstack-check' AND \"url\" = 'https://review.rdoproject.org/zuul/status.json' AND $timeFilter AND (\"review\"='560445' OR \"review\"='567224' OR \"review\"='564285 ' OR \"review\"='564291' )", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "$__interval"
+                                ]
+                            }
+                        ], 
+                        "resultFormat": "table"
+                    }
+                ], 
+                "fontSize": "100%", 
+                "datasource": "telegraf", 
+                "gridPos": {
+                    "y": 10, 
+                    "h": 5, 
+                    "w": 12, 
+                    "x": 10
+                }, 
+                "type": "table", 
+                "id": 22, 
+                "columns": []
+            }, 
+            {
+                "bars": true, 
+                "timeFrom": "20s", 
+                "links": [], 
+                "thresholds": [
+                    {
+                        "colorMode": "critical", 
+                        "line": true, 
+                        "op": "gt", 
+                        "value": 360, 
+                        "fill": true
+                    }
+                ], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "gridPos": {
+                    "y": 15, 
+                    "h": 5, 
+                    "w": 4, 
+                    "x": 0
+                }, 
+                "linewidth": 3, 
+                "steppedLine": false, 
+                "id": 23, 
+                "fill": 1, 
+                "title": "Upstream", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": false, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": false, 
+                    "max": false, 
+                    "min": false, 
+                    "current": false, 
+                    "values": false, 
+                    "avg": false
+                }, 
+                "targets": [
+                    {
+                        "rawQuery": false, 
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "gate", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "tripleo", 
+                                "key": "queue", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "zuul-queue-status", 
+                        "refId": "A", 
+                        "alias": "tripleo gate", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "enqueued_time"
+                                    ]
+                                }, 
+                                {
+                                    "type": "max", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "query": "SELECT \"enqueued_time\" FROM \"zuul-queue-status\" WHERE (\"pipeline\" = 'gate' AND \"queue\" = 'tripleo') AND $timeFilter", 
+                        "groupBy": [], 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "min": "0", 
+                        "max": "400", 
+                        "format": "m", 
+                        "label": "max enqueued time", 
+                        "show": true, 
+                        "decimals": 0
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "min": "-1", 
+                        "max": "1", 
+                        "format": "short", 
+                        "label": "result code( -1: failure, 0: ongoing, 1: success)", 
+                        "show": false, 
+                        "decimals": 0
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": 360, 
+                    "show": true, 
+                    "values": [
+                        "current"
+                    ], 
+                    "mode": "series", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "alert": {
+                    "noDataState": "no_data", 
+                    "name": "Upstream tripleo gate queue alert", 
+                    "frequency": "60s", 
+                    "notifications": [], 
+                    "handler": 1, 
+                    "executionErrorState": "alerting", 
+                    "message": "Upstream tripleo gate queue is older than 6 hours, check the jobs there http://zuul.openstack.org/.", 
+                    "conditions": [
+                        {
+                            "operator": {
+                                "type": "and"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "A", 
+                                    "5m", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "gt", 
+                                "params": [
+                                    360
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "last", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }
+                    ]
+                }, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": false, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }, 
+            {
+                "bars": true, 
+                "timeFrom": "20s", 
+                "links": [], 
+                "thresholds": [
+                    {
+                        "colorMode": "critical", 
+                        "line": true, 
+                        "op": "gt", 
+                        "value": 360, 
+                        "fill": true
+                    }
+                ], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "gridPos": {
+                    "y": 15, 
+                    "h": 5, 
+                    "w": 4, 
+                    "x": 4
+                }, 
+                "linewidth": 3, 
+                "steppedLine": false, 
+                "id": 24, 
+                "fill": 1, 
+                "title": "RDO", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": false, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": false, 
+                    "max": false, 
+                    "min": false, 
+                    "current": false, 
+                    "values": false, 
+                    "avg": false
+                }, 
+                "targets": [
+                    {
+                        "rawQuery": false, 
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "openstack-check", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "https://review.rdoproject.org/zuul/status.json", 
+                                "key": "url", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "zuul-queue-status", 
+                        "refId": "A", 
+                        "alias": "openstack-check", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "enqueued_time"
+                                    ]
+                                }, 
+                                {
+                                    "type": "max", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "query": "SELECT \"enqueued_time\" FROM \"zuul-queue-status\" WHERE (\"pipeline\" = 'gate' AND \"queue\" = 'tripleo') AND $timeFilter", 
+                        "groupBy": [], 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "min": "0", 
+                        "max": "400", 
+                        "format": "m", 
+                        "label": "max enqueued time", 
+                        "show": true, 
+                        "decimals": 0
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "min": "-1", 
+                        "max": "1", 
+                        "format": "short", 
+                        "label": "result code( -1: failure, 0: ongoing, 1: success)", 
+                        "show": false, 
+                        "decimals": 0
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": 360, 
+                    "show": true, 
+                    "values": [
+                        "current"
+                    ], 
+                    "mode": "series", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "alert": {
+                    "noDataState": "no_data", 
+                    "name": "RDO alert", 
+                    "frequency": "60s", 
+                    "notifications": [], 
+                    "handler": 1, 
+                    "executionErrorState": "alerting", 
+                    "message": "RDO openstack-check pipeline has jobs that are older than 6 hours, check the jobs https://review.rdoproject.org/zuul/.", 
+                    "conditions": [
+                        {
+                            "operator": {
+                                "type": "and"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "A", 
+                                    "5m", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "gt", 
+                                "params": [
+                                    360
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "last", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }
+                    ]
+                }, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": false, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }, 
+            {
+                "title": "Issues", 
+                "collapsed": true, 
+                "gridPos": {
+                    "y": 20, 
+                    "h": 1, 
+                    "w": 24, 
+                    "x": 0
+                }, 
+                "panels": [
+                    {
+                        "sort": {
+                            "col": 0, 
+                            "desc": true
+                        }, 
+                        "styles": [
+                            {
+                                "alias": "Time", 
+                                "type": "date", 
+                                "pattern": "Time", 
+                                "dateFormat": "YYYY-MM-DD HH:mm:ss"
+                            }, 
+                            {
+                                "linkTargetBlank": true, 
+                                "mappingType": 1, 
+                                "type": "number", 
+                                "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                                "colorMode": null, 
+                                "thresholds": [], 
+                                "alias": "", 
+                                "colors": [
+                                    "rgba(245, 54, 54, 0.9)", 
+                                    "rgba(237, 129, 40, 0.89)", 
+                                    "rgba(50, 172, 45, 0.97)"
+                                ], 
+                                "link": true, 
+                                "pattern": "link", 
+                                "decimals": 2, 
+                                "unit": "short", 
+                                "linkUrl": "${__cell}"
+                            }, 
+                            {
+                                "type": "number", 
+                                "pattern": "/.*/", 
+                                "thresholds": [], 
+                                "alias": "", 
+                                "colors": [
+                                    "rgba(245, 54, 54, 0.9)", 
+                                    "rgba(237, 129, 40, 0.89)", 
+                                    "rgba(50, 172, 45, 0.97)"
+                                ], 
+                                "colorMode": null, 
+                                "decimals": 2, 
+                                "unit": "short"
+                            }
+                        ], 
+                        "timeFrom": "20s", 
+                        "pageSize": null, 
+                        "links": [], 
+                        "title": "Urgent bugs", 
+                        "transform": "table", 
+                        "showHeader": true, 
+                        "scroll": true, 
+                        "targets": [
+                            {
+                                "rawQuery": true, 
+                                "tags": [], 
+                                "measurement": "urgent-bugs", 
+                                "refId": "A", 
+                                "select": [
+                                    [
+                                        {
+                                            "type": "field", 
+                                            "params": [
+                                                "title"
+                                            ]
+                                        }
+                                    ], 
+                                    [
+                                        {
+                                            "type": "field", 
+                                            "params": [
+                                                "status"
+                                            ]
+                                        }
+                                    ], 
+                                    [
+                                        {
+                                            "type": "field", 
+                                            "params": [
+                                                "link"
+                                            ]
+                                        }
+                                    ]
+                                ], 
+                                "orderByTime": "ASC", 
+                                "policy": "default", 
+                                "query": "SELECT \"title\", \"status\", \"link\" FROM \"urgent-bugs\" WHERE $timeFilter", 
+                                "groupBy": [], 
+                                "resultFormat": "table"
+                            }
+                        ], 
+                        "fontSize": "100%", 
+                        "datasource": "telegraf", 
+                        "gridPos": {
+                            "y": 21, 
+                            "h": 9, 
+                            "w": 12, 
+                            "x": 0
+                        }, 
+                        "type": "table", 
+                        "id": 6, 
+                        "columns": []
+                    }, 
+                    {
+                        "sort": {
+                            "col": 0, 
+                            "desc": true
+                        }, 
+                        "styles": [
+                            {
+                                "alias": "Time", 
+                                "type": "date", 
+                                "pattern": "Time", 
+                                "dateFormat": "YYYY-MM-DD HH:mm:ss"
+                            }, 
+                            {
+                                "type": "number", 
+                                "pattern": "/.*/", 
+                                "thresholds": [], 
+                                "alias": "", 
+                                "colors": [
+                                    "rgba(245, 54, 54, 0.9)", 
+                                    "rgba(237, 129, 40, 0.89)", 
+                                    "rgba(50, 172, 45, 0.97)"
+                                ], 
+                                "colorMode": null, 
+                                "decimals": 2, 
+                                "unit": "short"
+                            }
+                        ], 
+                        "pageSize": null, 
+                        "links": [], 
+                        "title": "Openstack infra issues", 
+                        "transform": "table", 
+                        "showHeader": true, 
+                        "scroll": true, 
+                        "targets": [
+                            {
+                                "rawQuery": true, 
+                                "tags": [], 
+                                "measurement": "openstack-infra-issues", 
+                                "refId": "A", 
+                                "select": [
+                                    [
+                                        {
+                                            "type": "field", 
+                                            "params": [
+                                                "issue"
+                                            ]
+                                        }
+                                    ]
+                                ], 
+                                "orderByTime": "ASC", 
+                                "policy": "default", 
+                                "query": "SELECT \"issue\" FROM \"openstack-infra-issues\"", 
+                                "groupBy": [], 
+                                "resultFormat": "table"
+                            }
+                        ], 
+                        "fontSize": "100%", 
+                        "datasource": "telegraf", 
+                        "gridPos": {
+                            "y": 21, 
+                            "h": 9, 
+                            "w": 10, 
+                            "x": 12
+                        }, 
+                        "type": "table", 
+                        "id": 2, 
+                        "columns": []
+                    }
+                ], 
+                "type": "row", 
+                "id": 4
+            }
+        ]
+    }
+}
