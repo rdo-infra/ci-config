@@ -11,8 +11,30 @@ import socket
 import subprocess
 import sys
 
+import os.path
+import traceback
+
+
 from dlrnapi_client.rest import ApiException
 import dlrnapi_client
+
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    """ handle all exceptions """
+
+    # KeyboardInterrupt is a special case.
+    if issubclass(exc_type, KeyboardInterrupt):
+        return
+
+    filename, line, dummy, dummy = traceback.extract_tb( exc_traceback ).pop()
+    
+    # TODO: log these
+    filename = os.path.basename( filename )
+    error    = "%s: %s" % ( exc_type.__name__, exc_value )
+
+    logger.error('Closed due to an error. This is the full error report:')
+    logger.error( "".join(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+    sys.exit(1)
 
 
 def check_promoted(dlrn, link, hashes):
@@ -252,6 +274,7 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hash
                 except:
                     logger.info('FAILED promoting %s as %s (%s)',
                                 current_name, promote_name, new_hashes)
+                    raise
 
 
 # Use atomic abstract socket creation as process lock
@@ -324,6 +347,10 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("Usage: %s <config-file>" % sys.argv[0])
     else:
+
+        # install handler for exceptions
+        sys.excepthook = handle_exception
+
         config = ConfigParser.SafeConfigParser(allow_no_value=True)
         config.read(sys.argv[1])
         setup_logging(config.get('main', 'log_file'))
