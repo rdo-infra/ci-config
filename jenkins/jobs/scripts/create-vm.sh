@@ -27,7 +27,7 @@ pushd $WORKSPACE
 # Install dependencies
 [[ ! -d provision_venv ]] && virtualenv provision_venv
 source provision_venv/bin/activate
-pip install ansible==2.5.2 ara shade
+pip install ansible==2.5.2 ara shade 'cmd2<0.9.0'
 
 # Is there a better way ?
 git clone https://github.com/rdo-infra/ci-config
