@@ -159,6 +159,7 @@
             name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/centos-binary-{{ item[0] }}"
             tag: "{{ item[1] }}"
             state: absent
+            force: yes
           with_nested:
             - "{{ built_images.stdout_lines }}"
             - ["{{ full_hash }}", "{{ named_label }}"]
@@ -172,6 +173,7 @@
             name: "docker.io/{{ dockerhub_namespace }}/centos-binary-{{ item[0] }}"
             tag: "{{ item[1] }}"
             state: absent
+            force: yes
           with_nested:
             - "{{ built_images.stdout_lines }}"
             - ["{{ full_hash }}", "{{ named_label }}"]
