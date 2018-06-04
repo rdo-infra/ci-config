@@ -1,0 +1,78 @@
+2018-06-04 09:35:13,095 INFO sqlalchemy.engine.base.Engine SELECT CAST('test plain returns' AS VARCHAR(60)) AS anon_1
+2018-06-04 09:35:13,095 INFO sqlalchemy.engine.base.Engine ()
+2018-06-04 09:35:13,096 INFO sqlalchemy.engine.base.Engine SELECT CAST('test unicode returns' AS VARCHAR(60)) AS anon_1
+2018-06-04 09:35:13,096 INFO sqlalchemy.engine.base.Engine ()
+2018-06-04 09:35:13,096 INFO sqlalchemy.engine.base.Engine PRAGMA table_info("promotions")
+2018-06-04 09:35:13,096 INFO sqlalchemy.engine.base.Engine ()
+2018-06-04 09:35:13,097 INFO sqlalchemy.engine.base.Engine PRAGMA table_info("repos")
+2018-06-04 09:35:13,097 INFO sqlalchemy.engine.base.Engine ()
+2018-06-04 09:35:13,097 INFO sqlalchemy.engine.base.Engine PRAGMA table_info("jobresults")
+2018-06-04 09:35:13,097 INFO sqlalchemy.engine.base.Engine ()
+2018-06-04 09:35:13,097 INFO sqlalchemy.engine.base.Engine PRAGMA table_info("promotionrules")
+2018-06-04 09:35:13,097 INFO sqlalchemy.engine.base.Engine ()
+2018-06-04 09:35:13,097 INFO sqlalchemy.engine.base.Engine 
+CREATE TABLE promotions (
+	id INTEGER NOT NULL, 
+	timestamp INTEGER NOT NULL, 
+	commit_hash VARCHAR(40) NOT NULL, 
+	distro_hash VARCHAR(40) NOT NULL, 
+	repo_hash VARCHAR(49) NOT NULL, 
+	promote_name VARCHAR(32) NOT NULL, 
+	user VARCHAR(16) NOT NULL, 
+	repo_url VARCHAR(256) NOT NULL, 
+	PRIMARY KEY (id), 
+	UNIQUE (id)
+)
+
+
+2018-06-04 09:35:13,098 INFO sqlalchemy.engine.base.Engine ()
+2018-06-04 09:35:13,098 INFO sqlalchemy.engine.base.Engine COMMIT
+2018-06-04 09:35:13,098 INFO sqlalchemy.engine.base.Engine 
+CREATE TABLE repos (
+	id INTEGER NOT NULL, 
+	commit_hash VARCHAR(40) NOT NULL, 
+	distro_hash VARCHAR(40) NOT NULL, 
+	repo_hash VARCHAR(49) NOT NULL, 
+	repo_url VARCHAR(256) NOT NULL, 
+	release VARCHAR(16) NOT NULL, 
+	last_ciresult_fetch DATETIME, 
+	PRIMARY KEY (id), 
+	UNIQUE (id)
+)
+
+
+2018-06-04 09:35:13,098 INFO sqlalchemy.engine.base.Engine ()
+2018-06-04 09:35:13,098 INFO sqlalchemy.engine.base.Engine COMMIT
+2018-06-04 09:35:13,099 INFO sqlalchemy.engine.base.Engine 
+CREATE TABLE promotionrules (
+	id INTEGER NOT NULL, 
+	git_permalink_url VARCHAR(256), 
+	promote_target VARCHAR(32) NOT NULL, 
+	promote_source VARCHAR(32) NOT NULL, 
+	job_id_csvlist VARCHAR(512), 
+	PRIMARY KEY (id), 
+	UNIQUE (id)
+)
+
+
+2018-06-04 09:35:13,099 INFO sqlalchemy.engine.base.Engine ()
+2018-06-04 09:35:13,099 INFO sqlalchemy.engine.base.Engine COMMIT
+2018-06-04 09:35:13,099 INFO sqlalchemy.engine.base.Engine 
+CREATE TABLE jobresults (
+	id INTEGER NOT NULL, 
+	repo_id INTEGER, 
+	commit_hash VARCHAR(40) NOT NULL, 
+	distro_hash VARCHAR(40) NOT NULL, 
+	job_id VARCHAR(128) NOT NULL, 
+	notes VARCHAR(256) NOT NULL, 
+	url VARCHAR(256) NOT NULL, 
+	in_progress INTEGER NOT NULL, 
+	success INTEGER NOT NULL, 
+	PRIMARY KEY (id), 
+	UNIQUE (id), 
+	FOREIGN KEY(repo_id) REFERENCES repos (id)
+)
+
+
+2018-06-04 09:35:13,099 INFO sqlalchemy.engine.base.Engine ()
+2018-06-04 09:35:13,099 INFO sqlalchemy.engine.base.Engine COMMIT
