@@ -83,3 +83,17 @@
       name: "Run ansible-pull for continuous delivery"
       minute: "*/5"
       job: "flock -n -E 2 /var/lock/ansible-pull /usr/local/bin/ansible_pull.sh"
+
+  - name: Copy dhclient-enter-hooks to /etc/dhcpd
+    copy:
+      src: dhclient-enter-hooks
+      dest: /etc/dhcp/
+      mode: "u+x"
+      when: {{ ansible_hostname }} != "dns"
+
+  - name: Create resolv.conf
+    template:
+      src: resolv.conf.j2
+      dest: "/etc/resolv.conf"
+      mode: 644
+    when: {{ ansible_hostname }} != "dns"
