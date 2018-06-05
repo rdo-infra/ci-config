@@ -72,6 +72,22 @@
       line: 'PasswordAuthentication no'
     notify: ssh-restart
 
+  - name: Set dns in /etc/resolv.conf
+    lineinfile:
+      path: /etc/resolv.conf
+      line: "nameserver {{ dns_internal_network_ip }}"
+    when: ansible_hostname != "dns-server"
+
+  - name: Content of /etc/resolv.conf
+    debug:
+      msg: "{{ lookup('file', '/etc/resolv.conf') }}"
+
+  - name: Set supersede in /etc/dhclient.conf
+    lineinfile:
+      path: /etc/dhcp/dhclient.conf
+      line: "supersede domain-name-servers {{ dns_internal_network_ip }};"
+    when: ansible_hostname != "dns-server"
+
   - name: Create continuous delivery script
     template:
       src: ansible-pull.sh.j2
