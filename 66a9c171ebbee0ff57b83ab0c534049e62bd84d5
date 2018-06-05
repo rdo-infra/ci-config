@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "bab921fb_0ae77de5",
+        "filename": "ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 202
+      },
+      "writtenOn": "2018-06-05T13:23:00Z",
+      "side": 1,
+      "message": "ahh cool I wasn\u0027t aware of that convention \u0027_\u0027",
+      "parentUuid": "bab921fb_69adea87",
+      "revId": "66a9c171ebbee0ff57b83ab0c534049e62bd84d5",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bab921fb_49aa2672",
         "filename": "ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "bab921fb_eaeb29af",
+        "filename": "ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 202
+      },
+      "writtenOn": "2018-06-05T13:23:00Z",
+      "side": 1,
+      "message": "that\u0027s the point though right?  if exceptional behavior occurs, we should not just keep going.  For example in the case that was happening, ansible isn\u0027t installed into the venv, so continued iterations of the loop would keep failing the same way.  In other contexts we could be looking at data loss or worse.  I agree that we should probably add more checking and error handling, and if we identify classes of errors where we do want a \"log details and keep going\" behavior, we should add logic (vs add handlers ) for that specific class of issue.  B\n\nBut to blindly catch all exceptions and continue is dangerous.  In C++ this is the \"catch(...){;}\" pitfall.  We shouldn\u0027t use exception handling for flow control...",
+      "parentUuid": "bab921fb_49aa2672",
+      "revId": "66a9c171ebbee0ff57b83ab0c534049e62bd84d5",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bab921fb_29b6d2dc",
         "filename": "ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2018-05-30T05:56:12Z",
       "side": 1,
       "message": "Not catching exception where there are not needed and doing a proper loggin.exception will get as more info without a global exception handler.",
+      "revId": "66a9c171ebbee0ff57b83ab0c534049e62bd84d5",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bab921fb_cad185fd",
+        "filename": "ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 202
+      },
+      "writtenOn": "2018-06-05T13:23:00Z",
+      "side": 1,
+      "message": "I agree that the promoter needs better error handling and/or behaviors, but that isn\u0027t the purpose of a global handler.  \n\nWe\u0027ve seen over the past few months multiple instances of the promoter failing in new/interesting ways.  For example a couple months ago we were not handling cases where the dlrn api itself was returning 500\u0027s due to infra.  In that case (as in the case that  motivated this global handler) the promoter either continued silently failing, or failed without any detail.  I see a global handler as something that ideally we don\u0027t need, but it\u0027s good to have for when the (literally) unexpected happens.  \n\nI can respin this if we want to just have a top level exception block that does something similar (e.g. dump out stack trace or other meaningful debug info)",
+      "parentUuid": "bab921fb_29b6d2dc",
       "revId": "66a9c171ebbee0ff57b83ab0c534049e62bd84d5",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": false
