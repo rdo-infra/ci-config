@@ -2,8 +2,7 @@
 
 from __future__ import print_function
 from datetime import datetime
-from sets import Set
-import ConfigParser
+import configparser
 import logging
 import logging.handlers
 import os
@@ -215,21 +214,21 @@ def get_latest_hashes(api, promote_name, current_name, latest_hashes_count):
 
     # returning only the hashes younger than the latest promoted
     # this list is already in reverse time order
-    index = 0
     for index, hashes in enumerate(candidate_hashes_list):
         full_hash = "%s_%s" % (hashes['commit_hash'], hashes['distro_hash'])
         if promote_name in candidate_hashes[full_hash]:
-            logger.info('Current "%s" hash is %s' % (promote_name, hashes))
-            break
+           logger.info('Current "%s" hash is %s' % (promote_name, hashes))
+           candidate_hashes_list = candidate_hashes_list[:index]
+           break
 
     if candidate_hashes_list:
         logger.debug('Remaining hashes after removing ones older than the '
-                    'currently promoted: %s', candidate_hashes_list[:index])
+                    'currently promoted: %s', candidate_hashes_list)
     else:
         logger.debug('No remaining hashes after removing ones older than the '
                     'currently promoted')
 
-    return candidate_hashes_list[:index]
+    return candidate_hashes_list
 
 
 def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hashes_count):
@@ -246,8 +245,8 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hash
                         new_hashes, current_name)
             new_hashes['full_hash'] = '{0}_{1}'.format(new_hashes['commit_hash'],
                                         new_hashes['distro_hash'][:8])
-            successful_jobs = Set(fetch_jobs(api, new_hashes))
-            required_jobs = Set(job_reqs[promote_name])
+            successful_jobs = set(fetch_jobs(api, new_hashes))
+            required_jobs = set(job_reqs[promote_name])
             missing_jobs = list(required_jobs - successful_jobs)
             if missing_jobs:
                 logger.info('Skipping promotion of %s from %s to %s, missing successful '
@@ -329,7 +328,7 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         print("Usage: %s <config-file>" % sys.argv[0])
     else:
-        config = ConfigParser.SafeConfigParser(allow_no_value=True)
+        config = configparser.SafeConfigParser(allow_no_value=True)
         config.read(sys.argv[1])
         setup_logging(config.get('main', 'log_file'))
         logger = logging.getLogger('promoter')
