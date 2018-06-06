@@ -213,6 +213,9 @@ def get_latest_hashes(api, promote_name, current_name, latest_hashes_count):
             if full_hash in candidate_hashes:
                 candidate_hashes[full_hash][promote_name] = hashes['timestamp']
 
+    # In case no hashes are fetched wee need this for the logs
+    index = 0
+
     # returning only the hashes younger than the latest promoted
     # this list is already in reverse time order
     index = 0
@@ -220,6 +223,7 @@ def get_latest_hashes(api, promote_name, current_name, latest_hashes_count):
         full_hash = "%s_%s" % (hashes['commit_hash'], hashes['distro_hash'])
         if promote_name in candidate_hashes[full_hash]:
             logger.info('Current "%s" hash is %s' % (promote_name, hashes))
+            candidate_hashes_list = candidate_hashes_list[:index]
             break
 
     if candidate_hashes_list:
