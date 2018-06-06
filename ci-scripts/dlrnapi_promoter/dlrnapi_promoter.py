@@ -213,18 +213,22 @@ def get_latest_hashes(api, promote_name, current_name, latest_hashes_count):
         if full_hash in candidate_hashes:
             candidate_hashes[full_hash][promote_name] = hashes['timestamp']
 
+    # In case no hashes are fetched wee need this for the logs
+    index = 0
+
     # returning only the hashes younger than the latest promoted
     # this list is already in reverse time order
     for index, hashes in enumerate(candidate_hashes_list):
         full_hash = "%s_%s" % (hashes['commit_hash'], hashes['distro_hash'])
         if promote_name in candidate_hashes[full_hash]:
             logger.info('Current "%s" hash is %s' % (promote_name, hashes))
+            candidate_hashes_list = candidate_hashes_list[:index]
             break
 
     logger.debug('Remaining hashes after removing ones older than the '
-                 'currently promoted: %s', candidate_hashes_list[:index])
+                 'currently promoted: %s', candidate_hashes_list)
 
-    return candidate_hashes_list[:index]
+    return candidate_hashes_list
 
 def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hashes_count):
     '''Promote DLRN API links as a different one when all jobs are
