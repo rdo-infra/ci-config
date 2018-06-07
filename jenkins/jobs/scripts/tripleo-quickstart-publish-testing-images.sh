@@ -56,7 +56,7 @@ ssh $ssh_args root@$VIRTHOST "cd $virthost_source_location &&
 # TODO: on multiple hosts/nodes.  For now just doing the slightly less awesome "copy key and use it"
 
 # copy the key
-scp $ssh_args ~/.ssh/rdo-ci-public.pem root@$VIRTHOST:$virthost_source_location
+scp $ssh_args ~/.ssh/id_rsa root@$VIRTHOST:$virthost_source_location/rdo-ci-public.pem
 
 # use key to rsync to images.rdoproject.org
 ssh $ssh_args root@$VIRTHOST "cd $virthost_source_location && $rsync_base_cmd -e 'ssh $ssh_args -i rdo-ci-public.pem' $artifact_list $dest_rdo_filer"
