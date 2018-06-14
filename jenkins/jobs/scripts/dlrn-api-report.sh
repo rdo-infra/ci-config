@@ -15,5 +15,5 @@ dlrnapi --url https://$DELOREAN_HOST/api-$RDO_VERSION \
     --commit-hash $commit_hash \
     --distro-hash $distro_hash \
     --timestamp $(date +%s) \
-    --info-url https://ci.centos.org/artifacts/rdo/$BUILD_TAG/console.txt.gz \
+    --info-url https://ci.centos.org/artifacts/rdo/$JOB_NAME/$BUILD_ID/console.txt.gz \
     --success $JOB_SUCCESS
