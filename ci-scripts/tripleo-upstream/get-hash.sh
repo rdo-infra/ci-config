@@ -19,24 +19,10 @@ DISTRO_HASH=$(shyaml get-value commits.0.distro_hash < $WORKSPACE/commit.yaml)
 FULL_HASH=${COMMIT_HASH}_${DISTRO_HASH:0:8}
 
 export DLRNAPI_URL="https://trunk.rdoproject.org/api-centos-$RELEASE"
-
 if [ "$RELEASE" = "master" ]; then
     # for master we have two DLRN builders, use the "upper constraint" one that
     # places restrictions on the maximum version of all dependencies
     export DLRNAPI_URL="${DLRNAPI_URL}-uc"
-
-    # FIXME: Delete this
-    # From https://review.rdoproject.org/jenkins/job/periodic-tripleo-ci-centos-7-ovb-3ctlr_1comp-featureset035-master/359/consoleFull
-    COMMIT_HASH=9f3a41c2c752bd68a84b6bd72add18e8bc6f4c76
-    DISTRO_HASH=f1a4ee5af8530044a9714efcbf99466535e1f9bf
-    FULL_HASH=9f3a41c2c752bd68a84b6bd72add18e8bc6f4c76_f1a4ee5a
-elif [ "$RELEASE" = "queens" -a "$PROMOTE_NAME" = "consistent" ]; then
-
-    # FIXME: Delete this
-   # From https://review.rdoproject.org/jenkins/job/periodic-tripleo-ci-centos-7-ovb-3ctlr_1comp-featureset001-queens/298/consoleText
-    COMMIT_HASH=bc3b37067c2008b55059a29045b579be43af9c65
-    DISTRO_HASH=1462a2567ed87a42190dbb935ff9044626b3e4f9
-    FULL_HASH=bc3b37067c2008b55059a29045b579be43af9c65_1462a256
 fi
 
 cat > $WORKSPACE/hash_info.sh << EOF
