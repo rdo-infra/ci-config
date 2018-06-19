@@ -8,7 +8,7 @@ import os
 import influxdb_utils
 
 promoter_skipping_regex = re.compile(
-    '.*promoter Skipping promotion of (.*) to (.*), missing successful jobs: (.*)'
+    '.*promoter Skipping promotion of (.*) from (.*) to (.*), missing successful jobs: (.*)'
 )
 
 def parse_skipped_promotions(release_name):
@@ -26,9 +26,10 @@ def parse_skipped_promotions(release_name):
         matched_regex = promoter_skipping_regex.match(log_line)
         if matched_regex:
             skipped_promotion = {
-                'from_name': matched_regex.group(1),
-                'to_name': matched_regex.group(2),
-                'failing_jobs': matched_regex.group(3),
+                'repo_hash': matched_regex.group(1),
+                'from_name': matched_regex.group(2),
+                'to_name': matched_regex.group(3),
+                'failing_jobs': matched_regex.group(4),
                 'timestamp': get_log_time(log_line),
                 'release': release_name
             }
@@ -38,7 +39,7 @@ def parse_skipped_promotions(release_name):
 
 def to_influxdb(skipped_promotions):
     influxdb_lines = []
-    influxdb_format = ("skipped-promotions,release={release},from_name={from_name},"
+    influxdb_format = ("skipped-promotions,repo_hash={repo_hash},release={release},from_name={from_name},"
                        "to_name={to_name} failing_jobs=\"{failing_jobs}\" "
                        "{timestamp}")
 

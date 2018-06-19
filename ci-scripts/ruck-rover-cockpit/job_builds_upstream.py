@@ -69,6 +69,7 @@ def influx(build):
         'result="%s",'
         'result_num=%s,'
         'log_url="%s",'
+        'log_link="%s",'
         'duration=%s,'
         'start=%s,'
         'end=%s'
@@ -87,6 +88,7 @@ def influx(build):
             'SUCCESS' if build['result'] == 'SUCCESS' else 'FAILURE',
             1 if build['result'] == 'SUCCESS' else 0,
             build['log_url'],
+            "<a href={} target='_blank'>{}</a>".format(build['log_url'], build['job_name']),
             build.get('duration', 0),
             to_ts(build['start_time'], seconds=True),
             to_ts(build['end_time'], seconds=True),
