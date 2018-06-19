@@ -141,7 +141,7 @@
         }, 
         "links": [], 
         "tags": [], 
-        "iteration": 1529316089603, 
+        "iteration": 1529570604510, 
         "time": {
             "to": "now", 
             "from": "now-2d"
@@ -249,15 +249,15 @@
                 }, 
                 "gridPos": {
                     "y": 1, 
-                    "h": 8, 
-                    "w": 4, 
+                    "h": 10, 
+                    "w": 5, 
                     "x": 0
                 }, 
                 "id": 144, 
                 "maxDataPoints": 100, 
                 "mappingType": 1, 
                 "colorBackground": false, 
-                "title": "UP Zuul queue", 
+                "title": "Upstream Zuul queue", 
                 "sparkline": {
                     "full": false, 
                     "fillColor": "rgba(31, 118, 189, 0.18)", 
@@ -373,9 +373,9 @@
                 }, 
                 "gridPos": {
                     "y": 1, 
-                    "h": 8, 
-                    "w": 4, 
-                    "x": 4
+                    "h": 10, 
+                    "w": 5, 
+                    "x": 5
                 }, 
                 "id": 145, 
                 "maxDataPoints": 100, 
@@ -491,15 +491,15 @@
                 }, 
                 "gridPos": {
                     "y": 1, 
-                    "h": 8, 
-                    "w": 4, 
-                    "x": 8
+                    "h": 10, 
+                    "w": 5, 
+                    "x": 10
                 }, 
                 "id": 147, 
                 "maxDataPoints": 100, 
                 "mappingType": 1, 
                 "colorBackground": false, 
-                "title": "Faled gates", 
+                "title": "Gate jobs", 
                 "sparkline": {
                     "full": false, 
                     "fillColor": "rgba(31, 118, 189, 0.18)", 
@@ -574,6 +574,7 @@
                         "value": 2
                     }
                 ], 
+                "timeFrom": null, 
                 "links": [], 
                 "valueMaps": [
                     {
@@ -602,9 +603,9 @@
                 }, 
                 "gridPos": {
                     "y": 1, 
-                    "h": 8, 
+                    "h": 10, 
                     "w": 4, 
-                    "x": 12
+                    "x": 15
                 }, 
                 "id": 149, 
                 "maxDataPoints": 100, 
@@ -719,9 +720,9 @@
                 "legendType": "On graph", 
                 "gridPos": {
                     "y": 1, 
-                    "h": 8, 
-                    "w": 4, 
-                    "x": 16
+                    "h": 10, 
+                    "w": 5, 
+                    "x": 19
                 }, 
                 "id": 164, 
                 "maxDataPoints": 3, 
@@ -947,19 +948,20 @@
                     {
                         "linkTargetBlank": true, 
                         "mappingType": 1, 
-                        "type": "hidden", 
+                        "type": "string", 
                         "dateFormat": "YYYY-MM-DD HH:mm:ss", 
                         "colorMode": null, 
                         "thresholds": [], 
                         "linkTooltip": "Logs", 
-                        "alias": "Log URL", 
+                        "alias": "Job", 
                         "colors": [
                             "rgba(245, 54, 54, 0.9)", 
                             "rgba(237, 129, 40, 0.89)", 
                             "rgba(50, 172, 45, 0.97)"
                         ], 
-                        "link": true, 
-                        "pattern": "log_url", 
+                        "link": false, 
+                        "sanitize": true, 
+                        "pattern": "log_link", 
                         "decimals": 2, 
                         "unit": "short", 
                         "linkUrl": "${__cell_7}"
@@ -1030,23 +1032,31 @@
                                 {
                                     "type": "field", 
                                     "params": [
+                                        "branch"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "change"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "log_link"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
                                         "duration"
-                                    ]
-                                }
-                            ], 
-                            [
-                                {
-                                    "type": "field", 
-                                    "params": [
-                                        "result"
-                                    ]
-                                }
-                            ], 
-                            [
-                                {
-                                    "type": "field", 
-                                    "params": [
-                                        "log_url"
                                     ]
                                 }
                             ]
@@ -1054,32 +1064,7 @@
                         "orderByTime": "ASC", 
                         "policy": "autogen", 
                         "query": "SELECT \"duration\", \"result\", \"log_url\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' ) AND $timeFilter GROUP BY \"job_name\", \"branch\", \"pipeline\", \"change\"", 
-                        "groupBy": [
-                            {
-                                "type": "tag", 
-                                "params": [
-                                    "job_name"
-                                ]
-                            }, 
-                            {
-                                "type": "tag", 
-                                "params": [
-                                    "branch"
-                                ]
-                            }, 
-                            {
-                                "type": "tag", 
-                                "params": [
-                                    "pipeline"
-                                ]
-                            }, 
-                            {
-                                "type": "tag", 
-                                "params": [
-                                    "change"
-                                ]
-                            }
-                        ], 
+                        "groupBy": [], 
                         "resultFormat": "table"
                     }
                 ], 
@@ -1087,7 +1072,7 @@
                 "fontSize": "100%", 
                 "datasource": "telegraf", 
                 "gridPos": {
-                    "y": 9, 
+                    "y": 11, 
                     "h": 7, 
                     "w": 11, 
                     "x": 0
@@ -1127,7 +1112,7 @@
                     {
                         "linkTargetBlank": true, 
                         "mappingType": 1, 
-                        "type": "string", 
+                        "type": "hidden", 
                         "dateFormat": "YYYY-MM-DD HH:mm:ss", 
                         "colorMode": "value", 
                         "thresholds": [
@@ -1206,19 +1191,20 @@
                     {
                         "linkTargetBlank": true, 
                         "mappingType": 1, 
-                        "type": "hidden", 
+                        "type": "string", 
                         "dateFormat": "YYYY-MM-DD HH:mm:ss", 
                         "colorMode": null, 
                         "thresholds": [], 
                         "linkTooltip": "Logs", 
-                        "alias": "Log URL", 
+                        "alias": "Job", 
                         "colors": [
                             "rgba(245, 54, 54, 0.9)", 
                             "rgba(237, 129, 40, 0.89)", 
                             "rgba(50, 172, 45, 0.97)"
                         ], 
                         "link": false, 
-                        "pattern": "log_url", 
+                        "sanitize": true, 
+                        "pattern": "log_link", 
                         "decimals": 2, 
                         "unit": "short", 
                         "linkUrl": "${__cell_7}"
@@ -1258,10 +1244,10 @@
                         "unit": "short"
                     }
                 ], 
-                "timeFrom": "6h", 
+                "timeFrom": "8h", 
                 "pageSize": null, 
                 "links": [], 
-                "title": "Failing noop check jobs", 
+                "title": "Failing check jobs (noop)", 
                 "timeShift": null, 
                 "transform": "table", 
                 "showHeader": true, 
@@ -1269,6 +1255,7 @@
                 "targets": [
                     {
                         "hide": false, 
+                        "slimit": "", 
                         "rawQuery": true, 
                         "tags": [
                             {
@@ -1299,17 +1286,19 @@
                                 "value": "564285", 
                                 "key": "change", 
                                 "condition": "OR"
-                            }, 
-                            {
-                                "operator": "=", 
-                                "value": "True", 
-                                "key": "voting", 
-                                "condition": "AND"
                             }
                         ], 
                         "measurement": "build", 
                         "refId": "A", 
                         "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "log_link"
+                                    ]
+                                }
+                            ], 
                             [
                                 {
                                     "type": "field", 
@@ -1325,19 +1314,11 @@
                                         "result"
                                     ]
                                 }
-                            ], 
-                            [
-                                {
-                                    "type": "field", 
-                                    "params": [
-                                        "log_url"
-                                    ]
-                                }
                             ]
                         ], 
                         "orderByTime": "ASC", 
                         "policy": "autogen", 
-                        "query": "SELECT \"duration\", \"result\", \"log_url\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND (\"change\" = '560445' OR \"change\" = '567224' OR \"change\" = '564291' OR \"change\" = '564285') AND \"voting\" = 'True') AND $timeFilter GROUP BY \"job_name\", \"branch\", \"pipeline\", \"change\"", 
+                        "query": "SELECT \"branch\", \"pipeline\", \"change\", \"job_name\", \"log_link\",  \"duration\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND (\"change\" = '560445' OR \"change\" = '567224' OR \"change\" = '564291' OR \"change\" = '564285') AND \"voting\" = 'True') AND $timeFilter ", 
                         "groupBy": [
                             {
                                 "type": "tag", 
@@ -1371,9 +1352,9 @@
                 "fontSize": "100%", 
                 "datasource": "telegraf", 
                 "gridPos": {
-                    "y": 9, 
+                    "y": 11, 
                     "h": 7, 
-                    "w": 9, 
+                    "w": 13, 
                     "x": 11
                 }, 
                 "type": "table", 
@@ -1429,7 +1410,7 @@
                         "unit": "short"
                     }
                 ], 
-                "timeFrom": "30s", 
+                "timeFrom": "20s", 
                 "pageSize": null, 
                 "links": [], 
                 "repeatDirection": "v", 
@@ -1483,7 +1464,7 @@
                 "fontSize": "100%", 
                 "datasource": "telegraf", 
                 "gridPos": {
-                    "y": 16, 
+                    "y": 18, 
                     "h": 6, 
                     "w": 11, 
                     "x": 0
@@ -1542,7 +1523,7 @@
                         "unit": "short"
                     }
                 ], 
-                "timeFrom": "30s", 
+                "timeFrom": "20s", 
                 "pageSize": null, 
                 "links": [], 
                 "repeatDirection": "v", 
@@ -1598,9 +1579,9 @@
                 "fontSize": "100%", 
                 "datasource": "telegraf", 
                 "gridPos": {
-                    "y": 16, 
+                    "y": 18, 
                     "h": 6, 
-                    "w": 9, 
+                    "w": 13, 
                     "x": 11
                 }, 
                 "minSpan": 10, 
@@ -1625,7 +1606,7 @@
                 "limit": "100", 
                 "nameFilter": "enqueued time", 
                 "gridPos": {
-                    "y": 22, 
+                    "y": 24, 
                     "h": 4, 
                     "w": 5, 
                     "x": 0
@@ -1652,7 +1633,7 @@
                 "limit": "100", 
                 "nameFilter": "noop", 
                 "gridPos": {
-                    "y": 22, 
+                    "y": 24, 
                     "h": 8, 
                     "w": 5, 
                     "x": 5
@@ -1679,7 +1660,7 @@
                 "limit": "100", 
                 "nameFilter": "promoter", 
                 "gridPos": {
-                    "y": 22, 
+                    "y": 24, 
                     "h": 8, 
                     "w": 5, 
                     "x": 10
@@ -1706,7 +1687,7 @@
                 "limit": "100", 
                 "nameFilter": "gate jobs", 
                 "gridPos": {
-                    "y": 26, 
+                    "y": 28, 
                     "h": 4, 
                     "w": 5, 
                     "x": 0
@@ -1740,7 +1721,7 @@
                 "limit": "100", 
                 "nameFilter": "tripleo ci promotion", 
                 "gridPos": {
-                    "y": 30, 
+                    "y": 32, 
                     "h": 6, 
                     "w": 5, 
                     "x": 0
@@ -1773,7 +1754,7 @@
                 "limit": "100", 
                 "nameFilter": "phase 1 promotion", 
                 "gridPos": {
-                    "y": 30, 
+                    "y": 32, 
                     "h": 6, 
                     "w": 5, 
                     "x": 5
@@ -1806,7 +1787,7 @@
                 "limit": "100", 
                 "nameFilter": "phase 2 promotion", 
                 "gridPos": {
-                    "y": 30, 
+                    "y": 32, 
                     "h": 6, 
                     "w": 5, 
                     "x": 10
@@ -1820,7 +1801,7 @@
                 "title": "Upstream zuul jobs", 
                 "collapsed": true, 
                 "gridPos": {
-                    "y": 36, 
+                    "y": 38, 
                     "h": 1, 
                     "w": 24, 
                     "x": 0
@@ -3107,7 +3088,7 @@
                 "title": "RDO zuul jobs", 
                 "collapsed": true, 
                 "gridPos": {
-                    "y": 37, 
+                    "y": 39, 
                     "h": 1, 
                     "w": 24, 
                     "x": 0
@@ -4014,7 +3995,7 @@
                 "title": "Promotions", 
                 "collapsed": false, 
                 "gridPos": {
-                    "y": 38, 
+                    "y": 40, 
                     "h": 1, 
                     "w": 24, 
                     "x": 0
@@ -4032,7 +4013,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 39, 
+                    "y": 41, 
                     "h": 4, 
                     "w": 5, 
                     "x": 0
@@ -4211,7 +4192,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 39, 
+                    "y": 41, 
                     "h": 4, 
                     "w": 5, 
                     "x": 5
@@ -4390,7 +4371,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 39, 
+                    "y": 41, 
                     "h": 4, 
                     "w": 4, 
                     "x": 10
@@ -4565,7 +4546,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 43, 
+                    "y": 45, 
                     "h": 4, 
                     "w": 5, 
                     "x": 0
@@ -4744,7 +4725,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 43, 
+                    "y": 45, 
                     "h": 4, 
                     "w": 5, 
                     "x": 5
@@ -4918,7 +4899,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 43, 
+                    "y": 45, 
                     "h": 4, 
                     "w": 4, 
                     "x": 10
@@ -5096,7 +5077,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 47, 
+                    "y": 49, 
                     "h": 4, 
                     "w": 5, 
                     "x": 0
@@ -5274,7 +5255,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 47, 
+                    "y": 49, 
                     "h": 4, 
                     "w": 5, 
                     "x": 5
@@ -5452,7 +5433,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 47, 
+                    "y": 49, 
                     "h": 4, 
                     "w": 4, 
                     "x": 10
@@ -5635,7 +5616,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 51, 
+                    "y": 53, 
                     "h": 4, 
                     "w": 5, 
                     "x": 0
@@ -5808,7 +5789,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 51, 
+                    "y": 53, 
                     "h": 4, 
                     "w": 5, 
                     "x": 5
@@ -5986,7 +5967,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 51, 
+                    "y": 53, 
                     "h": 4, 
                     "w": 4, 
                     "x": 10
@@ -6171,7 +6152,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 55, 
+                    "y": 57, 
                     "h": 4, 
                     "w": 7, 
                     "x": 0
@@ -6339,7 +6320,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 55, 
+                    "y": 57, 
                     "h": 4, 
                     "w": 7, 
                     "x": 7
@@ -6507,7 +6488,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 59, 
+                    "y": 61, 
                     "h": 4, 
                     "w": 7, 
                     "x": 0
@@ -6677,7 +6658,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 59, 
+                    "y": 61, 
                     "h": 4, 
                     "w": 7, 
                     "x": 7
@@ -6880,6 +6861,14 @@
                                 {
                                     "type": "field", 
                                     "params": [
+                                        "repo_hash"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
                                         "from_name"
                                     ]
                                 }
@@ -6917,9 +6906,9 @@
                     }
                 }, 
                 "gridPos": {
-                    "y": 63, 
+                    "y": 65, 
                     "h": 7, 
-                    "w": 14, 
+                    "w": 24, 
                     "x": 0
                 }, 
                 "type": "table", 
@@ -6977,6 +6966,14 @@
                                 {
                                     "type": "field", 
                                     "params": [
+                                        "repo_hash"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
                                         "from_name"
                                     ]
                                 }
@@ -7015,15 +7012,15 @@
                     }
                 }, 
                 "gridPos": {
-                    "y": 70, 
+                    "y": 72, 
                     "h": 7, 
-                    "w": 14, 
+                    "w": 24, 
                     "x": 0
                 }, 
                 "type": "table", 
                 "id": 169, 
                 "columns": [], 
-                "repeatIteration": 1529316089603
+                "repeatIteration": 1529570604510
             }, 
             {
                 "sort": {
@@ -7072,6 +7069,14 @@
                         "measurement": "skipped-promotions", 
                         "groupBy": [], 
                         "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "repo_hash"
+                                    ]
+                                }
+                            ], 
                             [
                                 {
                                     "type": "field", 
@@ -7114,15 +7119,15 @@
                     }
                 }, 
                 "gridPos": {
-                    "y": 77, 
+                    "y": 79, 
                     "h": 7, 
-                    "w": 14, 
+                    "w": 24, 
                     "x": 0
                 }, 
                 "type": "table", 
                 "id": 170, 
                 "columns": [], 
-                "repeatIteration": 1529316089603
+                "repeatIteration": 1529570604510
             }, 
             {
                 "sort": {
@@ -7175,6 +7180,14 @@
                                 {
                                     "type": "field", 
                                     "params": [
+                                        "repo_hash"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
                                         "from_name"
                                     ]
                                 }
@@ -7213,341 +7226,96 @@
                     }
                 }, 
                 "gridPos": {
-                    "y": 84, 
+                    "y": 86, 
                     "h": 7, 
-                    "w": 14, 
+                    "w": 24, 
                     "x": 0
                 }, 
                 "type": "table", 
                 "id": 171, 
                 "columns": [], 
-                "repeatIteration": 1529316089603
+                "repeatIteration": 1529570604510
             }, 
             {
                 "title": "Issues", 
-                "collapsed": true, 
+                "collapsed": false, 
                 "gridPos": {
-                    "y": 91, 
+                    "y": 93, 
                     "h": 1, 
                     "w": 24, 
                     "x": 0
                 }, 
-                "panels": [
-                    {
-                        "sort": {
-                            "col": 3, 
-                            "desc": true
-                        }, 
-                        "styles": [
-                            {
-                                "linkTargetBlank": true, 
-                                "dateFormat": "YYYY-MM-DD HH:mm:ss", 
-                                "pattern": "Time", 
-                                "alias": "Time", 
-                                "link": false, 
-                                "type": "date", 
-                                "linkUrl": ""
-                            }, 
-                            {
-                                "linkTargetBlank": true, 
-                                "mappingType": 1, 
-                                "type": "number", 
-                                "dateFormat": "YYYY-MM-DD HH:mm:ss", 
-                                "colorMode": null, 
-                                "thresholds": [], 
-                                "alias": "link", 
-                                "colors": [
-                                    "rgba(245, 54, 54, 0.9)", 
-                                    "rgba(237, 129, 40, 0.89)", 
-                                    "rgba(50, 172, 45, 0.97)"
-                                ], 
-                                "link": true, 
-                                "pattern": "id", 
-                                "decimals": 2, 
-                                "unit": "short", 
-                                "linkUrl": "https://bugs.launchpad.net/tripleo/+bug/${__cell_3} "
-                            }, 
-                            {
-                                "type": "number", 
-                                "pattern": "/.*/", 
-                                "thresholds": [], 
-                                "alias": "", 
-                                "colors": [
-                                    "rgba(245, 54, 54, 0.9)", 
-                                    "rgba(237, 129, 40, 0.89)", 
-                                    "rgba(50, 172, 45, 0.97)"
-                                ], 
-                                "colorMode": null, 
-                                "decimals": 2, 
-                                "unit": "short"
-                            }
-                        ], 
-                        "repeat": "launchpad_tags", 
-                        "pageSize": null, 
-                        "links": [], 
-                        "repeatDirection": "v", 
-                        "title": "$launchpad_tags bugs", 
-                        "transform": "table", 
-                        "showHeader": true, 
-                        "scroll": true, 
-                        "targets": [
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=~", 
-                                        "value": "/^$launchpad_tags$/", 
-                                        "key": "tag"
-                                    }
-                                ], 
-                                "measurement": "launchpad-bug", 
-                                "groupBy": [], 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "title"
-                                            ]
-                                        }
-                                    ], 
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "status"
-                                            ]
-                                        }
-                                    ], 
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "id"
-                                            ]
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "table"
-                            }
-                        ], 
-                        "timeFrom": "6M", 
-                        "fontSize": "100%", 
-                        "datasource": "telegraf", 
-                        "scopedVars": {
-                            "launchpad_tags": {
-                                "text": "alert", 
-                                "selected": true, 
-                                "value": "alert"
-                            }
-                        }, 
-                        "gridPos": {
-                            "y": 30, 
-                            "h": 6, 
-                            "w": 10, 
-                            "x": 0
-                        }, 
-                        "minSpan": 10, 
-                        "type": "table", 
-                        "id": 6, 
-                        "columns": []
-                    }, 
-                    {
-                        "sort": {
-                            "col": 0, 
-                            "desc": true
-                        }, 
-                        "styles": [
-                            {
-                                "alias": "Time", 
-                                "type": "date", 
-                                "pattern": "Time", 
-                                "dateFormat": "YYYY-MM-DD HH:mm:ss"
-                            }, 
-                            {
-                                "type": "number", 
-                                "pattern": "/.*/", 
-                                "thresholds": [], 
-                                "alias": "", 
-                                "colors": [
-                                    "rgba(245, 54, 54, 0.9)", 
-                                    "rgba(237, 129, 40, 0.89)", 
-                                    "rgba(50, 172, 45, 0.97)"
-                                ], 
-                                "colorMode": null, 
-                                "decimals": 2, 
-                                "unit": "short"
-                            }
-                        ], 
-                        "pageSize": null, 
-                        "links": [], 
-                        "title": "Openstack infra issues", 
-                        "transform": "table", 
-                        "showHeader": true, 
-                        "scroll": true, 
-                        "targets": [
-                            {
-                                "rawQuery": true, 
-                                "tags": [], 
-                                "measurement": "openstack-infra-issues", 
-                                "refId": "A", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "issue"
-                                            ]
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "query": "SELECT \"issue\" FROM \"openstack-infra-issues\"", 
-                                "groupBy": [], 
-                                "resultFormat": "table"
-                            }
-                        ], 
-                        "fontSize": "100%", 
-                        "datasource": "telegraf", 
-                        "gridPos": {
-                            "y": 30, 
-                            "h": 12, 
-                            "w": 10, 
-                            "x": 10
-                        }, 
-                        "type": "table", 
-                        "id": 2, 
-                        "columns": []
-                    }, 
-                    {
-                        "styles": [
-                            {
-                                "linkTargetBlank": true, 
-                                "dateFormat": "YYYY-MM-DD HH:mm:ss", 
-                                "pattern": "Time", 
-                                "alias": "Time", 
-                                "link": false, 
-                                "type": "date", 
-                                "linkUrl": ""
-                            }, 
-                            {
-                                "linkTargetBlank": true, 
-                                "mappingType": 1, 
-                                "type": "number", 
-                                "dateFormat": "YYYY-MM-DD HH:mm:ss", 
-                                "colorMode": null, 
-                                "thresholds": [], 
-                                "alias": "link", 
-                                "colors": [
-                                    "rgba(245, 54, 54, 0.9)", 
-                                    "rgba(237, 129, 40, 0.89)", 
-                                    "rgba(50, 172, 45, 0.97)"
-                                ], 
-                                "link": true, 
-                                "pattern": "id", 
-                                "decimals": 2, 
-                                "unit": "short", 
-                                "linkUrl": "https://bugs.launchpad.net/tripleo/+bug/${__cell_3} "
-                            }, 
-                            {
-                                "type": "number", 
-                                "pattern": "/.*/", 
-                                "thresholds": [], 
-                                "alias": "", 
-                                "colors": [
-                                    "rgba(245, 54, 54, 0.9)", 
-                                    "rgba(237, 129, 40, 0.89)", 
-                                    "rgba(50, 172, 45, 0.97)"
-                                ], 
-                                "colorMode": null, 
-                                "decimals": 2, 
-                                "unit": "short"
-                            }
-                        ], 
-                        "timeFrom": "6M", 
-                        "pageSize": null, 
-                        "repeatPanelId": 6, 
-                        "scopedVars": {
-                            "launchpad_tags": {
-                                "text": "promotion-blocker", 
-                                "selected": true, 
-                                "value": "promotion-blocker"
-                            }
-                        }, 
-                        "gridPos": {
-                            "y": 36, 
-                            "h": 6, 
-                            "w": 10, 
-                            "x": 0
-                        }, 
-                        "targets": [
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=~", 
-                                        "value": "/^$launchpad_tags$/", 
-                                        "key": "tag"
-                                    }
-                                ], 
-                                "measurement": "launchpad-bug", 
-                                "groupBy": [], 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "title"
-                                            ]
-                                        }
-                                    ], 
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "status"
-                                            ]
-                                        }
-                                    ], 
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "id"
-                                            ]
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "table"
-                            }
-                        ], 
-                        "links": [], 
-                        "title": "$launchpad_tags bugs", 
-                        "transform": "table", 
-                        "showHeader": true, 
-                        "id": 158, 
-                        "fontSize": "100%", 
-                        "type": "table", 
-                        "columns": [], 
-                        "sort": {
-                            "col": 3, 
-                            "desc": true
-                        }, 
-                        "repeat": null, 
-                        "repeatIteration": 1528957799402, 
-                        "repeatDirection": "v", 
-                        "datasource": "telegraf", 
-                        "minSpan": 10, 
-                        "scroll": true
-                    }
-                ], 
+                "panels": [], 
                 "type": "row", 
                 "id": 4
+            }, 
+            {
+                "sort": {
+                    "col": 0, 
+                    "desc": true
+                }, 
+                "styles": [
+                    {
+                        "alias": "Time", 
+                        "type": "date", 
+                        "pattern": "Time", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss"
+                    }, 
+                    {
+                        "type": "number", 
+                        "pattern": "/.*/", 
+                        "thresholds": [], 
+                        "alias": "", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "colorMode": null, 
+                        "decimals": 2, 
+                        "unit": "short"
+                    }
+                ], 
+                "pageSize": null, 
+                "links": [], 
+                "title": "Openstack infra issues", 
+                "transform": "table", 
+                "showHeader": true, 
+                "scroll": true, 
+                "targets": [
+                    {
+                        "rawQuery": true, 
+                        "tags": [], 
+                        "measurement": "openstack-infra-issues", 
+                        "refId": "A", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "issue"
+                                    ]
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "query": "SELECT \"issue\" FROM \"openstack-infra-issues\"", 
+                        "groupBy": [], 
+                        "resultFormat": "table"
+                    }
+                ], 
+                "fontSize": "100%", 
+                "datasource": "telegraf", 
+                "gridPos": {
+                    "y": 94, 
+                    "h": 7, 
+                    "w": 24, 
+                    "x": 0
+                }, 
+                "type": "table", 
+                "id": 2, 
+                "columns": []
             }
         ]
     }

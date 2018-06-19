@@ -21,7 +21,7 @@ def get_bugs(tag, status):
 def print_as_influxdb(tag, bug_tasks):
     if bug_tasks:
         for bug_task in bug_tasks:
-            print("launchpad-bug,tag={},id={} link=\"{}\",title=\"{}\",status=\"{}\" {}".format(
+            print("launchpad-bug,tag={},id={} link=\"{}\",title=\"{}\",status=\"{}\",date_created={}".format(
                 tag,
                 bug_task.bug.id,
                 bug_task.web_link,
