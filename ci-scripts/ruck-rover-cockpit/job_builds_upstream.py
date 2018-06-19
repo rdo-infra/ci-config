@@ -54,6 +54,7 @@ def get_builds_info(job_name, pages):
 def influx(build):
     if build['start_time'] == None:
         build['start_time'] = build['end_time']
+    log_url=build['log_url'].split('//')
     return (
         'build,'
         'type=upstream,'
@@ -86,7 +87,7 @@ def influx(build):
 
             'SUCCESS' if build['result'] == 'SUCCESS' else 'FAILURE',
             1 if build['result'] == 'SUCCESS' else 0,
-            build['log_url'],
+            log_url[1] if len(log_url) == 2 else log_url[0],
             build.get('duration', 0),
             to_ts(build['start_time'], seconds=True),
             to_ts(build['end_time'], seconds=True),

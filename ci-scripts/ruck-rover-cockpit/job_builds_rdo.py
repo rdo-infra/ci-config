@@ -60,6 +60,7 @@ def influx(build):
     start_time_from_epoch = to_ts(build['start_time'], seconds=True)
     end_time_from_epoch = to_ts(build['end_time'], seconds=True)
     duration = int(end_time_from_epoch) - int(start_time_from_epoch)
+    log_url = build['log_url'].split('//')
     return (
         'build,'
         'type=rdo,'
@@ -92,7 +93,7 @@ def influx(build):
 
             'SUCCESS' if build['result'] == 'SUCCESS' else 'FAILURE',
             1 if build['result'] == 'SUCCESS' else 0,
-            build['log_url'],
+            log_url[1] if len(log_url) == 2 else log_url[0],
             duration,
             start_time_from_epoch,
             end_time_from_epoch,
