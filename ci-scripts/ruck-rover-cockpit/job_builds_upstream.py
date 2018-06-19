@@ -86,7 +86,7 @@ def influx(build):
 
             'SUCCESS' if build['result'] == 'SUCCESS' else 'FAILURE',
             1 if build['result'] == 'SUCCESS' else 0,
-            build['log_url'],
+            build['log_url'].replace('http://logs.openstack.org/', ''),
             build.get('duration', 0),
             to_ts(build['start_time'], seconds=True),
             to_ts(build['end_time'], seconds=True),

@@ -92,7 +92,7 @@ def influx(build):
 
             'SUCCESS' if build['result'] == 'SUCCESS' else 'FAILURE',
             1 if build['result'] == 'SUCCESS' else 0,
-            build['log_url'],
+            build['log_url'].replace('https://review.rdoproject.org/',''),
             duration,
             start_time_from_epoch,
             end_time_from_epoch,
