@@ -2,7 +2,7 @@
 import datetime
 import time
 import requests
-
+import yaml
 
 ADDITIONAL_JOBS = []
 ZUUL_URL = 'http://zuul.openstack.org/api/'
@@ -50,10 +50,22 @@ def get_builds_info(job_name, pages):
             result += response
     return result
 
+def add_inventory_info(build):
+    if 'log_url' in build:
+        try:
+            r = requests.get(build['log_url'] + "/zuul-info/inventory.yaml")
+            if r.ok:
+                inventory = yaml.load(r.content)
+                # FIXME: Primary is enough ?
+                build['inventory'] = inventory
+        except Exception:
+            pass
 
 def influx(build):
     if build['start_time'] == None:
         build['start_time'] = build['end_time']
+
+    # Get the nodename
     return (
         'build,'
         'type=upstream,'
@@ -72,7 +84,10 @@ def influx(build):
         'log_link="%s",'
         'duration=%s,'
         'start=%s,'
-        'end=%s'
+        'end=%s,'
+        'primary_node_cloud="%s",'
+        'primary_node_region="%s"'
+        ''
         ' '
         '%s' % (
             build['pipeline'],
@@ -92,7 +107,10 @@ def influx(build):
             build.get('duration', 0),
             to_ts(build['start_time'], seconds=True),
             to_ts(build['end_time'], seconds=True),
-
+            'null' if 'inventory' not in build else build['inventory']
+                ['all']['hosts']['primary']['nodepool']['cloud'],
+            'null' if 'inventory' not in build else build['inventory']
+                ['all']['hosts']['primary']['nodepool']['region'],
             to_ts(build['end_time'])
                 )
     )
@@ -105,6 +123,8 @@ def main():
             builds = get_builds_info(job, pages=PAGES)
             if builds:
                 for build in builds:
+                    if build['result'] != 'SUCCESS':
+                        add_inventory_info(build)
                     print(influx(build))
 
 
