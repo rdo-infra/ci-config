@@ -2,14 +2,15 @@
 import datetime
 import time
 import requests
+import yaml
+import json
 
-
-ADDITIONAL_JOBS = []
+ADDITIONAL_PROJECTS = []
 ZUUL_URL = 'http://zuul.openstack.org/api/'
-JOBS_API = ZUUL_URL + 'jobs'
+GERRIT_URL = 'https://review.openstack.org/'
+PROJECTS_API = GERRIT_URL + 'projects/'
 BUILDS_API = ZUUL_URL + 'builds'
 PAGES = 1
-
 
 # Convert datetime to timestamp
 def to_ts(d, seconds=False):
@@ -19,26 +20,30 @@ def to_ts(d, seconds=False):
 
 
 def get(url, query={}, timeout=20, json_view=True):
+
     try:
         response = requests.get(url, params=query, timeout=timeout)
     except Exception as e:
         # add later log file
         pass
-    if response and response.ok:
-        if json_view:
-            return response.json()
-        return response.text
+    else:
+        if response and response.ok:
+            if json_view:
+                return response.json()
+            return response.text
     return None
 
 
-def get_jobs_list():
-    jobs_list = get(JOBS_API)
-    ooo_jobs = [i['name'] for i in jobs_list if 'tripleo' in i['name']]
-    return ooo_jobs + ADDITIONAL_JOBS
+def get_projects_list():
+    project_list_text = get(PROJECTS_API, json_view=False)
+    # Gerrit is returning garbage in the first line
+    project_list_text = '\n'.join(project_list_text.split('\n')[1:])
+    project_list = json.loads(project_list_text)
+    ooo_projects = [p for p in project_list if 'tripleo' in p]
+    return ooo_projects + ADDITIONAL_PROJECTS
 
 
-def get_builds_info(job_name, pages):
-    query = {'job_name': job_name}
+def get_builds_info(query, pages=PAGES):
     result = []
     for p in range(pages):
         if p > 0:
@@ -50,10 +55,24 @@ def get_builds_info(job_name, pages):
             result += response
     return result
 
+def add_inventory_info(build, hosts):
+
+    if 'log_url' in build:
+        try:
+            r = requests.get(build['log_url'] + "/zuul-info/inventory.yaml")
+            if r.ok:
+                inventory = yaml.load(r.content)
+                # FIXME: Primary is enough ?
+                if all(host in inventory['all']['hosts'] for host in hosts):
+                    build['inventory'] = inventory
+        except Exception:
+            pass
 
 def influx(build):
     if build['start_time'] == None:
         build['start_time'] = build['end_time']
+
+    # Get the nodename
     return (
         'build,'
         'type=upstream,'
@@ -72,7 +91,10 @@ def influx(build):
         'log_link="%s",'
         'duration=%s,'
         'start=%s,'
-        'end=%s'
+        'end=%s,'
+        'primary_node_cloud="%s",'
+        'primary_node_region="%s"'
+        ''
         ' '
         '%s' % (
             build['pipeline'],
@@ -92,21 +114,28 @@ def influx(build):
             build.get('duration', 0),
             to_ts(build['start_time'], seconds=True),
             to_ts(build['end_time'], seconds=True),
-
+            'null' if 'inventory' not in build else build['inventory']
+                ['all']['hosts']['primary']['nodepool']['cloud'],
+            'null' if 'inventory' not in build else build['inventory']
+                ['all']['hosts']['primary']['nodepool']['region'],
             to_ts(build['end_time'])
                 )
     )
 
 
-def main():
-    jobs = get_jobs_list()
-    if jobs:
-        for job in jobs:
-            builds = get_builds_info(job, pages=PAGES)
-            if builds:
-                for build in builds:
-                    print(influx(build))
+def print_influx(builds):
+    if builds:
+        for build in builds:
+            if build['result'] != 'SUCCESS':
+                add_inventory_info(build, hosts=['primary'])
+            print(influx(build))
 
+def main():
+    projects = get_projects_list()
+
+    if projects:
+        for project in projects:
+            print_influx(get_builds_info({'project': project}))
 
 if __name__ == '__main__':
     main()
