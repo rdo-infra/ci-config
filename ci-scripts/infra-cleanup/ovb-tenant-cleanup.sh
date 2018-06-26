@@ -172,6 +172,14 @@ else
     done
 fi
 
+CREATE_FAILED=$(openstack stack list -f json | jq -r '.[] | select(.["Stack Status"] == "CREATE_FAILED") | .["Stack Name"]')
+for STACK in $CREATE_FAILED; do
+    echo "Deleting a CREATE_FAILED stack, id $STACK ..."
+    openstack stack delete -y $STACK || echo "stack $STACK failed to clean up"
+    # don't overwhelm the tenant with mass delete
+    sleep $SLEEP_TIME
+done
+
 #  Check if there are stacks left in DELETE_FAILED state
 
 STACK_LIST_STATUS=$(openstack stack list -f json | jq -r '.[] | select(.["Stack Status"] == "DELETE_FAILED") | .["Stack Name"]')
