@@ -5,12 +5,16 @@ import requests
 import yaml
 import json
 
+from diskcache import Cache
+
 ADDITIONAL_PROJECTS = []
 ZUUL_URL = 'http://zuul.openstack.org/api/'
 GERRIT_URL = 'https://review.openstack.org/'
 PROJECTS_API = GERRIT_URL + 'projects/'
 BUILDS_API = ZUUL_URL + 'builds'
 PAGES = 1
+
+cache = Cache('/tmp/ruck_rover_cache')
 
 # Convert datetime to timestamp
 def to_ts(d, seconds=False):
@@ -44,7 +48,7 @@ def get_projects_list():
 
 
 def get_builds_info(query, pages=PAGES):
-    result = []
+    builds = []
     for p in range(pages):
         if p > 0:
             query['skip'] = ((pages - 1) * 50)
@@ -52,23 +56,30 @@ def get_builds_info(query, pages=PAGES):
             time.sleep(2)
         response = get(BUILDS_API, query)
         if response is not None:
-            result += response
-    return result
+            builds += response
+    return builds
 
 def add_inventory_info(build, hosts):
 
     if 'log_url' in build:
+        inventory_path = build['log_url'] + "/zuul-info/inventory.yaml"
         try:
-            r = requests.get(build['log_url'] + "/zuul-info/inventory.yaml")
-            if r.ok:
-                inventory = yaml.load(r.content)
-                # FIXME: Primary is enough ?
-                if all(host in inventory['all']['hosts'] for host in hosts):
-                    build['inventory'] = inventory
+            if inventory_path not in cache:
+                r = requests.get(inventory_path)
+                if r.ok:
+                    cache[inventory_path] = yaml.load(r.content)
+
+            inventory = cache[inventory_path]
+            if all(host in inventory['all']['hosts'] for host in hosts):
+                build['inventory'] = inventory
+
         except Exception:
             pass
 
 def influx(build):
+
+    add_inventory_info(build, hosts=['primary'])
+
     if build['start_time'] == None:
         build['start_time'] = build['end_time']
 
@@ -83,7 +94,9 @@ def influx(build):
         'voting=%s,'
         'change=%s,'
         'patchset=%s,'
-        'passed=%s'
+        'passed=%s,'
+        'primary_node_cloud="%s",'
+        'primary_node_region="%s"'
         ' '
         'result="%s",'
         'result_num=%s,'
@@ -91,7 +104,7 @@ def influx(build):
         'log_link="%s",'
         'duration=%s,'
         'start=%s,'
-        'end=%s'
+        'end=%s,'
         ' '
         '%s' % (
             build['pipeline'],
@@ -101,8 +114,11 @@ def influx(build):
             build['voting'],
             build['change'],
             build['patchset'],
-
             'True' if build['result'] == 'SUCCESS' else 'False',
+            'null' if 'inventory' not in build else build['inventory']
+                ['all']['hosts']['primary']['nodepool']['cloud'],
+            'null' if 'inventory' not in build else build['inventory']
+                ['all']['hosts']['primary']['nodepool']['region'],
 
             'SUCCESS' if build['result'] == 'SUCCESS' else 'FAILURE',
             1 if build['result'] == 'SUCCESS' else 0,
@@ -119,12 +135,6 @@ def influx(build):
 def print_influx(builds):
     if builds:
         for build in builds:
-
-            # FIXME: We don't want to hit log.ooo server too much
-            #        let's find another way to access inventory
-            #if build['result'] != 'SUCCESS':
-            #    add_inventory_info(build, hosts=['primary'])
-
             print(influx(build))
 
 def main():
