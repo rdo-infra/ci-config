@@ -1,0 +1,325 @@
+{
+    "dashboard": {
+        "originalTemplating": [], 
+        "style": "dark", 
+        "templating": {
+            "list": [
+                {
+                    "hide": 0, 
+                    "name": "influxdb_filter", 
+                    "label": "Influxdb filter", 
+                    "datasource": "telegraf", 
+                    "filters": [
+                        {
+                            "operator": "=", 
+                            "value": "tripleo-ci-centos-7-containers-multinode", 
+                            "key": "job_name"
+                        }
+                    ], 
+                    "type": "adhoc"
+                }
+            ]
+        }, 
+        "links": [], 
+        "tags": [], 
+        "iteration": 1530266858844, 
+        "time": {
+            "to": "now", 
+            "from": "now-7d"
+        }, 
+        "editable": true, 
+        "annotations": {
+            "list": [
+                {
+                    "enable": true, 
+                    "hide": true, 
+                    "name": "Annotations & Alerts", 
+                    "builtIn": 1, 
+                    "datasource": "-- Grafana --", 
+                    "type": "dashboard", 
+                    "iconColor": "rgba(0, 211, 255, 1)"
+                }
+            ]
+        }, 
+        "gnetId": null, 
+        "timepicker": {
+            "time_options": [
+                "5m", 
+                "15m", 
+                "1h", 
+                "6h", 
+                "12h", 
+                "24h", 
+                "2d", 
+                "7d", 
+                "30d"
+            ], 
+            "refresh_intervals": [
+                "5s", 
+                "10s", 
+                "30s", 
+                "1m", 
+                "5m", 
+                "15m", 
+                "30m", 
+                "1h", 
+                "2h", 
+                "1d"
+            ]
+        }, 
+        "title": "Exploration", 
+        "originalTime": {
+            "to": "now", 
+            "from": "now-6h"
+        }, 
+        "graphTooltip": 0, 
+        "timezone": "", 
+        "schemaVersion": 16, 
+        "panels": [
+            {
+                "bars": true, 
+                "timeFrom": null, 
+                "links": [], 
+                "thresholds": [], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "id": 2, 
+                "gridPos": {
+                    "y": 0, 
+                    "h": 9, 
+                    "w": 21, 
+                    "x": 0
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "!=", 
+                                "value": "null", 
+                                "key": "cloud"
+                            }
+                        ], 
+                        "measurement": "build", 
+                        "groupBy": [
+                            {
+                                "type": "tag", 
+                                "params": [
+                                    "cloud"
+                                ]
+                            }
+                        ], 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "duration"
+                                    ]
+                                }, 
+                                {
+                                    "type": "median", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "fill": 1, 
+                "title": "Job build duration per cloud", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": false, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": false, 
+                    "max": false, 
+                    "min": false, 
+                    "current": false, 
+                    "values": false, 
+                    "avg": false
+                }, 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "dtdurations", 
+                        "min": null, 
+                        "label": "durastion"
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": "count"
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [
+                        "current"
+                    ], 
+                    "mode": "series", 
+                    "name": null
+                }, 
+                "seriesOverrides": [
+                    {
+                        "alias": "/build.count/"
+                    }, 
+                    {
+                        "alias": "/build.median/"
+                    }
+                ], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": 1
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": false, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }, 
+            {
+                "bars": true, 
+                "timeFrom": null, 
+                "links": [], 
+                "thresholds": [], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "id": 3, 
+                "gridPos": {
+                    "y": 9, 
+                    "h": 9, 
+                    "w": 21, 
+                    "x": 0
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "!=", 
+                                "value": "null", 
+                                "key": "cloud"
+                            }
+                        ], 
+                        "measurement": "build", 
+                        "groupBy": [
+                            {
+                                "type": "tag", 
+                                "params": [
+                                    "cloud"
+                                ]
+                            }
+                        ], 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "duration"
+                                    ]
+                                }, 
+                                {
+                                    "type": "count", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "B", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "fill": 1, 
+                "title": "Job builds count per cloud", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": false, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": false, 
+                    "max": false, 
+                    "min": false, 
+                    "current": false, 
+                    "values": false, 
+                    "avg": false
+                }, 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": "count"
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": ""
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [
+                        "current"
+                    ], 
+                    "mode": "series", 
+                    "name": null
+                }, 
+                "seriesOverrides": [
+                    {
+                        "alias": "/build.count/"
+                    }, 
+                    {
+                        "alias": "/build.median/"
+                    }
+                ], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": 1
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": false, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }
+        ]
+    }
+}
