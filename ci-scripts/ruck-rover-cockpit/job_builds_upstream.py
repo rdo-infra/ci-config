@@ -19,7 +19,7 @@ OOO_PROJECTS = [
 
 ZUUL_URL = 'http://zuul.openstack.org/api/'
 BUILDS_API = ZUUL_URL + 'builds'
-PAGES = 1
+PAGES = 10
 
 cache = Cache('/tmp/ruck_rover_cache')
 cache.expire()
@@ -101,7 +101,7 @@ def influx(build):
         'patchset=%s,'
         'passed=%s,'
         'cloud=%s,'
-        'region=%s'
+        'region=%s,'
         'provider=%s'
         ' '
         'result="%s",'
@@ -112,7 +112,7 @@ def influx(build):
         'start=%s,'
         'end=%s,'
         'cloud="%s",'
-        'region="%s"'
+        'region="%s",'
         'provider="%s"'
         ' '
         '%s' % (
