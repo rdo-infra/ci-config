@@ -25,11 +25,21 @@ def parse_skipped_promotions(release_name):
     for log_line in promoter_logs.iter_lines():
         matched_regex = promoter_skipping_regex.match(log_line)
         if matched_regex:
+
+            promotion = matched_regex.group(1)
+            try:
+                promotion = eval(matched_regex.group(1))
+                repo_hash = promotion['repo_hash']
+                failing_jobs = matched_regex.group(3)
+            except Exception:
+                repo_hash = promotion
+                failing_jobs = matched_regex.group(3)
+
             skipped_promotion = {
-                'repo_hash': matched_regex.group(1),
+                'repo_hash': repo_hash,
                 'from_name': matched_regex.group(2),
                 'to_name': matched_regex.group(3),
-                'failing_jobs': matched_regex.group(4),
+                'failing_jobs': failing_jobs,
                 'timestamp': get_log_time(log_line),
                 'release': release_name
             }
