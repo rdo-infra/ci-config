@@ -1,6 +1,5 @@
 {
     "dashboard": {
-        "originalTemplating": [], 
         "style": "dark", 
         "templating": {
             "list": [
@@ -11,9 +10,9 @@
                     "datasource": "telegraf", 
                     "filters": [
                         {
-                            "operator": "=", 
-                            "value": "tripleo-ci-centos-7-containers-multinode", 
-                            "key": "job_name"
+                            "operator": ">", 
+                            "value": "10800", 
+                            "key": "duration"
                         }
                     ], 
                     "type": "adhoc"
@@ -22,7 +21,7 @@
         }, 
         "links": [], 
         "tags": [], 
-        "iteration": 1530266858844, 
+        "iteration": 1530282367408, 
         "time": {
             "to": "now", 
             "from": "now-7d"
@@ -68,10 +67,6 @@
             ]
         }, 
         "title": "Exploration", 
-        "originalTime": {
-            "to": "now", 
-            "from": "now-6h"
-        }, 
         "graphTooltip": 0, 
         "timezone": "", 
         "schemaVersion": 16, 
@@ -84,7 +79,6 @@
                 "spaceLength": 10, 
                 "nullPointMode": "null", 
                 "renderer": "flot", 
-                "id": 2, 
                 "gridPos": {
                     "y": 0, 
                     "h": 9, 
@@ -93,21 +87,40 @@
                 }, 
                 "linewidth": 1, 
                 "steppedLine": false, 
+                "id": 2, 
+                "fill": 1, 
+                "title": "Job build duration per cloud", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": false, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "rightSide": true, 
+                    "total": false, 
+                    "min": false, 
+                    "max": false, 
+                    "show": true, 
+                    "current": true, 
+                    "values": true, 
+                    "alignAsTable": true, 
+                    "avg": false
+                }, 
                 "targets": [
                     {
-                        "tags": [
-                            {
-                                "operator": "!=", 
-                                "value": "null", 
-                                "key": "cloud"
-                            }
-                        ], 
+                        "tags": [], 
                         "measurement": "build", 
                         "groupBy": [
                             {
                                 "type": "tag", 
                                 "params": [
                                     "cloud"
+                                ]
+                            }, 
+                            {
+                                "type": "tag", 
+                                "params": [
+                                    "region"
                                 ]
                             }
                         ], 
@@ -131,30 +144,15 @@
                         "resultFormat": "time_series"
                     }
                 ], 
-                "fill": 1, 
-                "title": "Job build duration per cloud", 
-                "tooltip": {
-                    "sort": 0, 
-                    "shared": false, 
-                    "value_type": "individual"
-                }, 
-                "legend": {
-                    "total": false, 
-                    "show": false, 
-                    "max": false, 
-                    "min": false, 
-                    "current": false, 
-                    "values": false, 
-                    "avg": false
-                }, 
                 "yaxes": [
                     {
                         "logBase": 1, 
-                        "show": true, 
+                        "min": null, 
                         "max": null, 
                         "format": "dtdurations", 
-                        "min": null, 
-                        "label": "durastion"
+                        "label": "durastion", 
+                        "show": true, 
+                        "decimals": 1
                     }, 
                     {
                         "logBase": 1, 
@@ -167,7 +165,7 @@
                 ], 
                 "xaxis": {
                     "buckets": null, 
-                    "show": true, 
+                    "show": false, 
                     "values": [
                         "current"
                     ], 
@@ -196,7 +194,8 @@
                 "lines": false, 
                 "points": false, 
                 "datasource": "telegraf", 
-                "pointradius": 5
+                "pointradius": 5, 
+                "decimals": 1
             }, 
             {
                 "bars": true, 
@@ -206,7 +205,6 @@
                 "spaceLength": 10, 
                 "nullPointMode": "null", 
                 "renderer": "flot", 
-                "id": 3, 
                 "gridPos": {
                     "y": 9, 
                     "h": 9, 
@@ -215,21 +213,40 @@
                 }, 
                 "linewidth": 1, 
                 "steppedLine": false, 
+                "id": 3, 
+                "fill": 1, 
+                "title": "Job builds count per cloud", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": false, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "rightSide": true, 
+                    "total": false, 
+                    "min": false, 
+                    "max": false, 
+                    "show": true, 
+                    "current": true, 
+                    "values": true, 
+                    "alignAsTable": true, 
+                    "avg": false
+                }, 
                 "targets": [
                     {
-                        "tags": [
-                            {
-                                "operator": "!=", 
-                                "value": "null", 
-                                "key": "cloud"
-                            }
-                        ], 
+                        "tags": [], 
                         "measurement": "build", 
                         "groupBy": [
                             {
                                 "type": "tag", 
                                 "params": [
                                     "cloud"
+                                ]
+                            }, 
+                            {
+                                "type": "tag", 
+                                "params": [
+                                    "region"
                                 ]
                             }
                         ], 
@@ -253,22 +270,6 @@
                         "resultFormat": "time_series"
                     }
                 ], 
-                "fill": 1, 
-                "title": "Job builds count per cloud", 
-                "tooltip": {
-                    "sort": 0, 
-                    "shared": false, 
-                    "value_type": "individual"
-                }, 
-                "legend": {
-                    "total": false, 
-                    "show": false, 
-                    "max": false, 
-                    "min": false, 
-                    "current": false, 
-                    "values": false, 
-                    "avg": false
-                }, 
                 "yaxes": [
                     {
                         "logBase": 1, 
@@ -289,7 +290,7 @@
                 ], 
                 "xaxis": {
                     "buckets": null, 
-                    "show": true, 
+                    "show": false, 
                     "values": [
                         "current"
                     ], 
@@ -318,7 +319,263 @@
                 "lines": false, 
                 "points": false, 
                 "datasource": "telegraf", 
-                "pointradius": 5
+                "pointradius": 5, 
+                "decimals": 0
+            }, 
+            {
+                "sort": {
+                    "col": 0, 
+                    "desc": true
+                }, 
+                "styles": [
+                    {
+                        "alias": "Time", 
+                        "type": "date", 
+                        "pattern": "Time", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss"
+                    }, 
+                    {
+                        "mappingType": 1, 
+                        "type": "string", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                        "colorMode": null, 
+                        "thresholds": [], 
+                        "alias": "Branch", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "pattern": "branch", 
+                        "decimals": 2, 
+                        "unit": "short"
+                    }, 
+                    {
+                        "linkTargetBlank": true, 
+                        "mappingType": 1, 
+                        "type": "string", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                        "colorMode": "value", 
+                        "thresholds": [
+                            "A"
+                        ], 
+                        "linkTooltip": "Logs", 
+                        "alias": "Job", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "link": true, 
+                        "pattern": "job_name", 
+                        "decimals": 2, 
+                        "unit": "short", 
+                        "linkUrl": "${__cell_7}"
+                    }, 
+                    {
+                        "mappingType": 1, 
+                        "type": "string", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                        "colorMode": null, 
+                        "thresholds": [], 
+                        "alias": "Pipeline", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "pattern": "pipeline", 
+                        "decimals": 2, 
+                        "unit": "short"
+                    }, 
+                    {
+                        "mappingType": 1, 
+                        "type": "number", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                        "colorMode": "cell", 
+                        "thresholds": [
+                            "10000", 
+                            "10600"
+                        ], 
+                        "alias": "Duration", 
+                        "colors": [
+                            "#2f575e", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(245, 54, 54, 0.9)"
+                        ], 
+                        "pattern": "duration", 
+                        "decimals": 1, 
+                        "unit": "dtdurations"
+                    }, 
+                    {
+                        "linkTargetBlank": true, 
+                        "mappingType": 1, 
+                        "type": "string", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                        "colorMode": "cell", 
+                        "thresholds": [
+                            "AA"
+                        ], 
+                        "linkTooltip": "Logs", 
+                        "alias": "", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "link": true, 
+                        "pattern": "result", 
+                        "decimals": 2, 
+                        "unit": "short", 
+                        "linkUrl": "${__cell_7}"
+                    }, 
+                    {
+                        "linkTargetBlank": true, 
+                        "mappingType": 1, 
+                        "type": "string", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                        "colorMode": null, 
+                        "thresholds": [], 
+                        "linkTooltip": "Logs", 
+                        "alias": "Job", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "link": false, 
+                        "sanitize": true, 
+                        "pattern": "log_link", 
+                        "decimals": 2, 
+                        "unit": "short", 
+                        "linkUrl": "${__cell_7}"
+                    }, 
+                    {
+                        "linkTargetBlank": true, 
+                        "mappingType": 1, 
+                        "type": "number", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                        "colorMode": null, 
+                        "thresholds": [], 
+                        "linkTooltip": "Gerrit", 
+                        "alias": "Patch", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "link": true, 
+                        "pattern": "change", 
+                        "decimals": 2, 
+                        "unit": "short", 
+                        "linkUrl": "https://review.openstack.org/${__cell}"
+                    }, 
+                    {
+                        "type": "number", 
+                        "pattern": "/.*/", 
+                        "thresholds": [], 
+                        "alias": "", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "colorMode": null, 
+                        "decimals": 2, 
+                        "unit": "short"
+                    }
+                ], 
+                "timeFrom": "3d", 
+                "pageSize": null, 
+                "links": [], 
+                "title": "Jobs", 
+                "timeShift": null, 
+                "transform": "table", 
+                "showHeader": true, 
+                "scroll": true, 
+                "targets": [
+                    {
+                        "rawQuery": false, 
+                        "tags": [], 
+                        "measurement": "build", 
+                        "refId": "A", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "branch"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "change"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "log_link"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "duration"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "cloud"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "region"
+                                    ]
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "autogen", 
+                        "query": "SELECT \"duration\", \"result\", \"log_url\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' ) AND $timeFilter GROUP BY \"job_name\", \"branch\", \"pipeline\", \"change\"", 
+                        "groupBy": [], 
+                        "resultFormat": "table"
+                    }
+                ], 
+                "hideTimeOverride": false, 
+                "fontSize": "100%", 
+                "datasource": "telegraf", 
+                "gridPos": {
+                    "y": 18, 
+                    "h": 8, 
+                    "w": 21, 
+                    "x": 0
+                }, 
+                "type": "table", 
+                "id": 5, 
+                "columns": []
             }
         ]
     }
