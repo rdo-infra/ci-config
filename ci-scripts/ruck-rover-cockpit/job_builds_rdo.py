@@ -70,7 +70,10 @@ def influx(build):
         'voting=%s,'
         'change=%s,'
         'patchset=%s,'
-        'passed=%s'
+        'passed=%s,'
+        'cloud=rdo,'
+        'region=rdo,'
+        'provider=rdo'
         ' '
         'result="%s",'
         'result_num=%s,'
@@ -78,7 +81,10 @@ def influx(build):
         'log_link="%s",'
         'duration=%s,'
         'start=%s,'
-        'end=%s'
+        'end=%s,'
+        'cloud="rdo",'
+        'region="rdo",'
+        'provider="rdo"'
         ' '
         '%s' % (
             build['pipeline'],

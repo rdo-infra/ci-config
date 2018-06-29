@@ -101,7 +101,7 @@ def influx(build):
         'patchset=%s,'
         'passed=%s,'
         'cloud=%s,'
-        'region=%s'
+        'region=%s,'
         'provider=%s'
         ' '
         'result="%s",'
@@ -112,7 +112,7 @@ def influx(build):
         'start=%s,'
         'end=%s,'
         'cloud="%s",'
-        'region="%s"'
+        'region="%s",'
         'provider="%s"'
         ' '
         '%s' % (
