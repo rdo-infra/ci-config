@@ -252,7 +252,7 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hash
             if missing_jobs:
                 logger.info('Skipping promotion of %s from %s to %s, missing successful '
                             'jobs: %s',
-                            new_hashes['full_hash'], current_name, promote_name, missing_jobs)
+                            new_hashes, current_name, promote_name, missing_jobs)
                 continue
             if dry_run:
                 logger.info('DRY RUN: promotion conditions satisfied, '
