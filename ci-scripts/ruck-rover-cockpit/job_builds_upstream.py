@@ -3,19 +3,18 @@ import datetime
 import time
 import requests
 import yaml
-import json
 
 from diskcache import Cache
 
 OOO_PROJECTS = [
-        'openstack/puppet-triple',
-        'openstack/python-tripleoclient',
-        'openstack/tripleo-upgrade',
-        'openstack/tripleo-quickstart-extras',
-        'openstack/tripleo-common',
-        'openstack-infra/tripleo-ci',
-        'openstack/tripleo-quickstart',
-        'openstack/tripleo-heat-templates']
+    'openstack/puppet-triple',
+    'openstack/python-tripleoclient',
+    'openstack/tripleo-upgrade',
+    'openstack/tripleo-quickstart-extras',
+    'openstack/tripleo-common',
+    'openstack-infra/tripleo-ci',
+    'openstack/tripleo-quickstart',
+    'openstack/tripleo-heat-templates']
 
 ZUUL_URL = 'http://zuul.openstack.org/api/'
 BUILDS_API = ZUUL_URL + 'builds'
@@ -25,6 +24,8 @@ cache = Cache('/tmp/ruck_rover_cache')
 cache.expire()
 
 # Convert datetime to timestamp
+
+
 def to_ts(d, seconds=False):
     return datetime.datetime.strptime(
         d, '%Y-%m-%dT%H:%M:%S').strftime('%s') + (
@@ -58,16 +59,21 @@ def get_builds_info(query, pages=PAGES):
             builds += response
     return builds
 
+
 def add_inventory_info(build):
 
     if 'log_url' in build:
+        if build['log_url'].endswith("/html/"):
+            build['log_url'] = build['log_url'].replace('html/', '')
+        if build['log_url'].endswith("/cover/"):
+            build['log_url'] = build['log_url'].replace('cover/', '')
         inventory_path = build['log_url'] + "/zuul-info/inventory.yaml"
         try:
             if inventory_path not in cache:
                 r = requests.get(inventory_path)
                 if r.ok:
                     cache.add(inventory_path, yaml.load(r.content),
-                            expire=259200) # expire is 3 days
+                              expire=259200)  # expire is 3 days
 
             inventory = cache[inventory_path]
             hosts = inventory['all']['hosts']
@@ -81,11 +87,12 @@ def add_inventory_info(build):
         except Exception:
             pass
 
+
 def influx(build):
 
     add_inventory_info(build)
 
-    if build['start_time'] == None:
+    if build['start_time'] is None:
         build['start_time'] = build['end_time']
 
     # Get the nodename
@@ -131,7 +138,8 @@ def influx(build):
             'SUCCESS' if build['result'] == 'SUCCESS' else 'FAILURE',
             1 if build['result'] == 'SUCCESS' else 0,
             build['log_url'],
-            "<a href={} target='_blank'>{}</a>".format(build['log_url'], build['job_name']),
+            "<a href={} target='_blank'>{}</a>".format(
+                build['log_url'], build['job_name']),
             build.get('duration', 0),
             to_ts(build['start_time'], seconds=True),
             to_ts(build['end_time'], seconds=True),
@@ -139,7 +147,7 @@ def influx(build):
             build.get('region', 'null'),
             build.get('provider', 'null'),
             to_ts(build['end_time'])
-                )
+        )
     )
 
 
@@ -148,9 +156,11 @@ def print_influx(builds):
         for build in builds:
             print(influx(build))
 
+
 def main():
     for project in OOO_PROJECTS:
         print_influx(get_builds_info({'project': project}))
+
 
 if __name__ == '__main__':
     main()
