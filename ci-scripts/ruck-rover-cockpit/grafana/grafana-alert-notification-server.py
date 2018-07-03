@@ -29,7 +29,10 @@ class GrafanaIRCAlertBot(irc.bot.SingleServerIRCBot):
         self.do_command(e, e.arguments[0])
 
     def on_pubmsg(self, c, e):
-        a = e.arguments[0].split(":", 1)
+        line = e.arguments[0]
+        a = line.split(":", 1)
+        if len(a) <= 1:
+            a = line.split(",", 1)
         if len(a) > 1 and irc.strings.lower(a[0]) == irc.strings.lower(
                 self.connection.get_nickname()):
             self.do_command(e, a[1].strip())
@@ -40,20 +43,40 @@ class GrafanaIRCAlertBot(irc.bot.SingleServerIRCBot):
 
     def send_alert(self, alert):
         if alert['state'] != 'ok':
-            self.send_message("{title}: {message}".format(**alert))
+            self.send_message("[{title}] {message}".format(**alert))
+
+    def filter_alerts(alerts, command):
+        filtered_alerts = alerts
+
+        if len(command) <= 1:
+            return filtered_alerts
+
+        for alert in alerts:
+            filters = command[1:]
+            name = alert['name'].lower()
+            message = alert['Message'].lower()
+            if any(filter.lower() in name + message for filter in filters):
+                filtered_alerts.append(alert)
+
+        return filtered_alerts
+
 
     def do_command(self, e, cmd):
         nick = e.source.nick
         c = self.connection
 
-        if cmd == "alerts":
-            alerts = get_alerts(
-                    self.grafana_host, self.grafana_key)
+        splitted_cmd = cmd.split()
+        action = splitted_cmd[0]
+        if action == "alerts":
+            alerts = filter_alerts(get_alerts(
+                    self.grafana_host, self.grafana_key), splitted_cmd)
             for alert in alerts:
                 self.send_alert(
                     {'title': alert['name'],
                      'message': alert['Message'],
                      'state' : 'alerting'})
+            else:
+                self.send_message("No alerts")
         else:
             self.send_message("Not understood: " + cmd)
 
