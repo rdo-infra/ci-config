@@ -46,10 +46,18 @@ class GrafanaIRCAlertBot(irc.bot.SingleServerIRCBot):
         nick = e.source.nick
         c = self.connection
 
-        if cmd == "alerts":
+        splitted_cmd = cmd.split()
+        action = splitted_cmd[0]
+        if action == "alerts":
             alerts = get_alerts(
                     self.grafana_host, self.grafana_key)
             for alert in alerts:
+            # Filter alerts if we have filters on the action
+                if len(splitted_cmd) > 1:
+                    filters = splitted_cmd[1:]
+                    if not any(filter in alert['name'] for filter in filters):
+                        continue
+
                 self.send_alert(
                     {'title': alert['name'],
                      'message': alert['Message'],
