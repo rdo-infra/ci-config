@@ -23,7 +23,7 @@
                         }, 
                         {
                             "text": "promotion-blocker", 
-                            "selected": true, 
+                            "selected": false, 
                             "value": "promotion-blocker"
                         }
                     ], 
@@ -104,12 +104,20 @@
                         }
                     ], 
                     "includeAll": false
+                }, 
+                {
+                    "hide": 0, 
+                    "name": "influxdb_filter", 
+                    "label": "Influxdb filter", 
+                    "datasource": "telegraf", 
+                    "filters": [], 
+                    "type": "adhoc"
                 }
             ]
         }, 
         "links": [], 
         "tags": [], 
-        "iteration": 1530695557174, 
+        "iteration": 1530709562481, 
         "time": {
             "to": "now", 
             "from": "now-2d"
@@ -1806,2137 +1814,2136 @@
             }, 
             {
                 "title": "Zuul jobs", 
-                "collapsed": true, 
+                "collapsed": false, 
                 "gridPos": {
                     "y": 36, 
                     "h": 1, 
                     "w": 24, 
                     "x": 0
                 }, 
-                "panels": [
-                    {
-                        "bars": false, 
-                        "timeFrom": "1w", 
-                        "links": [], 
-                        "thresholds": [
-                            {
-                                "yaxis": "left", 
-                                "colorMode": "ok", 
-                                "value": 95, 
-                                "line": true, 
-                                "fill": true, 
-                                "op": "gt"
-                            }, 
-                            {
-                                "yaxis": "left", 
-                                "colorMode": "warning", 
-                                "value": 90, 
-                                "line": true, 
-                                "fill": true, 
-                                "op": "gt"
-                            }, 
-                            {
-                                "yaxis": "left", 
-                                "colorMode": "critical", 
-                                "value": 1, 
-                                "fillColor": "#7eb26d", 
-                                "lineColor": "#3f6833", 
-                                "line": true, 
-                                "fill": true, 
-                                "op": "gt"
-                            }
-                        ], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "gridPos": {
-                            "y": 2, 
-                            "h": 7, 
-                            "w": 24, 
-                            "x": 0
-                        }, 
-                        "linewidth": 1, 
-                        "steppedLine": false, 
-                        "id": 157, 
-                        "fill": 1, 
-                        "title": "CI stats weekly", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "total": false, 
-                            "min": false, 
-                            "max": false, 
-                            "show": true, 
-                            "current": true, 
-                            "hideEmpty": false, 
-                            "values": true, 
-                            "alignAsTable": false, 
-                            "avg": false
-                        }, 
-                        "targets": [
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=", 
-                                        "value": "True", 
-                                        "key": "passed"
-                                    }
-                                ], 
-                                "measurement": "build", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "24h"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "PASS", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "result_num"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "count", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "time_series"
-                            }, 
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=", 
-                                        "value": "False", 
-                                        "key": "passed"
-                                    }
-                                ], 
-                                "measurement": "build", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "24h"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "FAIL", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "result_num"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "count", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "B", 
-                                "resultFormat": "time_series"
-                            }
-                        ], 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": "100", 
-                                "format": "none", 
-                                "min": "0", 
-                                "label": null
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": false, 
-                                "max": null, 
-                                "format": "percent", 
-                                "min": null, 
-                                "label": null
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [
-                            {
-                                "color": "#508642", 
-                                "alias": "PASS", 
-                                "bars": true, 
-                                "lines": false
-                            }, 
-                            {
-                                "color": "#bf1b00", 
-                                "alias": "FAIL", 
-                                "bars": true, 
-                                "lines": false
-                            }
-                        ], 
-                        "percentage": true, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "hideTimeOverride": true, 
-                        "dashLength": 10, 
-                        "stack": true, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": true, 
-                        "points": false, 
-                        "datasource": "telegraf", 
-                        "pointradius": 5
-                    }, 
-                    {
-                        "bars": false, 
-                        "timeFrom": "6h", 
-                        "links": [], 
-                        "thresholds": [
-                            {
-                                "colorMode": "critical", 
-                                "line": true, 
-                                "op": "gt", 
-                                "value": 360, 
-                                "fill": true
-                            }
-                        ], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "gridPos": {
-                            "y": 9, 
-                            "h": 6, 
-                            "w": 4, 
-                            "x": 0
-                        }, 
-                        "linewidth": 2, 
-                        "steppedLine": false, 
-                        "id": 71, 
-                        "fill": 4, 
-                        "title": "Upstream zuul max enqueued time", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "total": false, 
-                            "show": true, 
-                            "max": false, 
-                            "min": false, 
-                            "current": false, 
-                            "values": false, 
-                            "avg": false
-                        }, 
-                        "targets": [
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=", 
-                                        "value": "gate", 
-                                        "key": "pipeline"
-                                    }, 
-                                    {
-                                        "operator": "=", 
-                                        "value": "tripleo", 
-                                        "key": "queue", 
-                                        "condition": "AND"
-                                    }
-                                ], 
-                                "measurement": "zuul-queue-status", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "$__interval"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "none"
-                                        ]
-                                    }
-                                ], 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "enqueued_time"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "max", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "time_series"
-                            }
-                        ], 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "m", 
-                                "min": "0", 
-                                "label": null
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": false, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [], 
-                        "percentage": false, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "alert": {
-                            "noDataState": "ok", 
-                            "name": "Upstream zuul max enqueued time alert", 
-                            "frequency": "60s", 
-                            "notifications": [
-                                {
-                                    "id": 2
-                                }
-                            ], 
-                            "handler": 1, 
-                            "executionErrorState": "alerting", 
-                            "message": "A lot of jobs at upstream tripleo gate queue, check https://zuul.openstack.org", 
-                            "conditions": [
-                                {
-                                    "operator": {
-                                        "type": "and"
-                                    }, 
-                                    "query": {
-                                        "params": [
-                                            "A", 
-                                            "5m", 
-                                            "now"
-                                        ]
-                                    }, 
-                                    "evaluator": {
-                                        "type": "gt", 
-                                        "params": [
-                                            360
-                                        ]
-                                    }, 
-                                    "reducer": {
-                                        "type": "avg", 
-                                        "params": []
-                                    }, 
-                                    "type": "query"
-                                }
-                            ]
-                        }, 
-                        "dashLength": 10, 
-                        "stack": false, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": true, 
-                        "points": false, 
-                        "datasource": "telegraf", 
-                        "pointradius": 5
-                    }, 
-                    {
-                        "bars": false, 
-                        "timeFrom": "6h", 
-                        "links": [], 
-                        "thresholds": [
-                            {
-                                "colorMode": "critical", 
-                                "line": true, 
-                                "op": "gt", 
-                                "value": 360, 
-                                "fill": true
-                            }
-                        ], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "gridPos": {
-                            "y": 9, 
-                            "h": 6, 
-                            "w": 4, 
-                            "x": 4
-                        }, 
-                        "linewidth": 1, 
-                        "steppedLine": false, 
-                        "id": 72, 
-                        "fill": 1, 
-                        "title": "RDO zuul max enqueued time", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "total": false, 
-                            "show": true, 
-                            "max": false, 
-                            "min": false, 
-                            "current": false, 
-                            "values": false, 
-                            "avg": false
-                        }, 
-                        "targets": [
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=", 
-                                        "value": "openstack-check", 
-                                        "key": "pipeline"
-                                    }
-                                ], 
-                                "measurement": "zuul-queue-status", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "$__interval"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "none"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "openstack-check", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "enqueued_time"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "max", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "time_series"
-                            }
-                        ], 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "m", 
-                                "min": "0", 
-                                "label": null
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [], 
-                        "percentage": false, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "alert": {
-                            "noDataState": "ok", 
-                            "name": "RDO zuul max enqueued time alert", 
-                            "frequency": "60s", 
-                            "notifications": [
-                                {
-                                    "id": 2
-                                }
-                            ], 
-                            "handler": 1, 
-                            "executionErrorState": "alerting", 
-                            "message": "A lot of jobs at RDO openstack-check pipeline, check out https://review.rdoproject.org/zuul/.", 
-                            "conditions": [
-                                {
-                                    "operator": {
-                                        "type": "and"
-                                    }, 
-                                    "query": {
-                                        "params": [
-                                            "A", 
-                                            "5m", 
-                                            "now"
-                                        ]
-                                    }, 
-                                    "evaluator": {
-                                        "type": "gt", 
-                                        "params": [
-                                            360
-                                        ]
-                                    }, 
-                                    "reducer": {
-                                        "type": "max", 
-                                        "params": []
-                                    }, 
-                                    "type": "query"
-                                }
-                            ]
-                        }, 
-                        "dashLength": 10, 
-                        "stack": false, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": true, 
-                        "points": false, 
-                        "datasource": "telegraf", 
-                        "pointradius": 5
-                    }, 
-                    {
-                        "bars": true, 
-                        "timeFrom": null, 
-                        "links": [], 
-                        "thresholds": [
-                            {
-                                "colorMode": "critical", 
-                                "line": true, 
-                                "op": "gt", 
-                                "value": 0, 
-                                "fill": true
-                            }
-                        ], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "gridPos": {
-                            "y": 9, 
-                            "h": 6, 
-                            "w": 16, 
-                            "x": 8
-                        }, 
-                        "linewidth": 1, 
-                        "steppedLine": false, 
-                        "id": 55, 
-                        "fill": 1, 
-                        "title": "Upstream gate jobs", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "total": false, 
-                            "show": true, 
-                            "max": false, 
-                            "min": false, 
-                            "current": false, 
-                            "values": false, 
-                            "avg": false
-                        }, 
-                        "targets": [
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=", 
-                                        "value": "gate", 
-                                        "key": "pipeline"
-                                    }, 
-                                    {
-                                        "operator": "=", 
-                                        "value": "True", 
-                                        "key": "passed", 
-                                        "condition": "AND"
-                                    }, 
-                                    {
-                                        "operator": "=", 
-                                        "value": "upstream", 
-                                        "key": "type", 
-                                        "condition": "AND"
-                                    }
-                                ], 
-                                "measurement": "build", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "30m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "none"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "PASSED", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "result"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "count", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "time_series"
-                            }, 
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=", 
-                                        "value": "gate", 
-                                        "key": "pipeline"
-                                    }, 
-                                    {
-                                        "operator": "=", 
-                                        "value": "False", 
-                                        "key": "passed", 
-                                        "condition": "AND"
-                                    }, 
-                                    {
-                                        "operator": "=", 
-                                        "value": "upstream", 
-                                        "key": "type", 
-                                        "condition": "AND"
-                                    }
-                                ], 
-                                "measurement": "build", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "30m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "none"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "FAILED", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "result"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "count", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "B", 
-                                "resultFormat": "time_series"
-                            }
-                        ], 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "min": null, 
-                                "max": null, 
-                                "format": "short", 
-                                "label": "Number of builds", 
-                                "show": true, 
-                                "decimals": 0
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": false, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": "dfgd"
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [
-                            {
-                                "alias": "PASSED"
-                            }, 
-                            {
-                                "color": "#bf1b00", 
-                                "alias": "FAILED", 
-                                "transform": "negative-Y"
-                            }
-                        ], 
-                        "percentage": false, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "alert": {
-                            "noDataState": "ok", 
-                            "name": "Upstream gate jobs alert", 
-                            "frequency": "60s", 
-                            "notifications": [
-                                {
-                                    "id": 2
-                                }
-                            ], 
-                            "handler": 1, 
-                            "executionErrorState": "alerting", 
-                            "message": "Some jobs are failing in the last 24h", 
-                            "conditions": [
-                                {
-                                    "operator": {
-                                        "type": "and"
-                                    }, 
-                                    "query": {
-                                        "params": [
-                                            "B", 
-                                            "24h", 
-                                            "now"
-                                        ]
-                                    }, 
-                                    "evaluator": {
-                                        "type": "gt", 
-                                        "params": [
-                                            0
-                                        ]
-                                    }, 
-                                    "reducer": {
-                                        "type": "last", 
-                                        "params": []
-                                    }, 
-                                    "type": "query"
-                                }
-                            ]
-                        }, 
-                        "dashLength": 10, 
-                        "stack": false, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": false, 
-                        "points": false, 
-                        "datasource": "telegraf", 
-                        "pointradius": 5
-                    }, 
-                    {
-                        "bars": true, 
-                        "timeFrom": null, 
-                        "links": [], 
-                        "thresholds": [], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "id": 79, 
-                        "gridPos": {
-                            "y": 15, 
-                            "h": 6, 
-                            "w": 12, 
-                            "x": 0
-                        }, 
-                        "linewidth": 1, 
-                        "steppedLine": false, 
-                        "targets": [
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=", 
-                                        "value": "check", 
-                                        "key": "pipeline"
-                                    }, 
-                                    {
-                                        "operator": "=", 
-                                        "value": "True", 
-                                        "key": "passed", 
-                                        "condition": "AND"
-                                    }, 
-                                    {
-                                        "operator": "=", 
-                                        "value": "True", 
-                                        "key": "voting", 
-                                        "condition": "AND"
-                                    }
-                                ], 
-                                "measurement": "build", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "30m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "none"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "PASSED", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "result"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "count", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "time_series"
-                            }, 
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=", 
-                                        "value": "check", 
-                                        "key": "pipeline"
-                                    }, 
-                                    {
-                                        "operator": "=", 
-                                        "value": "False", 
-                                        "key": "passed", 
-                                        "condition": "AND"
-                                    }, 
-                                    {
-                                        "operator": "=", 
-                                        "value": "True", 
-                                        "key": "voting", 
-                                        "condition": "AND"
-                                    }
-                                ], 
-                                "measurement": "build", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "30m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "none"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "FAILED", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "result"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "count", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "B", 
-                                "resultFormat": "time_series"
-                            }
-                        ], 
-                        "fill": 1, 
-                        "title": "Check voting  jobs", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "total": true, 
-                            "show": true, 
-                            "max": true, 
-                            "min": true, 
-                            "current": true, 
-                            "values": true, 
-                            "avg": true
-                        }, 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "min": null, 
-                                "max": null, 
-                                "format": "short", 
-                                "label": "dfgd", 
-                                "show": false, 
-                                "decimals": 0
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": false, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": "dfgd"
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [
-                            {
-                                "alias": "PASSED"
-                            }, 
-                            {
-                                "color": "#bf1b00", 
-                                "alias": "FAILED", 
-                                "transform": "negative-Y"
-                            }
-                        ], 
-                        "percentage": false, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "dashLength": 10, 
-                        "stack": false, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": false, 
-                        "points": false, 
-                        "datasource": "telegraf", 
-                        "pointradius": 5
-                    }, 
-                    {
-                        "bars": true, 
-                        "timeFrom": null, 
-                        "links": [], 
-                        "thresholds": [], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "id": 80, 
-                        "gridPos": {
-                            "y": 15, 
-                            "h": 6, 
-                            "w": 12, 
-                            "x": 12
-                        }, 
-                        "linewidth": 1, 
-                        "steppedLine": false, 
-                        "targets": [
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=", 
-                                        "value": "check", 
-                                        "key": "pipeline"
-                                    }, 
-                                    {
-                                        "operator": "=", 
-                                        "value": "True", 
-                                        "key": "passed", 
-                                        "condition": "AND"
-                                    }
-                                ], 
-                                "measurement": "build", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "30m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "none"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "PASSED", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "result"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "count", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "time_series"
-                            }, 
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=", 
-                                        "value": "check", 
-                                        "key": "pipeline"
-                                    }, 
-                                    {
-                                        "operator": "=", 
-                                        "value": "False", 
-                                        "key": "passed", 
-                                        "condition": "AND"
-                                    }
-                                ], 
-                                "measurement": "build", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "30m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "none"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "FAILED", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "result"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "count", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "B", 
-                                "resultFormat": "time_series"
-                            }
-                        ], 
-                        "fill": 1, 
-                        "title": "Check  jobs", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "total": true, 
-                            "show": true, 
-                            "max": true, 
-                            "min": true, 
-                            "current": true, 
-                            "values": true, 
-                            "avg": true
-                        }, 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "min": null, 
-                                "max": null, 
-                                "format": "short", 
-                                "label": "dfgd", 
-                                "show": false, 
-                                "decimals": 0
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": false, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": "dfgd"
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [
-                            {
-                                "alias": "PASSED"
-                            }, 
-                            {
-                                "color": "#bf1b00", 
-                                "alias": "FAILED", 
-                                "transform": "negative-Y"
-                            }
-                        ], 
-                        "percentage": false, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "dashLength": 10, 
-                        "stack": false, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": false, 
-                        "points": false, 
-                        "datasource": "telegraf", 
-                        "pointradius": 5
-                    }, 
-                    {
-                        "bars": false, 
-                        "timeFrom": null, 
-                        "links": [
-                            {
-                                "url": "https://review.openstack.org/560445", 
-                                "type": "absolute", 
-                                "targetBlank": true, 
-                                "title": "gerrit"
-                            }
-                        ], 
-                        "thresholds": [
-                            {
-                                "colorMode": "critical", 
-                                "line": true, 
-                                "op": "lt", 
-                                "value": 1, 
-                                "fill": true
-                            }
-                        ], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "gridPos": {
-                            "y": 21, 
-                            "h": 4, 
-                            "w": 12, 
-                            "x": 0
-                        }, 
-                        "linewidth": 1, 
-                        "steppedLine": false, 
-                        "id": 103, 
-                        "fill": 1, 
-                        "title": "Master noop change results", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "rightSide": false, 
-                            "total": false, 
-                            "min": false, 
-                            "max": false, 
-                            "show": false, 
-                            "current": false, 
-                            "values": false, 
-                            "alignAsTable": true, 
-                            "avg": false
-                        }, 
-                        "targets": [
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=", 
-                                        "value": "560445", 
-                                        "key": "change"
-                                    }, 
-                                    {
-                                        "operator": "=", 
-                                        "value": "True", 
-                                        "key": "voting", 
-                                        "condition": "AND"
-                                    }
-                                ], 
-                                "measurement": "build", 
-                                "groupBy": [
-                                    {
-                                        "type": "tag", 
-                                        "params": [
-                                            "job_name"
-                                        ]
-                                    }
-                                ], 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "result_num"
-                                            ]
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "time_series"
-                            }
-                        ], 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "min": "0", 
-                                "max": "1", 
-                                "format": "short", 
-                                "label": "Result code", 
-                                "show": true, 
-                                "decimals": 0
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [], 
-                        "percentage": false, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "alert": {
-                            "noDataState": "no_data", 
-                            "name": "Master noop change results alert", 
-                            "frequency": "60s", 
-                            "notifications": [
-                                {
-                                    "id": 2
-                                }
-                            ], 
-                            "handler": 1, 
-                            "executionErrorState": "alerting", 
-                            "message": "Jobs failing at https://review.openstack.org/#/c/560445.", 
-                            "conditions": [
-                                {
-                                    "operator": {
-                                        "type": "and"
-                                    }, 
-                                    "query": {
-                                        "params": [
-                                            "A", 
-                                            "24h", 
-                                            "now"
-                                        ]
-                                    }, 
-                                    "evaluator": {
-                                        "type": "lt", 
-                                        "params": [
-                                            1
-                                        ]
-                                    }, 
-                                    "reducer": {
-                                        "type": "last", 
-                                        "params": []
-                                    }, 
-                                    "type": "query"
-                                }
-                            ]
-                        }, 
-                        "dashLength": 10, 
-                        "stack": false, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": false, 
-                        "points": true, 
-                        "datasource": "telegraf", 
-                        "pointradius": 5, 
-                        "decimals": 0
-                    }, 
-                    {
-                        "bars": false, 
-                        "timeFrom": null, 
-                        "links": [
-                            {
-                                "url": "https://review.openstack.org/564291", 
-                                "type": "absolute", 
-                                "targetBlank": true, 
-                                "title": "gerrit"
-                            }
-                        ], 
-                        "thresholds": [
-                            {
-                                "colorMode": "critical", 
-                                "line": true, 
-                                "op": "lt", 
-                                "value": 1, 
-                                "fill": true
-                            }
-                        ], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "gridPos": {
-                            "y": 21, 
-                            "h": 4, 
-                            "w": 12, 
-                            "x": 12
-                        }, 
-                        "linewidth": 1, 
-                        "steppedLine": false, 
-                        "id": 106, 
-                        "fill": 1, 
-                        "title": "Ocata noop change results", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "rightSide": false, 
-                            "total": false, 
-                            "min": false, 
-                            "max": false, 
-                            "show": false, 
-                            "current": false, 
-                            "values": false, 
-                            "alignAsTable": true, 
-                            "avg": false
-                        }, 
-                        "targets": [
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=", 
-                                        "value": "564291", 
-                                        "key": "change"
-                                    }, 
-                                    {
-                                        "operator": "=", 
-                                        "value": "True", 
-                                        "key": "voting", 
-                                        "condition": "AND"
-                                    }
-                                ], 
-                                "measurement": "build", 
-                                "groupBy": [
-                                    {
-                                        "type": "tag", 
-                                        "params": [
-                                            "job_name"
-                                        ]
-                                    }
-                                ], 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "result_num"
-                                            ]
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "time_series"
-                            }
-                        ], 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "min": "0", 
-                                "max": "1", 
-                                "format": "short", 
-                                "label": "Result code", 
-                                "show": true, 
-                                "decimals": 0
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [], 
-                        "percentage": false, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "alert": {
-                            "noDataState": "no_data", 
-                            "name": "Ocata noop change results alert", 
-                            "frequency": "60s", 
-                            "notifications": [
-                                {
-                                    "id": 2
-                                }
-                            ], 
-                            "handler": 1, 
-                            "executionErrorState": "alerting", 
-                            "message": "Jobs failing at  https://review.openstack.org/#/c/564291.", 
-                            "conditions": [
-                                {
-                                    "operator": {
-                                        "type": "and"
-                                    }, 
-                                    "query": {
-                                        "params": [
-                                            "A", 
-                                            "24h", 
-                                            "now"
-                                        ]
-                                    }, 
-                                    "evaluator": {
-                                        "type": "lt", 
-                                        "params": [
-                                            1
-                                        ]
-                                    }, 
-                                    "reducer": {
-                                        "type": "last", 
-                                        "params": []
-                                    }, 
-                                    "type": "query"
-                                }
-                            ]
-                        }, 
-                        "dashLength": 10, 
-                        "stack": false, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": false, 
-                        "points": true, 
-                        "datasource": "telegraf", 
-                        "pointradius": 5, 
-                        "decimals": 0
-                    }, 
-                    {
-                        "bars": false, 
-                        "timeFrom": null, 
-                        "links": [
-                            {
-                                "url": "https://review.openstack.org/567224", 
-                                "type": "absolute", 
-                                "targetBlank": true, 
-                                "title": "gerrit"
-                            }
-                        ], 
-                        "thresholds": [
-                            {
-                                "colorMode": "critical", 
-                                "line": true, 
-                                "op": "lt", 
-                                "value": 1, 
-                                "fill": true
-                            }
-                        ], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "gridPos": {
-                            "y": 25, 
-                            "h": 4, 
-                            "w": 12, 
-                            "x": 0
-                        }, 
-                        "linewidth": 1, 
-                        "steppedLine": false, 
-                        "id": 104, 
-                        "fill": 1, 
-                        "title": "Queens noop change results", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "rightSide": false, 
-                            "total": false, 
-                            "min": false, 
-                            "max": false, 
-                            "show": false, 
-                            "current": false, 
-                            "values": false, 
-                            "alignAsTable": true, 
-                            "avg": false
-                        }, 
-                        "targets": [
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=", 
-                                        "value": "567224", 
-                                        "key": "change"
-                                    }, 
-                                    {
-                                        "operator": "=", 
-                                        "value": "True", 
-                                        "key": "voting", 
-                                        "condition": "AND"
-                                    }
-                                ], 
-                                "measurement": "build", 
-                                "groupBy": [
-                                    {
-                                        "type": "tag", 
-                                        "params": [
-                                            "job_name"
-                                        ]
-                                    }
-                                ], 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "result_num"
-                                            ]
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "time_series"
-                            }
-                        ], 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "min": "0", 
-                                "max": "1", 
-                                "format": "short", 
-                                "label": "Result code", 
-                                "show": true, 
-                                "decimals": 0
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [], 
-                        "percentage": false, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "alert": {
-                            "noDataState": "no_data", 
-                            "name": "Queens noop change results alert", 
-                            "frequency": "60s", 
-                            "notifications": [
-                                {
-                                    "id": 2
-                                }
-                            ], 
-                            "handler": 1, 
-                            "executionErrorState": "alerting", 
-                            "message": "Jobs failing at https://review.openstack.org/#/c/567224.", 
-                            "conditions": [
-                                {
-                                    "operator": {
-                                        "type": "and"
-                                    }, 
-                                    "query": {
-                                        "params": [
-                                            "A", 
-                                            "24h", 
-                                            "now"
-                                        ]
-                                    }, 
-                                    "evaluator": {
-                                        "type": "lt", 
-                                        "params": [
-                                            1
-                                        ]
-                                    }, 
-                                    "reducer": {
-                                        "type": "last", 
-                                        "params": []
-                                    }, 
-                                    "type": "query"
-                                }
-                            ]
-                        }, 
-                        "dashLength": 10, 
-                        "stack": false, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": false, 
-                        "points": true, 
-                        "datasource": "telegraf", 
-                        "pointradius": 5, 
-                        "decimals": 0
-                    }, 
-                    {
-                        "bars": false, 
-                        "timeFrom": null, 
-                        "links": [
-                            {
-                                "url": "https://review.openstack.org/564285", 
-                                "type": "absolute", 
-                                "targetBlank": true, 
-                                "title": "gerrit"
-                            }
-                        ], 
-                        "thresholds": [
-                            {
-                                "colorMode": "critical", 
-                                "line": true, 
-                                "op": "lt", 
-                                "value": 1, 
-                                "fill": true
-                            }
-                        ], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "gridPos": {
-                            "y": 25, 
-                            "h": 4, 
-                            "w": 12, 
-                            "x": 12
-                        }, 
-                        "linewidth": 1, 
-                        "steppedLine": false, 
-                        "id": 105, 
-                        "fill": 1, 
-                        "title": "P\u00eeke noop change results", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "rightSide": false, 
-                            "total": false, 
-                            "min": false, 
-                            "max": false, 
-                            "show": false, 
-                            "current": false, 
-                            "values": false, 
-                            "alignAsTable": true, 
-                            "avg": false
-                        }, 
-                        "targets": [
-                            {
-                                "tags": [
-                                    {
-                                        "operator": "=", 
-                                        "value": "564285", 
-                                        "key": "change"
-                                    }, 
-                                    {
-                                        "operator": "=", 
-                                        "value": "True", 
-                                        "key": "voting", 
-                                        "condition": "AND"
-                                    }
-                                ], 
-                                "measurement": "build", 
-                                "groupBy": [
-                                    {
-                                        "type": "tag", 
-                                        "params": [
-                                            "job_name"
-                                        ]
-                                    }
-                                ], 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "result_num"
-                                            ]
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "time_series"
-                            }
-                        ], 
-                        "transparent": false, 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "min": "0", 
-                                "max": "1", 
-                                "format": "short", 
-                                "label": "Result code", 
-                                "show": true, 
-                                "decimals": 0
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [], 
-                        "percentage": false, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "alert": {
-                            "noDataState": "no_data", 
-                            "name": "Pike noop change results alert", 
-                            "frequency": "60s", 
-                            "notifications": [
-                                {
-                                    "id": 2
-                                }
-                            ], 
-                            "handler": 1, 
-                            "executionErrorState": "alerting", 
-                            "message": "Jobs failing at https://review.openstack.org/#/c/564285.", 
-                            "conditions": [
-                                {
-                                    "operator": {
-                                        "type": "and"
-                                    }, 
-                                    "query": {
-                                        "params": [
-                                            "A", 
-                                            "24h", 
-                                            "now"
-                                        ]
-                                    }, 
-                                    "evaluator": {
-                                        "type": "lt", 
-                                        "params": [
-                                            1
-                                        ]
-                                    }, 
-                                    "reducer": {
-                                        "type": "last", 
-                                        "params": []
-                                    }, 
-                                    "type": "query"
-                                }
-                            ]
-                        }, 
-                        "dashLength": 10, 
-                        "stack": false, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": false, 
-                        "points": true, 
-                        "datasource": "telegraf", 
-                        "pointradius": 5, 
-                        "decimals": 0
-                    }, 
-                    {
-                        "sort": {
-                            "col": 0, 
-                            "desc": true
-                        }, 
-                        "styles": [
-                            {
-                                "alias": "Time", 
-                                "type": "date", 
-                                "pattern": "Time", 
-                                "dateFormat": "YYYY-MM-DD HH:mm:ss"
-                            }, 
-                            {
-                                "mappingType": 1, 
-                                "type": "string", 
-                                "dateFormat": "YYYY-MM-DD HH:mm:ss", 
-                                "colorMode": null, 
-                                "thresholds": [], 
-                                "alias": "Branch", 
-                                "colors": [
-                                    "rgba(245, 54, 54, 0.9)", 
-                                    "rgba(237, 129, 40, 0.89)", 
-                                    "rgba(50, 172, 45, 0.97)"
-                                ], 
-                                "pattern": "branch", 
-                                "decimals": 2, 
-                                "unit": "short"
-                            }, 
-                            {
-                                "linkTargetBlank": true, 
-                                "mappingType": 1, 
-                                "type": "string", 
-                                "dateFormat": "YYYY-MM-DD HH:mm:ss", 
-                                "colorMode": null, 
-                                "thresholds": [], 
-                                "linkTooltip": "Logs", 
-                                "alias": "Job", 
-                                "colors": [
-                                    "rgba(245, 54, 54, 0.9)", 
-                                    "rgba(237, 129, 40, 0.89)", 
-                                    "rgba(50, 172, 45, 0.97)"
-                                ], 
-                                "link": true, 
-                                "pattern": "job_name", 
-                                "decimals": 2, 
-                                "unit": "short", 
-                                "linkUrl": "${__cell_7}"
-                            }, 
-                            {
-                                "mappingType": 1, 
-                                "type": "string", 
-                                "dateFormat": "YYYY-MM-DD HH:mm:ss", 
-                                "colorMode": null, 
-                                "thresholds": [], 
-                                "alias": "Pipeline", 
-                                "colors": [
-                                    "rgba(245, 54, 54, 0.9)", 
-                                    "rgba(237, 129, 40, 0.89)", 
-                                    "rgba(50, 172, 45, 0.97)"
-                                ], 
-                                "pattern": "pipeline", 
-                                "decimals": 2, 
-                                "unit": "short"
-                            }, 
-                            {
-                                "mappingType": 1, 
-                                "type": "number", 
-                                "dateFormat": "YYYY-MM-DD HH:mm:ss", 
-                                "colorMode": "cell", 
-                                "thresholds": [
-                                    "10000", 
-                                    "10600"
-                                ], 
-                                "alias": "Duration", 
-                                "colors": [
-                                    "#2f575e", 
-                                    "rgba(237, 129, 40, 0.89)", 
-                                    "rgba(245, 54, 54, 0.9)"
-                                ], 
-                                "pattern": "duration", 
-                                "decimals": 1, 
-                                "unit": "dtdurations"
-                            }, 
-                            {
-                                "linkTargetBlank": true, 
-                                "mappingType": 1, 
-                                "type": "string", 
-                                "dateFormat": "YYYY-MM-DD HH:mm:ss", 
-                                "colorMode": "row", 
-                                "thresholds": [
-                                    "-1", 
-                                    "1"
-                                ], 
-                                "rangeMaps": [
-                                    {
-                                        "text": "", 
-                                        "from": "", 
-                                        "to": ""
-                                    }
-                                ], 
-                                "linkTooltip": "Logs", 
-                                "valueMaps": [
-                                    {
-                                        "text": "SUCCESS", 
-                                        "value": "1"
-                                    }, 
-                                    {
-                                        "text": "FAILURE", 
-                                        "value": "0"
-                                    }
-                                ], 
-                                "alias": "Result", 
-                                "colors": [
-                                    "rgba(245, 54, 54, 0.9)", 
-                                    "#e24d42", 
-                                    "rgba(50, 172, 45, 0.97)"
-                                ], 
-                                "link": true, 
-                                "pattern": "result_num", 
-                                "decimals": 2, 
-                                "unit": "short", 
-                                "linkUrl": "${__cell_7}"
-                            }, 
-                            {
-                                "linkTargetBlank": true, 
-                                "mappingType": 1, 
-                                "type": "hidden", 
-                                "dateFormat": "YYYY-MM-DD HH:mm:ss", 
-                                "colorMode": null, 
-                                "thresholds": [], 
-                                "linkTooltip": "Logs", 
-                                "alias": "Log URL", 
-                                "colors": [
-                                    "rgba(245, 54, 54, 0.9)", 
-                                    "rgba(237, 129, 40, 0.89)", 
-                                    "rgba(50, 172, 45, 0.97)"
-                                ], 
-                                "link": true, 
-                                "pattern": "log_url", 
-                                "decimals": 2, 
-                                "unit": "short", 
-                                "linkUrl": "${__cell_7}"
-                            }, 
-                            {
-                                "mappingType": 1, 
-                                "type": "string", 
-                                "dateFormat": "YYYY-MM-DD HH:mm:ss", 
-                                "colorMode": null, 
-                                "thresholds": [
-                                    ""
-                                ], 
-                                "valueMaps": [], 
-                                "alias": "Patch", 
-                                "colors": [
-                                    "rgba(50, 172, 45, 0.97)", 
-                                    "rgba(237, 129, 40, 0.89)", 
-                                    "rgba(245, 54, 54, 0.9)"
-                                ], 
-                                "pattern": "change", 
-                                "decimals": 2, 
-                                "unit": "short"
-                            }, 
-                            {
-                                "type": "number", 
-                                "pattern": "/.*/", 
-                                "thresholds": [], 
-                                "alias": "", 
-                                "colors": [
-                                    "rgba(245, 54, 54, 0.9)", 
-                                    "rgba(237, 129, 40, 0.89)", 
-                                    "rgba(50, 172, 45, 0.97)"
-                                ], 
-                                "colorMode": null, 
-                                "decimals": 2, 
-                                "unit": "short"
-                            }
-                        ], 
-                        "pageSize": null, 
-                        "links": [], 
-                        "title": "Last jobs", 
-                        "transform": "table", 
-                        "showHeader": true, 
-                        "scroll": true, 
-                        "targets": [
-                            {
-                                "tags": [], 
-                                "measurement": "build", 
-                                "groupBy": [
-                                    {
-                                        "type": "tag", 
-                                        "params": [
-                                            "job_name"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "tag", 
-                                        "params": [
-                                            "branch"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "tag", 
-                                        "params": [
-                                            "pipeline"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "tag", 
-                                        "params": [
-                                            "change"
-                                        ]
-                                    }
-                                ], 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "duration"
-                                            ]
-                                        }
-                                    ], 
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "result_num"
-                                            ]
-                                        }
-                                    ], 
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "log_url"
-                                            ]
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "table"
-                            }
-                        ], 
-                        "fontSize": "100%", 
-                        "datasource": "telegraf", 
-                        "gridPos": {
-                            "y": 29, 
-                            "h": 10, 
-                            "w": 24, 
-                            "x": 0
-                        }, 
-                        "type": "table", 
-                        "id": 63, 
-                        "columns": []
-                    }
-                ], 
+                "panels": [], 
                 "type": "row", 
                 "id": 51
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": "1w", 
+                "links": [], 
+                "thresholds": [
+                    {
+                        "yaxis": "left", 
+                        "colorMode": "ok", 
+                        "value": 95, 
+                        "line": true, 
+                        "fill": true, 
+                        "op": "gt"
+                    }, 
+                    {
+                        "yaxis": "left", 
+                        "colorMode": "warning", 
+                        "value": 90, 
+                        "line": true, 
+                        "fill": true, 
+                        "op": "gt"
+                    }, 
+                    {
+                        "yaxis": "left", 
+                        "colorMode": "critical", 
+                        "value": 1, 
+                        "fillColor": "#7eb26d", 
+                        "lineColor": "#3f6833", 
+                        "line": true, 
+                        "fill": true, 
+                        "op": "gt"
+                    }
+                ], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "gridPos": {
+                    "y": 37, 
+                    "h": 7, 
+                    "w": 24, 
+                    "x": 0
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "id": 157, 
+                "fill": 1, 
+                "title": "CI stats weekly", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "min": false, 
+                    "max": false, 
+                    "show": true, 
+                    "current": true, 
+                    "hideEmpty": false, 
+                    "values": true, 
+                    "alignAsTable": false, 
+                    "avg": false
+                }, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "True", 
+                                "key": "passed"
+                            }
+                        ], 
+                        "measurement": "build", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "24h"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "PASS", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result_num"
+                                    ]
+                                }, 
+                                {
+                                    "type": "count", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "False", 
+                                "key": "passed"
+                            }
+                        ], 
+                        "measurement": "build", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "24h"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "FAIL", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result_num"
+                                    ]
+                                }, 
+                                {
+                                    "type": "count", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "B", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": "100", 
+                        "format": "none", 
+                        "min": "0", 
+                        "label": null
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": false, 
+                        "max": null, 
+                        "format": "percent", 
+                        "min": null, 
+                        "label": null
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [
+                    {
+                        "color": "#508642", 
+                        "alias": "PASS", 
+                        "bars": true, 
+                        "lines": false
+                    }, 
+                    {
+                        "color": "#bf1b00", 
+                        "alias": "FAIL", 
+                        "bars": true, 
+                        "lines": false
+                    }
+                ], 
+                "percentage": true, 
+                "type": "graph", 
+                "dashes": false, 
+                "hideTimeOverride": true, 
+                "dashLength": 10, 
+                "stack": true, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": true, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": "6h", 
+                "links": [], 
+                "thresholds": [
+                    {
+                        "colorMode": "critical", 
+                        "line": true, 
+                        "op": "gt", 
+                        "value": 360, 
+                        "fill": true
+                    }
+                ], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "gridPos": {
+                    "y": 44, 
+                    "h": 6, 
+                    "w": 4, 
+                    "x": 0
+                }, 
+                "linewidth": 2, 
+                "steppedLine": false, 
+                "id": 71, 
+                "fill": 4, 
+                "title": "Upstream zuul max enqueued time", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": true, 
+                    "max": false, 
+                    "min": false, 
+                    "current": false, 
+                    "values": false, 
+                    "avg": false
+                }, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "gate", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "tripleo", 
+                                "key": "queue", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "zuul-queue-status", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "$__interval"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "none"
+                                ]
+                            }
+                        ], 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "enqueued_time"
+                                    ]
+                                }, 
+                                {
+                                    "type": "max", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "m", 
+                        "min": "0", 
+                        "label": null
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": false, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "alert": {
+                    "noDataState": "ok", 
+                    "name": "Upstream zuul max enqueued time alert", 
+                    "frequency": "60s", 
+                    "notifications": [
+                        {
+                            "id": 2
+                        }
+                    ], 
+                    "handler": 1, 
+                    "executionErrorState": "alerting", 
+                    "message": "A lot of jobs at upstream tripleo gate queue, check https://zuul.openstack.org", 
+                    "conditions": [
+                        {
+                            "operator": {
+                                "type": "and"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "A", 
+                                    "5m", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "gt", 
+                                "params": [
+                                    360
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "avg", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }
+                    ]
+                }, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": true, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": "6h", 
+                "links": [], 
+                "thresholds": [
+                    {
+                        "colorMode": "critical", 
+                        "line": true, 
+                        "op": "gt", 
+                        "value": 360, 
+                        "fill": true
+                    }
+                ], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "gridPos": {
+                    "y": 44, 
+                    "h": 6, 
+                    "w": 4, 
+                    "x": 4
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "id": 72, 
+                "fill": 1, 
+                "title": "RDO zuul max enqueued time", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": true, 
+                    "max": false, 
+                    "min": false, 
+                    "current": false, 
+                    "values": false, 
+                    "avg": false
+                }, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "openstack-check", 
+                                "key": "pipeline"
+                            }
+                        ], 
+                        "measurement": "zuul-queue-status", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "$__interval"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "none"
+                                ]
+                            }
+                        ], 
+                        "alias": "openstack-check", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "enqueued_time"
+                                    ]
+                                }, 
+                                {
+                                    "type": "max", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "m", 
+                        "min": "0", 
+                        "label": null
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "alert": {
+                    "noDataState": "ok", 
+                    "name": "RDO zuul max enqueued time alert", 
+                    "frequency": "60s", 
+                    "notifications": [
+                        {
+                            "id": 2
+                        }
+                    ], 
+                    "handler": 1, 
+                    "executionErrorState": "alerting", 
+                    "message": "A lot of jobs at RDO openstack-check pipeline, check out https://review.rdoproject.org/zuul/.", 
+                    "conditions": [
+                        {
+                            "operator": {
+                                "type": "and"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "A", 
+                                    "5m", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "gt", 
+                                "params": [
+                                    360
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "max", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }
+                    ]
+                }, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": true, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }, 
+            {
+                "bars": true, 
+                "timeFrom": null, 
+                "links": [], 
+                "thresholds": [
+                    {
+                        "colorMode": "critical", 
+                        "line": true, 
+                        "op": "gt", 
+                        "value": 0, 
+                        "fill": true
+                    }
+                ], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "gridPos": {
+                    "y": 44, 
+                    "h": 6, 
+                    "w": 16, 
+                    "x": 8
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "id": 55, 
+                "fill": 1, 
+                "title": "Upstream gate jobs", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": true, 
+                    "max": false, 
+                    "min": false, 
+                    "current": false, 
+                    "values": false, 
+                    "avg": false
+                }, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "gate", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "True", 
+                                "key": "passed", 
+                                "condition": "AND"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "upstream", 
+                                "key": "type", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "build", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "30m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "none"
+                                ]
+                            }
+                        ], 
+                        "alias": "PASSED", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result"
+                                    ]
+                                }, 
+                                {
+                                    "type": "count", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "gate", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "False", 
+                                "key": "passed", 
+                                "condition": "AND"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "upstream", 
+                                "key": "type", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "build", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "30m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "none"
+                                ]
+                            }
+                        ], 
+                        "alias": "FAILED", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result"
+                                    ]
+                                }, 
+                                {
+                                    "type": "count", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "B", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "min": null, 
+                        "max": null, 
+                        "format": "short", 
+                        "label": "Number of builds", 
+                        "show": true, 
+                        "decimals": 0
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": false, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": "dfgd"
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [
+                    {
+                        "alias": "PASSED"
+                    }, 
+                    {
+                        "color": "#bf1b00", 
+                        "alias": "FAILED", 
+                        "transform": "negative-Y"
+                    }
+                ], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "alert": {
+                    "noDataState": "ok", 
+                    "name": "Upstream gate jobs alert", 
+                    "frequency": "60s", 
+                    "notifications": [
+                        {
+                            "id": 2
+                        }
+                    ], 
+                    "handler": 1, 
+                    "executionErrorState": "alerting", 
+                    "message": "Some jobs are failing in the last 24h", 
+                    "conditions": [
+                        {
+                            "operator": {
+                                "type": "and"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "B", 
+                                    "24h", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "gt", 
+                                "params": [
+                                    0
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "last", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }
+                    ]
+                }, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": false, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }, 
+            {
+                "bars": true, 
+                "timeFrom": null, 
+                "links": [], 
+                "thresholds": [], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "id": 79, 
+                "gridPos": {
+                    "y": 50, 
+                    "h": 6, 
+                    "w": 12, 
+                    "x": 0
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "check", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "True", 
+                                "key": "passed", 
+                                "condition": "AND"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "True", 
+                                "key": "voting", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "build", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "30m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "none"
+                                ]
+                            }
+                        ], 
+                        "alias": "PASSED", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result"
+                                    ]
+                                }, 
+                                {
+                                    "type": "count", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "check", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "False", 
+                                "key": "passed", 
+                                "condition": "AND"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "True", 
+                                "key": "voting", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "build", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "30m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "none"
+                                ]
+                            }
+                        ], 
+                        "alias": "FAILED", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result"
+                                    ]
+                                }, 
+                                {
+                                    "type": "count", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "B", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "fill": 1, 
+                "title": "Check voting  jobs", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": true, 
+                    "show": true, 
+                    "max": true, 
+                    "min": true, 
+                    "current": true, 
+                    "values": true, 
+                    "avg": true
+                }, 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "min": null, 
+                        "max": null, 
+                        "format": "short", 
+                        "label": "dfgd", 
+                        "show": false, 
+                        "decimals": 0
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": false, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": "dfgd"
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [
+                    {
+                        "alias": "PASSED"
+                    }, 
+                    {
+                        "color": "#bf1b00", 
+                        "alias": "FAILED", 
+                        "transform": "negative-Y"
+                    }
+                ], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": false, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }, 
+            {
+                "bars": true, 
+                "timeFrom": null, 
+                "links": [], 
+                "thresholds": [], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "id": 80, 
+                "gridPos": {
+                    "y": 50, 
+                    "h": 6, 
+                    "w": 12, 
+                    "x": 12
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "check", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "True", 
+                                "key": "passed", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "build", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "30m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "none"
+                                ]
+                            }
+                        ], 
+                        "alias": "PASSED", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result"
+                                    ]
+                                }, 
+                                {
+                                    "type": "count", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "check", 
+                                "key": "pipeline"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "False", 
+                                "key": "passed", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "build", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "30m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "none"
+                                ]
+                            }
+                        ], 
+                        "alias": "FAILED", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result"
+                                    ]
+                                }, 
+                                {
+                                    "type": "count", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "B", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "fill": 1, 
+                "title": "Check  jobs", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": true, 
+                    "show": true, 
+                    "max": true, 
+                    "min": true, 
+                    "current": true, 
+                    "values": true, 
+                    "avg": true
+                }, 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "min": null, 
+                        "max": null, 
+                        "format": "short", 
+                        "label": "dfgd", 
+                        "show": false, 
+                        "decimals": 0
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": false, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": "dfgd"
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [
+                    {
+                        "alias": "PASSED"
+                    }, 
+                    {
+                        "color": "#bf1b00", 
+                        "alias": "FAILED", 
+                        "transform": "negative-Y"
+                    }
+                ], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": false, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": null, 
+                "links": [
+                    {
+                        "url": "https://review.openstack.org/560445", 
+                        "type": "absolute", 
+                        "targetBlank": true, 
+                        "title": "gerrit"
+                    }
+                ], 
+                "thresholds": [
+                    {
+                        "colorMode": "critical", 
+                        "line": true, 
+                        "op": "lt", 
+                        "value": 1, 
+                        "fill": true
+                    }
+                ], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "gridPos": {
+                    "y": 56, 
+                    "h": 4, 
+                    "w": 12, 
+                    "x": 0
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "id": 103, 
+                "fill": 1, 
+                "title": "Master noop change results", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "rightSide": false, 
+                    "total": false, 
+                    "min": false, 
+                    "max": false, 
+                    "show": false, 
+                    "current": false, 
+                    "values": false, 
+                    "alignAsTable": true, 
+                    "avg": false
+                }, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "560445", 
+                                "key": "change"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "True", 
+                                "key": "voting", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "build", 
+                        "groupBy": [
+                            {
+                                "type": "tag", 
+                                "params": [
+                                    "job_name"
+                                ]
+                            }
+                        ], 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result_num"
+                                    ]
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "min": "0", 
+                        "max": "1", 
+                        "format": "short", 
+                        "label": "Result code", 
+                        "show": true, 
+                        "decimals": 0
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "alert": {
+                    "noDataState": "no_data", 
+                    "name": "Master noop change results alert", 
+                    "frequency": "60s", 
+                    "notifications": [
+                        {
+                            "id": 2
+                        }
+                    ], 
+                    "handler": 1, 
+                    "executionErrorState": "alerting", 
+                    "message": "Jobs failing at https://review.openstack.org/#/c/560445.", 
+                    "conditions": [
+                        {
+                            "operator": {
+                                "type": "and"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "A", 
+                                    "24h", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "lt", 
+                                "params": [
+                                    1
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "last", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }
+                    ]
+                }, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": false, 
+                "points": true, 
+                "datasource": "telegraf", 
+                "pointradius": 5, 
+                "decimals": 0
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": null, 
+                "links": [
+                    {
+                        "url": "https://review.openstack.org/564291", 
+                        "type": "absolute", 
+                        "targetBlank": true, 
+                        "title": "gerrit"
+                    }
+                ], 
+                "thresholds": [
+                    {
+                        "colorMode": "critical", 
+                        "line": true, 
+                        "op": "lt", 
+                        "value": 1, 
+                        "fill": true
+                    }
+                ], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "gridPos": {
+                    "y": 56, 
+                    "h": 4, 
+                    "w": 12, 
+                    "x": 12
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "id": 106, 
+                "fill": 1, 
+                "title": "Ocata noop change results", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "rightSide": false, 
+                    "total": false, 
+                    "min": false, 
+                    "max": false, 
+                    "show": false, 
+                    "current": false, 
+                    "values": false, 
+                    "alignAsTable": true, 
+                    "avg": false
+                }, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "564291", 
+                                "key": "change"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "True", 
+                                "key": "voting", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "build", 
+                        "groupBy": [
+                            {
+                                "type": "tag", 
+                                "params": [
+                                    "job_name"
+                                ]
+                            }
+                        ], 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result_num"
+                                    ]
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "min": "0", 
+                        "max": "1", 
+                        "format": "short", 
+                        "label": "Result code", 
+                        "show": true, 
+                        "decimals": 0
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "alert": {
+                    "noDataState": "no_data", 
+                    "name": "Ocata noop change results alert", 
+                    "frequency": "60s", 
+                    "notifications": [
+                        {
+                            "id": 2
+                        }
+                    ], 
+                    "handler": 1, 
+                    "executionErrorState": "alerting", 
+                    "message": "Jobs failing at  https://review.openstack.org/#/c/564291.", 
+                    "conditions": [
+                        {
+                            "operator": {
+                                "type": "and"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "A", 
+                                    "24h", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "lt", 
+                                "params": [
+                                    1
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "last", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }
+                    ]
+                }, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": false, 
+                "points": true, 
+                "datasource": "telegraf", 
+                "pointradius": 5, 
+                "decimals": 0
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": null, 
+                "links": [
+                    {
+                        "url": "https://review.openstack.org/567224", 
+                        "type": "absolute", 
+                        "targetBlank": true, 
+                        "title": "gerrit"
+                    }
+                ], 
+                "thresholds": [
+                    {
+                        "colorMode": "critical", 
+                        "line": true, 
+                        "op": "lt", 
+                        "value": 1, 
+                        "fill": true
+                    }
+                ], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "gridPos": {
+                    "y": 60, 
+                    "h": 4, 
+                    "w": 12, 
+                    "x": 0
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "id": 104, 
+                "fill": 1, 
+                "title": "Queens noop change results", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "rightSide": false, 
+                    "total": false, 
+                    "min": false, 
+                    "max": false, 
+                    "show": false, 
+                    "current": false, 
+                    "values": false, 
+                    "alignAsTable": true, 
+                    "avg": false
+                }, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "567224", 
+                                "key": "change"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "True", 
+                                "key": "voting", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "build", 
+                        "groupBy": [
+                            {
+                                "type": "tag", 
+                                "params": [
+                                    "job_name"
+                                ]
+                            }
+                        ], 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result_num"
+                                    ]
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "min": "0", 
+                        "max": "1", 
+                        "format": "short", 
+                        "label": "Result code", 
+                        "show": true, 
+                        "decimals": 0
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "alert": {
+                    "noDataState": "no_data", 
+                    "name": "Queens noop change results alert", 
+                    "frequency": "60s", 
+                    "notifications": [
+                        {
+                            "id": 2
+                        }
+                    ], 
+                    "handler": 1, 
+                    "executionErrorState": "alerting", 
+                    "message": "Jobs failing at https://review.openstack.org/#/c/567224.", 
+                    "conditions": [
+                        {
+                            "operator": {
+                                "type": "and"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "A", 
+                                    "24h", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "lt", 
+                                "params": [
+                                    1
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "last", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }
+                    ]
+                }, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": false, 
+                "points": true, 
+                "datasource": "telegraf", 
+                "pointradius": 5, 
+                "decimals": 0
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": null, 
+                "links": [
+                    {
+                        "url": "https://review.openstack.org/564285", 
+                        "type": "absolute", 
+                        "targetBlank": true, 
+                        "title": "gerrit"
+                    }
+                ], 
+                "thresholds": [
+                    {
+                        "colorMode": "critical", 
+                        "line": true, 
+                        "op": "lt", 
+                        "value": 1, 
+                        "fill": true
+                    }
+                ], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "gridPos": {
+                    "y": 60, 
+                    "h": 4, 
+                    "w": 12, 
+                    "x": 12
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "id": 105, 
+                "fill": 1, 
+                "title": "P\u00eeke noop change results", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "rightSide": false, 
+                    "total": false, 
+                    "min": false, 
+                    "max": false, 
+                    "show": false, 
+                    "current": false, 
+                    "values": false, 
+                    "alignAsTable": true, 
+                    "avg": false
+                }, 
+                "targets": [
+                    {
+                        "tags": [
+                            {
+                                "operator": "=", 
+                                "value": "564285", 
+                                "key": "change"
+                            }, 
+                            {
+                                "operator": "=", 
+                                "value": "True", 
+                                "key": "voting", 
+                                "condition": "AND"
+                            }
+                        ], 
+                        "measurement": "build", 
+                        "groupBy": [
+                            {
+                                "type": "tag", 
+                                "params": [
+                                    "job_name"
+                                ]
+                            }
+                        ], 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result_num"
+                                    ]
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "transparent": false, 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "min": "0", 
+                        "max": "1", 
+                        "format": "short", 
+                        "label": "Result code", 
+                        "show": true, 
+                        "decimals": 0
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "alert": {
+                    "noDataState": "no_data", 
+                    "name": "Pike noop change results alert", 
+                    "frequency": "60s", 
+                    "notifications": [
+                        {
+                            "id": 2
+                        }
+                    ], 
+                    "handler": 1, 
+                    "executionErrorState": "alerting", 
+                    "message": "Jobs failing at https://review.openstack.org/#/c/564285.", 
+                    "conditions": [
+                        {
+                            "operator": {
+                                "type": "and"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "A", 
+                                    "24h", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "lt", 
+                                "params": [
+                                    1
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "last", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }
+                    ]
+                }, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": false, 
+                "points": true, 
+                "datasource": "telegraf", 
+                "pointradius": 5, 
+                "decimals": 0
+            }, 
+            {
+                "sort": {
+                    "col": 0, 
+                    "desc": true
+                }, 
+                "styles": [
+                    {
+                        "alias": "Time", 
+                        "type": "date", 
+                        "pattern": "Time", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss"
+                    }, 
+                    {
+                        "mappingType": 1, 
+                        "type": "string", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                        "colorMode": null, 
+                        "thresholds": [], 
+                        "alias": "Branch", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "pattern": "branch", 
+                        "decimals": 2, 
+                        "unit": "short"
+                    }, 
+                    {
+                        "linkTargetBlank": true, 
+                        "mappingType": 1, 
+                        "type": "string", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                        "colorMode": null, 
+                        "thresholds": [], 
+                        "linkTooltip": "Logs", 
+                        "alias": "Job", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "link": true, 
+                        "pattern": "job_name", 
+                        "decimals": 2, 
+                        "unit": "short", 
+                        "linkUrl": "${__cell_7}"
+                    }, 
+                    {
+                        "mappingType": 1, 
+                        "type": "string", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                        "colorMode": null, 
+                        "thresholds": [], 
+                        "alias": "Pipeline", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "pattern": "pipeline", 
+                        "decimals": 2, 
+                        "unit": "short"
+                    }, 
+                    {
+                        "mappingType": 1, 
+                        "type": "number", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                        "colorMode": "cell", 
+                        "thresholds": [
+                            "10000", 
+                            "10600"
+                        ], 
+                        "alias": "Duration", 
+                        "colors": [
+                            "#2f575e", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(245, 54, 54, 0.9)"
+                        ], 
+                        "pattern": "duration", 
+                        "decimals": 1, 
+                        "unit": "dtdurations"
+                    }, 
+                    {
+                        "linkTargetBlank": true, 
+                        "mappingType": 1, 
+                        "type": "string", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                        "colorMode": "row", 
+                        "thresholds": [
+                            "-1", 
+                            "1"
+                        ], 
+                        "rangeMaps": [
+                            {
+                                "text": "", 
+                                "from": "", 
+                                "to": ""
+                            }
+                        ], 
+                        "linkTooltip": "Logs", 
+                        "valueMaps": [
+                            {
+                                "text": "SUCCESS", 
+                                "value": "1"
+                            }, 
+                            {
+                                "text": "FAILURE", 
+                                "value": "0"
+                            }
+                        ], 
+                        "alias": "Result", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "#e24d42", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "link": true, 
+                        "pattern": "result_num", 
+                        "decimals": 2, 
+                        "unit": "short", 
+                        "linkUrl": "${__cell_7}"
+                    }, 
+                    {
+                        "linkTargetBlank": true, 
+                        "mappingType": 1, 
+                        "type": "hidden", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                        "colorMode": null, 
+                        "thresholds": [], 
+                        "linkTooltip": "Logs", 
+                        "alias": "Log URL", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "link": true, 
+                        "pattern": "log_url", 
+                        "decimals": 2, 
+                        "unit": "short", 
+                        "linkUrl": "${__cell_7}"
+                    }, 
+                    {
+                        "mappingType": 1, 
+                        "type": "string", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                        "colorMode": null, 
+                        "thresholds": [
+                            ""
+                        ], 
+                        "valueMaps": [], 
+                        "alias": "Patch", 
+                        "colors": [
+                            "rgba(50, 172, 45, 0.97)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(245, 54, 54, 0.9)"
+                        ], 
+                        "pattern": "change", 
+                        "decimals": 2, 
+                        "unit": "short"
+                    }, 
+                    {
+                        "type": "number", 
+                        "pattern": "/.*/", 
+                        "thresholds": [], 
+                        "alias": "", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "colorMode": null, 
+                        "decimals": 2, 
+                        "unit": "short"
+                    }
+                ], 
+                "pageSize": null, 
+                "links": [], 
+                "title": "Last jobs", 
+                "transform": "table", 
+                "showHeader": true, 
+                "scroll": true, 
+                "targets": [
+                    {
+                        "tags": [], 
+                        "measurement": "build", 
+                        "groupBy": [
+                            {
+                                "type": "tag", 
+                                "params": [
+                                    "job_name"
+                                ]
+                            }, 
+                            {
+                                "type": "tag", 
+                                "params": [
+                                    "branch"
+                                ]
+                            }, 
+                            {
+                                "type": "tag", 
+                                "params": [
+                                    "pipeline"
+                                ]
+                            }, 
+                            {
+                                "type": "tag", 
+                                "params": [
+                                    "change"
+                                ]
+                            }
+                        ], 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "duration"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "result_num"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "log_url"
+                                    ]
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "table"
+                    }
+                ], 
+                "fontSize": "100%", 
+                "datasource": "telegraf", 
+                "gridPos": {
+                    "y": 64, 
+                    "h": 10, 
+                    "w": 24, 
+                    "x": 0
+                }, 
+                "type": "table", 
+                "id": 63, 
+                "columns": []
             }, 
             {
                 "title": "Promotions", 
                 "collapsed": true, 
                 "gridPos": {
-                    "y": 37, 
+                    "y": 74, 
                     "h": 1, 
                     "w": 24, 
                     "x": 0
@@ -7250,7 +7257,7 @@
                 "title": "Issues", 
                 "collapsed": true, 
                 "gridPos": {
-                    "y": 38, 
+                    "y": 75, 
                     "h": 1, 
                     "w": 24, 
                     "x": 0
@@ -7332,7 +7339,7 @@
                 "title": "RDO cloud performance", 
                 "collapsed": false, 
                 "gridPos": {
-                    "y": 39, 
+                    "y": 76, 
                     "h": 1, 
                     "w": 24, 
                     "x": 0
@@ -7351,7 +7358,7 @@
                 "renderer": "flot", 
                 "id": 175, 
                 "gridPos": {
-                    "y": 40, 
+                    "y": 77, 
                     "h": 6, 
                     "w": 12, 
                     "x": 0
@@ -7525,7 +7532,7 @@
                 "renderer": "flot", 
                 "id": 177, 
                 "gridPos": {
-                    "y": 40, 
+                    "y": 77, 
                     "h": 6, 
                     "w": 12, 
                     "x": 12
@@ -7787,7 +7794,7 @@
                 "renderer": "flot", 
                 "id": 179, 
                 "gridPos": {
-                    "y": 46, 
+                    "y": 83, 
                     "h": 7, 
                     "w": 12, 
                     "x": 0
@@ -8093,7 +8100,7 @@
                 "nullPointMode": "null", 
                 "renderer": "flot", 
                 "gridPos": {
-                    "y": 46, 
+                    "y": 83, 
                     "h": 7, 
                     "w": 12, 
                     "x": 12
@@ -8306,7 +8313,7 @@
                 "renderer": "flot", 
                 "id": 183, 
                 "gridPos": {
-                    "y": 53, 
+                    "y": 90, 
                     "h": 6, 
                     "w": 7, 
                     "x": 0
@@ -8420,7 +8427,7 @@
                 "renderer": "flot", 
                 "id": 185, 
                 "gridPos": {
-                    "y": 53, 
+                    "y": 90, 
                     "h": 6, 
                     "w": 9, 
                     "x": 7
@@ -8534,7 +8541,7 @@
                 "renderer": "flot", 
                 "id": 187, 
                 "gridPos": {
-                    "y": 53, 
+                    "y": 90, 
                     "h": 6, 
                     "w": 8, 
                     "x": 16
