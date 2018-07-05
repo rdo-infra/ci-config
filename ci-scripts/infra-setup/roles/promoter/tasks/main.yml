@@ -175,7 +175,14 @@
     state: started
     enabled: yes
 
-- name: Copy telegraf config for promoter
+- name: Configure telegraf to report to rrcockpit
+  ini_file:
+    path: /etc/telegraf/telegraf.conf
+    section: 'outputs.influxdb'
+    option: urls
+    value: '["http://{{ rrcockpit_external_network_ip }}:8086"]'
+
+- name: Configure dlrn-promoter at telegraf
   copy:
     src: dlrn-promoter.telegraf.conf
     dest: /etc/telegraf/telegraf.d/dlrn-promoter.conf
