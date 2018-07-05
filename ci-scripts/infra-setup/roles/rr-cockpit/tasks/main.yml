@@ -1,0 +1,93 @@
+- name: Uninstall old versions
+  become: true
+  package:
+    name: '{{ item }}'
+    state: absent
+  with_items:
+    - docker
+    - docker-client
+    - docker-client-latest
+    - docker-common
+    - docker-latest
+    - docker-latest-logrotate
+    - docker-logrotate
+    - docker-selinux
+    - docker-engine-selinux
+    - docker-engine
+
+- name: Install required packages
+  become: true
+  package:
+    name: '{{ item }}'
+    state: latest
+  with_items:
+    - epel-release
+    - yum-utils
+    - device-mapper-persistent-data
+    - lvm2
+
+- name: Add Docker repo
+  become: true
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docer-ce.repo
+
+- name: Install Docker
+  become: true
+  package:
+    name: docker-ce
+    state: latest
+
+- name: Install pip
+  become: true
+  package:
+    name: python-pip
+    state: latest
+
+- name: Start Docker service
+  become: true
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Add user to docker group
+  become: yes
+  user:
+    name: 'centos'
+    groups: docker
+    append: yes
+
+- name: reset ssh connection to allow user changes to affect
+  meta: reset_connection
+
+- name: Install docker-compose
+  pip:
+    name: docker-compose
+    extra_args: --user
+
+- name: Clone ci-config repo
+  git:
+    repo: https://github.com/rdo-infra/ci-config.git
+    dest: /home/centos/ci-config/
+    refspec: refs/changes/32/14632/21
+    version: FETCH_HEAD
+
+- name: Create docker volumes
+  docker_volume:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - influxdb-volume
+    - grafana-volume
+
+- name: Start services
+  docker_service:
+    project_src: /home/centos/ci-config/ci-scripts/infra-setup/roles/rr-cockpit/files/
+    state: present
+    build: yes
+
+    #- name: Reload git changes
+    #  cron:
+    #    minute: "*/5"
+    #    job: "ansible-playbook /home/centos/ci-config/ci-scripts/infra-setup/rr-cockpit-playbook.yml -i /home/centos/ci-config/ci-scripts/infra-setup/inventories/localhost-rr-cockpit.yaml"
