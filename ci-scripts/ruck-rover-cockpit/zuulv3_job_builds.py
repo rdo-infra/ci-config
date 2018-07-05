@@ -1,4 +1,6 @@
 #!/usr/bin/python
+
+import argparse
 import datetime
 import time
 import requests
@@ -16,9 +18,7 @@ OOO_PROJECTS = [
     'openstack/tripleo-quickstart',
     'openstack/tripleo-heat-templates']
 
-ZUUL_URL = 'http://zuul.openstack.org/api/'
-BUILDS_API = ZUUL_URL + 'builds'
-PAGES = 1
+TIMESTAMP_PATTERN = '%Y-%m-%dT%H:%M:%S'
 
 cache = Cache('/tmp/ruck_rover_cache')
 cache.expire()
@@ -28,7 +28,7 @@ cache.expire()
 
 def to_ts(d, seconds=False):
     return datetime.datetime.strptime(
-        d, '%Y-%m-%dT%H:%M:%S').strftime('%s') + (
+        d, TIMESTAMP_PATTERN).strftime('%s') + (
             '' if seconds else "000000000")
 
 
@@ -47,14 +47,15 @@ def get(url, query={}, timeout=20, json_view=True):
     return None
 
 
-def get_builds_info(query, pages=PAGES):
+def get_builds_info(url, query, pages):
     builds = []
     for p in range(pages):
         if p > 0:
             query['skip'] = ((pages - 1) * 50)
             # let's not abuse ZUUL API and sleep betwen requests
             time.sleep(2)
-        response = get(BUILDS_API, query)
+        builds_api = url + "builds"
+        response = get(builds_api, query)
         if response is not None:
             builds += response
     return builds
@@ -92,13 +93,16 @@ def influx(build):
 
     add_inventory_info(build)
 
+    if build['end_time'] is None:
+        build['end_time'] = datetime.datetime.fromtimestamp(
+                time.time()).strftime(TIMESTAMP_PATTERN)
+
     if build['start_time'] is None:
         build['start_time'] = build['end_time']
-
     # Get the nodename
     return (
         'build,'
-        'type=upstream,'
+        'type=%s,'
         'pipeline=%s,'
         'branch=%s,'
         'project=%s,'
@@ -123,6 +127,7 @@ def influx(build):
         'provider="%s"'
         ' '
         '%s' % (
+            build['type'],
             build['pipeline'],
             'none' if not build['branch'] else build['branch'],
             build['project'],
@@ -151,15 +156,31 @@ def influx(build):
     )
 
 
-def print_influx(builds):
+def print_influx(type, builds):
     if builds:
         for build in builds:
+            build['type'] = type
             print(influx(build))
 
 
 def main():
+
+    parser = argparse.ArgumentParser(
+        description="Retrieve as influxdb zuul builds")
+
+    parser.add_argument('--url', default="http://zuul.openstack.org/api/",
+                                 help="(default: %(default)s)")
+    parser.add_argument('--type', default="upstream",
+                                 help="(default: %(default)s)")
+    parser.add_argument('--pages', type=int, default=1,
+                                 help = "(default: %(default)s)")
+    args = parser.parse_args()
+
+
     for project in OOO_PROJECTS:
-        print_influx(get_builds_info({'project': project}))
+        print_influx(args.type, get_builds_info(url=args.url,
+                                     query={'project': project},
+                                     pages=args.pages))
 
 
 if __name__ == '__main__':
