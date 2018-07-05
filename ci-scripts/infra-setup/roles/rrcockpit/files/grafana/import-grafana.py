@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 import argparse
 import os
@@ -18,6 +18,7 @@ def import_file(host, key, path, json_file_path):
         print("Importing {}".format(json_file_path))
         data = json.load(json_file)
         response = requests.post(url, headers=headers, json=data)
+        print(response)
         if not response.ok:
             if path == "dashboards/db" and response.status_code == 412:
                 data['overwrite'] = True
@@ -29,12 +30,12 @@ def import_file(host, key, path, json_file_path):
                 response = requests.get(id_by_name_url, headers=headers)
                 id = json.loads(response.content)['id']
                 url = "{}/{}".format(url, id)
-                response = requests.get(url, headers=headers, json=data)
+                response = requests.put(url, headers=headers, json=data)
                 print(response)
             elif path == "alert-notifications" and response.status_code == 500:
                 # Update it
                 url = "{}/{}".format(url, data['name'])
-                response = requests.get(url, headers=headers, json=data)
+                response = requests.put(url, headers=headers, json=data)
                 print(response)
 
 def main():
