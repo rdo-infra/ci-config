@@ -1,0 +1,46 @@
+- name: Install required packages
+  become: true
+  yum:
+    name: '{{ item }}'
+    state: present
+  with_items:
+    - epel-release
+    - docker
+    - python-pip
+
+- name: Install docker-compose
+  pip:
+    name: docker-compose
+    extra_args: --user
+
+- name: Clone ci-config repo
+  git:
+    repo: https://github.com/rdo-infra/ci-config.git
+    dest: /home/centos/ci-config/
+    refspec: refs/changes/32/14632/4
+    version: FETCH_HEAD
+
+- name: Add docker group
+  become: yes
+  group:
+    name: docker
+    state: present
+
+- name: Add user to docker group
+  become: yes
+  user:
+    name: 'centos'
+    groups: docker
+    append: yes
+
+- name: Start and enable docker
+  become: yes
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Start services
+  docker_service:
+    project_src: /home/centos/ci-config/ci-scripts/infra-setup/roles/rr-cockpit/files/
+    state: present
