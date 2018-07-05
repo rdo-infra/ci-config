@@ -2,8 +2,8 @@
   tasks:
     - include_vars:
         file: "tenant_vars/common.yml"
-    - include_role:
-        name: base
+        #- include_role:
+        #name: base
     # BUG https://github.com/ansible/ansible/issues/22571
     # we currently cannot setup a include_role with a dynamic name
     #- import_role:
@@ -11,44 +11,51 @@
 
 # Without dynamic inclusion, we need to call roles
 # one by one
-- name: Apply te-broker role
-  hosts: te-broker
-  tasks:
-    - include_role:
-        name: te-broker
+#- name: Apply te-broker role
+#  hosts: te-broker
+#  tasks:
+#    - include_role:
+#        name: te-broker
+#
+#- name: Apply dns role
+#  hosts: dns
+#  tasks:
+#    - include_role:
+#        name: dns
+#
+#- name: Apply promoter role
+#  hosts: promoter
+#  tasks:
+#    - include_role:
+#        name: promoter
+#
+#- name: Apply hubbot role
+#  hosts: hubbot
+#  tasks:
+#    - include_role:
+#        name: hubbot
+#
+#- name: Apply jumphost role
+#  hosts: jumphost
+#  tasks:
+#    - include_role:
+#        name: jumphost
+#
+#- name: Apply logserver role
+#  hosts: logserver
+#  tasks:
+#    - include_role:
+#        name: logserver
+#
+#- name: Apply sova role
+#  hosts: sova
+#  tasks:
+#    - include_role:
+#        name: sova
 
-- name: Apply dns role
-  hosts: dns
-  tasks:
-    - include_role:
-        name: dns
 
-- name: Apply promoter role
-  hosts: promoter
+- name: Apply ruck rover cockpit role
+  hosts: rrcockpit
   tasks:
     - include_role:
-        name: promoter
-
-- name: Apply hubbot role
-  hosts: hubbot
-  tasks:
-    - include_role:
-        name: hubbot
-
-- name: Apply jumphost role
-  hosts: jumphost
-  tasks:
-    - include_role:
-        name: jumphost
-
-- name: Apply logserver role
-  hosts: logserver
-  tasks:
-    - include_role:
-        name: logserver
-
-- name: Apply sova role
-  hosts: sova
-  tasks:
-    - include_role:
-        name: sova
+        name: rr-cockpit
