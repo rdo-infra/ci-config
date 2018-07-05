@@ -1,0 +1,62 @@
+- name: Install influxdb repo
+  become: true
+  yum_repository:
+    name: influxdb
+    description: InfluxDB Repository - CentOS \$releasever
+    baseurl: https://repos.influxdata.com/centos/\$releasever/\$basearch/stable
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://repos.influxdata.com/influxdb.key
+
+- name: Install grafana repo
+  become: true
+  yum_repository:
+    name: grafana
+    description: Grafana Repository - CentOS \$releasever
+    baseurl: https://packagecloud.io/grafana/stable/el/7/$basearch
+    repo_gpgcheck: yes
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://packagecloud.io/gpg.key https://grafanarel.s3.amazonaws.com/RPM-GPG-KEY-grafana
+    sslverify: 1
+    sslcacert: /etc/pki/tls/certs/ca-bundle.crt
+
+- name: Install required packages
+  become: true
+  yum:
+    name: '{{ item }}'
+    state: present
+  with_items:
+    - epel-release
+    - python-virtualenv
+    - telegraf
+    - grafana
+
+- name: Copy private key from the provisioned location to target
+  become: true
+  command: 'cp /root/rr-cockpit_key /home/centos/.ssh/id_rsa'
+  args:
+    creates: '/home/centos/.ssh/id_rsa'
+
+- name: Fix owners of the key
+  become: true
+  file:
+    path: '/home/centos/.ssh/id_rsa'
+    mode: '0600'
+    owner: 'centos'
+    group: 'centos'
+
+- become: true
+  become_user: centos
+  block:
+    - name: Generate public key from private key for uploader user
+      shell: >
+        ssh-keygen -y -t rsa -N '' -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+      args:
+        creates: /home/centos/.ssh/id_rsa.pub
+
+    - name: Create a virtualenv
+      pip:
+        name: pip
+        state: latest
+        virtualenv: /home/centos/rr-cockpit/
