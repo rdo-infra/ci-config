@@ -172,3 +172,35 @@ servers:
           - mkdir -p /etc/ansible/
           - echo 'sova ansible_connection=local' >  /etc/ansible/hosts
           - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+
+    - name: rrcockpit
+      image: "{{ default_image }}"
+      flavor: "{{ rrcockpit_flavor }}"
+      key_name: "{{ default_keypair_name }}"
+      security_groups:
+        - sec_group_http_access_external
+        - sec_group_ssh_access_external
+      ports:
+        - name: rrcockpit-port
+          network: "{{ servers_internal_network_name  }}"
+          fixed_ip_address: "{{ rrcockpit_internal_network_ip }}"
+      nics:
+        - port-name: rrcockpit-port
+      floating_ips:
+        - "{{ rrcockpit_external_network_ip }}"
+      userdata: |
+        #cloud-config
+        packages:
+            - git
+            - epel-release
+        package_upgrade: true
+        write_files:
+            - path: /root/grafana_admin_password
+              permissions: '0600'
+              content: "{{ grafana_admin_password }}"
+        runcmd:
+          - yum install -y python-pip
+          - pip install ansible==2.5.5
+          - mkdir -p /etc/ansible/
+          - echo 'rrcockpit ansible_connection=local' >  /etc/ansible/hosts
+          - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log

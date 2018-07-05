@@ -1,0 +1,35 @@
+---
+- name: Setup docker compose
+  include_role:
+    name: setup_docker_compose
+
+- name: Create docker volumes
+  docker_volume:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - influxdb-volume
+    - grafana-volume
+    - telegraf-volume
+
+- name: Copy grafana admin password file
+  become: yes
+  copy:
+    remote_src: true
+    src: "/root/grafana_admin_password"
+    dest: "/home/centos/"
+    owner: centos
+    group: centos
+
+- name: Read grafana admin password file
+  slurp:
+    src: /home/centos/grafana_admin_password
+  register: slurpfile
+
+- name: Start services
+  environment:
+    GRAFANA_ADMIN_PASSWORD: "{{ slurpfile['content'] | b64decode }}"
+  docker_service:
+    project_src: "{{ playbook_dir }}/files/"
+    state: present
+    build: yes
