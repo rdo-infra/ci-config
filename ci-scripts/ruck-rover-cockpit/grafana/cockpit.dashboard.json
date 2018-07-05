@@ -117,7 +117,7 @@
         }, 
         "links": [], 
         "tags": [], 
-        "iteration": 1530778026294, 
+        "iteration": 1530782935132, 
         "time": {
             "to": "now", 
             "from": "now-2d"
@@ -1784,6 +1784,27 @@
                 "type": "alertlist", 
                 "id": 162, 
                 "sortOrder": 3
+            }, 
+            {
+                "stateFilter": [], 
+                "links": [], 
+                "show": "current", 
+                "title": "Infra issues", 
+                "dashboardFilter": "", 
+                "onlyAlertsOnDashboard": false, 
+                "dashboardTags": [], 
+                "limit": 10, 
+                "nameFilter": "Github", 
+                "gridPos": {
+                    "y": 30, 
+                    "h": 6, 
+                    "w": 5, 
+                    "x": 15
+                }, 
+                "folderId": null, 
+                "type": "alertlist", 
+                "id": 198, 
+                "sortOrder": 1
             }, 
             {
                 "stateFilter": [
@@ -7285,91 +7306,325 @@
             }, 
             {
                 "title": "Issues", 
-                "collapsed": true, 
+                "collapsed": false, 
                 "gridPos": {
                     "y": 75, 
                     "h": 1, 
                     "w": 24, 
                     "x": 0
                 }, 
-                "panels": [
-                    {
-                        "sort": {
-                            "col": 0, 
-                            "desc": true
-                        }, 
-                        "styles": [
-                            {
-                                "alias": "Time", 
-                                "type": "date", 
-                                "pattern": "Time", 
-                                "dateFormat": "YYYY-MM-DD HH:mm:ss"
-                            }, 
-                            {
-                                "type": "number", 
-                                "pattern": "/.*/", 
-                                "thresholds": [], 
-                                "alias": "", 
-                                "colors": [
-                                    "rgba(245, 54, 54, 0.9)", 
-                                    "rgba(237, 129, 40, 0.89)", 
-                                    "rgba(50, 172, 45, 0.97)"
-                                ], 
-                                "colorMode": null, 
-                                "decimals": 2, 
-                                "unit": "short"
-                            }
-                        ], 
-                        "pageSize": null, 
-                        "links": [], 
-                        "title": "Openstack infra issues", 
-                        "transform": "table", 
-                        "showHeader": true, 
-                        "scroll": true, 
-                        "targets": [
-                            {
-                                "rawQuery": true, 
-                                "tags": [], 
-                                "measurement": "openstack-infra-issues", 
-                                "refId": "A", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "issue"
-                                            ]
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "query": "SELECT \"issue\" FROM \"openstack-infra-issues\"", 
-                                "groupBy": [], 
-                                "resultFormat": "table"
-                            }
-                        ], 
-                        "fontSize": "100%", 
-                        "datasource": "telegraf", 
-                        "gridPos": {
-                            "y": 5, 
-                            "h": 7, 
-                            "w": 24, 
-                            "x": 0
-                        }, 
-                        "type": "table", 
-                        "id": 2, 
-                        "columns": []
-                    }
-                ], 
+                "panels": [], 
                 "type": "row", 
                 "id": 4
+            }, 
+            {
+                "sort": {
+                    "col": 0, 
+                    "desc": true
+                }, 
+                "styles": [
+                    {
+                        "alias": "Time", 
+                        "type": "date", 
+                        "pattern": "Time", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss"
+                    }, 
+                    {
+                        "type": "number", 
+                        "pattern": "/.*/", 
+                        "thresholds": [], 
+                        "alias": "", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "colorMode": null, 
+                        "decimals": 2, 
+                        "unit": "short"
+                    }
+                ], 
+                "pageSize": null, 
+                "links": [], 
+                "title": "Openstack infra issues", 
+                "transform": "table", 
+                "showHeader": true, 
+                "scroll": true, 
+                "targets": [
+                    {
+                        "rawQuery": true, 
+                        "tags": [], 
+                        "measurement": "openstack-infra-issues", 
+                        "refId": "A", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "issue"
+                                    ]
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "query": "SELECT \"issue\" FROM \"openstack-infra-issues\"", 
+                        "groupBy": [], 
+                        "resultFormat": "table"
+                    }
+                ], 
+                "fontSize": "100%", 
+                "datasource": "telegraf", 
+                "gridPos": {
+                    "y": 76, 
+                    "h": 7, 
+                    "w": 24, 
+                    "x": 0
+                }, 
+                "type": "table", 
+                "id": 2, 
+                "columns": []
+            }, 
+            {
+                "sort": {
+                    "col": 0, 
+                    "desc": true
+                }, 
+                "styles": [
+                    {
+                        "alias": "Time", 
+                        "type": "date", 
+                        "pattern": "Time", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss"
+                    }, 
+                    {
+                        "mappingType": 1, 
+                        "type": "string", 
+                        "valueMaps": [
+                            {
+                                "text": "good", 
+                                "value": "0"
+                            }, 
+                            {
+                                "text": "minor", 
+                                "value": "-1"
+                            }, 
+                            {
+                                "text": "major", 
+                                "value": "-2"
+                            }
+                        ], 
+                        "pattern": "status_enum", 
+                        "thresholds": [
+                            "-2", 
+                            "0"
+                        ], 
+                        "alias": "status", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "colorMode": "row", 
+                        "decimals": 0, 
+                        "unit": "short"
+                    }
+                ], 
+                "pageSize": null, 
+                "links": [], 
+                "title": "Github", 
+                "transform": "table", 
+                "showHeader": true, 
+                "scroll": true, 
+                "targets": [
+                    {
+                        "tags": [], 
+                        "measurement": "github-status", 
+                        "groupBy": [], 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "message"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "status_enum"
+                                    ]
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "table"
+                    }
+                ], 
+                "fontSize": "100%", 
+                "datasource": "telegraf", 
+                "gridPos": {
+                    "y": 83, 
+                    "h": 9, 
+                    "w": 12, 
+                    "x": 0
+                }, 
+                "type": "table", 
+                "id": 196, 
+                "columns": []
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": null, 
+                "links": [], 
+                "thresholds": [
+                    {
+                        "colorMode": "critical", 
+                        "line": true, 
+                        "op": "lt", 
+                        "value": 0, 
+                        "fill": true
+                    }
+                ], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "gridPos": {
+                    "y": 83, 
+                    "h": 9, 
+                    "w": 12, 
+                    "x": 12
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "id": 194, 
+                "fill": 1, 
+                "title": "Github", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": false, 
+                    "max": false, 
+                    "min": false, 
+                    "current": false, 
+                    "values": false, 
+                    "avg": false
+                }, 
+                "targets": [
+                    {
+                        "tags": [], 
+                        "measurement": "github-status", 
+                        "groupBy": [], 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "status_enum"
+                                    ]
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "min": "-2", 
+                        "max": "0", 
+                        "format": "short", 
+                        "label": "status", 
+                        "show": true, 
+                        "decimals": 0
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": false, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "alert": {
+                    "noDataState": "no_data", 
+                    "name": "Github alert", 
+                    "frequency": "60s", 
+                    "notifications": [
+                        {
+                            "id": 2
+                        }
+                    ], 
+                    "handler": 1, 
+                    "executionErrorState": "alerting", 
+                    "message": "Github has problems", 
+                    "conditions": [
+                        {
+                            "operator": {
+                                "type": "and"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "A", 
+                                    "24h", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "lt", 
+                                "params": [
+                                    0
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "last", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }
+                    ]
+                }, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": false, 
+                "points": true, 
+                "datasource": "telegraf", 
+                "pointradius": 5
             }, 
             {
                 "title": "RDO cloud performance", 
                 "collapsed": true, 
                 "gridPos": {
-                    "y": 76, 
+                    "y": 92, 
                     "h": 1, 
                     "w": 24, 
                     "x": 0
