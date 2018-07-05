@@ -1,0 +1,51 @@
+version: '3.6'
+
+services:
+  influxdb:
+    image: influxdb/influxdb:latest
+    container_name: influxdb
+    ports:
+      - "8083:8083"
+      - "8086:8086"
+      - "8090:8090"
+    env_file:
+      - 'influxdb/env'
+    volumes:
+      - influxdb-volume:/var/lib/influxdb
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: always
+    container_name: grafana
+    ports:
+      - "80:3000"
+    env_file:
+      - 'grafana/env'
+    links:
+      - influxdb
+    volumes:
+      - grafana-volume:/var/lib/grafana
+
+  grafana-sidecar:
+    build: grafana
+    restart: always
+    container_name: grafana-sidecar
+    links:
+      - grafana
+    volumes:
+      - grafana-volume:/var/lib/grafana
+
+  telegraf:
+    build: telegraf
+    restart: always
+    container_name: telegraf
+    env_file:
+      - 'telegraf/env'
+    links:
+      - influxdb
+
+volumes:
+  influxdb-volume:
+    external: true
+  grafana-volume:
+    external: true
