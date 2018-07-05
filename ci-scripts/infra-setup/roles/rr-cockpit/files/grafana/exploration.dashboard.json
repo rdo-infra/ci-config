@@ -1,0 +1,843 @@
+{
+    "dashboard":
+    {
+        "style": "dark",
+        "templating": {
+            "list": [
+                {
+                    "hide": 0,
+                    "name": "influxdb_filter",
+                    "label": "Influxdb filter",
+                    "datasource": "telegraf",
+                    "filters": [],
+                    "type": "adhoc"
+                }
+            ]
+        },
+        "links": [],
+        "tags": [],
+        "iteration": 1530778844837,
+        "time": {
+            "to": "now",
+            "from": "now-7d"
+        },
+        "editable": true,
+        "annotations": {
+            "list": [
+                {
+                    "enable": true,
+                    "hide": true,
+                    "name": "Annotations & Alerts",
+                    "builtIn": 1,
+                    "datasource": "-- Grafana --",
+                    "type": "dashboard",
+                    "iconColor": "rgba(0, 211, 255, 1)"
+                }
+            ]
+        },
+        "gnetId": null,
+        "timepicker": {
+            "time_options": [
+                "5m",
+                "15m",
+                "1h",
+                "6h",
+                "12h",
+                "24h",
+                "2d",
+                "7d",
+                "30d"
+            ],
+            "refresh_intervals": [
+                "5s",
+                "10s",
+                "30s",
+                "1m",
+                "5m",
+                "15m",
+                "30m",
+                "1h",
+                "2h",
+                "1d"
+            ]
+        },
+        "title": "Exploration",
+        "graphTooltip": 0,
+        "timezone": "",
+        "schemaVersion": 16,
+        "panels": [
+            {
+                "sort": {
+                    "col": 0,
+                    "desc": true
+                },
+                "styles": [
+                    {
+                        "alias": "Time",
+                        "type": "date",
+                        "pattern": "Time",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss"
+                    },
+                    {
+                        "mappingType": 1,
+                        "type": "string",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": null,
+                        "thresholds": [],
+                        "alias": "Branch",
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "pattern": "branch",
+                        "decimals": 2,
+                        "unit": "short"
+                    },
+                    {
+                        "linkTargetBlank": true,
+                        "mappingType": 1,
+                        "type": "string",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": null,
+                        "thresholds": [],
+                        "linkTooltip": "Logs",
+                        "alias": "Job",
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "link": true,
+                        "sanitize": true,
+                        "pattern": "job_name",
+                        "decimals": 2,
+                        "unit": "short",
+                        "linkUrl": "${__cell_3}"
+                    },
+                    {
+                        "mappingType": 1,
+                        "type": "string",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": null,
+                        "thresholds": [],
+                        "alias": "Pipeline",
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "pattern": "pipeline",
+                        "decimals": 2,
+                        "unit": "short"
+                    },
+                    {
+                        "mappingType": 1,
+                        "type": "number",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": "cell",
+                        "thresholds": [
+                            "10000",
+                            "10600"
+                        ],
+                        "alias": "Duration",
+                        "colors": [
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "pattern": "duration",
+                        "decimals": 1,
+                        "unit": "dtdurations"
+                    },
+                    {
+                        "linkTargetBlank": true,
+                        "mappingType": 1,
+                        "type": "string",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": "row",
+                        "thresholds": [
+                            "-1",
+                            "1"
+                        ],
+                        "rangeMaps": [
+                            {
+                                "text": "",
+                                "from": "",
+                                "to": ""
+                            }
+                        ],
+                        "linkTooltip": "Logs",
+                        "valueMaps": [
+                            {
+                                "text": "SUCCESS",
+                                "value": "1"
+                            },
+                            {
+                                "text": "FAILURE",
+                                "value": "0"
+                            }
+                        ],
+                        "alias": "Result",
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "link": true,
+                        "pattern": "result_num",
+                        "decimals": 2,
+                        "unit": "short",
+                        "linkUrl": "${__cell_7}"
+                    },
+                    {
+                        "linkTargetBlank": true,
+                        "mappingType": 1,
+                        "type": "hidden",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": null,
+                        "thresholds": [],
+                        "linkTooltip": "Logs",
+                        "alias": "Log URL",
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "link": true,
+                        "pattern": "log_url",
+                        "decimals": 2,
+                        "unit": "short",
+                        "linkUrl": "${__cell_7}"
+                    },
+                    {
+                        "linkTargetBlank": true,
+                        "mappingType": 1,
+                        "type": "string",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": null,
+                        "thresholds": [
+                            ""
+                        ],
+                        "valueMaps": [],
+                        "linkTooltip": "Gerrit",
+                        "alias": "Patch",
+                        "colors": [
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "link": true,
+                        "pattern": "change",
+                        "decimals": 2,
+                        "unit": "short",
+                        "linkUrl": "https://review.openstack.org/${__cell}"
+                    },
+                    {
+                        "mappingType": 1,
+                        "type": "string",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": null,
+                        "thresholds": [],
+                        "alias": "Job",
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "link": false,
+                        "sanitize": true,
+                        "pattern": "log_link",
+                        "decimals": 2,
+                        "unit": "short"
+                    },
+                    {
+                        "mappingType": 1,
+                        "type": "string",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": null,
+                        "thresholds": [],
+                        "alias": "",
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "pattern": "passed",
+                        "decimals": 2,
+                        "unit": "short"
+                    },
+                    {
+                        "type": "number",
+                        "pattern": "/.*/",
+                        "thresholds": [],
+                        "alias": "",
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "colorMode": null,
+                        "decimals": 2,
+                        "unit": "short"
+                    }
+                ],
+                "pageSize": null,
+                "links": [],
+                "title": "Last jobs",
+                "transform": "table",
+                "showHeader": true,
+                "scroll": true,
+                "targets": [
+                    {
+                        "tags": [],
+                        "measurement": "build",
+                        "groupBy": [],
+                        "select": [
+                            [
+                                {
+                                    "type": "field",
+                                    "params": [
+                                        "branch"
+                                    ]
+                                }
+                            ],
+                            [
+                                {
+                                    "type": "field",
+                                    "params": [
+                                        "change"
+                                    ]
+                                }
+                            ],
+                            [
+                                {
+                                    "type": "field",
+                                    "params": [
+                                        "log_link"
+                                    ]
+                                }
+                            ],
+                            [
+                                {
+                                    "type": "field",
+                                    "params": [
+                                        "duration"
+                                    ]
+                                }
+                            ],
+                            [
+                                {
+                                    "type": "field",
+                                    "params": [
+                                        "result_num"
+                                    ]
+                                }
+                            ],
+                            [
+                                {
+                                    "type": "field",
+                                    "params": [
+                                        "cloud"
+                                    ]
+                                }
+                            ],
+                            [
+                                {
+                                    "type": "field",
+                                    "params": [
+                                        "region"
+                                    ]
+                                }
+                            ]
+                        ],
+                        "orderByTime": "ASC",
+                        "policy": "default",
+                        "refId": "A",
+                        "resultFormat": "table"
+                    }
+                ],
+                "fontSize": "100%",
+                "datasource": "telegraf",
+                "gridPos": {
+                    "y": 0,
+                    "h": 10,
+                    "w": 24,
+                    "x": 0
+                },
+                "type": "table",
+                "id": 9,
+                "columns": []
+            },
+            {
+                "sort": {
+                    "col": 2,
+                    "desc": true
+                },
+                "styles": [
+                    {
+                        "alias": "Time",
+                        "type": "date",
+                        "pattern": "Time",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss"
+                    },
+                    {
+                        "mappingType": 1,
+                        "type": "string",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": null,
+                        "thresholds": [],
+                        "alias": "Branch",
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "pattern": "branch",
+                        "decimals": 2,
+                        "unit": "short"
+                    },
+                    {
+                        "linkTargetBlank": true,
+                        "mappingType": 1,
+                        "type": "string",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": "value",
+                        "thresholds": [
+                            "A"
+                        ],
+                        "linkTooltip": "Logs",
+                        "alias": "Job",
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "link": true,
+                        "pattern": "job_name",
+                        "decimals": 2,
+                        "unit": "short",
+                        "linkUrl": "${__cell_7}"
+                    },
+                    {
+                        "mappingType": 1,
+                        "type": "string",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": null,
+                        "thresholds": [],
+                        "alias": "Pipeline",
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "pattern": "pipeline",
+                        "decimals": 2,
+                        "unit": "short"
+                    },
+                    {
+                        "mappingType": 1,
+                        "type": "number",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": "cell",
+                        "thresholds": [
+                            "10000",
+                            "10600"
+                        ],
+                        "alias": "Duration",
+                        "colors": [
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "pattern": "duration",
+                        "decimals": 1,
+                        "unit": "dtdurations"
+                    },
+                    {
+                        "linkTargetBlank": true,
+                        "mappingType": 1,
+                        "type": "string",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": "cell",
+                        "thresholds": [
+                            "AA"
+                        ],
+                        "linkTooltip": "Logs",
+                        "alias": "",
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "link": true,
+                        "pattern": "result",
+                        "decimals": 2,
+                        "unit": "short",
+                        "linkUrl": "${__cell_7}"
+                    },
+                    {
+                        "linkTargetBlank": true,
+                        "mappingType": 1,
+                        "type": "string",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": null,
+                        "thresholds": [],
+                        "linkTooltip": "Logs",
+                        "alias": "Job",
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "link": false,
+                        "sanitize": true,
+                        "pattern": "log_link",
+                        "decimals": 2,
+                        "unit": "short",
+                        "linkUrl": "${__cell_7}"
+                    },
+                    {
+                        "linkTargetBlank": true,
+                        "mappingType": 1,
+                        "type": "number",
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                        "colorMode": null,
+                        "thresholds": [],
+                        "linkTooltip": "Gerrit",
+                        "alias": "Patch",
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "link": true,
+                        "pattern": "change",
+                        "decimals": 2,
+                        "unit": "short",
+                        "linkUrl": "https://review.openstack.org/${__cell}"
+                    },
+                    {
+                        "type": "number",
+                        "pattern": "/.*/",
+                        "thresholds": [],
+                        "alias": "",
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "colorMode": null,
+                        "decimals": 2,
+                        "unit": "short"
+                    }
+                ],
+                "timeFrom": null,
+                "pageSize": null,
+                "links": [],
+                "title": "Jobs Frequency",
+                "timeShift": null,
+                "transform": "table",
+                "showHeader": true,
+                "scroll": true,
+                "targets": [
+                    {
+                        "rawQuery": false,
+                        "tags": [],
+                        "measurement": "build",
+                        "refId": "A",
+                        "select": [
+                            [
+                                {
+                                    "type": "field",
+                                    "params": [
+                                        "result_num"
+                                    ]
+                                },
+                                {
+                                    "type": "count",
+                                    "params": []
+                                }
+                            ]
+                        ],
+                        "orderByTime": "ASC",
+                        "policy": "autogen",
+                        "query": "SELECT \"duration\", \"result\", \"log_url\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' ) AND $timeFilter GROUP BY \"job_name\", \"branch\", \"pipeline\", \"change\"",
+                        "groupBy": [
+                            {
+                                "type": "tag",
+                                "params": [
+                                    "job_name"
+                                ]
+                            }
+                        ],
+                        "resultFormat": "table"
+                    }
+                ],
+                "hideTimeOverride": false,
+                "fontSize": "100%",
+                "datasource": "telegraf",
+                "gridPos": {
+                    "y": 10,
+                    "h": 8,
+                    "w": 24,
+                    "x": 0
+                },
+                "type": "table",
+                "id": 7,
+                "columns": []
+            },
+            {
+                "bars": true,
+                "timeFrom": null,
+                "links": [],
+                "thresholds": [],
+                "spaceLength": 10,
+                "nullPointMode": "null",
+                "renderer": "flot",
+                "gridPos": {
+                    "y": 18,
+                    "h": 9,
+                    "w": 24,
+                    "x": 0
+                },
+                "linewidth": 1,
+                "steppedLine": false,
+                "id": 2,
+                "fill": 1,
+                "title": "Job build duration per cloud",
+                "tooltip": {
+                    "sort": 0,
+                    "shared": false,
+                    "value_type": "individual"
+                },
+                "legend": {
+                    "rightSide": true,
+                    "total": false,
+                    "min": false,
+                    "max": false,
+                    "show": true,
+                    "current": true,
+                    "values": true,
+                    "alignAsTable": true,
+                    "avg": false
+                },
+                "targets": [
+                    {
+                        "tags": [],
+                        "measurement": "build",
+                        "groupBy": [
+                            {
+                                "type": "tag",
+                                "params": [
+                                    "cloud"
+                                ]
+                            },
+                            {
+                                "type": "tag",
+                                "params": [
+                                    "region"
+                                ]
+                            }
+                        ],
+                        "select": [
+                            [
+                                {
+                                    "type": "field",
+                                    "params": [
+                                        "duration"
+                                    ]
+                                },
+                                {
+                                    "type": "median",
+                                    "params": []
+                                }
+                            ]
+                        ],
+                        "orderByTime": "ASC",
+                        "policy": "default",
+                        "refId": "A",
+                        "resultFormat": "time_series"
+                    }
+                ],
+                "yaxes": [
+                    {
+                        "logBase": 1,
+                        "min": null,
+                        "max": null,
+                        "format": "dtdurations",
+                        "label": "durastion",
+                        "show": true,
+                        "decimals": 1
+                    },
+                    {
+                        "logBase": 1,
+                        "show": true,
+                        "max": null,
+                        "format": "short",
+                        "min": null,
+                        "label": "count"
+                    }
+                ],
+                "xaxis": {
+                    "buckets": null,
+                    "show": false,
+                    "values": [
+                        "current"
+                    ],
+                    "mode": "series",
+                    "name": null
+                },
+                "seriesOverrides": [
+                    {
+                        "alias": "/build.count/"
+                    },
+                    {
+                        "alias": "/build.median/"
+                    }
+                ],
+                "percentage": false,
+                "type": "graph",
+                "dashes": false,
+                "dashLength": 10,
+                "stack": false,
+                "yaxis": {
+                    "align": false,
+                    "alignLevel": 1
+                },
+                "timeShift": null,
+                "aliasColors": {},
+                "lines": false,
+                "points": false,
+                "datasource": "telegraf",
+                "pointradius": 5,
+                "decimals": 1
+            },
+            {
+                "bars": true,
+                "timeFrom": null,
+                "links": [],
+                "thresholds": [],
+                "spaceLength": 10,
+                "nullPointMode": "null",
+                "renderer": "flot",
+                "gridPos": {
+                    "y": 27,
+                    "h": 8,
+                    "w": 24,
+                    "x": 0
+                },
+                "linewidth": 1,
+                "steppedLine": false,
+                "id": 3,
+                "fill": 1,
+                "title": "Job builds count per cloud",
+                "tooltip": {
+                    "sort": 0,
+                    "shared": false,
+                    "value_type": "individual"
+                },
+                "legend": {
+                    "rightSide": true,
+                    "total": false,
+                    "min": false,
+                    "max": false,
+                    "show": true,
+                    "current": true,
+                    "values": true,
+                    "alignAsTable": true,
+                    "avg": false
+                },
+                "targets": [
+                    {
+                        "tags": [],
+                        "measurement": "build",
+                        "groupBy": [
+                            {
+                                "type": "tag",
+                                "params": [
+                                    "cloud"
+                                ]
+                            },
+                            {
+                                "type": "tag",
+                                "params": [
+                                    "region"
+                                ]
+                            }
+                        ],
+                        "select": [
+                            [
+                                {
+                                    "type": "field",
+                                    "params": [
+                                        "duration"
+                                    ]
+                                },
+                                {
+                                    "type": "count",
+                                    "params": []
+                                }
+                            ]
+                        ],
+                        "orderByTime": "ASC",
+                        "policy": "default",
+                        "refId": "B",
+                        "resultFormat": "time_series"
+                    }
+                ],
+                "yaxes": [
+                    {
+                        "logBase": 1,
+                        "show": true,
+                        "max": null,
+                        "format": "short",
+                        "min": null,
+                        "label": "count"
+                    },
+                    {
+                        "logBase": 1,
+                        "show": true,
+                        "max": null,
+                        "format": "short",
+                        "min": null,
+                        "label": ""
+                    }
+                ],
+                "xaxis": {
+                    "buckets": null,
+                    "show": false,
+                    "values": [
+                        "current"
+                    ],
+                    "mode": "series",
+                    "name": null
+                },
+                "seriesOverrides": [
+                    {
+                        "alias": "/build.count/"
+                    },
+                    {
+                        "alias": "/build.median/"
+                    }
+                ],
+                "percentage": false,
+                "type": "graph",
+                "dashes": false,
+                "dashLength": 10,
+                "stack": false,
+                "yaxis": {
+                    "align": false,
+                    "alignLevel": 1
+                },
+                "timeShift": null,
+                "aliasColors": {},
+                "lines": false,
+                "points": false,
+                "datasource": "telegraf",
+                "pointradius": 5,
+                "decimals": 0
+            }
+        ]
+    }
+}
