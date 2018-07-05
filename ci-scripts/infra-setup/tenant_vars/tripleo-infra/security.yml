@@ -13,6 +13,12 @@ security_groups:
           port_range_max: 22
           direction: ingress
           remote_ip_prefix: "{{ jumphost_internal_network_ip }}"
+    - name: sec_group_influxdb_access_external
+      rules:
+        - protocol: tcp
+          port_range_min: 8086
+          port_range_max: 8086
+          remote_ip_prefix: 0.0.0.0/0
     - name: sec_group_http_access_external
       rules:
         - protocol: tcp
