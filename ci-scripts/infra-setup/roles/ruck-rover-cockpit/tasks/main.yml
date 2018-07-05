@@ -1,0 +1,64 @@
+- name: Mount external volume - create a partition
+  parted:
+    device: /dev/vdb
+    number: 1
+    state: present
+
+- name: Mount external volume - create a filesystem
+  filesystem:
+    fstype: xfs
+    dev: /dev/vdb1
+
+- name: create a mount folder
+  file:
+    path: /opt/ruck-rover-cockpit
+    state: directory
+
+- name: Mount external volume - mount the partition
+  mount:
+    path: /opt/ruck-rover-cockpit
+    src: /dev/vdb1
+    fstype: xfs
+    state: mounted
+
+- name: Fix data directory permissions
+  file:
+    path: '/opt/ruck-rover-cockpit'
+    mode: 0755
+    owner: 'centos'
+    group: 'centos'
+
+- name: Install required packages
+  yum:
+    name: '{{ item }}'
+    state: present
+  with_items:
+    - epel-release
+    - python-virtualenv
+
+- name: Copy private key from the provisioned location to target
+  command: 'cp /root/ruck-rover-cockpit_key /home/centos/.ssh/id_rsa'
+  args:
+    creates: '/home/centos/.ssh/id_rsa'
+
+- name: Fix owners of the key
+  file:
+    path: '/home/centos/.ssh/id_rsa'
+    mode: '0600'
+    owner: 'centos'
+    group: 'centos'
+
+- become: true
+  become_user: centos
+  block:
+    - name: Generate public key from private key for uploader user
+      shell: >
+        ssh-keygen -y -t rsa -N '' -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+      args:
+        creates: /home/centos/.ssh/id_rsa.pub
+
+    - name: Create a virtualenv
+      pip:
+        name: pip
+        state: latest
+        virtualenv: /home/centos/ruck-rover-cockpit/
