@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 import requests
 import re
 import json
@@ -25,7 +25,7 @@ def print_as_influxdb(tag, bug_tasks):
                 tag,
                 bug_task.bug.id,
                 bug_task.web_link,
-                bug_task.bug.title.replace('"', "'"),
+                bug_task.bug.title.replace('"', "'").replace("\\n",""),
                 bug_task.status,
                 format_ts_from_date(bug_task.date_created)))
 def main():

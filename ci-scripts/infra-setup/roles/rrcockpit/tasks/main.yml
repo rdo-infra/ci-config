@@ -1,0 +1,28 @@
+---
+- name: Setup docker compose
+  include_role:
+    name: setup_docker_compose
+
+# FIXME: Delete this after merge it
+- name: Clone ci-config repo
+  git:
+    repo: https://github.com/rdo-infra/ci-config.git
+    dest: /home/centos/ci-config/
+    refspec: refs/changes/32/14632/49
+    version: FETCH_HEAD
+
+- name: Create docker volumes
+  docker_volume:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - influxdb-volume
+    - grafana-volume
+    - telegraf-volume
+
+
+- name: Start services
+  docker_service:
+    project_src: /home/centos/ci-config/ci-scripts/infra-setup/roles/rrcockpit/files/
+    state: present
+    build: yes
