@@ -1,4 +1,6 @@
 #!/usr/bin/python
+
+import argparse
 import datetime
 import time
 import requests
@@ -15,10 +17,6 @@ OOO_PROJECTS = [
     'openstack-infra/tripleo-ci',
     'openstack/tripleo-quickstart',
     'openstack/tripleo-heat-templates']
-
-ZUUL_URL = 'http://zuul.openstack.org/api/'
-BUILDS_API = ZUUL_URL + 'builds'
-PAGES = 1
 
 cache = Cache('/tmp/ruck_rover_cache')
 cache.expire()
@@ -47,14 +45,16 @@ def get(url, query={}, timeout=20, json_view=True):
     return None
 
 
-def get_builds_info(query, pages=PAGES):
+def get_builds_info(url, query, pages):
     builds = []
     for p in range(pages):
         if p > 0:
             query['skip'] = ((pages - 1) * 50)
             # let's not abuse ZUUL API and sleep betwen requests
             time.sleep(2)
-        response = get(BUILDS_API, query)
+        builds_api = url + "builds"
+        print(builds_api)
+        response = get(builds_api, query)
         if response is not None:
             builds += response
     return builds
@@ -92,9 +92,12 @@ def influx(build):
 
     add_inventory_info(build)
 
+    if build['end_time'] is None:
+        return
+
     if build['start_time'] is None:
         build['start_time'] = build['end_time']
-
+    print(build)
     # Get the nodename
     return (
         'build,'
@@ -158,8 +161,21 @@ def print_influx(builds):
 
 
 def main():
+
+    parser = argparse.ArgumentParser(
+        description="Retrieve as influxdb zuul builds")
+
+    parser.add_argument('--url', default="http://zuul.openstack.org/api/",
+                                 help="(default: %(default)s)")
+    parser.add_argument('--pages', type=int, default=1,
+                                 help = "(default: %(default)s)")
+    args = parser.parse_args()
+
+
     for project in OOO_PROJECTS:
-        print_influx(get_builds_info({'project': project}))
+        print_influx(get_builds_info(url=args.url,
+                                     query={'project': project},
+                                     pages=args.pages))
 
 
 if __name__ == '__main__':
