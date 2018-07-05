@@ -1,0 +1,63 @@
+---
+- name: Install required_packages
+  become: yes
+  package:
+    name:
+      - epel-release
+      - python-pip
+      - docker
+
+- name: Install docker-compose with pip
+  pip:
+    name: docker-compose
+    version: "{{ docker_compose_version }}"
+
+- name: Find out docker group name
+  shell: grep docker /etc/group | cut -d":" -f1 | head -1
+  register: docker_group
+  changed_when: false
+
+- name: Check if user is in docker group
+  command: "groups {{ username }}"
+  register: user_groups
+  changed_when: false
+
+- when: "docker_group.stdout not in user_groups.stdout"
+  block:
+
+  - name: Add user to docker group
+    become: yes
+    user:
+      name: '{{ username }}'
+      groups: '{{ docker_group.stdout }}'
+      append: yes
+    register: groupadd
+
+
+- name: reset ssh connection to allow user changes to affect
+  meta: reset_connection
+
+- name: Create docker configuration file
+  become: yes
+  copy:
+    content: |
+      {
+      "live-restore": true,
+      "group": "{{ docker_group.stdout }}",
+      }
+    dest: /etc/docker/daemon.json
+  register: docker_config
+
+- name: Reload docker if config was changed
+  become: yes
+  service:
+    name: docker
+    state: reloaded
+  when: docker_config is changed
+
+- name: Start and enable docker
+  become: yes
+  service:
+    name: docker
+    state: started
+    enabled: yes
