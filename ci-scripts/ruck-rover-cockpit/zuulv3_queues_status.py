@@ -46,6 +46,7 @@ def convert_builds_as_influxdb(queues):
     # Le's express failures as negative numbers, is easier for alarms
 
     result_mapping = {
+        'NODE_FAILURE': -1,
         'FAILURE': -1,
         'POST_FAILURE': -1,
         'MERGER_FAILURE': -1,
