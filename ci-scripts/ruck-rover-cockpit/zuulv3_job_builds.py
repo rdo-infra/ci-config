@@ -140,7 +140,7 @@ def influx(build):
             build.get('region', 'null'),
             build.get('provider', 'null'),
 
-            'SUCCESS' if build['result'] == 'SUCCESS' else 'FAILURE',
+            build['result'],
             1 if build['result'] == 'SUCCESS' else 0,
             build['log_url'],
             "<a href={} target='_blank'>{}</a>".format(
