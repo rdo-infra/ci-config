@@ -117,7 +117,7 @@
         }, 
         "links": [], 
         "tags": [], 
-        "iteration": 1530782935132, 
+        "iteration": 1530864386830, 
         "time": {
             "to": "now", 
             "from": "now-2d"
@@ -1218,6 +1218,25 @@
                         "linkUrl": "https://review.openstack.org/${__cell}"
                     }, 
                     {
+                        "mappingType": 1, 
+                        "type": "number", 
+                        "dateFormat": "YYYY-MM-DD HH:mm:ss", 
+                        "colorMode": null, 
+                        "thresholds": [], 
+                        "linkTooltip": "Gerrit", 
+                        "alias": "Patchset", 
+                        "colors": [
+                            "rgba(245, 54, 54, 0.9)", 
+                            "rgba(237, 129, 40, 0.89)", 
+                            "rgba(50, 172, 45, 0.97)"
+                        ], 
+                        "link": true, 
+                        "pattern": "patchset", 
+                        "decimals": 2, 
+                        "unit": "short", 
+                        "linkUrl": "https://review.openstack.org/c/${__cell_3}/${__cell}"
+                    }, 
+                    {
                         "type": "number", 
                         "pattern": "/.*/", 
                         "thresholds": [], 
@@ -1306,7 +1325,7 @@
                         ], 
                         "orderByTime": "ASC", 
                         "policy": "autogen", 
-                        "query": "SELECT \"branch\", \"pipeline\", \"change\", \"job_name\", \"log_link\",  \"duration\", \"cloud\", \"region\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND (\"change\" = '560445' OR \"change\" = '567224' OR \"change\" = '564291' OR \"change\" = '564285') AND \"voting\" = 'True') AND $timeFilter ", 
+                        "query": "SELECT \"branch\", \"pipeline\", \"change\", \"patchset\", \"job_name\", \"log_link\",  \"duration\", \"cloud\", \"region\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND (\"change\" = '560445' OR \"change\" = '567224' OR \"change\" = '564291' OR \"change\" = '564285') AND \"voting\" = 'True') AND $timeFilter ", 
                         "groupBy": [
                             {
                                 "type": "tag", 
@@ -7306,1064 +7325,173 @@
             }, 
             {
                 "title": "Issues", 
-                "collapsed": false, 
+                "collapsed": true, 
                 "gridPos": {
                     "y": 75, 
                     "h": 1, 
                     "w": 24, 
                     "x": 0
                 }, 
-                "panels": [], 
-                "type": "row", 
-                "id": 4
-            }, 
-            {
-                "sort": {
-                    "col": 0, 
-                    "desc": true
-                }, 
-                "styles": [
-                    {
-                        "alias": "Time", 
-                        "type": "date", 
-                        "pattern": "Time", 
-                        "dateFormat": "YYYY-MM-DD HH:mm:ss"
-                    }, 
-                    {
-                        "type": "number", 
-                        "pattern": "/.*/", 
-                        "thresholds": [], 
-                        "alias": "", 
-                        "colors": [
-                            "rgba(245, 54, 54, 0.9)", 
-                            "rgba(237, 129, 40, 0.89)", 
-                            "rgba(50, 172, 45, 0.97)"
-                        ], 
-                        "colorMode": null, 
-                        "decimals": 2, 
-                        "unit": "short"
-                    }
-                ], 
-                "pageSize": null, 
-                "links": [], 
-                "title": "Openstack infra issues", 
-                "transform": "table", 
-                "showHeader": true, 
-                "scroll": true, 
-                "targets": [
-                    {
-                        "rawQuery": true, 
-                        "tags": [], 
-                        "measurement": "openstack-infra-issues", 
-                        "refId": "A", 
-                        "select": [
-                            [
-                                {
-                                    "type": "field", 
-                                    "params": [
-                                        "issue"
-                                    ]
-                                }
-                            ]
-                        ], 
-                        "orderByTime": "ASC", 
-                        "policy": "default", 
-                        "query": "SELECT \"issue\" FROM \"openstack-infra-issues\"", 
-                        "groupBy": [], 
-                        "resultFormat": "table"
-                    }
-                ], 
-                "fontSize": "100%", 
-                "datasource": "telegraf", 
-                "gridPos": {
-                    "y": 76, 
-                    "h": 7, 
-                    "w": 24, 
-                    "x": 0
-                }, 
-                "type": "table", 
-                "id": 2, 
-                "columns": []
-            }, 
-            {
-                "sort": {
-                    "col": 0, 
-                    "desc": true
-                }, 
-                "styles": [
-                    {
-                        "alias": "Time", 
-                        "type": "date", 
-                        "pattern": "Time", 
-                        "dateFormat": "YYYY-MM-DD HH:mm:ss"
-                    }, 
-                    {
-                        "mappingType": 1, 
-                        "type": "string", 
-                        "valueMaps": [
-                            {
-                                "text": "good", 
-                                "value": "0"
-                            }, 
-                            {
-                                "text": "minor", 
-                                "value": "-1"
-                            }, 
-                            {
-                                "text": "major", 
-                                "value": "-2"
-                            }
-                        ], 
-                        "pattern": "status_enum", 
-                        "thresholds": [
-                            "-2", 
-                            "0"
-                        ], 
-                        "alias": "status", 
-                        "colors": [
-                            "rgba(245, 54, 54, 0.9)", 
-                            "rgba(237, 129, 40, 0.89)", 
-                            "rgba(50, 172, 45, 0.97)"
-                        ], 
-                        "colorMode": "row", 
-                        "decimals": 0, 
-                        "unit": "short"
-                    }
-                ], 
-                "pageSize": null, 
-                "links": [], 
-                "title": "Github", 
-                "transform": "table", 
-                "showHeader": true, 
-                "scroll": true, 
-                "targets": [
-                    {
-                        "tags": [], 
-                        "measurement": "github-status", 
-                        "groupBy": [], 
-                        "select": [
-                            [
-                                {
-                                    "type": "field", 
-                                    "params": [
-                                        "message"
-                                    ]
-                                }
-                            ], 
-                            [
-                                {
-                                    "type": "field", 
-                                    "params": [
-                                        "status_enum"
-                                    ]
-                                }
-                            ]
-                        ], 
-                        "orderByTime": "ASC", 
-                        "policy": "default", 
-                        "refId": "A", 
-                        "resultFormat": "table"
-                    }
-                ], 
-                "fontSize": "100%", 
-                "datasource": "telegraf", 
-                "gridPos": {
-                    "y": 83, 
-                    "h": 9, 
-                    "w": 12, 
-                    "x": 0
-                }, 
-                "type": "table", 
-                "id": 196, 
-                "columns": []
-            }, 
-            {
-                "bars": false, 
-                "timeFrom": null, 
-                "links": [], 
-                "thresholds": [
-                    {
-                        "colorMode": "critical", 
-                        "line": true, 
-                        "op": "lt", 
-                        "value": 0, 
-                        "fill": true
-                    }
-                ], 
-                "spaceLength": 10, 
-                "nullPointMode": "null", 
-                "renderer": "flot", 
-                "gridPos": {
-                    "y": 83, 
-                    "h": 9, 
-                    "w": 12, 
-                    "x": 12
-                }, 
-                "linewidth": 1, 
-                "steppedLine": false, 
-                "id": 194, 
-                "fill": 1, 
-                "title": "Github", 
-                "tooltip": {
-                    "sort": 0, 
-                    "shared": true, 
-                    "value_type": "individual"
-                }, 
-                "legend": {
-                    "total": false, 
-                    "show": false, 
-                    "max": false, 
-                    "min": false, 
-                    "current": false, 
-                    "values": false, 
-                    "avg": false
-                }, 
-                "targets": [
-                    {
-                        "tags": [], 
-                        "measurement": "github-status", 
-                        "groupBy": [], 
-                        "select": [
-                            [
-                                {
-                                    "type": "field", 
-                                    "params": [
-                                        "status_enum"
-                                    ]
-                                }
-                            ]
-                        ], 
-                        "orderByTime": "ASC", 
-                        "policy": "default", 
-                        "refId": "A", 
-                        "resultFormat": "time_series"
-                    }
-                ], 
-                "yaxes": [
-                    {
-                        "logBase": 1, 
-                        "min": "-2", 
-                        "max": "0", 
-                        "format": "short", 
-                        "label": "status", 
-                        "show": true, 
-                        "decimals": 0
-                    }, 
-                    {
-                        "logBase": 1, 
-                        "show": false, 
-                        "max": null, 
-                        "format": "short", 
-                        "min": null, 
-                        "label": null
-                    }
-                ], 
-                "xaxis": {
-                    "buckets": null, 
-                    "show": true, 
-                    "values": [], 
-                    "mode": "time", 
-                    "name": null
-                }, 
-                "seriesOverrides": [], 
-                "percentage": false, 
-                "type": "graph", 
-                "dashes": false, 
-                "alert": {
-                    "noDataState": "no_data", 
-                    "name": "Github alert", 
-                    "frequency": "60s", 
-                    "notifications": [
-                        {
-                            "id": 2
-                        }
-                    ], 
-                    "handler": 1, 
-                    "executionErrorState": "alerting", 
-                    "message": "Github has problems", 
-                    "conditions": [
-                        {
-                            "operator": {
-                                "type": "and"
-                            }, 
-                            "query": {
-                                "params": [
-                                    "A", 
-                                    "24h", 
-                                    "now"
-                                ]
-                            }, 
-                            "evaluator": {
-                                "type": "lt", 
-                                "params": [
-                                    0
-                                ]
-                            }, 
-                            "reducer": {
-                                "type": "last", 
-                                "params": []
-                            }, 
-                            "type": "query"
-                        }
-                    ]
-                }, 
-                "dashLength": 10, 
-                "stack": false, 
-                "yaxis": {
-                    "align": false, 
-                    "alignLevel": null
-                }, 
-                "timeShift": null, 
-                "aliasColors": {}, 
-                "lines": false, 
-                "points": true, 
-                "datasource": "telegraf", 
-                "pointradius": 5
-            }, 
-            {
-                "title": "RDO cloud performance", 
-                "collapsed": true, 
-                "gridPos": {
-                    "y": 92, 
-                    "h": 1, 
-                    "w": 24, 
-                    "x": 0
-                }, 
                 "panels": [
                     {
-                        "bars": false, 
-                        "timeFrom": null, 
-                        "links": [], 
-                        "thresholds": [], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "id": 175, 
-                        "gridPos": {
-                            "y": 40, 
-                            "h": 6, 
-                            "w": 12, 
-                            "x": 0
+                        "sort": {
+                            "col": 0, 
+                            "desc": true
                         }, 
-                        "linewidth": 1, 
-                        "steppedLine": false, 
+                        "styles": [
+                            {
+                                "alias": "Time", 
+                                "type": "date", 
+                                "pattern": "Time", 
+                                "dateFormat": "YYYY-MM-DD HH:mm:ss"
+                            }, 
+                            {
+                                "type": "number", 
+                                "pattern": "/.*/", 
+                                "thresholds": [], 
+                                "alias": "", 
+                                "colors": [
+                                    "rgba(245, 54, 54, 0.9)", 
+                                    "rgba(237, 129, 40, 0.89)", 
+                                    "rgba(50, 172, 45, 0.97)"
+                                ], 
+                                "colorMode": null, 
+                                "decimals": 2, 
+                                "unit": "short"
+                            }
+                        ], 
+                        "pageSize": null, 
+                        "links": [], 
+                        "title": "Openstack infra issues", 
+                        "transform": "table", 
+                        "showHeader": true, 
+                        "scroll": true, 
                         "targets": [
                             {
+                                "rawQuery": true, 
                                 "tags": [], 
-                                "measurement": "rdocloud-servers", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "none"
-                                        ]
-                                    }
-                                ], 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "ACTIVE"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }, 
-                                        {
-                                            "type": "alias", 
-                                            "params": [
-                                                "ACTIVE"
-                                            ]
-                                        }
-                                    ], 
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "BUILD"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }, 
-                                        {
-                                            "type": "alias", 
-                                            "params": [
-                                                "BUILD"
-                                            ]
-                                        }
-                                    ], 
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "DELETED"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }, 
-                                        {
-                                            "type": "alias", 
-                                            "params": [
-                                                "DELETED"
-                                            ]
-                                        }
-                                    ], 
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "ERROR"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }, 
-                                        {
-                                            "type": "alias", 
-                                            "params": [
-                                                "ERROR"
-                                            ]
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
+                                "measurement": "openstack-infra-issues", 
                                 "refId": "A", 
-                                "resultFormat": "time_series"
+                                "select": [
+                                    [
+                                        {
+                                            "type": "field", 
+                                            "params": [
+                                                "issue"
+                                            ]
+                                        }
+                                    ]
+                                ], 
+                                "orderByTime": "ASC", 
+                                "policy": "default", 
+                                "query": "SELECT \"issue\" FROM \"openstack-infra-issues\"", 
+                                "groupBy": [], 
+                                "resultFormat": "table"
                             }
                         ], 
-                        "fill": 1, 
-                        "title": "Nodes status", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "total": false, 
-                            "show": true, 
-                            "max": true, 
-                            "min": true, 
-                            "current": true, 
-                            "values": true, 
-                            "alignAsTable": false, 
-                            "avg": true
-                        }, 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [], 
-                        "percentage": false, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "dashLength": 10, 
-                        "stack": false, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": true, 
-                        "points": false, 
+                        "fontSize": "100%", 
                         "datasource": "telegraf", 
-                        "pointradius": 5
-                    }, 
-                    {
-                        "bars": false, 
-                        "timeFrom": null, 
-                        "links": [], 
-                        "thresholds": [], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "id": 177, 
                         "gridPos": {
-                            "y": 40, 
-                            "h": 6, 
-                            "w": 12, 
-                            "x": 12
-                        }, 
-                        "linewidth": 1, 
-                        "steppedLine": false, 
-                        "targets": [
-                            {
-                                "tags": [], 
-                                "measurement": "rdocloud-servers", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "BMC node", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "bmc"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "time_series"
-                            }, 
-                            {
-                                "tags": [], 
-                                "measurement": "rdocloud-servers", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "Multinode", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "multinode"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "B", 
-                                "resultFormat": "time_series"
-                            }, 
-                            {
-                                "tags": [], 
-                                "measurement": "rdocloud-servers", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "Undercloud", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "undercloud"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "C", 
-                                "resultFormat": "time_series"
-                            }, 
-                            {
-                                "tags": [], 
-                                "measurement": "rdocloud-servers", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "OVB BM node", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "ovb-node"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "D", 
-                                "resultFormat": "time_series"
-                            }, 
-                            {
-                                "tags": [], 
-                                "measurement": "rdocloud-servers", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "Other", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "other"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "E", 
-                                "resultFormat": "time_series"
-                            }
-                        ], 
-                        "fill": 1, 
-                        "title": "Instances types", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "total": false, 
-                            "show": true, 
-                            "max": false, 
-                            "min": false, 
-                            "current": true, 
-                            "values": true, 
-                            "avg": false
-                        }, 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [], 
-                        "percentage": false, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "dashLength": 10, 
-                        "stack": true, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": true, 
-                        "points": false, 
-                        "datasource": "telegraf", 
-                        "pointradius": 5
-                    }, 
-                    {
-                        "bars": false, 
-                        "timeFrom": null, 
-                        "links": [], 
-                        "thresholds": [], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "id": 179, 
-                        "gridPos": {
-                            "y": 46, 
+                            "y": 76, 
                             "h": 7, 
-                            "w": 12, 
+                            "w": 24, 
                             "x": 0
                         }, 
-                        "linewidth": 1, 
-                        "steppedLine": false, 
+                        "type": "table", 
+                        "id": 2, 
+                        "columns": []
+                    }, 
+                    {
+                        "sort": {
+                            "col": 0, 
+                            "desc": true
+                        }, 
+                        "styles": [
+                            {
+                                "alias": "Time", 
+                                "type": "date", 
+                                "pattern": "Time", 
+                                "dateFormat": "YYYY-MM-DD HH:mm:ss"
+                            }, 
+                            {
+                                "mappingType": 1, 
+                                "type": "string", 
+                                "valueMaps": [
+                                    {
+                                        "text": "good", 
+                                        "value": "0"
+                                    }, 
+                                    {
+                                        "text": "minor", 
+                                        "value": "-1"
+                                    }, 
+                                    {
+                                        "text": "major", 
+                                        "value": "-2"
+                                    }
+                                ], 
+                                "pattern": "status_enum", 
+                                "thresholds": [
+                                    "-2", 
+                                    "0"
+                                ], 
+                                "alias": "status", 
+                                "colors": [
+                                    "rgba(245, 54, 54, 0.9)", 
+                                    "rgba(237, 129, 40, 0.89)", 
+                                    "rgba(50, 172, 45, 0.97)"
+                                ], 
+                                "colorMode": "row", 
+                                "decimals": 0, 
+                                "unit": "short"
+                            }
+                        ], 
+                        "pageSize": null, 
+                        "links": [], 
+                        "title": "Github", 
+                        "transform": "table", 
+                        "showHeader": true, 
+                        "scroll": true, 
                         "targets": [
                             {
                                 "tags": [], 
-                                "measurement": "rdocloud-servers", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "CREATE_COMPLETE", 
+                                "measurement": "github-status", 
+                                "groupBy": [], 
                                 "select": [
                                     [
                                         {
                                             "type": "field", 
                                             "params": [
-                                                "create_complete"
+                                                "message"
                                             ]
-                                        }, 
+                                        }
+                                    ], 
+                                    [
                                         {
-                                            "type": "mean", 
-                                            "params": []
+                                            "type": "field", 
+                                            "params": [
+                                                "status_enum"
+                                            ]
                                         }
                                     ]
                                 ], 
                                 "orderByTime": "ASC", 
-                                "policy": "autogen", 
+                                "policy": "default", 
                                 "refId": "A", 
-                                "resultFormat": "time_series"
-                            }, 
-                            {
-                                "tags": [], 
-                                "measurement": "rdocloud-servers", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "CREATE_FAILED", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "create_failed"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "autogen", 
-                                "refId": "B", 
-                                "resultFormat": "time_series"
-                            }, 
-                            {
-                                "tags": [], 
-                                "measurement": "rdocloud-servers", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "CREATE_IN_PROGRESS", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "create_in_progress"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "autogen", 
-                                "refId": "C", 
-                                "resultFormat": "time_series"
-                            }, 
-                            {
-                                "tags": [], 
-                                "measurement": "rdocloud-servers", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "DELETE_COMPLETE", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "delete_complete"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "autogen", 
-                                "refId": "D", 
-                                "resultFormat": "time_series"
-                            }, 
-                            {
-                                "tags": [], 
-                                "measurement": "rdocloud-servers", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "DELETE_FAILED", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "delete_failed"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "autogen", 
-                                "refId": "E", 
-                                "resultFormat": "time_series"
-                            }, 
-                            {
-                                "tags": [], 
-                                "measurement": "rdocloud-servers", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "DELETE_IN_PROGRESS", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "delete_in_progress"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "autogen", 
-                                "refId": "F", 
-                                "resultFormat": "time_series"
+                                "resultFormat": "table"
                             }
                         ], 
-                        "fill": 1, 
-                        "title": "Stacks", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "total": false, 
-                            "show": true, 
-                            "max": false, 
-                            "min": false, 
-                            "current": true, 
-                            "values": true, 
-                            "avg": false
-                        }, 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [], 
-                        "percentage": false, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "dashLength": 10, 
-                        "stack": true, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": true, 
-                        "points": false, 
+                        "fontSize": "100%", 
                         "datasource": "telegraf", 
-                        "pointradius": 5
+                        "gridPos": {
+                            "y": 83, 
+                            "h": 9, 
+                            "w": 12, 
+                            "x": 0
+                        }, 
+                        "type": "table", 
+                        "id": 196, 
+                        "columns": []
                     }, 
                     {
                         "bars": false, 
@@ -8373,8 +7501,8 @@
                             {
                                 "colorMode": "critical", 
                                 "line": true, 
-                                "op": "gt", 
-                                "value": 1, 
+                                "op": "lt", 
+                                "value": 0, 
                                 "fill": true
                             }
                         ], 
@@ -8382,16 +7510,16 @@
                         "nullPointMode": "null", 
                         "renderer": "flot", 
                         "gridPos": {
-                            "y": 46, 
-                            "h": 7, 
+                            "y": 83, 
+                            "h": 9, 
                             "w": 12, 
                             "x": 12
                         }, 
                         "linewidth": 1, 
                         "steppedLine": false, 
-                        "id": 181, 
+                        "id": 194, 
                         "fill": 1, 
-                        "title": "Problematic stacks", 
+                        "title": "Github", 
                         "tooltip": {
                             "sort": 0, 
                             "shared": true, 
@@ -8399,7 +7527,7 @@
                         }, 
                         "legend": {
                             "total": false, 
-                            "show": true, 
+                            "show": false, 
                             "max": false, 
                             "min": false, 
                             "current": false, 
@@ -8409,33 +7537,15 @@
                         "targets": [
                             {
                                 "tags": [], 
-                                "measurement": "rdocloud-servers", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "Old stacks", 
+                                "measurement": "github-status", 
+                                "groupBy": [], 
                                 "select": [
                                     [
                                         {
                                             "type": "field", 
                                             "params": [
-                                                "old_stacks"
+                                                "status_enum"
                                             ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
                                         }
                                     ]
                                 ], 
@@ -8443,57 +7553,21 @@
                                 "policy": "default", 
                                 "refId": "A", 
                                 "resultFormat": "time_series"
-                            }, 
-                            {
-                                "tags": [], 
-                                "measurement": "rdocloud-servers", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "Failed to delete", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "delete_failed"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "B", 
-                                "resultFormat": "time_series"
                             }
                         ], 
                         "yaxes": [
                             {
                                 "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
+                                "min": "-2", 
+                                "max": "0", 
                                 "format": "short", 
-                                "min": null, 
-                                "label": null
+                                "label": "status", 
+                                "show": true, 
+                                "decimals": 0
                             }, 
                             {
                                 "logBase": 1, 
-                                "show": true, 
+                                "show": false, 
                                 "max": null, 
                                 "format": "short", 
                                 "min": null, 
@@ -8513,7 +7587,7 @@
                         "dashes": false, 
                         "alert": {
                             "noDataState": "no_data", 
-                            "name": "Problematic stacks alert", 
+                            "name": "Github alert", 
                             "frequency": "60s", 
                             "notifications": [
                                 {
@@ -8522,7 +7596,7 @@
                             ], 
                             "handler": 1, 
                             "executionErrorState": "alerting", 
-                            "message": "RDO Nodepool has issues", 
+                            "message": "Github has problems", 
                             "conditions": [
                                 {
                                     "operator": {
@@ -8531,35 +7605,12 @@
                                     "query": {
                                         "params": [
                                             "A", 
-                                            "30m", 
+                                            "24h", 
                                             "now"
                                         ]
                                     }, 
                                     "evaluator": {
-                                        "type": "gt", 
-                                        "params": [
-                                            1
-                                        ]
-                                    }, 
-                                    "reducer": {
-                                        "type": "last", 
-                                        "params": []
-                                    }, 
-                                    "type": "query"
-                                }, 
-                                {
-                                    "operator": {
-                                        "type": "or"
-                                    }, 
-                                    "query": {
-                                        "params": [
-                                            "B", 
-                                            "30m", 
-                                            "now"
-                                        ]
-                                    }, 
-                                    "evaluator": {
-                                        "type": "gt", 
+                                        "type": "lt", 
                                         "params": [
                                             0
                                         ]
@@ -8580,356 +7631,1325 @@
                         }, 
                         "timeShift": null, 
                         "aliasColors": {}, 
-                        "lines": true, 
-                        "points": false, 
-                        "datasource": "telegraf", 
-                        "pointradius": 5
-                    }, 
-                    {
-                        "bars": false, 
-                        "timeFrom": null, 
-                        "links": [], 
-                        "thresholds": [], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "id": 183, 
-                        "gridPos": {
-                            "y": 53, 
-                            "h": 6, 
-                            "w": 7, 
-                            "x": 0
-                        }, 
-                        "linewidth": 1, 
-                        "steppedLine": false, 
-                        "targets": [
-                            {
-                                "tags": [], 
-                                "measurement": "rdocloud-perf", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "CPU cores", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "cores"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "time_series"
-                            }
-                        ], 
-                        "fill": 1, 
-                        "title": "CPU cores", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "total": false, 
-                            "show": true, 
-                            "max": true, 
-                            "min": true, 
-                            "current": true, 
-                            "values": true, 
-                            "avg": true
-                        }, 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [], 
-                        "percentage": false, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "dashLength": 10, 
-                        "stack": false, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": true, 
-                        "points": false, 
-                        "datasource": "telegraf", 
-                        "pointradius": 5
-                    }, 
-                    {
-                        "bars": false, 
-                        "timeFrom": null, 
-                        "links": [], 
-                        "thresholds": [], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "id": 185, 
-                        "gridPos": {
-                            "y": 53, 
-                            "h": 6, 
-                            "w": 9, 
-                            "x": 7
-                        }, 
-                        "linewidth": 1, 
-                        "steppedLine": false, 
-                        "targets": [
-                            {
-                                "tags": [], 
-                                "measurement": "rdocloud-perf", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "RAM", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "ram"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "time_series"
-                            }
-                        ], 
-                        "fill": 1, 
-                        "title": "Memory", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "total": false, 
-                            "show": true, 
-                            "max": true, 
-                            "min": true, 
-                            "current": true, 
-                            "values": true, 
-                            "avg": true
-                        }, 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "decmbytes", 
-                                "min": null, 
-                                "label": null
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [], 
-                        "percentage": false, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "dashLength": 10, 
-                        "stack": false, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": true, 
-                        "points": false, 
-                        "datasource": "telegraf", 
-                        "pointradius": 5
-                    }, 
-                    {
-                        "bars": false, 
-                        "timeFrom": null, 
-                        "links": [], 
-                        "thresholds": [], 
-                        "spaceLength": 10, 
-                        "nullPointMode": "null", 
-                        "renderer": "flot", 
-                        "id": 187, 
-                        "gridPos": {
-                            "y": 53, 
-                            "h": 6, 
-                            "w": 8, 
-                            "x": 16
-                        }, 
-                        "linewidth": 1, 
-                        "steppedLine": false, 
-                        "targets": [
-                            {
-                                "tags": [], 
-                                "measurement": "rdocloud-perf", 
-                                "groupBy": [
-                                    {
-                                        "type": "time", 
-                                        "params": [
-                                            "15m"
-                                        ]
-                                    }, 
-                                    {
-                                        "type": "fill", 
-                                        "params": [
-                                            "null"
-                                        ]
-                                    }
-                                ], 
-                                "alias": "Servers", 
-                                "select": [
-                                    [
-                                        {
-                                            "type": "field", 
-                                            "params": [
-                                                "instances"
-                                            ]
-                                        }, 
-                                        {
-                                            "type": "mean", 
-                                            "params": []
-                                        }
-                                    ]
-                                ], 
-                                "orderByTime": "ASC", 
-                                "policy": "default", 
-                                "refId": "A", 
-                                "resultFormat": "time_series"
-                            }
-                        ], 
-                        "fill": 1, 
-                        "title": "Instances", 
-                        "tooltip": {
-                            "sort": 0, 
-                            "shared": true, 
-                            "value_type": "individual"
-                        }, 
-                        "legend": {
-                            "total": false, 
-                            "show": true, 
-                            "max": false, 
-                            "min": false, 
-                            "current": false, 
-                            "values": false, 
-                            "avg": false
-                        }, 
-                        "yaxes": [
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }, 
-                            {
-                                "logBase": 1, 
-                                "show": true, 
-                                "max": null, 
-                                "format": "short", 
-                                "min": null, 
-                                "label": null
-                            }
-                        ], 
-                        "xaxis": {
-                            "buckets": null, 
-                            "show": true, 
-                            "values": [], 
-                            "mode": "time", 
-                            "name": null
-                        }, 
-                        "seriesOverrides": [], 
-                        "percentage": false, 
-                        "type": "graph", 
-                        "dashes": false, 
-                        "dashLength": 10, 
-                        "stack": false, 
-                        "yaxis": {
-                            "align": false, 
-                            "alignLevel": null
-                        }, 
-                        "timeShift": null, 
-                        "aliasColors": {}, 
-                        "lines": true, 
-                        "points": false, 
+                        "lines": false, 
+                        "points": true, 
                         "datasource": "telegraf", 
                         "pointradius": 5
                     }
                 ], 
                 "type": "row", 
+                "id": 4
+            }, 
+            {
+                "title": "RDO cloud performance", 
+                "collapsed": false, 
+                "gridPos": {
+                    "y": 76, 
+                    "h": 1, 
+                    "w": 24, 
+                    "x": 0
+                }, 
+                "panels": [], 
+                "type": "row", 
                 "id": 173
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": null, 
+                "links": [], 
+                "thresholds": [], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "id": 175, 
+                "gridPos": {
+                    "y": 77, 
+                    "h": 6, 
+                    "w": 12, 
+                    "x": 0
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "targets": [
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-servers", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "none"
+                                ]
+                            }
+                        ], 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "ACTIVE"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }, 
+                                {
+                                    "type": "alias", 
+                                    "params": [
+                                        "ACTIVE"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "BUILD"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }, 
+                                {
+                                    "type": "alias", 
+                                    "params": [
+                                        "BUILD"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "DELETED"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }, 
+                                {
+                                    "type": "alias", 
+                                    "params": [
+                                        "DELETED"
+                                    ]
+                                }
+                            ], 
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "ERROR"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }, 
+                                {
+                                    "type": "alias", 
+                                    "params": [
+                                        "ERROR"
+                                    ]
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "fill": 1, 
+                "title": "Nodes status", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": true, 
+                    "max": true, 
+                    "min": true, 
+                    "current": true, 
+                    "values": true, 
+                    "alignAsTable": false, 
+                    "avg": true
+                }, 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": true, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": null, 
+                "links": [], 
+                "thresholds": [], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "id": 177, 
+                "gridPos": {
+                    "y": 77, 
+                    "h": 6, 
+                    "w": 12, 
+                    "x": 12
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "targets": [
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-servers", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "BMC node", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "bmc"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-servers", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "Multinode", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "multinode"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "B", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-servers", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "Undercloud", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "undercloud"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "C", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-servers", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "OVB BM node", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "ovb-node"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "D", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-servers", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "Other", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "other"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "E", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "fill": 1, 
+                "title": "Instances types", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": true, 
+                    "max": false, 
+                    "min": false, 
+                    "current": true, 
+                    "values": true, 
+                    "avg": false
+                }, 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "dashLength": 10, 
+                "stack": true, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": true, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": null, 
+                "links": [], 
+                "thresholds": [], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "id": 179, 
+                "gridPos": {
+                    "y": 83, 
+                    "h": 7, 
+                    "w": 12, 
+                    "x": 0
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "targets": [
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-servers", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "CREATE_COMPLETE", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "create_complete"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "autogen", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-servers", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "CREATE_FAILED", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "create_failed"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "autogen", 
+                        "refId": "B", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-servers", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "CREATE_IN_PROGRESS", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "create_in_progress"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "autogen", 
+                        "refId": "C", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-servers", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "DELETE_COMPLETE", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "delete_complete"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "autogen", 
+                        "refId": "D", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-servers", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "DELETE_FAILED", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "delete_failed"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "autogen", 
+                        "refId": "E", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-servers", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "DELETE_IN_PROGRESS", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "delete_in_progress"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "autogen", 
+                        "refId": "F", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "fill": 1, 
+                "title": "Stacks", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": true, 
+                    "max": false, 
+                    "min": false, 
+                    "current": true, 
+                    "values": true, 
+                    "avg": false
+                }, 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "dashLength": 10, 
+                "stack": true, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": true, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": null, 
+                "links": [], 
+                "thresholds": [
+                    {
+                        "colorMode": "critical", 
+                        "line": true, 
+                        "op": "gt", 
+                        "value": 1, 
+                        "fill": true
+                    }
+                ], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "gridPos": {
+                    "y": 83, 
+                    "h": 7, 
+                    "w": 12, 
+                    "x": 12
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "id": 181, 
+                "fill": 1, 
+                "title": "Problematic stacks", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": true, 
+                    "max": false, 
+                    "min": false, 
+                    "current": false, 
+                    "values": false, 
+                    "avg": false
+                }, 
+                "targets": [
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-servers", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "Old stacks", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "old_stacks"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }, 
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-servers", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "Failed to delete", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "delete_failed"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "B", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "min": "0", 
+                        "max": "5", 
+                        "format": "short", 
+                        "label": "", 
+                        "show": true, 
+                        "decimals": 0
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "alert": {
+                    "noDataState": "no_data", 
+                    "name": "Problematic stacks alert", 
+                    "frequency": "60s", 
+                    "notifications": [
+                        {
+                            "id": 2
+                        }
+                    ], 
+                    "handler": 1, 
+                    "executionErrorState": "alerting", 
+                    "message": "RDO Nodepool has issues", 
+                    "conditions": [
+                        {
+                            "operator": {
+                                "type": "and"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "A", 
+                                    "30m", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "gt", 
+                                "params": [
+                                    1
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "last", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }, 
+                        {
+                            "operator": {
+                                "type": "or"
+                            }, 
+                            "query": {
+                                "params": [
+                                    "B", 
+                                    "30m", 
+                                    "now"
+                                ]
+                            }, 
+                            "evaluator": {
+                                "type": "gt", 
+                                "params": [
+                                    0
+                                ]
+                            }, 
+                            "reducer": {
+                                "type": "last", 
+                                "params": []
+                            }, 
+                            "type": "query"
+                        }
+                    ]
+                }, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": true, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": null, 
+                "links": [], 
+                "thresholds": [], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "id": 183, 
+                "gridPos": {
+                    "y": 90, 
+                    "h": 6, 
+                    "w": 7, 
+                    "x": 0
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "targets": [
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-perf", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "CPU cores", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "cores"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "fill": 1, 
+                "title": "CPU cores", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": true, 
+                    "max": true, 
+                    "min": true, 
+                    "current": true, 
+                    "values": true, 
+                    "avg": true
+                }, 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": true, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": null, 
+                "links": [], 
+                "thresholds": [], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "id": 185, 
+                "gridPos": {
+                    "y": 90, 
+                    "h": 6, 
+                    "w": 9, 
+                    "x": 7
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "targets": [
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-perf", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "RAM", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "ram"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "fill": 1, 
+                "title": "Memory", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": true, 
+                    "max": true, 
+                    "min": true, 
+                    "current": true, 
+                    "values": true, 
+                    "avg": true
+                }, 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "decmbytes", 
+                        "min": null, 
+                        "label": null
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": true, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
+            }, 
+            {
+                "bars": false, 
+                "timeFrom": null, 
+                "links": [], 
+                "thresholds": [], 
+                "spaceLength": 10, 
+                "nullPointMode": "null", 
+                "renderer": "flot", 
+                "id": 187, 
+                "gridPos": {
+                    "y": 90, 
+                    "h": 6, 
+                    "w": 8, 
+                    "x": 16
+                }, 
+                "linewidth": 1, 
+                "steppedLine": false, 
+                "targets": [
+                    {
+                        "tags": [], 
+                        "measurement": "rdocloud-perf", 
+                        "groupBy": [
+                            {
+                                "type": "time", 
+                                "params": [
+                                    "15m"
+                                ]
+                            }, 
+                            {
+                                "type": "fill", 
+                                "params": [
+                                    "null"
+                                ]
+                            }
+                        ], 
+                        "alias": "Servers", 
+                        "select": [
+                            [
+                                {
+                                    "type": "field", 
+                                    "params": [
+                                        "instances"
+                                    ]
+                                }, 
+                                {
+                                    "type": "mean", 
+                                    "params": []
+                                }
+                            ]
+                        ], 
+                        "orderByTime": "ASC", 
+                        "policy": "default", 
+                        "refId": "A", 
+                        "resultFormat": "time_series"
+                    }
+                ], 
+                "fill": 1, 
+                "title": "Instances", 
+                "tooltip": {
+                    "sort": 0, 
+                    "shared": true, 
+                    "value_type": "individual"
+                }, 
+                "legend": {
+                    "total": false, 
+                    "show": true, 
+                    "max": false, 
+                    "min": false, 
+                    "current": false, 
+                    "values": false, 
+                    "avg": false
+                }, 
+                "yaxes": [
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }, 
+                    {
+                        "logBase": 1, 
+                        "show": true, 
+                        "max": null, 
+                        "format": "short", 
+                        "min": null, 
+                        "label": null
+                    }
+                ], 
+                "xaxis": {
+                    "buckets": null, 
+                    "show": true, 
+                    "values": [], 
+                    "mode": "time", 
+                    "name": null
+                }, 
+                "seriesOverrides": [], 
+                "percentage": false, 
+                "type": "graph", 
+                "dashes": false, 
+                "dashLength": 10, 
+                "stack": false, 
+                "yaxis": {
+                    "align": false, 
+                    "alignLevel": null
+                }, 
+                "timeShift": null, 
+                "aliasColors": {}, 
+                "lines": true, 
+                "points": false, 
+                "datasource": "telegraf", 
+                "pointradius": 5
             }
         ]
     }
