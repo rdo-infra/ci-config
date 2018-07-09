@@ -60,3 +60,21 @@
           test-day-tools/run_tests.sh
     publishers:
       - weirdo-release-node
+
+- job:
+    name: 'rdo-test-day-tools-ppc64le'
+    defaults: weirdo-defaults
+    properties:
+      - inject:
+          properties-content: |
+            CPU_ARCH=ppc64le
+    scm:
+      - repo-test-day-tools-gerrit
+    builders:
+      - weirdo-get-node
+      - shell: |
+          # All the logic should be embedded in this script
+          # Ansible inventory with the node is available in $WORKSPACE/hosts.
+          test-day-tools/run_tests.sh
+    publishers:
+      - weirdo-release-node
