@@ -4,7 +4,7 @@ NODE_COUNT=${NODE_COUNT:-1}
 ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
 SSID_FILE=${SSID_FILE:-$WORKSPACE/cico-ssid}
 
-CPU_ARCH=${CPU_ARCH:-x86_64}
+CPU_ARCH=${1:-x86_64}
 
 # Write the header of the hosts file
 cat << EOF > ${ANSIBLE_HOSTS}
