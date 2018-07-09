@@ -53,7 +53,23 @@
     triggers:
       - trigger-test-day-tools
     builders:
-      - weirdo-get-node
+      - weirdo-get-node:
+          cpu_arch: "x86_64"
+      - shell: |
+          # All the logic should be embedded in this script
+          # Ansible inventory with the node is available in $WORKSPACE/hosts.
+          test-day-tools/run_tests.sh
+    publishers:
+      - weirdo-release-node
+
+- job:
+    name: 'rdo-test-day-tools-ppc64le'
+    defaults: weirdo-defaults
+    scm:
+      - repo-test-day-tools-gerrit
+    builders:
+      - weirdo-get-node:
+          cpu_arch: "ppc64le"
       - shell: |
           # All the logic should be embedded in this script
           # Ansible inventory with the node is available in $WORKSPACE/hosts.
