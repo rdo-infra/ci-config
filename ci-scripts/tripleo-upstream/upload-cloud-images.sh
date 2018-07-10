@@ -1,6 +1,6 @@
 set -e
 echo ======== UPLOAD CLOUD IMAGES
-
+export SSH_KEY="~/.ssh/id_rsa_uploader"
 export FULL_HASH=$(grep -o -E '[0-9a-f]{40}_[0-9a-f]{8}' < /etc/yum.repos.d/delorean.repo)
 
 pushd $HOME
