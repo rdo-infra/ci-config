@@ -77,6 +77,7 @@ echo ======== UPLOAD UNDERCLOUD IMAGE
 export FULL_HASH=$(grep -o -E '[0-9a-f]{40}_[0-9a-f]{8}' < /etc/yum.repos.d/delorean.repo)
 
 
+sudo chown $USER: $SSH_KEY
 chmod 600 $SSH_KEY
 export RSYNC_RSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i $SSH_KEY"
 rsync_cmd="rsync --verbose --archive --delay-updates --relative"

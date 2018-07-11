@@ -6,8 +6,9 @@ export FULL_HASH=$(grep -o -E '[0-9a-f]{40}_[0-9a-f]{8}' < /etc/yum.repos.d/delo
 pushd $HOME
 
 ls *.tar
-
+sudo chown $USER: $SSH_KEY
 chmod 600 $SSH_KEY
+ls -lash $SSH_KEY
 export RSYNC_RSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i $SSH_KEY"
 rsync_cmd="rsync --verbose --archive --delay-updates --relative"
 UPLOAD_URL=uploader@images.rdoproject.org:/var/www/html/images/$RELEASE/rdo_trunk
