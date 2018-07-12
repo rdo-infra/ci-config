@@ -1,0 +1,225 @@
+dashboard:
+  title: New dashboard
+  time:
+    from: now-2d
+    to: now
+  rows:
+    - title: Main
+      height: 250px
+      panels:
+          - title: Main
+            type: row
+            collapsed: false
+          - title: Upstream Zuul queue
+            span: 2
+            sparkline:
+              fillColor: rgba(31, 118, 189, 0.18)
+              full: false
+              lineColor: rgb(31, 120, 193)
+              show: true
+            maxDataPoints: 100
+            colorValue: true
+            valueName: current
+            valueFontSize: 50%
+            datasource: telegraf
+            #link: true
+            #linkTargetBlank: true
+            #linkUrl: 'https://bugs.launchpad.net/tripleo/+bug/${__cell_3} '
+            type: singlestat
+            format: m
+            decimals: 1
+            thresholds: 500,1000
+            gauge:
+               maxValue: 2000
+               minValue: 0
+               show: true
+               thresholdLabels: true
+               thresholdMarkers: true
+            targets:
+              - groupBy:
+                - params:
+                  - $__interval
+                  type: time
+                - params:
+                  - none
+                  type: fill
+                measurement: zuul-queue-status
+                orderByTime: ASC
+                policy: default
+                refId: A
+                resultFormat: time_series
+                select:
+                - - params:
+                    - enqueued_time
+                    type: field
+                  - params: []
+                    type: max
+                tags:
+                - key: pipeline
+                  operator: '='
+                  value: gate
+                - condition: AND
+                  key: queue
+                  operator: '='
+                  value: tripleo
+          - title: RDO Zuul queue
+            span: 2
+            sparkline:
+              fillColor: rgba(31, 118, 189, 0.18)
+              full: false
+              lineColor: rgb(31, 120, 193)
+              show: true
+            maxDataPoints: 100
+            colorValue: true
+            valueName: current
+            valueFontSize: 50%
+            datasource: telegraf
+            #link: true
+            #linkTargetBlank: true
+            #linkUrl: 'https://bugs.launchpad.net/tripleo/+bug/${__cell_3} '
+            type: singlestat
+            format: m
+            decimals: 1
+            thresholds: 500,1000
+            gauge:
+               maxValue: 2000
+               minValue: 0
+               show: true
+               thresholdLabels: true
+               thresholdMarkers: true
+            targets:
+            - groupBy:
+              - params:
+                - $__interval
+                type: time
+              - params:
+                - none
+                type: fill
+              measurement: zuul-queue-status
+              orderByTime: ASC
+              policy: default
+              refId: A
+              resultFormat: time_series
+              select:
+              - - params:
+                  - enqueued_time
+                  type: field
+                - params: []
+                  type: max
+              tags:
+              - key: pipeline
+                operator: '='
+                value: openstack-check
+
+          - title: Gate jobs
+            span: 2
+            #FIXME: Only takes 2,3
+            thresholds: 1,2,3
+            colorBackground: false
+            colorValue: true
+            #colors:
+            #- '#299c46'
+            #- rgba(237, 129, 40, 0.89)
+            #- '#d44a3a'
+            datasource: telegraf
+            gauge:
+              maxValue: 10
+              minValue: 0
+              show: true
+              thresholdLabels: true
+              thresholdMarkers: true
+            postfix: ' fails'
+            postfixFontSize: 50%
+            #tableColumn: count
+            targets:
+            - groupBy: []
+              measurement: build
+              orderByTime: ASC
+              policy: default
+              refId: A
+              resultFormat: time_series
+              select:
+              - - params:
+                  - result_num
+                  type: field
+                - params: []
+                  type: count
+              tags:
+              - key: pipeline
+                operator: '='
+                value: gate
+              - condition: AND
+                key: passed
+                operator: '='
+                value: 'False'
+            timeFrom: 24h
+            type: singlestat
+            valueFontSize: 70%
+            valueName: current
+          - title: Check jobs (noop)
+            span: 2
+            colorBackground: false
+            colorValue: true
+            datasource: telegraf
+            gauge:
+              maxValue: 20
+              minValue: 0
+              show: true
+              thresholdLabels: false
+              thresholdMarkers: true
+            postfix: ' fails'
+            postfixFontSize: 50%
+            prefix: ''
+            prefixFontSize: 50%
+            targets:
+            - groupBy:
+              - params:
+                - 6h
+                type: time
+              - params:
+                - none
+                type: fill
+              measurement: build
+              orderByTime: ASC
+              policy: default
+              query: SELECT count("result_num") FROM "build" WHERE (("change" = '560445' OR
+                "change" = '567224' OR "change" = '564291' OR "change" = '564285' ) AND "voting"
+                = 'True' AND "passed" = 'False') AND $timeFilter
+              rawQuery: true
+              refId: A
+              resultFormat: time_series
+              select:
+              - - params:
+                  - result_num
+                  type: field
+                - params: []
+                  type: count
+              tags:
+              - key: change
+                operator: '='
+                value: '560445'
+              - condition: OR
+                key: change
+                operator: '='
+                value: '567224'
+              - condition: OR
+                key: change
+                operator: '='
+                value: '564291'
+              - condition: OR
+                key: change
+                operator: '='
+                value: '564285'
+              - condition: AND
+                key: voting
+                operator: '='
+                value: 'True'
+              - condition: AND
+                key: passed
+                operator: '='
+                value: 'False'
+            thresholds: 4,6
+            timeFrom: 11h
+            type: singlestat
+            valueFontSize: 80%
+            valueName: current
