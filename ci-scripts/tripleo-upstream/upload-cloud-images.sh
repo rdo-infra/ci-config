@@ -1,14 +1,12 @@
 set -e
 echo ======== UPLOAD CLOUD IMAGES
-export SSH_KEY="/tmp/id_rsa_uploader"
 export FULL_HASH=$(grep -o -E '[0-9a-f]{40}_[0-9a-f]{8}' < /etc/yum.repos.d/delorean.repo)
 
 pushd $HOME
 
 ls *.tar
 
-chmod 600 $SSH_KEY
-export RSYNC_RSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i $SSH_KEY"
+export RSYNC_RSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 rsync_cmd="rsync --verbose --archive --delay-updates --relative"
 UPLOAD_URL=uploader@images.rdoproject.org:/var/www/html/images/$RELEASE/rdo_trunk
 # Check if directory $FULL_HASH exists, if not create it.

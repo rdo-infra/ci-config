@@ -4,7 +4,6 @@ echo ======== CONVERT OVERCLOUD IMAGE TO UNDERCLOUD IMAGE
 
 : ${WORKSPACE:=$HOME}
 export QUICKSTART_VENV=$WORKSPACE/.quickstart
-export SSH_KEY="/tmp/id_rsa_uploader"
 
 # Enforce TCG as kvm is not working in some environment due to
 # nested kvm issue:- https://bugzilla.redhat.com/show_bug.cgi?id=1565179
@@ -77,8 +76,7 @@ echo ======== UPLOAD UNDERCLOUD IMAGE
 export FULL_HASH=$(grep -o -E '[0-9a-f]{40}_[0-9a-f]{8}' < /etc/yum.repos.d/delorean.repo)
 
 
-chmod 600 $SSH_KEY
-export RSYNC_RSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i $SSH_KEY"
+export RSYNC_RSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 rsync_cmd="rsync --verbose --archive --delay-updates --relative"
 UPLOAD_URL=uploader@images.rdoproject.org:/var/www/html/images/$RELEASE/rdo_trunk
 mkdir $FULL_HASH
