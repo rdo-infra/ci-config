@@ -28,14 +28,17 @@ def get_failing_jobs_html(dlrn_hashes, release_name):
             params.distro_hash = dlrn_hashes['distro_hash']
             params.success = str(False)
             failing_jobs = dlrn.api_repo_status_get(params)
-            for failing_job in failing_jobs:
-                failing_job_html = "<a href='{}' target='_blank' >{}</a><br>".format(failing_job.url,
-                                                                                         failing_job.job_id)
+            for i, failing_job in enumerate(failing_jobs):
+                failing_job_html = "<a href='{}' target='_blank' >{}</a>".format(
+                    failing_job.url, failing_job.job_id)
+
+                if i > 0:
+                    failing_job_html.append("<br>")
                 failing_jobs_html += failing_job_html
+
     except Exception as e:
         pass
     return failing_jobs_html
-
 # FIXME: Use a decorator ?
 def get_cached_failing_jobs_html(dlrn_hashes, release_name):
     cache_key = "failing_jobs_html_{timestamp}_{repo_hash}".format(**dlrn_hashes)
