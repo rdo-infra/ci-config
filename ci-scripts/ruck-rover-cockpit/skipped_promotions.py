@@ -10,7 +10,7 @@ import influxdb_utils
 from promoter_utils import get_dlrn_instance_for_release
 from diskcache import Cache
 
-cache = Cache('/tmp/ruck_rover_cache')
+cache = Cache('/tmp/skipped_promotions_cache')
 cache.expire()
 
 promoter_skipping_regex = re.compile(
@@ -20,6 +20,10 @@ promoter_skipping_regex = re.compile(
 
 def get_failing_jobs_html(dlrn_hashes, release_name):
     failing_jobs_html = ""
+
+    # If any of the jobs is still in progress
+    in_progress = False
+
     try:
         dlrn = get_dlrn_instance_for_release(release_name)
         if dlrn:
@@ -27,22 +31,33 @@ def get_failing_jobs_html(dlrn_hashes, release_name):
             params.commit_hash = dlrn_hashes['commit_hash']
             params.distro_hash = dlrn_hashes['distro_hash']
             params.success = str(False)
+            if params.in_progress:
+                in_progress = True
+
             failing_jobs = dlrn.api_repo_status_get(params)
-            for failing_job in failing_jobs:
-                failing_job_html = "<a href='{}' target='_blank' >{}</a><br>".format(failing_job.url,
-                                                                                         failing_job.job_id)
+            for i, failing_job in enumerate(failing_jobs):
+                failing_job_html = "<a href='{}' target='_blank' >{}</a>".format(
+                    failing_job.url, failing_job.job_id)
+
+                if i > 0:
+                    failing_job_html.append("<br>")
                 failing_jobs_html += failing_job_html
+
     except Exception as e:
         pass
-    return failing_jobs_html
+    return (in_progress, failing_jobs_html)
 
 # FIXME: Use a decorator ?
 def get_cached_failing_jobs_html(dlrn_hashes, release_name):
     cache_key = "failing_jobs_html_{timestamp}_{repo_hash}".format(**dlrn_hashes)
-    if cache_key not in cache or dlrn_hashes['repo_hash'] == "3a06aedd82dd5ed609c9371dada9f75cf3692008_8d0f9fd1":
-        failing_jobs_html = get_failing_jobs_html(dlrn_hashes,
+    if cache_key not in cache:
+        in_progress, failing_jobs_html = get_failing_jobs_html(dlrn_hashes,
                                                     release_name)
-        cache.add(cache_key, failing_jobs_html, expire=259200)
+
+        # Only chache if jobs have finished
+        if not in_progress:
+            cache.add(cache_key, failing_jobs_html, expire=259200)
+
     return cache[cache_key]
 
 def parse_skipped_promotions(release_name):
@@ -85,7 +100,7 @@ def parse_skipped_promotions(release_name):
 def to_influxdb(skipped_promotions):
     influxdb_lines = []
     influxdb_format = ("skipped-promotions,repo_hash={repo_hash},release={release},from_name={from_name},"
-                       "to_name={to_name} failing_jobs=\"{failing_jobs}\" "
+                       "to_name={to_name} dummy=1,failing_jobs=\"{failing_jobs}\" "
                        "{timestamp}")
 
     for skipped_promotion in skipped_promotions:
