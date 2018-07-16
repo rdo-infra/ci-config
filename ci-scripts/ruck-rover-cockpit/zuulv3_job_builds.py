@@ -113,7 +113,8 @@ def influx(build):
         'passed=%s,'
         'cloud=%s,'
         'region=%s,'
-        'provider=%s'
+        'provider=%s,'
+        'result="%s"'
         ' '
         'result="%s",'
         'result_num=%s,'
@@ -139,6 +140,7 @@ def influx(build):
             build.get('cloud', 'null'),
             build.get('region', 'null'),
             build.get('provider', 'null'),
+            build['result'],
 
             build['result'],
             1 if build['result'] == 'SUCCESS' else 0,
