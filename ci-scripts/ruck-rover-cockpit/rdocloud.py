@@ -76,6 +76,14 @@ def run_quote_check():
     return d
 
 
+def run_fips_count():
+    cmd = "openstack floating ip list -f json"
+    out = _run_cmd(cmd)[0]
+    if not out:
+        return 0
+    return len(out)
+
+
 def run_stacks_check():
     cmd = "openstack stack list  -f json"
     out = _run_cmd(cmd)[0]
@@ -104,7 +112,7 @@ def run_stacks_check():
     return d
 
 
-def write_influxdb_file(servers, quotes, stacks, ts):
+def write_influxdb_file(servers, quotes, stacks, fips, ts):
     s = ''
     if servers:
         s = 'rdocloud-servers '
@@ -126,8 +134,10 @@ def write_influxdb_file(servers, quotes, stacks, ts):
             ).format(**stacks)
     p = ''
     if quotes:
+        quotes.update({'fips': fips})
         p = 'rdocloud-perf '
-        p += ('instances={instances},cores={cores},ram={ram},gigabytes={gbs}'
+        p += ('instances={instances},cores={cores},ram={ram},gigabytes={gbs},'
+              'fips={fips}'
               ).format(**quotes)
     nanots = str(int(ts)) + "000000000"
     with open(FILE_PATH, "w") as f:
@@ -140,7 +150,8 @@ def main():
     servers = run_server_check()
     quotes = run_quote_check()
     stacks = run_stacks_check()
-    write_influxdb_file(servers, quotes, stacks, time.time())
+    fips = run_fips_count()
+    write_influxdb_file(servers, quotes, stacks, fips, time.time())
 
 
 if __name__ == '__main__':
