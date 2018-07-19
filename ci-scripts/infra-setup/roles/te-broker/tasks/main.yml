@@ -124,3 +124,9 @@
       owner: root
       group: root
       mode: 0644
+
+  - name: Create cron job to clean OVB old stacks
+    cron:
+      name: 'Cleaning old OVB stacks'
+      minute: 0
+      job: 'source /etc/nodepoolrc && bash /opt/stack/ci-config/ci-scripts/infra-cleanup/ovb-tenant-cleanup.sh 2>&1 > /var/log/cleaning_stacks.log'
