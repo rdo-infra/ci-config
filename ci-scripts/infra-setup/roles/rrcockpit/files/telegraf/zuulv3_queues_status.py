@@ -43,10 +43,6 @@ def convert_builds_as_influxdb(queues):
     # Le's express failures as negative numbers, is easier for alarms
 
     result_mapping = {
-        'NODE_FAILURE': -1,
-        'FAILURE': -1,
-        'POST_FAILURE': -1,
-        'MERGER_FAILURE': -1,
         'ONGOING': 0,
         'SUCCESS': 1,
         'SKIPPED': 1,
@@ -66,12 +62,9 @@ def convert_builds_as_influxdb(queues):
                 values.update(refspec)
                 values.update(queue)
 
-                result = values['result']
-                if result is not None:
-                    result_code = result_mapping[result]
-                else:
-                    values['result'] = 'ONGOING'
-                    result_code = result_mapping[values['result']]
+                result = values.get('result', 'ONGOING')
+                values['result'] = result
+                result_code = result_mapping.get(result, -1)
 
                 values['result_code'] = result_code
                 values['enqueued_time'] = calculate_minutes_enqueued(
