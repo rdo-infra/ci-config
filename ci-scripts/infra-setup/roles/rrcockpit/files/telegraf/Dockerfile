@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
                         python-yaml \
                    && rm -rf /var/lib/apt/lists/*
 
-COPY *.py requirements.txt /
+COPY requirements.txt /
 RUN pip install -r requirements.txt
 
 COPY telegraf.conf /etc/telegraf/telegraf.conf

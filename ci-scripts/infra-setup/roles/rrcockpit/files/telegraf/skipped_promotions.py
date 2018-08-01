@@ -15,6 +15,7 @@ promoter_skipping_regex = re.compile(
     ('.*promoter Skipping promotion of (.*) from (.*) to (.*), '
      'missing successful jobs: (.*)')
 )
+html_link = "<a href='{}' target='_blank' >{}</a>"
 
 
 def get_failing_jobs_html(dlrn_hashes, release_name):
@@ -32,15 +33,19 @@ def get_failing_jobs_html(dlrn_hashes, release_name):
             params.success = str(False)
 
             failing_jobs = dlrn.api_repo_status_get(params)
-            for i, failing_job in enumerate(failing_jobs):
-                if failing_job.in_progress:
-                    in_progress = True
-                failing_job_ln = "<a href='{}' target='_blank' >{}</a>".format(
-                        failing_job.url, failing_job.job_id)
+            if len(failing_jobs) > 0:
+                for i, failing_job in enumerate(failing_jobs):
+                    if failing_job.in_progress:
+                        in_progress = True
+                    failing_job_ln = html_link.format(
+                            failing_job.url, failing_job.job_id)
 
-                if i > 0:
-                    failing_job_ln += "<br>"
-                failing_jobs_html += failing_job_ln
+                    if i > 0:
+                        failing_job_ln += "<br>"
+                    failing_jobs_html += failing_job_ln
+            else:
+                failing_jobs_html = ("<font color='red'>WARNING</font> "
+                                     "expected perodic jobs have not run")
 
     except Exception as e:
         print(e)
