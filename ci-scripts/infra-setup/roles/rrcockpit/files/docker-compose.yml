@@ -18,6 +18,13 @@ services:
     ports:
       - "80:3000"
     environment:
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=smtp.gmail.com:587
+      - GF_SMTP_USER=tripleo.ci.ruck.rover@gmail.com
+      - GF_SMTP_FROM_ADDRESSS=tripleo.ci.ruck.rover@gmail.com
+      - GF_SMTP_FROM_NAME="Tripleo CI alerts"
+      - GF_SMTP_EHLO_IDENTITY=dashboard-ci.tripleo.org
+      - GF_SMTP_PASSWORD=${GRAFANA_SMTP_PASSWORD:-smtppassword}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
     env_file:
       - 'grafana/env'
