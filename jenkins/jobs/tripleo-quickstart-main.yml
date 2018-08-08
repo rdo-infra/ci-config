@@ -12,29 +12,16 @@
     jobs:
         - tripleo-quickstart-gate-{release}-{build_system}-quick-{test}
 
-- project:
-    name: 'tripleo-quickstart-extras-gate-jobs'
-    test: 'full-deploy'
-    build_system: 'delorean'
-    jobs:
-        - 'tripleo-quickstart-extras-gate-{release}-{build_system}-full-{topology}':
-            release: 'master'
-            topology: 'featureset052'
-            job_type: 'gate'
-
-- project:
-    name: 'tripleo-quickstart-gate-jobs'
-    test: 'full-deploy'
-    build_system: 'delorean'
-    jobs:
-        - 'tripleo-quickstart-gate-{release}-{build_system}-full-{topology}':
-            release: 'newton'
-            topology: 'minimal'
-            job_type: 'gate'
-        - 'tripleo-quickstart-gate-{release}-{build_system}-full-{topology}':
-            release: 'ocata'
-            topology: 'minimal'
-            job_type: 'gate'
+# WIP
+# - project:
+#     name: 'tripleo-quickstart-extras-gate-jobs'
+#     test: 'full-deploy'
+#     build_system: 'delorean'
+#     jobs:
+#         - 'tripleo-quickstart-extras-gate-{release}-{build_system}-full-{topology}':
+#             release: 'master'
+#             topology: 'featureset052'
+#             job_type: 'gate'
 
 - project:
     name: 'tripleo-quickstart-gate-images-jobs'
@@ -88,38 +75,6 @@
     jobs:
         - tripleo-quickstart-promote-{release}-current-tripleo-{build_system}-build-images
 
-#cloudsig
-- project:
-    name: 'tripleo-quickstart-promote-cloudsig-pipeline-full-jobs'
-    test: 'full-deploy'
-    job_type: 'promote'
-    release:
-        - 'pike'
-        - 'ocata'
-        - 'newton'
-    build_system:
-        - 'cloudsig-testing'
-        - 'cloudsig-stable'
-    topology:
-        - 'minimal'
-        - 'minimal_pacemaker'
-    jobs:
-        - tripleo-quickstart-promote-{release}-{build_system}-{topology}
-
-- project:
-    name: 'tripleo-quickstart-promote-cloudsig-pipeline-images-jobs'
-    test: 'images'
-    job_type: 'promote'
-    release:
-        - 'newton'
-    build_system:
-        - 'cloudsig-testing'
-        - 'cloudsig-stable'
-    topology: 'minimal'
-    jobs:
-        - tripleo-quickstart-promote-{release}-{build_system}-build-images
-
-
 - project:
     name: 'tripleo-quickstart-periodic-images-jobs'
     test:
@@ -132,19 +87,5 @@
         - 'delorean'
     topology:
         - 'minimal_pacemaker'
-    jobs:
-        - tripleo-quickstart-periodic-{release}-{build_system}-{test}-{topology}
-
-- project:
-    name: 'tripleo-quickstart-periodic-full-jobs'
-    test: full-deploy
-    job_type: 'periodic'
-    release:
-        - 'pike'
-        - 'master'
-    build_system:
-        - 'delorean'
-    topology:
-        - 'featureset022'
     jobs:
         - tripleo-quickstart-periodic-{release}-{build_system}-{test}-{topology}
