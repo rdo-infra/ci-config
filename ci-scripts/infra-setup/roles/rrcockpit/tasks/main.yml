@@ -12,23 +12,32 @@
     - grafana-volume
     - telegraf-volume
 
-- name: Copy grafana admin password file
+- name: Copy password files
   become: yes
   copy:
     remote_src: true
-    src: "/root/grafana_admin_password"
+    src: "/root/{{ item }}"
     dest: "/home/centos/"
     owner: centos
     group: centos
+  with_items:
+    - grafana_admin_password
+    - grafana_smtp_password
 
 - name: Read grafana admin password file
   slurp:
     src: /home/centos/grafana_admin_password
-  register: slurpfile
+  register: gf_admin_password
+
+- name: Read grafana smtp password file
+  slurp:
+    src: /home/centos/grafana_smtp_password
+  register: gf_smtp_password
 
 - name: Start services
   environment:
-    GRAFANA_ADMIN_PASSWORD: "{{ slurpfile['content'] | b64decode }}"
+    GRAFANA_ADMIN_PASSWORD: "{{ gf_admin_password['content'] | b64decode }}"
+    GRAFANA_SMTP_PASSWORD: "{{ gf_smtp_password['content'] | b64decode }}"
   docker_service:
     project_src: "{{ role_path }}/files/"
     state: present
