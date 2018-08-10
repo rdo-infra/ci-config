@@ -5,8 +5,10 @@ import datetime
 import time
 import requests
 import yaml
+import json
 
 from diskcache import Cache
+from influxdb_utils import format_ts_from_str
 
 OOO_PROJECTS = [
     'openstack/puppet-triple', 'openstack/python-tripleoclient',
@@ -16,6 +18,7 @@ OOO_PROJECTS = [
 ]
 
 TIMESTAMP_PATTERN = '%Y-%m-%dT%H:%M:%S'
+GERRIT_DETAIL_API = "https://review.openstack.org/changes/{}/detail"
 
 cache = Cache('/tmp/ruck_rover_cache')
 cache.expire()
@@ -85,17 +88,34 @@ def add_inventory_info(build):
         except Exception:
             pass
 
-
+def get_timestamp_from_gerrit(build):
+    detail_url = GERRIT_DETAIL_API.format(build['change'])
+    response = requests.get(detail_url)
+    if response.ok:
+        sanitized_content = "\n".join(response.content.split("\n")[1:])
+        detail = json.loads(sanitized_content)
+        for message in detail['messages']:
+            if "Patch Set {}".format(
+                    build['patchset']
+            ) in message['message'] and build['job_name'] in message['message']:
+                return format_ts_from_str(message['date'].split('.')[0])
+        return format_ts_from_str(detail['updated'].split('.')[0])
+    else:
+        return format_ts_from_date(time.time())
 def influx(build):
 
     add_inventory_info(build)
 
     if build['end_time'] is None:
-        build['end_time'] = datetime.datetime.fromtimestamp(
-            time.time()).strftime(TIMESTAMP_PATTERN)
+        build['end_time'] = get_timestamp_from_gerrit(build)
+    else:
+        build['end_time'] = to_ts(build['end_time'], seconds=True)
 
     if build['start_time'] is None:
         build['start_time'] = build['end_time']
+    else:
+        build['start_time'] = to_ts(build['start_time'], seconds=True)
+
     # Get the nodename
     return ('build,'
             'type=%s,'
@@ -110,7 +130,7 @@ def influx(build):
             'cloud=%s,'
             'region=%s,'
             'provider=%s,'
-            'result="%s"'
+            'result=%s'
             ' '
             'result="%s",'
             'result_num=%s,'
@@ -124,20 +144,34 @@ def influx(build):
             'provider="%s"'
             ' '
             '%s' %
-            (build['type'], build['pipeline'], 'none' if not build['branch']
-             else build['branch'], build['project'], build['job_name'],
-             build['voting'], build['change'], build['patchset'], 'True'
-             if build['result'] == 'SUCCESS' else 'False',
-             build.get('cloud', 'null'), build.get('region', 'null'),
-             build.get('provider', 'null'), build['result'], build['result'], 1
-             if build['result'] == 'SUCCESS' else 0, build['log_url'],
-             "<a href={} target='_blank'>{}</a>".format(
-                 build['log_url'], build['job_name']), build.get(
-                     'duration', 0), to_ts(build['start_time'], seconds=True),
-             to_ts(build['end_time'], seconds=True), build.get(
-                 'cloud', 'null'), build.get('region', 'null'),
-             build.get('provider', 'null'), to_ts(build['end_time'])))
+            (build['type'],
+             build['pipeline'],
+             'none' if not build['branch'] else build['branch'],
+             build['project'],
+             build['job_name'],
+             build['voting'],
+             build['change'],
+             build['patchset'],
+             'True' if build['result'] == 'SUCCESS' else 'False',
+             build.get('cloud', 'null'),
+             build.get('region', 'null'),
+             build.get('provider', 'null'),
+             build['result'],
 
+             build['result'],
+             1 if build['result'] == 'SUCCESS' else 0,
+             build['log_url'],
+
+             "<a href={} target='_blank'>{}</a>".format(
+                 build['log_url'], build['job_name']),
+             build.get('duration', 0),
+             build['start_time'],
+             build['end_time'],
+             build.get('cloud', 'null'),
+             build.get('region', 'null'),
+             build.get('provider', 'null'),
+
+             build['end_time']))
 
 def print_influx(type, builds):
     if builds:
