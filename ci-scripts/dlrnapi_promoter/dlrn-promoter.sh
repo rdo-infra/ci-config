@@ -27,6 +27,9 @@ while true; do
     # promoter script for the queens branch
     /usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/queens.ini
 
+    # promoter script for the rocky branch
+    /usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/rocky.ini
+
     # Sleep 10 minutes
     sleep 600
 done
