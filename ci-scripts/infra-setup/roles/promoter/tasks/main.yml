@@ -176,11 +176,12 @@
     enabled: yes
 
 - name: Configure telegraf to report to rrcockpit
-  ini_file:
+  blockinfile:
     path: /etc/telegraf/telegraf.conf
-    section: 'outputs.influxdb'
-    option: urls
-    value: '["http://{{ rrcockpit_internal_network_ip }}:8086"]'
+    marker: "# -- {mark} ANSIBLE MANAGED BLOCK --"
+    block: |
+      [[outputs.influxdb]]
+      urls = ['http://{{ rrcockpit_internal_network_ip }}:8086']
 
 - name: Configure dlrn-promoter at telegraf
   copy:
