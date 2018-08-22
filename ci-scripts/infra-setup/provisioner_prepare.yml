@@ -3,9 +3,15 @@
     - set_fact:
         ansible_python_interpreter: "{{ python_interpreter|default(omit) }}"
     - set_fact:
+        os_identity_api_version: "{{ lookup('env', 'OS_IDENTITY_API_VERSION')|default('2') }}"
+    - set_fact:
         tenant: "{{ lookup('env', 'OS_TENANT_NAME')|default(omit) }}"
+      when: os_identity_api_version == '2'
+    - set_fact:
+        tenant: "{{ lookup('env', 'OS_PROJECT_NAME')|default(omit) }}"
+      when: os_identity_api_version == '3'
     - fail:
-        msg: "No tenant specified. Source a credentials file that exports OS_TENANT_NAME"
+        msg: "No tenant specified. Source a credentials file that exports OS_* variables"
       when: tenant == ""
     - include_vars:
         file: "tenant_vars/common.yml"
