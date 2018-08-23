@@ -190,9 +190,11 @@
     mode: '0644'
     owner: 'root'
     group: 'root'
+  register: telegraf
 
 - name: Start and enable telegraf
   service:
     name: telegraf
-    state: started
+    state: restarted
     enabled: yes
+  when: telegraf|changed
