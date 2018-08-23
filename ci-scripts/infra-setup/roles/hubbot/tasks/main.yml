@@ -114,9 +114,15 @@
     minute: 0
     job: '/usr/bin/python ~/multinode.py -c ~/creds'
 
-- name: Create cron job for removing multinode db every day
+- name: Create cron job to run multinode parser for InfluxDB and Grafana
+  cron:
+    name: 'script for pulling monitoring data from OVB jobs'
+    minute: 30
+    job: '/usr/bin/python ~/ovb_tracking.py -c ~/creds'
+
+- name: Create cron job for removing multinode and OVB db every day
   cron:
     name: 'script for cleaning up databse file regularly'
     minute: 30
     hour: 03
-    job: 'rm -f ~/multinode_db'
+    job: 'rm -f ~/multinode_db; rm -f ~/ovb_db; '
