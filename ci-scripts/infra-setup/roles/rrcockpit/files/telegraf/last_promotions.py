@@ -25,9 +25,11 @@ def get_last_promotion(dlrn, release, name):
     query = dlrnapi_client.PromotionQuery()
     query.promote_name = name
     promotions = dlrn.api_promotions_get(query)
-    last_promotion = promotions[0].to_dict()
-    last_promotion['release'] = release
-    return last_promotion
+    if promotions:
+        last_promotion = promotions[0].to_dict()
+        last_promotion['release'] = release
+        return last_promotion
+    return
 
 
 if __name__ == '__main__':
@@ -42,5 +44,7 @@ if __name__ == '__main__':
     dlrn = get_dlrn_instance(promoter_config)
     if dlrn:
         for promotion_name, _ in promoter_config.items('promote_from'):
-            print(influxdb(
-                get_last_promotion(dlrn, args.release, promotion_name)))
+            promo = get_last_promotion(dlrn, args.release, promotion_name)
+            if promo:
+                print(influxdb(
+                    get_last_promotion(dlrn, args.release, promotion_name)))
