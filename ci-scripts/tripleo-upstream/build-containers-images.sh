@@ -16,6 +16,13 @@ unset ANSIBLE_STDOUT_CALLBACK
 export ANSIBLE_HOST_KEY_CHECKING=False
 export ANSIBLE_ROLES_PATH="$WORKSPACE/roles"
 
+# Retain the lack of arch in namespace for x86_64 containers
+if [ "$CPU_ARCH" = "x86_64" ] || [ "$CPU_ARCH" = "" ]; then
+    CPU_ARCH=""
+else
+    CPU_ARCH="-$CPU_ARCH"
+fi
+
 cat << EOF > $WORKSPACE/playbook.yml
 ---
 - name: Build Kolla images
@@ -23,7 +30,7 @@ cat << EOF > $WORKSPACE/playbook.yml
   become: yes
   become_user: root
   vars:
-    kolla_namespace: "tripleo${RELEASE}"
+    kolla_namespace: "tripleo${RELEASE}${CPU_ARCH}"
     kolla_push: true
     kolla_tag: "$TESTING_TAG"
     openstack_release: "$RELEASE"
