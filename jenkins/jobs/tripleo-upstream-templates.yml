@@ -1,0 +1,13 @@
+- job-template:
+    name: 'tripleo-upstream-containers-build-{openstack_release}-{cpu_arch}'
+    defaults: 'weirdo-defaults'
+    properties:
+      - inject:
+          properties-content: |
+            CPU_ARCH={cpu_arch}
+            OPENSTACK_RELEASE={openstack_release}
+    builders:
+        - weirdo-get-node
+        - build-containers-images
+    publishers:
+        - weirdo-release-node
