@@ -23,7 +23,7 @@ cat << EOF > $WORKSPACE/playbook.yml
   become: yes
   become_user: root
   vars:
-    kolla_namespace: "tripleo${RELEASE}"
+    kolla_namespace: "tripleo${RELEASE}-${CPU_ARCH}"
     kolla_push: true
     kolla_tag: "$TESTING_TAG"
     openstack_release: "$RELEASE"

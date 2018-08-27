@@ -1,0 +1,15 @@
+- builder:
+    name: build-containers-images
+    builders:
+        - shell: |
+            cat << EOF > $WORKSPACE/playbook.yml
+            ---
+            - name: Build Triple O Containers
+              hosts: openstack_nodes
+              tasks:
+                - name: Build Triple O Containers
+                  script: $WORKSPACE/ci-config/ci-scripts/jenkins/jobs/scripts/build-kolla-containers.sh $OPENSTACK_RELEASE
+            EOF
+        - shell:
+            !include-raw:
+                - scripts/cico-node-run-playbook.sh
