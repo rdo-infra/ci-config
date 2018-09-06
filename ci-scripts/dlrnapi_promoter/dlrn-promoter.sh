@@ -6,7 +6,7 @@ source ~/promoter_venv/bin/activate
 while true; do
 
     #fetch the latest ci-config
-    cd ~/ci-config; git pull >/dev/null
+    cd ~/ci-config; git reset --hard origin/master && git pull >/dev/null
 
     #fetch the latest dlrnapi_client and dependencies
     pip install -U -r ~/ci-config/ci-scripts/dlrnapi_promoter/requirements.txt
