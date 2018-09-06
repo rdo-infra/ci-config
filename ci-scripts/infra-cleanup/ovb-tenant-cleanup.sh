@@ -275,4 +275,16 @@ else
 
     done
 
+    # Delete any remaining instances in error status
+    SERVER_IDS=$(openstack server list --status error -f json |  jq -r  '.[] |  .["ID"]')
+    if [[ "$DRY_RUN" == "1" ]]; then
+        echo "DRY RUN - Servers to delete:
+        $SERVER_IDS"
+    else
+        for SERVER in $SERVER_IDS; do
+            echo "Deleting server in ERROR state with ID $SERVER ..."
+            openstack server delete $SERVER
+        done
+    fi
+
 fi
