@@ -175,10 +175,11 @@ fi
 #  Check if there are stacks left in DELETE_FAILED state
 
 STACK_LIST_STATUS=$(openstack stack list -f json | jq -r '.[] | select(.["Stack Status"] == "DELETE_FAILED") | .["Stack Name"]')
+
 if [[  -z $STACK_LIST_STATUS ]]; then
-    echo "There are no stacks that failed to delete. Exiting script ..."
-    exit 0
-else
+    echo "There are no stacks that failed to delete."
+
+elif [[  -n $STACK_LIST_STATUS ]]; then
     echo "There are stacks in DELETE_FAILED state - $STACK_LIST_STATUS"
     echo "Remove associated resources and then delete the stacks again."
 
@@ -274,5 +275,25 @@ else
         fi
 
     done
+fi
 
+ERROR_SERVER_IDS=$(openstack server list --status error -f json |  jq -r  '.[] |  .["ID"]')
+if [[ -n $ERROR_SERVER_IDS ]]; then
+
+    echo "Delete any remaining instances in error status"
+    SERVER_IDS=$(openstack server list --status error -f json |  jq -r  '.[] |  .["ID"]')
+    if [[ "$DRY_RUN" == "1" ]]; then
+        echo "DRY RUN - Servers to delete:
+        $SERVER_IDS"
+    else
+        for SERVER in $SERVER_IDS; do
+            echo "Deleting server in ERROR state with ID $SERVER ..."
+            openstack server delete $SERVER || true
+            sleep 1;
+        done
+    fi
+
+else
+    echo "The tenant has been cleaned up or is already clean"
+    exit 0
 fi
