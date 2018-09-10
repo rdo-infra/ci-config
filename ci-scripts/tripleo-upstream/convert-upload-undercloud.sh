@@ -5,12 +5,6 @@ echo ======== CONVERT OVERCLOUD IMAGE TO UNDERCLOUD IMAGE
 : ${WORKSPACE:=$HOME}
 export QUICKSTART_VENV=$WORKSPACE/.quickstart
 
-# Enforce TCG as kvm is not working in some environment due to
-# nested kvm issue:- https://bugzilla.redhat.com/show_bug.cgi?id=1565179
-sudo tee -a /etc/environment <<EOF
-export LIBGUESTFS_BACKEND_SETTINGS=force_tcg
-EOF
-
 pushd $HOME
 ls *.tar
 tar -xf overcloud-full.tar
