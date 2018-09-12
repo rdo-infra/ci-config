@@ -34,8 +34,11 @@
 
   - name: Install required python modules
     pip:
-      name: gear
+      name: "{{ item }}"
       state: present
+    with_items:
+      - docutils
+      - gear
 
   - name: Create repo directory
     file:
