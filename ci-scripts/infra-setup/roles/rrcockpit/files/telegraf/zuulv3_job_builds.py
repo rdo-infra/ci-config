@@ -5,6 +5,7 @@ import datetime
 import time
 import requests
 import yaml
+import json
 
 from diskcache import Cache
 
@@ -16,6 +17,9 @@ OOO_PROJECTS = [
 ]
 
 TIMESTAMP_PATTERN = '%Y-%m-%dT%H:%M:%S'
+TIMESTAMP_PATTERN2 = '%Y-%m-%d %H:%M:%S'
+
+JOBS_FOR_ARA = ['tripleo-ci-centos-7-containers-multinode']
 
 cache = Cache('/tmp/ruck_rover_cache')
 cache.expire()
@@ -23,10 +27,13 @@ cache.expire()
 # Convert datetime to timestamp
 
 
-def to_ts(d, seconds=False):
+def to_ts(d, seconds=False, pattern=TIMESTAMP_PATTERN):
     return datetime.datetime.strptime(
-        d, TIMESTAMP_PATTERN).strftime('%s') + ('' if seconds else "000000000")
+        d, pattern).strftime('%s') + ('' if seconds else "000000000")
 
+def to_seconds(duration):
+    x = time.strptime(duration,'%H:%M:%S')
+    return datetime.timedelta(hours=x.tm_hour,minutes=x.tm_min,seconds=x.tm_sec).total_seconds()
 
 def get(url, query={}, timeout=20, json_view=True):
 
@@ -56,6 +63,59 @@ def get_builds_info(url, query, pages):
             builds += response
     return builds
 
+
+def get_file_from_build(build, file_relative_path):
+    if 'log_url' in build:
+        if build['log_url'].endswith("/html/"):
+            build['log_url'] = build['log_url'].replace('html/', '')
+        if build['log_url'].endswith("/cover/"):
+            build['log_url'] = build['log_url'].replace('cover/', '')
+        file_path = build['log_url'] + file_relative_path
+        if file_path not in cache:
+            r = requests.get(file_path)
+            if r.ok:
+                cache.add(
+                    file_path, yaml.load(r.content),
+                    expire=259200)  # expire is 3 days
+            # Add negative cache we don't to hit logs is file does not exists
+            else:
+                cache[file_path] = None
+
+        return cache[file_path]
+
+def add_inventory_info(build):
+        try:
+            inventory = get_file_from_build(build, "/zuul-info/inventory.yaml")
+            hosts = inventory['all']['hosts']
+            host = hosts[hosts.keys()[0]]
+            if 'nodepool' in host:
+                nodepool = host['nodepool']
+                build['cloud'] = nodepool['cloud']
+                build['region'] = nodepool['region']
+                build['provider'] = nodepool['provider']
+
+        except Exception:
+            pass
+
+def print_influx_ara_tasks(build, ara_json_file):
+    if build['job_name'] not in JOBS_FOR_ARA:
+        return
+    try:
+        tasks = get_file_from_build(build, ara_json_file)
+        if tasks is None:
+            return
+        for task in tasks:
+            duration = to_seconds(task['Duration'])
+            if duration > 0:
+                print("build-task,name={},path={}"
+                       " duration={} {}".format(
+                          task['Name'].replace(' ', '\\ '),
+                          ara_json_file,
+                          duration,
+                          to_ts(task['Time Start'], seconds=True, pattern=TIMESTAMP_PATTERN2)))
+
+    except Exception as e:
+        pass
 
 def add_inventory_info(build):
 
@@ -143,6 +203,8 @@ def print_influx(type, builds):
     if builds:
         for build in builds:
             build['type'] = type
+            print_influx_ara_tasks(build, '/logs/ara.oooq.root.json')
+            print_influx_ara_tasks(build, '/logs/ara.oooq.oc.json')
             print(influx(build))
 
 
