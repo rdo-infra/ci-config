@@ -176,8 +176,8 @@ fi
 
 STACK_LIST_STATUS=$(openstack stack list -f json | jq -r '.[] | select(.["Stack Status"] == "DELETE_FAILED") | .["Stack Name"]')
 if [[  -z $STACK_LIST_STATUS ]]; then
-    echo "There are no stacks that failed to delete. Exiting script ..."
-    exit 0
+    echo "There are no stacks that failed to delete. Skipping stack cleanup ..."
+    : # do nothing
 else
     echo "There are stacks in DELETE_FAILED state - $STACK_LIST_STATUS"
     echo "Remove associated resources and then delete the stacks again."
@@ -215,6 +215,11 @@ else
         else
             for SERVER in $SERVER_IDS; do
                 echo "Deleting server ID $SERVER ..."
+                server_status=`openstack server show $SERVER -f value -c status`
+                if [[ $server_status == "ERROR" || $server_status == "DELETE_FAILED" ]]; then
+                  openstack server set --state active $SERVER || true
+                  sleep 5;
+                fi
                 openstack server delete $SERVER
             done
         fi
@@ -276,3 +281,15 @@ else
     done
 
 fi
+
+# Check nodepool instances
+NODEPOOL_INSTANCES=`openstack server list --flavor ci.m1.nodepool --status ERROR -f json | jq -r '.[]| .["ID"]'`
+for SERVER in $NODEPOOL_INSTANCES; do
+    echo "Deleting server ID $SERVER ..."
+    server_status=`openstack server show $SERVER -f value -c status || true`
+    if [[ $server_status == "ERROR" || $server_status == "DELETE_FAILED" ]]; then
+        openstack server set --state active $SERVER || true
+        sleep 5;
+    fi
+    openstack server delete $SERVER || true
+done
