@@ -111,7 +111,7 @@ def add_inventory_info(build):
 
 def fix_task_name(task_name):
     return re.sub(r'/tmp/tripleo-modify-image.*', '/tmp/tripleo-modify-image',
-                  task_name)
+                  task_name).replace(',', '_')
 
 
 def print_influx_ara_tasks(build, ara_json_file):
@@ -125,12 +125,11 @@ def print_influx_ara_tasks(build, ara_json_file):
             duration = to_seconds(task['Duration'])
             if duration > 0:
                 print("build-task,task_name={},logs_path={},json_path={}"
-                      " duration={},job_result=\"{}\" {}".format(
+                      " duration={},job_result=\"{}\",job_branch=\"{}\" {}".
+                      format(
                           fix_task_name(task['Name'].replace(' ', '\\ ')),
-                          build['log_url'],
-                          ara_json_file,
-                          duration,
-                          build['result'],
+                          build['log_url'], ara_json_file, duration,
+                          build['result'], build['branch'],
                           to_ts(
                               task['Time Start'],
                               seconds=False,
