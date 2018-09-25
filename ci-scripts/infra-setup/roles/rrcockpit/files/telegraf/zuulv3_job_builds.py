@@ -47,7 +47,7 @@ def get_builds_info(url, query, pages):
     builds = []
     for p in range(pages):
         if p > 0:
-            query['skip'] = ((pages - 1) * 50)
+            query['skip'] = ((p - 1) * 50)
             # let's not abuse ZUUL API and sleep betwen requests
             time.sleep(2)
         builds_api = url + "builds"
