@@ -58,13 +58,15 @@ def get(url, query={}, timeout=20, json_view=True):
     return None
 
 
-def get_builds_info(url, query, pages):
+def get_builds_info(url, query, pages, offset):
     builds = []
     for p in range(pages):
         if p > 0:
-            query['skip'] = ((p - 1) * 50)
+            query['skip'] = offset + (p * 50)
             # let's not abuse ZUUL API and sleep betwen requests
             time.sleep(2)
+        else:
+            query['skip'] = offset
         builds_api = url + "builds"
         response = get(builds_api, query)
         if response is not None:
@@ -210,13 +212,18 @@ def main():
         '--type', default="upstream", help="(default: %(default)s)")
     parser.add_argument(
         '--pages', type=int, default=1, help="(default: %(default)s)")
+    parser.add_argument(
+        '--offset', type=int, default=0, help="(default: %(default)s)")
     args = parser.parse_args()
 
     for project in OOO_PROJECTS:
         print_influx(
             args.type,
             get_builds_info(
-                url=args.url, query={'project': project}, pages=args.pages))
+                url=args.url,
+                query={'project': project},
+                pages=args.pages,
+                offset=args.offset))
 
 
 if __name__ == '__main__':
