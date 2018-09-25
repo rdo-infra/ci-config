@@ -125,9 +125,12 @@ def print_influx_ara_tasks(build, ara_json_file):
             duration = to_seconds(task['Duration'])
             if duration > 0:
                 print("build-task,task_name={},logs_path={},json_path={}"
-                      " duration={} {}".format(
+                      " duration={},job_result=\"{}\" {}".format(
                           fix_task_name(task['Name'].replace(' ', '\\ ')),
-                          build['log_url'], ara_json_file, duration,
+                          build['log_url'],
+                          ara_json_file,
+                          duration,
+                          build['result'],
                           to_ts(
                               task['Time Start'],
                               seconds=False,
