@@ -19,7 +19,6 @@ OOO_PROJECTS = [
 TIMESTAMP_PATTERN = '%Y-%m-%dT%H:%M:%S'
 TIMESTAMP_PATTERN2 = '%Y-%m-%d %H:%M:%S'
 
-JOBS_FOR_ARA = ['tripleo-ci-centos-7-containers-multinode']
 ARA_JSONS = [
     '/logs/ara.oooq.root.json',
     '/logs/ara.oooq.oc.json',
@@ -115,8 +114,6 @@ def fix_task_name(task_name):
 
 
 def print_influx_ara_tasks(build, ara_json_file):
-    if build['job_name'] not in JOBS_FOR_ARA:
-        return
     try:
         tasks = get_file_from_build(build, ara_json_file)
         if tasks is None:
