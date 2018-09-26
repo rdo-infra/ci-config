@@ -84,14 +84,8 @@ def parse_skipped_promotions(release_name):
         if matched_regex:
 
             promotion = matched_regex.group(1)
-            try:
-                promotion = eval(matched_regex.group(1))
-                repo_hash = promotion['repo_hash']
-                failing_jobs = get_cached_failing_jobs_html(
-                    promotion, release_name)
-            except Exception:
-                repo_hash = promotion
-                failing_jobs = matched_regex.group(3)
+            repo_hash = promotion
+            failing_jobs = matched_regex.group(3)
 
             skipped_promotion = {
                 'repo_hash': repo_hash,
