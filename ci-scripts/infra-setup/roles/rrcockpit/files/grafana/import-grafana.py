@@ -39,8 +39,11 @@ def import_file(host, key, path, json_file_path):
                 # Update it
                 url = "{}/{}".format(url, data['name'])
                 response = requests.put(url, headers=headers, json=data)
+
+                # Grafana alert notifications throw API is not working
+                # quite well, let's just print it at least
                 if not response.ok:
-                    raise ValueError(response.content)
+                    print(response.content)
 
 
 def main():
