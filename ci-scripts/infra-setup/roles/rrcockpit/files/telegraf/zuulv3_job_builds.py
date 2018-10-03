@@ -20,8 +20,13 @@ TIMESTAMP_PATTERN = '%Y-%m-%dT%H:%M:%S'
 TIMESTAMP_PATTERN2 = '%Y-%m-%d %H:%M:%S'
 
 JOBS_FOR_ARA = [
+    'tripleo-ci-centos-7-standalone',
     'tripleo-ci-centos-7-containers-multinode',
+    'tripleo-ci-centos-7-undercloud-containers',
     'tripleo-ci-centos-7-scenario001-multinode-oooq-container',
+    'tripleo-ci-centos-7-scenario002-multinode-oooq-container',
+    'tripleo-ci-centos-7-scenario003-multinode-oooq-container',
+    'tripleo-ci-centos-7-scenario004-multinode-oooq-container',
 ]
 
 ARA_JSONS = [
@@ -29,6 +34,8 @@ ARA_JSONS = [
     '/logs/ara.oooq.oc.json',
     '/logs/ara.json'
 ]
+
+TASK_DURATION_TRESHOLD = 10
 
 cache = Cache('/tmp/ruck_rover_cache')
 cache.expire()
@@ -127,7 +134,7 @@ def print_influx_ara_tasks(build, ara_json_file):
             return
         for task in tasks:
             duration = to_seconds(task['Duration'])
-            if duration > 5:
+            if duration > TASK_DURATION_TRESHOLD:
                 print("build-task,task_name={},logs_path={},json_path={}"
                       " duration={},job_result=\"{}\",job_branch=\"{}\" {}".
                       format(
