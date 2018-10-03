@@ -19,7 +19,11 @@ OOO_PROJECTS = [
 TIMESTAMP_PATTERN = '%Y-%m-%dT%H:%M:%S'
 TIMESTAMP_PATTERN2 = '%Y-%m-%d %H:%M:%S'
 
-JOBS_FOR_ARA = ['tripleo-ci-centos-7-containers-multinode']
+JOBS_FOR_ARA = [
+    'tripleo-ci-centos-7-containers-multinode',
+    'tripleo-ci-centos-7-scenario001-multinode-oooq-container',
+]
+
 ARA_JSONS = [
     '/logs/ara.oooq.root.json',
     '/logs/ara.oooq.oc.json',
@@ -123,7 +127,7 @@ def print_influx_ara_tasks(build, ara_json_file):
             return
         for task in tasks:
             duration = to_seconds(task['Duration'])
-            if duration > 0:
+            if duration > 5:
                 print("build-task,task_name={},logs_path={},json_path={}"
                       " duration={},job_result=\"{}\",job_branch=\"{}\" {}".
                       format(
