@@ -1,4 +1,6 @@
-set -e
+set -ex
+mkdir -p $WORKSPACE/logs
+exec &> >(tee -i -a $WORKSPACE/logs/get_hash_log.log )
 
 echo ======== PREPARE HASH INFO
 
@@ -33,7 +35,7 @@ export COMMIT_HASH=$COMMIT_HASH
 export DISTRO_HASH=$DISTRO_HASH
 EOF
 
-mkdir -p $WORKSPACE/logs
+
 cp $WORKSPACE/hash_info.sh $WORKSPACE/logs
 
 echo ======== PREPARE HASH INFO COMPLETE
