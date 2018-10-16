@@ -22,6 +22,7 @@ IMAGE=${IMAGE:-template-rdo-centos-7}
 TIMEOUT=${TIMEOUT:-120}
 FLAVOR=${FLAVOR:-rdo.m1.nodepool}
 VM_INFO="${WORKSPACE}/vminfo.json"
+ANSIBLE_PYTHON_INTERPRETER=${ANSIBLE_PYTHON_INTERPRETER:-/usr/bin/python}
 
 if [ ! -f "${CLOUD_CONFIG}" ]; then
     echo "Configuration file does not exist: ${CLOUD_CONFIG}"
@@ -172,6 +173,7 @@ cat <<EOF >create-vm.yml
         ansible_user: "jenkins"
         ansible_become: "yes"
         ansible_become_user: "root"
+        ansible_python_interpreter: "${ANSIBLE_PYTHON_INTERPRETER}"
 
     - name: Ensure the server is reachable
       ping:
@@ -192,6 +194,7 @@ cat <<EOF >create-vm.yml
           ansible_user=jenkins
           ansible_become=yes
           ansible_become_user=root
+          ansible_python_interpreter="${ANSIBLE_PYTHON_INTERPRETER}"
 EOF
 
 ansible-playbook -i 'localhost' create-vm.yml
