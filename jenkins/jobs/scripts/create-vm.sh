@@ -172,6 +172,7 @@ cat <<EOF >create-vm.yml
         ansible_user: "jenkins"
         ansible_become: "yes"
         ansible_become_user: "root"
+        ansible_python_interpreter: "${ANSIBLE_PYTHON_INTERPRETER:-/usr/bin/python}"
 
     - name: Ensure the server is reachable
       ping:
@@ -192,6 +193,7 @@ cat <<EOF >create-vm.yml
           ansible_user=jenkins
           ansible_become=yes
           ansible_become_user=root
+          ansible_python_interpreter: "${ANSIBLE_PYTHON_INTERPRETER:-/usr/bin/python}"
 EOF
 
 ansible-playbook -i 'localhost' create-vm.yml
