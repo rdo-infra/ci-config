@@ -5,6 +5,7 @@ ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
 SSID_FILE=${SSID_FILE:-$WORKSPACE/cico-ssid}
 
 CPU_ARCH=${CPU_ARCH:-x86_64}
+CICO_FLAVOR=${CICO_FLAVOR:-small}
 
 # Write the header of the hosts file
 cat << EOF > ${ANSIBLE_HOSTS}
@@ -14,7 +15,7 @@ localhost ansible_connection=local
 EOF
 
 # Get nodes
-nodes=$(cico -q node get --arch $CPU_ARCH --retry-count 6 --retry-interval 60  --count ${NODE_COUNT} --column hostname --column ip_address --column comment -f value)
+nodes=$(cico -q node get --arch $CPU_ARCH --flavor $CICO_FLAVOR --retry-count 6 --retry-interval 60  --count ${NODE_COUNT} --column hostname --column ip_address --column comment -f value)
 
 # Write nodes to inventory file and persist the SSID separately for simplicity
 touch ${SSID_FILE}
