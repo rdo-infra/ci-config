@@ -38,12 +38,6 @@
               source "./$(basename ${{properties}})"
             fi
 
-            # Scenario004 was introduced in ocata and is skip in previous releases
-            if [ "${{openstack_release}}" == "newton" -a "{playbook}" == "puppet-openstack-scenario004" ]; then
-                echo "INFO: puppet-openstack-scenario004 is skipped for newton release"
-                exit 0
-            fi
-
             # Set up ansible-playbook extra vars because we don't want to override
             # the defaults if they're not set
             extra_vars=""
