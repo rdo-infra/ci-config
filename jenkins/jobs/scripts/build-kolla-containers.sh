@@ -6,6 +6,7 @@ sudo pip install ansible
 
 export RELEASE=${1:-"master"}
 export CPU_ARCH=${2:-"x86_64"}
+export CICO_FLAVOR=${3:-"small"}
 
 git clone https://github.com/rdo-infra/review.rdoproject.org-config
 
