@@ -113,6 +113,12 @@
       enabled: yes
     when: apache_config|changed
 
+# Allow log rotate in {{ logsdir }}
+- sefcontext:
+    target: {{ logsdir }}(/.*)?
+    setype: var_log_t
+    state: present
+
   - name: add configuration for the te-broker log rotation
     copy:
       content: |
@@ -122,6 +128,7 @@
               compress
               missingok
               notifempty
+              maxage 60
           }
       dest: /etc/logrotate.d/te-broker
       owner: root
