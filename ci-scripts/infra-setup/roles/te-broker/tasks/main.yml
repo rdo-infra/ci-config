@@ -113,17 +113,51 @@
       enabled: yes
     when: apache_config|changed
 
-  - name: add configuration for the te-broker log rotation
+  - name: Add config for te-broker log rotation
     copy:
       content: |
           {{ logsdir }}/testenv-worker.log {
               rotate 7
               daily
+              size 100M
+              dateext
               compress
               missingok
               notifempty
           }
       dest: /etc/logrotate.d/te-broker
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Add config for te-broker baremetal logs rotation
+    copy:
+      content: |
+          {{ logsdir }}/console-logs/baremetal*.log.gz {
+              rotate 4
+              weekly
+              dateext
+              compress
+              missingok
+              notifempty
+          }
+      dest: /etc/logrotate.d/te-broker-baremetal
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Add config for te-broker bmc logs rotation
+    copy:
+      content: |
+          {{ logsdir }}/console-logs/bmc*.log.gz {
+              rotate 4
+              weekly
+              dateext
+              compress
+              missingok
+              notifempty
+          }
+      dest: /etc/logrotate.d/te-broker-bmc
       owner: root
       group: root
       mode: 0644
