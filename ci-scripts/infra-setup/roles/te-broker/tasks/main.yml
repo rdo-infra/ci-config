@@ -113,12 +113,14 @@
       enabled: yes
     when: apache_config|changed
 
-  - name: add configuration for the te-broker log rotation
+  - name: Add config for te-broker log rotation
     copy:
       content: |
           {{ logsdir }}/testenv-worker.log {
               rotate 7
               daily
+              size 100M
+              dateext
               compress
               missingok
               notifempty
