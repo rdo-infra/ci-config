@@ -113,15 +113,20 @@
       enabled: yes
     when: apache_config|changed
 
-  - name: add configuration for the te-broker log rotation
+  - name: Add config for te-broker log rotation
     copy:
       content: |
           {{ logsdir }}/testenv-worker.log {
               rotate 7
               daily
+              dateext
               compress
               missingok
               notifempty
+              maxage 30
+              prerotate
+                semanage fcontext -a -t var_log_t {{ logsdir }}/testenv-worker.log
+              endscript
           }
       dest: /etc/logrotate.d/te-broker
       owner: root
