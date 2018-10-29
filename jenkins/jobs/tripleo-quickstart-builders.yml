@@ -2,6 +2,13 @@
     name: 'tripleo-quickstart-builder'
     builders:
         - shell: |
+              export PATH=$PATH:
+              for DIR in /usr/sbin /sbin /usr/local/bin /usr/local/sbin ~/.local/bin ; do
+                if [[ ! ":$PATH:" == *":$DIR:"* ]] && [ -d "$DIR" ]; then
+                  export PATH=${DIR}:$PATH
+                fi
+              done
+
               bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
               export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
               echo $VIRTHOST
@@ -22,6 +29,11 @@
     name: 'tripleo-quickstart-rdo-infra-builder'
     builders:
         - shell: |
+              for DIR in /usr/sbin /sbin /usr/local/bin /usr/local/sbin ~/.local/bin ; do
+                if [[ ! ":$PATH:" == *":$DIR:"* ]] && [ -d "$DIR" ]; then
+                  export PATH=${DIR}:$PATH
+                fi
+              done
               bash $WORKSPACE/ci-config/ci-scripts/checkout-patches.sh
 
               bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
@@ -43,6 +55,11 @@
     name: 'tripleo-quickstart-upgrade-builder'
     builders:
         - shell: |
+              for DIR in /usr/sbin /sbin /usr/local/bin /usr/local/sbin ~/.local/bin ; do
+                if [[ ! ":$PATH:" == *":$DIR:"* ]] && [ -d "$DIR" ]; then
+                  export PATH=${DIR}:$PATH
+                fi
+              done
               bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
               export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
               echo $VIRTHOST
