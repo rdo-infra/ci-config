@@ -130,6 +130,15 @@
       group: root
       mode: 0644
 
+  - name: Create cron job to clean old tebroker baremetal logs
+    cron:
+      name: 'Cleaning old tebroker baremetal logs'
+      weekday: 0
+      minute: 30
+      hour: 12
+      user: root
+      job: 'find {{ logsdir }}/console-logs/ -type f -mtime +30 -print -delete | systemd-cat -t tebroker-log -p info'
+
   - name: Create cron job to clean OVB old stacks
     cron:
       name: 'Cleaning old OVB stacks'
