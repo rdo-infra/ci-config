@@ -1133,7 +1133,7 @@
                 "fontSize":"100%",
                 "gridPos":{
                     "h":7,
-                    "w":11,
+                    "w":24,
                     "x":0,
                     "y":20
                 },
@@ -1405,15 +1405,24 @@
                 "datasource":"telegraf",
                 "fontSize":"100%",
                 "gridPos":{
-                    "h":7,
-                    "w":13,
-                    "x":11,
-                    "y":20
+                    "h":6,
+                    "w":12,
+                    "x":0,
+                    "y":27
                 },
                 "hideTimeOverride":false,
                 "id":205,
                 "links":[],
                 "pageSize":null,
+                "repeat":"releases",
+                "repeatDirection":"v",
+                "scopedVars":{
+                    "releases":{
+                        "selected":true,
+                        "text":"master",
+                        "value":"master"
+                    }
+                },
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -1629,7 +1638,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"autogen",
-                        "query":"SELECT \"branch\", \"pipeline\", \"change\", \"patchset\", \"job_name\", \"log_link\",  \"duration\", \"cloud\", \"region\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND (\"change\" = '560445' OR \"change\" = '567224' OR \"change\" = '564291' OR \"change\" = '602248' OR \"change\" = '604293') AND \"voting\" = 'True') AND $timeFilter AND \"type\" = 'upstream'",
+                        "query":"SELECT \"type\", \"branch\", \"pipeline\", \"change\", \"patchset\", \"job_name\", \"log_link\",  \"duration\", \"cloud\", \"region\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND (\"change\" = '560445' OR \"change\" = '567224' OR \"change\" = '564291' OR \"change\" = '602248' OR \"change\" = '604293') AND \"voting\" = 'True') AND $timeFilter AND \"branch\" =~ /$releases/",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -1665,7 +1674,7 @@
                 ],
                 "timeFrom":"11h",
                 "timeShift":null,
-                "title":"Upstream failing check jobs (noop)",
+                "title":"$releases failing check jobs (noop)",
                 "transform":"table",
                 "type":"table"
             },
@@ -1674,15 +1683,24 @@
                 "datasource":"telegraf",
                 "fontSize":"100%",
                 "gridPos":{
-                    "h":7,
-                    "w":11,
-                    "x":0,
+                    "h":6,
+                    "w":12,
+                    "x":12,
                     "y":27
                 },
                 "hideTimeOverride":false,
                 "id":206,
                 "links":[],
                 "pageSize":null,
+                "repeat":"releases",
+                "repeatDirection":"v",
+                "scopedVars":{
+                    "releases":{
+                        "selected":true,
+                        "text":"master",
+                        "value":"master"
+                    }
+                },
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -1944,13 +1962,19 @@
                                 "key":"result",
                                 "operator":"!=",
                                 "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"branch",
+                                "operator":"=~",
+                                "value":"/$releases/"
                             }
                         ]
                     }
                 ],
                 "timeFrom":"3d",
                 "timeShift":null,
-                "title":"RDO failing periodic jobs",
+                "title":"$releases failing periodic jobs",
                 "transform":"table",
                 "type":"table"
             },
@@ -1959,15 +1983,26 @@
                 "datasource":"telegraf",
                 "fontSize":"100%",
                 "gridPos":{
-                    "h":7,
-                    "w":13,
-                    "x":11,
-                    "y":27
+                    "h":6,
+                    "w":12,
+                    "x":0,
+                    "y":33
                 },
                 "hideTimeOverride":false,
-                "id":150,
+                "id":222,
                 "links":[],
                 "pageSize":null,
+                "repeat":null,
+                "repeatDirection":"v",
+                "repeatIteration":1541406446687,
+                "repeatPanelId":205,
+                "scopedVars":{
+                    "releases":{
+                        "selected":true,
+                        "text":"rocky",
+                        "value":"rocky"
+                    }
+                },
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -2183,7 +2218,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"autogen",
-                        "query":"SELECT \"branch\", \"pipeline\", \"change\", \"patchset\", \"job_name\", \"log_link\",  \"duration\", \"cloud\", \"region\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND (\"change\" = '560445' OR \"change\" = '567224' OR \"change\" = '564291' OR \"change\" = '602248' OR \"change\" = '604293') AND \"voting\" = 'True') AND $timeFilter AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE'",
+                        "query":"SELECT \"type\", \"branch\", \"pipeline\", \"change\", \"patchset\", \"job_name\", \"log_link\",  \"duration\", \"cloud\", \"region\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND (\"change\" = '560445' OR \"change\" = '567224' OR \"change\" = '564291' OR \"change\" = '602248' OR \"change\" = '604293') AND \"voting\" = 'True') AND $timeFilter AND \"branch\" =~ /$releases/",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -2219,7 +2254,7 @@
                 ],
                 "timeFrom":"11h",
                 "timeShift":null,
-                "title":"RDO failing check jobs (noop)",
+                "title":"$releases failing check jobs (noop)",
                 "transform":"table",
                 "type":"table"
             },
@@ -2229,9 +2264,1475 @@
                 "fontSize":"100%",
                 "gridPos":{
                     "h":6,
-                    "w":11,
+                    "w":12,
+                    "x":12,
+                    "y":33
+                },
+                "hideTimeOverride":false,
+                "id":225,
+                "links":[],
+                "pageSize":null,
+                "repeat":null,
+                "repeatDirection":"v",
+                "repeatIteration":1541406446687,
+                "repeatPanelId":206,
+                "scopedVars":{
+                    "releases":{
+                        "selected":true,
+                        "text":"rocky",
+                        "value":"rocky"
+                    }
+                },
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "thresholds":[
+                            "A"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":"cell",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[
+                            "AA"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.openstack.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"autogen",
+                        "query":"SELECT \"duration\", \"result\", \"log_url\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' ) AND $timeFilter GROUP BY \"job_name\", \"branch\", \"pipeline\", \"change\"",
+                        "rawQuery":false,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "cloud"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "region"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=~",
+                                "value":"/periodic/"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"branch",
+                                "operator":"=~",
+                                "value":"/^$releases/"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"3d",
+                "timeShift":null,
+                "title":"$releases failing periodic jobs",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":6,
+                    "w":12,
                     "x":0,
-                    "y":34
+                    "y":39
+                },
+                "hideTimeOverride":false,
+                "id":223,
+                "links":[],
+                "pageSize":null,
+                "repeat":null,
+                "repeatDirection":"v",
+                "repeatIteration":1541406446687,
+                "repeatPanelId":205,
+                "scopedVars":{
+                    "releases":{
+                        "selected":true,
+                        "text":"queens",
+                        "value":"queens"
+                    }
+                },
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "thresholds":[
+                            "A"
+                        ],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":"cell",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[
+                            "AA"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.openstack.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patchset",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.openstack.org/c/${__cell_3}/${__cell}",
+                        "mappingType":1,
+                        "pattern":"patchset",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "job_name"
+                                ],
+                                "type":"tag"
+                            },
+                            {
+                                "params":[
+                                    "branch"
+                                ],
+                                "type":"tag"
+                            },
+                            {
+                                "params":[
+                                    "pipeline"
+                                ],
+                                "type":"tag"
+                            },
+                            {
+                                "params":[
+                                    "change"
+                                ],
+                                "type":"tag"
+                            }
+                        ],
+                        "hide":false,
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"autogen",
+                        "query":"SELECT \"type\", \"branch\", \"pipeline\", \"change\", \"patchset\", \"job_name\", \"log_link\",  \"duration\", \"cloud\", \"region\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND (\"change\" = '560445' OR \"change\" = '567224' OR \"change\" = '564291' OR \"change\" = '602248' OR \"change\" = '604293') AND \"voting\" = 'True') AND $timeFilter AND \"branch\" =~ /$releases/",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "slimit":"",
+                        "tags":[]
+                    }
+                ],
+                "timeFrom":"11h",
+                "timeShift":null,
+                "title":"$releases failing check jobs (noop)",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":6,
+                    "w":12,
+                    "x":12,
+                    "y":39
+                },
+                "hideTimeOverride":false,
+                "id":226,
+                "links":[],
+                "pageSize":null,
+                "repeat":null,
+                "repeatDirection":"v",
+                "repeatIteration":1541406446687,
+                "repeatPanelId":206,
+                "scopedVars":{
+                    "releases":{
+                        "selected":true,
+                        "text":"queens",
+                        "value":"queens"
+                    }
+                },
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "thresholds":[
+                            "A"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":"cell",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[
+                            "AA"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.openstack.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"autogen",
+                        "query":"SELECT \"duration\", \"result\", \"log_url\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' ) AND $timeFilter GROUP BY \"job_name\", \"branch\", \"pipeline\", \"change\"",
+                        "rawQuery":false,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "cloud"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "region"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=~",
+                                "value":"/periodic/"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"branch",
+                                "operator":"=~",
+                                "value":"/^$releases/"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"3d",
+                "timeShift":null,
+                "title":"$releases failing periodic jobs",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":6,
+                    "w":12,
+                    "x":0,
+                    "y":45
+                },
+                "hideTimeOverride":false,
+                "id":224,
+                "links":[],
+                "pageSize":null,
+                "repeat":null,
+                "repeatDirection":"v",
+                "repeatIteration":1541406446687,
+                "repeatPanelId":205,
+                "scopedVars":{
+                    "releases":{
+                        "selected":true,
+                        "text":"pike",
+                        "value":"pike"
+                    }
+                },
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "thresholds":[
+                            "A"
+                        ],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":"cell",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[
+                            "AA"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.openstack.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patchset",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.openstack.org/c/${__cell_3}/${__cell}",
+                        "mappingType":1,
+                        "pattern":"patchset",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "job_name"
+                                ],
+                                "type":"tag"
+                            },
+                            {
+                                "params":[
+                                    "branch"
+                                ],
+                                "type":"tag"
+                            },
+                            {
+                                "params":[
+                                    "pipeline"
+                                ],
+                                "type":"tag"
+                            },
+                            {
+                                "params":[
+                                    "change"
+                                ],
+                                "type":"tag"
+                            }
+                        ],
+                        "hide":false,
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"autogen",
+                        "query":"SELECT \"type\", \"branch\", \"pipeline\", \"change\", \"patchset\", \"job_name\", \"log_link\",  \"duration\", \"cloud\", \"region\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND (\"change\" = '560445' OR \"change\" = '567224' OR \"change\" = '564291' OR \"change\" = '602248' OR \"change\" = '604293') AND \"voting\" = 'True') AND $timeFilter AND \"branch\" =~ /$releases/",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "slimit":"",
+                        "tags":[]
+                    }
+                ],
+                "timeFrom":"11h",
+                "timeShift":null,
+                "title":"$releases failing check jobs (noop)",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":6,
+                    "w":12,
+                    "x":12,
+                    "y":45
+                },
+                "hideTimeOverride":false,
+                "id":227,
+                "links":[],
+                "pageSize":null,
+                "repeat":null,
+                "repeatDirection":"v",
+                "repeatIteration":1541406446687,
+                "repeatPanelId":206,
+                "scopedVars":{
+                    "releases":{
+                        "selected":true,
+                        "text":"pike",
+                        "value":"pike"
+                    }
+                },
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "thresholds":[
+                            "A"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":"cell",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[
+                            "AA"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.openstack.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"autogen",
+                        "query":"SELECT \"duration\", \"result\", \"log_url\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' ) AND $timeFilter GROUP BY \"job_name\", \"branch\", \"pipeline\", \"change\"",
+                        "rawQuery":false,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "cloud"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "region"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=~",
+                                "value":"/periodic/"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"branch",
+                                "operator":"=~",
+                                "value":"/^$releases/"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"3d",
+                "timeShift":null,
+                "title":"$releases failing periodic jobs",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":6,
+                    "w":12,
+                    "x":0,
+                    "y":51
                 },
                 "id":154,
                 "links":[],
@@ -2342,9 +3843,9 @@
                 "fontSize":"100%",
                 "gridPos":{
                     "h":6,
-                    "w":13,
-                    "x":11,
-                    "y":34
+                    "w":12,
+                    "x":12,
+                    "y":51
                 },
                 "id":155,
                 "links":[],
@@ -2459,7 +3960,7 @@
                     "h":6,
                     "w":5,
                     "x":0,
-                    "y":40
+                    "y":57
                 },
                 "id":160,
                 "limit":"100",
@@ -2486,7 +3987,7 @@
                     "h":6,
                     "w":5,
                     "x":5,
-                    "y":40
+                    "y":57
                 },
                 "id":159,
                 "limit":"100",
@@ -2520,7 +4021,7 @@
                     "h":6,
                     "w":5,
                     "x":10,
-                    "y":40
+                    "y":57
                 },
                 "id":165,
                 "limit":"100",
@@ -2553,7 +4054,7 @@
                     "h":6,
                     "w":5,
                     "x":15,
-                    "y":40
+                    "y":57
                 },
                 "id":166,
                 "limit":"100",
@@ -2586,7 +4087,7 @@
                     "h":6,
                     "w":5,
                     "x":0,
-                    "y":46
+                    "y":63
                 },
                 "id":161,
                 "limit":"100",
@@ -2613,7 +4114,7 @@
                     "h":6,
                     "w":5,
                     "x":5,
-                    "y":46
+                    "y":63
                 },
                 "id":135,
                 "limit":"100",
@@ -2640,7 +4141,7 @@
                     "h":3,
                     "w":5,
                     "x":10,
-                    "y":46
+                    "y":63
                 },
                 "id":162,
                 "limit":"100",
@@ -2667,7 +4168,7 @@
                     "h":6,
                     "w":5,
                     "x":15,
-                    "y":46
+                    "y":63
                 },
                 "id":198,
                 "limit":10,
@@ -2692,7 +4193,7 @@
                     "h":3,
                     "w":5,
                     "x":10,
-                    "y":49
+                    "y":66
                 },
                 "id":192,
                 "limit":10,
@@ -2717,7 +4218,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":52
+                    "y":69
                 },
                 "id":51,
                 "panels":[],
@@ -2735,7 +4236,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":53
+                    "y":70
                 },
                 "hideTimeOverride":true,
                 "id":157,
@@ -2991,7 +4492,7 @@
                     "h":6,
                     "w":4,
                     "x":0,
-                    "y":60
+                    "y":77
                 },
                 "id":71,
                 "legend":{
@@ -3162,7 +4663,7 @@
                     "h":6,
                     "w":4,
                     "x":4,
-                    "y":60
+                    "y":77
                 },
                 "id":72,
                 "legend":{
@@ -3328,7 +4829,7 @@
                     "h":6,
                     "w":16,
                     "x":8,
-                    "y":60
+                    "y":77
                 },
                 "id":55,
                 "legend":{
@@ -3545,7 +5046,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":66
+                    "y":83
                 },
                 "id":79,
                 "legend":{
@@ -3742,7 +5243,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":66
+                    "y":83
                 },
                 "id":80,
                 "legend":{
@@ -3966,7 +5467,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":72
+                    "y":89
                 },
                 "id":103,
                 "legend":{
@@ -4144,7 +5645,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":72
+                    "y":89
                 },
                 "id":106,
                 "legend":{
@@ -4322,7 +5823,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":76
+                    "y":93
                 },
                 "id":221,
                 "legend":{
@@ -4500,7 +6001,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":76
+                    "y":93
                 },
                 "id":105,
                 "legend":{
@@ -4679,7 +6180,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":80
+                    "y":97
                 },
                 "id":104,
                 "legend":{
@@ -4815,7 +6316,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":84
+                    "y":101
                 },
                 "id":63,
                 "links":[],
@@ -5144,7 +6645,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":94
+                    "y":111
                 },
                 "id":207,
                 "links":[],
@@ -5476,7 +6977,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":104
+                    "y":121
                 },
                 "id":209,
                 "legend":{
@@ -5591,7 +7092,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":112
+                    "y":129
                 },
                 "id":82,
                 "panels":[],
@@ -5646,7 +7147,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":113
+                    "y":130
                 },
                 "hideTimeOverride":false,
                 "id":110,
@@ -5825,7 +7326,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":113
+                    "y":130
                 },
                 "hideTimeOverride":false,
                 "id":116,
@@ -6000,7 +7501,7 @@
                     "h":4,
                     "w":4,
                     "x":10,
-                    "y":113
+                    "y":130
                 },
                 "hideTimeOverride":false,
                 "id":115,
@@ -6175,7 +7676,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":117
+                    "y":134
                 },
                 "hideTimeOverride":false,
                 "id":213,
@@ -6350,7 +7851,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":117
+                    "y":134
                 },
                 "id":214,
                 "legend":{
@@ -6524,7 +8025,7 @@
                     "h":4,
                     "w":4,
                     "x":10,
-                    "y":117
+                    "y":134
                 },
                 "id":215,
                 "legend":{
@@ -6702,7 +8203,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":121
+                    "y":138
                 },
                 "hideTimeOverride":false,
                 "id":117,
@@ -6877,7 +8378,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":121
+                    "y":138
                 },
                 "id":118,
                 "legend":{
@@ -7055,7 +8556,7 @@
                     "h":4,
                     "w":4,
                     "x":10,
-                    "y":121
+                    "y":138
                 },
                 "id":122,
                 "legend":{
@@ -7233,7 +8734,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":125
+                    "y":142
                 },
                 "id":123,
                 "legend":{
@@ -7411,7 +8912,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":125
+                    "y":142
                 },
                 "id":125,
                 "legend":{
@@ -7589,7 +9090,7 @@
                     "h":4,
                     "w":4,
                     "x":10,
-                    "y":125
+                    "y":142
                 },
                 "id":124,
                 "legend":{
@@ -7762,7 +9263,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":129
+                    "y":146
                 },
                 "id":126,
                 "legend":{
@@ -7946,7 +9447,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":129
+                    "y":146
                 },
                 "id":127,
                 "legend":{
@@ -8124,7 +9625,7 @@
                     "h":4,
                     "w":4,
                     "x":10,
-                    "y":129
+                    "y":146
                 },
                 "id":128,
                 "legend":{
@@ -8301,7 +9802,7 @@
                     "h":4,
                     "w":7,
                     "x":0,
-                    "y":133
+                    "y":150
                 },
                 "id":130,
                 "legend":{
@@ -8465,7 +9966,7 @@
                     "h":4,
                     "w":7,
                     "x":7,
-                    "y":133
+                    "y":150
                 },
                 "id":216,
                 "legend":{
@@ -8633,7 +10134,7 @@
                     "h":4,
                     "w":7,
                     "x":0,
-                    "y":137
+                    "y":154
                 },
                 "id":133,
                 "legend":{
@@ -8803,7 +10304,7 @@
                     "h":4,
                     "w":7,
                     "x":7,
-                    "y":137
+                    "y":154
                 },
                 "id":131,
                 "legend":{
@@ -8971,7 +10472,7 @@
                     "h":4,
                     "w":7,
                     "x":7,
-                    "y":141
+                    "y":158
                 },
                 "id":132,
                 "legend":{
@@ -9100,7 +10601,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":145
+                    "y":162
                 },
                 "id":168,
                 "links":[],
@@ -9222,14 +10723,14 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":152
+                    "y":169
                 },
-                "id":222,
+                "id":228,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1540449758491,
+                "repeatIteration":1541406446687,
                 "repeatPanelId":168,
                 "scopedVars":{
                     "releases":{
@@ -9346,14 +10847,14 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":159
+                    "y":176
                 },
-                "id":223,
+                "id":229,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1540449758491,
+                "repeatIteration":1541406446687,
                 "repeatPanelId":168,
                 "scopedVars":{
                     "releases":{
@@ -9470,14 +10971,14 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":166
+                    "y":183
                 },
-                "id":224,
+                "id":230,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1540449758491,
+                "repeatIteration":1541406446687,
                 "repeatPanelId":168,
                 "scopedVars":{
                     "releases":{
@@ -9587,136 +11088,12 @@
                 "type":"table"
             },
             {
-                "columns":[],
-                "datasource":"telegraf",
-                "fontSize":"100%",
-                "gridPos":{
-                    "h":7,
-                    "w":24,
-                    "x":0,
-                    "y":173
-                },
-                "id":225,
-                "links":[],
-                "pageSize":null,
-                "repeat":null,
-                "repeatDirection":"v",
-                "repeatIteration":1540449758491,
-                "repeatPanelId":168,
-                "scopedVars":{
-                    "releases":{
-                        "selected":true,
-                        "text":"ocata",
-                        "value":"ocata"
-                    }
-                },
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":0,
-                    "desc":true
-                },
-                "styles":[
-                    {
-                        "alias":"Time",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"failing_jobs",
-                        "sanitize":true,
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "decimals":2,
-                        "pattern":"/.*/",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    }
-                ],
-                "targets":[
-                    {
-                        "groupBy":[],
-                        "measurement":"skipped-promotions",
-                        "orderByTime":"DESC",
-                        "policy":"default",
-                        "refId":"A",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "repo_hash"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "from_name"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "to_name"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "failing_jobs"
-                                    ],
-                                    "type":"field"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"release",
-                                "operator":"=~",
-                                "value":"/^$releases$/"
-                            }
-                        ]
-                    }
-                ],
-                "title":"Skipped $releases promotions",
-                "transform":"table",
-                "type":"table"
-            },
-            {
                 "collapsed":false,
                 "gridPos":{
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":180
+                    "y":190
                 },
                 "id":4,
                 "panels":[],
@@ -9731,7 +11108,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":181
+                    "y":191
                 },
                 "id":2,
                 "links":[],
@@ -9799,7 +11176,7 @@
                     "h":9,
                     "w":12,
                     "x":0,
-                    "y":188
+                    "y":198
                 },
                 "hideTimeOverride":true,
                 "id":196,
@@ -9935,7 +11312,7 @@
                     "h":9,
                     "w":12,
                     "x":12,
-                    "y":188
+                    "y":198
                 },
                 "hideTimeOverride":true,
                 "id":194,
@@ -10036,7 +11413,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":197
+                    "y":207
                 },
                 "id":173,
                 "panels":[],
@@ -10054,7 +11431,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":198
+                    "y":208
                 },
                 "id":175,
                 "legend":{
@@ -10228,7 +11605,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":198
+                    "y":208
                 },
                 "id":177,
                 "legend":{
@@ -10490,7 +11867,7 @@
                     "h":7,
                     "w":12,
                     "x":0,
-                    "y":204
+                    "y":214
                 },
                 "id":179,
                 "legend":{
@@ -10850,7 +12227,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":204
+                    "y":214
                 },
                 "id":181,
                 "legend":{
@@ -11010,7 +12387,7 @@
                     "h":6,
                     "w":7,
                     "x":0,
-                    "y":211
+                    "y":221
                 },
                 "id":183,
                 "legend":{
@@ -11124,7 +12501,7 @@
                     "h":6,
                     "w":9,
                     "x":7,
-                    "y":211
+                    "y":221
                 },
                 "id":185,
                 "legend":{
@@ -11238,7 +12615,7 @@
                     "h":6,
                     "w":8,
                     "x":16,
-                    "y":211
+                    "y":221
                 },
                 "id":187,
                 "legend":{
@@ -11412,12 +12789,13 @@
                 {
                     "allValue":null,
                     "current":{
-                        "text":"master + queens + pike + ocata",
+                        "tags":[],
+                        "text":"master + rocky + queens + pike",
                         "value":[
                             "master",
+                            "rocky",
                             "queens",
-                            "pike",
-                            "ocata"
+                            "pike"
                         ]
                     },
                     "hide":2,
@@ -11445,14 +12823,9 @@
                             "selected":true,
                             "text":"pike",
                             "value":"pike"
-                        },
-                        {
-                            "selected":true,
-                            "text":"ocata",
-                            "value":"ocata"
                         }
                     ],
-                    "query":"master, rocky,queens, pike, ocata",
+                    "query":"master, rocky,queens, pike",
                     "type":"custom"
                 },
                 {
