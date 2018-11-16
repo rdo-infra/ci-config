@@ -4,6 +4,7 @@ import re
 import sys
 import dlrnapi_client
 import influxdb_utils
+import json
 
 from promoter_utils import get_dlrn_instance_for_release
 from diskcache import Cache
@@ -83,8 +84,8 @@ def parse_skipped_promotions(release_name):
         matched_regex = promoter_skipping_regex.match(log_line)
         if matched_regex:
 
-            promotion = matched_regex.group(1)
-            repo_hash = promotion
+            promotion = json.loads(matched_regex.group(1).replace("'", '"'))
+            repo_hash = promotion['full_hash']
             failing_jobs = matched_regex.group(3)
 
             skipped_promotion = {
