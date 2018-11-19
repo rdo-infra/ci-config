@@ -29,11 +29,11 @@ JOBS_FOR_ARA = [
     'tripleo-ci-centos-7-scenario004-multinode-oooq-container',
 ]
 
-ARA_JSONS = [
-    '/logs/ara.oooq.root.json',
-    '/logs/ara.oooq.oc.json',
-    '/logs/ara.json'
-]
+ARA_JSONS = []
+#    '/logs/ara.oooq.root.json',
+#    '/logs/ara.oooq.oc.json',
+#    '/logs/ara.json'
+#]
 
 TASK_DURATION_TRESHOLD = 10
 
