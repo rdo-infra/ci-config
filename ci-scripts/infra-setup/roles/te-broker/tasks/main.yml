@@ -113,14 +113,6 @@
       enabled: yes
     when: apache_config|changed
 
-  # Allow log rotate in {{ logsdir }}
-  # cat /etc/selinux/targeted/contexts/files/file_contexts.local
-  # /var/www/html/tebroker/testenv-worker.log    system_u:object_r:var_log_t:s0
-  - sefcontext:
-      target: "{{ logsdir }}/testenv-worker.log"
-      setype: var_log_t
-      state: present
-
   - name: Add config for te-broker log rotation
     copy:
       content: |
@@ -132,11 +124,12 @@
               missingok
               notifempty
               maxage 30
+              copytruncate
               prerotate
                 semanage fcontext -a -t var_log_t {{ logsdir }}/testenv-worker.log
               endscript
               postrotate
-                semanage fcontext -a -t var_log_t {{ logsdir }}/testenv-worker.log
+                semanage fcontext -a -t httpd_sys_content_t {{ logsdir }}/testenv-worker.log
               endscript
           }
       dest: /etc/logrotate.d/te-broker
