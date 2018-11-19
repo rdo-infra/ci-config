@@ -30,9 +30,9 @@ JOBS_FOR_ARA = [
 ]
 
 ARA_JSONS = [
-    '/logs/ara.oooq.root.json',
-    '/logs/ara.oooq.oc.json',
-    '/logs/ara.json'
+#    '/logs/ara.oooq.root.json',
+#    '/logs/ara.oooq.oc.json',
+#    '/logs/ara.json'
 ]
 
 TASK_DURATION_TRESHOLD = 10
