@@ -72,6 +72,12 @@
       line: 'PasswordAuthentication no'
     notify: ssh-restart
 
+  - name: Forbid SSH login for user centos
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      line: 'DenyUsers centos'
+    notify: ssh-restart
+
   - name: Create continuous delivery script
     template:
       src: ansible-pull.sh.j2
