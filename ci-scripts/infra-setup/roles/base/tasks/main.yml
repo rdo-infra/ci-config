@@ -78,6 +78,17 @@
       line: 'DenyUsers centos'
     notify: ssh-restart
 
+  - name: Configure PAM to track users activity
+    lineinfile:
+      path: /etc/pam.d/system-auth
+      line: 'session     required     pam_tty_audit.so disable=* enable=root,centos'
+
+  - name: Ensure auditd service runs
+    systemd:
+      name: auditd
+      state: started
+      enabled: yes
+
   - name: Create continuous delivery script
     template:
       src: ansible-pull.sh.j2
