@@ -89,3 +89,10 @@
       name: "Run ansible-pull for continuous delivery"
       minute: "*/5"
       job: "flock -n -E 2 /var/lock/ansible-pull /usr/local/bin/ansible_pull.sh"
+
+- name: Add timestamps to bash history
+  lineinfile:
+    path: /home/centos/.bashrc
+    line: "export HISTTIMEFORMAT='%F %T '"
+  become: true
+  become_user: centos
