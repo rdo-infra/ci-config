@@ -1,0 +1,108 @@
+version: '3'
+
+services:
+  gerrit:
+    image: gerritcodereview/gerrit
+    ports:
+      - "8080:8080"
+      - "29418:29418"
+    command: |
+      /bin/sh -c '\
+        git config -f /var/gerrit/etc/gerrit.config gerrit.canonicalWebUrl http://localhost:8080/ && \
+        git config -f /var/gerrit/etc/gerrit.config gerrit.ui POLYGERRIT && \
+        git config -f /var/gerrit/etc/gerrit.config sendemail.enable false && \
+        git config -f /var/gerrit/etc/gerrit.config noteDb.changes.autoMigrate true && \
+        /var/gerrit/bin/gerrit.sh run'
+  gerritconfig:
+    image: zuul/zuul
+    environment:
+      no_proxy: "${no_proxy},gerrit"
+    depends_on:
+      - gerrit
+    volumes:
+      - "~/.ssh/:/var/ssh/:z"
+      - "./playbooks/:/var/playbooks/:z"
+      - "./projects/:/var/projects/:z"
+    command: "ansible-playbook /var/playbooks/setup-gerrit.yaml"
+  zk:
+    image: zookeeper
+  mysql:
+    image: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: zuul
+      MYSQL_USER: zuul
+      MYSQL_PASSWORD: secret
+  scheduler:
+    depends_on:
+      - gerritconfig
+      - zk
+      - mysql
+    environment:
+      no_proxy: "${no_proxy},gerrit"
+    command: "sh -c 'ansible-playbook /var/playbooks/wait-gerrit.yaml; zuul-scheduler -d'"
+    image: zuul/zuul-scheduler
+    volumes:
+      - "./etc_zuul/:/etc/zuul/:z"
+      - "./playbooks/:/var/playbooks/:z"
+      - "~/.ssh/:/var/ssh/:z"
+      - /var/lib/zuul
+      - "./projects:/var/projects/:z"
+  web:
+    command: "zuul-web -d"
+    depends_on:
+      - scheduler
+      - mysql
+    ports:
+      - "9000:9000"
+    image: zuul/zuul-web
+    volumes:
+      - "./etc_zuul/:/etc/zuul/:z"
+  executor:
+    privileged: true
+    environment:
+      no_proxy: "${no_proxy},gerrit"
+    command: "sh -c \"sed -i 's/makedirs(path)/makedirs(path, exist_ok=True)/g' /usr/local/lib/python3.7/site-packages/zuul/merger/merger.py && zuul-executor -d\""
+    depends_on:
+      - scheduler
+    image: zuul/zuul-executor
+    sysctls:
+      net.ipv4.tcp_keepalive_time: 600
+      net.ipv4.tcp_keepalive_intvl: 75
+      net.ipv4.tcp_keepalive_probes: 9
+    volumes:
+      - "./etc_zuul/:/etc/zuul/:z"
+      - "./playbooks/:/var/playbooks/:z"
+      - "~/.ssh/:/var/ssh/:z"
+      - "logs:/srv/static/logs:z"
+      - "./projects:/projects/:z"
+
+  launcher:
+    command: "nodepool-launcher -d"
+    depends_on:
+      - zk
+    image: zuul/nodepool-launcher
+    volumes:
+      - "./etc_nodepool/:/etc/nodepool/:z"
+      - "~/.config/openstack/:/etc/openstack/:z"
+      - "/etc/pki/:/etc/pki/:z"
+    ports:
+      - "8022:8022"
+    environment:
+      - REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
+
+  logs:
+    build:
+      dockerfile: logs-Dockerfile
+      context: ./
+      args:
+        http_proxy: "${http_proxy}"
+        https_proxy: "${http_proxy}"
+        no_proxy: "${no_proxy}"
+    ports:
+      - "8000:80"
+    volumes:
+      - "logs:/usr/local/apache2/htdocs:z"
+
+volumes:
+  logs:
