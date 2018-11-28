@@ -1,0 +1,19 @@
+---
+- name: Clone {{ project.name }}
+  git:
+    repo: "{{ project.repo }}"
+    dest: "{{ install_path }}/{{ project.name }}"
+    version: "{{ project.version }}"
+    refspec: "{{ project.refspec }}"
+    force: true
+
+- name: Install pbrx
+  pip:
+    name: [ "pbrx", "configparser" ]
+    state: present
+    extra_args: --user
+
+- name: Build containers for {{ project.name }}
+  shell: pbrx --debug build-images --prefix={{ project.name }}
+  args:
+    chdir: "{{ install_path }}/{{ project.name }}"

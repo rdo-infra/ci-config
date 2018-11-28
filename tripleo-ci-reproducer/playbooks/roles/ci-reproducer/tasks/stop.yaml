@@ -1,0 +1,12 @@
+---
+- name: Check if reproducer is installed
+  stat:
+    path: "{{ install_path }}"
+  register: reproducer_path
+
+- name: Stop zuul and friends
+  docker_service:
+    project_src: "{{ install_path }}"
+    state: absent
+    build: true
+  when: reproducer_path.stat.exists and reproducer_path.stat.isdir
