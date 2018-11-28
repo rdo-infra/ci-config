@@ -1,0 +1,47 @@
+[gearman]
+server=scheduler
+
+[gearman_server]
+start=true
+
+[zookeeper]
+hosts=zk
+
+[scheduler]
+tenant_config=/etc/zuul/main.yaml
+
+[connection "git.openstack.org"]
+name=git.openstack.org
+driver=gerrit
+server=review.openstack.org
+canonical_hostname=git.openstack.org
+gitweb_url_template=https://git.openstack.org/cgit/{project.name}/commit/?id={sha}
+user={{ upstream_gerrit_user }}
+sshkey=/var/ssh/id_rsa
+
+[connection "gerrit"]
+name=gerrit
+driver=gerrit
+server=gerrit
+sshkey=/var/ssh/id_rsa
+user=zuul
+password=secret
+baseurl=http://gerrit:8080
+auth_type=basic
+
+[connection "mysql"]
+name=mysql
+driver=sql
+dburi=mysql+pymysql://zuul:secret@mysql/zuul
+
+[web]
+listen_address=0.0.0.0
+
+[executor]
+private_key_file=/var/ssh/id_rsa
+default_username=zuul
+trusted_rw_paths=/srv/static/logs
+
+[merger]
+git_user_email="os-tripleo-ci@redhat.com"
+git_user_name="Openstack Triple CI"
