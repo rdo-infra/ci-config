@@ -1,0 +1,17 @@
+---
+- name: Install and start reproducer
+  block:
+  - name: Install it
+    include_tasks: install.yaml
+
+  - name: Start it
+    include_tasks: start.yaml
+  when: state == "present"
+
+- name: stop reproducer
+  block:
+  - name: Stop it
+    include_tasks: stop.yaml
+  when: state == "absent"
+
+
