@@ -1,0 +1,34 @@
+- job:
+    name: base
+    parent: null
+    abstract: true
+    description: |
+      The recommended base job.
+
+      All jobs ultimately inherit from this.  It runs a pre-playbook
+      which copies all of the job's prepared git repos on to all of
+      the nodes in the nodeset.
+
+      It also sets a default timeout value (which may be overridden).
+    pre-run: playbooks/base/pre.yaml
+    post-run:
+      - playbooks/base/post-ssh.yaml
+      - playbooks/base/post-logs.yaml
+    roles:
+      - zuul: openstack-infra/project-config
+      - zuul: openstack-infra/zuul-jobs
+      - zuul: openstack-infra/openstack-zuul-jobs
+      - zuul: rdo-jobs
+    vars:
+      ara_report_type: database
+      ara_report_path: ara-report
+      zuul_site_mirror_fqdn: "mirror.{{ nodepool.region | lower }}.{{ nodepool.cloud | lower }}.rdoproject.org"
+      zuul_output_dir: "{{ ansible_user_dir }}/zuul-output"
+      mirror_fqdn: "{{ zuul_site_mirror_fqdn }}"
+    timeout: 1800
+    post-timeout: 1800
+    nodeset:
+      nodes:
+        - name: centos-7
+          label: centos-7
+
