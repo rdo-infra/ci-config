@@ -1,0 +1,35 @@
+---
+- name: Build zuul container
+  vars:
+    project:
+      name: zuul
+      repo: https://git.openstack.org/openstack-infra/zuul
+      version: FETCH_HEAD
+      refspec: refs/changes/77/607077/1
+  include_tasks: build-pbrx-container.yaml
+
+- name: Build nodepool container
+  vars:
+    project:
+      name: nodepool
+      repo: https://git.openstack.org/openstack-infra/zuul
+      version: master
+      refspec: HEAD
+  include_tasks: build-pbrx-container.yaml
+
+- name: Install and start reproducer
+  block:
+  - name: Install it
+    include_tasks: install.yaml
+
+  - name: Start it
+    include_tasks: start.yaml
+  when: state == "present"
+
+- name: stop reproducer
+  block:
+  - name: Stop it
+    include_tasks: stop.yaml
+  when: state == "absent"
+
+
