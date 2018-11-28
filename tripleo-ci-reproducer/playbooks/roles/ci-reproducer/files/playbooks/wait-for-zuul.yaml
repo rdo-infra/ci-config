@@ -1,0 +1,16 @@
+---
+- hosts: localhost
+  gather_facts: false
+  tasks:
+  - name: Wait for zuul tenant
+    uri:
+      url: "http://web:9000/api/tenant/tripleo-ci-reproducer/status"
+      method: GET
+      return_content: true
+      status_code: 200
+      body_format: json
+    register: result
+    retries: 60
+    delay: 10
+    until: result.status == 200 and result.json["zuul_version"] is defined
+    changed_when: false
