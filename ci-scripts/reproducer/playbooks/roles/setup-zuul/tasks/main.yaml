@@ -1,0 +1,54 @@
+---
+
+- name: Generate nodepool configuration
+  template:
+    src: nodepool.yaml.j2
+    dest: "{{ role_path }}/etc_nodepool/nodepool.yaml"
+
+- name: Generate zuul configuration
+  template:
+    src: zuul.conf.j2
+    dest: "{{ role_path }}/etc_zuul/zuul.conf"
+
+- name: Generate tenant configuration
+  template:
+    src: main.yaml.j2
+    dest: "{{ role_path }}/etc_zuul/main.yaml"
+
+- name: Open needed ports at default security group
+  os_security_group_rule:
+    cloud: "{{ os_cloud_name }}"
+    security_group: default
+    protocol: tcp
+    port_range_min: "{{ item }}"
+    port_range_max: "{{ item }}"
+    remote_ip_prefix: 0.0.0.0/0
+  with_items:
+    - 19885
+    - 22
+
+- name: Start docker
+  become: true
+  service:
+    name: docker
+    state: started
+
+- name: Start up zuul and friends
+  docker_service:
+    project_src: "{{ role_path }}"
+    state: present
+    build: true
+
+
+- name: Wait for zuul upstream tenant
+  uri:
+    url: "http://localhost:9000/api/tenant/upstream/status"
+    method: GET
+    return_content: true
+    status_code: 200
+    body_format: json
+  register: result
+  retries: 60
+  delay: 10
+  until: result.status == 200 and result.json["zuul_version"] is defined
+  changed_when: false
