@@ -1,0 +1,61 @@
+---
+- name: Install reproducer
+  copy:
+    src: "{{ item }}"
+    dest: "{{ install_path }}"
+  with_items:
+    - playbooks
+    - projects
+    - docker-compose.yaml
+    - httpd.conf
+    - logs-Dockerfile
+
+- name: Create configuration directories
+  file:
+    name: "{{ install_path }}/{{ item }}"
+    state: directory
+  with_items:
+    - etc_nodepool
+    - etc_zuul
+
+- name: Generate nodepool configuration
+  template:
+    src: nodepool.yaml.j2
+    dest: "{{ install_path }}/etc_nodepool/nodepool.yaml"
+
+- name: Generate zuul configuration
+  template:
+    src: "{{ item }}.j2"
+    dest: "{{ install_path }}/etc_zuul/{{ item }}"
+  with_items:
+    - zuul.conf
+    - main.yaml
+    - scheduler-logging.yaml
+    - executor-logging.yaml
+
+- name: Open needed ports at default security group
+  os_security_group_rule:
+    cloud: "{{ os_cloud_name }}"
+    security_group: default
+    protocol: tcp
+    port_range_min: "{{ item }}"
+    port_range_max: "{{ item }}"
+    remote_ip_prefix: 0.0.0.0/0
+  with_items:
+    - 19885
+    - 22
+
+- name: Get installed images names
+  os_image_facts:
+    cloud: "{{ os_cloud_name }}"
+
+- name: Check image are uploaded
+  fail:
+    msg: |
+      Cannot find {{ item }} at the openstack cloud, you can upload one from
+      https://nb02.openstack.org/images/ and add your ssh pub key with
+      virt-edit and upload it to your openstack cloud.
+  when: openstack_image | selectattr( 'name', 'equalto', item ) | list | length == 0
+  with_items:
+    - "{{ os_centos7_image }}"
+    - "{{ os_fedora28_image }}"
