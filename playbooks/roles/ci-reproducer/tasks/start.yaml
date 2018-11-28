@@ -1,0 +1,52 @@
+---
+- name: Start docker
+  become: true
+  service:
+    name: docker
+    state: started
+
+- name: Start up zuul and friends
+  docker_service:
+    project_src: "{{ install_path }}"
+    state: present
+    build: true
+
+
+- name: Wait for zuul upstream tenant
+  uri:
+    url: "http://localhost:9000/api/tenant/upstream/status"
+    method: GET
+    return_content: true
+    status_code: 200
+    body_format: json
+  register: result
+  retries: 60
+  delay: 10
+  until: result.status == 200 and result.json["zuul_version"] is defined
+  changed_when: false
+
+- name: Show banner
+  vars:
+    banner: |
+      Now a local openstack tripleo ci environment has being installed at this
+      system to use it you can acces to the following links and use it as a
+      normal zuul + gerrit system.
+
+      Gerrit: http://localhost:8080
+      Zuul: http://localhost:9000
+      Docker compose: {{ install_path }}
+
+      To trigger jobs:
+        - git clone http://localhost:8080/test1
+        - Add a zuul.yaml with content like this:
+          - project:
+            check:
+              jobs:
+                - tripleo-ci-centos-7-scenario002-standalone
+        - git review it
+
+      You can also comment with 'recheck' at local gerrit to spin a job
+      already commited
+
+  debug:
+    msg: "{{ banner.split('\n') }}"
