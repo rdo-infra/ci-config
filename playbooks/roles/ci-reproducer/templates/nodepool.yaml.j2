@@ -1,0 +1,46 @@
+---
+zookeeper-servers:
+  - host: zk
+
+labels:
+  - name: centos-7
+  - name: fedora-28
+  - name: tripleo-ovb-centos-7
+
+providers:
+  - name: {{ os_cloud_name }}
+    cloud: {{ os_cloud_name }}
+    # NOTE(jpena): this is a workaround for infitite retries, see https://review.openstack.org/584488
+    launch-retries: 999999999
+    region-name: regionOne
+    clean-floating-ips: true
+    boot-timeout: 240
+    rate: 0.25
+    cloud-images:
+      - name: centos-7
+        config-drive: true
+        image-name: {{ os_centos7_image }}
+        username: zuul
+      - name: fedora-28
+        config-drive: true
+        image-name: {{ os_fedora28_image }}
+        username: zuul
+    pools:
+      - name: main
+        max-servers: 5
+        labels:
+          - name: centos-7
+            min-ram: 8192
+            flavor-name: 'm1.large'
+            cloud-image: centos-7
+            console-log: true
+          - name: tripleo-ovb-centos-7
+            min-ram: 8192
+            flavor-name: 'm1.large'
+            cloud-image: centos-7
+            console-log: true
+          - name: fedora-28
+            min-ram: 8192
+            flavor-name: 'm1.large'
+            cloud-image: fedora-28
+            console-log: true
