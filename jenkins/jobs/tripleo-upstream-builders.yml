@@ -13,3 +13,18 @@
         - shell:
             !include-raw:
                 - scripts/cico-node-run-playbook.sh
+- builder:
+    name: build-tripleo-images
+    builders:
+        - shell: |
+            cat << EOF > $WORKSPACE/playbook.yml
+            ---
+            - name: Build Triple O Images
+              hosts: openstack_nodes
+              tasks:
+                - name: Build Triple O Images
+                  script: $WORKSPACE/ci-config/jenkins/jobs/scripts/build-tripleo-images.sh $OPENSTACK_RELEASE $CPU_ARCH $CICO_FLAVOR
+            EOF
+        - shell:
+            !include-raw:
+                - scripts/cico-node-run-playbook.sh
