@@ -11,19 +11,23 @@ trap deactivate_dlrnapi_venv EXIT
 activate_dlrnapi_venv
 
 set -u
+: ${DLRNAPI_DISTRO:="CentOS"}
+: ${DLRNAPI_DISTRO_VERSION:="7"}
 
-curl -sLo $WORKSPACE/commit.yaml https://trunk.rdoproject.org/centos7-$RELEASE/$PROMOTE_NAME/commit.yaml
-
-COMMIT_HASH=$(shyaml get-value commits.0.commit_hash < $WORKSPACE/commit.yaml)
-DISTRO_HASH=$(shyaml get-value commits.0.distro_hash < $WORKSPACE/commit.yaml)
-FULL_HASH=${COMMIT_HASH}_${DISTRO_HASH:0:8}
-
-export DLRNAPI_URL="https://trunk.rdoproject.org/api-centos-$RELEASE"
-if [ "$RELEASE" = "master" ]; then
+DLRNAPI_URL="https://trunk.rdoproject.org/api-${DLRNAPI_DISTRO,,}-$RELEASE"
+if [[ "$RELEASE" = "master"  && "$DLRNAPI_DISTRO" == "CentOS" ]]; then
     # for master we have two DLRN builders, use the "upper constraint" one that
     # places restrictions on the maximum version of all dependencies
     export DLRNAPI_URL="${DLRNAPI_URL}-uc"
 fi
+
+HASHES_URL=https://trunk.rdoproject.org/${DLRNAPI_DISTRO,,}${DLRNAPI_DISTRO_VERSION}-$RELEASE/$PROMOTE_NAME/commit.yaml
+
+curl -sLo $WORKSPACE/commit.yaml $HASHES_URL
+
+COMMIT_HASH=$(shyaml get-value commits.0.commit_hash < $WORKSPACE/commit.yaml)
+DISTRO_HASH=$(shyaml get-value commits.0.distro_hash < $WORKSPACE/commit.yaml)
+FULL_HASH=${COMMIT_HASH}_${DISTRO_HASH:0:8}
 
 cat > $WORKSPACE/hash_info.sh << EOF
 export DLRNAPI_URL=$DLRNAPI_URL
