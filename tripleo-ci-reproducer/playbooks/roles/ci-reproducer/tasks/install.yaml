@@ -6,9 +6,13 @@
   with_items:
     - playbooks
     - projects
-    - docker-compose.yaml
     - httpd.conf
     - logs-Dockerfile
+
+- name: Generate docker compose config
+  template:
+    src: docker-compose.yaml.j2
+    dest: "{{ install_path }}/docker-compose.yaml"
 
 - name: Create configuration directories
   file:
