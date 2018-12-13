@@ -104,5 +104,20 @@ services:
     volumes:
       - "logs:/usr/local/apache2/htdocs:z"
 
+{% for i in range(mergers) %}
+  merger{{ i }}:
+    environment:
+      no_proxy: "${no_proxy},gerrit"
+    command: "zuul-merger -d"
+    depends_on:
+      - scheduler
+    image: zuul/zuul-merger
+    volumes:
+      - "./etc_zuul/:/etc/zuul/:z"
+      - "~/.ssh/:/var/ssh/:z"
+      - "logs:/srv/static/logs:z"
+
+{% endfor %}
+
 volumes:
   logs:
