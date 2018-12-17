@@ -8,7 +8,13 @@ ls *.tar
 
 export RSYNC_RSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 rsync_cmd="rsync --verbose --archive --delay-updates --relative"
-UPLOAD_URL=uploader@images.rdoproject.org:/var/www/html/images/$RELEASE/rdo_trunk
+
+if [ -n "$DISTRO_NAME" ]; then
+    UPLOAD_URL=uploader@images.rdoproject.org:/var/www/html/images/$DISTRO_NAME/$RELEASE/rdo_trunk
+else
+    UPLOAD_URL=uploader@images.rdoproject.org:/var/www/html/images/$RELEASE/rdo_trunk
+fi
+
 # Check if directory $FULL_HASH exists, if not create it.
 if [ ! -d $FULL_HASH ]; then
     mkdir $FULL_HASH
