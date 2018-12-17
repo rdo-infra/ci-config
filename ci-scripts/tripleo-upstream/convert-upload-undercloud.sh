@@ -78,7 +78,13 @@ export FULL_HASH=$(grep -o -E '[0-9a-f]{40}_[0-9a-f]{8}' < /etc/yum.repos.d/delo
 
 export RSYNC_RSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 rsync_cmd="rsync --verbose --archive --delay-updates --relative"
-UPLOAD_URL=uploader@images.rdoproject.org:/var/www/html/images/$RELEASE/rdo_trunk
+
+if [ -n $DISTRO_NAME ]; then
+    UPLOAD_URL=uploader@images.rdoproject.org:/var/www/html/images/$DISTRO_NAME/$RELEASE/rdo_trunk
+else
+    UPLOAD_URL=uploader@images.rdoproject.org:/var/www/html/images/$RELEASE/rdo_trunk
+fi
+
 mkdir $FULL_HASH
 mv undercloud.qcow2 undercloud.qcow2.md5 $FULL_HASH
 
