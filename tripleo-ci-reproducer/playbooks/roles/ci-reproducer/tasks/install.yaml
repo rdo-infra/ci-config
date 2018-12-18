@@ -1,4 +1,45 @@
 ---
+- name: Copy private ssh key
+  copy:
+    src: "{{ ssh_prv_key }}"
+    dest: "{{ ansible_user_dir }}/.ssh/id_rsa_repro"
+    mode: 0600
+
+- name: Copy public ssh key
+  copy:
+    src: "{{ ssh_pub_key }}"
+    dest: "{{ ansible_user_dir }}/.ssh/id_rsa_repro.pub"
+    mode: 0600
+
+- name: Install needed packages
+  become: true
+  package:
+    name:
+      - libselinux-python
+      - python-openstackclient
+
+- name: Install docker
+  vars:
+    ansible_become: true
+    docker_users:
+      - "{{ ansible_user }}"
+  include_role:
+    name: geerlingguy.docker
+
+- name: Get user groups
+  slurp:
+    src: /etc/group
+  register: remote_group
+
+- name: Print user groups
+  debug:
+    msg: "group content: {{ remote_group.content | b64decode }}"
+
+- name: Install docker-compose
+  pip:
+    name: docker-compose
+    extra_args: --user
+
 - name: Install reproducer
   copy:
     src: "{{ item }}"

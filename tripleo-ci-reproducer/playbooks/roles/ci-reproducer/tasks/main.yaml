@@ -1,7 +1,12 @@
 ---
-- name: Gather vcpus facts
+- name: Gather needed facts
   setup:
-    gather_subset: "!min,processor"
+    gather_subset: "!min,os_family,processor,user_dir,service_mgr"
+  when:
+    - ansible_os_family is not defined
+    - ansible_processor_vcpus is not defined
+    - ansible_user_dir is not defined
+    - ansible_service_mgr is not defined
 
 - name: Build zuul container
   when: build_zuul is defined
@@ -25,17 +30,15 @@
 
 - name: Install and start reproducer
   block:
-  - name: Install it
-    include_tasks: install.yaml
+    - name: Install it
+      include_tasks: install.yaml
 
-  - name: Start it
-    include_tasks: start.yaml
+    - name: Start it
+      include_tasks: start.yaml
   when: state == "present"
 
 - name: stop reproducer
   block:
-  - name: Stop it
-    include_tasks: stop.yaml
+    - name: Stop it
+      include_tasks: stop.yaml
   when: state == "absent"
-
-

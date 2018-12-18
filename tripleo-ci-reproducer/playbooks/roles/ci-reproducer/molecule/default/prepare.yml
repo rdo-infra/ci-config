@@ -1,0 +1,25 @@
+---
+- name: Prepare
+  hosts: all
+  gather_facts: false
+  tasks:
+
+    - name: Install python for Ansible
+      raw: test -e /usr/bin/python || (dnf -y update && dnf install -y python-minimal)
+      become: true
+      changed_when: false
+
+    - name: Install python-libselinux
+      become: true
+      package:
+        name: python-libselinux
+
+    - name: Create openstack config dir
+      file:
+        path: "~/.config/openstack/"
+        state: directory
+
+    - name: Copy cloud.yaml to the testing box
+      copy:
+        src: "~/.config/openstack/clouds.yaml"
+        dest: "~/.config/openstack/clouds.yaml"
