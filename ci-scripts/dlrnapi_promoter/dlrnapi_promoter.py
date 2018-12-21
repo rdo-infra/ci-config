@@ -133,6 +133,8 @@ def tag_containers(new_hashes, release, promote_name):
     env['FULL_HASH'] = new_hashes['full_hash']
     env['PROMOTE_NAME'] = promote_name
     env['SCRIPT_ROOT'] = script_root
+    env['DISTRO_NAME'] = distro_name
+    env['DISTRO_VERSION'] = distro_version
     promote_playbook = (
         script_root + 'ci-scripts/container-push/container-push.yml'
     )

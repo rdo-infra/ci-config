@@ -20,6 +20,9 @@
     rdoproject_namespace: "tripleo{{ lookup('env','RELEASE') }}"
     rdoproject_username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
     rdoproject_password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
+    distro_name_orig: "{{ lookup('env','DISTRO_NAME')|default('CentOS')  }}"
+    distro_name: "{{ distro_name_orig|lower }}"
+    distro_version: "{{ lookup('env','DISTRO_VERSION')|default('7')  }}"
     containers_file: "parsed_containers-{{ lookup('env','RELEASE') }}.txt"
     registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleo{{ lookup('env', 'RELEASE') }}/imagestreamtags"
     image_tag: tripleo-ci-testing
@@ -30,7 +33,7 @@
 
     - name: Construct the DLRN URL for the promoted hash
       set_fact:
-        dlrn_url: "https://trunk.rdoproject.org/centos7-{{ lookup('env','RELEASE') }}/{{ dlrn_dir }}/versions.csv"
+        dlrn_url: "https://trunk.rdoproject.org/{{ distro_name }}{{ distro_version }}-{{ lookup('env','RELEASE') }}/{{ dlrn_dir }}/versions.csv"
 
     - name: Get the tripleo-common commit in the promoted hash
       shell: >
@@ -45,13 +48,13 @@
       shell: |
         echo -n > {{ containers_file }};
         for image in $(curl -fk {{ release_url }} 2>/dev/null | grep -o -P '(?<=name_prefix).*(?=name_suffix)' | sed "s/[{}]//g"); do
-            echo -n "Checking {{ registry_api }}/centos-binary-$image:{{ image_tag }} ... ";
-            if curl -fk "{{ registry_api }}/centos-binary-$image:{{ image_tag }}" &>/dev/null; then
+            echo -n "Checking {{ registry_api }}/{{ distro_name }}-binary-$image:{{ image_tag }} ... ";
+            if curl -fk "{{ registry_api }}/{{ distro_name }}-binary-$image:{{ image_tag }}" &>/dev/null; then
                 echo $image >> {{ containers_file }};
                 echo "OK";
             else
                 echo "FAIL";
-                echo "ERROR ========== centos-binary-$image IS NOT BUILT! FIX THIS ASAP! ==========";
+                echo "ERROR ========== {{ distro_name }}-binary-$image IS NOT BUILT! FIX THIS ASAP! ==========";
             fi
         done
         # fail the script and exit with error if the container list is empty
@@ -77,7 +80,7 @@
 
         - name: Pull the images from rdoproject registry
           docker_image:
-            name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/centos-binary-{{ item }}"
+            name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item }}"
             tag: "{{ full_hash }}"
           with_items: "{{ built_images.stdout_lines }}"
           retries: 3
@@ -97,15 +100,15 @@
         - name: Tag images to rdoproject registry with named label
           shell: >
             docker tag
-            trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/centos-binary-{{ item }}:{{ full_hash }}
-            trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/centos-binary-{{ item }}:{{ named_label }}
+            trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}
+            trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ named_label }}
           with_items: "{{ built_images.stdout_lines }}"
           tags:
             - rdoproject_push
 
         - name: Push images to rdoproject registry with named label
           shell: >
-            docker push trunk.registry.rdoproject.org/{{ rdoproject_namespace  }}/centos-binary-{{ item  }}:{{ named_label  }}
+            docker push trunk.registry.rdoproject.org/{{ rdoproject_namespace  }}/{{ distro_name }}-binary-{{ item  }}:{{ named_label  }}
           with_items: "{{ built_images.stdout_lines }}"
           retries: 3
           tags:
@@ -124,9 +127,9 @@
         # Nested loop order here is on purpose, so we push first all the images with the full hash, then we tag with the named label.
         - name: Tag and push images to docker hub
           docker_image:
-            name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/centos-binary-{{ item[1] }}"
+            name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item[1] }}"
             tag: "{{ item[0] }}"
-            repository: "docker.io/{{ dockerhub_namespace}}/centos-binary-{{ item[1] }}"
+            repository: "docker.io/{{ dockerhub_namespace}}/{{ distro_name }}-binary-{{ item[1] }}"
             push: yes
           with_nested:
             - ["{{ full_hash }}", "{{ named_label }}"]
@@ -140,7 +143,7 @@
             tag={{ full_hash }}
             for image in $(cat {{containers_file }})
             do
-                if curl --silent -fk -lSL "https://index.docker.io/v1/repositories/{{ dockerhub_namespace}}/centos-binary-${image}/tags/${tag}" 1>/dev/null;
+                if curl --silent -fk -lSL "https://index.docker.io/v1/repositories/{{ dockerhub_namespace}}/{{ distro_name }}-binary-${image}/tags/${tag}" 1>/dev/null;
                 then
                     echo "$image OK";
                 else
@@ -156,7 +159,7 @@
       always:
         - name: Delete the local images from rdoproject registry
           docker_image:
-            name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/centos-binary-{{ item[0] }}"
+            name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item[0] }}"
             tag: "{{ item[1] }}"
             state: absent
             force: yes
@@ -170,7 +173,7 @@
 
         - name: Delete the local images from docker hub
           docker_image:
-            name: "docker.io/{{ dockerhub_namespace }}/centos-binary-{{ item[0] }}"
+            name: "docker.io/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item[0] }}"
             tag: "{{ item[1] }}"
             state: absent
             force: yes
