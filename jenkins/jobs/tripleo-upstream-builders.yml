@@ -9,6 +9,9 @@
               tasks:
                 - name: Build Triple O Containers
                   script: $WORKSPACE/ci-config/jenkins/jobs/scripts/build-kolla-containers.sh $OPENSTACK_RELEASE $CPU_ARCH $CICO_FLAVOR
+                  register: out
+
+                - debug: var=out.stdout_lines
             EOF
         - shell:
             !include-raw:
