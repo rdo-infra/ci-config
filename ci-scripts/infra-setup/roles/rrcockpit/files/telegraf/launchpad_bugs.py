@@ -35,7 +35,8 @@ def main():
         description="Print launchpad bugs as influxdb lines")
 
     parser.add_argument('--tag')
-    parser.add_argument('--status', nargs='+', default=[])
+    parser.add_argument('--status', nargs='+',
+                        default=['New', 'Triaged', 'In Progress'])
     args = parser.parse_args()
 
     print_as_influxdb(args.tag, get_bugs(args.tag, args.status))
