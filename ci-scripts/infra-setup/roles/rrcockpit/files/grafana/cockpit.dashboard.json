@@ -307,106 +307,6 @@
                 "valueName":"current"
             },
             {
-                "cacheTimeout":null,
-                "colorBackground":false,
-                "colorValue":true,
-                "colors":[
-                    "#299c46",
-                    "rgba(237, 129, 40, 0.89)",
-                    "#d44a3a"
-                ],
-                "datasource":"telegraf",
-                "format":"none",
-                "gauge":{
-                    "maxValue":20,
-                    "minValue":0,
-                    "show":true,
-                    "thresholdLabels":false,
-                    "thresholdMarkers":true
-                },
-                "gridPos":{
-                    "h":10,
-                    "w":6,
-                    "x":12,
-                    "y":1
-                },
-                "id":149,
-                "interval":null,
-                "links":[],
-                "mappingType":1,
-                "mappingTypes":[
-                    {
-                        "name":"value to text",
-                        "value":1
-                    },
-                    {
-                        "name":"range to text",
-                        "value":2
-                    }
-                ],
-                "maxDataPoints":100,
-                "nullPointMode":"connected",
-                "nullText":null,
-                "postfix":" fails",
-                "postfixFontSize":"50%",
-                "prefix":"",
-                "prefixFontSize":"50%",
-                "rangeMaps":[
-                    {
-                        "from":"null",
-                        "text":"N/A",
-                        "to":"null"
-                    }
-                ],
-                "sparkline":{
-                    "fillColor":"rgba(31, 118, 189, 0.18)",
-                    "full":false,
-                    "lineColor":"rgb(31, 120, 193)",
-                    "show":false
-                },
-                "tableColumn":"",
-                "targets":[
-                    {
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"change\" = '560445' OR \"change\" = '567224' OR \"change\" = '564291' OR \"change\" = '602248' OR \"change\" = '604293') AND \"voting\" = 'True' AND \"passed\" = 'False' AND \"type\" = 'upstream' AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[]
-                    }
-                ],
-                "thresholds":"4,6",
-                "timeFrom":"11h",
-                "title":"Upstream check jobs (noop)",
-                "type":"singlestat",
-                "valueFontSize":"80%",
-                "valueMaps":[
-                    {
-                        "op":"=",
-                        "text":"0",
-                        "value":"null"
-                    }
-                ],
-                "valueName":"current"
-            },
-            {
                 "aliasColors":{},
                 "breakPoint":"50%",
                 "cacheTimeout":null,
@@ -421,7 +321,7 @@
                 "gridPos":{
                     "h":10,
                     "w":6,
-                    "x":18,
+                    "x":12,
                     "y":1
                 },
                 "id":164,
@@ -603,6 +503,119 @@
                 "valueName":"current"
             },
             {
+                "columns":[],
+                "datasource":"telegraf",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":10,
+                    "w":6,
+                    "x":18,
+                    "y":1
+                },
+                "id":154,
+                "links":[],
+                "minSpan":10,
+                "pageSize":null,
+                "repeatDirection":"v",
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":3,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkUrl":"",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"link",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkUrl":"https://bugs.launchpad.net/tripleo/+bug/${__cell_3} ",
+                        "mappingType":1,
+                        "pattern":"id",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"launchpad-bug",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "title"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "status"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "id"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"tag",
+                                "operator":"=~",
+                                "value":"/^$launchpad_tags$/"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"20s",
+                "title":"$launchpad_tags bugs",
+                "transform":"table",
+                "type":"table"
+            },
+            {
                 "cacheTimeout":null,
                 "colorBackground":false,
                 "colorValue":true,
@@ -761,106 +774,6 @@
                     "x":6,
                     "y":11
                 },
-                "id":204,
-                "interval":null,
-                "links":[],
-                "mappingType":1,
-                "mappingTypes":[
-                    {
-                        "name":"value to text",
-                        "value":1
-                    },
-                    {
-                        "name":"range to text",
-                        "value":2
-                    }
-                ],
-                "maxDataPoints":100,
-                "nullPointMode":"connected",
-                "nullText":null,
-                "postfix":" fails",
-                "postfixFontSize":"50%",
-                "prefix":"",
-                "prefixFontSize":"50%",
-                "rangeMaps":[
-                    {
-                        "from":"null",
-                        "text":"N/A",
-                        "to":"null"
-                    }
-                ],
-                "sparkline":{
-                    "fillColor":"rgba(31, 118, 189, 0.18)",
-                    "full":false,
-                    "lineColor":"rgb(31, 120, 193)",
-                    "show":false
-                },
-                "tableColumn":"",
-                "targets":[
-                    {
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE ((\"change\" = '560445' OR \"change\" = '567224' OR \"change\" = '564291' OR \"change\" = '602248' OR \"change\" = '604293' ) AND \"voting\" = 'True' AND \"passed\" = 'False') AND $timeFilter",
-                        "rawQuery":false,
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[]
-                    }
-                ],
-                "thresholds":"4,6",
-                "timeFrom":"11h",
-                "title":"RDO periodic jobs",
-                "type":"singlestat",
-                "valueFontSize":"80%",
-                "valueMaps":[
-                    {
-                        "op":"=",
-                        "text":"0",
-                        "value":"null"
-                    }
-                ],
-                "valueName":"current"
-            },
-            {
-                "cacheTimeout":null,
-                "colorBackground":false,
-                "colorValue":true,
-                "colors":[
-                    "#299c46",
-                    "rgba(237, 129, 40, 0.89)",
-                    "#d44a3a"
-                ],
-                "datasource":"telegraf",
-                "format":"none",
-                "gauge":{
-                    "maxValue":20,
-                    "minValue":0,
-                    "show":true,
-                    "thresholdLabels":false,
-                    "thresholdMarkers":true
-                },
-                "gridPos":{
-                    "h":9,
-                    "w":6,
-                    "x":12,
-                    "y":11
-                },
                 "id":202,
                 "interval":null,
                 "links":[],
@@ -952,7 +865,7 @@
                 "gridPos":{
                     "h":9,
                     "w":6,
-                    "x":18,
+                    "x":12,
                     "y":11
                 },
                 "id":203,
@@ -1126,6 +1039,121 @@
                 "title":"RDO CI stats",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":9,
+                    "w":6,
+                    "x":18,
+                    "y":11
+                },
+                "id":155,
+                "links":[],
+                "minSpan":10,
+                "pageSize":null,
+                "repeatDirection":"v",
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkUrl":"",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"link",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkUrl":"https://bugs.launchpad.net/tripleo/+bug/${__cell_3} ",
+                        "mappingType":1,
+                        "pattern":"id",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "limit":"",
+                        "measurement":"launchpad-bug",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "title"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "status"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "id"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "slimit":"1",
+                        "tags":[
+                            {
+                                "key":"tag",
+                                "operator":"=",
+                                "value":"promotion-blocker"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"20s",
+                "title":"Promotion blockers",
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -1962,7 +1990,7 @@
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1542361887069,
+                "repeatIteration":1546902346064,
                 "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
@@ -2242,7 +2270,7 @@
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1542361887069,
+                "repeatIteration":1546902346064,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -2429,22 +2457,6 @@
                             [
                                 {
                                     "params":[
-                                        "branch"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "change"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
                                         "log_link"
                                     ],
                                     "type":"field"
@@ -2454,22 +2466,6 @@
                                 {
                                     "params":[
                                         "duration"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "cloud"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "region"
                                     ],
                                     "type":"field"
                                 }
@@ -2515,7 +2511,7 @@
                             },
                             {
                                 "condition":"AND",
-                                "key":"branch",
+                                "key":"job_name",
                                 "operator":"=~",
                                 "value":"/$releases/"
                             }
@@ -2544,7 +2540,7 @@
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1542361887069,
+                "repeatIteration":1546902346064,
                 "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
@@ -2824,7 +2820,7 @@
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1542361887069,
+                "repeatIteration":1546902346064,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -3011,22 +3007,6 @@
                             [
                                 {
                                     "params":[
-                                        "branch"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "change"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
                                         "log_link"
                                     ],
                                     "type":"field"
@@ -3036,22 +3016,6 @@
                                 {
                                     "params":[
                                         "duration"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "cloud"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "region"
                                     ],
                                     "type":"field"
                                 }
@@ -3097,7 +3061,7 @@
                             },
                             {
                                 "condition":"AND",
-                                "key":"branch",
+                                "key":"job_name",
                                 "operator":"=~",
                                 "value":"/$releases/"
                             }
@@ -3126,7 +3090,7 @@
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1542361887069,
+                "repeatIteration":1546902346064,
                 "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
@@ -3406,7 +3370,7 @@
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1542361887069,
+                "repeatIteration":1546902346064,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -3593,22 +3557,6 @@
                             [
                                 {
                                     "params":[
-                                        "branch"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "change"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
                                         "log_link"
                                     ],
                                     "type":"field"
@@ -3618,22 +3566,6 @@
                                 {
                                     "params":[
                                         "duration"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "cloud"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "region"
                                     ],
                                     "type":"field"
                                 }
@@ -3679,7 +3611,7 @@
                             },
                             {
                                 "condition":"AND",
-                                "key":"branch",
+                                "key":"job_name",
                                 "operator":"=~",
                                 "value":"/$releases/"
                             }
@@ -3693,234 +3625,6 @@
                 "type":"table"
             },
             {
-                "columns":[],
-                "datasource":"telegraf",
-                "fontSize":"100%",
-                "gridPos":{
-                    "h":6,
-                    "w":12,
-                    "x":0,
-                    "y":51
-                },
-                "id":154,
-                "links":[],
-                "minSpan":10,
-                "pageSize":null,
-                "repeatDirection":"v",
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":3,
-                    "desc":true
-                },
-                "styles":[
-                    {
-                        "alias":"Time",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkUrl":"",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"link",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkUrl":"https://bugs.launchpad.net/tripleo/+bug/${__cell_3} ",
-                        "mappingType":1,
-                        "pattern":"id",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "decimals":2,
-                        "pattern":"/.*/",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    }
-                ],
-                "targets":[
-                    {
-                        "groupBy":[],
-                        "measurement":"launchpad-bug",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "refId":"A",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "title"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "status"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "id"
-                                    ],
-                                    "type":"field"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"tag",
-                                "operator":"=~",
-                                "value":"/^$launchpad_tags$/"
-                            }
-                        ]
-                    }
-                ],
-                "timeFrom":"20s",
-                "title":"$launchpad_tags bugs",
-                "transform":"table",
-                "type":"table"
-            },
-            {
-                "columns":[],
-                "datasource":"telegraf",
-                "fontSize":"100%",
-                "gridPos":{
-                    "h":6,
-                    "w":12,
-                    "x":12,
-                    "y":51
-                },
-                "id":155,
-                "links":[],
-                "minSpan":10,
-                "pageSize":null,
-                "repeatDirection":"v",
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":0,
-                    "desc":true
-                },
-                "styles":[
-                    {
-                        "alias":"Time",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkUrl":"",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"link",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkUrl":"https://bugs.launchpad.net/tripleo/+bug/${__cell_3} ",
-                        "mappingType":1,
-                        "pattern":"id",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "decimals":2,
-                        "pattern":"/.*/",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    }
-                ],
-                "targets":[
-                    {
-                        "groupBy":[],
-                        "limit":"",
-                        "measurement":"launchpad-bug",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "refId":"A",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "title"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "status"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "id"
-                                    ],
-                                    "type":"field"
-                                }
-                            ]
-                        ],
-                        "slimit":"1",
-                        "tags":[
-                            {
-                                "key":"tag",
-                                "operator":"=",
-                                "value":"promotion-blocker"
-                            }
-                        ]
-                    }
-                ],
-                "timeFrom":"20s",
-                "title":"Promotion blockers",
-                "transform":"table",
-                "type":"table"
-            },
-            {
                 "dashboardFilter":"",
                 "dashboardTags":[],
                 "folderId":null,
@@ -3928,7 +3632,7 @@
                     "h":6,
                     "w":5,
                     "x":0,
-                    "y":57
+                    "y":51
                 },
                 "id":160,
                 "limit":"100",
@@ -3955,7 +3659,7 @@
                     "h":6,
                     "w":5,
                     "x":5,
-                    "y":57
+                    "y":51
                 },
                 "id":159,
                 "limit":"100",
@@ -3989,7 +3693,7 @@
                     "h":6,
                     "w":5,
                     "x":10,
-                    "y":57
+                    "y":51
                 },
                 "id":165,
                 "limit":"100",
@@ -4022,7 +3726,7 @@
                     "h":6,
                     "w":5,
                     "x":15,
-                    "y":57
+                    "y":51
                 },
                 "id":166,
                 "limit":"100",
@@ -4055,7 +3759,7 @@
                     "h":6,
                     "w":5,
                     "x":0,
-                    "y":63
+                    "y":57
                 },
                 "id":161,
                 "limit":"100",
@@ -4082,7 +3786,7 @@
                     "h":6,
                     "w":5,
                     "x":5,
-                    "y":63
+                    "y":57
                 },
                 "id":135,
                 "limit":"100",
@@ -4109,7 +3813,7 @@
                     "h":3,
                     "w":5,
                     "x":10,
-                    "y":63
+                    "y":57
                 },
                 "id":162,
                 "limit":"100",
@@ -4136,7 +3840,7 @@
                     "h":6,
                     "w":5,
                     "x":15,
-                    "y":63
+                    "y":57
                 },
                 "id":198,
                 "limit":10,
@@ -4161,7 +3865,7 @@
                     "h":3,
                     "w":5,
                     "x":10,
-                    "y":66
+                    "y":60
                 },
                 "id":192,
                 "limit":10,
@@ -4186,7 +3890,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":69
+                    "y":63
                 },
                 "id":51,
                 "panels":[],
@@ -4204,7 +3908,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":70
+                    "y":64
                 },
                 "hideTimeOverride":true,
                 "id":157,
@@ -4460,7 +4164,7 @@
                     "h":6,
                     "w":4,
                     "x":0,
-                    "y":77
+                    "y":71
                 },
                 "id":71,
                 "legend":{
@@ -4631,7 +4335,7 @@
                     "h":6,
                     "w":4,
                     "x":4,
-                    "y":77
+                    "y":71
                 },
                 "id":72,
                 "legend":{
@@ -4797,7 +4501,7 @@
                     "h":6,
                     "w":16,
                     "x":8,
-                    "y":77
+                    "y":71
                 },
                 "id":55,
                 "legend":{
@@ -5014,7 +4718,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":83
+                    "y":77
                 },
                 "id":79,
                 "legend":{
@@ -5211,7 +4915,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":83
+                    "y":77
                 },
                 "id":80,
                 "legend":{
@@ -5435,7 +5139,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":89
+                    "y":83
                 },
                 "id":103,
                 "legend":{
@@ -5613,7 +5317,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":89
+                    "y":83
                 },
                 "id":104,
                 "legend":{
@@ -5791,7 +5495,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":93
+                    "y":87
                 },
                 "id":221,
                 "legend":{
@@ -5969,7 +5673,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":93
+                    "y":87
                 },
                 "id":105,
                 "legend":{
@@ -6106,7 +5810,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":97
+                    "y":91
                 },
                 "id":63,
                 "links":[],
@@ -6435,7 +6139,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":107
+                    "y":101
                 },
                 "id":207,
                 "links":[],
@@ -6767,7 +6471,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":117
+                    "y":111
                 },
                 "id":209,
                 "legend":{
@@ -6882,7 +6586,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":125
+                    "y":119
                 },
                 "id":82,
                 "panels":[],
@@ -6937,7 +6641,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":126
+                    "y":120
                 },
                 "hideTimeOverride":false,
                 "id":110,
@@ -7116,7 +6820,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":126
+                    "y":120
                 },
                 "hideTimeOverride":false,
                 "id":116,
@@ -7291,7 +6995,7 @@
                     "h":4,
                     "w":4,
                     "x":10,
-                    "y":126
+                    "y":120
                 },
                 "hideTimeOverride":false,
                 "id":115,
@@ -7466,7 +7170,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":130
+                    "y":124
                 },
                 "hideTimeOverride":false,
                 "id":213,
@@ -7641,7 +7345,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":130
+                    "y":124
                 },
                 "id":214,
                 "legend":{
@@ -7815,7 +7519,7 @@
                     "h":4,
                     "w":4,
                     "x":10,
-                    "y":130
+                    "y":124
                 },
                 "id":215,
                 "legend":{
@@ -7993,7 +7697,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":134
+                    "y":128
                 },
                 "hideTimeOverride":false,
                 "id":117,
@@ -8168,7 +7872,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":134
+                    "y":128
                 },
                 "id":118,
                 "legend":{
@@ -8346,7 +8050,7 @@
                     "h":4,
                     "w":4,
                     "x":10,
-                    "y":134
+                    "y":128
                 },
                 "id":122,
                 "legend":{
@@ -8524,7 +8228,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":138
+                    "y":132
                 },
                 "id":123,
                 "legend":{
@@ -8702,7 +8406,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":138
+                    "y":132
                 },
                 "id":125,
                 "legend":{
@@ -8880,7 +8584,7 @@
                     "h":4,
                     "w":4,
                     "x":10,
-                    "y":138
+                    "y":132
                 },
                 "id":124,
                 "legend":{
@@ -9057,7 +8761,7 @@
                     "h":4,
                     "w":7,
                     "x":0,
-                    "y":142
+                    "y":136
                 },
                 "id":130,
                 "legend":{
@@ -9221,7 +8925,7 @@
                     "h":4,
                     "w":7,
                     "x":7,
-                    "y":142
+                    "y":136
                 },
                 "id":216,
                 "legend":{
@@ -9389,7 +9093,7 @@
                     "h":4,
                     "w":7,
                     "x":0,
-                    "y":146
+                    "y":140
                 },
                 "id":133,
                 "legend":{
@@ -9559,7 +9263,7 @@
                     "h":4,
                     "w":7,
                     "x":7,
-                    "y":146
+                    "y":140
                 },
                 "id":131,
                 "legend":{
@@ -9688,7 +9392,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":150
+                    "y":144
                 },
                 "id":168,
                 "links":[],
@@ -9810,14 +9514,14 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":157
+                    "y":151
                 },
                 "id":228,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1542361887069,
+                "repeatIteration":1546902346064,
                 "repeatPanelId":168,
                 "scopedVars":{
                     "releases":{
@@ -9934,14 +9638,14 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":164
+                    "y":158
                 },
                 "id":229,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1542361887069,
+                "repeatIteration":1546902346064,
                 "repeatPanelId":168,
                 "scopedVars":{
                     "releases":{
@@ -10058,14 +9762,14 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":171
+                    "y":165
                 },
                 "id":230,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1542361887069,
+                "repeatIteration":1546902346064,
                 "repeatPanelId":168,
                 "scopedVars":{
                     "releases":{
@@ -10180,7 +9884,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":178
+                    "y":172
                 },
                 "id":4,
                 "panels":[],
@@ -10195,7 +9899,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":179
+                    "y":173
                 },
                 "id":2,
                 "links":[],
@@ -10263,7 +9967,7 @@
                     "h":9,
                     "w":12,
                     "x":0,
-                    "y":186
+                    "y":180
                 },
                 "hideTimeOverride":true,
                 "id":196,
@@ -10399,7 +10103,7 @@
                     "h":9,
                     "w":12,
                     "x":12,
-                    "y":186
+                    "y":180
                 },
                 "hideTimeOverride":true,
                 "id":194,
@@ -10500,7 +10204,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":195
+                    "y":189
                 },
                 "id":173,
                 "panels":[],
@@ -10518,7 +10222,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":196
+                    "y":190
                 },
                 "id":175,
                 "legend":{
@@ -10692,7 +10396,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":196
+                    "y":190
                 },
                 "id":177,
                 "legend":{
@@ -10954,7 +10658,7 @@
                     "h":7,
                     "w":12,
                     "x":0,
-                    "y":202
+                    "y":196
                 },
                 "id":179,
                 "legend":{
@@ -11314,7 +11018,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":202
+                    "y":196
                 },
                 "id":181,
                 "legend":{
@@ -11474,7 +11178,7 @@
                     "h":6,
                     "w":7,
                     "x":0,
-                    "y":209
+                    "y":203
                 },
                 "id":183,
                 "legend":{
@@ -11588,7 +11292,7 @@
                     "h":6,
                     "w":9,
                     "x":7,
-                    "y":209
+                    "y":203
                 },
                 "id":185,
                 "legend":{
@@ -11702,7 +11406,7 @@
                     "h":6,
                     "w":8,
                     "x":16,
-                    "y":209
+                    "y":203
                 },
                 "id":187,
                 "legend":{
@@ -11836,6 +11540,7 @@
                         }
                     ],
                     "query":"alert, promotion-blocker",
+                    "skipUrlSync":false,
                     "type":"custom"
                 },
                 {
@@ -11871,6 +11576,7 @@
                         }
                     ],
                     "query":"current-tripleo, current-tripleo-rdo, current-tripleo-rdo-testing",
+                    "skipUrlSync":false,
                     "type":"custom"
                 },
                 {
@@ -11913,6 +11619,7 @@
                         }
                     ],
                     "query":"master, rocky,queens, pike",
+                    "skipUrlSync":false,
                     "type":"custom"
                 },
                 {
@@ -11921,6 +11628,7 @@
                     "hide":0,
                     "label":"Influxdb filter",
                     "name":"influxdb_filter",
+                    "skipUrlSync":false,
                     "type":"adhoc"
                 }
             ]
