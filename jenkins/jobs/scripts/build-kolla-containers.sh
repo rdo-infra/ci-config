@@ -1,7 +1,11 @@
 #!/bin/bash
 
+# Install pip from python packaging authority to avoid using epel
+curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+sudo python get-pip.py
+
 # Install dependencies
-sudo yum -y install git python-pip
+sudo yum -y install git
 sudo pip install ansible
 
 export RELEASE=${1:-"master"}
