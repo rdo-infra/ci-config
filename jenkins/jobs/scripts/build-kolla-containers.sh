@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Install dependencies
-sudo yum -y install git python-pip
+sudo yum -y install git python-setuptools
+sudo easy_install pip
 sudo pip install ansible
 
 export RELEASE=${1:-"master"}
