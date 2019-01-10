@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install dependencies
-sudo yum -y install git python-setuptools
+sudo yum -y install git python-devel python-setuptools libffi libffi-devel
 sudo easy_install pip
 sudo pip install ansible
 
