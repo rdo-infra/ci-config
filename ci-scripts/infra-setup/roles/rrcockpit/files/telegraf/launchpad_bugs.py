@@ -24,8 +24,8 @@ def print_as_influxdb(tag, bug_tasks):
             print(("launchpad-bug,tag={},id={} link=\"{}\""
                    ",title=\"{}\",status=\"{}\",date_created={}").format(
                        tag, bug_task.bug.id, bug_task.web_link,
-                       bug_task.bug.title.replace('"', "'").replace("\\n", ""),
-                       bug_task.status,
+                       bug_task.bug.title.replace('"', "'").replace(
+                           "\\n", "").replace("\\", ""), bug_task.status,
                        format_ts_from_date(bug_task.date_created)))
 
 
