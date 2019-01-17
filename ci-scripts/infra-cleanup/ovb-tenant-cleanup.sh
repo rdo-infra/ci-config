@@ -25,7 +25,7 @@
 : ${DRY_RUN:=0}
 : ${PREFIX:="baremetal_"}
 : ${SUFFIX:=""}
-: ${SLEEP_TIME:=20}
+: ${SLEEP_TIME:=5}
 
 usage () {
     echo "Usage: $0 [options]"
@@ -62,9 +62,9 @@ usage () {
 
 set -e
 
-# Check that tenant credentials have been sourced
-if [[ ! -v OS_USERNAME ]]; then
-    echo "Tenant credentials are not sourced."
+# Check that we can talk with the cloud
+if ! openstack token issue >/dev/null; then
+    echo "ERROR: Failed to talk with cloud, credentials should be sourced or configured in cloud.yaml file." >&2
     exit 1;
 fi
 
@@ -132,66 +132,66 @@ fi
 # Check input values
 
 if [[ ! "$TIME_EXPIRED" =~ ^[0-9]+$ ]]; then
-        echo "A time (in minutes) must be defined if -t is passed."
+        echo "ERROR: A time (in minutes) must be defined if -t is passed." >&2
         exit 1
 fi
 if [[ "$PREFIX" =~ ^[\-].*$ || "$SUFFIX" =~ ^[\-].*$ ]]; then
-    echo "A prefix and suffix, if defined, must not start with a -."
+    echo "ERROR: A prefix and suffix, if defined, must not start with a -." >&2
     exit 1
 fi
 
 # Install jq if not already there
 # Required to use JSON parsing of openstack client return values
 
-which jq || sudo yum install -y jq
+which jq >/dev/null || sudo yum install -y jq
 
 # Get list of stacks and make a first attempt to delete
 # each stack
 
 if [[ ! -z "$STACK_LIST" ]]; then
-    echo "Using the specified stack list to remove stacks."
+    echo "INFO: Using the specified stack list to remove stacks." >&2
     LONG_RUNNING=0
 elif [[ "$NUCLEAR" == "1" ]]; then
-    echo "Collecting a list of all available Heat stacks ..."
+    echo "INFO: Collecting a list of all available Heat stacks ..." >&2
     STACK_LIST=$(openstack stack list -f json | jq -r '.[]| .["ID"]')
 else
-    echo "Getting a list of all stacks running longer than $TIME_EXPIRED minutes ..."
-    DATE_TIME_EXPIRED=$(date -d " $TIME_EXPIRED minutes ago" -u  "+%Y-%m-%dT%H:%M:%SZ")
+    echo "INFO: Getting a list of all stacks running longer than $TIME_EXPIRED minutes ..." >&2
+    DATE_TIME_EXPIRED=$(`which gdate date|head -n1` -d " $TIME_EXPIRED minutes ago" -u  "+%Y-%m-%dT%H:%M:%SZ")
     STACK_LIST=$(openstack stack list -f json | jq --arg date_time_expired "$DATE_TIME_EXPIRED" -r '.[]| select(.["Creation Time"] <= $date_time_expired)  | .["ID"]')
 fi
 
 if [[ "$DRY_RUN" == "1" ]]; then
-    echo "DRY RUN - Stack list to delete:
-    $STACK_LIST"
+    echo "INFO: DRY RUN - Stack list to delete:
+    $STACK_LIST" >&2
 else
     for STACK in $STACK_LIST; do
-        echo "Deleting stack id $STACK ..."
-        openstack stack delete -y $STACK || echo "stack $STACK failed to clean up"
+        echo "INFO: Deleting stack id $STACK ..." >&2
+        openstack stack delete -y $STACK || echo "WARN: stack $STACK failed to clean up" >&2
         # don't overwhelm the tenant with mass delete
         sleep $SLEEP_TIME
     done
 fi
 
-#  Check if there are stacks left in DELETE_FAILED state
+#  Check if there are stacks left in CREATE_FAILED or DELETE_FAILED state
 
-STACK_LIST_STATUS=$(openstack stack list -f json | jq -r '.[] | select(.["Stack Status"] == "DELETE_FAILED") | .["Stack Name"]')
+STACK_LIST_STATUS=$(openstack stack list -f json | jq -r '.[] | select(.["Stack Status"] |test("(CREATE|DELETE)_FAILED")) | .["Stack Name"]')
 if [[  -z $STACK_LIST_STATUS ]]; then
-    echo "There are no stacks that failed to delete. Exiting script ..."
+    echo "INFO: There are no stacks to delete, exiting script." >&2
     exit 0
 else
-    echo "There are stacks in DELETE_FAILED state - $STACK_LIST_STATUS"
-    echo "Remove associated resources and then delete the stacks again."
+    echo "INFO: There are stacks in DELETE_FAILED state - $STACK_LIST_STATUS" >&2
+    echo "INFO: Remove associated resources and then delete the stacks again." >&2
 
     # NUCLEAR OPTION - Remove all non-marked ports
 
     if [[ "$NUCLEAR" == "1" ]]; then
         PORT_LIST_EMPTY_ID=$(openstack port list -f json | jq -r '.[] | select(.["Name"] == "") | .["ID"]')
         if [[ "$DRY_RUN" == "1" ]]; then
-            echo "DRY RUN - Empty ports to delete:
-            $PORT_LIST_EMPTY_ID"
+            echo "INFO: DRY RUN - Empty ports to delete:
+            $PORT_LIST_EMPTY_ID" >&2
         else
             for PORT in $PORT_LIST_EMPTY_ID; do
-                echo "Deleting port with empty name, ID $PORT ..."
+                echo "INFO: Deleting port with empty name, ID $PORT ..." >&2
                 openstack port delete $PORT
             done
         fi
@@ -205,7 +205,7 @@ else
         # Extract identfier for associated resources
         IDENTIFIER=${STACK#$PREFIX}
         IDENTIFIER=${IDENTIFIER%$SUFFIX}
-        echo "Identifier is $IDENTIFIER"
+        echo "INFO: Identifier is $IDENTIFIER" >&2
 
         # Delete associated instances/servers
         SERVER_IDS=$(openstack server list -f json |  jq -r --arg IDENTIFIER "-${IDENTIFIER}_" '.[] | select(.["Name"] | contains($IDENTIFIER)) | .["ID"]')
@@ -214,7 +214,7 @@ else
             $SERVER_IDS"
         else
             for SERVER in $SERVER_IDS; do
-                echo "Deleting server ID $SERVER ..."
+                echo "INFO: Deleting server ID $SERVER ..." >&2
                 openstack server delete $SERVER
             done
         fi
@@ -222,11 +222,11 @@ else
         # Delete ports with identifier in the name
         PORT_IDS=$(openstack port list -f json |  jq -r --arg IDENTIFIER "-${IDENTIFIER}_" '.[] | select(.["Name"] | contains($IDENTIFIER))| .["ID"]')
         if [[ "$DRY_RUN" == "1" ]]; then
-            echo "DRY RUN - Ports to delete:
-            $PORT_IDS"
+            echo "INFO: DRY RUN - Ports to delete:
+            $PORT_IDS" >&2
         else
             for PORT in $PORT_IDS; do
-                echo "Deleting port ID $PORT ..."
+                echo "INFO: Deleting port ID $PORT ..." >&2
                 openstack port delete $PORT
             done
         fi
@@ -236,11 +236,11 @@ else
         for SUBNET_ID in $SUBNET_IDS; do
              PORT_SUBNET_IDS=$(openstack port list -f json |  jq -r --arg SUBNET_ID "$SUBNET_ID" '.[] | select(.["Fixed IP Addresses"] | contains($SUBNET_ID)) | .["ID"]')
              if [[ "$DRY_RUN" == "1" ]]; then
-                echo "DRY RUN - Ports from subnets to delete:
-                $PORT_SUBNET_IDS"
+                echo "INFO: DRY RUN - Ports from subnets to delete:
+                $PORT_SUBNET_IDS" >&2
              else
                  for PORT_SUBNET_ID in $PORT_SUBNET_IDS; do
-                     echo "Deleting port ID $PORT_SUBNET_ID ..."
+                     echo "INFO: Deleting port ID $PORT_SUBNET_ID ..." >&2
                      openstack port delete $PORT_SUBNET_ID
                  done
              fi
@@ -248,11 +248,11 @@ else
 
         NETWORK_IDS=$(openstack network list -f json |  jq -r --arg IDENTIFIER "-${IDENTIFIER}" '.[] | select(.["Name"] | endswith($IDENTIFIER)) | .["ID"]')
         if [[ "$DRY_RUN" == "1" ]]; then
-            echo "DRY RUN - Networks to delete:
-            $NETWORK_IDS"
+            echo "INFO: DRY RUN - Networks to delete:
+            $NETWORK_IDS" >&2
         else
             for NETWORK_ID in $NETWORK_IDS; do
-                echo "Deleting network ID $NETWORK_ID ..."
+                echo "INFO: Deleting network ID $NETWORK_ID ..." >&2
                 openstack network delete $NETWORK_ID
             done
         fi
@@ -265,7 +265,7 @@ else
             for (( DELETE_TIMES=0; DELETE_TIMES <= 4; DELETE_TIMES++ )); do
                 openstack stack show $STACK  || break
                 if [[ "$(openstack stack show $STACK -f json |  jq -r '.["stack_status"] ')" == "DELETE_FAILED" ]]; then
-                    echo "Deleting stack id $STACK..."
+                    echo "INFO: Deleting stack id $STACK..." >&2
                     openstack stack delete -y $STACK
                     # don't overwhelm the tenant with mass delete
                     sleep $SLEEP_TIME
