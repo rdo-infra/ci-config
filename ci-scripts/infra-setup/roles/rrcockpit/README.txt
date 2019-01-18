@@ -1,5 +1,8 @@
 Adding changes to the json files
 -------------------------------------------
+Setting up the development environment
+> cd files
+> ./development_script.sh --help
 
 Exporting/Importing local grafana changes
 
