@@ -11,9 +11,11 @@ while true; do
     #fetch the latest dlrnapi_client and dependencies
     pip install -U -r ~/ci-config/ci-scripts/dlrnapi_promoter/requirements.txt
 
+    set +x
     # Source secrets
     source ~/registry_secret
     source ~/dlrnapi_secret
+    set -x
 
     # promoter script for the master branch
     /usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/master.ini
