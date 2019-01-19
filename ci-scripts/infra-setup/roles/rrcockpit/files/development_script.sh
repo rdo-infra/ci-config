@@ -14,13 +14,14 @@ start()
   docker volume create telegraf-volume
   docker volume create grafana-volume
   docker volume create influxdb-volume
+  docker volume create mariadb-volume
   docker-compose up
 }
 
 clean()
 {
   # clean
-  docker system prune
+  docker system prune -f
   sudo docker rmi -f $(sudo docker images -q)\n
 }
 
