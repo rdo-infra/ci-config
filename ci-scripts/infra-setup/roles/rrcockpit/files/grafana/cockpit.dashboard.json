@@ -855,7 +855,8 @@
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
+                "datasource":"mariadb",
+                "description":"List of TripleO promotion-blocker bugs",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":9,
@@ -864,28 +865,37 @@
                     "y":11
                 },
                 "id":155,
-                "links":[],
+                "links":[
+                    {
+                        "title":"link to promotion-blocker bugs",
+                        "type":"absolute",
+                        "url":"https://bugs.launchpad.net/tripleo/+bugs?field.searchtext=&orderby=-importance&field.status%3Alist=NEW&field.status%3Alist=CONFIRMED&field.status%3Alist=TRIAGED&field.status%3Alist=INPROGRESS&assignee_option=any&field.assignee=&field.bug_reporter=&field.bug_commenter=&field.subscriber=&field.structural_subscriber=&field.tag=promotion-blocker&field.tags_combinator=ANY&field.has_cve.used=&field.omit_dupes.used=&field.omit_dupes=on&field.affects_me.used=&field.has_patch.used=&field.has_branches.used=&field.has_branches=on&field.has_no_branches.used=&field.has_no_branches=on&field.has_blueprints.used=&field.has_blueprints=on&field.has_no_blueprints.used=&field.has_no_blueprints=on&search=Search"
+                    }
+                ],
                 "minSpan":10,
                 "pageSize":null,
-                "repeatDirection":"v",
+                "repeat":null,
+                "repeatDirection":"h",
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
-                    "col":0,
+                    "col":1,
                     "desc":true
                 },
                 "styles":[
                     {
-                        "alias":"Time",
+                        "alias":"bug",
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "link":false,
+                        "link":true,
                         "linkTargetBlank":true,
-                        "linkUrl":"",
-                        "pattern":"Time",
-                        "type":"date"
+                        "linkTooltip":"link to bug",
+                        "linkUrl":"${__cell_3:raw}",
+                        "pattern":"id",
+                        "sanitize":true,
+                        "type":"string"
                     },
                     {
-                        "alias":"link",
+                        "alias":"",
                         "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
@@ -894,13 +904,10 @@
                         ],
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkUrl":"https://bugs.launchpad.net/tripleo/+bug/${__cell_3} ",
                         "mappingType":1,
-                        "pattern":"id",
+                        "pattern":"link",
                         "thresholds":[],
-                        "type":"number",
+                        "type":"hidden",
                         "unit":"short"
                     },
                     {
@@ -920,11 +927,15 @@
                 ],
                 "targets":[
                     {
+                        "alias":"",
+                        "format":"table",
                         "groupBy":[],
+                        "hide":false,
                         "limit":"",
                         "measurement":"launchpad-bug",
                         "orderByTime":"ASC",
                         "policy":"default",
+                        "rawSql":"SELECT id, status, description, link from rr_bugs where tag = \"promotion-blocker\"",
                         "refId":"A",
                         "resultFormat":"table",
                         "select":[
@@ -963,7 +974,7 @@
                         ]
                     }
                 ],
-                "timeFrom":"20s",
+                "timeFrom":null,
                 "title":"Promotion blockers",
                 "transform":"table",
                 "type":"table"
@@ -1432,117 +1443,164 @@
                 "type":"table"
             },
             {
-                "columns":[],
+                "aliasColors":{},
+                "bars":false,
+                "dashLength":10,
+                "dashes":false,
                 "datasource":"telegraf",
-                "fontSize":"100%",
+                "description":"This shows the number of heat stacks in CREATE_FAILED, DELETE_FAILED, ERROR",
+                "fill":1,
                 "gridPos":{
                     "h":7,
                     "w":12,
                     "x":12,
                     "y":20
                 },
-                "id":154,
-                "links":[],
-                "minSpan":10,
-                "pageSize":null,
-                "repeatDirection":"v",
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":3,
-                    "desc":true
+                "id":231,
+                "legend":{
+                    "avg":false,
+                    "current":false,
+                    "max":false,
+                    "min":false,
+                    "show":true,
+                    "total":false,
+                    "values":false
                 },
-                "styles":[
+                "lines":true,
+                "linewidth":1,
+                "links":[
                     {
-                        "alias":"Time",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkUrl":"",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"link",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkUrl":"https://bugs.launchpad.net/tripleo/+bug/${__cell_3} ",
-                        "mappingType":1,
-                        "pattern":"id",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "decimals":2,
-                        "pattern":"/.*/",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
+                        "targetBlank":true,
+                        "title":"Stack may need to be cleaned up",
+                        "type":"absolute",
+                        "url":"https://github.com/rdo-infra/ci-config/blob/master/ci-scripts/infra-cleanup/ovb-tenant-cleanup.sh"
                     }
                 ],
+                "nullPointMode":"null",
+                "percentage":false,
+                "pointradius":5,
+                "points":false,
+                "renderer":"flot",
+                "seriesOverrides":[],
+                "spaceLength":10,
+                "stack":false,
+                "steppedLine":false,
                 "targets":[
                     {
-                        "groupBy":[],
-                        "measurement":"launchpad-bug",
+                        "alias":"Old stacks",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "15m"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "none"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "measurement":"rdocloud-servers",
                         "orderByTime":"ASC",
                         "policy":"default",
                         "refId":"A",
-                        "resultFormat":"table",
+                        "resultFormat":"time_series",
                         "select":[
                             [
                                 {
                                     "params":[
-                                        "title"
+                                        "old_stacks"
                                     ],
                                     "type":"field"
-                                }
-                            ],
-                            [
+                                },
                                 {
-                                    "params":[
-                                        "status"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "id"
-                                    ],
-                                    "type":"field"
+                                    "params":[],
+                                    "type":"mean"
                                 }
                             ]
                         ],
-                        "tags":[
+                        "tags":[]
+                    },
+                    {
+                        "alias":"Failed to delete",
+                        "groupBy":[
                             {
-                                "key":"tag",
-                                "operator":"=~",
-                                "value":"/^$launchpad_tags$/"
+                                "params":[
+                                    "15m"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "none"
+                                ],
+                                "type":"fill"
                             }
-                        ]
+                        ],
+                        "measurement":"rdocloud-servers",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "delete_failed"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
                     }
                 ],
-                "timeFrom":"20s",
-                "title":"$launchpad_tags bugs",
-                "transform":"table",
-                "type":"table"
+                "thresholds":[],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"Number of problematic heat stacks",
+                "tooltip":{
+                    "shared":true,
+                    "sort":0,
+                    "value_type":"individual"
+                },
+                "type":"graph",
+                "xaxis":{
+                    "buckets":null,
+                    "mode":"time",
+                    "name":null,
+                    "show":true,
+                    "values":[]
+                },
+                "yaxes":[
+                    {
+                        "decimals":0,
+                        "format":"short",
+                        "label":"Number of stacks",
+                        "logBase":1,
+                        "max":null,
+                        "min":"0",
+                        "show":true
+                    },
+                    {
+                        "format":"short",
+                        "label":null,
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    }
+                ],
+                "yaxis":{
+                    "align":false,
+                    "alignLevel":null
+                }
             },
             {
                 "aliasColors":{},
@@ -1845,164 +1903,129 @@
                 }
             },
             {
-                "aliasColors":{},
-                "bars":false,
-                "dashLength":10,
-                "dashes":false,
-                "datasource":"telegraf",
-                "description":"This shows the number of heat stacks in CREATE_FAILED, DELETE_FAILED, ERROR",
-                "fill":1,
+                "columns":[],
+                "datasource":"mariadb",
+                "description":"List of TripleO promotion-blocker bugs",
+                "fontSize":"100%",
                 "gridPos":{
                     "h":7,
                     "w":12,
                     "x":12,
                     "y":27
                 },
-                "id":231,
-                "legend":{
-                    "avg":false,
-                    "current":false,
-                    "max":false,
-                    "min":false,
-                    "show":true,
-                    "total":false,
-                    "values":false
-                },
-                "lines":true,
-                "linewidth":1,
+                "id":242,
                 "links":[
                     {
-                        "targetBlank":true,
-                        "title":"Stack may need to be cleaned up",
+                        "title":"link to promotion-blocker bugs",
                         "type":"absolute",
-                        "url":"https://github.com/rdo-infra/ci-config/blob/master/ci-scripts/infra-cleanup/ovb-tenant-cleanup.sh"
+                        "url":"https://bugs.launchpad.net/tripleo/+bugs?field.searchtext=&orderby=-importance&field.status%3Alist=NEW&field.status%3Alist=CONFIRMED&field.status%3Alist=TRIAGED&field.status%3Alist=INPROGRESS&assignee_option=any&field.assignee=&field.bug_reporter=&field.bug_commenter=&field.subscriber=&field.structural_subscriber=&field.tag=promotion-blocker&field.tags_combinator=ANY&field.has_cve.used=&field.omit_dupes.used=&field.omit_dupes=on&field.affects_me.used=&field.has_patch.used=&field.has_branches.used=&field.has_branches=on&field.has_no_branches.used=&field.has_no_branches=on&field.has_blueprints.used=&field.has_blueprints=on&field.has_no_blueprints.used=&field.has_no_blueprints=on&search=Search"
                     }
                 ],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":5,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":false,
+                "minSpan":10,
+                "pageSize":null,
+                "repeatDirection":"h",
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":1,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"bug",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"link to bug",
+                        "linkUrl":"${__cell_3:raw}",
+                        "pattern":"id",
+                        "sanitize":true,
+                        "type":"string"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"link",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
                 "targets":[
                     {
-                        "alias":"Old stacks",
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "15m"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "none"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "measurement":"rdocloud-servers",
+                        "alias":"",
+                        "format":"table",
+                        "groupBy":[],
+                        "hide":false,
+                        "limit":"",
+                        "measurement":"launchpad-bug",
                         "orderByTime":"ASC",
                         "policy":"default",
+                        "rawSql":"SELECT id, status, description, link from rr_bugs where tag = \"alert\"",
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
                                     "params":[
-                                        "old_stacks"
+                                        "title"
                                     ],
                                     "type":"field"
-                                },
+                                }
+                            ],
+                            [
                                 {
-                                    "params":[],
-                                    "type":"mean"
+                                    "params":[
+                                        "status"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "id"
+                                    ],
+                                    "type":"field"
                                 }
                             ]
                         ],
-                        "tags":[]
-                    },
-                    {
-                        "alias":"Failed to delete",
-                        "groupBy":[
+                        "slimit":"1",
+                        "tags":[
                             {
-                                "params":[
-                                    "15m"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "none"
-                                ],
-                                "type":"fill"
+                                "key":"tag",
+                                "operator":"=",
+                                "value":"promotion-blocker"
                             }
-                        ],
-                        "measurement":"rdocloud-servers",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "refId":"B",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "delete_failed"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"mean"
-                                }
-                            ]
-                        ],
-                        "tags":[]
+                        ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":null,
-                "timeShift":null,
-                "title":"Number of problematic heat stacks",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of stacks",
-                        "logBase":1,
-                        "max":null,
-                        "min":"0",
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "title":"Alert bug",
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -2561,12 +2584,12 @@
                     "y":40
                 },
                 "hideTimeOverride":false,
-                "id":233,
+                "id":243,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1547849742055,
+                "repeatIteration":1549275525656,
                 "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
@@ -2841,12 +2864,12 @@
                     "y":40
                 },
                 "hideTimeOverride":false,
-                "id":236,
+                "id":246,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1547849742055,
+                "repeatIteration":1549275525656,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -3111,12 +3134,12 @@
                     "y":46
                 },
                 "hideTimeOverride":false,
-                "id":234,
+                "id":244,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1547849742055,
+                "repeatIteration":1549275525656,
                 "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
@@ -3391,12 +3414,12 @@
                     "y":46
                 },
                 "hideTimeOverride":false,
-                "id":237,
+                "id":247,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1547849742055,
+                "repeatIteration":1549275525656,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -3661,12 +3684,12 @@
                     "y":52
                 },
                 "hideTimeOverride":false,
-                "id":235,
+                "id":245,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1547849742055,
+                "repeatIteration":1549275525656,
                 "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
@@ -3941,12 +3964,12 @@
                     "y":52
                 },
                 "hideTimeOverride":false,
-                "id":238,
+                "id":248,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1547849742055,
+                "repeatIteration":1549275525656,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -4301,6 +4324,31 @@
                 "gridPos":{
                     "h":6,
                     "w":5,
+                    "x":15,
+                    "y":58
+                },
+                "id":198,
+                "limit":10,
+                "links":[],
+                "nameFilter":"Github",
+                "onlyAlertsOnDashboard":false,
+                "show":"current",
+                "sortOrder":1,
+                "stateFilter":[
+                    "ok",
+                    "alerting",
+                    "execution_error"
+                ],
+                "title":"Infra issues",
+                "type":"alertlist"
+            },
+            {
+                "dashboardFilter":"",
+                "dashboardTags":[],
+                "folderId":null,
+                "gridPos":{
+                    "h":6,
+                    "w":5,
                     "x":0,
                     "y":64
                 },
@@ -4373,31 +4421,6 @@
                     "ok"
                 ],
                 "title":"Gate jobs alerts",
-                "type":"alertlist"
-            },
-            {
-                "dashboardFilter":"",
-                "dashboardTags":[],
-                "folderId":null,
-                "gridPos":{
-                    "h":6,
-                    "w":5,
-                    "x":15,
-                    "y":64
-                },
-                "id":198,
-                "limit":10,
-                "links":[],
-                "nameFilter":"Github",
-                "onlyAlertsOnDashboard":false,
-                "show":"current",
-                "sortOrder":1,
-                "stateFilter":[
-                    "ok",
-                    "alerting",
-                    "execution_error"
-                ],
-                "title":"Infra issues",
                 "type":"alertlist"
             },
             {
@@ -9354,12 +9377,12 @@
                     "x":0,
                     "y":142
                 },
-                "id":239,
+                "id":249,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1547849742055,
+                "repeatIteration":1549275525656,
                 "repeatPanelId":168,
                 "scopedVars":{
                     "releases":{
@@ -9478,12 +9501,12 @@
                     "x":0,
                     "y":149
                 },
-                "id":240,
+                "id":250,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1547849742055,
+                "repeatIteration":1549275525656,
                 "repeatPanelId":168,
                 "scopedVars":{
                     "releases":{
@@ -9602,12 +9625,12 @@
                     "x":0,
                     "y":156
                 },
-                "id":241,
+                "id":251,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1547849742055,
+                "repeatIteration":1549275525656,
                 "repeatPanelId":168,
                 "scopedVars":{
                     "releases":{

@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Wait for mariadb to become ready
+      wait_for:
+        host: mariadb
+        port: 3306
+        state: started
+        delay: 5
+        connect_timeout: 15
+        timeout: 30
