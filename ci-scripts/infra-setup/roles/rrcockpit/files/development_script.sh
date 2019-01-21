@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 usage()
 {
@@ -15,13 +16,19 @@ start()
   docker volume create grafana-volume
   docker volume create influxdb-volume
   docker volume create mariadb-volume
-  docker-compose up
+  #docker-compose up --build
+  docker-compose up 
 }
 
 clean()
 {
   # clean
   docker system prune -f
+  running_containers=`docker ps -a --format="{{.ID}}"`
+  for i in $running_containers; do 
+    echo $i;
+    docker rm -f $i
+  done
   sudo docker rmi -f $(sudo docker images -q)\n
 }
 
