@@ -1,6 +1,24 @@
 version: '3.6'
 
 services:
+  mariadb:
+    image: mariadb
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_DATABASE: lpbug
+      MYSQL_USER: lpbug
+      MYSQL_PASSWORD: "lpbug"
+    volumes:
+      - mariadb-volume:/var/lib/mysql
+
+  mariadb-sidecar:
+    build: mariadb
+    container_name: mariadb-sidecar
+    tty: true
+
   influxdb:
     image: influxdb:1.7.1
     container_name: influxdb
@@ -10,19 +28,6 @@ services:
       - "8090:8090"
     volumes:
       - influxdb-volume:/var/lib/influxdb
-
-  mariadb:
-    image: mariadb
-    container_name: mariadb
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: lpbug
-      MYSQL_USER: lpbug
-      MYSQL_PASSWORD: lpbug
-    volumes:
-      - mariadb-volume:/var/lib/mysql
 
   grafana:
     image: grafana/grafana:5.3.4
@@ -70,11 +75,11 @@ services:
       - telegraf-volume:/tmp/
 
 volumes:
+  mariadb-volume:
+    external: true
   influxdb-volume:
     external: true
   grafana-volume:
     external: true
   telegraf-volume:
-    external: true
-  mariadb-volume:
     external: true
