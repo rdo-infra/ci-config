@@ -3,7 +3,7 @@
   block:
 
   - name: Install required packages
-    yum:
+    package:
       name: 'epel-release'
       state: present
 
@@ -16,7 +16,7 @@
       - https://trunk.rdoproject.org/centos7/delorean-deps.repo
 
   - name: Install required packages
-    yum:
+    package:
       name: '{{ item }}'
       state: present
     with_items:
@@ -34,11 +34,10 @@
 
   - name: Install required python modules
     pip:
-      name: "{{ item }}"
+      name:
+        - docutils
+        - gear
       state: present
-    with_items:
-      - docutils
-      - gear
 
   - name: Create repo directory
     file:
@@ -111,7 +110,7 @@
       name: httpd
       state: restarted
       enabled: yes
-    when: apache_config|changed
+    when: apache_config is changed
 
   - name: Add config for te-broker log rotation
     copy:
@@ -150,7 +149,7 @@
     cron:
       name: 'Cleaning old OVB stacks'
       minute: 0
-      job: 'source /etc/nodepoolrc && bash /opt/stack/ci-config/ci-scripts/infra-cleanup/ovb-tenant-cleanup.sh 2>&1 > /var/log/cleaning_stacks.log'
+      job: 'systemd-cat -t ovb-tenant-cleanup bash /opt/stack/ci-config/ci-scripts/infra-cleanup/ovb-tenant-cleanup.sh'
 
   - name: Create cron job to get influxdb stats
     cron:
