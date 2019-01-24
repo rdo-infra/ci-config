@@ -234,16 +234,16 @@ else
         # Networks - delete empty ports associated with subnets and then networks
         SUBNET_IDS=$(openstack subnet list -f json |  jq -r --arg IDENTIFIER "-${IDENTIFIER}" '.[] | select(.["Name"] | endswith($IDENTIFIER)) | .["ID"]')
         for SUBNET_ID in $SUBNET_IDS; do
-             PORT_SUBNET_IDS=$(openstack port list -f json |  jq -r --arg SUBNET_ID "$SUBNET_ID" '.[] | select(.["Fixed IP Addresses"] | contains($SUBNET_ID)) | .["ID"]')
-             if [[ "$DRY_RUN" == "1" ]]; then
+            PORT_SUBNET_IDS=$(openstack port list -f json |  jq -r --arg SUBNET_ID "$SUBNET_ID" '.[] | select(.["Fixed IP Addresses"] | contains($SUBNET_ID)) | .["ID"]')
+            if [[ "$DRY_RUN" == "1" ]]; then
                 echo "INFO: DRY RUN - Ports from subnets to delete:
                 $PORT_SUBNET_IDS" >&2
-             else
-                 for PORT_SUBNET_ID in $PORT_SUBNET_IDS; do
-                     echo "INFO: Deleting port ID $PORT_SUBNET_ID ..." >&2
-                     openstack port delete $PORT_SUBNET_ID
-                 done
-             fi
+            else
+                for PORT_SUBNET_ID in $PORT_SUBNET_IDS; do
+                    echo "INFO: Deleting port ID $PORT_SUBNET_ID ..." >&2
+                    openstack port delete $PORT_SUBNET_ID
+                done
+            fi
         done
 
         NETWORK_IDS=$(openstack network list -f json |  jq -r --arg IDENTIFIER "-${IDENTIFIER}" '.[] | select(.["Name"] | endswith($IDENTIFIER)) | .["ID"]')

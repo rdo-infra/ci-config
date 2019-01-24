@@ -24,4 +24,3 @@ bash $WORKSPACE/tripleo-quickstart/quickstart.sh \
     --requirements $WORKSPACE/local-requires.txt \
     --playbook noop.yml \
     localhost
-

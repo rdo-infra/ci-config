@@ -10,22 +10,22 @@ usage()
 
 start()
 {
-  # start up
-  docker volume create telegraf-volume
-  docker volume create grafana-volume
-  docker volume create influxdb-volume
-  docker-compose up
+    # start up
+    docker volume create telegraf-volume
+    docker volume create grafana-volume
+    docker volume create influxdb-volume
+    docker-compose up
 }
 
 clean()
 {
-  # clean
-  docker system prune
-  sudo docker rmi -f $(sudo docker images -q)\n
+    # clean
+    docker system prune
+    sudo docker rmi -f $(sudo docker images -q)\n
 }
 
 if [ -z "$1" ]; then
-  usage
+    usage
 fi
 
 while [ "$1" != "" ]; do
@@ -43,4 +43,3 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
-
