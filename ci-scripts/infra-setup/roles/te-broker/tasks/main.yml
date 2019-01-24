@@ -150,7 +150,9 @@
     cron:
       name: 'Cleaning old OVB stacks'
       minute: 0
-      job: 'source /etc/nodepoolrc && bash /opt/stack/ci-config/ci-scripts/infra-cleanup/ovb-tenant-cleanup.sh 2>&1 > /var/log/cleaning_stacks.log'
+      job: 'source /etc/nodepoolrc && bash /opt/stack/ci-config/ci-scripts/infra-cleanup/ovb-tenant-cleanup.sh'
+      env:
+        LOG_FILE: /var/log/cleaning_stacks.log
 
   - name: Create cron job to get influxdb stats
     cron:
