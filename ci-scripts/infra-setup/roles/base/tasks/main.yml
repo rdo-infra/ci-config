@@ -50,13 +50,12 @@
     systemd:
       name: systemd-journald
       state: restarted
-    when: journal_config|changed
+    when: journal_config is changed
 
   - name: Install required packages
-    yum:
-      name: "{{ item }}"
+    package:
+      name: "{{ packages }}"
       state: present
-    with_items: "{{ packages }}"
 
   - name: Remove PasswordAuthentication if exists
     lineinfile:
