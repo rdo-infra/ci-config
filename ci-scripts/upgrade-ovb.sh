@@ -96,4 +96,3 @@ bash quickstart.sh \
     --extra-vars major_upgrade=$MAJOR_UPGRADE \
     --extra-vars target_upgrade_version=$TARGET_VERSION \
 localhost
-

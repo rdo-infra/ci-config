@@ -20,8 +20,7 @@ nodes=$(cico -q node get --arch $CPU_ARCH --flavor $CICO_FLAVOR --retry-count 6 
 # Write nodes to inventory file and persist the SSID separately for simplicity
 touch ${SSID_FILE}
 IFS=$'\n'
-for node in ${nodes}
-do
+for node in ${nodes}; do
     host=$(echo "${node}" |cut -f1 -d " ")
     address=$(echo "${node}" |cut -f2 -d " ")
     ssid=$(echo "${node}" |cut -f3 -d " ")
