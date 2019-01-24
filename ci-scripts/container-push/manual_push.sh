@@ -22,4 +22,3 @@ fi
 export RELEASE
 
 ansible-playbook -v container-push.yml
-

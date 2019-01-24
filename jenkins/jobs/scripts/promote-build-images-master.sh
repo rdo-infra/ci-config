@@ -25,4 +25,3 @@ scp $ssh_args $build_script root@$VIRTHOST:$virthost_source_location
 
 # run the build script
 ssh $ssh_args root@$VIRTHOST "cd $virthost_source_location && chmod +x build-images.sh && delorean_current_hash=$delorean_current_hash ./build-images.sh"
-

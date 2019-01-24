@@ -10,8 +10,8 @@ LOGSERVER="logs.rdoproject.org ansible_user=uploader"
 
 # If a properties file is specified, it should overwrite and have priority over other parameters
 if [[ -n "${properties}" ]]; then
-  curl -s -O "${properties}"
-  source "./$(basename ${properties})"
+    curl -s -O "${properties}"
+    source "./$(basename ${properties})"
 fi
 
 # Ansible config
