@@ -7,22 +7,12 @@
       name: 'epel-release'
       state: present
 
-  - name: Install new dlrn repos
-    get_url:
-      url: "{{ item }}"
-      dest: "/etc/yum.repos.d/{{ item.split('/')[-1] }}"
-    with_items:
-      - https://trunk.rdoproject.org/centos7-master/current-tripleo/delorean.repo
-      - https://trunk.rdoproject.org/centos7/delorean-deps.repo
-
   - name: Install required packages
     package:
       name: '{{ item }}'
       state: present
     with_items:
-      - ansible
       - git
-      - httpd
       - vim
       - python-pip
       - python-heatclient
@@ -30,129 +20,15 @@
       - python-novaclient
       - python-swiftclient
       - python-openstackclient
-      - logrotate
 
-  - name: Install required python modules
-    pip:
-      name:
-        - docutils
-        - gear
-      state: present
-
-  - name: Create repo directory
-    file:
-      path: /opt/stack/
-      state: directory
-
-  - name: Clone repos
-    git:
-      repo: '{{ item.repo }}'
-      dest: '{{ item.path }}'
-      version: master
-      force: yes
-    with_items:
-      - repo: https://git.openstack.org/openstack-infra/tripleo-ci
-        path: /opt/stack/tripleo-ci
-      - repo: https://github.com/cybertron/openstack-virtual-baremetal.git
-        path: /opt/stack/openstack-virtual-baremetal
-      - repo: https://github.com/rdo-infra/ci-config.git
-        path: /opt/stack/ci-config
-
-  - name: Copy services
+  - name: Deploy ovb-tenant-cleanup.sh
     copy:
-      src: '{{ item.file }}'
-      dest: '{{ item.path }}'
-    with_items:
-      - file: geard.service
-        path: /lib/systemd/system/geard.service
-      - file: te_workers.service
-        path: /lib/systemd/system/te_workers.service
-
-  - name: Create a directory for the te-broker logs
-    file:
-      path: '{{ logsdir }}'
-      state: directory
-
-  - name: Run services
-    systemd:
-      name: '{{ item }}'
-      state: started
-      enabled: yes
-    with_items:
-      - te_workers
-      - geard
-
-  - name: Disable the default welcome page
-    copy:
-      content: ''
-      dest: '/etc/httpd/conf.d/welcome.conf'
-      backup: yes
-
-  - name: Add config file for Apache to expose the logs
-    blockinfile:
-      path: '/etc/httpd/conf.d/tebroker_logs.conf'
-      create: yes
-      block: |
-        <VirtualHost *:80>
-            ServerAdmin rdo-ci-admins@redhat.com
-            DocumentRoot "{{ logsdir }}"
-
-            <Directory {{ logsdir }}>
-                Options Indexes MultiViews
-                AllowOverride None
-                Require all granted
-            </Directory>
-        </VirtualHost>
-    register: apache_config
-
-  - name: Start and enable Apache
-    service:
-      name: httpd
-      state: restarted
-      enabled: yes
-    when: apache_config is changed
-
-  - name: Add config for te-broker log rotation
-    copy:
-      content: |
-          {{ logsdir }}/testenv-worker.log {
-              rotate 7
-              daily
-              dateext
-              compress
-              missingok
-              notifempty
-              maxage 30
-              copytruncate
-              prerotate
-                semanage fcontext -a -t var_log_t {{ logsdir }}/testenv-worker.log
-              endscript
-              postrotate
-                semanage fcontext -a -t httpd_sys_content_t {{ logsdir }}/testenv-worker.log
-              endscript
-          }
-      dest: /etc/logrotate.d/te-broker
-      owner: root
-      group: root
-      mode: 0644
-
-  - name: Create cron job to clean old tebroker baremetal logs
-    cron:
-      name: 'Cleaning old tebroker baremetal logs'
-      weekday: 0
-      minute: 30
-      hour: 12
-      user: root
-      job: 'find {{ logsdir }}/console-logs/ -type f -mtime +30 -print -delete | systemd-cat -t tebroker-log -p info'
+      src: ../infra-cleanup/ovb-tenant-cleanup.sh
+      dest: /root/ovb-tenant-cleanup.sh
+      mode: 0774
 
   - name: Create cron job to clean OVB old stacks
     cron:
       name: 'Cleaning old OVB stacks'
       minute: 0
-      job: 'systemd-cat -t ovb-tenant-cleanup bash /opt/stack/ci-config/ci-scripts/infra-cleanup/ovb-tenant-cleanup.sh'
-
-  - name: Create cron job to get influxdb stats
-    cron:
-      name: 'Get influxdb stats'
-      minute: '*/15'
-      job: 'python /opt/stack/ci-config/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf/rdocloud.py 2>&1 > /var/log/influxdb_stats.log'
+      job: 'systemd-cat -t ovb-tenant-cleanup bash /root/ovb-tenant-cleanup.sh'
