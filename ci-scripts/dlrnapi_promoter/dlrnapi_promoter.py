@@ -6,7 +6,6 @@ import configparser
 import logging
 import logging.handlers
 import os
-import socket
 import subprocess
 import sys
 
@@ -48,10 +47,12 @@ def fetch_hashes(dlrn, link, count=1):
         unduplicated_response = []
         for hashes in api_response:
             hashes = hashes.to_dict()
-            existing_hashes = [(ex_hashes['commit_hash'], ex_hashes['distro_hash']) for ex_hashes in unduplicated_response]
-            if (hashes['commit_hash'], hashes['distro_hash']) not in existing_hashes:
+            existing_hashes = \
+                [(ex_hashes['commit_hash'], ex_hashes['distro_hash'])
+                    for ex_hashes in unduplicated_response]
+            if (hashes['commit_hash'],
+                    hashes['distro_hash']) not in existing_hashes:
                 unduplicated_response.append(hashes)
-
 
         if count == -1:
             return unduplicated_response
@@ -96,7 +97,7 @@ def promote_link(dlrn, hash_values, link):
         except ApiException:
             logger.error('Exception when calling api_promote_post: %s'
                          ' to store current hashes as previous',
-                        ApiException)
+                         ApiException)
             raise
     params = dlrnapi_client.Promotion()
     params.commit_hash = hash_values['commit_hash']
@@ -126,7 +127,7 @@ def tag_containers(new_hashes, release, promote_name):
     logger = logging.getLogger('promoter')
     env = os.environ
     relpath = "ci-scripts/dlrnapi_promoter"
-    script_root = os.path.abspath(sys.path[0]).replace(relpath,"")
+    script_root = os.path.abspath(sys.path[0]).replace(relpath, "")
     env['RELEASE'] = release
     env['COMMIT_HASH'] = new_hashes['commit_hash']
     env['DISTRO_HASH'] = new_hashes['distro_hash']
@@ -140,9 +141,10 @@ def tag_containers(new_hashes, release, promote_name):
     try:
         logger.info('Promoting the container images for dlrn hash %s on '
                     '%s to %s', commit_hash, release, promote_name)
-        container_logs = subprocess.check_output(
-                         ['ansible-playbook', promote_playbook],
-                         env=env, stderr=subprocess.STDOUT).split("\n")
+        container_logs = \
+            subprocess.check_output(
+                ['ansible-playbook', promote_playbook],
+                env=env, stderr=subprocess.STDOUT).split("\n")
         for line in container_logs:
             logger.info(line)
     except subprocess.CalledProcessError as ex:
@@ -156,7 +158,7 @@ def tag_containers(new_hashes, release, promote_name):
 def tag_qcow_images(new_hashes, release, promote_name):
     logger = logging.getLogger('promoter')
     relpath = "ci-scripts/dlrnapi_promoter"
-    script_root = os.path.abspath(sys.path[0]).replace(relpath,"")
+    script_root = os.path.abspath(sys.path[0]).replace(relpath, "")
     promote_script = script_root + 'ci-scripts/promote-images.sh'
     full_hash = new_hashes['full_hash']
     try:
@@ -181,7 +183,11 @@ def get_latest_hashes(api, promote_name, current_name, latest_hashes_count):
     '''Get and filter eligible hashes for promotion'''
     logger = logging.getLogger('promoter')
 
-    candidate_hashes_list = fetch_hashes(api, current_name, count=latest_hashes_count)
+    candidate_hashes_list = fetch_hashes(
+        api,
+        current_name,
+        count=latest_hashes_count)
+
     if candidate_hashes_list is None:
         logger.error('Failed to fetch any hashes for %s, skipping promotion',
                      current_name)
@@ -189,10 +195,12 @@ def get_latest_hashes(api, promote_name, current_name, latest_hashes_count):
     else:
         logger.debug('Hashes fetched (tried to get the last %d): %s',
                      latest_hashes_count, candidate_hashes_list)
-        candidate_hashes_list.sort(key=lambda hashes: hashes['timestamp'], reverse=True)
+        candidate_hashes_list.sort(
+            key=lambda hashes: hashes['timestamp'],
+            reverse=True)
 
-    # This will be a map of recent hashes candidate for promotion. We'll map here
-    # the timestamp for each promotion to promote name, if any
+    # This will be a map of recent hashes candidate for promotion. We'll map
+    # here the timestamp for each promotion to promote name, if any
     candidate_hashes = {}
     for hashes in candidate_hashes_list:
         full_hash = "%s_%s" % (hashes['commit_hash'], hashes['distro_hash'])
@@ -217,21 +225,29 @@ def get_latest_hashes(api, promote_name, current_name, latest_hashes_count):
     for index, hashes in enumerate(candidate_hashes_list):
         full_hash = "%s_%s" % (hashes['commit_hash'], hashes['distro_hash'])
         if promote_name in candidate_hashes[full_hash]:
-           logger.info('Current "%s" hash is %s' % (promote_name, hashes))
-           candidate_hashes_list = candidate_hashes_list[:index]
-           break
+            logger.info('Current "%s" hash is %s' % (promote_name, hashes))
+            candidate_hashes_list = candidate_hashes_list[:index]
+            break
 
     if candidate_hashes_list:
-        logger.debug('Remaining hashes after removing ones older than the '
-                    'currently promoted: %s', candidate_hashes_list)
+        logger.debug(
+            'Remaining hashes after removing ones older than the '
+            'currently promoted: %s', candidate_hashes_list)
     else:
-        logger.debug('No remaining hashes after removing ones older than the '
-                    'currently promoted')
+        logger.debug(
+            'No remaining hashes after removing ones older than the '
+            'currently promoted')
 
     return candidate_hashes_list
 
 
-def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hashes_count):
+def promote_all_links(
+        api,
+        promote_from,
+        job_reqs,
+        dry_run,
+        release,
+        latest_hashes_count):
     '''Promote DLRN API links as a different one when all jobs are
     successful'''
     logger = logging.getLogger('promoter')
@@ -243,15 +259,17 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hash
                                             latest_hashes_count):
             logger.info('Checking hash %s from %s for promotion criteria',
                         new_hashes, current_name)
-            new_hashes['full_hash'] = '{0}_{1}'.format(new_hashes['commit_hash'],
-                                        new_hashes['distro_hash'][:8])
+            new_hashes['full_hash'] = \
+                '{0}_{1}'.format(new_hashes['commit_hash'],
+                                 new_hashes['distro_hash'][:8])
             successful_jobs = set(fetch_jobs(api, new_hashes))
             required_jobs = set(job_reqs[promote_name])
             missing_jobs = list(required_jobs - successful_jobs)
             if missing_jobs:
-                logger.info('Skipping promotion of %s from %s to %s, missing successful '
-                            'jobs: %s',
-                            new_hashes, current_name, promote_name, missing_jobs)
+                logger.info(
+                    'Skipping promotion of %s from %s to %s, missing '
+                    'successful jobs: %s',
+                    new_hashes, current_name, promote_name, missing_jobs)
                 continue
             if dry_run:
                 logger.info('DRY RUN: promotion conditions satisfied, '
@@ -270,7 +288,7 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hash
                                 current_name, promote_name, new_hashes)
                     # stop here, don't try to promote other hashes
                     break
-                except:
+                except Exception:
                     logger.info('FAILED promoting %s as %s (%s)',
                                 current_name, promote_name, new_hashes)
 
@@ -320,7 +338,13 @@ def promoter(config):
         job_reqs[section] = [k for k, v in config.items(section)]
     logger.debug('Promotion requirements loaded: %s', job_reqs)
 
-    promote_all_links(api_instance, promote_from, job_reqs, dry_run, release, latest_hashes_count)
+    promote_all_links(
+        api_instance,
+        promote_from,
+        job_reqs,
+        dry_run,
+        release,
+        latest_hashes_count)
     logger.info("FINISHED promotion process")
 
 
