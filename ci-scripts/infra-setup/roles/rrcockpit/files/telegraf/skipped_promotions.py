@@ -39,7 +39,7 @@ def get_failing_jobs_html(dlrn_hashes, release_name):
                     if failing_job.in_progress:
                         in_progress = True
                     failing_job_ln = html_link.format(
-                            failing_job.url, failing_job.job_id)
+                        failing_job.url, failing_job.job_id)
 
                     if i > 0:
                         failing_job_ln += "<br>"

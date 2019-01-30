@@ -2,6 +2,7 @@ import mock
 
 from dlrnapi_promoter import get_latest_hashes
 
+
 @mock.patch('dlrnapi_promoter.fetch_hashes')
 def test_no_hashes_fetched_returns_empty_list(fetch_hashes_mock):
 
@@ -12,12 +13,13 @@ def test_no_hashes_fetched_returns_empty_list(fetch_hashes_mock):
     obtained_hashes = get_latest_hashes(
         'dlrn_api', 'promote_name', 'curent_name', 3)
 
-    fetch_hashes_mock.assert_has_calls(
-            [mock.call('dlrn_api', 'curent_name', count=3),
-             mock.call('dlrn_api', 'promote_name', count=-1)])
-
+    fetch_hashes_mock.assert_has_calls([
+        mock.call('dlrn_api', 'curent_name', count=3),
+        mock.call('dlrn_api', 'promote_name', count=-1)
+        ])
 
     assert(len(obtained_hashes) == 0)
+
 
 @mock.patch('dlrnapi_promoter.fetch_hashes')
 def test_no_candidates_returns_empty_list(fetch_hashes_mock):
@@ -36,12 +38,12 @@ def test_no_candidates_returns_empty_list(fetch_hashes_mock):
     obtained_hashes = get_latest_hashes(
         'dlrn_api', 'promote_name', 'curent_name', 3)
 
-    fetch_hashes_mock.assert_has_calls(
-            [mock.call('dlrn_api', 'curent_name', count=3),
-             mock.call('dlrn_api', 'promote_name', count=-1)])
-
+    fetch_hashes_mock.assert_has_calls([
+        mock.call('dlrn_api', 'curent_name', count=3),
+        mock.call('dlrn_api', 'promote_name', count=-1)])
 
     assert(len(obtained_hashes) == 0)
+
 
 @mock.patch('dlrnapi_promoter.fetch_hashes')
 def test_no_old_hashes_returns_candidates(fetch_hashes_mock):
@@ -65,12 +67,12 @@ def test_no_old_hashes_returns_candidates(fetch_hashes_mock):
     obtained_hashes = get_latest_hashes(
         'dlrn_api', 'promote_name', 'curent_name', 3)
 
-    fetch_hashes_mock.assert_has_calls(
-            [mock.call('dlrn_api', 'curent_name', count=3),
-             mock.call('dlrn_api', 'promote_name', count=-1)])
-
+    fetch_hashes_mock.assert_has_calls([
+        mock.call('dlrn_api', 'curent_name', count=3),
+        mock.call('dlrn_api', 'promote_name', count=-1)])
 
     assert(obtained_hashes == candidate_hashes)
+
 
 @mock.patch('dlrnapi_promoter.fetch_hashes')
 def test_old_hashes_get_filtered_from_candidates(fetch_hashes_mock):
@@ -135,9 +137,8 @@ def test_old_hashes_get_filtered_from_candidates(fetch_hashes_mock):
     obtained_hashes = get_latest_hashes(
         'dlrn_api', 'promote_name', 'curent_name', 3)
 
-    fetch_hashes_mock.assert_has_calls(
-            [mock.call('dlrn_api', 'curent_name', count=3),
-             mock.call('dlrn_api', 'promote_name', count=-1)])
-
+    fetch_hashes_mock.assert_has_calls([
+        mock.call('dlrn_api', 'curent_name', count=3),
+        mock.call('dlrn_api', 'promote_name', count=-1)])
 
     assert(obtained_hashes == expected_hashes)

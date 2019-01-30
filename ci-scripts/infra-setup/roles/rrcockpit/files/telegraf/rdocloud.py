@@ -46,16 +46,18 @@ def run_server_check():
     for s in statuses:
         d[s] = len([i for i in out if i['Status'] == s])
     d['undercloud'] = len([
-        i for i in out if i['Flavor Name'] == 'ci.m1.nodepool'
-        and "upstream-centos-7-rdo-cloud" in i['Name']
+        i for i in out
+        if i['Flavor Name'] == 'ci.m1.nodepool' and  # noqa: W504
+        "upstream-centos-7-rdo-cloud" in i['Name']
     ])
     d['multinode'] = len(
         [i for i in out if "upstream-centos-7-2-node-rdo-cloud" in i['Name']])
     d['bmc'] = len([i for i in out if i['Image Name'] == 'bmc-template'])
     d['ovb-node'] = len([i for i in out if i['Image Name'] == 'ipxe-boot'])
     d['total'] = len(out)
-    d['other'] = (d['total'] - d['ovb-node'] - d['bmc'] - d['undercloud'] -
-                  d['multinode'])
+    d['other'] = (
+        d['total'] - d['ovb-node'] - d['bmc'] -  # noqa: W504
+        d['undercloud'] - d['multinode'])
     return d
 
 
@@ -108,8 +110,8 @@ def run_stacks_check():
     d['old_stacks'] = len([
         i for i in out
         if int((datetime.datetime.now() - datetime.datetime.strptime(
-            i['Creation Time'], '%Y-%m-%dT%H:%M:%SZ')).total_seconds() /
-               3600) > 5
+            i['Creation Time'],
+            '%Y-%m-%dT%H:%M:%SZ')).total_seconds() / 3600) > 5
     ])
     return d
 

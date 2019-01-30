@@ -42,10 +42,9 @@ def main():
     nodepool_images = [
         image
         for image in images
-        if 'nodepool_build_id' in image['properties'] and
-           args.pattern in image['name']
+        if 'nodepool_build_id' in image['properties'] and  # noqa: W504
+        args.pattern in image['name']
     ]
-
     if nodepool_images:
         # If there are any matches, alphabetically sort them by name
         # This allows us to easily get the latest image since nodepool suffixes

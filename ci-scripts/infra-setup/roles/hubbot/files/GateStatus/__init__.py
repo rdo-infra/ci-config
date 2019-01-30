@@ -18,10 +18,10 @@ __contributors__ = {}
 from . import config
 from . import plugin
 from imp import reload
-reload(plugin) # In case we're being reloaded.
+reload(plugin) # noqa: In case we're being reloaded.
 
 if world.testing:
-    from . import test
+    from . import test  # noqa
 
 Class = plugin.Class
 configure = config.configure
