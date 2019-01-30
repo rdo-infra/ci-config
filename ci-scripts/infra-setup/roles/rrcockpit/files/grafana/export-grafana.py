@@ -26,8 +26,8 @@ def main():
         authorization_header = "Bearer {}".format(key)
         headers = {'Authorization': authorization_header}
         response = requests.get(
-                "{}/api/search?query=&".format(args.host),
-                headers=headers)
+            "{}/api/search?query=&".format(args.host),
+            headers=headers)
 
         if response.ok:
             for dashboard_id in response.json():
@@ -37,7 +37,7 @@ def main():
                 dashboard_response = requests.get(url, headers=headers)
                 dashboard = dashboard_response.json()
                 dashboard_name = dashboard_id['uri'].split('/')[1]
-                with file("{}.dashboard.json".format(dashboard_name),
+                with open("{}.dashboard.json".format(dashboard_name),
                           'w') as json_file:
                     dashboard.pop('meta', None)
                     dashboard['dashboard'].pop('version', None)
@@ -55,7 +55,7 @@ def main():
                     host=args.host, **datasource_id)
                 datasource_response = requests.get(url, headers=headers)
                 datasource = datasource_response.json()
-                with file("{name}.datasource.json".format(**datasource_id),
+                with open("{name}.datasource.json".format(**datasource_id),
                           'w') as json_file:
                     datasource.pop('id', None)
                     datasource.pop('version', None)
@@ -73,7 +73,7 @@ def main():
                 alert_notification_response = requests.get(url,
                                                            headers=headers)
                 alert_notification = alert_notification_response.json()
-                with file(
+                with open(
                         "{name}.alert-notification.json".format(
                             **alert_notification_id), 'w') as json_file:
                     alert_notification.pop('version', None)
