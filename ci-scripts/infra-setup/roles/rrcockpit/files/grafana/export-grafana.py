@@ -26,8 +26,8 @@ def main():
         authorization_header = "Bearer {}".format(key)
         headers = {'Authorization': authorization_header}
         response = requests.get(
-                "{}/api/search?query=&".format(args.host),
-                headers=headers)
+            "{}/api/search?query=&".format(args.host),
+            headers=headers)
 
         if response.ok:
             for dashboard_id in response.json():
