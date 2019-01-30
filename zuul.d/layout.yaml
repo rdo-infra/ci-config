@@ -1,3 +1,8 @@
+- job:
+    name: tripleo-ci-molecule
+    nodeset: ubuntu-bionic
+    pre-run: zuul.d/playbooks/tox-molecule-pre-run.yml
+    run: zuul.d/playbooks/tox-molecule-run.yml
 - project:
     check:
       jobs:
@@ -5,9 +10,13 @@
         - tox-py27
         - tox-py36:
             nodeset: rdo-fedora-28
+        - tripleo-ci-molecule:
+            voting: false
     gate:
       jobs:
         - tox-pep8
         - tox-py27
         - tox-py36:
             nodeset: rdo-fedora-28
+        - tripleo-ci-molecule:
+            voting: false
