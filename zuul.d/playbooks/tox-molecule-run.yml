@@ -1,0 +1,10 @@
+---
+- hosts: all
+  tasks:
+    - name: Running molecule
+      # TODO(ssbarnea): remove --debug once we have it running for a longer
+      # period of time. Without --debug is impossible to guess why create
+      # may have failed.
+      command: tox -e molecule --debug test
+      args:
+        chdir: "{{ zuul.project.src_dir }}"
