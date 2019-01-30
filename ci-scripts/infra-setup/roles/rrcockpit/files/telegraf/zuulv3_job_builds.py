@@ -106,18 +106,18 @@ def get_file_from_build(build, file_relative_path):
 
 
 def add_inventory_info(build):
-        try:
-            inventory = get_file_from_build(build, "/zuul-info/inventory.yaml")
-            hosts = inventory['all']['hosts']
-            host = hosts[hosts.keys()[0]]
-            if 'nodepool' in host:
-                nodepool = host['nodepool']
-                build['cloud'] = nodepool['cloud']
-                build['region'] = nodepool['region']
-                build['provider'] = nodepool['provider']
+    try:
+        inventory = get_file_from_build(build, "/zuul-info/inventory.yaml")
+        hosts = inventory['all']['hosts']
+        host = hosts[hosts.keys()[0]]
+        if 'nodepool' in host:
+            nodepool = host['nodepool']
+            build['cloud'] = nodepool['cloud']
+            build['region'] = nodepool['region']
+            build['provider'] = nodepool['provider']
 
-        except Exception:
-            pass
+    except Exception:
+        pass
 
 
 def fix_task_name(task_name):
