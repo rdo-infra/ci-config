@@ -1,0 +1,48 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+  privileged: true
+log: true
+platforms:
+  # Until https://github.com/ansible/molecule/issues/1665 is implemented we
+  # do use only one parametrized platform in config file which allows us to
+  # control what we test from outside (zuul)
+  # - name: centos
+  #   hostname: centos
+  #   image: centos/systemd:latest
+  #   # ^ this is based on centos 7 at the moment and we have no other tag to use
+  #   environment:
+  #     http_proxy: "{{ lookup('env', 'http_proxy') }}"
+  #     https_proxy: "{{ lookup('env', 'https_proxy') }}"
+  # - name: fedora-rawhide
+  #   hostname: fedora-rawhide
+  #   image: fedora:rawhide
+  # ^ disabled until a fix is released: https://github.com/ansible/molecule/issues/1645
+  - name: ${_MOLECULE_PLATFORM:-centos}
+    hostname: "${_MOLECULE_PLATFORM-centos}"
+    # centos:7 does not have a fully working systemd
+    image: ${_MOLECULE_DOCKER_IMAGE:-centos/systemd:latest}
+    environment:
+      http_proxy: "{{ lookup('env', 'http_proxy') }}"
+      https_proxy: "{{ lookup('env', 'https_proxy') }}"
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ROLES_PATH: ../../ci-scripts/infra-setup/roles
+    ANSIBLE_STDOUT_CALLBACK: yaml
+scenario:
+  name: te-broker
+  test_sequence:
+    - destroy
+    # - dependency
+    - create
+    # - prepare
+    - converge
+    - idempotence
+    - side_effect
+    - verify
+    - destroy
+verifier:
+  name: testinfra
