@@ -3,13 +3,11 @@ import re
 import subprocess
 import time
 
-import supybot.conf as conf
-import supybot.utils as utils
-import supybot.world as world
-from supybot.commands import *
+from supybot.commands import wrap
 import supybot.callbacks as callbacks
 from supybot.i18n import PluginInternationalization, internationalizeDocstring
 _ = PluginInternationalization('GateStatus')
+
 
 class GateStatus(callbacks.Plugin):
     """This plugin reports gate statuses.
@@ -23,7 +21,9 @@ class GateStatus(callbacks.Plugin):
         cmd = (' '.join([self.registryValue('sshCommand'),
                          "gerrit query --format json --comments",
                          query]))
-        output = subprocess.check_output(cmd.split(" "), stderr=subprocess.STDOUT)
+        output = subprocess.check_output(
+            cmd.split(" "),
+            stderr=subprocess.STDOUT)
 
         query_data = []
         # skip the last line of output, which is a query summary
@@ -36,20 +36,21 @@ class GateStatus(callbacks.Plugin):
     def filter_comments(self, comments):
         '''Filter the comments by username and timestamp'''
 
-        limit = time.time() - (60*60*self.registryValue('timeLimit'))
+        limit = time.time() - (60 * 60 * self.registryValue('timeLimit'))
 
-        filtered = [comment for comment in comments if
-                    comment['reviewer']['username'] in
-                    self.registryValue('userFilter') and
-                    comment['timestamp'] > limit]
+        filtered = [
+            comment for comment in comments if
+            comment['reviewer']['username'] in
+            self.registryValue('userFilter') and comment['timestamp'] > limit]
         return filtered
 
     def parse_comments(self, comments):
         results = {}
         for comment in comments:
             for line in comment['message'].split('\n'):
-                result = re.match(r'^[*-] (?P<job>.*?) (?P<url>.*?) : (?P<result>[^ ]+) '
-                                  '?(?P<comment>.*)$', line)
+                result = re.match(
+                    r'^[*-] (?P<job>.*?) (?P<url>.*?) : (?P<result>[^ ]+) '
+                    '?(?P<comment>.*)$', line)
                 if result:
                     success = result.group('result') == 'SUCCESS'
                     job = result.group('job')
@@ -95,11 +96,11 @@ class GateStatus(callbacks.Plugin):
         failing_list = []
         for change in processed_data:
             failing_list += processed_data[change]['failing']
-        #failing_list = []
+        # failing_list = []
         if not failing_list:
             return "All check jobs are working fine on %s." % \
-                   (', '.join([processed_data[change]['branch']
-                                for change in processed_data]))
+                (', '.join([processed_data[change]['branch']
+                 for change in processed_data]))
         msg = "FAILING CHECK JOBS on "
         for change in processed_data:
             if processed_data[change]['failing']:
@@ -109,7 +110,7 @@ class GateStatus(callbacks.Plugin):
         return msg[:-2]
 
     def user_report(self):
-        limit = time.time() - (60*60*self.registryValue('timeLimit'))
+        limit = time.time() - (60 * 60 * self.registryValue('timeLimit'))
 
         query_data = self.fetch_data()
 
@@ -159,6 +160,7 @@ class GateStatus(callbacks.Plugin):
         Print all the users that commented on the test change. Userful for
         figuring out the users for the userFilter variable"""
         irc.reply(self.user_report(), prefixNick=False)
+
 
 Class = GateStatus
 
