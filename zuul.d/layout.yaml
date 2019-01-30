@@ -1,3 +1,9 @@
+- job:
+    name: tox-molecule
+    pre-run: zuul.d/playbooks/tox-molecule-pre-run.yml
+    run: zuul.d/playbooks/tox-molecule-run.yml
+    vars:
+      use_upstream_docker: false
 - project:
     check:
       jobs:
@@ -5,9 +11,13 @@
         - tox-py27
         - tox-py36:
             nodeset: rdo-fedora-28
+        - tox-molecule:
+            voting: false
     gate:
       jobs:
         - tox-pep8
         - tox-py27
         - tox-py36:
             nodeset: rdo-fedora-28
+        - tox-molecule:
+            voting: false
