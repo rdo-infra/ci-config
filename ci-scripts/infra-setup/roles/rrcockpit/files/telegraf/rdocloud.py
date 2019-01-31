@@ -86,6 +86,15 @@ def run_fips_count():
     return len(out)
 
 
+def run_ports_down_count():
+    cmd = "openstack port list -f json"
+    out = _run_cmd(cmd)[0]
+    if not out:
+        return 0
+    downs = [i for i in out if i['Status'] == "DOWN"]
+    return len(downs)
+
+
 def run_stacks_check():
     cmd = "openstack stack list  -f json"
     out = _run_cmd(cmd)[0]
@@ -114,7 +123,7 @@ def run_stacks_check():
     return d
 
 
-def write_influxdb_file(servers, quotes, stacks, fips, ts):
+def write_influxdb_file(servers, quotes, stacks, fips, ports_down, ts):
     s = ''
     if servers:
         s = 'rdocloud-servers '
@@ -136,9 +145,10 @@ def write_influxdb_file(servers, quotes, stacks, fips, ts):
     p = ''
     if quotes:
         quotes.update({'fips': fips})
+        quotes.update({'ports_down': ports_down})
         p = 'rdocloud-perf '
         p += ('instances={instances},cores={cores},ram={ram},gigabytes={gbs},'
-              'fips={fips}'
+              'fips={fips},ports_down={ports_down}'
               ).format(**quotes)
     nanots = str(int(ts)) + "000000000"
     with open(FILE_PATH, "w") as f:
@@ -152,7 +162,8 @@ def main():
     quotes = run_quote_check()
     stacks = run_stacks_check()
     fips = run_fips_count()
-    write_influxdb_file(servers, quotes, stacks, fips, time.time())
+    ports_down = run_ports_down_count()
+    write_influxdb_file(servers, quotes, stacks, fips, ports_down, time.time())
 
 
 if __name__ == '__main__':
