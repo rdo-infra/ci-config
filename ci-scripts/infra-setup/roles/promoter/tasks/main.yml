@@ -98,6 +98,24 @@
     enabled: yes
   when: apache_config|changed
 
+- name: Configure overlay2 for docker
+  copy:
+    content: |
+      {
+          "storage-driver": "overlay2",
+          "storage-opts": [
+            "overlay2.override_kernel_check=true"
+          ]
+      }
+    dest: /etc/docker/daemon.json
+  register: docker_config
+
+- name: Reload docker if config was changed
+  service:
+    name: docker
+    state: reloaded
+  when: docker_config is changed
+
 - name: Start and enable Docker
   service:
     name: docker
