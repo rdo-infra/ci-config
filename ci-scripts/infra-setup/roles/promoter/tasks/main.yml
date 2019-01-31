@@ -190,11 +190,21 @@
     mode: '0644'
     owner: 'root'
     group: 'root'
-  register: telegraf
+  register: dlrn_promoter_telegram
+
+- name: Configure disk at telegraf
+  copy:
+    src: disk.telegraf.conf
+    dest: /etc/telegraf/telegraf.d/disk.conf
+    mode: '0644'
+    owner: 'root'
+    group: 'root'
+  register: disk_telegram
+
 
 - name: Start and enable telegraf
   service:
     name: telegraf
     state: restarted
     enabled: yes
-  when: telegraf|changed
+  when: dlrn_promoter_telegram.changed or disk_telegram.changed
