@@ -1,12 +1,17 @@
+- job:
+    name: tox-jjb
+    run: zuul.d/playbooks/tox-jjb-run.yml
 - project:
     check:
       jobs:
+        - tox-jjb
         - tox-pep8
         - tox-py27
         - tox-py36:
             nodeset: rdo-fedora-28
     gate:
       jobs:
+        - tox-jjb
         - tox-pep8
         - tox-py27
         - tox-py36:
