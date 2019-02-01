@@ -160,6 +160,22 @@ else
     STACK_LIST=$(openstack stack list -f json | jq --arg date_time_expired "$DATE_TIME_EXPIRED" -r '.[]| select(.["Creation Time"] <= $date_time_expired)  | .["ID"]')
 fi
 
+# DOWN port cleanup
+PORT_TIME_EXPIRED=300
+DATE_TIME_EXPIRED=$(`which date date|head -n1` -d " $PORT_TIME_EXPIRED minutes ago" -u  "+%Y-%m-%dT%H:%M:%SZ")
+# Get a list of ports which are DOWN
+echo "INFO: Getting a list of ports which are DOWN"
+DOWN_PORT_LIST=$(openstack port list -f json | jq -r '.[]| select(.["Status"] == "DOWN") | .["ID"]')
+# Get a list of ports which are down for 5 hours
+for PORT in $DOWN_PORT_LIST; do
+    DOWN_PORT=$(openstack port show $PORT -f json | jq --arg date_time_expired "$DATE_TIME_EXPIRED" -r '.[]| select(.["updated_at"] <= $date_time_expired) | .["ID"]')
+    if [[ ! -z $DOWN_PORT ]]; then
+        echo "INFO: Deleting Port $DOWN_PORT"
+        openstack port delete $DOWN_PORT
+    fi
+done
+
+
 if [[ "$DRY_RUN" == "1" ]]; then
     echo "INFO: DRY RUN - Stack list to delete:
     $STACK_LIST" >&2
