@@ -14,7 +14,7 @@ start()
     docker volume create telegraf-volume
     docker volume create grafana-volume
     docker volume create influxdb-volume
-    docker-compose up
+    docker-compose up --build
 }
 
 clean()
