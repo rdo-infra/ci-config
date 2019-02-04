@@ -263,8 +263,8 @@ else
             $STACK"
         else
             for (( DELETE_TIMES=0; DELETE_TIMES <= 4; DELETE_TIMES++ )); do
-                openstack stack show $STACK  || break
-                if [[ "$(openstack stack show $STACK -f json |  jq -r '.["stack_status"] ')" == "DELETE_FAILED" ]]; then
+                openstack stack show $STACK || break
+                if [[ "$(openstack stack show $STACK -f json | jq -r '.["stack_status"] | test("(CREATE|DELETE)_FAILED")')" == "true" ]]; then
                     echo "INFO: Deleting stack id $STACK..." >&2
                     openstack stack delete -y $STACK
                     # don't overwhelm the tenant with mass delete
