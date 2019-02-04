@@ -130,7 +130,7 @@ def write_influxdb_file(servers, quotes, stacks, fips, ports_down, ts):
         s += ('ACTIVE={ACTIVE},BUILD={BUILD},ERROR={ERROR},DELETED={DELETED},'
               ).format(**servers)
         s += ('undercloud={undercloud},multinode={multinode},bmc={bmc},'
-              'ovb-node={ovb-node},other={other},total={total},'
+              'ovb-node={ovb-node},other={other},total={total}'
               ).format(**servers)
     if stacks:
         if not s:
