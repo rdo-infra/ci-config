@@ -124,17 +124,16 @@ def run_stacks_check():
 
 
 def write_influxdb_file(servers, quotes, stacks, fips, ports_down, ts):
-    s = ''
+    s = 'rdocloud-servers '
     if servers:
-        s = 'rdocloud-servers '
         s += ('ACTIVE={ACTIVE},BUILD={BUILD},ERROR={ERROR},DELETED={DELETED},'
               ).format(**servers)
         s += ('undercloud={undercloud},multinode={multinode},bmc={bmc},'
               'ovb-node={ovb-node},other={other},total={total}'
               ).format(**servers)
     if stacks:
-        if not s:
-            s = 'rdocloud-servers '
+        if servers:
+            s += ','
         s += (
             'stacks_total={stacks_total},create_complete={create_complete},'
             'create_failed={create_failed},'
