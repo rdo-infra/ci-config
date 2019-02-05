@@ -123,8 +123,9 @@ def run_stacks_check():
     return d
 
 
-def write_influxdb_file(servers, quotes, stacks, fips, ports_down, ts):
+def compose_influxdb_data(servers, quotes, stacks, fips, ports_down, ts):
     s = ''
+    influxdb_data = ''
     if servers:
         s = 'rdocloud-servers '
         s += ('ACTIVE={ACTIVE},BUILD={BUILD},ERROR={ERROR},DELETED={DELETED},'
@@ -133,7 +134,9 @@ def write_influxdb_file(servers, quotes, stacks, fips, ports_down, ts):
               'ovb-node={ovb-node},other={other},total={total}'
               ).format(**servers)
     if stacks:
-        if not s:
+        if s:
+            s += ','
+        else:
             s = 'rdocloud-servers '
         s += (
             'stacks_total={stacks_total},create_complete={create_complete},'
@@ -142,6 +145,7 @@ def write_influxdb_file(servers, quotes, stacks, fips, ports_down, ts):
             ',delete_in_progress={delete_in_progress},'
             'delete_failed={delete_failed},delete_complete={delete_complete},'
             'old_stacks={old_stacks}').format(**stacks)
+
     p = ''
     if quotes:
         quotes.update({'fips': fips})
@@ -151,19 +155,28 @@ def write_influxdb_file(servers, quotes, stacks, fips, ports_down, ts):
               'fips={fips},ports_down={ports_down}'
               ).format(**quotes)
     nanots = str(int(ts)) + "000000000"
+    if s:
+        influxdb_data = s + " %s\n" % nanots
+    if p:
+        influxdb_data += p + " %s\n" % nanots
+
+    return influxdb_data
+
+
+def write_influxdb_file(influxdb_data):
     with open(FILE_PATH, "w") as f:
-        f.write(s + " %s\n" % nanots)
-        f.write(p + " %s\n" % nanots)
+        f.write(influxdb_data)
 
 
 def main():
-
     servers = run_server_check()
     quotes = run_quote_check()
     stacks = run_stacks_check()
     fips = run_fips_count()
     ports_down = run_ports_down_count()
-    write_influxdb_file(servers, quotes, stacks, fips, ports_down, time.time())
+    influxdb_data = compose_influxdb_data(
+                        servers, quotes, stacks, fips, ports_down, time.time())
+    write_influxdb_file(influxdb_data)
 
 
 if __name__ == '__main__':
