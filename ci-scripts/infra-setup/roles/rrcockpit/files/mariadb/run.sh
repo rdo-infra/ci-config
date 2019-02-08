@@ -23,9 +23,24 @@ read_lp(){
             Incomplete
 }
 
+read_noop(){
+    releases="master rocky queens pike"
+    types="upstream rdo"
+    for release in $releases; do
+        for type in $types; do
+            noop_build.py --release $release --type $type
+        done
+    done
+}
+
 load_db(){
     read_lp > /tmp/lp.csv
     mysql -h mariadb -P 3306 -u root < /tmp/load_lp_mysql.sql
+}
+
+load_noop(){
+    read_noop > /tmp/noop.csv
+    mysql -h mariadb -P 3306 -u root < /tmp/load_noop_mysql.sql
 }
 
 # We could have just keep sleep 60 before load_db, but this helps dev
@@ -35,5 +50,6 @@ ansible-playbook /tmp/wait-mariadb.yaml
 
 while true; do
     load_db 2>&1 | tee /tmp/run.log
+    load_noop 2>&1 | tee /tmp/run.log
     sleep 60;
 done

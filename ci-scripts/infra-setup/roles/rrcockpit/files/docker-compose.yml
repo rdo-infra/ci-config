@@ -9,9 +9,9 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_ROOT_PASSWORD: ""
-      MYSQL_DATABASE: lpbug
-      MYSQL_USER: lpbug
-      MYSQL_PASSWORD: "lpbug"
+      MYSQL_DATABASE: rrcockpit
+      MYSQL_USER: rrcockpit
+      MYSQL_PASSWORD: "rrcockpit"
     volumes:
       - mariadb-volume:/var/lib/mysql
 
@@ -19,6 +19,8 @@ services:
     build: mariadb
     container_name: mariadb-sidecar
     tty: true
+    depends_on:
+      - mariadb
 
   influxdb:
     image: influxdb:1.7.1
@@ -47,7 +49,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
     env_file:
       - 'grafana/env'
-    links:
+    depends_on:
       - influxdb
     volumes:
       - grafana-volume:/var/lib/grafana
@@ -58,7 +60,7 @@ services:
     container_name: grafana-sidecar
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
-    links:
+    depends_on:
       - grafana
     volumes:
       - grafana-volume:/var/lib/grafana
@@ -70,7 +72,7 @@ services:
     hostname: telegraf.rrcockpit
     env_file:
       - 'telegraf/env'
-    links:
+    depends_on:
       - influxdb
     volumes:
       - telegraf-volume:/tmp/
