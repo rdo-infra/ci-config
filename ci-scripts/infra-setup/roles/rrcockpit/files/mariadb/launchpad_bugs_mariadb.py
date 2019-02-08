@@ -17,7 +17,7 @@ def get_bugs(tag, status):
     return bugs
 
 
-def print_as_influxdb(tag, bug_tasks):
+def print_as_csv(tag, bug_tasks):
     if bug_tasks:
         for bug_task in bug_tasks:
             print(('{},{},{},{},"{}"').format(
@@ -41,7 +41,7 @@ def main():
                         default=['New', 'Triaged', 'In Progress'])
     args = parser.parse_args()
 
-    print_as_influxdb(args.tag, get_bugs(args.tag, args.status))
+    print_as_csv(args.tag, get_bugs(args.tag, args.status))
 
 
 if __name__ == '__main__':
