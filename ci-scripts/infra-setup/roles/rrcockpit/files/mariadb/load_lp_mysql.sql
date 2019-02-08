@@ -1,4 +1,5 @@
-USE lpbug;
+USE rrcockpit;
+
 CREATE TABLE IF NOT EXISTS rr_bugs (
     id INT,
     status VARCHAR(255) NOT NULL,
