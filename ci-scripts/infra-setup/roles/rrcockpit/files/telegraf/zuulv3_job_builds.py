@@ -160,6 +160,9 @@ def influx(build):
 
     if build['start_time'] is None:
         build['start_time'] = build['end_time']
+    duration = build.get('duration', 0)
+    if duration is None:
+        duration = 0
     # Get the nodename
     return ('build,'
             'type=%s,'
@@ -196,8 +199,9 @@ def influx(build):
              build.get('provider', 'null'), build['result'], build['result'], 1
              if build['result'] == 'SUCCESS' else 0, build['log_url'],
              "<a href={} target='_blank'>{}</a>".format(
-                 build['log_url'], build['job_name']), build.get(
-                     'duration', 0), to_ts(build['start_time'], seconds=True),
+                 build['log_url'], build['job_name']),
+             duration,
+             to_ts(build['start_time'], seconds=True),
              to_ts(build['end_time'], seconds=True), build.get(
                  'cloud', 'null'), build.get('region', 'null'),
              build.get('provider', 'null'), to_ts(build['end_time'])))
