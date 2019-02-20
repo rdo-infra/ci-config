@@ -9,7 +9,7 @@ export RELEASE=${1:-"master"}
 export CPU_ARCH=${2:-"x86_64"}
 export CICO_FLAVOR=${3:-"small"}
 export DISTRO_NAME=${4:-"centos"}
-export DISTRO_RELEASE=${5:-"7"}
+export DISTRO_VERSION=${5:-"7"}
 
 git clone https://github.com/rdo-infra/review.rdoproject.org-config
 
