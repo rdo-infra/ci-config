@@ -30,12 +30,21 @@ services:
     volumes:
       - influxdb-volume:/var/lib/influxdb
 
+  nginx:
+    image: nginx:latest
+    restart: always
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:z
+
   grafana:
     image: grafana/grafana:5.4.3
     restart: always
     container_name: grafana
     ports:
-      - "80:3000"
+      - "8080:3000"
     environment:
       - GF_SMTP_ENABLED=true
       - GF_SMTP_HOST=smtp.gmail.com:587
