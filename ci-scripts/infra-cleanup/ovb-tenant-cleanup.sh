@@ -195,7 +195,6 @@ fi
 STACK_LIST_STATUS=$(openstack stack list -f json | jq -r '.[] | select(.["Stack Status"] |test("(CREATE|DELETE)_FAILED")) | .["Stack Name"]')
 if [[  -z $STACK_LIST_STATUS ]]; then
     echo "INFO: There are no stacks to delete, exiting script." >&2
-    exit 0
 else
     echo "INFO: There are stacks in DELETE_FAILED state - $STACK_LIST_STATUS" >&2
     echo "INFO: Remove associated resources and then delete the stacks again." >&2
@@ -293,4 +292,16 @@ else
 
     done
 
+fi
+
+SERVER_LIST_STATUS=$(openstack server list -f json | jq -r '.[] | select(.["Status"] |test("ERROR")) | .["Server ID"]')
+if [[  -z $SERVER_LIST_STATUS ]]; then
+    echo "INFO: There are no servers to delete" >&2
+else
+    echo "INFO: There are servers in ERROR state - $SERVER_LIST_STATUS" >&2
+    echo "INFO: Remove associated resources and then delete the stacks again." >&2
+
+    for ID in $SERVER_LIST_STATUS; do
+        openstack server delete $ID
+    done
 fi
