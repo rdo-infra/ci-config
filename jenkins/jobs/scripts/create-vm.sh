@@ -20,7 +20,7 @@ NETWORK=${NETWORK:-private}
 NAME="${JOB_NAME_SIMPLIFIED}-${BUILD_NUMBER}"
 IMAGE=${IMAGE:-template-rdo-centos-7}
 TIMEOUT=${TIMEOUT:-120}
-FLAVOR=${FLAVOR:-rdo.m1.nodepool}
+FLAVOR=${FLAVOR:-ci.m1.nodepool}
 VM_INFO="${WORKSPACE}/vminfo.json"
 ANSIBLE_PYTHON_INTERPRETER=${ANSIBLE_PYTHON_INTERPRETER:-/usr/bin/python}
 
