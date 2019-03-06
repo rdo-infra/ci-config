@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install dependencies
-sudo yum -y install gcc git python-devel python-setuptools libffi libffi-devel openssl openssl-devel
+sudo yum -y install gcc git rsync python-devel python-setuptools libffi libffi-devel openssl openssl-devel
 sudo easy_install pip
 sudo pip install ansible
 
@@ -16,7 +16,3 @@ git clone https://github.com/rdo-infra/review.rdoproject.org-config
 pushd review.rdoproject.org-config
     bash -xe ci-scripts/tripleo-upstream/build-containers-images.sh
 popd
-
-# Set up logs for Weirdo playbooks to collect
-sudo mkdir -p /var/log/weirdo
-sudo cp -R /tmp/kolla/logs/* /var/log/weirdo/

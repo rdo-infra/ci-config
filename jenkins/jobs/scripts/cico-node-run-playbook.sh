@@ -8,7 +8,6 @@ VENV="${WORKSPACE}/venv"
 [[ ! -d "${VENV}" ]] && virtualenv "${VENV}"
 source "${VENV}/bin/activate"
 
-# Install requirements.
 # Pin to version used by tripleo-quickstart as of this commit.
 pip install ansible==2.5.8
 
