@@ -16,7 +16,3 @@ git clone https://github.com/rdo-infra/review.rdoproject.org-config
 pushd review.rdoproject.org-config
     bash -xe ci-scripts/tripleo-upstream/build-containers-images.sh
 popd
-
-# Set up logs for Weirdo playbooks to collect
-sudo mkdir -p /var/log/weirdo
-sudo cp -R /tmp/kolla/logs/* /var/log/weirdo/
