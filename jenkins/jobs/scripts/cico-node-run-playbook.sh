@@ -9,6 +9,8 @@ VENV="${WORKSPACE}/venv"
 source "${VENV}/bin/activate"
 
 # Install requirements.
+sudo yum -y install rsync
+
 # Pin to version used by tripleo-quickstart as of this commit.
 pip install ansible==2.5.8
 
