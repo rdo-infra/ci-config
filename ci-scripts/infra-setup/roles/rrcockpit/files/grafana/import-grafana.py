@@ -14,7 +14,7 @@ def import_file(host, key, path, json_file_path):
         'Conent-Type': 'application/json'
     }
     url = "{}/api/{}".format(host, path)
-    with file(json_file_path) as json_file:
+    with open(json_file_path) as json_file:
         print("Importing {}".format(json_file_path))
         data = json.load(json_file)
         response = requests.post(url, headers=headers, json=data)
