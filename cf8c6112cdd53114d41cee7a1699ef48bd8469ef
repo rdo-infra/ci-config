@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c3cad56d_492e29d8",
+        "filename": "jenkins/jobs/scripts/cico-node-run-playbook.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 16
+      },
+      "writtenOn": "2019-03-11T15:46:58Z",
+      "side": 1,
+      "message": "The Jenkins user does not have sudo privileges so this will fail.\nrsync should be installed by default but please let me know if it\u0027s not the case.",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 25
+      },
+      "revId": "cf8c6112cdd53114d41cee7a1699ef48bd8469ef",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0775015a_218c2a75",
+        "filename": "jenkins/jobs/scripts/tripleo-upstream-collect-logs.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 16
+      },
+      "writtenOn": "2019-03-11T15:46:58Z",
+      "side": 1,
+      "message": "This executes on the Jenkins slave where sudo is not available.\nThe artifacts (such as logs) should be kept inside the workspace of the job so they are eventually pruned.\n\n$WORKSPACE/logs maybe ?",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 34
+      },
+      "revId": "cf8c6112cdd53114d41cee7a1699ef48bd8469ef",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "83a67bbb_9c659c6e",
+        "filename": "jenkins/jobs/scripts/tripleo-upstream-collect-logs.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 16
+      },
+      "writtenOn": "2019-03-11T15:46:58Z",
+      "side": 1,
+      "message": "I don\u0027t believe this is required if logs are kept in the workspace.",
+      "range": {
+        "startLine": 23,
+        "startChar": 10,
+        "endLine": 23,
+        "endChar": 34
+      },
+      "revId": "cf8c6112cdd53114d41cee7a1699ef48bd8469ef",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ec663117_ac843d35",
+        "filename": "jenkins/jobs/scripts/tripleo-upstream-collect-logs.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 16
+      },
+      "writtenOn": "2019-03-11T15:46:58Z",
+      "side": 1,
+      "message": "This could probably be in the same playbook as upload-logs.yml just before they are uploaded.",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 26
+      },
+      "revId": "cf8c6112cdd53114d41cee7a1699ef48bd8469ef",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "be9d5a37_ed74e517",
+        "filename": "jenkins/jobs/scripts/tripleo-upstream-collect-logs.sh",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 16
+      },
+      "writtenOn": "2019-03-11T15:46:58Z",
+      "side": 1,
+      "message": "This works for the weirdo use case because virtual machines are spawned in RDO cloud and they are on the public internet.\n\ncico nodes as well as the jenkins slaves are on a private network that the log server does not have access to.\n\nIn your use case, I think what you want to do is:\n1) Download logs from the cico node to the slave\n2) Upload logs from the jenkins slave to the log server\n\nFor #1, the first playbook (collect-logs.yml) is fine I think.\nFor #2, we need the rsync to be from localhost (the jenkins slave) to the log server. Also, ssh_opts can be taken out -- the logserver is not expected to change SSH keys.",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 60,
+        "endChar": 3
+      },
+      "revId": "cf8c6112cdd53114d41cee7a1699ef48bd8469ef",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
