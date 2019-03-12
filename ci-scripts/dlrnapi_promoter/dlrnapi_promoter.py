@@ -133,6 +133,9 @@ def tag_containers(new_hashes, release, promote_name):
     env['FULL_HASH'] = new_hashes['full_hash']
     env['PROMOTE_NAME'] = promote_name
     env['SCRIPT_ROOT'] = script_root
+    # TODO: This will be de-harcoded at preparing promoer for f28
+    env['DISTRO_NAME'] = "centos"
+    env['DISTRO_VERSION'] = "7"
     promote_playbook = (
         script_root + 'ci-scripts/container-push/container-push.yml'
     )

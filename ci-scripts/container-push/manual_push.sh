@@ -21,4 +21,14 @@ if [[ -z "$RELEASE" ]]; then
 fi
 export RELEASE
 
+if [[ -z "$DISTRO_NAME" ]]; then
+    read -p "DISTRO_NAME=" DISTRO_NAME
+fi
+export DISTRO_NAME
+
+if [[ -z "$DISTRO_VERSION" ]]; then
+    read -p "DISTRO_VERSION=" DISTRO_VERSION
+fi
+export DISTRO_VERSION
+
 ansible-playbook -v container-push.yml
