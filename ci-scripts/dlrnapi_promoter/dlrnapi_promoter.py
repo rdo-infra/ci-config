@@ -9,6 +9,7 @@ import os
 import socket
 import subprocess
 import sys
+import platform
 
 from dlrnapi_client.rest import ApiException
 import dlrnapi_client
@@ -133,6 +134,11 @@ def tag_containers(new_hashes, release, promote_name):
     env['FULL_HASH'] = new_hashes['full_hash']
     env['PROMOTE_NAME'] = promote_name
     env['SCRIPT_ROOT'] = script_root
+    dist = platform.linux_distribution()
+    # DISTRO_NAME = centos / fedora
+    env['DISTRO_NAME'] = dist[0].lower()
+    # DISTRO_VERSION = 7 / 28
+    env['DISTRO_VERSION'] = dist[1]
     promote_playbook = (
         script_root + 'ci-scripts/container-push/container-push.yml'
     )
