@@ -1,7 +1,11 @@
+# "Building remotely" shows up regardless of job status,
+# So this publisher should always run.
 - publisher:
     name: 'tripleo-upstream-collect-logs'
     publishers:
         - post-tasks:
-            - script:
+            - matches:
+                - log-text: Building remotely
+              script:
                 !include-raw:
                     - scripts/tripleo-upstream-collect-logs.sh
