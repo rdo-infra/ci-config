@@ -14,9 +14,9 @@ EOF
 pushd $WORKSPACE
 mkdir -p $WORKSPACE/logs
 
-# Ensure Ansible is installed and available
-[[ ! -d provision_venv ]] && virtualenv provision_venv
-provision_venv/bin/pip install ansible
+# Ensure Ansible is installed and available via venv. Disabled for now due to environment issues
+#[[ ! -d provision_venv ]] && virtualenv provision_venv
+#provision_venv/bin/pip install ansible
 
 cat << EOF > collect-logs.yaml
 # Create a playbook to pull the logs down from our cico node
@@ -45,5 +45,8 @@ cat << EOF > collect-logs.yaml
         dest: "${DESTINATION}/"
 EOF
 
-provision_venv/bin/pip ansible-playbook -i "${ANSIBLE_HOSTS}" collect-logs.yaml
+# Run the playbooks. venv variant disabled for now due to environment issues.
+#provision_venv/bin/pip ansible-playbook -i "${ANSIBLE_HOSTS}" collect-logs.yaml
+ansible-playbook -i "${ANSIBLE_HOSTS}" collect-logs.yaml
+
 popd
