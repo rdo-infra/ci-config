@@ -22,8 +22,16 @@
     rdoproject_password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
     containers_file: "parsed_containers-{{ lookup('env','RELEASE') }}.txt"
     registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleo{{ lookup('env', 'RELEASE') }}/imagestreamtags"
-    image_tag: tripleo-ci-testing
   tasks:
+    - name: print out hash, label and namespaces in play
+      debug:
+        var: "{{ item }}"
+      with_items:
+        - full_hash
+        - named_label
+        - dockerhub_namespace
+        - rdoproject_namespace
+
     - name: Construct dlrn_dir from full_hash (turn xxyyz* into xx/yy/xxyyz*)
       set_fact:
         dlrn_dir: "{{ full_hash | regex_replace('^(?P<first>.{2})(?P<second>.{2})(?P<third>.+)$', '\\g<first>/\\g<second>/\\g<first>\\g<second>\\g<third>') }}"
@@ -45,8 +53,8 @@
       shell: |
         echo -n > {{ containers_file }};
         for image in $(curl -fk {{ release_url }} 2>/dev/null | grep -o -P '(?<=name_prefix).*(?=name_suffix)' | sed "s/[{}]//g"); do
-            echo -n "Checking {{ registry_api }}/centos-binary-$image:{{ image_tag }} ... ";
-            if curl -fk "{{ registry_api }}/centos-binary-$image:{{ image_tag }}" &>/dev/null; then
+            echo -n "Checking {{ registry_api }}/centos-binary-$image:{{ full_hash }} ... ";
+            if curl -fk "{{ registry_api }}/centos-binary-$image:{{ full_hash }}" &>/dev/null; then
                 echo $image >> {{ containers_file }};
                 echo "OK";
             else
