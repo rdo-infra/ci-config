@@ -27,7 +27,7 @@ cat << EOF > collect-logs.yaml
   hosts: openstack_nodes
   gather_facts: no
   tasks:
-      synchronize:
+    - synchronize:
           mode: pull
           src: "${SOURCE}"
           dest: "${WORKSPACE}/logs/"
