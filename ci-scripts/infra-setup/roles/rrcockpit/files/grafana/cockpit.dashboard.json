@@ -1263,6 +1263,21 @@
                 "valueName":"current"
             },
             {
+                "content":"current ruck rover etherpad https://etherpad.openstack.org/p/ruckroversprint7",
+                "description":"This is a place to keep some notes and links to current etherpads for ruck rovers.",
+                "gridPos":{
+                    "h":2,
+                    "w":24,
+                    "x":0,
+                    "y":20
+                },
+                "id":253,
+                "links":[],
+                "mode":"markdown",
+                "title":"Ruck Rover Notes",
+                "type":"text"
+            },
+            {
                 "columns":[],
                 "datasource":"telegraf",
                 "fontSize":"100%",
@@ -1270,7 +1285,7 @@
                     "h":7,
                     "w":12,
                     "x":0,
-                    "y":20
+                    "y":22
                 },
                 "hideTimeOverride":false,
                 "id":61,
@@ -1547,7 +1562,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":20
+                    "y":22
                 },
                 "id":231,
                 "legend":{
@@ -1708,7 +1723,7 @@
                     "h":7,
                     "w":12,
                     "x":0,
-                    "y":27
+                    "y":29
                 },
                 "id":232,
                 "legend":{
@@ -2006,7 +2021,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":27
+                    "y":29
                 },
                 "id":242,
                 "links":[
@@ -2141,7 +2156,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":34
+                    "y":36
                 },
                 "hideTimeOverride":false,
                 "id":205,
@@ -2293,7 +2308,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":34
+                    "y":36
                 },
                 "hideTimeOverride":false,
                 "id":206,
@@ -2561,7 +2576,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":40
+                    "y":42
                 },
                 "hideTimeOverride":false,
                 "id":243,
@@ -2569,7 +2584,7 @@
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1549967557471,
+                "repeatIteration":1553022975679,
                 "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
@@ -2603,11 +2618,27 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkUrl":"${__cell_2:raw}",
+                        "linkUrl":"${__cell_4:raw}",
                         "mappingType":1,
                         "pattern":"job",
                         "thresholds":[],
                         "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
                         "unit":"short"
                     }
                 ],
@@ -2617,7 +2648,7 @@
                         "group":[],
                         "metricColumn":"none",
                         "rawQuery":false,
-                        "rawSql":"SELECT\n  ts AS \"time\",\n  job,\n  type,\n  result\nFROM noop_builds\nWHERE\n  $__timeFilter(ts) AND\n  branch = $releases AND\n  success = 0\nORDER BY ts",
+                        "rawSql":"SELECT\n  ts AS \"time\",\n  job,\n  type,\n  result,\n  log_url\nFROM noop_builds\nWHERE\n  $__timeFilter(ts) AND\n  branch = $releases AND\n  success = 0\nORDER BY ts",
                         "refId":"A",
                         "select":[
                             [
@@ -2640,6 +2671,14 @@
                                 {
                                     "params":[
                                         "result"
+                                    ],
+                                    "type":"column"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_url"
                                     ],
                                     "type":"column"
                                 }
@@ -2691,7 +2730,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":40
+                    "y":42
                 },
                 "hideTimeOverride":false,
                 "id":246,
@@ -2699,7 +2738,7 @@
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1549967557471,
+                "repeatIteration":1553022975679,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -2961,7 +3000,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":46
+                    "y":48
                 },
                 "hideTimeOverride":false,
                 "id":244,
@@ -2969,7 +3008,7 @@
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1549967557471,
+                "repeatIteration":1553022975679,
                 "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
@@ -3003,11 +3042,27 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkUrl":"${__cell_2:raw}",
+                        "linkUrl":"${__cell_4:raw}",
                         "mappingType":1,
                         "pattern":"job",
                         "thresholds":[],
                         "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
                         "unit":"short"
                     }
                 ],
@@ -3017,7 +3072,7 @@
                         "group":[],
                         "metricColumn":"none",
                         "rawQuery":false,
-                        "rawSql":"SELECT\n  ts AS \"time\",\n  job,\n  type,\n  result\nFROM noop_builds\nWHERE\n  $__timeFilter(ts) AND\n  branch = $releases AND\n  success = 0\nORDER BY ts",
+                        "rawSql":"SELECT\n  ts AS \"time\",\n  job,\n  type,\n  result,\n  log_url\nFROM noop_builds\nWHERE\n  $__timeFilter(ts) AND\n  branch = $releases AND\n  success = 0\nORDER BY ts",
                         "refId":"A",
                         "select":[
                             [
@@ -3040,6 +3095,14 @@
                                 {
                                     "params":[
                                         "result"
+                                    ],
+                                    "type":"column"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_url"
                                     ],
                                     "type":"column"
                                 }
@@ -3091,7 +3154,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":46
+                    "y":48
                 },
                 "hideTimeOverride":false,
                 "id":247,
@@ -3099,7 +3162,7 @@
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1549967557471,
+                "repeatIteration":1553022975679,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -3361,7 +3424,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":52
+                    "y":54
                 },
                 "hideTimeOverride":false,
                 "id":245,
@@ -3369,7 +3432,7 @@
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1549967557471,
+                "repeatIteration":1553022975679,
                 "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
@@ -3403,11 +3466,27 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkUrl":"${__cell_2:raw}",
+                        "linkUrl":"${__cell_4:raw}",
                         "mappingType":1,
                         "pattern":"job",
                         "thresholds":[],
                         "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
                         "unit":"short"
                     }
                 ],
@@ -3417,7 +3496,7 @@
                         "group":[],
                         "metricColumn":"none",
                         "rawQuery":false,
-                        "rawSql":"SELECT\n  ts AS \"time\",\n  job,\n  type,\n  result\nFROM noop_builds\nWHERE\n  $__timeFilter(ts) AND\n  branch = $releases AND\n  success = 0\nORDER BY ts",
+                        "rawSql":"SELECT\n  ts AS \"time\",\n  job,\n  type,\n  result,\n  log_url\nFROM noop_builds\nWHERE\n  $__timeFilter(ts) AND\n  branch = $releases AND\n  success = 0\nORDER BY ts",
                         "refId":"A",
                         "select":[
                             [
@@ -3440,6 +3519,14 @@
                                 {
                                     "params":[
                                         "result"
+                                    ],
+                                    "type":"column"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_url"
                                     ],
                                     "type":"column"
                                 }
@@ -3491,7 +3578,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":52
+                    "y":54
                 },
                 "hideTimeOverride":false,
                 "id":248,
@@ -3499,7 +3586,7 @@
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1549967557471,
+                "repeatIteration":1553022975679,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -3761,7 +3848,7 @@
                     "h":6,
                     "w":5,
                     "x":0,
-                    "y":58
+                    "y":60
                 },
                 "id":160,
                 "limit":"100",
@@ -3788,7 +3875,7 @@
                     "h":6,
                     "w":5,
                     "x":5,
-                    "y":58
+                    "y":60
                 },
                 "id":159,
                 "limit":"100",
@@ -3822,7 +3909,7 @@
                     "h":6,
                     "w":5,
                     "x":10,
-                    "y":58
+                    "y":60
                 },
                 "id":165,
                 "limit":"100",
@@ -3855,7 +3942,7 @@
                     "h":6,
                     "w":5,
                     "x":15,
-                    "y":58
+                    "y":60
                 },
                 "id":198,
                 "limit":10,
@@ -3880,7 +3967,7 @@
                     "h":6,
                     "w":5,
                     "x":0,
-                    "y":64
+                    "y":66
                 },
                 "id":161,
                 "limit":"100",
@@ -3907,7 +3994,7 @@
                     "h":6,
                     "w":5,
                     "x":5,
-                    "y":64
+                    "y":66
                 },
                 "id":135,
                 "limit":"100",
@@ -3934,7 +4021,7 @@
                     "h":3,
                     "w":5,
                     "x":10,
-                    "y":64
+                    "y":66
                 },
                 "id":162,
                 "limit":"100",
@@ -3961,7 +4048,7 @@
                     "h":3,
                     "w":5,
                     "x":10,
-                    "y":67
+                    "y":69
                 },
                 "id":192,
                 "limit":10,
@@ -3986,7 +4073,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":70
+                    "y":72
                 },
                 "id":51,
                 "panels":[],
@@ -4004,7 +4091,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":71
+                    "y":73
                 },
                 "hideTimeOverride":true,
                 "id":157,
@@ -4261,7 +4348,7 @@
                     "h":6,
                     "w":4,
                     "x":0,
-                    "y":78
+                    "y":80
                 },
                 "id":71,
                 "legend":{
@@ -4433,7 +4520,7 @@
                     "h":6,
                     "w":4,
                     "x":4,
-                    "y":78
+                    "y":80
                 },
                 "id":72,
                 "legend":{
@@ -4600,7 +4687,7 @@
                     "h":6,
                     "w":16,
                     "x":8,
-                    "y":78
+                    "y":80
                 },
                 "id":55,
                 "legend":{
@@ -4818,7 +4905,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":84
+                    "y":86
                 },
                 "id":79,
                 "legend":{
@@ -5016,7 +5103,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":84
+                    "y":86
                 },
                 "id":80,
                 "legend":{
@@ -5242,7 +5329,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":90
+                    "y":92
                 },
                 "hideTimeOverride":false,
                 "id":103,
@@ -5427,7 +5514,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":90
+                    "y":92
                 },
                 "id":104,
                 "legend":{
@@ -5640,7 +5727,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":94
+                    "y":96
                 },
                 "id":221,
                 "legend":{
@@ -5852,7 +5939,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":94
+                    "y":96
                 },
                 "id":105,
                 "legend":{
@@ -6023,7 +6110,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":98
+                    "y":100
                 },
                 "id":63,
                 "links":[],
@@ -6352,7 +6439,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":108
+                    "y":110
                 },
                 "id":207,
                 "links":[],
@@ -6679,7 +6766,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":118
+                    "y":120
                 },
                 "id":82,
                 "panels":[],
@@ -6734,7 +6821,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":119
+                    "y":121
                 },
                 "hideTimeOverride":false,
                 "id":110,
@@ -6914,7 +7001,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":119
+                    "y":121
                 },
                 "hideTimeOverride":false,
                 "id":116,
@@ -7093,7 +7180,7 @@
                     "h":4,
                     "w":7,
                     "x":10,
-                    "y":119
+                    "y":121
                 },
                 "id":130,
                 "legend":{
@@ -7258,7 +7345,7 @@
                     "h":4,
                     "w":7,
                     "x":17,
-                    "y":119
+                    "y":121
                 },
                 "id":216,
                 "legend":{
@@ -7424,7 +7511,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":123
+                    "y":125
                 },
                 "hideTimeOverride":false,
                 "id":213,
@@ -7600,7 +7687,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":123
+                    "y":125
                 },
                 "id":214,
                 "legend":{
@@ -7778,7 +7865,7 @@
                     "h":4,
                     "w":7,
                     "x":10,
-                    "y":123
+                    "y":125
                 },
                 "id":133,
                 "legend":{
@@ -7949,7 +8036,7 @@
                     "h":4,
                     "w":7,
                     "x":17,
-                    "y":123
+                    "y":125
                 },
                 "id":131,
                 "legend":{
@@ -8119,7 +8206,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":127
+                    "y":129
                 },
                 "hideTimeOverride":false,
                 "id":117,
@@ -8295,7 +8382,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":127
+                    "y":129
                 },
                 "id":118,
                 "legend":{
@@ -8437,7 +8524,7 @@
                     "h":8,
                     "w":14,
                     "x":10,
-                    "y":127
+                    "y":129
                 },
                 "id":209,
                 "legend":{
@@ -8595,7 +8682,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":131
+                    "y":133
                 },
                 "id":123,
                 "legend":{
@@ -8774,7 +8861,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":131
+                    "y":133
                 },
                 "id":125,
                 "legend":{
@@ -8913,7 +9000,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":135
+                    "y":137
                 },
                 "id":168,
                 "links":[],
@@ -9035,14 +9122,14 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":142
+                    "y":144
                 },
                 "id":249,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1549967557471,
+                "repeatIteration":1553022975679,
                 "repeatPanelId":168,
                 "scopedVars":{
                     "releases":{
@@ -9159,14 +9246,14 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":149
+                    "y":151
                 },
                 "id":250,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1549967557471,
+                "repeatIteration":1553022975679,
                 "repeatPanelId":168,
                 "scopedVars":{
                     "releases":{
@@ -9283,14 +9370,14 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":156
+                    "y":158
                 },
                 "id":251,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1549967557471,
+                "repeatIteration":1553022975679,
                 "repeatPanelId":168,
                 "scopedVars":{
                     "releases":{
@@ -9405,7 +9492,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":163
+                    "y":165
                 },
                 "id":4,
                 "panels":[],
@@ -9420,7 +9507,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":164
+                    "y":166
                 },
                 "id":2,
                 "links":[],
@@ -9488,7 +9575,7 @@
                     "h":9,
                     "w":12,
                     "x":0,
-                    "y":171
+                    "y":173
                 },
                 "hideTimeOverride":true,
                 "id":196,
@@ -9624,7 +9711,7 @@
                     "h":9,
                     "w":12,
                     "x":12,
-                    "y":171
+                    "y":173
                 },
                 "hideTimeOverride":true,
                 "id":194,
@@ -9726,7 +9813,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":180
+                    "y":182
                 },
                 "id":173,
                 "panels":[],
@@ -9744,7 +9831,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":181
+                    "y":183
                 },
                 "id":175,
                 "legend":{
@@ -9919,7 +10006,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":181
+                    "y":183
                 },
                 "id":177,
                 "legend":{
@@ -10182,7 +10269,7 @@
                     "h":7,
                     "w":12,
                     "x":0,
-                    "y":187
+                    "y":189
                 },
                 "id":179,
                 "legend":{
@@ -10543,7 +10630,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":187
+                    "y":189
                 },
                 "id":181,
                 "legend":{
@@ -10704,7 +10791,7 @@
                     "h":6,
                     "w":7,
                     "x":0,
-                    "y":194
+                    "y":196
                 },
                 "id":183,
                 "legend":{
@@ -10819,7 +10906,7 @@
                     "h":6,
                     "w":9,
                     "x":7,
-                    "y":194
+                    "y":196
                 },
                 "id":185,
                 "legend":{
@@ -10934,7 +11021,7 @@
                     "h":6,
                     "w":8,
                     "x":16,
-                    "y":194
+                    "y":196
                 },
                 "id":187,
                 "legend":{
