@@ -30,6 +30,18 @@ services:
     volumes:
       - influxdb-volume:/var/lib/influxdb
 
+  prometheus:
+    image: prom/prometheus:v2.8.0
+    volumes:
+      - prometheus-volume:/prometheus
+      - ./prometheus/:/etc/prometheus/
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    restart: always
+
   nginx:
     image: nginx:latest
     restart: always
@@ -82,8 +94,11 @@ services:
       - 'telegraf/env'
     depends_on:
       - influxdb
+      - prometheus
     volumes:
       - telegraf-volume:/tmp/
+    ports:
+      - "9273:9273"
 
 volumes:
   mariadb-volume:
@@ -92,4 +107,6 @@ volumes:
   grafana-volume:
     external: true
   telegraf-volume:
+    external: true
+  prometheus-volume:
     external: true

@@ -16,6 +16,7 @@ start()
     docker volume create grafana-volume
     docker volume create influxdb-volume
     docker volume create mariadb-volume
+    docker volume create prometheus-volume
     docker-compose up
 }
 
