@@ -5,12 +5,12 @@ import requests
 from StringIO import StringIO
 
 PROMOTER_CONFIG_URL = ("https://raw.githubusercontent.com/rdo-infra/ci-config/"
-                       "master/ci-scripts/dlrnapi_promoter/config/{}.ini")
+                       "master/ci-scripts/dlrnapi_promoter/config/{}/{}.ini")
 
 
-def get_promoter_config(release):
+def get_promoter_config(release, distro='CentOS-7'):
 
-    response = requests.get(PROMOTER_CONFIG_URL.format(release))
+    response = requests.get(PROMOTER_CONFIG_URL.format(distro, release))
 
     if response.ok:
         config = ConfigParser.SafeConfigParser(allow_no_value=True)

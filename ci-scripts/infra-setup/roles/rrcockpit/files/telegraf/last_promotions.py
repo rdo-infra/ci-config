@@ -38,9 +38,10 @@ if __name__ == '__main__':
         description="Pring release last promotions as influxdb lines")
 
     parser.add_argument('--release', required=True)
+    parser.add_argument('--distro', default="CentOS-7")
     args = parser.parse_args()
 
-    promoter_config = get_promoter_config(args.release)
+    promoter_config = get_promoter_config(args.release, args.distro)
     dlrn = get_dlrn_instance(promoter_config)
     if dlrn:
         for promotion_name, _ in promoter_config.items('promote_from'):
