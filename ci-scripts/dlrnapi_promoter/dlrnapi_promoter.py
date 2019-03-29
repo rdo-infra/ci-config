@@ -122,7 +122,7 @@ def setup_logging(log_file):
     logger.addHandler(log_handler)
 
 
-def tag_containers(new_hashes, release, promote_name):
+def tag_containers(new_hashes, distro, release, promote_name):
     logger = logging.getLogger('promoter')
     env = os.environ
     relpath = "ci-scripts/dlrnapi_promoter"
@@ -134,8 +134,9 @@ def tag_containers(new_hashes, release, promote_name):
     env['PROMOTE_NAME'] = promote_name
     env['SCRIPT_ROOT'] = script_root
     # TODO: This will be de-harcoded at preparing promoer for f28
-    env['DISTRO_NAME'] = "centos"
-    env['DISTRO_VERSION'] = "7"
+    distro_name, distro_version = distro
+    env['DISTRO_NAME'] = distro_name
+    env['DISTRO_VERSION'] = distro_version
     promote_playbook = (
         script_root + 'ci-scripts/container-push/container-push.yml'
     )
@@ -234,7 +235,7 @@ def get_latest_hashes(api, promote_name, current_name, latest_hashes_count):
     return candidate_hashes_list
 
 
-def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hashes_count):
+def promote_all_links(api, promote_from, job_reqs, dry_run, distro, release, latest_hashes_count):
     '''Promote DLRN API links as a different one when all jobs are
     successful'''
     logger = logging.getLogger('promoter')
@@ -266,7 +267,7 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hash
                     # ocata does not have containers to upload
                     # this can be removed once ocata is EOL
                     if release not in ['ocata']:
-                        tag_containers(new_hashes, release, promote_name)
+                        tag_containers(new_hashes, distro, release, promote_name)
                     tag_qcow_images(new_hashes, release, promote_name)
                     promote_link(api, new_hashes, promote_name)
                     logger.info('SUCCESS promoting %s as %s (%s)',
@@ -281,6 +282,9 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, release, latest_hash
 def promoter(config):
     logger = logging.getLogger('promoter')
 
+    distro = (config.get('main', 'distro_name'), 
+              config.get('main', 'distro_version'))
+    
     release = config.get('main', 'release')
 
     logger.info('STARTED promotion process for release: %s', release)
@@ -323,7 +327,7 @@ def promoter(config):
         job_reqs[section] = [k for k, v in config.items(section)]
     logger.debug('Promotion requirements loaded: %s', job_reqs)
 
-    promote_all_links(api_instance, promote_from, job_reqs, dry_run, release, latest_hashes_count)
+    promote_all_links(api_instance, promote_from, job_reqs, dry_run, distro, release, latest_hashes_count)
     logger.info("FINISHED promotion process")
 
 
