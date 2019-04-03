@@ -1,68 +1,27 @@
 #!/bin/bash -x
 
-#Activate virtualenv
-source ~/promoter_venv/bin/activate
+# Source secrets
+source ~/registry_secret
+source ~/dlrnapi_secret
+set -x
 
-while true; do
+TIMEOUT=115m
+KILLTIME=120m
 
-    #fetch the latest ci-config
-    cd ~/ci-config; git reset --hard origin/master && git pull >/dev/null
+CENTOS7_RELEASES=( "master" "stein" "rocky" "queens" "ocata" "pike" )
+FEDORA28_RELEASES=( "master" "stein")
 
-    #fetch the latest dlrnapi_client and dependencies
-    pip install -U -r ~/ci-config/ci-scripts/dlrnapi_promoter/requirements.txt
-
-    set +x
-    # Source secrets
-    source ~/registry_secret
-    source ~/dlrnapi_secret
-    set -x
-
-    # Temp retain old promoter config reporting
-
-    # promoter script for the master branch
-    #/usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/master.ini
-
-    # promoter script for the pike branch
-    #/usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/pike.ini
-
-    # promoter script for the ocata branch
-    #/usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/ocata.ini
-
-    # promoter script for the queens branch
-    #/usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/queens.ini
-
-    # promoter script for the rocky branch
-    #/usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/rocky.ini
-
-    # promoter script for the stein branch
-    #/usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/stein.ini
-
-    # Start using the new promoter configs, using full job names as promotion criterias
-
-    # promoter script for the CentOS-7 master branch
-    /usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/CentOS-7/master.ini
-
-    # promoter script for the CentOS-7 pike branch
-    /usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/CentOS-7/pike.ini
-
-    # promoter script for the CentOS-7 ocata branch
-    /usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/CentOS-7/ocata.ini
-
-    # promoter script for the CentOS-7 queens branch
-    /usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/CentOS-7/queens.ini
-
-    # promoter script for the CentOS-7 rocky branch
-    /usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/CentOS-7/rocky.ini
-
-    # promoter script for the CentOS-7 stein branch
-    /usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/CentOS-7/stein.ini
-
-    # promoter script for the Fedora-28 master branch
-    /usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/Fedora-28/master.ini
-
-    # promoter script for the Fedora-28 stein branch
-    /usr/bin/timeout --preserve-status -k 120m 115m python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py ~/ci-config/ci-scripts/dlrnapi_promoter/config/Fedora-28/stein.ini
-
-    # Sleep 10 minutes
-    sleep 600
+# promoter script for centos 7
+for r in "${CENTOS7_RELEASES[@]}"; do
+    /usr/bin/timeout --preserve-status -k $KILLTIME $TIMEOUT \
+        python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py \
+            ~/ci-config/ci-scripts/dlrnapi_promoter/config/CentOS-7/${r}.ini
 done
+
+# promoter script for fedora 28
+for r in "${FEDORA28_RELEASES[@]}"; do
+    /usr/bin/timeout --preserve-status -k $KILLTIME $TIMEOUT \
+        python ~/ci-config/ci-scripts/dlrnapi_promoter/dlrnapi_promoter.py \
+            ~/ci-config/ci-scripts/dlrnapi_promoter/config/Fedora-28/${r}.ini
+done
+
