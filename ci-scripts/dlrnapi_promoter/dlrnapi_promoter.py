@@ -157,17 +157,18 @@ def tag_containers(new_hashes, distro, release, promote_name):
         raise
 
 
-def tag_qcow_images(new_hashes, release, promote_name):
+def tag_qcow_images(new_hashes, distro, release, promote_name):
     logger = logging.getLogger('promoter')
     relpath = "ci-scripts/dlrnapi_promoter"
     script_root = os.path.abspath(sys.path[0]).replace(relpath,"")
     promote_script = script_root + 'ci-scripts/promote-images.sh'
     full_hash = new_hashes['full_hash']
+    distro_release = "%s%s/%s" % (distro[0].lower(), distro[1], release)
     try:
         logger.info('Promoting the qcow image for dlrn hash %s on %s to %s',
                     full_hash, release, promote_name)
         qcow_logs = subprocess.check_output(['bash', promote_script,
-                                            release, full_hash,
+                                            distro_release, full_hash,
                                             promote_name],
                                             stderr=subprocess.STDOUT
                                             ).split("\n")
@@ -268,7 +269,7 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, distro, release, lat
                     # this can be removed once ocata is EOL
                     if release not in ['ocata']:
                         tag_containers(new_hashes, distro, release, promote_name)
-                    tag_qcow_images(new_hashes, release, promote_name)
+                    tag_qcow_images(new_hashes, distro, release, promote_name)
                     promote_link(api, new_hashes, promote_name)
                     logger.info('SUCCESS promoting %s as %s (%s)',
                                 current_name, promote_name, new_hashes)
