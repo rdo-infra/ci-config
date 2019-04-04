@@ -2579,12 +2579,12 @@
                     "y":42
                 },
                 "hideTimeOverride":false,
-                "id":243,
+                "id":264,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1553022975679,
+                "repeatIteration":1554377500865,
                 "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
@@ -2733,12 +2733,12 @@
                     "y":42
                 },
                 "hideTimeOverride":false,
-                "id":246,
+                "id":267,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1553022975679,
+                "repeatIteration":1554377500865,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -3003,12 +3003,12 @@
                     "y":48
                 },
                 "hideTimeOverride":false,
-                "id":244,
+                "id":265,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1553022975679,
+                "repeatIteration":1554377500865,
                 "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
@@ -3157,12 +3157,12 @@
                     "y":48
                 },
                 "hideTimeOverride":false,
-                "id":247,
+                "id":268,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1553022975679,
+                "repeatIteration":1554377500865,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -3427,12 +3427,12 @@
                     "y":54
                 },
                 "hideTimeOverride":false,
-                "id":245,
+                "id":266,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1553022975679,
+                "repeatIteration":1554377500865,
                 "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
@@ -3581,12 +3581,12 @@
                     "y":54
                 },
                 "hideTimeOverride":false,
-                "id":248,
+                "id":269,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1553022975679,
+                "repeatIteration":1554377500865,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -7322,12 +7322,698 @@
                             },
                             "reducer":{
                                 "params":[],
+                                "type":"avg"
+                            },
+                            "type":"query"
+                        }
+                    ],
+                    "executionErrorState":"alerting",
+                    "for":"0m",
+                    "frequency":"60s",
+                    "handler":1,
+                    "name":"DLRN promoter stein alert",
+                    "noDataState":"no_data",
+                    "notifications":[]
+                },
+                "aliasColors":{},
+                "bars":false,
+                "dashLength":10,
+                "dashes":false,
+                "datasource":"telegraf",
+                "fill":1,
+                "gridPos":{
+                    "h":4,
+                    "w":7,
+                    "x":17,
+                    "y":121
+                },
+                "id":274,
+                "legend":{
+                    "avg":false,
+                    "current":false,
+                    "max":false,
+                    "min":false,
+                    "show":false,
+                    "total":false,
+                    "values":false
+                },
+                "lines":true,
+                "linewidth":1,
+                "links":[
+                    {
+                        "targetBlank":true,
+                        "title":"logs",
+                        "type":"absolute",
+                        "url":"http://38.145.34.55/rocky.log"
+                    }
+                ],
+                "nullPointMode":"null",
+                "percentage":false,
+                "pointradius":5,
+                "points":false,
+                "renderer":"flot",
+                "seriesOverrides":[],
+                "spaceLength":10,
+                "stack":false,
+                "steppedLine":true,
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "1m"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "0"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "measurement":"procstat",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "cpu_time_user"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"max"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"host",
+                                "operator":"=",
+                                "value":"promoter"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pattern",
+                                "operator":"=",
+                                "value":"^python.*dlrnapi_promoter.py .*stein.*"
+                            }
+                        ]
+                    }
+                ],
+                "thresholds":[],
+                "timeFrom":"12h",
+                "timeRegions":[],
+                "timeShift":null,
+                "title":"DLRN promoter stein",
+                "tooltip":{
+                    "shared":true,
+                    "sort":0,
+                    "value_type":"individual"
+                },
+                "type":"graph",
+                "xaxis":{
+                    "buckets":null,
+                    "mode":"time",
+                    "name":null,
+                    "show":true,
+                    "values":[]
+                },
+                "yaxes":[
+                    {
+                        "format":"percent",
+                        "label":"CPU time",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    },
+                    {
+                        "format":"percent",
+                        "label":"CPU time",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":false
+                    }
+                ],
+                "yaxis":{
+                    "align":false,
+                    "alignLevel":null
+                }
+            },
+            {
+                "alert":{
+                    "conditions":[
+                        {
+                            "evaluator":{
+                                "params":[],
+                                "type":"no_value"
+                            },
+                            "operator":{
+                                "type":"and"
+                            },
+                            "query":{
+                                "params":[
+                                    "A",
+                                    "48h",
+                                    "now"
+                                ]
+                            },
+                            "reducer":{
+                                "params":[],
+                                "type":"max"
+                            },
+                            "type":"query"
+                        }
+                    ],
+                    "executionErrorState":"alerting",
+                    "for":"0m",
+                    "frequency":"60s",
+                    "handler":1,
+                    "name":"stein tripleo ci promotion alert",
+                    "noDataState":"no_data",
+                    "notifications":[]
+                },
+                "aliasColors":{},
+                "bars":true,
+                "dashLength":10,
+                "dashes":false,
+                "datasource":"telegraf",
+                "decimals":0,
+                "fill":1,
+                "gridPos":{
+                    "h":4,
+                    "w":5,
+                    "x":0,
+                    "y":125
+                },
+                "hideTimeOverride":false,
+                "id":263,
+                "legend":{
+                    "alignAsTable":true,
+                    "avg":false,
+                    "current":true,
+                    "hideEmpty":false,
+                    "hideZero":false,
+                    "max":false,
+                    "min":false,
+                    "rightSide":true,
+                    "show":false,
+                    "total":false,
+                    "values":true
+                },
+                "lines":false,
+                "linewidth":1,
+                "links":[],
+                "nullPointMode":"null",
+                "percentage":false,
+                "pointradius":2,
+                "points":false,
+                "renderer":"flot",
+                "seriesOverrides":[
+                    {
+                        "alias":"dlrn-promotion.count {name: current-tripleo}"
+                    }
+                ],
+                "spaceLength":10,
+                "stack":false,
+                "steppedLine":false,
+                "targets":[
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "24h"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "name"
+                                ],
+                                "type":"tag"
+                            },
+                            {
+                                "params":[
+                                    "0"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "measurement":"dlrn-promotion",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "repo_hash"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"release",
+                                "operator":"=",
+                                "value":"stein"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"name",
+                                "operator":"=",
+                                "value":"current-tripleo"
+                            }
+                        ]
+                    }
+                ],
+                "thresholds":[],
+                "timeFrom":"2w",
+                "timeRegions":[],
+                "timeShift":null,
+                "title":"Promotions for stein tripleo ci",
+                "tooltip":{
+                    "shared":true,
+                    "sort":0,
+                    "value_type":"individual"
+                },
+                "type":"graph",
+                "xaxis":{
+                    "buckets":null,
+                    "mode":"time",
+                    "name":null,
+                    "show":true,
+                    "values":[]
+                },
+                "yaxes":[
+                    {
+                        "decimals":0,
+                        "format":"short",
+                        "label":"Number of promotions",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    },
+                    {
+                        "format":"short",
+                        "label":null,
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":false
+                    }
+                ],
+                "yaxis":{
+                    "align":false,
+                    "alignLevel":null
+                }
+            },
+            {
+                "alert":{
+                    "conditions":[
+                        {
+                            "evaluator":{
+                                "params":[],
+                                "type":"no_value"
+                            },
+                            "operator":{
+                                "type":"and"
+                            },
+                            "query":{
+                                "params":[
+                                    "A",
+                                    "48h",
+                                    "now"
+                                ]
+                            },
+                            "reducer":{
+                                "params":[],
+                                "type":"max"
+                            },
+                            "type":"query"
+                        }
+                    ],
+                    "executionErrorState":"alerting",
+                    "for":"0m",
+                    "frequency":"60s",
+                    "handler":1,
+                    "name":"stein phase 1 promotion alert",
+                    "noDataState":"no_data",
+                    "notifications":[]
+                },
+                "aliasColors":{},
+                "bars":true,
+                "dashLength":10,
+                "dashes":false,
+                "datasource":"telegraf",
+                "decimals":0,
+                "fill":1,
+                "gridPos":{
+                    "h":4,
+                    "w":5,
+                    "x":5,
+                    "y":125
+                },
+                "id":273,
+                "legend":{
+                    "alignAsTable":true,
+                    "avg":false,
+                    "current":true,
+                    "hideEmpty":false,
+                    "hideZero":false,
+                    "max":false,
+                    "min":false,
+                    "rightSide":true,
+                    "show":false,
+                    "total":false,
+                    "values":true
+                },
+                "lines":false,
+                "linewidth":1,
+                "links":[],
+                "nullPointMode":"null",
+                "percentage":false,
+                "pointradius":2,
+                "points":false,
+                "renderer":"flot",
+                "seriesOverrides":[
+                    {
+                        "alias":"dlrn-promotion.count {name: current-tripleo}"
+                    }
+                ],
+                "spaceLength":10,
+                "stack":false,
+                "steppedLine":true,
+                "targets":[
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "24h"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "name"
+                                ],
+                                "type":"tag"
+                            },
+                            {
+                                "params":[
+                                    "0"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "measurement":"dlrn-promotion",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "repo_hash"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"release",
+                                "operator":"=",
+                                "value":"stein"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"name",
+                                "operator":"=",
+                                "value":"current-tripleo-rdo"
+                            }
+                        ]
+                    }
+                ],
+                "thresholds":[],
+                "timeFrom":"2w",
+                "timeRegions":[],
+                "timeShift":null,
+                "title":"Promotions for stein phase 1",
+                "tooltip":{
+                    "shared":true,
+                    "sort":0,
+                    "value_type":"individual"
+                },
+                "type":"graph",
+                "xaxis":{
+                    "buckets":null,
+                    "mode":"time",
+                    "name":null,
+                    "show":true,
+                    "values":[]
+                },
+                "yaxes":[
+                    {
+                        "decimals":0,
+                        "format":"short",
+                        "label":"Number of promotions",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    },
+                    {
+                        "format":"short",
+                        "label":null,
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":false
+                    }
+                ],
+                "yaxis":{
+                    "align":false,
+                    "alignLevel":null
+                }
+            },
+            {
+                "alert":{
+                    "conditions":[
+                        {
+                            "evaluator":{
+                                "params":[],
+                                "type":"no_value"
+                            },
+                            "operator":{
+                                "type":"and"
+                            },
+                            "query":{
+                                "params":[
+                                    "A",
+                                    "6h",
+                                    "now"
+                                ]
+                            },
+                            "reducer":{
+                                "params":[],
                                 "type":"last"
                             },
                             "type":"query"
                         }
                     ],
                     "executionErrorState":"alerting",
+                    "frequency":"60s",
+                    "handler":1,
+                    "message":"Not run in the last 6h",
+                    "name":"DLRN promoter queens alert",
+                    "noDataState":"no_data",
+                    "notifications":[
+                        {
+                            "id":1
+                        }
+                    ]
+                },
+                "aliasColors":{},
+                "bars":false,
+                "dashLength":10,
+                "dashes":false,
+                "datasource":"telegraf",
+                "fill":1,
+                "gridPos":{
+                    "h":4,
+                    "w":7,
+                    "x":10,
+                    "y":125
+                },
+                "id":131,
+                "legend":{
+                    "avg":false,
+                    "current":false,
+                    "max":false,
+                    "min":false,
+                    "show":false,
+                    "total":false,
+                    "values":false
+                },
+                "lines":true,
+                "linewidth":1,
+                "links":[
+                    {
+                        "targetBlank":true,
+                        "title":"logs",
+                        "type":"absolute",
+                        "url":"http://38.145.34.55/queens.log"
+                    }
+                ],
+                "nullPointMode":"null",
+                "percentage":false,
+                "pointradius":5,
+                "points":false,
+                "renderer":"flot",
+                "seriesOverrides":[],
+                "spaceLength":10,
+                "stack":false,
+                "steppedLine":true,
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "1m"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "0"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "measurement":"procstat",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "cpu_time_user"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"max"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"host",
+                                "operator":"=",
+                                "value":"promoter"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pattern",
+                                "operator":"=",
+                                "value":"^python.*dlrnapi_promoter.py .*queens.*"
+                            }
+                        ]
+                    }
+                ],
+                "thresholds":[],
+                "timeFrom":"12h",
+                "timeRegions":[],
+                "timeShift":null,
+                "title":"DLRN promoter queens",
+                "tooltip":{
+                    "shared":true,
+                    "sort":0,
+                    "value_type":"individual"
+                },
+                "type":"graph",
+                "xaxis":{
+                    "buckets":null,
+                    "mode":"time",
+                    "name":null,
+                    "show":true,
+                    "values":[]
+                },
+                "yaxes":[
+                    {
+                        "format":"percent",
+                        "label":"CPU time",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    },
+                    {
+                        "format":"percent",
+                        "label":"CPU time",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":false
+                    }
+                ],
+                "yaxis":{
+                    "align":false,
+                    "alignLevel":null
+                }
+            },
+            {
+                "alert":{
+                    "conditions":[
+                        {
+                            "evaluator":{
+                                "params":[],
+                                "type":"no_value"
+                            },
+                            "operator":{
+                                "type":"and"
+                            },
+                            "query":{
+                                "params":[
+                                    "A",
+                                    "6h",
+                                    "now"
+                                ]
+                            },
+                            "reducer":{
+                                "params":[],
+                                "type":"last"
+                            },
+                            "type":"query"
+                        }
+                    ],
+                    "executionErrorState":"alerting",
+                    "for":"0m",
                     "frequency":"60s",
                     "handler":1,
                     "message":"Not run in the last 6h",
@@ -7345,7 +8031,7 @@
                     "h":4,
                     "w":7,
                     "x":17,
-                    "y":121
+                    "y":125
                 },
                 "id":216,
                 "legend":{
@@ -7493,6 +8179,7 @@
                         }
                     ],
                     "executionErrorState":"alerting",
+                    "for":"0m",
                     "frequency":"60s",
                     "handler":1,
                     "message":"No promotions in the last 48h",
@@ -7511,7 +8198,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":125
+                    "y":129
                 },
                 "hideTimeOverride":false,
                 "id":213,
@@ -7687,7 +8374,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":125
+                    "y":129
                 },
                 "id":214,
                 "legend":{
@@ -7865,7 +8552,7 @@
                     "h":4,
                     "w":7,
                     "x":10,
-                    "y":125
+                    "y":129
                 },
                 "id":133,
                 "legend":{
@@ -8003,175 +8690,6 @@
                             "query":{
                                 "params":[
                                     "A",
-                                    "6h",
-                                    "now"
-                                ]
-                            },
-                            "reducer":{
-                                "params":[],
-                                "type":"last"
-                            },
-                            "type":"query"
-                        }
-                    ],
-                    "executionErrorState":"alerting",
-                    "frequency":"60s",
-                    "handler":1,
-                    "message":"Not run in the last 6h",
-                    "name":"DLRN promoter queens alert",
-                    "noDataState":"no_data",
-                    "notifications":[
-                        {
-                            "id":1
-                        }
-                    ]
-                },
-                "aliasColors":{},
-                "bars":false,
-                "dashLength":10,
-                "dashes":false,
-                "datasource":"telegraf",
-                "fill":1,
-                "gridPos":{
-                    "h":4,
-                    "w":7,
-                    "x":17,
-                    "y":125
-                },
-                "id":131,
-                "legend":{
-                    "avg":false,
-                    "current":false,
-                    "max":false,
-                    "min":false,
-                    "show":false,
-                    "total":false,
-                    "values":false
-                },
-                "lines":true,
-                "linewidth":1,
-                "links":[
-                    {
-                        "targetBlank":true,
-                        "title":"logs",
-                        "type":"absolute",
-                        "url":"http://38.145.34.55/queens.log"
-                    }
-                ],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":5,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
-                    {
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "1m"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "0"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "measurement":"procstat",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "cpu_time_user"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"max"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"host",
-                                "operator":"=",
-                                "value":"promoter"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"pattern",
-                                "operator":"=",
-                                "value":"^python.*dlrnapi_promoter.py .*queens.*"
-                            }
-                        ]
-                    }
-                ],
-                "thresholds":[],
-                "timeFrom":"12h",
-                "timeRegions":[],
-                "timeShift":null,
-                "title":"DLRN promoter queens",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "format":"percent",
-                        "label":"CPU time",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"percent",
-                        "label":"CPU time",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
-            },
-            {
-                "alert":{
-                    "conditions":[
-                        {
-                            "evaluator":{
-                                "params":[],
-                                "type":"no_value"
-                            },
-                            "operator":{
-                                "type":"and"
-                            },
-                            "query":{
-                                "params":[
-                                    "A",
                                     "48h",
                                     "now"
                                 ]
@@ -8206,7 +8724,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":129
+                    "y":133
                 },
                 "hideTimeOverride":false,
                 "id":117,
@@ -8382,7 +8900,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":129
+                    "y":133
                 },
                 "id":118,
                 "legend":{
@@ -8524,7 +9042,7 @@
                     "h":8,
                     "w":14,
                     "x":10,
-                    "y":129
+                    "y":133
                 },
                 "id":209,
                 "legend":{
@@ -8682,7 +9200,7 @@
                     "h":4,
                     "w":5,
                     "x":0,
-                    "y":133
+                    "y":137
                 },
                 "id":123,
                 "legend":{
@@ -8861,7 +9379,7 @@
                     "h":4,
                     "w":5,
                     "x":5,
-                    "y":133
+                    "y":137
                 },
                 "id":125,
                 "legend":{
@@ -9000,7 +9518,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":137
+                    "y":141
                 },
                 "id":168,
                 "links":[],
@@ -9122,14 +9640,14 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":144
+                    "y":148
                 },
-                "id":249,
+                "id":270,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1553022975679,
+                "repeatIteration":1554377500865,
                 "repeatPanelId":168,
                 "scopedVars":{
                     "releases":{
@@ -9246,14 +9764,14 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":151
+                    "y":155
                 },
-                "id":250,
+                "id":271,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1553022975679,
+                "repeatIteration":1554377500865,
                 "repeatPanelId":168,
                 "scopedVars":{
                     "releases":{
@@ -9370,14 +9888,14 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":158
+                    "y":162
                 },
-                "id":251,
+                "id":272,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1553022975679,
+                "repeatIteration":1554377500865,
                 "repeatPanelId":168,
                 "scopedVars":{
                     "releases":{
@@ -9492,7 +10010,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":165
+                    "y":169
                 },
                 "id":4,
                 "panels":[],
@@ -9507,7 +10025,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":166
+                    "y":170
                 },
                 "id":2,
                 "links":[],
@@ -9575,7 +10093,7 @@
                     "h":9,
                     "w":12,
                     "x":0,
-                    "y":173
+                    "y":177
                 },
                 "hideTimeOverride":true,
                 "id":196,
@@ -9711,7 +10229,7 @@
                     "h":9,
                     "w":12,
                     "x":12,
-                    "y":173
+                    "y":177
                 },
                 "hideTimeOverride":true,
                 "id":194,
@@ -9813,7 +10331,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":182
+                    "y":186
                 },
                 "id":173,
                 "panels":[],
@@ -9831,7 +10349,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":183
+                    "y":187
                 },
                 "id":175,
                 "legend":{
@@ -10006,7 +10524,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":183
+                    "y":187
                 },
                 "id":177,
                 "legend":{
@@ -10269,7 +10787,7 @@
                     "h":7,
                     "w":12,
                     "x":0,
-                    "y":189
+                    "y":193
                 },
                 "id":179,
                 "legend":{
@@ -10630,7 +11148,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":189
+                    "y":193
                 },
                 "id":181,
                 "legend":{
@@ -10791,7 +11309,7 @@
                     "h":6,
                     "w":7,
                     "x":0,
-                    "y":196
+                    "y":200
                 },
                 "id":183,
                 "legend":{
@@ -10906,7 +11424,7 @@
                     "h":6,
                     "w":9,
                     "x":7,
-                    "y":196
+                    "y":200
                 },
                 "id":185,
                 "legend":{
@@ -11021,7 +11539,7 @@
                     "h":6,
                     "w":8,
                     "x":16,
-                    "y":196
+                    "y":200
                 },
                 "id":187,
                 "legend":{

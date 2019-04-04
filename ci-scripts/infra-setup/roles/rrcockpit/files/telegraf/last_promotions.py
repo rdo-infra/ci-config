@@ -35,7 +35,7 @@ def get_last_promotion(dlrn, release, name):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(
-        description="Pring release last promotions as influxdb lines")
+        description="Print release last promotions as influxdb lines")
 
     parser.add_argument('--release', required=True)
     parser.add_argument('--distro', default="CentOS-7")
