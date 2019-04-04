@@ -159,7 +159,7 @@ def tag_containers(new_hashes, distro, release, promote_name):
         raise
 
 
-def tag_qcow_images(new_hashes, release, promote_name):
+def tag_qcow_images(new_hashes, distro, release, promote_name):
     logger = logging.getLogger('promoter')
     relpath = "ci-scripts/dlrnapi_promoter"
     script_root = os.path.abspath(sys.path[0]).replace(relpath, "")
@@ -168,11 +168,13 @@ def tag_qcow_images(new_hashes, release, promote_name):
     try:
         logger.info('Promoting the qcow image for dlrn hash %s on %s to %s',
                     full_hash, release, promote_name)
-        qcow_logs = subprocess.check_output(['bash', promote_script,
-                                            release, full_hash,
-                                            promote_name],
-                                            stderr=subprocess.STDOUT
-                                            ).split("\n")
+        qcow_logs = subprocess.check_output(
+            ['bash', promote_script,
+             '--distro', distro[0],
+             '--distro-version', distro[1],
+             release, full_hash,
+             promote_name],
+            stderr=subprocess.STDOUT).split("\n")
         for line in qcow_logs:
             logger.info(line)
     except subprocess.CalledProcessError as ex:
@@ -295,7 +297,11 @@ def promote_all_links(
                     # For fedora we just run standalone let's not tag images
                     distro_name, _ = distro
                     if distro_name != 'fedora':
-                        tag_qcow_images(new_hashes, release, promote_name)
+                        tag_qcow_images(
+                            new_hashes,
+                            distro,
+                            release,
+                            promote_name)
 
                     promote_link(api, new_hashes, promote_name)
                     logger.info('SUCCESS promoting %s as %s (%s)',
