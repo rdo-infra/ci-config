@@ -8,7 +8,8 @@ from promoter_utils import get_dlrn_instance
 from promoter_utils import get_promoter_config
 
 PROMOTION_INFLUXDB_LINE = ("dlrn-promotion,"
-                           "release={release},name={promote_name} "
+                           "release={release},distro={distro},"
+                           "name={promote_name} "
                            "commit_hash=\"{commit_hash}\","
                            "distro_hash=\"{distro_hash}\","
                            "repo_hash=\"{repo_hash}\","
@@ -21,13 +22,14 @@ def influxdb(promotion):
     return PROMOTION_INFLUXDB_LINE.format(**promotion)
 
 
-def get_last_promotion(dlrn, release, name):
+def get_last_promotion(dlrn, release, distro, name):
     query = dlrnapi_client.PromotionQuery()
     query.promote_name = name
     promotions = dlrn.api_promotions_get(query)
     if promotions:
         last_promotion = promotions[0].to_dict()
         last_promotion['release'] = release
+        last_promotion['distro'] = distro
         return last_promotion
     return
 
@@ -45,6 +47,7 @@ if __name__ == '__main__':
     dlrn = get_dlrn_instance(promoter_config)
     if dlrn:
         for promotion_name, _ in promoter_config.items('promote_from'):
-            promo = get_last_promotion(dlrn, args.release, promotion_name)
+            promo = get_last_promotion(dlrn, args.release, args.distro,
+                                       promotion_name)
             if promo:
                 print(influxdb(promo))
