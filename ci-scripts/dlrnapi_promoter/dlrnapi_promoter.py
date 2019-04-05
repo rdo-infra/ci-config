@@ -268,7 +268,12 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, distro, release, lat
                     # this can be removed once ocata is EOL
                     if release not in ['ocata']:
                         tag_containers(new_hashes, distro, release, promote_name)
-                    tag_qcow_images(new_hashes, release, promote_name)
+
+                    # For fedora we just run standalone let's not tag images
+                    distro_name, _ = distro
+                    if distro_name != 'fedora':
+                        tag_qcow_images(new_hashes, release, promote_name)
+
                     promote_link(api, new_hashes, promote_name)
                     logger.info('SUCCESS promoting %s as %s (%s)',
                                 current_name, promote_name, new_hashes)
@@ -282,7 +287,7 @@ def promote_all_links(api, promote_from, job_reqs, dry_run, distro, release, lat
 def promoter(config):
     logger = logging.getLogger('promoter')
 
-    distro = (config.get('main', 'distro_name'),
+    distro = (config.get('main', 'distro_name').lower(),
               config.get('main', 'distro_version'))
 
     release = config.get('main', 'release')
