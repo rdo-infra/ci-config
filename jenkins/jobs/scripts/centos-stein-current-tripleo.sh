@@ -17,4 +17,4 @@ export BUILD_SYS='delorean'
 # When ENABLE_PUPPET_MODULES_RPM is true, puppet modules are installed from
 # rpm instead of git repo in p-o-i jobs
 export ENABLE_PUPPET_MODULES_RPM=true
-export HASH_FILE='/tmp/stein_current_tripleo_hash'
+export HASH_FILE='/tmp/delorean_stein_current_tripleo_hash'
