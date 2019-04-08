@@ -1,18 +1,101 @@
 - builder:
-    name: build-containers-images
+    name: 'tripleo-upstream-setup-roles'
     builders:
         - shell: |
-            cat << EOF > $WORKSPACE/playbook.yml
+            WORKSPACE="${WORKSPACE:-/tmp}"
+
+            # Place roles for the tripleo-ci container build playbooks in the proper directory
+            mkdir ${WORKSPACE}/tripleo-ci/playbooks/tripleo-buildcontainers/roles
+            cp -r ${WORKSPACE}/tripleo-ci/roles/* ${WORKSPACE}/tripleo-ci/playbooks/tripleo-buildcontainers/roles/
+            git clone https://github.com/openstack/ansible-role-bindep \
+                ${WORKSPACE}/tripleo-ci/playbooks/tripleo-buildcontainers/roles/bindep
+
+            # Mock prerequisite zuul vars so the playbooks can run on jenkins
+            cat <<EOF >> ${WORKSPACE}/tripleo-ci/playbooks/tripleo-buildcontainers/vars/common.yaml
+
+            zuul:
+              projects:
+                git.openstack.org/openstack/tripleo-repos:
+                  src_dir: "src/git.openstack.org/openstack/tripleo-repos"
+                git.openstack.org/openstack/python-tripleoclient:
+                  src_dir: "src/git.openstack.org/openstack/python-tripleoclient"
+              branch: "master"
+              pipeline: "periodic"
+
+            use_buildah: "true"
+            EOF
+
+            cat <<EOF >> ${WORKSPACE}/tripleo-ci/playbooks/tripleo-buildcontainers/roles/build-containers/vars/common.yaml
+            zuul:
+              branch: master
+              projects:
+                git.openstack.org/openstack/tripleo-repos:
+                  src_dir: "src/git.openstack.org/openstack/tripleo-repos"
+                git.openstack.org/openstack/python-tripleoclient:
+                  src_dir: "src/git.openstack.org/openstack/python-tripleoclient"
+            EOF
+
+- builder:
+    name: 'tripleo-upstream-build-containers'
+    builders:
+         - shell: |
+            WORKSPACE="${WORKSPACE:-/tmp}"
+            VENV="${WORKSPACE}/venv"
+            OPENSTACK_GIT_URL="https://github.com/openstack"
+
+            [[ ! -d "${VENV}" ]] && virtualenv "${VENV}"
+            source "${VENV}/bin/activate"
+
+            # Install requirements.
+            # Pin to version used by tripleo-quickstart as of this commit.
+            pip install ansible==2.5.8
+
+            # We keep connecting onto the same hosts that are continuously reinstalled
+            export ANSIBLE_HOST_KEY_CHECKING=False
+
+            # cat the playbook to the workspace
+            cat << EOF > ${WORKSPACE}/prepare-for-containers-build.yml
             ---
-            - name: Build Triple O Containers
+            - name: 'Clone git dependencies'
               hosts: openstack_nodes
               tasks:
-                - name: Build Triple O Containers
-                  script: $WORKSPACE/ci-config/jenkins/jobs/scripts/build-kolla-containers.sh $OPENSTACK_RELEASE $CPU_ARCH $CICO_FLAVOR {{ ansible_distribution|lower }} {{ ansible_distribution_major_version }}
-                  register: out
+                - name: 'Clone ansible-role-container-registry'
+                  git:
+                    repo: '${OPENSTACK_GIT_URL}/ansible-role-container-registry.git'
+                    dest: '${WORKSPACE}/src/git.openstack.org/openstack/ansible-role-container-registry'
+                - name: 'Clone tripleo-repos'
+                  git:
+                    repo: '${OPENSTACK_GIT_URL}/tripleo-repos.git'
+                    dest: '${WORKSPACE}/src/git.openstack.org/openstack/tripleo-repos'
+                - name: 'Clone kolla'
+                  git:
+                    repo: '${OPENSTACK_GIT_URL}/kolla.git'
+                    dest: '${WORKSPACE}/src/git.openstack.org/openstack/kolla'
+                - name: 'Clone python-tripleoclient'
+                  git:
+                    repo: '${OPENSTACK_GIT_URL}/python-tripleoclient.git'
+                    dest: '${WORKSPACE}/src/git.openstack.org/openstack/python-tripleoclient'
+                - name: 'Clone tripleo-common'
+                  git:
+                    repo: '${OPENSTACK_GIT_URL}/tripleo-common.git'
+                    dest: '${WORKSPACE}/src/git.openstack.org/openstack/tripleo-common'
 
-                - debug: var=out.stdout_lines
+            - name: 'Setup CICO node for container builds'
+              hosts: openstack_nodes
+              become: yes
+              become_user: root
+              tasks:
+                - shell: |
+                    iptables -N openstack-INPUT
+                    yum install -y git gcc libffi-devel openssl-devel
+                    pip install ansible
             EOF
-        - shell:
-            !include-raw:
-                - scripts/cico-node-run-playbook.sh
+
+            # cico-get-node requests a duffy node and generates an ansible-compatible
+            # inventory at $WORKSPACE/hosts
+            ansible-playbook -i "${WORKSPACE}/hosts" "${WORKSPACE}/prepare-for-containers-build.yml"
+
+            pushd ${WORKSPACE}/tripleo-ci
+                ansible-playbook -i "${WORKSPACE}/hosts" "playbooks/tripleo-buildcontainers/pre.yaml" && \
+                ansible-playbook -i "${WORKSPACE}/hosts" "playbooks/tripleo-buildcontainers/run.yaml"
+            popd
