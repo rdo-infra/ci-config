@@ -2,7 +2,7 @@ set -ex
 WORKSPACE=${WORKSPACE:-/tmp}
 ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
 LOGSERVER="logs.rdoproject.org ansible_user=uploader"
-SOURCE="/tmp/kolla/logs"
+SOURCE="${WORKSPACE}/workspace/logs"
 DESTINATION="/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
 VENV="${WORKSPACE}/venv"
 
@@ -23,6 +23,18 @@ mkdir -p $WORKSPACE/logs
 
 cat << EOF > collect-logs.yaml
 # Create a playbook to pull the logs down from our cico node
+- name: Group together logs on cico node
+  hosts: openstack_nodes
+  gather_facts: no
+  tasks:
+   - shell: |
+        mkdir -p ${WORKSPACE}/workspace/logs
+
+        pushd ${WORKSPACE}/workspace
+            cp *.log ./logs/
+            cp *.conf ./logs/
+        popd
+
 - name: Collect logs from cico node
   hosts: openstack_nodes
   gather_facts: no
