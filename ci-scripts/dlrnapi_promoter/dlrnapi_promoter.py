@@ -269,6 +269,12 @@ def promote_all_links(
                                  new_hashes['distro_hash'][:8])
             successful_jobs = set(fetch_jobs(api, new_hashes))
             required_jobs = set(job_reqs[promote_name])
+            if not required_jobs:
+                logger.info(
+                    'Skipping promotion of %s from %s to %s, no jobs '
+                    'specified in criteria',
+                    new_hashes, current_name, promote_name)
+                break
             missing_jobs = list(required_jobs - successful_jobs)
             if missing_jobs:
                 logger.info(
