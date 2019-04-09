@@ -22,7 +22,7 @@
     rdoproject_namespace: "tripleo{{ lookup('env','RELEASE') }}"
     rdoproject_username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
     rdoproject_password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
-    containers_file: "parsed_containers-{{ lookup('env','RELEASE') }}.txt"
+    containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ lookup('env','RELEASE') }}.txt"
     registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleo{{ lookup('env', 'RELEASE') }}/imagestreamtags"
   tasks:
     - name: print out hash, label and namespaces in play
@@ -62,6 +62,7 @@
             else
                 echo "FAIL";
                 echo "ERROR ========== {{ distro_name}}-binary-$image IS NOT BUILT! FIX THIS ASAP! ==========";
+                exit 1
             fi
         done
         # fail the script and exit with error if the container list is empty
