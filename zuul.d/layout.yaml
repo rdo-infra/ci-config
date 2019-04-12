@@ -5,12 +5,17 @@
     check:
       jobs:
         - tox-jjb
-        - tox-py27
-        - tox-py36:
+        - tox-py27: &py27
+            success-url: "tox/reports.html"
+            failure-url: "tox/reports.html"
+        - tox-py36: &py36
+            success-url: "tox/reports.html"
+            failure-url: "tox/reports.html"
             nodeset: rdo-fedora-28
     gate:
       jobs:
         - tox-jjb
-        - tox-py27
+        - tox-py27:
+            <<: *py27
         - tox-py36:
-            nodeset: rdo-fedora-28
+            <<: *py36
