@@ -1,3 +1,7 @@
+- name: assure we have parted installed
+  package:
+    name: parted
+
 - name: Mount external volume - create a partition
   parted:
     device: /dev/vdb
@@ -84,18 +88,10 @@
         src: 'GateStatus'
         dest: '/opt/hubbot/plugins'
 
-    - name: Create the recheck script from template
-      template:
-        src: 'gate-recheck.sh.j2'
-        dest: '/home/centos/gate-recheck.sh'
-        mode: '0755'
-
-    - name: Add a cron jobs to run the recheck script
+    - name: Remove cron jobs to run the recheck script
       cron:
         name: 'recheck script for gate status'
-        minute: '0'
-        hour: '0-23/8'
-        job: '/home/centos/gate-recheck.sh'
+        state: absent
 
     - name: Add a cron jobs to start the bot after reboot
       cron:
