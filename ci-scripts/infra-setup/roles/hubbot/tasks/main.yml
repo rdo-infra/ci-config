@@ -1,25 +1,45 @@
-- name: Mount external volume - create a partition
-  parted:
-    device: /dev/vdb
-    number: 1
-    state: present
+- name: assure we have required packages installed
+  package:
+    name:
+      - cronie
+      - parted
+      - openssh
 
-- name: Mount external volume - create a filesystem
-  filesystem:
-    fstype: xfs
-    dev: /dev/vdb1
+- name: assure service user exists
+  user:
+    name: centos
+
+- name: check if hdd exists
+  stat:
+    path: /dev/vdb
+  register: vdb_stat
 
 - name: create a mount folder
   file:
     path: /opt/hubbot
     state: directory
 
-- name: Mount external volume - mount the partition
-  mount:
-    path: /opt/hubbot
-    src: /dev/vdb1
-    fstype: xfs
-    state: mounted
+- name: format and mount disk
+  when: vdb_stat.stat.exists
+  block:
+
+  - name: Mount external volume - create a partition
+    parted:
+      device: /dev/vdb
+      number: 1
+      state: present
+
+  - name: Mount external volume - create a filesystem
+    filesystem:
+      fstype: xfs
+      dev: /dev/vdb1
+
+  - name: Mount external volume - mount the partition
+    mount:
+      path: /opt/hubbot
+      src: /dev/vdb1
+      fstype: xfs
+      state: mounted
 
 - name: Fix data directory permissions
   file:
@@ -29,7 +49,7 @@
     group: 'centos'
 
 - name: Install required packages
-  yum:
+  package:
     name: '{{ item }}'
     state: present
   with_items:
@@ -37,14 +57,36 @@
     - python-virtualenv
 
 - name: Install jq from EPEL
-  yum:
+  package:
     name: 'jq'
     state: present
 
-- name: Copy private key from the provisioned location to target
-  command: 'cp /root/hubbot_key /home/centos/.ssh/id_rsa'
-  args:
-    creates: '/home/centos/.ssh/id_rsa'
+- name: assure /home/centos/.ssh exists
+  file:
+    path: /home/centos/.ssh
+    mode: '0700'
+    owner: centos
+    group: centos
+    state: directory
+
+- name: setup bot key
+  block:
+
+    - name: Copy private key from the provisioned location to target
+      shell: cp /root/hubbot_key /home/centos/.ssh/id_rsa
+      args:
+        creates: '/home/centos/.ssh/id_rsa'
+        warn: false
+
+  rescue:
+    # used on CI for testing a fake deployment
+    - name: generate ssh key if not supplied
+      become: yes
+      become_user: centos
+      shell: |
+        ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q > ~/.ssh/id_rsa.pub
+      args:
+        creates: '/home/centos/.ssh/id_rsa'
 
 - name: Fix owners of the key
   file:
@@ -84,18 +126,10 @@
         src: 'GateStatus'
         dest: '/opt/hubbot/plugins'
 
-    - name: Create the recheck script from template
-      template:
-        src: 'gate-recheck.sh.j2'
-        dest: '/home/centos/gate-recheck.sh'
-        mode: '0755'
-
-    - name: Add a cron jobs to run the recheck script
+    - name: Remove cron jobs to run the recheck script
       cron:
         name: 'recheck script for gate status'
-        minute: '0'
-        hour: '0-23/8'
-        job: '/home/centos/gate-recheck.sh'
+        state: absent
 
     - name: Add a cron jobs to start the bot after reboot
       cron:
