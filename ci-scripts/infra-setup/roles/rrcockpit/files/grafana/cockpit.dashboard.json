@@ -52,7 +52,7 @@
                 },
                 "gridPos":{
                     "h":10,
-                    "w":6,
+                    "w":5,
                     "x":0,
                     "y":1
                 },
@@ -181,159 +181,6 @@
                     "rgba(237, 129, 40, 0.89)",
                     "#d44a3a"
                 ],
-                "datasource":"mariadb",
-                "format":"none",
-                "gauge":{
-                    "maxValue":20,
-                    "minValue":0,
-                    "show":true,
-                    "thresholdLabels":true,
-                    "thresholdMarkers":true
-                },
-                "gridPos":{
-                    "h":10,
-                    "w":6,
-                    "x":6,
-                    "y":1
-                },
-                "id":149,
-                "interval":null,
-                "links":[
-                    {
-                        "params":"",
-                        "targetBlank":true,
-                        "title":"link to no_op jobs, see upstream jobs)",
-                        "type":"absolute",
-                        "url":"https://review.openstack.org/#/q/topic:gate-check+status:open"
-                    }
-                ],
-                "mappingType":1,
-                "mappingTypes":[
-                    {
-                        "name":"value to text",
-                        "value":1
-                    },
-                    {
-                        "name":"range to text",
-                        "value":2
-                    }
-                ],
-                "maxDataPoints":100,
-                "nullPointMode":"connected",
-                "nullText":null,
-                "postfix":" fails",
-                "postfixFontSize":"50%",
-                "prefix":"",
-                "prefixFontSize":"50%",
-                "rangeMaps":[
-                    {
-                        "from":"null",
-                        "text":"N/A",
-                        "to":"null"
-                    }
-                ],
-                "repeat":null,
-                "repeatDirection":"h",
-                "sparkline":{
-                    "fillColor":"rgba(31, 118, 189, 0.18)",
-                    "full":false,
-                    "lineColor":"rgb(31, 120, 193)",
-                    "show":false
-                },
-                "tableColumn":"time_sec",
-                "targets":[
-                    {
-                        "format":"time_series",
-                        "group":[
-                            {
-                                "params":[
-                                    "$__interval",
-                                    "none"
-                                ],
-                                "type":"time"
-                            }
-                        ],
-                        "metricColumn":"none",
-                        "rawQuery":false,
-                        "rawSql":"SELECT\n  $__timeGroupAlias(ts,$__interval),\n  count(result) AS \"result\"\nFROM noop_builds\nWHERE\n  $__timeFilter(ts) AND\n  success = 0 AND\n  type = \"upstream\"\nGROUP BY 1\nORDER BY $__timeGroup(ts,$__interval)",
-                        "refId":"A",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result"
-                                    ],
-                                    "type":"column"
-                                },
-                                {
-                                    "params":[
-                                        "count"
-                                    ],
-                                    "type":"aggregate"
-                                },
-                                {
-                                    "params":[
-                                        "result"
-                                    ],
-                                    "type":"alias"
-                                }
-                            ]
-                        ],
-                        "table":"noop_builds",
-                        "timeColumn":"ts",
-                        "timeColumnType":"timestamp",
-                        "where":[
-                            {
-                                "name":"$__timeFilter",
-                                "params":[],
-                                "type":"macro"
-                            },
-                            {
-                                "datatype":"int",
-                                "name":"",
-                                "params":[
-                                    "success",
-                                    "=",
-                                    "0"
-                                ],
-                                "type":"expression"
-                            },
-                            {
-                                "datatype":"varchar",
-                                "name":"",
-                                "params":[
-                                    "type",
-                                    "=",
-                                    "\"upstream\""
-                                ],
-                                "type":"expression"
-                            }
-                        ]
-                    }
-                ],
-                "thresholds":"0,1",
-                "timeFrom":null,
-                "title":"no_op upstream jobs ( should always pass )",
-                "type":"singlestat",
-                "valueFontSize":"80%",
-                "valueMaps":[
-                    {
-                        "op":"=",
-                        "text":"0",
-                        "value":"null"
-                    }
-                ],
-                "valueName":"total"
-            },
-            {
-                "cacheTimeout":null,
-                "colorBackground":false,
-                "colorValue":true,
-                "colors":[
-                    "#299c46",
-                    "rgba(237, 129, 40, 0.89)",
-                    "#d44a3a"
-                ],
                 "datasource":"telegraf",
                 "decimals":null,
                 "format":"none",
@@ -346,8 +193,8 @@
                 },
                 "gridPos":{
                     "h":10,
-                    "w":6,
-                    "x":12,
+                    "w":5,
+                    "x":5,
                     "y":1
                 },
                 "id":147,
@@ -473,8 +320,8 @@
                 "format":"none",
                 "gridPos":{
                     "h":10,
-                    "w":6,
-                    "x":18,
+                    "w":4,
+                    "x":10,
                     "y":1
                 },
                 "id":164,
@@ -656,6 +503,142 @@
                 "valueName":"current"
             },
             {
+                "columns":[],
+                "datasource":"mariadb",
+                "description":"List of TripleO promotion-blocker bugs",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":10,
+                    "w":10,
+                    "x":14,
+                    "y":1
+                },
+                "id":242,
+                "links":[
+                    {
+                        "title":"link to promotion-blocker bugs",
+                        "type":"absolute",
+                        "url":"https://bugs.launchpad.net/tripleo/+bugs?field.searchtext=&orderby=-importance&field.status%3Alist=NEW&field.status%3Alist=CONFIRMED&field.status%3Alist=TRIAGED&field.status%3Alist=INPROGRESS&assignee_option=any&field.assignee=&field.bug_reporter=&field.bug_commenter=&field.subscriber=&field.structural_subscriber=&field.tag=promotion-blocker&field.tags_combinator=ANY&field.has_cve.used=&field.omit_dupes.used=&field.omit_dupes=on&field.affects_me.used=&field.has_patch.used=&field.has_branches.used=&field.has_branches=on&field.has_no_branches.used=&field.has_no_branches=on&field.has_blueprints.used=&field.has_blueprints=on&field.has_no_blueprints.used=&field.has_no_blueprints=on&search=Search"
+                    }
+                ],
+                "maxPerRow":2,
+                "pageSize":null,
+                "repeatDirection":"h",
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":1,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"bug",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"link to bug",
+                        "linkUrl":"${__cell_3:raw}",
+                        "pattern":"id",
+                        "sanitize":true,
+                        "type":"string"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"link",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"",
+                        "format":"table",
+                        "group":[],
+                        "groupBy":[],
+                        "hide":false,
+                        "limit":"",
+                        "measurement":"launchpad-bug",
+                        "metricColumn":"none",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "rawQuery":true,
+                        "rawSql":"SELECT id, status, description, link from rr_bugs where tag = \"alert\"",
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "title"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "status"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "id"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "slimit":"1",
+                        "tags":[
+                            {
+                                "key":"tag",
+                                "operator":"=",
+                                "value":"promotion-blocker"
+                            }
+                        ],
+                        "timeColumn":"time",
+                        "where":[
+                            {
+                                "name":"$__timeFilter",
+                                "params":[],
+                                "type":"macro"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":null,
+                "title":"Alert bug",
+                "transform":"table",
+                "type":"table"
+            },
+            {
                 "cacheTimeout":null,
                 "colorBackground":false,
                 "colorValue":true,
@@ -791,288 +774,6 @@
                 "valueName":"current"
             },
             {
-                "cacheTimeout":null,
-                "colorBackground":false,
-                "colorValue":true,
-                "colors":[
-                    "#299c46",
-                    "rgba(237, 129, 40, 0.89)",
-                    "#d44a3a"
-                ],
-                "datasource":"mariadb",
-                "format":"none",
-                "gauge":{
-                    "maxValue":20,
-                    "minValue":0,
-                    "show":true,
-                    "thresholdLabels":true,
-                    "thresholdMarkers":true
-                },
-                "gridPos":{
-                    "h":9,
-                    "w":5,
-                    "x":5,
-                    "y":11
-                },
-                "id":202,
-                "interval":null,
-                "links":[
-                    {
-                        "params":"",
-                        "targetBlank":true,
-                        "title":"link to no_op jobs, see ovb jobs)",
-                        "type":"absolute",
-                        "url":"https://review.openstack.org/#/q/topic:gate-check+status:open"
-                    }
-                ],
-                "mappingType":1,
-                "mappingTypes":[
-                    {
-                        "name":"value to text",
-                        "value":1
-                    },
-                    {
-                        "name":"range to text",
-                        "value":2
-                    }
-                ],
-                "maxDataPoints":100,
-                "nullPointMode":"connected",
-                "nullText":null,
-                "postfix":" fails",
-                "postfixFontSize":"50%",
-                "prefix":"",
-                "prefixFontSize":"50%",
-                "rangeMaps":[
-                    {
-                        "from":"null",
-                        "text":"N/A",
-                        "to":"null"
-                    }
-                ],
-                "sparkline":{
-                    "fillColor":"rgba(31, 118, 189, 0.18)",
-                    "full":false,
-                    "lineColor":"rgb(31, 120, 193)",
-                    "show":false
-                },
-                "tableColumn":"time_sec",
-                "targets":[
-                    {
-                        "format":"time_series",
-                        "group":[
-                            {
-                                "params":[
-                                    "$__interval",
-                                    "none"
-                                ],
-                                "type":"time"
-                            }
-                        ],
-                        "metricColumn":"none",
-                        "rawQuery":false,
-                        "rawSql":"SELECT\n  $__timeGroupAlias(ts,$__interval),\n  count(result)\nFROM noop_builds\nWHERE\n  $__timeFilter(ts) AND\n  success = 0 AND\n  type = 'rdo'\nGROUP BY 1\nORDER BY $__timeGroup(ts,$__interval)",
-                        "refId":"A",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result"
-                                    ],
-                                    "type":"column"
-                                },
-                                {
-                                    "params":[
-                                        "count"
-                                    ],
-                                    "type":"aggregate"
-                                }
-                            ]
-                        ],
-                        "table":"noop_builds",
-                        "timeColumn":"ts",
-                        "timeColumnType":"varchar",
-                        "where":[
-                            {
-                                "name":"$__timeFilter",
-                                "params":[],
-                                "type":"macro"
-                            },
-                            {
-                                "datatype":"int",
-                                "name":"",
-                                "params":[
-                                    "success",
-                                    "=",
-                                    "0"
-                                ],
-                                "type":"expression"
-                            },
-                            {
-                                "datatype":"varchar",
-                                "name":"",
-                                "params":[
-                                    "type",
-                                    "=",
-                                    "'rdo'"
-                                ],
-                                "type":"expression"
-                            }
-                        ]
-                    }
-                ],
-                "thresholds":"0,1",
-                "timeFrom":null,
-                "title":"no_op 3rd party jobs ( should always pass )",
-                "type":"singlestat",
-                "valueFontSize":"80%",
-                "valueMaps":[
-                    {
-                        "op":"=",
-                        "text":"0",
-                        "value":"null"
-                    }
-                ],
-                "valueName":"total"
-            },
-            {
-                "columns":[],
-                "datasource":"mariadb",
-                "description":"List of TripleO promotion-blocker bugs",
-                "fontSize":"100%",
-                "gridPos":{
-                    "h":9,
-                    "w":8,
-                    "x":10,
-                    "y":11
-                },
-                "id":155,
-                "links":[
-                    {
-                        "title":"link to promotion-blocker bugs",
-                        "type":"absolute",
-                        "url":"https://bugs.launchpad.net/tripleo/+bugs?field.searchtext=&orderby=-importance&field.status%3Alist=NEW&field.status%3Alist=CONFIRMED&field.status%3Alist=TRIAGED&field.status%3Alist=INPROGRESS&assignee_option=any&field.assignee=&field.bug_reporter=&field.bug_commenter=&field.subscriber=&field.structural_subscriber=&field.tag=promotion-blocker&field.tags_combinator=ANY&field.has_cve.used=&field.omit_dupes.used=&field.omit_dupes=on&field.affects_me.used=&field.has_patch.used=&field.has_branches.used=&field.has_branches=on&field.has_no_branches.used=&field.has_no_branches=on&field.has_blueprints.used=&field.has_blueprints=on&field.has_no_blueprints.used=&field.has_no_blueprints=on&search=Search"
-                    }
-                ],
-                "maxPerRow":2,
-                "pageSize":null,
-                "repeat":null,
-                "repeatDirection":"h",
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":1,
-                    "desc":true
-                },
-                "styles":[
-                    {
-                        "alias":"bug",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"link to bug",
-                        "linkUrl":"${__cell_3:raw}",
-                        "pattern":"id",
-                        "sanitize":true,
-                        "type":"string"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"link",
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "decimals":2,
-                        "pattern":"/.*/",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    }
-                ],
-                "targets":[
-                    {
-                        "alias":"",
-                        "format":"table",
-                        "group":[],
-                        "groupBy":[],
-                        "hide":false,
-                        "limit":"",
-                        "measurement":"launchpad-bug",
-                        "metricColumn":"none",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "rawQuery":true,
-                        "rawSql":"SELECT id, status, description, link from rr_bugs where tag = \"promotion-blocker\"",
-                        "refId":"A",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "title"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "status"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "id"
-                                    ],
-                                    "type":"field"
-                                }
-                            ]
-                        ],
-                        "slimit":"1",
-                        "tags":[
-                            {
-                                "key":"tag",
-                                "operator":"=",
-                                "value":"promotion-blocker"
-                            }
-                        ],
-                        "timeColumn":"time",
-                        "where":[
-                            {
-                                "name":"$__timeFilter",
-                                "params":[],
-                                "type":"macro"
-                            }
-                        ]
-                    }
-                ],
-                "timeFrom":null,
-                "title":"Promotion blockers",
-                "transform":"table",
-                "type":"table"
-            },
-            {
                 "aliasColors":{},
                 "breakPoint":"50%",
                 "cacheTimeout":null,
@@ -1086,8 +787,8 @@
                 "format":"none",
                 "gridPos":{
                     "h":9,
-                    "w":6,
-                    "x":18,
+                    "w":5,
+                    "x":5,
                     "y":11
                 },
                 "id":203,
@@ -1263,7 +964,144 @@
                 "valueName":"current"
             },
             {
-                "content":"current ruck rover etherpad https://etherpad.openstack.org/p/ruckroversprint7",
+                "columns":[],
+                "datasource":"mariadb",
+                "description":"List of TripleO promotion-blocker bugs",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":9,
+                    "w":14,
+                    "x":10,
+                    "y":11
+                },
+                "id":155,
+                "links":[
+                    {
+                        "title":"link to promotion-blocker bugs",
+                        "type":"absolute",
+                        "url":"https://bugs.launchpad.net/tripleo/+bugs?field.searchtext=&orderby=-importance&field.status%3Alist=NEW&field.status%3Alist=CONFIRMED&field.status%3Alist=TRIAGED&field.status%3Alist=INPROGRESS&assignee_option=any&field.assignee=&field.bug_reporter=&field.bug_commenter=&field.subscriber=&field.structural_subscriber=&field.tag=promotion-blocker&field.tags_combinator=ANY&field.has_cve.used=&field.omit_dupes.used=&field.omit_dupes=on&field.affects_me.used=&field.has_patch.used=&field.has_branches.used=&field.has_branches=on&field.has_no_branches.used=&field.has_no_branches=on&field.has_blueprints.used=&field.has_blueprints=on&field.has_no_blueprints.used=&field.has_no_blueprints=on&search=Search"
+                    }
+                ],
+                "maxPerRow":2,
+                "pageSize":null,
+                "repeat":null,
+                "repeatDirection":"h",
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":1,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"bug",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"link to bug",
+                        "linkUrl":"${__cell_3:raw}",
+                        "pattern":"id",
+                        "sanitize":true,
+                        "type":"string"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"link",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"",
+                        "format":"table",
+                        "group":[],
+                        "groupBy":[],
+                        "hide":false,
+                        "limit":"",
+                        "measurement":"launchpad-bug",
+                        "metricColumn":"none",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "rawQuery":true,
+                        "rawSql":"SELECT id, status, description, link from rr_bugs where tag = \"promotion-blocker\"",
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "title"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "status"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "id"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "slimit":"1",
+                        "tags":[
+                            {
+                                "key":"tag",
+                                "operator":"=",
+                                "value":"promotion-blocker"
+                            }
+                        ],
+                        "timeColumn":"time",
+                        "where":[
+                            {
+                                "name":"$__timeFilter",
+                                "params":[],
+                                "type":"macro"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":null,
+                "title":"Promotion blockers",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "content":"current ruck rover etherpad https://etherpad.openstack.org/p/ruckroversprint8",
                 "description":"This is a place to keep some notes and links to current etherpads for ruck rovers.",
                 "gridPos":{
                     "h":2,
@@ -2014,301 +1852,13 @@
             },
             {
                 "columns":[],
-                "datasource":"mariadb",
-                "description":"List of TripleO promotion-blocker bugs",
+                "datasource":"telegraf",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":7,
                     "w":12,
                     "x":12,
                     "y":29
-                },
-                "id":242,
-                "links":[
-                    {
-                        "title":"link to promotion-blocker bugs",
-                        "type":"absolute",
-                        "url":"https://bugs.launchpad.net/tripleo/+bugs?field.searchtext=&orderby=-importance&field.status%3Alist=NEW&field.status%3Alist=CONFIRMED&field.status%3Alist=TRIAGED&field.status%3Alist=INPROGRESS&assignee_option=any&field.assignee=&field.bug_reporter=&field.bug_commenter=&field.subscriber=&field.structural_subscriber=&field.tag=promotion-blocker&field.tags_combinator=ANY&field.has_cve.used=&field.omit_dupes.used=&field.omit_dupes=on&field.affects_me.used=&field.has_patch.used=&field.has_branches.used=&field.has_branches=on&field.has_no_branches.used=&field.has_no_branches=on&field.has_blueprints.used=&field.has_blueprints=on&field.has_no_blueprints.used=&field.has_no_blueprints=on&search=Search"
-                    }
-                ],
-                "maxPerRow":2,
-                "pageSize":null,
-                "repeatDirection":"h",
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":1,
-                    "desc":true
-                },
-                "styles":[
-                    {
-                        "alias":"bug",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"link to bug",
-                        "linkUrl":"${__cell_3:raw}",
-                        "pattern":"id",
-                        "sanitize":true,
-                        "type":"string"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"link",
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "decimals":2,
-                        "pattern":"/.*/",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    }
-                ],
-                "targets":[
-                    {
-                        "alias":"",
-                        "format":"table",
-                        "group":[],
-                        "groupBy":[],
-                        "hide":false,
-                        "limit":"",
-                        "measurement":"launchpad-bug",
-                        "metricColumn":"none",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "rawQuery":true,
-                        "rawSql":"SELECT id, status, description, link from rr_bugs where tag = \"alert\"",
-                        "refId":"A",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "title"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "status"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "id"
-                                    ],
-                                    "type":"field"
-                                }
-                            ]
-                        ],
-                        "slimit":"1",
-                        "tags":[
-                            {
-                                "key":"tag",
-                                "operator":"=",
-                                "value":"promotion-blocker"
-                            }
-                        ],
-                        "timeColumn":"time",
-                        "where":[
-                            {
-                                "name":"$__timeFilter",
-                                "params":[],
-                                "type":"macro"
-                            }
-                        ]
-                    }
-                ],
-                "timeFrom":null,
-                "title":"Alert bug",
-                "transform":"table",
-                "type":"table"
-            },
-            {
-                "columns":[],
-                "datasource":"mariadb",
-                "fontSize":"100%",
-                "gridPos":{
-                    "h":6,
-                    "w":12,
-                    "x":0,
-                    "y":36
-                },
-                "hideTimeOverride":false,
-                "id":205,
-                "links":[],
-                "pageSize":null,
-                "repeat":"releases",
-                "repeatDirection":"v",
-                "scopedVars":{
-                    "releases":{
-                        "selected":true,
-                        "text":"master",
-                        "value":"master"
-                    }
-                },
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":0,
-                    "desc":true
-                },
-                "styles":[
-                    {
-                        "alias":"Time",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"Job",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkUrl":"${__cell_4:raw}",
-                        "mappingType":1,
-                        "pattern":"job",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"log_url",
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
-                    }
-                ],
-                "targets":[
-                    {
-                        "format":"table",
-                        "group":[],
-                        "metricColumn":"none",
-                        "rawQuery":false,
-                        "rawSql":"SELECT\n  ts AS \"time\",\n  job,\n  type,\n  result,\n  log_url\nFROM noop_builds\nWHERE\n  $__timeFilter(ts) AND\n  branch = $releases AND\n  success = 0\nORDER BY ts",
-                        "refId":"A",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "job"
-                                    ],
-                                    "type":"column"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "type"
-                                    ],
-                                    "type":"column"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "result"
-                                    ],
-                                    "type":"column"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "log_url"
-                                    ],
-                                    "type":"column"
-                                }
-                            ]
-                        ],
-                        "table":"noop_builds",
-                        "timeColumn":"ts",
-                        "timeColumnType":"varchar",
-                        "where":[
-                            {
-                                "name":"$__timeFilter",
-                                "params":[],
-                                "type":"macro"
-                            },
-                            {
-                                "datatype":"varchar",
-                                "name":"",
-                                "params":[
-                                    "branch",
-                                    "=",
-                                    "$releases"
-                                ],
-                                "type":"expression"
-                            },
-                            {
-                                "datatype":"int",
-                                "name":"",
-                                "params":[
-                                    "success",
-                                    "=",
-                                    "0"
-                                ],
-                                "type":"expression"
-                            }
-                        ]
-                    }
-                ],
-                "timeFrom":null,
-                "timeShift":null,
-                "title":"$releases failing check jobs (noop)",
-                "transform":"table",
-                "type":"table"
-            },
-            {
-                "columns":[],
-                "datasource":"telegraf",
-                "fontSize":"100%",
-                "gridPos":{
-                    "h":6,
-                    "w":12,
-                    "x":12,
-                    "y":36
                 },
                 "hideTimeOverride":false,
                 "id":206,
@@ -2576,21 +2126,19 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":42
+                    "y":36
                 },
                 "hideTimeOverride":false,
-                "id":308,
+                "id":205,
                 "links":[],
                 "pageSize":null,
-                "repeat":null,
+                "repeat":"releases",
                 "repeatDirection":"v",
-                "repeatIteration":1555036959750,
-                "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
                         "selected":true,
-                        "text":"stein",
-                        "value":"stein"
+                        "text":"master",
+                        "value":"master"
                     }
                 },
                 "scroll":true,
@@ -2730,15 +2278,15 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":42
+                    "y":36
                 },
                 "hideTimeOverride":false,
-                "id":312,
+                "id":322,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1555036959750,
+                "repeatIteration":1555539123979,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -3000,21 +2548,21 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":48
+                    "y":42
                 },
                 "hideTimeOverride":false,
-                "id":309,
+                "id":318,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1555036959750,
+                "repeatIteration":1555539123979,
                 "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
                         "selected":true,
-                        "text":"rocky",
-                        "value":"rocky"
+                        "text":"stein",
+                        "value":"stein"
                     }
                 },
                 "scroll":true,
@@ -3154,15 +2702,15 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":48
+                    "y":42
                 },
                 "hideTimeOverride":false,
-                "id":313,
+                "id":323,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1555036959750,
+                "repeatIteration":1555539123979,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -3424,21 +2972,21 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":54
+                    "y":48
                 },
                 "hideTimeOverride":false,
-                "id":310,
+                "id":319,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1555036959750,
+                "repeatIteration":1555539123979,
                 "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
                         "selected":true,
-                        "text":"queens",
-                        "value":"queens"
+                        "text":"rocky",
+                        "value":"rocky"
                     }
                 },
                 "scroll":true,
@@ -3578,15 +3126,15 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":54
+                    "y":48
                 },
                 "hideTimeOverride":false,
-                "id":314,
+                "id":324,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1555036959750,
+                "repeatIteration":1555539123979,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -3848,21 +3396,21 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":60
+                    "y":54
                 },
                 "hideTimeOverride":false,
-                "id":311,
+                "id":320,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1555036959750,
+                "repeatIteration":1555539123979,
                 "repeatPanelId":205,
                 "scopedVars":{
                     "releases":{
                         "selected":true,
-                        "text":"pike",
-                        "value":"pike"
+                        "text":"queens",
+                        "value":"queens"
                     }
                 },
                 "scroll":true,
@@ -4002,15 +3550,15 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":60
+                    "y":54
                 },
                 "hideTimeOverride":false,
-                "id":315,
+                "id":325,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1555036959750,
+                "repeatIteration":1555539123979,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -4263,6 +3811,185 @@
                 "title":"$releases failing periodic jobs",
                 "transform":"table",
                 "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"mariadb",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":6,
+                    "w":12,
+                    "x":0,
+                    "y":60
+                },
+                "hideTimeOverride":false,
+                "id":321,
+                "links":[],
+                "pageSize":null,
+                "repeat":null,
+                "repeatDirection":"v",
+                "repeatIteration":1555539123979,
+                "repeatPanelId":205,
+                "scopedVars":{
+                    "releases":{
+                        "selected":true,
+                        "text":"pike",
+                        "value":"pike"
+                    }
+                },
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkUrl":"${__cell_4:raw}",
+                        "mappingType":1,
+                        "pattern":"job",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "format":"table",
+                        "group":[],
+                        "metricColumn":"none",
+                        "rawQuery":false,
+                        "rawSql":"SELECT\n  ts AS \"time\",\n  job,\n  type,\n  result,\n  log_url\nFROM noop_builds\nWHERE\n  $__timeFilter(ts) AND\n  branch = $releases AND\n  success = 0\nORDER BY ts",
+                        "refId":"A",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "job"
+                                    ],
+                                    "type":"column"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "type"
+                                    ],
+                                    "type":"column"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"column"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_url"
+                                    ],
+                                    "type":"column"
+                                }
+                            ]
+                        ],
+                        "table":"noop_builds",
+                        "timeColumn":"ts",
+                        "timeColumnType":"varchar",
+                        "where":[
+                            {
+                                "name":"$__timeFilter",
+                                "params":[],
+                                "type":"macro"
+                            },
+                            {
+                                "datatype":"varchar",
+                                "name":"",
+                                "params":[
+                                    "branch",
+                                    "=",
+                                    "$releases"
+                                ],
+                                "type":"expression"
+                            },
+                            {
+                                "datatype":"int",
+                                "name":"",
+                                "params":[
+                                    "success",
+                                    "=",
+                                    "0"
+                                ],
+                                "type":"expression"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"$releases failing check jobs (noop)",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "dashboardFilter":"",
+                "dashboardTags":[],
+                "folderId":null,
+                "gridPos":{
+                    "h":6,
+                    "w":12,
+                    "x":12,
+                    "y":60
+                },
+                "id":198,
+                "limit":10,
+                "links":[],
+                "nameFilter":"Github",
+                "onlyAlertsOnDashboard":false,
+                "show":"current",
+                "sortOrder":1,
+                "stateFilter":[
+                    "ok",
+                    "alerting",
+                    "execution_error"
+                ],
+                "title":"Infra issues",
+                "type":"alertlist"
             },
             {
                 "dashboardFilter":"",
@@ -4356,31 +4083,6 @@
                     "ok"
                 ],
                 "title":"Phase 1 promotions alerts",
-                "type":"alertlist"
-            },
-            {
-                "dashboardFilter":"",
-                "dashboardTags":[],
-                "folderId":null,
-                "gridPos":{
-                    "h":6,
-                    "w":5,
-                    "x":15,
-                    "y":66
-                },
-                "id":198,
-                "limit":10,
-                "links":[],
-                "nameFilter":"Github",
-                "onlyAlertsOnDashboard":false,
-                "show":"current",
-                "sortOrder":1,
-                "stateFilter":[
-                    "ok",
-                    "alerting",
-                    "execution_error"
-                ],
-                "title":"Infra issues",
                 "type":"alertlist"
             },
             {
@@ -6818,835 +6520,12 @@
                 "type":"table"
             },
             {
-                "alert":{
-                    "conditions":[
-                        {
-                            "evaluator":{
-                                "params":[
-                                    1
-                                ],
-                                "type":"lt"
-                            },
-                            "operator":{
-                                "type":"and"
-                            },
-                            "query":{
-                                "params":[
-                                    "A",
-                                    "24h",
-                                    "now"
-                                ]
-                            },
-                            "reducer":{
-                                "params":[],
-                                "type":"last"
-                            },
-                            "type":"query"
-                        }
-                    ],
-                    "executionErrorState":"alerting",
-                    "for":"0m",
-                    "frequency":"60s",
-                    "handler":1,
-                    "message":"Jobs failing at https://review.openstack.org/#/c/604293.",
-                    "name":"Rocky noop change results alert",
-                    "noDataState":"no_data",
-                    "notifications":[
-                        {
-                            "id":1
-                        }
-                    ]
-                },
-                "aliasColors":{},
-                "bars":false,
-                "dashLength":10,
-                "dashes":false,
-                "datasource":"mariadb",
-                "decimals":0,
-                "fill":1,
-                "gridPos":{
-                    "h":4,
-                    "w":12,
-                    "x":0,
-                    "y":135
-                },
-                "id":221,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":true,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
-                "links":[
-                    {
-                        "targetBlank":true,
-                        "title":"gerrit",
-                        "type":"absolute",
-                        "url":"https://review.openstack.org/604293"
-                    }
-                ],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":5,
-                "points":true,
-                "renderer":"flot",
-                "seriesOverrides":[],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":false,
-                "targets":[
-                    {
-                        "format":"time_series",
-                        "group":[],
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "job_name"
-                                ],
-                                "type":"tag"
-                            }
-                        ],
-                        "measurement":"build",
-                        "metricColumn":"none",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "rawQuery":false,
-                        "rawSql":"SELECT\n  ts AS \"time\",\n  success,\n  job\nFROM noop_builds\nWHERE\n  $__timeFilter(ts) AND\n  branch = 'rocky'\nORDER BY ts",
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "success"
-                                    ],
-                                    "type":"column"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "job"
-                                    ],
-                                    "type":"column"
-                                }
-                            ]
-                        ],
-                        "table":"noop_builds",
-                        "tags":[
-                            {
-                                "key":"change",
-                                "operator":"=",
-                                "value":"604293"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"voting",
-                                "operator":"=",
-                                "value":"True"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            }
-                        ],
-                        "timeColumn":"ts",
-                        "timeColumnType":"timestamp",
-                        "where":[
-                            {
-                                "name":"$__timeFilter",
-                                "params":[],
-                                "type":"macro"
-                            },
-                            {
-                                "datatype":"varchar",
-                                "name":"",
-                                "params":[
-                                    "branch",
-                                    "=",
-                                    "'rocky'"
-                                ],
-                                "type":"expression"
-                            }
-                        ]
-                    }
-                ],
-                "thresholds":[
-                    {
-                        "colorMode":"critical",
-                        "fill":true,
-                        "line":true,
-                        "op":"lt",
-                        "value":1
-                    }
-                ],
-                "timeFrom":null,
-                "timeRegions":[],
-                "timeShift":null,
-                "title":"Rocky noop change results",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Result code",
-                        "logBase":1,
-                        "max":"1",
-                        "min":"0",
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
-            },
-            {
-                "alert":{
-                    "conditions":[
-                        {
-                            "evaluator":{
-                                "params":[
-                                    1
-                                ],
-                                "type":"lt"
-                            },
-                            "operator":{
-                                "type":"and"
-                            },
-                            "query":{
-                                "params":[
-                                    "A",
-                                    "24h",
-                                    "now"
-                                ]
-                            },
-                            "reducer":{
-                                "params":[],
-                                "type":"last"
-                            },
-                            "type":"query"
-                        }
-                    ],
-                    "executionErrorState":"alerting",
-                    "for":"0m",
-                    "frequency":"60s",
-                    "handler":1,
-                    "message":"Jobs failing at https://review.openstack.org/#/c/567224.",
-                    "name":"Queens noop change results alert",
-                    "noDataState":"no_data",
-                    "notifications":[
-                        {
-                            "id":1
-                        }
-                    ]
-                },
-                "aliasColors":{},
-                "bars":false,
-                "dashLength":10,
-                "dashes":false,
-                "datasource":"mariadb",
-                "decimals":0,
-                "fill":1,
-                "gridPos":{
-                    "h":4,
-                    "w":12,
-                    "x":12,
-                    "y":135
-                },
-                "id":104,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":true,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
-                "links":[
-                    {
-                        "targetBlank":true,
-                        "title":"gerrit",
-                        "type":"absolute",
-                        "url":"https://review.openstack.org/567224"
-                    }
-                ],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":5,
-                "points":true,
-                "renderer":"flot",
-                "seriesOverrides":[],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":false,
-                "targets":[
-                    {
-                        "format":"time_series",
-                        "group":[],
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "job_name"
-                                ],
-                                "type":"tag"
-                            }
-                        ],
-                        "measurement":"build",
-                        "metricColumn":"none",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "rawQuery":false,
-                        "rawSql":"SELECT\n  ts AS \"time\",\n  success,\n  job\nFROM noop_builds\nWHERE\n  $__timeFilter(ts) AND\n  branch = 'queens'\nORDER BY ts",
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "success"
-                                    ],
-                                    "type":"column"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "job"
-                                    ],
-                                    "type":"column"
-                                }
-                            ]
-                        ],
-                        "table":"noop_builds",
-                        "tags":[
-                            {
-                                "key":"change",
-                                "operator":"=",
-                                "value":"567224"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"voting",
-                                "operator":"=",
-                                "value":"True"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            }
-                        ],
-                        "timeColumn":"ts",
-                        "timeColumnType":"timestamp",
-                        "where":[
-                            {
-                                "name":"$__timeFilter",
-                                "params":[],
-                                "type":"macro"
-                            },
-                            {
-                                "datatype":"varchar",
-                                "name":"",
-                                "params":[
-                                    "branch",
-                                    "=",
-                                    "'queens'"
-                                ],
-                                "type":"expression"
-                            }
-                        ]
-                    }
-                ],
-                "thresholds":[
-                    {
-                        "colorMode":"critical",
-                        "fill":true,
-                        "line":true,
-                        "op":"lt",
-                        "value":1
-                    }
-                ],
-                "timeFrom":null,
-                "timeRegions":[],
-                "timeShift":null,
-                "title":"Queens noop change results",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Result code",
-                        "logBase":1,
-                        "max":"1",
-                        "min":"0",
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
-            },
-            {
-                "alert":{
-                    "conditions":[
-                        {
-                            "evaluator":{
-                                "params":[
-                                    1
-                                ],
-                                "type":"lt"
-                            },
-                            "operator":{
-                                "type":"and"
-                            },
-                            "query":{
-                                "params":[
-                                    "A",
-                                    "24h",
-                                    "now"
-                                ]
-                            },
-                            "reducer":{
-                                "params":[],
-                                "type":"last"
-                            },
-                            "type":"query"
-                        }
-                    ],
-                    "executionErrorState":"alerting",
-                    "for":"0m",
-                    "frequency":"60s",
-                    "handler":1,
-                    "message":"Jobs failing at https://review.openstack.org/#/c/560445.",
-                    "name":"Master noop change results alert",
-                    "noDataState":"no_data",
-                    "notifications":[
-                        {
-                            "id":1
-                        }
-                    ]
-                },
-                "aliasColors":{},
-                "bars":false,
-                "dashLength":10,
-                "dashes":false,
-                "datasource":"mariadb",
-                "decimals":0,
-                "fill":1,
-                "gridPos":{
-                    "h":4,
-                    "w":12,
-                    "x":0,
-                    "y":139
-                },
-                "hideTimeOverride":false,
-                "id":103,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":true,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
-                "links":[
-                    {
-                        "targetBlank":true,
-                        "title":"gerrit",
-                        "type":"absolute",
-                        "url":"https://review.openstack.org/560445"
-                    }
-                ],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":5,
-                "points":true,
-                "renderer":"flot",
-                "seriesOverrides":[],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":false,
-                "targets":[
-                    {
-                        "format":"time_series",
-                        "group":[],
-                        "metricColumn":"none",
-                        "rawQuery":false,
-                        "rawSql":"SELECT\n  ts AS \"time\",\n  success,\n  job\nFROM noop_builds\nWHERE\n  $__timeFilter(ts) AND\n  branch = 'master'\nORDER BY ts",
-                        "refId":"A",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "success"
-                                    ],
-                                    "type":"column"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "job"
-                                    ],
-                                    "type":"column"
-                                }
-                            ]
-                        ],
-                        "table":"noop_builds",
-                        "timeColumn":"ts",
-                        "timeColumnType":"timestamp",
-                        "where":[
-                            {
-                                "name":"$__timeFilter",
-                                "params":[],
-                                "type":"macro"
-                            },
-                            {
-                                "datatype":"varchar",
-                                "name":"",
-                                "params":[
-                                    "branch",
-                                    "=",
-                                    "'master'"
-                                ],
-                                "type":"expression"
-                            }
-                        ]
-                    }
-                ],
-                "thresholds":[
-                    {
-                        "colorMode":"critical",
-                        "fill":true,
-                        "line":true,
-                        "op":"lt",
-                        "value":1
-                    }
-                ],
-                "timeFrom":null,
-                "timeRegions":[],
-                "timeShift":null,
-                "title":"Master noop change results",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Result code",
-                        "logBase":1,
-                        "max":"1",
-                        "min":"0",
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
-            },
-            {
-                "alert":{
-                    "conditions":[
-                        {
-                            "evaluator":{
-                                "params":[
-                                    1
-                                ],
-                                "type":"lt"
-                            },
-                            "operator":{
-                                "type":"and"
-                            },
-                            "query":{
-                                "params":[
-                                    "A",
-                                    "24h",
-                                    "now"
-                                ]
-                            },
-                            "reducer":{
-                                "params":[],
-                                "type":"last"
-                            },
-                            "type":"query"
-                        }
-                    ],
-                    "executionErrorState":"alerting",
-                    "frequency":"60s",
-                    "handler":1,
-                    "message":"Jobs failing at https://review.openstack.org/#/c/602248.",
-                    "name":"Pike noop change results alert",
-                    "noDataState":"no_data",
-                    "notifications":[
-                        {
-                            "id":1
-                        }
-                    ]
-                },
-                "aliasColors":{},
-                "bars":false,
-                "dashLength":10,
-                "dashes":false,
-                "datasource":"mariadb",
-                "decimals":0,
-                "fill":1,
-                "gridPos":{
-                    "h":4,
-                    "w":12,
-                    "x":12,
-                    "y":139
-                },
-                "id":105,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":true,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
-                "links":[
-                    {
-                        "targetBlank":true,
-                        "title":"gerrit",
-                        "type":"absolute",
-                        "url":"https://review.openstack.org/602248"
-                    }
-                ],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":5,
-                "points":true,
-                "renderer":"flot",
-                "seriesOverrides":[],
-                "spaceLength":10,
-                "stack":true,
-                "steppedLine":false,
-                "targets":[
-                    {
-                        "format":"time_series",
-                        "group":[],
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "job_name"
-                                ],
-                                "type":"tag"
-                            }
-                        ],
-                        "measurement":"build",
-                        "metricColumn":"none",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "rawQuery":false,
-                        "rawSql":"SELECT\n  ts AS \"time\",\n  success,\n  job\nFROM noop_builds\nWHERE\n  $__timeFilter(ts) AND\n  branch = 'pike'\nORDER BY ts",
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "success"
-                                    ],
-                                    "type":"column"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "job"
-                                    ],
-                                    "type":"column"
-                                }
-                            ]
-                        ],
-                        "table":"noop_builds",
-                        "tags":[
-                            {
-                                "key":"change",
-                                "operator":"=",
-                                "value":"602248"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"voting",
-                                "operator":"=",
-                                "value":"True"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            }
-                        ],
-                        "timeColumn":"ts",
-                        "timeColumnType":"timestamp",
-                        "where":[
-                            {
-                                "name":"$__timeFilter",
-                                "params":[],
-                                "type":"macro"
-                            },
-                            {
-                                "datatype":"varchar",
-                                "name":"",
-                                "params":[
-                                    "branch",
-                                    "=",
-                                    "'pike'"
-                                ],
-                                "type":"expression"
-                            }
-                        ]
-                    }
-                ],
-                "thresholds":[
-                    {
-                        "colorMode":"critical",
-                        "fill":true,
-                        "line":true,
-                        "op":"lt",
-                        "value":1
-                    }
-                ],
-                "timeFrom":null,
-                "timeRegions":[],
-                "timeShift":null,
-                "title":"P\u00eeke noop change results",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Result code",
-                        "logBase":1,
-                        "max":"1",
-                        "min":"0",
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
-            },
-            {
                 "collapsed":false,
                 "gridPos":{
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":143
+                    "y":135
                 },
                 "id":82,
                 "panels":[],
@@ -7702,7 +6581,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":144
+                    "y":136
                 },
                 "hideTimeOverride":false,
                 "id":110,
@@ -7889,7 +6768,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":144
+                    "y":136
                 },
                 "hideTimeOverride":false,
                 "id":116,
@@ -8075,7 +6954,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":144
+                    "y":136
                 },
                 "id":130,
                 "legend":{
@@ -8241,7 +7120,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":148
+                    "y":140
                 },
                 "hideTimeOverride":false,
                 "id":263,
@@ -8423,7 +7302,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":148
+                    "y":140
                 },
                 "id":273,
                 "legend":{
@@ -8603,7 +7482,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":148
+                    "y":140
                 },
                 "id":274,
                 "legend":{
@@ -8770,7 +7649,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":152
+                    "y":144
                 },
                 "hideTimeOverride":false,
                 "id":213,
@@ -8953,7 +7832,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":152
+                    "y":144
                 },
                 "id":214,
                 "legend":{
@@ -9134,7 +8013,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":152
+                    "y":144
                 },
                 "id":216,
                 "legend":{
@@ -9305,7 +8184,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":156
+                    "y":148
                 },
                 "hideTimeOverride":false,
                 "id":117,
@@ -9488,7 +8367,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":156
+                    "y":148
                 },
                 "id":118,
                 "legend":{
@@ -9673,7 +8552,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":156
+                    "y":148
                 },
                 "id":131,
                 "legend":{
@@ -9844,7 +8723,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":160
+                    "y":152
                 },
                 "id":123,
                 "legend":{
@@ -10030,7 +8909,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":160
+                    "y":152
                 },
                 "id":125,
                 "legend":{
@@ -10215,7 +9094,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":160
+                    "y":152
                 },
                 "id":133,
                 "legend":{
@@ -10345,7 +9224,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":164
+                    "y":156
                 },
                 "id":298,
                 "panels":[],
@@ -10396,7 +9275,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":165
+                    "y":157
                 },
                 "hideTimeOverride":false,
                 "id":284,
@@ -10577,7 +9456,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":165
+                    "y":157
                 },
                 "id":286,
                 "legend":{
@@ -10743,7 +9622,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":169
+                    "y":161
                 },
                 "hideTimeOverride":false,
                 "id":285,
@@ -10924,7 +9803,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":169
+                    "y":161
                 },
                 "id":287,
                 "legend":{
@@ -11052,7 +9931,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":173
+                    "y":165
                 },
                 "id":4,
                 "panels":[],
@@ -11070,7 +9949,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":174
+                    "y":166
                 },
                 "id":209,
                 "legend":{
@@ -11188,7 +10067,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":182
+                    "y":174
                 },
                 "id":2,
                 "links":[],
@@ -11256,7 +10135,7 @@
                     "h":9,
                     "w":12,
                     "x":0,
-                    "y":189
+                    "y":181
                 },
                 "hideTimeOverride":true,
                 "id":196,
@@ -11392,7 +10271,7 @@
                     "h":9,
                     "w":12,
                     "x":12,
-                    "y":189
+                    "y":181
                 },
                 "hideTimeOverride":true,
                 "id":194,
@@ -11494,7 +10373,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":198
+                    "y":190
                 },
                 "id":173,
                 "panels":[],
@@ -11512,7 +10391,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":199
+                    "y":191
                 },
                 "id":175,
                 "legend":{
@@ -11687,7 +10566,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":199
+                    "y":191
                 },
                 "id":177,
                 "legend":{
@@ -11950,7 +10829,7 @@
                     "h":7,
                     "w":12,
                     "x":0,
-                    "y":205
+                    "y":197
                 },
                 "id":179,
                 "legend":{
@@ -12311,7 +11190,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":205
+                    "y":197
                 },
                 "id":181,
                 "legend":{
@@ -12472,7 +11351,7 @@
                     "h":6,
                     "w":7,
                     "x":0,
-                    "y":212
+                    "y":204
                 },
                 "id":183,
                 "legend":{
@@ -12587,7 +11466,7 @@
                     "h":6,
                     "w":9,
                     "x":7,
-                    "y":212
+                    "y":204
                 },
                 "id":185,
                 "legend":{
@@ -12702,7 +11581,7 @@
                     "h":6,
                     "w":8,
                     "x":16,
-                    "y":212
+                    "y":204
                 },
                 "id":187,
                 "legend":{
