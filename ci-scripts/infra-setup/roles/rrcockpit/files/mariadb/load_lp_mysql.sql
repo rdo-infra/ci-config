@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS rr_bugs (
     tag VARCHAR(255) NOT NULL,
     link VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
-    PRIMARY KEY (id)
+    CONSTRAINT id_tag PRIMARY KEY (id, tag)
 );
 
 TRUNCATE TABLE rr_bugs;
