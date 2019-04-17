@@ -21,11 +21,21 @@ read_lp(){
             'In Progress' \
             'Fix Committed' \
             Incomplete
+
+    launchpad_bugs_mariadb.py \
+        --tag tempest \
+        --status \
+            New \
+            Confirmed \
+            Triaged \
+            'In Progress' \
+            'Fix Committed' \
+            Incomplete
 }
 
 read_noop(){
     releases="master rocky queens pike"
-    types="upstream rdo"
+    types="upstream rdo tempest"
     for release in $releases; do
         for type in $types; do
             noop_build.py --release $release --type $type
@@ -44,7 +54,8 @@ load_mariadb(){
 ansible-playbook /tmp/wait-mariadb.yaml
 
 while true; do
-    load_mariadb noop 2>&1 | tee /tmp/run.log
+    # noop jobs have been disabled
+    # load_mariadb noop 2>&1 | tee /tmp/run.log
     load_mariadb lp 2>&1 | tee /tmp/run.log
     sleep 60;
 done
