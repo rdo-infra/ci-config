@@ -33,6 +33,10 @@ read_lp(){
             Incomplete
 }
 
+read_bz(){
+    bugzilla_bugs_mariadb.py
+}
+
 read_noop(){
     releases="master rocky queens pike"
     types="upstream rdo tempest"
@@ -57,5 +61,6 @@ while true; do
     # noop jobs have been disabled
     # load_mariadb noop 2>&1 | tee /tmp/run.log
     load_mariadb lp 2>&1 | tee /tmp/run.log
+    load_mariadb bz 2>&1 | tee /tmp/run.log
     sleep 60;
 done
