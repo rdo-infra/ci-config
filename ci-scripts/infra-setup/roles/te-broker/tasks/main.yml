@@ -137,14 +137,12 @@
       group: root
       mode: 0644
 
-  - name: Create cron job to clean old tebroker baremetal logs
+  - name: Create cron job to run mini cleanup of failed stacks and servers in error
     cron:
-      name: 'Cleaning old tebroker baremetal logs'
-      weekday: 0
+      name: 'Cleaning failed stacks and servers in error'
       minute: 30
-      hour: 12
-      user: root
-      job: 'find {{ logsdir }}/console-logs/ -type f -mtime +30 -print -delete | systemd-cat -t tebroker-log -p info'
+      job: 'source /etc/nodepoolrc && bash /opt/stack/ci-config/ci-scripts/infra-cleanup/cleanup-failed-stacks.sh 2>&1 > /var/log/mini_clean_failed_stacks.log \
+            && bash /opt/stack/ci-config/ci-scripts/infra-cleanup/cleanup-servers.sh 2>&1 > /var/log/mini_clean_errored_servers.log'
 
   - name: Create cron job to clean OVB old stacks
     cron:
