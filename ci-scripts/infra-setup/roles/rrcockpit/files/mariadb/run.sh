@@ -31,6 +31,20 @@ read_lp(){
             'In Progress' \
             'Fix Committed' \
             Incomplete
+
+    launchpad_bugs_mariadb.py \
+        --tag ci \
+        --status \
+            New
+
+    launchpad_bugs_mariadb.py \
+        --status \
+            New
+}
+
+read_recent_lp(){
+    launchpad_bugs_mariadb.py \
+        --previous_days=1
 }
 
 read_bz(){
@@ -62,5 +76,6 @@ while true; do
     # load_mariadb noop 2>&1 | tee /tmp/run.log
     load_mariadb lp 2>&1 | tee /tmp/run.log
     load_mariadb bz 2>&1 | tee /tmp/run.log
+    load_mariadb recent_lp 2>&1 | tee /tmp/run.log
     sleep 60;
 done
