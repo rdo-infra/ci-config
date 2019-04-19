@@ -1,19 +1,44 @@
 #!/usr/bin/env python
-import os
 import argparse
+import os
+import sys
 
+from datetime import datetime, timedelta
 from launchpadlib.launchpad import Launchpad
+import pdb
 
 cachedir = "{}/.launchpadlib/cache/".format(os.path.expanduser('~'))
 
 
-def get_bugs(tag, status):
+def get_bugs(status, tag=None, previous_days=None):
     launchpad = Launchpad.login_anonymously(
         'OOOQ Ruck Rover', 'production', cachedir, version='devel')
     project = launchpad.projects['tripleo']
 
     # We can filter by status too
-    bugs = project.searchTasks(tags=tag, status=status)
+    if tag is not None and previous_days is None:
+        bugs = project.searchTasks(
+            status=status,
+            tags=tag)
+    elif tag is None and previous_days is None:
+        bugs = project.searchTasks(
+            status=status)
+    elif tag is None and previous_days is not None:
+        days_to_search = datetime.utcnow() - timedelta(days=int(previous_days))
+        bugs = project.searchTasks(
+            status=status,
+            created_since=days_to_search)
+    elif tag is not None and previous_days is not None:
+        days_to_search = datetime.utcnow() - timedelta(days=int(previous_days))
+        bugs = project.searchTasks(
+            status=status,
+            created_since=days_to_search,
+            tags=tag)
+    else:
+        print("invalid combination of parameters")
+        sys.exit(1)
+
+    #pdb.set_trace()
     return bugs
 
 
@@ -38,10 +63,11 @@ def main():
 
     parser.add_argument('--tag')
     parser.add_argument('--status', nargs='+',
-                        default=['New', 'Triaged', 'In Progress'])
+                        default=['New', 'Triaged', 'In Progress']),
+    parser.add_argument('--previous_days')
     args = parser.parse_args()
 
-    print_as_csv(args.tag, get_bugs(args.tag, args.status))
+    print_as_csv(args.tag, get_bugs(args.status, args.tag, args.previous_days))
 
 
 if __name__ == '__main__':
