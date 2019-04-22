@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+import json
 import os
 import sys
 
@@ -43,18 +44,22 @@ def get_bugs(status, tag=None, previous_days=None):
     return bugs
 
 
-def print_as_csv(tag, bug_tasks):
+def print_as_csv(bug_tasks):
     if bug_tasks:
         for bug_task in bug_tasks:
             print(('{},{},{},{},"{}"').format(
                     bug_task.bug.id,
                     bug_task.status,
-                    tag,
+                    json.dumps(bug_task.bug.tags).replace(
+                        ',', ' ').replace(
+                        '"', '').replace(
+                        '[', '').replace(
+                        ']', ''),
                     bug_task.web_link,
-                    bug_task.bug.title.replace(
+                    json.dumps(bug_task.bug.title).replace(
                         '"', "'").replace(
                         "\\n", "").replace(
-                        "\\", ""), bug_task.status))
+                        "\\", "")))
 
 
 def main():
@@ -65,10 +70,12 @@ def main():
     parser.add_argument('--tag')
     parser.add_argument('--status', nargs='+',
                         default=['New', 'Triaged', 'In Progress']),
-    parser.add_argument('--previous_days')
+    parser.add_argument('--previous_days', default=365)
     args = parser.parse_args()
 
-    print_as_csv(args.tag, get_bugs(args.status, args.tag, args.previous_days))
+    print_as_csv(get_bugs(args.status,
+                          args.tag,
+                          args.previous_days))
 
 
 if __name__ == '__main__':
