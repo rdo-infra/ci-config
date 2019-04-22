@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+import json
 import os
 import sys
 
@@ -57,6 +58,24 @@ def print_as_csv(tag, bug_tasks):
                         "\\", ""), bug_task.status))
 
 
+def print_as_csv_no_tag(bug_tasks):
+    if bug_tasks:
+        for bug_task in bug_tasks:
+            print(('{},{},{},{},"{}"').format(
+                    bug_task.bug.id,
+                    bug_task.status,
+                    json.dumps(bug_task.bug.tags).replace(
+                        ',',' ').replace(
+                        '"','').replace(
+                        '[','').replace(
+                        ']',''),
+                    bug_task.web_link,
+                    bug_task.bug.title.replace(
+                        '"', "'").replace(
+                        "\\n", "").replace(
+                        "\\", ""), bug_task.status))
+
+
 def main():
 
     parser = argparse.ArgumentParser(
@@ -68,7 +87,10 @@ def main():
     parser.add_argument('--previous_days')
     args = parser.parse_args()
 
-    print_as_csv(args.tag, get_bugs(args.status, args.tag, args.previous_days))
+    if args.tag is not None:
+        print_as_csv(args.tag, get_bugs(args.status, args.tag, args.previous_days))
+    else:
+        print_as_csv_no_tag(get_bugs(args.status, args.tag, args.previous_days))
 
 
 if __name__ == '__main__':
