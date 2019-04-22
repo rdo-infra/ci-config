@@ -5,7 +5,7 @@ import http_utils
 import json
 import re
 
-GERRIT_URL = 'https://review.openstack.org'
+GERRIT_URL = 'https://review.opendev.org'
 
 CI_NAME = {
     'upstream': 'zuul',
