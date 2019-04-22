@@ -77,5 +77,5 @@ while true; do
     load_mariadb lp 2>&1 | tee /tmp/run.log
     load_mariadb bz 2>&1 | tee /tmp/run.log
     load_mariadb recent_lp 2>&1 | tee /tmp/run.log
-    sleep 60;
+    sleep 360;
 done
