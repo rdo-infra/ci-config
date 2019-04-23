@@ -46,7 +46,7 @@ api_repo_status_get = [
         timestamp=1551428403,
         url=(
             'https://logs.rdoproject.org/openstack-periodic/git.openstack.org/'
-            'openstack-infra/tripleo-ci/master/'
+            'openstack/tripleo-ci/master/'
             'periodic-tripleo-ci-centos-7-multinode-1ctlr-featureset030-master/'
             '8ed900e')),
     # This simulates a complete failed job using the old TOCI_JOBTYPE id report
@@ -60,7 +60,7 @@ api_repo_status_get = [
         timestamp=1551428534,
         url=(
             'https://logs.rdoproject.org/openstack-periodic/git.openstack.org/'
-            'openstack-infra/tripleo-ci/master/'
+            'openstack/tripleo-ci/master/'
             'periodic-tripleo-ci-centos-7-ovb-3ctlr_1comp_1supp-'
             'featureset039-master/2791714')),
     # This simulates a complete failed job using the new zuul.job id report
@@ -75,7 +75,7 @@ api_repo_status_get = [
         timestamp=1551428540,
         url=(
             'https://logs.rdoproject.org/openstack-periodic/git.openstack.org/'
-            'openstack-infra/tripleo-ci/master/'
+            'openstack/tripleo-ci/master/'
             'periodic-tripleo-ci-centos-7-ovb-3ctlr_1comp_1supp-'
             'featureset039-master/2791714'))
 ]

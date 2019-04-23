@@ -12,7 +12,7 @@ from diskcache import Cache
 OOO_PROJECTS = [
     'openstack/puppet-tripleo', 'openstack/python-tripleoclient',
     'openstack/tripleo-upgrade', 'openstack/tripleo-quickstart-extras',
-    'openstack/tripleo-common', 'openstack-infra/tripleo-ci',
+    'openstack/tripleo-common', 'openstack/tripleo-ci',
     'openstack/tripleo-quickstart', 'openstack/tripleo-heat-templates'
 ]
 
