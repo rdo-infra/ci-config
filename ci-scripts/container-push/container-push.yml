@@ -16,6 +16,7 @@
     script_root: "{{ lookup('env', 'SCRIPT_ROOT') }}"
     distro_name: "{{ lookup('env', 'DISTRO_NAME') }}"
     distro_version: "{{ lookup('env', 'DISTRO_VERSION') }}"
+    release: "{{ lookup('env','RELEASE') }}"
     dockerhub_namespace: "tripleo{{ lookup('env','RELEASE') }}"
     dockerhub_username: "{{ lookup('env','DOCKERHUB_USERNAME') }}"
     dockerhub_password: "{{ lookup('env','DOCKERHUB_PASSWORD') }}"
@@ -33,6 +34,7 @@
         - named_label
         - dockerhub_namespace
         - rdoproject_namespace
+        - release
 
     - name: Construct dlrn_dir from full_hash (turn xxyyz* into xx/yy/xxyyz*)
       set_fact:
@@ -40,16 +42,22 @@
 
     - name: Construct the DLRN URL for the promoted hash
       set_fact:
-        dlrn_url: "https://trunk.rdoproject.org/{{ distro_name }}{{ distro_version }}-{{ lookup('env','RELEASE') }}/{{ dlrn_dir }}/versions.csv"
+        dlrn_url: "https://trunk.rdoproject.org/{{ distro_name }}{{ distro_version }}-{{ release }}/{{ dlrn_dir }}/versions.csv"
 
     - name: Get the tripleo-common commit in the promoted hash
       shell: >
         curl {{ dlrn_url }} | grep ',openstack-tripleo-common-[0-9]' | cut -f3 -d','
       register: local_release
 
-    - name: Set the release_url
+    - name: Set the release_url - master
       set_fact:
         release_url: "https://opendev.org/openstack/tripleo-common/raw/branch/master/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}"
+      when: release == 'master'
+
+    - name: Set the release_url - stable
+      set_fact:
+        release_url: "https://opendev.org/openstack/tripleo-common/raw/branch/stable/{{ release }}/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}"
+      when: release != 'master'
 
     - name: Generate list of containers to push
       shell: |
