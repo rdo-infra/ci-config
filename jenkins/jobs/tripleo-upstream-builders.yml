@@ -57,6 +57,16 @@
             # cat the playbook to the workspace
             cat << EOF > ${WORKSPACE}/prepare-for-containers-build.yml
             ---
+            - name: 'Setup CICO node for container builds'
+              hosts: openstack_nodes
+              become: yes
+              become_user: root
+              tasks:
+                - shell: |
+                    iptables -N openstack-INPUT
+                    yum install -y git gcc libffi-devel openssl-devel
+                    pip install ansible
+
             - name: 'Clone git dependencies'
               hosts: openstack_nodes
               tasks:
@@ -70,16 +80,6 @@
                     - 'kolla'
                     - 'python-tripleoclient'
                     - 'tripleo-common'
-
-            - name: 'Setup CICO node for container builds'
-              hosts: openstack_nodes
-              become: yes
-              become_user: root
-              tasks:
-                - shell: |
-                    iptables -N openstack-INPUT
-                    yum install -y git gcc libffi-devel openssl-devel
-                    pip install ansible
             EOF
 
             # cico-get-node requests a duffy node and generates an ansible-compatible
