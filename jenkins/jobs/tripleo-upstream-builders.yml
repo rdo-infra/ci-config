@@ -44,6 +44,10 @@
             VENV="${WORKSPACE}/venv"
             OPENSTACK_GIT_URL="https://opendev.org/openstack"
 
+            # Remove localhost from the ansible inventory as we only want to
+            # run the playbooks on the remote node.
+            sed 's/localhost.*//g' ${WORKSPACE}/hosts
+
             [[ ! -d "${VENV}" ]] && virtualenv "${VENV}"
             source "${VENV}/bin/activate"
 
