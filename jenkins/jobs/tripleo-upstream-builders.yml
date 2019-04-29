@@ -41,6 +41,7 @@
     builders:
          - shell: |
             WORKSPACE="${WORKSPACE:-/tmp}"
+            CICO_USER_DIR="${CICO_USER_DIR:-/root}"
             VENV="${WORKSPACE}/venv"
             OPENSTACK_GIT_URL="https://opendev.org/openstack"
 
@@ -74,7 +75,7 @@
                 - name: 'Clone git dependency'
                   git:
                     repo: '${OPENSTACK_GIT_URL}/{{ item }}.git'
-                    dest: '${WORKSPACE}/src/opendev.org/openstack/{{ item }}'
+                    dest: '${CICO_USER_DIR}/src/opendev.org/openstack/{{ item }}'
                   with_items:
                     - 'ansible-role-container-registry'
                     - 'tripleo-repos'
@@ -87,9 +88,9 @@
               roles:
                 - role: tripleo-repos
                   override_repos: "{{ buildcontainers_override_repos | default('') }}"
-                  tripleo_repos_repository: "${WORKSPACE}/{{ zuul.projects['opendev.org/openstack/tripleo-repos'].src_dir }}"
+                  tripleo_repos_repository: "${CICO_USER_DIR}/{{ zuul.projects['opendev.org/openstack/tripleo-repos'].src_dir }}"
                 - role: bindep
-                  bindep_dir: "${WORKSPACE}/{{ zuul.projects['opendev.org/openstack/python-tripleoclient'].src_dir }}"
+                  bindep_dir: "${CICO_USER_DIR}/{{ zuul.projects['opendev.org/openstack/python-tripleoclient'].src_dir }}"
               tasks:
                 - name: Run build containers pre tasks
                   include_role:
