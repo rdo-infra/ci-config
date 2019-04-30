@@ -1,8 +1,9 @@
 set -ex
+CICO_USER_DIR=${CICO_USER_DIR:-/root}
 WORKSPACE=${WORKSPACE:-/tmp}
 ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
 LOGSERVER="logs.rdoproject.org ansible_user=uploader"
-SOURCE="${WORKSPACE}/workspace/logs"
+SOURCE="${CICO_USER_DIR}/workspace/logs"
 DESTINATION="/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
 VENV="${WORKSPACE}/venv"
 
@@ -28,9 +29,9 @@ cat << EOF > collect-logs.yaml
   gather_facts: no
   tasks:
    - shell: |
-        mkdir -p ${WORKSPACE}/workspace/logs
+        mkdir -p ${CICO_USER_DIR}/workspace/logs
 
-        pushd ${WORKSPACE}/workspace
+        pushd ${CICO_USER_DIR}/workspace
             cp *.log ./logs/
             cp *.conf ./logs/
         popd
