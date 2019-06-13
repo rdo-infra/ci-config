@@ -23,6 +23,8 @@
               pipeline: "periodic"
 
             use_buildah: "true"
+            push_containers: true
+            push_registry: trunk.registry.rdoproject.org
             EOF
 
             cat <<EOF >> ${WORKSPACE}/roles/tripleo-repos/vars/main.yml
@@ -65,7 +67,7 @@
               tasks:
                 - shell: |
                     iptables -N openstack-INPUT
-                    yum install -y gcc git python-devel python-setuptools libffi libffi-devel openssl openssl-devel
+                    yum install -y gcc git python-devel python-setuptools python-docker libffi libffi-devel openssl openssl-devel
                     easy_install pip
                     pip install ansible==2.5.8
 
@@ -85,6 +87,18 @@
                     - 'kolla'
                     - 'python-tripleoclient'
                     - 'tripleo-common'
+
+            - name: Login to RDO registry
+              become: "{{ item }}"
+              docker_login:
+                registry_url: "https://trunk.registry.rdoproject.org"
+                username: "tripleo.service"
+                password: "${RDO_REGISTRY_TOKEN}"
+                reauthorize: true
+              when: push_containers|default(true)|bool
+              with_items:
+                - true
+                - false
 
             - name: 'Setup TripleO Container Registry and repos mirror'
               hosts: openstack_nodes
