@@ -3,6 +3,8 @@ CICO_USER_DIR=${CICO_USER_DIR:-/root}
 WORKSPACE=${WORKSPACE:-/tmp}
 ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
 LOGSERVER="logs.rdoproject.org ansible_user=uploader"
+LOG_DISPLAY_URL="https://centos.logs.rdoproject.org/${JOB_NAME}/${BUILD_NUMBER}"
+CI_CENTOS_URL="https://ci.centos.org/job/${JOB_NAME}/${BUILD_NUMBER}"
 SOURCE="${CICO_USER_DIR}/workspace/logs"
 DESTINATION="/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
 VENV="${WORKSPACE}/venv"
@@ -34,6 +36,8 @@ cat << EOF > collect-logs.yaml
         pushd ${CICO_USER_DIR}/workspace
             cp *.log ./logs/
             cp *.conf ./logs/
+
+            curl -o ./logs/consoleText.txt ${CI_CENTOS_URL}/consoleText
         popd
 
 - name: Collect logs from cico node
@@ -59,6 +63,9 @@ cat << EOF > collect-logs.yaml
       synchronize:
         src: "${WORKSPACE}/logs"
         dest: "${DESTINATION}/"
+
+    - shell: |
+        echo "All collected logs are available at ${LOG_DISPLAY_URL}"
 EOF
 
 # Run the playbooks.
