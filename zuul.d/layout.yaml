@@ -9,11 +9,29 @@
             pre-run: playbooks/pre-run-docker.yml
             success-url: "tox/reports.html"
             failure-url: "tox/reports.html"
+            files:
+              - ^ci-scripts/infra-.*/.*
+              - ^requirements.txt
+              - ^test-requirements.txt
+              - ^setup.cfg
+              - ^setup.py
+              - ^tox.ini
+              - ^molecule/.*
+              - ^playbooks/.*
         - tox-py36: &py36
             pre-run: playbooks/pre-run-docker.yml
             success-url: "tox/reports.html"
             failure-url: "tox/reports.html"
             nodeset: rdo-fedora-28
+            files:
+              - ^ci-scripts/infra-.*/.*
+              - ^requirements.txt
+              - ^test-requirements.txt
+              - ^setup.cfg
+              - ^setup.py
+              - ^tox.ini
+              - ^molecule/.*
+              - ^playbooks/.*
     gate:
       jobs:
         - tox-jjb
