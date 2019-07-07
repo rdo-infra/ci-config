@@ -3,9 +3,9 @@
 import argparse
 import datetime
 import time
+import re
 import requests
 import yaml
-import re
 
 from diskcache import Cache
 
@@ -13,7 +13,9 @@ OOO_PROJECTS = [
     'openstack/puppet-tripleo', 'openstack/python-tripleoclient',
     'openstack/tripleo-upgrade', 'openstack/tripleo-quickstart-extras',
     'openstack/tripleo-common', 'openstack/tripleo-ci',
-    'openstack/tripleo-quickstart', 'openstack/tripleo-heat-templates'
+    'openstack/tripleo-quickstart', 'openstack/tripleo-heat-templates',
+    'openstack/tripleo-ansible', 'openstack/tripleo-validations',
+    'rdo-infra/ansible-role-tripleo-ci-reproducer'
 ]
 
 TIMESTAMP_PATTERN = '%Y-%m-%dT%H:%M:%S'
@@ -54,8 +56,8 @@ def to_seconds(duration):
         hours=x.tm_hour, minutes=x.tm_min, seconds=x.tm_sec).total_seconds()
 
 
-def get(url, query={}, timeout=20, json_view=True):
-
+def get(url, query=None, timeout=20, json_view=True):
+    query = query or {}
     try:
         response = requests.get(url, params=query, timeout=timeout)
     except Exception:
@@ -96,7 +98,7 @@ def get_file_from_build(build, file_relative_path):
             r = requests.get(file_path)
             if r.ok:
                 cache.add(
-                    file_path, yaml.load(r.content),
+                    file_path, yaml.safe_load(r.content),
                     expire=259200)  # expire is 3 days
             # Add negative cache
             else:
@@ -207,10 +209,10 @@ def influx(build):
              build.get('provider', 'null'), to_ts(build['end_time'])))
 
 
-def print_influx(type, builds):
+def print_influx(build_type, builds):
     if builds:
         for build in builds:
-            build['type'] = type
+            build['type'] = build_type
             for ara_json in ARA_JSONS:
                 print_influx_ara_tasks(build, ara_json)
             print(influx(build))
