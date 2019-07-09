@@ -1,12 +1,12 @@
 - job:
     name: tox-jjb
     run: playbooks/tox-jjb-run.yml
+
 - project:
     check:
       jobs:
         - tox-jjb
         - tox-py27: &py27
-            pre-run: playbooks/pre-run-docker.yml
             success-url: "tox/reports.html"
             failure-url: "tox/reports.html"
             files:
@@ -20,10 +20,9 @@
               - ^playbooks/.*
               - .*\.py
         - tox-py36: &py36
-            pre-run: playbooks/pre-run-docker.yml
             success-url: "tox/reports.html"
             failure-url: "tox/reports.html"
-            nodeset: rdo-fedora-28
+            nodeset: rdo-fedora-stable
             files:
               - ^ci-scripts/infra-.*/.*
               - ^requirements.txt
@@ -31,9 +30,16 @@
               - ^setup.cfg
               - ^setup.py
               - ^tox.ini
-              - ^molecule/.*
               - ^playbooks/.*
-              - .*\.py
+        - rdo-tox-molecule:
+            files:
+              - .*molecule.*
+              - ^playbooks/.*
+              - ^requirements.txt
+              - ^test-requirements.txt
+              - ^setup.cfg
+              - ^tox.ini
+              - ^ci-scripts/infra-setup/roles/hubbot/.*
     gate:
       jobs:
         - tox-jjb
