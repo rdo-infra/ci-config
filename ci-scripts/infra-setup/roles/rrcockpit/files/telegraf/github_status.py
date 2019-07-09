@@ -5,20 +5,23 @@ import requests
 from influxdb_utils import format_ts_from_str
 
 INFLUXDB_LINE = 'github-status message="{}",status="{}",status_enum={} {}'
-STATUS_MAPPING = {'good': 0, 'minor': -1, 'major': -2}
+STATUS_MAPPING = {'none': 0, 'minor': -1, 'major': -2, 'critical': -3}
 
 # ISO 8601
-TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+TIMESTAMP_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
 
 def main():
-    r = requests.get("https://status.github.com/api/messages.json")
+    r = requests.get("https://kctbh9vrtdwd.statuspage.io/api/v2/status.json")
     if r.ok:
-        for message in r.json():
+        message = r.json()
+        if message:
             print(INFLUXDB_LINE.format(
-                message['body'], message['status'],
-                STATUS_MAPPING[message['status']],
-                format_ts_from_str(message['created_on'], TIMESTAMP_FORMAT)))
+                message['status']['description'],
+                message['status']['indicator'],
+                STATUS_MAPPING[message['status']['indicator']],
+                format_ts_from_str(message['page']['updated_at'],
+                                   TIMESTAMP_FORMAT)))
 
 
 if __name__ == '__main__':
