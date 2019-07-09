@@ -1,0 +1,14 @@
+- project-template:
+    name: rdo-tox-molecule
+    description: |
+      Runs Ansible molecule testing using tox 'molecule' environment.
+    check:
+      jobs:
+        - tox-molecule: &data
+            success-url: "tox/reports.html"
+            failure-url: "tox/reports.html"
+            nodeset: rdo-fedora-28
+    gate:
+      jobs:
+        - tox-molecule:
+            <<: *data
