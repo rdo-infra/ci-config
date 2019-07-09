@@ -6,9 +6,9 @@ import re
 import json
 import datetime
 
-# This file is running on te-broker periodically
+# This file is running on toolbox periodically
 
-FILE_PATH = '/var/www/html/tebroker/influxdb_stats'
+FILE_PATH = '/var/www/html/toolbox/influxdb_stats'
 SECRETS = "/etc/nodepoolrc"
 re_ex = re.compile(r"^export ([^\s=]+)=(\S+)")
 
