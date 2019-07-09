@@ -3284,6 +3284,19 @@
                 "type":"table"
             },
             {
+                "collapsed":false,
+                "gridPos":{
+                    "h":1,
+                    "w":24,
+                    "x":0,
+                    "y":73
+                },
+                "id":403,
+                "panels":[],
+                "title":"Reproducer",
+                "type":"row"
+            },
+            {
                 "columns":[],
                 "datasource":"telegraf",
                 "fontSize":"100%",
@@ -3291,7 +3304,7 @@
                     "h":5,
                     "w":24,
                     "x":0,
-                    "y":73
+                    "y":74
                 },
                 "id":381,
                 "links":[],
@@ -3619,12 +3632,347 @@
                 "type":"table"
             },
             {
+                "columns":[],
+                "datasource":"telegraf",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":5,
+                    "w":24,
+                    "x":0,
+                    "y":79
+                },
+                "id":397,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"project",
+                                "operator":"=",
+                                "value":"rdo-infra/ansible-role-tripleo-ci-reproducer"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"check"
+                            }
+                        ]
+                    }
+                ],
+                "title":"Reproducer check jobs",
+                "transform":"table",
+                "type":"table"
+            },
+            {
                 "collapsed":true,
                 "gridPos":{
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":78
+                    "y":84
                 },
                 "id":140,
                 "panels":[
@@ -3637,7 +3985,7 @@
                             "h":10,
                             "w":12,
                             "x":0,
-                            "y":3
+                            "y":79
                         },
                         "id":242,
                         "links":[
@@ -3773,7 +4121,7 @@
                             "h":10,
                             "w":12,
                             "x":12,
-                            "y":3
+                            "y":79
                         },
                         "id":155,
                         "links":[
@@ -3910,7 +4258,7 @@
                             "h":8,
                             "w":12,
                             "x":0,
-                            "y":13
+                            "y":89
                         },
                         "id":345,
                         "links":[
@@ -4046,7 +4394,7 @@
                             "h":8,
                             "w":12,
                             "x":12,
-                            "y":13
+                            "y":89
                         },
                         "id":322,
                         "links":[
@@ -4181,7 +4529,7 @@
                             "h":7,
                             "w":4,
                             "x":0,
-                            "y":21
+                            "y":97
                         },
                         "id":351,
                         "links":[
@@ -4266,7 +4614,7 @@
                             "h":7,
                             "w":4,
                             "x":4,
-                            "y":21
+                            "y":97
                         },
                         "id":356,
                         "links":[
@@ -4351,7 +4699,7 @@
                             "h":7,
                             "w":4,
                             "x":8,
-                            "y":21
+                            "y":97
                         },
                         "id":357,
                         "links":[
@@ -4437,7 +4785,7 @@
                             "h":7,
                             "w":12,
                             "x":12,
-                            "y":21
+                            "y":97
                         },
                         "id":358,
                         "links":[
@@ -4574,7 +4922,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":79
+                    "y":85
                 },
                 "id":340,
                 "panels":[],
@@ -4589,7 +4937,7 @@
                     "h":11,
                     "w":5,
                     "x":0,
-                    "y":80
+                    "y":86
                 },
                 "id":160,
                 "limit":"100",
@@ -4616,7 +4964,7 @@
                     "h":11,
                     "w":5,
                     "x":5,
-                    "y":80
+                    "y":86
                 },
                 "id":159,
                 "limit":"100",
@@ -4650,7 +4998,7 @@
                     "h":11,
                     "w":5,
                     "x":10,
-                    "y":80
+                    "y":86
                 },
                 "id":165,
                 "limit":"100",
@@ -4683,7 +5031,7 @@
                     "h":11,
                     "w":4,
                     "x":15,
-                    "y":80
+                    "y":86
                 },
                 "id":161,
                 "limit":"100",
@@ -4710,7 +5058,7 @@
                     "h":3,
                     "w":5,
                     "x":19,
-                    "y":80
+                    "y":86
                 },
                 "id":162,
                 "limit":"100",
@@ -4737,7 +5085,7 @@
                     "h":3,
                     "w":5,
                     "x":19,
-                    "y":83
+                    "y":89
                 },
                 "id":192,
                 "limit":10,
@@ -4764,7 +5112,7 @@
                     "h":5,
                     "w":5,
                     "x":19,
-                    "y":86
+                    "y":92
                 },
                 "id":198,
                 "limit":10,
@@ -4789,7 +5137,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":91
+                    "y":97
                 },
                 "hideTimeOverride":false,
                 "id":206,
@@ -5057,15 +5405,15 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":99
+                    "y":105
                 },
                 "hideTimeOverride":false,
-                "id":393,
+                "id":404,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1562520379254,
+                "repeatIteration":1562684817301,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -5327,15 +5675,15 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":107
+                    "y":113
                 },
                 "hideTimeOverride":false,
-                "id":394,
+                "id":405,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1562520379254,
+                "repeatIteration":1562684817301,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -5597,15 +5945,15 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":115
+                    "y":121
                 },
                 "hideTimeOverride":false,
-                "id":395,
+                "id":406,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1562520379254,
+                "repeatIteration":1562684817301,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -5867,15 +6215,15 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":123
+                    "y":129
                 },
                 "hideTimeOverride":false,
-                "id":396,
+                "id":407,
                 "links":[],
                 "pageSize":null,
                 "repeat":null,
                 "repeatDirection":"v",
-                "repeatIteration":1562520379254,
+                "repeatIteration":1562684817301,
                 "repeatPanelId":206,
                 "scopedVars":{
                     "releases":{
@@ -6135,7 +6483,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":131
+                    "y":137
                 },
                 "id":51,
                 "panels":[],
@@ -6153,7 +6501,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":132
+                    "y":138
                 },
                 "hideTimeOverride":true,
                 "id":157,
@@ -6384,7 +6732,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":139
+                    "y":145
                 },
                 "hideTimeOverride":true,
                 "id":307,
@@ -6616,7 +6964,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":146
+                    "y":152
                 },
                 "id":317,
                 "legend":{
@@ -6867,7 +7215,7 @@
                     "h":6,
                     "w":4,
                     "x":0,
-                    "y":152
+                    "y":158
                 },
                 "id":71,
                 "legend":{
@@ -7039,7 +7387,7 @@
                     "h":6,
                     "w":4,
                     "x":4,
-                    "y":152
+                    "y":158
                 },
                 "id":72,
                 "legend":{
@@ -7206,7 +7554,7 @@
                     "h":6,
                     "w":16,
                     "x":8,
-                    "y":152
+                    "y":158
                 },
                 "id":55,
                 "legend":{
@@ -7424,7 +7772,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":158
+                    "y":164
                 },
                 "id":79,
                 "legend":{
@@ -7622,7 +7970,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":158
+                    "y":164
                 },
                 "id":80,
                 "legend":{
@@ -7803,7 +8151,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":164
+                    "y":170
                 },
                 "id":82,
                 "panels":[],
@@ -7859,7 +8207,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":165
+                    "y":171
                 },
                 "hideTimeOverride":false,
                 "id":110,
@@ -8046,7 +8394,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":165
+                    "y":171
                 },
                 "hideTimeOverride":false,
                 "id":116,
@@ -8232,7 +8580,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":165
+                    "y":171
                 },
                 "id":130,
                 "legend":{
@@ -8398,7 +8746,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":169
+                    "y":175
                 },
                 "hideTimeOverride":false,
                 "id":263,
@@ -8580,7 +8928,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":169
+                    "y":175
                 },
                 "id":273,
                 "legend":{
@@ -8760,7 +9108,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":169
+                    "y":175
                 },
                 "id":274,
                 "legend":{
@@ -8927,7 +9275,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":173
+                    "y":179
                 },
                 "hideTimeOverride":false,
                 "id":213,
@@ -9110,7 +9458,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":173
+                    "y":179
                 },
                 "id":214,
                 "legend":{
@@ -9291,7 +9639,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":173
+                    "y":179
                 },
                 "id":216,
                 "legend":{
@@ -9462,7 +9810,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":177
+                    "y":183
                 },
                 "hideTimeOverride":false,
                 "id":117,
@@ -9645,7 +9993,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":177
+                    "y":183
                 },
                 "id":118,
                 "legend":{
@@ -9830,7 +10178,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":177
+                    "y":183
                 },
                 "id":131,
                 "legend":{
@@ -10001,7 +10349,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":181
+                    "y":187
                 },
                 "id":123,
                 "legend":{
@@ -10187,7 +10535,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":181
+                    "y":187
                 },
                 "id":125,
                 "legend":{
@@ -10372,7 +10720,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":181
+                    "y":187
                 },
                 "id":133,
                 "legend":{
@@ -10502,7 +10850,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":185
+                    "y":191
                 },
                 "id":298,
                 "panels":[
@@ -11210,7 +11558,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":186
+                    "y":192
                 },
                 "id":4,
                 "panels":[],
@@ -11228,7 +11576,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":187
+                    "y":193
                 },
                 "id":209,
                 "legend":{
@@ -11346,7 +11694,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":195
+                    "y":201
                 },
                 "id":2,
                 "links":[],
@@ -11414,7 +11762,7 @@
                     "h":9,
                     "w":12,
                     "x":0,
-                    "y":202
+                    "y":208
                 },
                 "hideTimeOverride":true,
                 "id":196,
@@ -11550,7 +11898,7 @@
                     "h":9,
                     "w":12,
                     "x":12,
-                    "y":202
+                    "y":208
                 },
                 "hideTimeOverride":true,
                 "id":194,
@@ -11652,7 +12000,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":211
+                    "y":217
                 },
                 "id":173,
                 "panels":[],
@@ -11670,7 +12018,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":212
+                    "y":218
                 },
                 "id":175,
                 "legend":{
@@ -11845,7 +12193,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":212
+                    "y":218
                 },
                 "id":177,
                 "legend":{
@@ -12108,7 +12456,7 @@
                     "h":7,
                     "w":12,
                     "x":0,
-                    "y":218
+                    "y":224
                 },
                 "id":179,
                 "legend":{
@@ -12469,7 +12817,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":218
+                    "y":224
                 },
                 "id":181,
                 "legend":{
@@ -12630,7 +12978,7 @@
                     "h":6,
                     "w":7,
                     "x":0,
-                    "y":225
+                    "y":231
                 },
                 "id":183,
                 "legend":{
@@ -12745,7 +13093,7 @@
                     "h":6,
                     "w":9,
                     "x":7,
-                    "y":225
+                    "y":231
                 },
                 "id":185,
                 "legend":{
@@ -12860,7 +13208,7 @@
                     "h":6,
                     "w":8,
                     "x":16,
-                    "y":225
+                    "y":231
                 },
                 "id":187,
                 "legend":{
@@ -13015,7 +13363,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":231
+                    "y":237
                 },
                 "id":364,
                 "legend":{
