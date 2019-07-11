@@ -24,6 +24,9 @@ EOF
 pushd $WORKSPACE
 mkdir -p $WORKSPACE/logs
 
+# Collect terminal output from centos-ci job regardless of job/cico status
+curl -o $WORKSPACE/logs/consoleText.txt ${CI_CENTOS_URL}/consoleText
+
 cat << EOF > collect-logs.yaml
 # Create a playbook to pull the logs down from our cico node
 - name: Group together logs on cico node
@@ -36,8 +39,6 @@ cat << EOF > collect-logs.yaml
         pushd ${CICO_USER_DIR}/workspace
             cp *.log ./logs/
             cp *.conf ./logs/
-
-            curl -o ./logs/consoleText.txt ${CI_CENTOS_URL}/consoleText
         popd
 
 - name: Collect logs from cico node
