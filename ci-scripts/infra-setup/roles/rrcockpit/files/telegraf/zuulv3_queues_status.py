@@ -3,10 +3,12 @@
 import argparse
 from time import time
 import json
+import re
 import requests
 
 
-def find_zuul_queues(zuul_status_url, pipeline_name, queue_name):
+def find_zuul_queues(zuul_status_url, pipeline_name, queue_name,
+                     project_regex):
     queues = []
     zuul_status = json.loads(requests.get(zuul_status_url).content)
 
@@ -14,8 +16,14 @@ def find_zuul_queues(zuul_status_url, pipeline_name, queue_name):
                           for pipeline in zuul_status['pipelines']
                           if pipeline['name'] == pipeline_name)
 
-    found_queues = (queue for queue in found_pipeline
-                    if queue_name is None or queue['name'] == queue_name)
+    if queue_name:
+        found_queues = (queue for queue in found_pipeline
+                        if queue['name'] == queue_name)
+    elif project_regex:
+        found_queues = (queue for queue in found_pipeline
+                        if re.search(project_regex, queue['name']))
+    else:
+        found_queues = (queue for queue in found_pipeline)
 
     for queue in found_queues:
         refspecs = []
@@ -39,7 +47,7 @@ def calculate_minutes_enqueued(enqueue_time):
     return minutes_enqueued
 
 
-def convert_builds_as_influxdb(queues):
+def convert_builds_as_influxdb(queues, max_time=False):
     # Le's express failures as negative numbers, is easier for alarms
 
     result_mapping = {
@@ -53,6 +61,7 @@ def convert_builds_as_influxdb(queues):
                      ",patch_set={patch_set} result=\"{result}\""
                      ",enqueue_time={enqueue_time},"
                      "enqueued_time={enqueued_time},result_code={result_code}")
+    lines = []
     for queue in queues:
         for refspec in queue['refspecs']:
             for job in refspec['jobs']:
@@ -75,8 +84,11 @@ def convert_builds_as_influxdb(queues):
                 id_ = values['id'].split(',')
                 values['review'] = id_[0]
                 values['patch_set'] = id_[1]
-
-                influxdb_lines.append(influxdb_line.format(**values))
+                lines.append(values)
+    if max_time:
+        lines = sorted(lines, key=lambda x: x['enqueued_time'])[-1:]
+    for line in lines:
+        influxdb_lines.append(influxdb_line.format(**line))
     return influxdb_lines
 
 
@@ -87,13 +99,18 @@ def main():
 
     parser.add_argument('--url', required=True)
     parser.add_argument('--pipeline', required=True)
-    parser.add_argument('--queue')
+    parser.add_argument('--max-time', action="store_true",
+                        default=False)
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('--queue')
+    group.add_argument('--project-regex')
 
     args = parser.parse_args()
 
-    queues = find_zuul_queues(args.url, args.pipeline, args.queue)
+    queues = find_zuul_queues(args.url, args.pipeline, args.queue,
+                              args.project_regex)
 
-    influxdb_lines = convert_builds_as_influxdb(queues)
+    influxdb_lines = convert_builds_as_influxdb(queues, max_time=args.max_time)
 
     print('\n'.join(influxdb_lines))
 
