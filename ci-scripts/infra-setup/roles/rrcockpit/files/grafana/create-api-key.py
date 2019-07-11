@@ -22,5 +22,5 @@ if __name__ == '__main__':
     if response.ok:
         print(response.json()['key'])
     else:
-        print(response)
+        print(response.content)
         exit(1)

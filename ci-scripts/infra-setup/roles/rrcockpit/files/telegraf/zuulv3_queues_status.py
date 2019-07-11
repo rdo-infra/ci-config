@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import argparse
-import requests
-import json
 from time import time
+import json
+import requests
 
 
 def find_zuul_queues(zuul_status_url, pipeline_name, queue_name):
@@ -72,9 +72,9 @@ def convert_builds_as_influxdb(queues):
 
                 # influxdb line protocol uses commas to split stuf,
                 # let's escape it
-                id = values['id'].split(',')
-                values['review'] = id[0]
-                values['patch_set'] = id[1]
+                id_ = values['id'].split(',')
+                values['review'] = id_[0]
+                values['patch_set'] = id_[1]
 
                 influxdb_lines.append(influxdb_line.format(**values))
     return influxdb_lines
