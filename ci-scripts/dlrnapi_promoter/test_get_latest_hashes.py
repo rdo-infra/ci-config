@@ -1,6 +1,8 @@
 import mock
+import pytest
 
-from dlrnapi_promoter import get_latest_hashes
+# avoid pytest --collect-only errors with missing imports:
+dlrnapi_promoter = pytest.importorskip('dlrnapi_promoter')
 
 
 @mock.patch('dlrnapi_promoter.fetch_hashes')
@@ -10,7 +12,7 @@ def test_no_hashes_fetched_returns_empty_list(fetch_hashes_mock):
     candidate_hashes = []
     fetch_hashes_mock.side_effect = [candidate_hashes, old_hashes]
 
-    obtained_hashes = get_latest_hashes(
+    obtained_hashes = dlrnapi_promoter.get_latest_hashes(
         'dlrn_api', 'promote_name', 'curent_name', 3)
 
     fetch_hashes_mock.assert_has_calls([
@@ -34,7 +36,7 @@ def test_no_candidates_returns_empty_list(fetch_hashes_mock):
     candidate_hashes = []
     fetch_hashes_mock.side_effect = [candidate_hashes, old_hashes]
 
-    obtained_hashes = get_latest_hashes(
+    obtained_hashes = dlrnapi_promoter.get_latest_hashes(
         'dlrn_api', 'promote_name', 'curent_name', 3)
 
     fetch_hashes_mock.assert_has_calls([
@@ -63,7 +65,7 @@ def test_no_old_hashes_returns_candidates(fetch_hashes_mock):
     ]
     fetch_hashes_mock.side_effect = [candidate_hashes, old_hashes]
 
-    obtained_hashes = get_latest_hashes(
+    obtained_hashes = dlrnapi_promoter.get_latest_hashes(
         'dlrn_api', 'promote_name', 'curent_name', 3)
 
     fetch_hashes_mock.assert_has_calls([
@@ -133,7 +135,7 @@ def test_old_hashes_get_filtered_from_candidates(fetch_hashes_mock):
 
     fetch_hashes_mock.side_effect = [candidate_hashes, old_hashes]
 
-    obtained_hashes = get_latest_hashes(
+    obtained_hashes = dlrnapi_promoter.get_latest_hashes(
         'dlrn_api', 'promote_name', 'curent_name', 3)
 
     fetch_hashes_mock.assert_has_calls([
