@@ -92,37 +92,6 @@ servers:
           - echo 'promoter ansible_connection=local' >  /etc/ansible/hosts
           - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
 
-    - name: hubbot
-      image: "{{ default_image }}"
-      flavor: "{{ default_flavor }}"
-      key_name: "{{ default_keypair_name }}"
-      security_groups:
-        - sec_group_jumphost_access_internal
-      ports:
-        - name: hubbot-port
-          network: "{{ servers_internal_network_name  }}"
-          fixed_ip_address: "{{ hubbot_internal_network_ip }}"
-      nics:
-        - port-name: hubbot-port
-      volumes:
-        - display_name: hubbot-storage
-          size: 1
-      userdata: |
-        #cloud-config
-        packages:
-            - ansible
-            - git
-        package_upgrade: true
-        runcmd:
-          - mkdir -p /etc/ansible/
-          - echo 'hubbot ansible_connection=local' >  /etc/ansible/hosts
-          - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
-        write_files:
-            - path: /root/hubbot_key
-              permissions: '0600'
-              content: |
-        {{ hubbot_ssh_priv_key | indent(10, true) }}
-
     - name: logserver
       image: "{{ default_image }}"
       flavor: "{{ default_flavor }}"
