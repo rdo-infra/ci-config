@@ -1,0 +1,66 @@
+---
+- hosts: localhost
+  gather_facts: false
+  vars:
+    base_dir: "/tmp"
+    sova_git: https://github.com/sshnaidm/sova
+  tasks:
+    - name: Clone master sova
+      git:
+        dest: "{{ base_dir }}/sova-master"
+        repo: "{{ sova_git }}"
+        force: yes
+        clone: yes
+        update: yes
+        version: master
+
+    - name: Check sova check jobs
+      command: ./sova-check --check --repo {{ base_dir }}/sova-master
+      ignore_errors: true
+      register: master
+
+    - name: Clone gates sova
+      git:
+        dest: "{{ base_dir }}/sova-gates"
+        repo: "{{ sova_git }}"
+        force: yes
+        clone: yes
+        update: yes
+        version: gates
+
+    - name: Check sova gates jobs
+      command: ./sova-check --gates --repo {{ base_dir }}/sova-gates
+      ignore_errors: true
+      register: gates
+
+    - name: Clone promotion sova
+      git:
+        dest: "{{ base_dir }}/sova-promotion"
+        repo: "{{ sova_git }}"
+        force: yes
+        clone: yes
+        update: yes
+        version: promotion
+
+    - name: Check sova promotion jobs
+      command: ./sova-check --promotion --repo {{ base_dir }}/sova-promotion
+      ignore_errors: true
+      register: promotion
+
+    - name: Fail if there are differences
+      fail:
+        msg: |
+          Checking configuration of CI and Sova repo failed, see below:
+          ==========================================
+          For check jobs: {% if master.rc == 0 %}passed{% else %}failed{% endif %}
+
+          {{ master.stdout }}
+          ==========================================
+          For gates jobs: {% if gates.rc == 0 %}passed{% else %}failed{% endif %}
+
+          {{ gates.stdout }}
+          ==========================================
+          For promotion jobs: {% if promotion.rc == 0 %}passed{% else %}failed{% endif %}
+
+          {{ promotion.stdout }}
+      when: master is failed or gates is failed or promotion is failed

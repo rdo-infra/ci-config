@@ -1,9 +1,15 @@
 - job:
+    name: sova-tracking-jobs-test
+    run: ci-scripts/infra-setup/scheduler/sova-check.yml
+    nodeset: rdo-fedora-28
+
+- job:
     name: tox-jjb
     run: playbooks/tox-jjb-run.yml
 - project:
     check:
       jobs:
+        - sova-tracking-jobs-test
         - tox-jjb
         - tox-py27: &py27
             pre-run: playbooks/pre-run-docker.yml
@@ -41,3 +47,6 @@
             <<: *py27
         - tox-py36:
             <<: *py36
+
+    periodic:
+      jobs:
