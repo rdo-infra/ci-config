@@ -1,0 +1,241 @@
+#!/usr/bin/env python
+import argparse
+import importlib
+import os
+import requests
+import sys
+import re
+import time
+
+
+UPSTREAM_ZUUL_API = ("https://zuul.opendev.org/api/tenant/"
+                     "openstack/pipeline/%s/project/%s/branch/%s/freeze-jobs")
+RDO_ZUUL_API = ("https://softwarefactory-project.io/zuul/api/tenant/"
+                "rdoproject.org/pipeline/%s/project/%s/branch/%s/freeze-jobs")
+BRANCHES = [
+    'master',
+    'stable/stein',
+    'stable/rocky',
+    'stable/queens'
+]
+PROMOTION_QUEUES = [
+    'openstack-periodic-master',
+    'openstack-periodic-latest-released',
+    'openstack-periodic-24hr',
+
+]
+UPSTREAM_ZUUL_API_BASE = "http://zuul.openstack.org/api/jobs"
+UPSTREAM_JOB_NAMES = [
+    'tripleo-ci-centos',
+    'tripleo-buildimage',
+    'tripleo-build-containers-centos',
+    'tripleo-ci-fedora'
+]
+ALL_BRANCHES = ['master',
+                'stable/stein',
+                'stable/rocky',
+                'stable/queens']
+PROJECTS = [
+    {'openstack/ansible-role-container-registry': ['master']},
+    {'openstack/ansible-role-tripleo-modify-image': ['master']},
+    {'openstack/diskimage-builder': ['master']},
+    {'openstack/openstack-ansible-os_tempest': ['master',
+                                                'stable/stein']},
+    {'openstack/os-apply-config': ALL_BRANCHES},
+    {'openstack/os-collect-config': ALL_BRANCHES},
+    {'openstack/os-net-config': ALL_BRANCHES},
+    {'openstack/os-refresh-config': ALL_BRANCHES},
+    {'openstack/puppet-tripleo': ALL_BRANCHES},
+    {'openstack/python-tripleoclient': ALL_BRANCHES},
+    {'openstack/tripleo-ansible': ['master']},
+    {'openstack/tripleo-ci': ['master']},
+    {'openstack/tripleo-common': ALL_BRANCHES},
+    {'openstack/tripleo-heat-templates': ALL_BRANCHES},
+    {'openstack/tripleo-image-elements': ALL_BRANCHES},
+    {'openstack/tripleo-puppet-elements': ALL_BRANCHES},
+    {'openstack/tripleo-quickstart': ['master']},
+    {'openstack/tripleo-quickstart-extras': ['master']},
+    {'openstack/tripleo-repos': ['master']},
+    {'openstack/tripleo-upgrade': ALL_BRANCHES},
+    {'openstack/tripleo-validations': ALL_BRANCHES},
+    {'openstack/openstack-virtual-baremetal': ['master', 'stable/1.0']},
+]
+NOT_TRACK_OVB = [
+    'openstack/ansible-role-container-registry',
+    'openstack/ansible-role-tripleo-modify-image',
+    'openstack/openstack-ansible-os_tempest',
+    'openstack/tripleo-upgrade',
+    'openstack/tripleo-validations'
+]
+OVB = [i for i in PROJECTS if next(iter(i)) not in NOT_TRACK_OVB]
+
+
+def project_jobs(project, pipeline, filter_str=None, rdo=False):
+    api = UPSTREAM_ZUUL_API if not rdo else RDO_ZUUL_API
+    if filter_str and not isinstance(filter_str, list):
+        filter_str = [filter_str]
+    proj = next((i for i in PROJECTS if next(iter(i.keys())) == project), None)
+    if not proj:
+        return []
+    project_name, branches = list(proj.items())[0]
+    if rdo:
+        project_name = "opendev.org/" + project_name
+    jobs = set()
+    for branch in branches:
+        try:
+            jobs_web = requests.get(
+                api % (pipeline, project_name, branch)).json()
+            if not jobs_web:
+                print("NO jobs found for branch", branch, "project",
+                      project_name)
+            jobs_list = [i['name'] for i in jobs_web]
+            jobs.update(jobs_list)
+        except Exception as e:
+            print("ERROR", "Failed to retrieve branch", branch,
+                  "from project", project_name, "with error", e)
+            continue
+    if jobs and filter_str:
+        return [job for job in jobs
+                if any(name in job for name in filter_str)]
+    else:
+        return list(jobs)
+
+
+def upstream_zuul_api():
+    jobs_web = requests.get(UPSTREAM_ZUUL_API_BASE)
+    jobs = jobs_web.json()
+    tripleo_jobs = [job['name'] for job in jobs
+                    if any(name in job['name'] for name in UPSTREAM_JOB_NAMES)]
+    if not tripleo_jobs:
+        print("Failed to retrieve jobs from Zuul API full list")
+        sys.exit(1)
+    return tripleo_jobs
+
+
+def retrieve_check_jobs(projects=None):
+    if not projects:
+        return upstream_zuul_api()
+    else:
+        jobs = upstream_zuul_api()
+        for project in projects:
+            jobs += project_jobs(project=project, pipeline="check")
+    return jobs
+
+
+def retrieve_ovb_check_jobs():
+    projects = [j for i in OVB for j in i]
+    jobs = []
+    for project in projects:
+        jobs += project_jobs(project=project,
+                             pipeline="openstack-check",
+                             filter_str='tripleo',
+                             rdo=True)
+    return list(set(jobs))
+
+
+def retrive_gate_jobs(projects=None, filter_str=None):
+    jobs = []
+    for project in projects:
+        jobs += project_jobs(project=project,
+                             pipeline="gate", filter_str=filter_str)
+        time.sleep(1)
+    return list(set(jobs))
+
+
+def retrive_promotion_jobs():
+    jobs = []
+    for pipeline in PROMOTION_QUEUES:
+        jobs += project_jobs(project="openstack/tripleo-ci",
+                             pipeline=pipeline,
+                             rdo=True)
+        time.sleep(1)
+    return list(set(jobs))
+
+
+def parse_sova_check(path):
+    sys.path.append(os.path.abspath(os.path.join(path, "tripleoci")))
+    # Workaround for promotion branch where flask is imported
+    with open(os.path.abspath(os.path.join(path, "tripleoci",
+                                           "config.py"))) as f:
+        t = f.read()
+        if "flask" in t:
+            with open(
+                os.path.abspath(os.path.join(
+                    path, "tripleoci", "configbkp.py")), "w") as new:
+                z = 0
+                for i in t.splitlines():
+                    z += 1
+                    if "flask import" in i:
+                        continue
+                    if " Markup('''" in i:
+                        i = re.sub(r'(Markup\(.*\))', '"key_%s"' % z, i)
+                    new.write(i + "\n")
+            from configbkp import COLUMNED_TRACKED_JOBS
+        else:
+            from config import COLUMNED_TRACKED_JOBS  # pylint: disable=all
+    return list({j for i in COLUMNED_TRACKED_JOBS.values() for j in i})
+
+
+def compare(triple_jobs, path):
+    sova_tripleo_jobs = sorted(parse_sova_check(path))
+    jobs_to_complete = set(triple_jobs) - set(sova_tripleo_jobs)
+    if jobs_to_complete:
+        return jobs_to_complete
+    redundant = set(sova_tripleo_jobs) - set(triple_jobs)
+    if redundant:
+        print("Redundant jobs in Sova:\n", "\n".join(redundant))
+
+
+def check(path):
+    triple_jobs = sorted(retrieve_check_jobs())
+    ovb_jobs = sorted(retrieve_ovb_check_jobs())
+    return compare(triple_jobs + ovb_jobs, path)
+
+
+def gate(path):
+    triple_jobs = sorted(retrive_gate_jobs(
+        projects=[j for i in PROJECTS for j in i],
+        filter_str=['tripleo-ci', 'tripleo-build', 'tripleo-standalone']))
+    return compare(triple_jobs, path)
+
+
+def promotion(path):
+    triple_jobs = sorted(retrive_promotion_jobs())
+    return compare(triple_jobs, path)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Sova jobs check")
+    parser.add_argument('--check', default=False, action='store_true',
+                        help="Check if check queue of upstream "
+                             "jobs config is up to date")
+    parser.add_argument('--promotion', default=False, action='store_true',
+                        help="Check if promotion jobs config is up to date")
+    parser.add_argument('--gates', default=False, action='store_true',
+                        help="Check if gates job config is up to date")
+    parser.add_argument('--repo', required=True,
+                        help="Path to sova repository")
+    args = parser.parse_args()
+    if not os.path.exists(args.repo):
+        print("Path %s doesn't exist!" % args.repo)
+        sys.exit(1)
+    if args.check:
+        missed = check(args.repo)
+        if missed:
+            print("Missed jobs in Sova:\n", "\n".join(missed))
+            sys.exit(1)
+    if args.gates:
+        missed = gate(args.repo)
+        if missed:
+            print("Missed jobs in Sova:\n", "\n".join(missed))
+            sys.exit(1)
+    if args.promotion:
+        missed = promotion(args.repo)
+        if missed:
+            print("Missed jobs in Sova:\n", "\n".join(missed))
+            sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
