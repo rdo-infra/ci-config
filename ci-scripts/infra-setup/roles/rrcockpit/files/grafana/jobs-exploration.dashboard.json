@@ -546,25 +546,9 @@
                 "styles":[
                     {
                         "alias":"Time",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "dateFormat":"YYYY-MM-DD",
                         "pattern":"Time",
                         "type":"date"
-                    },
-                    {
-                        "alias":"Branch",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"branch",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
                     },
                     {
                         "alias":"Job",
@@ -578,8 +562,8 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
+                        "linkTooltip":"Statistics",
+                        "linkUrl":"http://zuul.openstack.org/builds?job_name=${__cell}",
                         "mappingType":1,
                         "pattern":"job_name",
                         "thresholds":[
@@ -589,64 +573,25 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"Pipeline",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"pipeline",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
                         "alias":"Duration",
-                        "colorMode":"cell",
+                        "colorMode":null,
                         "colors":[
                             "#2f575e",
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(245, 54, 54, 0.9)"
                         ],
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":1,
+                        "decimals":0,
                         "mappingType":1,
-                        "pattern":"duration",
+                        "pattern":"sum",
                         "thresholds":[
-                            "10000",
-                            "10600"
+                            ""
                         ],
                         "type":"number",
                         "unit":"dtdurations"
                     },
                     {
-                        "alias":"",
-                        "colorMode":"cell",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"result",
-                        "thresholds":[
-                            "AA"
-                        ],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Job",
+                        "alias":"Count",
                         "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
@@ -654,37 +599,36 @@
                             "rgba(50, 172, 45, 0.97)"
                         ],
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
+                        "decimals":0,
                         "link":false,
                         "linkTargetBlank":true,
                         "linkTooltip":"Logs",
                         "linkUrl":"${__cell_7}",
                         "mappingType":1,
-                        "pattern":"log_link",
-                        "sanitize":true,
+                        "pattern":"count",
+                        "sanitize":false,
                         "thresholds":[],
-                        "type":"string",
+                        "type":"number",
                         "unit":"short"
                     },
                     {
-                        "alias":"Patch",
-                        "colorMode":null,
+                        "alias":"Success rate",
+                        "colorMode":"value",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Gerrit",
-                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "decimals":0,
                         "mappingType":1,
-                        "pattern":"change",
-                        "thresholds":[],
+                        "pattern":"sum_count",
+                        "thresholds":[
+                            "80",
+                            "90"
+                        ],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"percent"
                     },
                     {
                         "alias":"",
@@ -714,8 +658,8 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"autogen",
-                        "query":"SELECT \"duration\", \"result\", \"log_url\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' ) AND $timeFilter GROUP BY \"job_name\", \"branch\", \"pipeline\", \"change\"",
-                        "rawQuery":false,
+                        "query":"SELECT count(\"result_num\"), sum(\"duration\"),sum(\"result_num\")*100/count(\"result_num\") FROM \"autogen\".\"build\" WHERE (\"type\" = 'upstream') AND $timeFilter GROUP BY \"job_name\"",
+                        "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
                         "select":[
@@ -730,9 +674,27 @@
                                     "params":[],
                                     "type":"count"
                                 }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"sum"
+                                }
                             ]
                         ],
-                        "tags":[]
+                        "tags":[
+                            {
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            }
+                        ]
                     }
                 ],
                 "timeFrom":null,
@@ -811,6 +773,7 @@
                 ],
                 "thresholds":[],
                 "timeFrom":null,
+                "timeRegions":[],
                 "timeShift":null,
                 "title":"Jobs Frequency Histogram",
                 "tooltip":{
@@ -920,6 +883,7 @@
                 ],
                 "thresholds":[],
                 "timeFrom":null,
+                "timeRegions":[],
                 "timeShift":null,
                 "title":"Jobs Duration Histogram",
                 "tooltip":{
@@ -1044,6 +1008,7 @@
                 ],
                 "thresholds":[],
                 "timeFrom":null,
+                "timeRegions":[],
                 "timeShift":null,
                 "title":"Job build duration per cloud",
                 "tooltip":{
@@ -1170,6 +1135,7 @@
                 ],
                 "thresholds":[],
                 "timeFrom":null,
+                "timeRegions":[],
                 "timeShift":null,
                 "title":"Job builds count per cloud",
                 "tooltip":{
@@ -1211,7 +1177,7 @@
                 }
             }
         ],
-        "schemaVersion":16,
+        "schemaVersion":18,
         "style":"dark",
         "tags":[],
         "templating":{
@@ -1222,6 +1188,7 @@
                     "hide":0,
                     "label":"Influxdb filter",
                     "name":"influxdb_filter",
+                    "skipUrlSync":false,
                     "type":"adhoc"
                 }
             ]
