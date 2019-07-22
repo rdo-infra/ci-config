@@ -44,7 +44,7 @@ def convert_to_influxdb_lines(infra_issues):
         ts = influxdb_utils.format_ts_from_date(index)
         issue = infra_issue['issue'].replace('"', "'")
         formatted += "openstack-infra-issues issue=\"{}\" {}\n".format(
-            issue, ts)
+            issue.encode('utf-8'), ts)
     return formatted
 
 
