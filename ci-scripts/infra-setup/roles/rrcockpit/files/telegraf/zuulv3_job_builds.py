@@ -8,6 +8,7 @@ import requests
 import yaml
 
 from diskcache import Cache
+from promoter_utils import get_promoter_config
 
 OOO_PROJECTS = [
     'openstack/puppet-tripleo', 'openstack/python-tripleoclient',
@@ -107,6 +108,23 @@ def get_file_from_build(build, file_relative_path):
         return cache[file_path]
 
 
+# Get dict with {branch: [promotion-criteria-jobslist ] , ... }
+def get_promotion_joblist():
+    promoter_configs = {} # needs work ... want {Centos: {master: [a,b,c], stein: [e,f,g]}}}
+    for distro in ["CentOS-7", "Fedora-28" ]:
+        for branch in ["master", "stein", "rocky", "queens", "pike"]:
+            branch_config = get_promoter_config(branch, distro)
+            if branch_config:
+                joblist = branch_config.items('current-tripleo')
+                # joblist is list of tuples with (jobname, '') - flatten it
+                flat_config = [item for sublist in joblist for item in sublist]
+                if promoter_configs.get(branch):
+                    promoter_configs[branch].append(flat_config)
+                else:
+                    promoter_configs[branch] = flat_config
+    return promoter_configs
+
+
 def add_inventory_info(build):
     try:
         inventory = get_file_from_build(build, "/zuul-info/inventory.yaml")
@@ -152,7 +170,18 @@ def print_influx_ara_tasks(build, ara_json_file):
         pass
 
 
-def influx(build):
+def check_job_in_promotion_configs(jobname, promotion_configs, branch):
+    if branch:
+        if jobname in promotion_configs[branch]:
+            return branch
+    else:
+        for branch, joblist in promotion_configs.iteritems():
+            if jobname in joblist:
+                return branch
+        return 'None'
+
+
+def influx(build, promotion_configs=None):
 
     add_inventory_info(build)
 
@@ -165,6 +194,11 @@ def influx(build):
     duration = build.get('duration', 0)
     if duration is None:
         duration = 0
+    promotion_criteria = 'None'
+    if promotion_configs:
+        promotion_criteria = check_job_in_promotion_configs(
+            build['job_name'], promotion_configs, build.get('branch', ''))
+
     # Get the nodename
     return ('build,'
             'type=%s,'
@@ -192,7 +226,8 @@ def influx(build):
             'region="%s",'
             'provider="%s"'
             ' '
-            '%s' %
+            '%s'
+            'promote_criteria="%s"' %
             (build['type'], build['pipeline'], 'none' if not build['branch']
              else build['branch'], build['project'], build['job_name'],
              build['voting'], build['change'], build['patchset'], 'True'
@@ -206,16 +241,17 @@ def influx(build):
              to_ts(build['start_time'], seconds=True),
              to_ts(build['end_time'], seconds=True), build.get(
                  'cloud', 'null'), build.get('region', 'null'),
-             build.get('provider', 'null'), to_ts(build['end_time'])))
+             build.get('provider', 'null'), to_ts(build['end_time']),
+             promotion_criteria))
 
 
-def print_influx(build_type, builds):
+def print_influx(build_type, builds, promotion_configs=None):
     if builds:
         for build in builds:
             build['type'] = build_type
             for ara_json in ARA_JSONS:
                 print_influx_ara_tasks(build, ara_json)
-            print(influx(build))
+            print(influx(build, promotion_configs))
 
 
 def main():
@@ -235,6 +271,10 @@ def main():
         '--offset', type=int, default=0, help="(default: %(default)s)")
     args = parser.parse_args()
 
+    promotion_configs = None
+    if args.type == "rdo":
+        promotion_configs = get_promotion_joblist()
+
     for project in OOO_PROJECTS:
         print_influx(
             args.type,
@@ -242,7 +282,7 @@ def main():
                 url=args.url,
                 query={'project': project},
                 pages=args.pages,
-                offset=args.offset))
+                offset=args.offset), promotion_configs)
 
 
 if __name__ == '__main__':
