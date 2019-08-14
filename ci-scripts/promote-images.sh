@@ -6,6 +6,7 @@ set -euo pipefail
 : ${OPT_DISTRO_VERSION:=7}
 : ${OPT_WEBROOT:=/var/www/html/images}
 : ${OPT_WEBSITE:=https://images.rdoproject.org}
+: ${IMAGE_SERVER_USER_HOST:=uploader@images.rdoproject.org}
 
 function usage {
     cat <<-EOF
@@ -59,12 +60,18 @@ PROMOTED_HASH=$2
 LINK_NAME=$3
 
 DISTRO_AND_VERSION="${OPT_DISTRO}${OPT_DISTRO_VERSION}"
+if [[ "${OPT_DISTRO}" == "rhel" ]]; then
+    OPT_DISTRO="redhat"
+    OPT_WEBSITE="http://38.145.34.141/rcm-guest/images"
+    IMAGE_SERVER_USER_HOST=centos@38.145.34.141
+    OPT_WEBROOT="/var/www/rcm-guest/images"
+fi
 
 function sftp_command {
     # "-b -" assures that sftp command exit code is returned
     sftp -b - \
         -o LogLevel=error -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-        uploader@images.rdoproject.org 1>&2 <<EOF
+        ${IMAGE_SERVER_USER_HOST} 1>&2 <<EOF
 $1
 EOF
 }
