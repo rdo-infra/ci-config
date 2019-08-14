@@ -10,7 +10,7 @@ KILLTIME=120m
 
 RELEASES=( "CentOS-7/master" "CentOS-7/stein" "CentOS-7/rocky" \
            "CentOS-7/queens" "CentOS-7/ocata" "CentOS-7/pike" \
-           "Fedora-28/master" "Fedora-28/stein" "RedHat-8/master" )
+           "RedHat-8/master" )
 
 for r in "${RELEASES[@]}"; do
     /usr/bin/timeout --preserve-status -k $KILLTIME $TIMEOUT \
