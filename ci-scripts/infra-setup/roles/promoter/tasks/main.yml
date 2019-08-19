@@ -34,6 +34,19 @@
         gpgcheck: yes
         gpgkey: https://repos.influxdata.com/influxdb.key
 
+    - name: Removed old/distro version of docker
+      yum:
+        name:
+          - docker
+          - docker-client
+          - docker-client-latest
+          - docker-common
+          - docker-latest
+          - docker-latest-logrotate
+          - docker-logrotate
+          - docker-engine
+        state: absent
+
     - name: Install required packages
       yum:
         name:
