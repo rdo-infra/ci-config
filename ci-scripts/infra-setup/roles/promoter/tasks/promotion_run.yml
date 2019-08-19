@@ -1,0 +1,23 @@
+---
+- name: run promoter script on the staging environment
+  become: true
+  become_user: "{{ promoter_user }}"
+  shell:
+    cmd: |
+      source /home/{{ promoter_user }}/promoter_venv/bin/activate
+      {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/dlrn-promoter.sh -s
+
+- name:
+  shell:
+    cmd: |
+       grep log_file config/staging.ini | awk '{ print $2 }'
+  args:
+    chdir: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter"
+
+- set fact:
+    promoter_log_file: "{{ log_file_grep.stdout }}"
+
+- name: check if dlrn api actually finished a promotion process
+  become: true
+  become_user: "{{ promoter_user }}"
+  command: "grep -Fxq 'FINISHED promotion process' {{ promoter_log_file }}"
