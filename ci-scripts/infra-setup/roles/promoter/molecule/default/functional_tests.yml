@@ -104,7 +104,7 @@
   become: true
   become_user: "{{ promoter_user }}"
   shell: |
-    source ~/promoter_venv/bin/activate
+    source /tmp/promoter_venv/bin/activate
     python --version
 
 - name: Ensure dlrn-promoter service unit file is correctly installed
@@ -120,3 +120,15 @@
   debug:
     msg: Not Implemented
 
+- name: Run dlrn-promoter w/ staging env flag -s
+  command: "ci-scripts/dlrnapi_promoter/dlrn-promoter.sh -s"
+  args:
+    chdir: "{{ ci_config_remote_src_dir }}"
+  register: dlrn_promoter_run
+  ignore_errors: true
+
+- name: Ensure dlrn-promoter runs a fake promotion when invoked from staging env
+  assert:
+    that: '"staging" in dlrn_promoter_run.stderr'
+    fail_msg: "dlrn-promoter script has not been invoked in staging mode"
+    success_msg: "staging mode invoked successfully"

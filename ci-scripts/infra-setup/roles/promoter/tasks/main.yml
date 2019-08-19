@@ -232,9 +232,10 @@
 #
 - name: Make sure .ssh dir exists
   file:
-    path: "/home/{{ promoter_user }}/.ssh"
+    path: "/root/.ssh"
     state: directory
     mode: '0700'
+  become: true
 
 #
 # Credentials setup
@@ -260,6 +261,7 @@
       delegate_to: localhost
 
 - name: Handle credentials for standalone environment
+  become: true
   when:
     - dlrnapi_secret_local.stat.exists
     - registry_secret_local.stat.exists
@@ -318,11 +320,12 @@
   file:
     path: '{{ item }}'
     mode: '0600'
-    owner: "{{ promoter_user }}"
+    owner: "root"
   with_items:
       - "{{ remote_path_dlrnapi_secret  }}"
       - "{{ remote_path_registry_secret  }}"
       - "{{ remote_path_uploader_key  }}"
+  become: true
 
 #
 # Ci-config repo handling
@@ -372,7 +375,7 @@
   become_user: "{{ promoter_user }}"
   pip:
     requirements: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/requirements.txt"
-    virtualenv: ~/promoter_venv
+    virtualenv: /tmp/promoter_venv
 
 - name: Render promoter service script
   template:

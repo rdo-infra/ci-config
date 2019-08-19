@@ -15,9 +15,10 @@
 # so when we are testing, it's nice to have them in the same virtual env
 - name: install test requirements
   become: true
+  become_user: "{{ promoter_user }}"
   pip:
     requirements: "{{ ci_config_remote_src_dir }}/test-requirements.txt"
-    virtualenv: "/home/{{ promoter_user }}/promoter_venv"
+    virtualenv: "/tmp/promoter_venv"
   tags:
     - staging_prepare
 
@@ -151,7 +152,7 @@
 
     - name: launch staging setup scripts
       shell: |
-        source ~/promoter_venv/bin/activate
+        source /tmp/promoter_venv/bin/activate
         # Export the path to the mounted docker socket so all docker client commands will use it
         if [ -S /tmp/docker.sock ]; then
             export DOCKER_HOST=unix:///tmp/docker.sock
@@ -166,7 +167,7 @@
         echo "Purging db"
         rm sqlite.commits
         echo "cleaning up environment"
-        source ~/promoter_venv/bin/activate
+        source /tmp/promoter_venv/bin/activate
         if [ -S /tmp/docker.sock ]; then
             export DOCKER_HOST=unix:///tmp/docker.sock
         fi
