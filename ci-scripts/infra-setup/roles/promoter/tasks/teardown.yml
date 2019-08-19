@@ -1,0 +1,18 @@
+---
+- name: Cleanup
+  shell: |
+    killed=$(pkill -c uwsgi)
+    echo "Killed $killed uWSGI process"
+    echo "Purging db"
+    rm -f sqlite.commits
+    echo "cleaning up environment"
+    source ~/promoter_venv/bin/activate
+    if [ -S /tmp/docker.sock ]; then
+        export DOCKER_HOST=unix:///tmp/docker.sock
+    fi
+    python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py teardown --env-id 12345
+    rm -f /home/{{ promoter_user }}/dlrnapi.log
+  args:
+    chdir: "/home/{{ promoter_user }}"
+  tags:
+    - staging_cleanup
