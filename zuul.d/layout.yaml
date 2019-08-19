@@ -10,6 +10,12 @@
 - project:
     check:
       jobs:
+        - molecule-promotion-staging:
+            files:
+              - ^ci-scripts/dlrnapi_promoter/.*
+              - ^ci-scripts/container-push/.*
+              - ^ci-scripts/promote-images.sh
+              - ^ci-scripts/infra-setup/roles/promoter/.*
         - tripleo-ci-promotion-staging:
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
@@ -20,6 +26,7 @@
             files:
               - ^ci-scripts/infra-setup/scheduler/.*$
         - rdo-tox-molecule
+        - molecule-promotion-staging
         - tox-jjb
         - tox-py27: &py27
             pre-run: playbooks/pre-run-docker.yml
