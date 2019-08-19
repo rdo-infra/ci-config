@@ -15,6 +15,7 @@
 # so when we are testing, it's nice to have them in the same virtual env
 - name: install test requirements
   become: true
+  become_user: "{{ promoter_user }}"
   pip:
     requirements: "{{ ci_config_remote_src_dir }}/test-requirements.txt"
     virtualenv: "/home/{{ promoter_user }}/promoter_venv"
@@ -136,16 +137,43 @@
         docker build -t localhost:5000/tripleomaster/hello-world:cc26d47faedf3643237cfb494d001d1add50267c .
       register: build
 
-# This block is the setup / run/ teardown
+# This block is the setup / run
 - become: true
   become_user: "{{ promoter_user }}"
   block:
+
+    - name: Cleanup
+      shell: |
+        killed=$(pkill -c uwsgi)
+        echo "Killed $killed uWSGI process"
+        echo "Purging db"
+        rm -f sqlite.commits
+        echo "cleaning up environment"
+        source ~/promoter_venv/bin/activate
+        if [ -S /tmp/docker.sock ]; then
+            export DOCKER_HOST=unix:///tmp/docker.sock
+        fi
+        python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py teardown --env-id 12345
+        rm -f /home/{{ promoter_user }}/dlrnapi.log
+      failed_when: false
+      args:
+        chdir: "/home/{{ promoter_user }}"
+      tags:
+        - staging_cleanup
+
     - name: setup dlrn-server
       shell: |
-        #gunicorn dlrn.api:app --log-level debug --debug
         rm sqlite.commits
-        # THis runs uWSGI server as a daemon to expose dlrn api
-        uwsgi --http-socket 127.0.0.1:8080 --plugin python --manage-script-name --mount /=dlrn.api:app --daemonize ./dlrnapi.log
+        # This runs uWSGI server as a daemon to expose dlrn api
+        uwsgi --http-socket 127.0.0.1:8080 --plugin python --manage-script-name --virtualenv promoter_venv/ \
+              --mount /=dlrn.api:app --daemonize ./dlrnapi.log
+        # Give it time to run before checking logs
+        sleep 2
+      args:
+        chdir: "/home/{{ promoter_user }}"
+
+    - name: check if dlrn-server has been spawned
+      command: grep 'spawned uWSGI worker' ./dlrnapi.log
       args:
         chdir: "/home/{{ promoter_user }}"
 
@@ -157,21 +185,3 @@
             export DOCKER_HOST=unix:///tmp/docker.sock
         fi
         python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py setup --env-id 12345
-
-  always:
-    - name: Cleanup
-      shell: |
-        killed=$(pkill -c uwsgi)
-        echo "Killed $killed uWSGI process"
-        echo "Purging db"
-        rm sqlite.commits
-        echo "cleaning up environment"
-        source ~/promoter_venv/bin/activate
-        if [ -S /tmp/docker.sock ]; then
-            export DOCKER_HOST=unix:///tmp/docker.sock
-        fi
-        python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py teardown --env-id 12345
-      args:
-        chdir: "/home/{{ promoter_user }}"
-      tags:
-        - staging_cleanup
