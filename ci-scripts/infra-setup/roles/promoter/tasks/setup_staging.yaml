@@ -15,6 +15,7 @@
 # so when we are testing, it's nice to have them in the same virtual env
 - name: install test requirements
   become: true
+  become_user: "{{ promoter_user }}"
   pip:
     requirements: "{{ ci_config_remote_src_dir }}/test-requirements.txt"
     virtualenv: "/home/{{ promoter_user }}/promoter_venv"
@@ -140,6 +141,33 @@
 - become: true
   become_user: "{{ promoter_user }}"
   block:
+
+    - name: check if local dlrnapi needs a cleanup
+      get_url:
+        url: "http://localhost:8080"
+        dest: "/tmp/staging-api"
+      register: check_dlrnapi
+      retries: 2
+      failed_when: false
+
+    - name: Cleanup
+      shell: |
+        killed=$(pkill -c uwsgi)
+        echo "Killed $killed uWSGI process"
+        echo "Purging db"
+        rm sqlite.commits
+        echo "cleaning up environment"
+        source ~/promoter_venv/bin/activate
+        if [ -S /tmp/docker.sock ]; then
+            export DOCKER_HOST=unix:///tmp/docker.sock
+        fi
+        python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py teardown --env-id 12345
+      args:
+        chdir: "/home/{{ promoter_user }}"
+      tags:
+        - staging_cleanup
+      when: check_dlrnapi.status_code == 200
+
     - name: setup dlrn-server
       shell: |
         #gunicorn dlrn.api:app --log-level debug --debug
@@ -157,21 +185,3 @@
             export DOCKER_HOST=unix:///tmp/docker.sock
         fi
         python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py setup --env-id 12345
-
-  always:
-    - name: Cleanup
-      shell: |
-        killed=$(pkill -c uwsgi)
-        echo "Killed $killed uWSGI process"
-        echo "Purging db"
-        rm sqlite.commits
-        echo "cleaning up environment"
-        source ~/promoter_venv/bin/activate
-        if [ -S /tmp/docker.sock ]; then
-            export DOCKER_HOST=unix:///tmp/docker.sock
-        fi
-        python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py teardown --env-id 12345
-      args:
-        chdir: "/home/{{ promoter_user }}"
-      tags:
-        - staging_cleanup
