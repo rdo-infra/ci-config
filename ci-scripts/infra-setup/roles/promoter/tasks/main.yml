@@ -179,6 +179,15 @@
         requirements: ~/ci-config/ci-scripts/dlrnapi_promoter/requirements.txt
         virtualenv: ~/promoter_venv
 
+- name: Render promoter service script
+  template:
+    src: "dlrn-promoter-service.sh.j2"
+    dest: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/dlrn-promoter-service.sh"
+    mode: '0755'
+    owner: 'root'
+    group: 'root'
+  become: true
+
 - name: Install promoter service
   copy:
     src: dlrn-promoter.service
