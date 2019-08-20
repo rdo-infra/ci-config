@@ -1,0 +1,107 @@
+---
+# This is very useful while developing the staging environment locally
+# as it will always clone your latest change to the server
+- name: clone promoter dir in staging
+  synchronize:
+    src: "{{ ci_config_local_src_dir }}/"
+    dest: "{{ ci_config_remote_src_dir }}"
+    rsync_opts:
+        - "--no-motd"
+        - "--exclude=.tox"
+
+# Same as above, the test requirements are usually run only by tox
+# so when we are testing, it's nice to have them in the same virtual env
+- name: install test requirements
+  become: true
+  pip:
+    requirements: "{{ ci_config_remote_src_dir }}/test-requirements.txt"
+    virtualenv: "/home/{{ promoter_user }}/promoter_venv"
+  tags:
+    - staging_prepare
+
+# Epel is needed to install uWSGI
+- name:  install epel
+  become: true
+  package:
+    name: epel-release
+  tags:
+    - staging_prepare
+
+# uWSGI is used to expose and daemonize the delorean API without the need
+# to run and configure an apache server
+# Alternatives are:
+#   flask run directly, but there is not support daemonization, so the result would be an hack
+#   gunicorn which is similar to uWSGI and doesn't require EPEL. I found gunicorn after uWSGI so we may
+#   test it and see if it's a more viable solution
+- name: install uwsgi
+  become: true
+  package:
+    name:
+      - uwsgi
+      - uwsgi-plugin-python2
+      - python-gunicorn
+  tags:
+    - staging_prepare
+
+# Molecule docker driver it's the default and easiest provisioner to use
+# unfortunately it has some limitations: you can't run docker daemon in it.
+# so to test docker client actions we need to trick the client and the container itself.
+# we are mounting the docker socket from the host to the container, but in a different
+# location than default (it's a long story).
+# So with the docker daemon mounted, the docker client can create containers in the host.
+# Here we are getting the group from the socket file in the host, and adding the group to
+# the user that is going to use the socket
+# Sets up docker on docker socket
+- name: Get docker socket group
+  stat:
+    path: /tmp/docker.sock
+  register: docker_on_docker_socket
+  tags:
+    - staging_prepare
+
+- name: Add promoter user to the socket group
+  become: true
+  command: "usermod -G {{ docker_on_docker_socket.stat.gr_name }} {{ promoter_user }}"
+  when: docker_on_docker_socket.stat.exists
+  tags:
+    - staging_prepare
+
+# This block is the setup / run/ teardown
+- become: true
+  become_user: "{{ promoter_user }}"
+  block:
+    - name: setup dlrn-server
+      shell: |
+        #gunicorn dlrn.api:app --log-level debug --debug
+        rm sqlite.commits
+        # THis runs uWSGI server as a daemon to expose dlrn api
+        uwsgi --http-socket 127.0.0.1:8080 --plugin python --manage-script-name --mount /=dlrn.api:app --daemonize ./dlrnapi.log
+      args:
+        chdir: "/home/{{ promoter_user }}"
+
+    - name: launch staging setup scripts
+      shell: |
+        source ~/promoter_venv/bin/activate
+        # Export the path to the mounted docker socket so all docker client commands will use it
+        if [ -S /tmp/docker.sock ]; then
+            export DOCKER_HOST=unix:///tmp/docker.sock
+        fi
+        python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py setup --env-id 12345
+
+  always:
+    - name: Cleanup
+      shell: |
+        killed=$(pkill -c uwsgi)
+        echo "Killed $killed uWSGI process"
+        echo "Purging db"
+        rm sqlite.commits
+        echo "cleaning up environment"
+        source ~/promoter_venv/bin/activate
+        if [ -S /tmp/docker.sock ]; then
+            export DOCKER_HOST=unix:///tmp/docker.sock
+        fi
+        python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py teardown --env-id 12345
+      args:
+        chdir: "/home/{{ promoter_user }}"
+      tags:
+        - staging_cleanup
