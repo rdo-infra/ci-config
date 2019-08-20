@@ -280,6 +280,9 @@
         target: "{{ ansible_user_dir }}/.ssh/id_rsa"
   when: not setup_staging
 
+- include_tasks: setup_staging_pre.yaml
+  when: setup_staging
+
 - name: Fix owners of the files
   file:
     path: '{{ item }}'
@@ -352,6 +355,9 @@
       pip:
         requirements: "{{ ci_config_src_dir|default('~/ci-config') }}/ci-scripts/dlrnapi_promoter/requirements.txt"
         virtualenv: ~/promoter_venv
+
+- include_tasks: setup_staging.yaml
+  when: etup_staging
 
 - name: Install promoter service
   copy:
