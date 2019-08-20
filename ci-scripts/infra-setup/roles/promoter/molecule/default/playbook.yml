@@ -4,6 +4,7 @@
     # use role defaults
     - include_vars:
         file: ../../defaults/main.yml
+
     - set_fact:
         ci_config_local_src_dir: /workspace/repos/rdo-infra-ci-config/
         molecule_testing: true
@@ -14,6 +15,8 @@
         path: "{{ local_path_registry_secret }}"
       register: registry_secret_local
       delegate_to: localhost
+      tags:
+        - provisioning
     #
     # Create credentials (MOLECULE)
     #
@@ -21,6 +24,8 @@
         content: export DLRNAPI_PASSWORD='test'
         dest: "{{ local_path_dlrnapi_secret }}"
       delegate_to: localhost
+      tags:
+        - provisioning
 
     - name: save fake static uploader key locally
       copy:
@@ -54,6 +59,8 @@
             -----END RSA PRIVATE KEY-----
         dest: "{{ local_path_uploader_key }}"
       delegate_to: localhost
+      tags:
+        - provisioning
 #
 # While testing, we usually not provisioning a second disk for the server
 # So we emulate the second disk with a loopback device
@@ -73,3 +80,17 @@
     - include_tasks: functional_tests.yml
       tags:
         - functional
+
+    - name: Stage setup
+      include_role:
+        name: promoter
+        tasks_from: setup_staging
+      tags:
+        - staging
+
+    - name: Staged promotion run
+      include_role:
+        name: promoter
+        tasks_from: promotion_run
+      tags:
+        - staging
