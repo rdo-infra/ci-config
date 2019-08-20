@@ -1,0 +1,17 @@
+# Good idempotency: ssh_keypair is filled with proper information even
+# if the key is already there
+- name: create ssh dir
+  file:
+    path: "{{ ansible_user_dir  }}/.ssh"
+    state: directory
+    mode: 0700
+
+- openssh_keypair:
+    path: "{{ ansible_user_dir }}/.ssh/id_rsa"
+    size: 1024
+  register: ssh_keypair
+
+- copy:
+    content: "{{ ssh_keypair.public_key }}"
+    dest: "{{ ansible_user_dir }}/.ssh/authorized_keys"
+

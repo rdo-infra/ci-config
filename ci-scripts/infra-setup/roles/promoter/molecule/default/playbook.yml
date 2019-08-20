@@ -61,8 +61,19 @@
     - include_role:
         name: promoter
         tasks_from: setup_loop
+      tags: provisioning
 
     - name: promoter staging provisioning
       include_role:
         name: promoter
+      tags: provisioning
 
+    - name: Stage setup
+      include_role:
+        name: promoter
+        tasks_from: stage_setup
+
+    - name: Staged promotion run
+      include_role:
+        name: promoter
+        tasks_from: promotion_run
