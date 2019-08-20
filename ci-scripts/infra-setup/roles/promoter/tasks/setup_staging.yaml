@@ -1,0 +1,38 @@
+- name: install dlrn server
+  become: true
+  pip:
+    name:
+      - dlrn
+      - dlrnapi_client
+
+- name:  install epel
+  become: true
+  package:
+    name: epel-release
+
+- name: install uwsgi
+  become: true
+  package:
+    name:
+      - uwsgi
+      - uwsgi-plugin-python2
+
+- block:
+    - name: setup dlrn-server
+      become: true
+      shell: |
+        mkdir -p data/repos/
+        #cd data/repos
+        #mkdir -p 1c/67/1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc_8170b868
+        uwsgi --http-socket 127.0.0.1:8080 --plugin python --manage-script-name --mount /=dlrn.api:app --daemonize /tmp/dlrn.log
+      args:
+        chdir: /tmp/
+
+    - name: launch staging setup scripts
+      shell: |
+        dlrnapi --url http://127.0.0.1:8080 repo-get
+        #    dlrnapi --url http://127.0.0.1:8080 --username foo --password bar promotion-get --commit-hash 1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc --distro-hash 8170b8686c38bafb6021d998e2fb268ab26ccf65  --promote-name cicciobello
+        #    python ~/ci-config/ci-scripts/dlrnapi_promoter/setup_staging/setup_staging.py
+  always:
+    - name: kill uwsgi
+      command: pkill uwsgi
