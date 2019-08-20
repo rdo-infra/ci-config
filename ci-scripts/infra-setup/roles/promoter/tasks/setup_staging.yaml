@@ -1,0 +1,92 @@
+---
+# This is very useful while developing the staging environment locally
+# as it will always clone your latest change to the server
+- name: clone promoter dir in staging
+  synchronize:
+    src: "{{ ci_config_local_src_dir }}/"
+    dest: "{{ ci_config_remote_src_dir }}"
+    rsync_opts:
+        - "--no-motd"
+        - "--exclude=.tox"
+
+- name: install test requirements
+  become: true
+  pip:
+    requirements: "{{ ci_config_remote_src_dir }}/test-requirements.txt"
+    virtualenv: "/home/{{ promoter_user }}/promoter_venv"
+  tags:
+    - staging_prepare
+
+- name:  install epel
+  become: true
+  package:
+    name: epel-release
+  tags:
+    - staging_prepare
+
+- name: install uwsgi
+  become: true
+  package:
+    name:
+      - uwsgi
+      - uwsgi-plugin-python2
+      - python-gunicorn
+  tags:
+    - staging_prepare
+
+# Sets up docker on docker socket
+- name: Get docker socket group
+  stat:
+    path: /tmp/docker.sock
+  register: docker_on_docker_socket
+  tags:
+    - staging_prepare
+
+- name: Add promoter user to the socket group
+  become: true
+  command: "usermod -G {{ docker_on_docker_socket.stat.gr_name }} {{ promoter_user }}"
+  when: docker_on_docker_socket.stat.exists
+  tags:
+    - staging_prepare
+
+- become: true
+  become_user: "{{ promoter_user }}"
+  block:
+    - name: setup dlrn-server
+      shell: |
+        #mkdir -p data/repos/
+        #cd data/repos
+        #mkdir -p 1c/67/1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc_8170b868
+        #gunicorn dlrn.api:app --log-level debug --debug
+        rm sqlite.commits
+        uwsgi --http-socket 127.0.0.1:8080 --plugin python --manage-script-name --mount /=dlrn.api:app --daemonize ./dlrnapi.log
+      args:
+        chdir: "/home/{{ promoter_user }}"
+
+    - name: launch staging setup scripts
+      shell: |
+        source ~/promoter_venv/bin/activate
+        #dlrnapi --url http://127.0.0.1:8080 repo-get
+        #    dlrnapi --url http://127.0.0.1:8080 --username foo --password bar promotion-get --commit-hash 1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc --distro-hash 8170b8686c38bafb6021d998e2fb268ab26ccf65  --promote-name cicciobello
+        if [ -S /tmp/docker.sock ]; then
+            export DOCKER_HOST=unix:///tmp/docker.sock
+        fi
+        python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py setup --env-id 12345
+
+  always:
+    - name: Cleanup
+      shell: |
+        killed=$(pkill -c uwsgi)
+        echo "Killed $killed uWSGI process"
+        echo "Purging db"
+        rm sqlite.commits
+        echo "cleaning up environment"
+        source ~/promoter_venv/bin/activate
+        if [ -S /tmp/docker.sock ]; then
+            export DOCKER_HOST=unix:///tmp/docker.sock
+        fi
+        python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py teardown --env-id 12345
+      args:
+        chdir: "/home/{{ promoter_user }}"
+      tags:
+        - staging_cleanup
