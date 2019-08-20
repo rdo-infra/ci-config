@@ -1,0 +1,11 @@
+# this could have a different behaviour in non-zuul nodes
+# AAS the key is already there.
+- openssh_keypair:
+    path: /home/centos/.ssh/id_rsa
+    size: 1024
+  register: ssh_keypair
+
+- copy:
+    content: "{{ ssh_keypair.public_key }}"
+    dest: /home/centos/.ssh/authorized_keys
+
