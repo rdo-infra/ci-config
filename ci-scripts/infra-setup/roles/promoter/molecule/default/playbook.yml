@@ -73,3 +73,13 @@
     - include_tasks: functional_tests.yml
       tags:
         - functional
+
+    - name: Stage setup
+      include_role:
+        name: promoter
+        tasks_from: setup_staging
+
+    - name: Staged promotion run
+      include_role:
+        name: promoter
+        tasks_from: promotion_run
