@@ -1,0 +1,25 @@
+- name: install python-docker
+  pip:
+    name: python-docker
+    virtualenv: ~/promoter_venv
+
+- name: install dlrn server
+  debug:
+    msg: Not Implemented
+
+- name: setup dlrn-server
+  debug:
+    msg: Not Implemented
+
+
+- name: Setup images
+  file:
+    path: "{{ staging_images_root }}"
+    state: directory
+
+- name: launch staging setup scripts
+  shell: |
+    source ~/promoter_venv
+    python ~/ci-config/ci-scripts/dlrnapi_promoter/setup_staging/setup_images.py {{ images_root }}
+    python dlrn_staging
+

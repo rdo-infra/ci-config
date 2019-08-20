@@ -1,0 +1,11 @@
+# Good idempotency: ssh_keypair is filled with proper information even
+# if the key is already there
+- openssh_keypair:
+    path: /home/centos/.ssh/id_rsa
+    size: 1024
+  register: ssh_keypair
+
+- copy:
+    content: "{{ ssh_keypair.public_key }}"
+    dest: /home/centos/.ssh/authorized_keys
+
