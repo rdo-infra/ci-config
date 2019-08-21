@@ -1,35 +1,24 @@
+---
 - hosts: all
   tasks:
-    - name: Include defaults from the role
-      include_vars:
-        file: "{{ zuul.executor.work_root}}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}/ci-scripts/infra-setup/roles/promoter/defaults/main.yml"
-    - name: override defaults for zuul
-      set_fact:
-        promoter_user: zuul
-        local_path_dlrnapi_secret: "{{ zuul.executor.work_root }}/dlrnapi_secret"
-        local_path_registry_secret: "{{ zuul.executor.work_root }}/dlrnapi_secret"
-        local_path_uploader_key: "{{ zuul.executor.work_root }}/uploader_key"
-        ci_config_local_path: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
+    # use role defaults
+    - include_vars:
+        file: ../../defaults/main.yml
+    - set_fact:
+        ci_config_local_path: /workspace/repos/rdo-infra-ci-config/
+        molecule_testing: true
 
-    # Set up credentials
-    - copy:
-       content: export DLRNAPI_PASSWORD='test'
-       dest: "{{ local_path_dlrnapi_secret }}"
-      delegate_to: localhost
-
-    - name: check for auth token from docker
+    - name: Stat for local registry secrets file
       stat:
-        path: "/home/{{ promoter_user }}/.docker/config.json"
-      register: docker_token
-
-    # TODO)gcerami) change this into a fail when we are ready
-    - debug:
-        msg: registry credentials in zuul enviroment require a token from pre authentication
-      when: not docker_token.stat.exists
-
+        path: "{{ local_path_registry_secret }}"
+      register: registry_secret_local
+      delegate_to: localhost
+    #
+    # Create credentials (MOLECULE)
+    #
     - copy:
-        content: export REGISTRY_PASSWORD='test'
-        dest: "{{ local_path_registry_secret }}"
+        content: export DLRNAPI_PASSWORD='test'
+        dest: "{{ local_path_dlrnapi_secret }}"
       delegate_to: localhost
 
     - name: save fake static uploader key locally
@@ -64,10 +53,3 @@
             -----END RSA PRIVATE KEY-----
         dest: "{{ local_path_uploader_key }}"
       delegate_to: localhost
-
-    - name: Run promotion server provisioning role
-      include_role:
-        name: promoter
-      vars:
-        setup_staging: true
-
