@@ -1,0 +1,122 @@
+---
+- name: Check docker version
+  command: docker version --format {% raw %} '{{ .Client.Version }}' {% endraw %}
+  register: docker_version
+  failed_when: docker_version.stdout == ""
+
+# Manifest command introduced in version 18.02.0
+- name: Ensure Docker version is recent enough
+  assert:
+    that: docker_version.stdout|version_compare("18.02.0", ">")
+    success_msg: "Docker version installed in > 18.02.0"
+    fail_msg: "Docker version installed is not recent enough"
+
+- name: Call docker manifest help
+  become: true
+  become_user: "{{ promoter_user }}"
+  command: docker manifest --help
+  register: docker_manifest
+
+- name: Ensure docker manifest command is enabled by default
+  assert:
+    that: '"docker manifest is only supported on a Docker cli with experimental cli features enabled" not in docker_manifest.stderr'
+    success_msg: "Docker manifest enabled by default"
+    fail_msg: "Docker manifest command is present but not enable by default"
+
+- name: Ensure influxdb repo is present and configured correctly
+  command: yum repoinfo influxdb
+
+- name: Ensure /var/lib/docker is from a different partition
+  command: findmnt -P /var/lib/docker
+
+# We can't run the daemon in molecule without virsh driver for now
+- name: Ensure docker deamon is using the overlay driver
+  command: "docker info --format {% raw %} '{{ json .Driver  }}' {% endraw %}"
+  failed_when: false
+
+- name: Ensure we can access logs from apache
+  get_url:
+    url: http://localhost/
+    dest: "/home/{{ promoter_user }}/staging_promotion_index.html"
+
+# Log rotation is very difficult to check. Even when configuration works and a forced run completes
+# successfully, a lot of time was spent in selinux policy configuaration, and the only way to check was
+# just "wait for it to fail"
+# Unless there's a way to run logorate with the exect selinux context, this is the only test we can launch right now
+- name: Dry run log rotation
+  command: logrotate -d /etc/logrotate.d/promoter
+  register: logrotate_run
+
+- name: Ensure Log rotation is configured properly
+  assert:
+    that: '"error:" not in logrotate_run.stderr'
+    fail_msg: "Logrotate configuration file contains errors"
+    success_msg: "Logrotate dry run completed successfully"
+
+- name: Ensure Log rotation is taking the correct pattern
+  assert:
+    that: '"rotating pattern: /home/{{ promoter_user }}/promoter_logs/*.log" in logrotate_run.stderr'
+    fail_msg: "Rotating pattern in rotation is wrong"
+    success_msg: "Rotating pattern in rotation is correct"
+
+- name: Ensure selinux policy is installed
+  shell: semanage module -l | grep logrotate-promoter
+  become: true
+
+- name: Ensure selinux policy for promoter is configured correctly
+  debug:
+    msg: Not Implemented
+
+- name: Ensure log rotation actually works
+  debug:
+    msg: Not Implemented
+
+- name: Stat public key
+  stat:
+    path: "{{ remote_path_uploader_key }}.pub"
+  register: uploader_public_key
+
+- name: Ensure we have uploader public key created and with correct permissions
+  assert:
+    that: uploader_public_key.stat.exists
+    fail_msg: "Uploader public key not found"
+    success_msg: "Uploader public key was correctly created"
+
+- name: Ensure role did not clone git from master
+  block:
+    - name: Retrieve master commit
+      shell: |
+        git ls-remote https://github.com/rdo-infra/ci-config.git \
+          | grep HEAD | awk '{ print $1 }'
+      register: ci_config_commit
+    - name: Retrieve actual commit from local ci-config
+      command: git rev-parse HEAD
+      args:
+        chdir: "{{ ci_config_remote_src_dir }}"
+      register: ci_config_commit_master
+    - name: Ensure commit is not master
+      assert:
+        that: ci_config_commit.stdout != ci_config_commit_master
+        fail_msg: "No value in testing master commit in ci-config repo"
+        success_msg: "Commit {{ ci_config_commit }} is being tested"
+
+- name: Ensure promoter virtualenv is ready to be used
+  become: true
+  become_user: "{{ promoter_user }}"
+  shell: |
+    source ~/promoter_venv/bin/activate
+    python --version
+
+- name: Ensure dlrn-promoter service unit file is correctly installed
+  become: true
+  command: systemd-analyze verify dlrn-promoter.service
+
+- name: Ensure monitoring service unit file is correctly installed
+  become: true
+  command: systemd-analyze verify telegraf.service
+
+# Not sure how to verify this
+- name: Ensure monitoring is enabled and working correctly
+  debug:
+    msg: Not Implemented
+
