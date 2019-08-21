@@ -109,7 +109,7 @@ def get_file_from_build(build, file_relative_path):
 
 def add_inventory_info(build):
     try:
-        inventory = get_file_from_build(build, "/zuul-info/inventory.yaml")
+        inventory = get_file_from_build(build, "zuul-info/inventory.yaml")
         hosts = inventory['all']['hosts']
         host = hosts[hosts.keys()[0]]
         if 'nodepool' in host:
