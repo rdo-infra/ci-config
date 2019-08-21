@@ -1,0 +1,27 @@
+---
+- name: setup loopback device in staging environment
+  become: true
+  block:
+    - name:
+      set_fact:
+        docker_device: /dev/loop0
+        docker_partition: /dev/mapper/loop0p1
+
+    - name: Create loop device
+      command: "mknod -m640 {{ docker_device }} b 7 0"
+      args:
+        creates: "{{ docker_device }}"
+
+    - name: Create empty loop file
+      command: dd if=/dev/zero of=/var/docker_device.img bs=100M count=1
+      args:
+        creates: /var/docker_device.img
+
+    - name: Check existing association
+      command: losetup
+      register: losetup_list
+
+    - name: Associate file to device
+      command: losetup -P /dev/loop0 /var/docker_device.img
+      when: "'/dev/loop0' not in losetup_list.stdout"
+
