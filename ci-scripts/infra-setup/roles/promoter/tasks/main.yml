@@ -1,53 +1,130 @@
-- name: Mount external volume - create a partition
-  parted:
-    device: /dev/vdb
-    number: 1
-    state: present
+# This role is meant to run in 3 different environments:
+#  STANDALONE, ZUUL, and MOLECULE
+#
+# - STANDALONE (production promoter server in real host or vm)
+#   should be run only after merging tested code
+# - ZUUL ci job in staging promoter (nodepool node)
+#   watch the test in your ci job
+# - MOLECULE testing (local docker driver)
+#   test and iterate over it before submitting changes
+#
+#   ALL refers to all environments above
 
-- name: Mount external volume - create a filesystem
-  filesystem:
-    fstype: xfs
-    dev: /dev/vdb1
+#
+# Repos and packages (ALL)
+#
 
-- name: create a mount folder
-  file:
-    path: /var/lib/docker
-    state: directory
+- name: Packages
+  block:
+    - name: Configure docker-ce repo
+      command: yum-config-manager --add-repo \
+          https://download.docker.com/linux/centos/docker-ce.repo
 
-- name: Mount external volume - mount the partition
-  mount:
-    path: /var/lib/docker
-    src: /dev/vdb1
-    fstype: xfs
-    state: mounted
+    - name: Install influxdb repo to get telegraf
+      yum_repository:
+        name: influxdb
+        description: InfluxDB Repository - RHEL \$releasever
+        baseurl: https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://repos.influxdata.com/influxdb.key
 
-- name: Install influxdb repo to get telegraf
-  yum_repository:
-    name: influxdb
-    description: InfluxDB Repository - RHEL \$releasever
-    baseurl: https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
-    enabled: yes
-    gpgcheck: yes
-    gpgkey: https://repos.influxdata.com/influxdb.key
+    - name: Install required packages
+      yum:
+        name:
+          - httpd
+          - python-virtualenv
+          - telegraf
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+          - openssh
+          - git
+          - parted
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+  become: true
 
-- name: Install required packages
-  yum:
-    name: '{{ item }}'
-    state: present
-  with_items:
-    - docker
-    - docker-python
-    - httpd
-    - python-virtualenv
-    - telegraf
+#
+# Docker daemon/volume setup (STANDALONE)
+# No external volume on the nodepool node
+# No support for docker in docker
+#
+
+- block:
+    - name: Mount external volume - create a partition
+      parted:
+        device: /dev/vdb
+        number: 1
+        state: present
+
+    - name: Mount external volume - create a filesystem
+      filesystem:
+        fstype: xfs
+        dev: /dev/vdb1
+
+    - name: create a mount folder
+      file:
+        path: /var/lib/docker
+        state: directory
+
+    - name: Mount external volume - mount the partition
+      mount:
+        path: /var/lib/docker
+        src: /dev/vdb1
+        fstype: xfs
+        state: mounted
+
+    - name: Install required packages
+      yum:
+        name: '{{ item }}'
+        state: present
+      with_items:
+        - docker
+        - docker-python
+    - name: Configure overlay2 for docker
+      copy:
+        content: |
+          {
+              "storage-driver": "overlay2",
+              "storage-opts": [
+                "overlay2.override_kernel_check=true"
+              ]
+          }
+        dest: /etc/docker/daemon.json
+      become: true
+      register: docker_config
+
+    - name: Reload docker if config was changed
+      service:
+        name: docker
+        state: reloaded
+      become: true
+      when: docker_config is changed
+
+    - name: Start and enable Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+      become: true
+
+  become: true
+  when: not setup_staging
+
+#
+# Promoter logs and httpd service setup (ALL)
+#
 
 - name: Create a directory for the promoter logs
   file:
-    path: '/home/centos/promoter_logs'
+    path: "{{ ansible_user_dir }}/promoter_logs"
     state: directory
     setype: httpd_sys_content_t
-    owner: centos
-    group: centos
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_real_group_id }}"
 
 - name: copy logrotate selinux policy
   copy:
@@ -65,7 +142,7 @@
 
 - name: Fix home directory permissions
   file:
-    path: '/home/centos'
+    path: "{{ ansible_user_dir }}"
     mode: 0755
 
 - name: Disable the default welcome page
@@ -73,6 +150,7 @@
     content: ''
     dest: '/etc/httpd/conf.d/welcome.conf'
     backup: yes
+  become: true
 
 - name: Add config file for Apache to expose the logs
   blockinfile:
@@ -81,54 +159,32 @@
     block: |
       <VirtualHost *:80>
           ServerAdmin rdo-ci-admins@redhat.com
-          DocumentRoot "/home/centos/promoter_logs"
+          DocumentRoot {{ ansible_user_dir }}/promoter_logs
 
-          <Directory /home/centos/promoter_logs>
+          <Directory {{ ansible_user_dir }}/promoter_logs>
               Options Indexes MultiViews
               AllowOverride None
               Require all granted
           </Directory>
       </VirtualHost>
   register: apache_config
+  become: true
 
 - name: Start and enable Apache
   service:
     name: httpd
     state: restarted
     enabled: yes
+  become: true
   when: apache_config|changed
-
-- name: Configure overlay2 for docker
-  copy:
-    content: |
-      {
-          "storage-driver": "overlay2",
-          "storage-opts": [
-            "overlay2.override_kernel_check=true"
-          ]
-      }
-    dest: /etc/docker/daemon.json
-  register: docker_config
-
-- name: Reload docker if config was changed
-  service:
-    name: docker
-    state: reloaded
-  when: docker_config is changed
-
-- name: Start and enable Docker
-  service:
-    name: docker
-    state: started
-    enabled: yes
 
 - name: add configuration for the log rotation
   copy:
     content: |
-        /home/centos/promoter_logs/*.log {
+        {{ ansible_user_dir }}/promoter_logs/*.log {
             daily
             missingok
-            su centos centos
+            su {{ ansible_user_id }} {{ ansible_user_id }}
             dateext
             dateyesterday
             notifempty
@@ -139,44 +195,176 @@
     owner: root
     group: root
     mode: 0644
+  become: true
 
-- name: Copy files from the provisioned location to target
-  command: 'cp {{ item.source }} {{ item.target }}'
-  args:
-    creates: '{{ item.target }}'
-  with_items:
-      - { source: '/root/dlrnapi_secret', target: '/home/centos/dlrnapi_secret' }
-      - { source: '/root/registry_secret', target: '/home/centos/registry_secret' }
-      - { source: '/root/uploader_key', target: '/home/centos/.ssh/id_rsa' }
+#
+# Credentials setup (ZUUL)
+#
 
-- name: Fix owners of the files
-  file:
-    path: '{{ item }}'
-    mode: '0600'
-    owner: 'centos'
-    group: 'centos'
-  with_items:
-      - '/home/centos/dlrnapi_secret'
-      - '/home/centos/registry_secret'
-      - '/home/centos/.ssh/id_rsa'
-
-- become: true
-  become_user: centos
+- name: Handle credentials for zuul environment
+  when:
+    - zuul is defined
   block:
-    - name: Clone to the ci-config repo
+    - copy:
+       content: export DLRNAPI_PASSWORD='test'
+       dest: "{{ remote_path_dlrnapi_secret }}"
+
+    - debug:
+        msg: registry credentials come from token in zuul
+
+    - openssh_keypair:
+        path: "{{ remote_path_uploader_key }}"
+        size: 1024
+      register: uploader_key
+
+    - name: Stat for local dlrnapi secrets file
+      stat:
+        path: "{{ local_path_dlrn_secret }}"
+      register: dlrnapi_secret_local
+      delegate_to: localhost
+
+    - name: Stat for local registry secrets file
+      stat:
+        path: "{{ local_path_registry_secret }}"
+      register: registry_secret_local
+      delegate_to: localhost
+
+    - name: Stat for uploader_key file
+      stat:
+        path: "{{ local_path_uploader_key }}"
+      register: uploader_key_local
+      delegate_to: localhost
+
+#
+# Credentials setup (STANDALONE)
+#
+- name: Handle credentials for standalone environment
+  when:
+    - not setup_staging
+    - zuul is not defined
+  block:
+    - copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      with_items:
+        - src: "{{ local_path_dlrnapi_secret }}"
+          dest: "{{ remote_path_dlrnapi_secret }}"
+        - src: "{{ local_path_registry_secret }}"
+          dest: "{{ remote_path_registry_secret }}"
+        - src: "{{ local_path_uploader_key }}"
+          dest: "{{ remote_path_uploader_key }}"
+      when:
+        - dlrnapi_secret_local.stat.exists
+        - registry_secret_local.stat.exists
+        - uploader_key_local.stat.exists
+
+    - name: Stat for dlrnapi secrets file on server
+      stat:
+        path: "{{ remote_path_dlrnapi_secret }}"
+      register: remote_dlrnapi_secret
+
+    - name: Stat for registry secrets file on server
+      stat:
+        path: "{{ remote_path_registry_secret }}"
+      register: remote_registry_secret on server
+
+    - name: Stat for uploader_key
+      stat:
+        path: "{{ remote_path_uploader_key }}"
+      register: remote_uploader_key
+
+    - name: Fail if we don't have any credential to use.
+      fail:
+        msg: Installation cannot continue, credentials are missing
+      when: >
+        not remote_dlrnapi_secret.stat.exists
+        or not remote_registry_secret.stat.exists
+        or not remote_uploader_key.stat.exists
+
+    - name: Copy files from the provisioned location to target
+      command: 'cp {{ item.source }} {{ item.target }}'
+      args:
+        creates: '{{ item.target }}'
+      with_items:
+          - source: "{{ fixme }}"
+            target: "{{ ansible_user_dir }}/dlrnapi_secret"
+
+          - source: '/root/registry_secret'
+            target: "{{ ansible_user_dir }}/registry_secret"
+
+          - source: '/root/uploader_key'
+            target: "{{ ansible_user_dir }}/.ssh/id_rsa"
+
+    - name: Fix owners of the files
+      file:
+        path: '{{ item }}'
+        mode: '0600'
+        owner: "{{ ansible_user_id }}"
+        group: "{{ ansible_real_group_id }}"
+      with_items:
+          - "{{ ansible_user_dir }}/dlrnapi_secret"
+          - "{{ ansible_user_dir }}/registry_secret"
+          - "{{ ansible_user_dir }}/.ssh/id_rsa"
+
+#
+# Ci-config repo handling
+# We have three execution environments: zuul when checking changes, local when
+# running local test iteration, and standalone when this role run to actually
+# provision a real server
+#
+- name: Understand from where to take the ci-config
+  become: true
+  become_user: "{{ ansible_user_id }}"
+  block:
+    - name: Check for presence of repo on the node
+      stat:
+        path: "{{ ci_config_remote_src_dir }}"
+      register: ci_config_remote_src_dir_stat
+
+    - name: Check for presence of repo on local machine
+      stat:
+        path: "{{ ci_config_local_src_dir }}"
+      register: ci_config_local_src_dir_stat
+      delegate_to: localhost
+      when: zuul is defined
+
+    - name: When dir is not present on the node, or locally, clone from git
       git:
         repo: 'https://review.rdoproject.org/r/p/rdo-infra/ci-config.git'
-        dest: '~/ci-config'
+        dest: "{{ ansible_user_dir }}/ci-config"
+      when:
+        - not ci_config_remote_src_dir_stat
+        - not ci_config_local_src_dir_stat
+
+    - name: When dir is present on the node, just use it.
+      debug:
+        msg: ci-config is already present in the host, nothing to clone
+      when:
+        - ci_config_remote_src_dir_stat
+
+    - name: when dir is present locally but not remote, synchronize it
+      synchronize:
+        src: "{{ ci_config_local_src_dir  }}"
+        dest: "{{ ci_config_remote_src_dir  }}"
+      when:
+        - not ci_config_remote_src_dir_stat
+        - ci_config_local_src_dir_stat.stat
+
+    - name: Make sure .ssh dir exists
+      file:
+        path: "{{ ansible_user_dir }}/.ssh"
+        state: directory
+        mode: '0700'
 
     - name: Generate public key from private key for uploader user
       shell: >
         ssh-keygen -y -t rsa -N '' -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
       args:
-        creates: /home/centos/.ssh/id_rsa.pub
+        creates: "{{ ansible_user_dir }}/.ssh/id_rsa.pub"
 
     - name: Create a virtualenv for the promoter script
       pip:
-        requirements: ~/ci-config/ci-scripts/dlrnapi_promoter/requirements.txt
+        requirements: "{{ ci_config_src_dir|default('~/ci-config') }}/ci-scripts/dlrnapi_promoter/requirements.txt"
         virtualenv: ~/promoter_venv
 
 - name: Install promoter service
@@ -186,43 +374,50 @@
     mode: '0644'
     owner: 'root'
     group: 'root'
+  become: true
 
 - name: Start and enable promoter
   service:
     name: dlrn-promoter
     state: started
     enabled: yes
+  become: true
+  when: not setup_staging
 
-- name: Configure telegraf to report to rrcockpit
-  blockinfile:
-    path: /etc/telegraf/telegraf.conf
-    marker: "# -- {mark} ANSIBLE MANAGED BLOCK --"
-    block: |
-      [[outputs.influxdb]]
-      urls = ['http://{{ rrcockpit_internal_network_ip }}:8086']
+- block:
+    - name: Configure telegraf to report to rrcockpit
+      blockinfile:
+        path: /etc/telegraf/telegraf.conf
+        marker: "# -- {mark} ANSIBLE MANAGED BLOCK --"
+        block: |
+          [[outputs.influxdb]]
+          urls = ['http://{{ rrcockpit_internal_network_ip }}:8086']
+      become: true
 
-- name: Configure dlrn-promoter at telegraf
-  copy:
-    src: dlrn-promoter.telegraf.conf
-    dest: /etc/telegraf/telegraf.d/dlrn-promoter.conf
-    mode: '0644'
-    owner: 'root'
-    group: 'root'
-  register: dlrn_promoter_telegram
+    - name: Configure dlrn-promoter at telegraf
+      copy:
+        src: dlrn-promoter.telegraf.conf
+        dest: /etc/telegraf/telegraf.d/dlrn-promoter.conf
+        mode: '0644'
+        owner: 'root'
+        group: 'root'
+      register: dlrn_promoter_telegram
 
-- name: Configure disk at telegraf
-  copy:
-    src: disk.telegraf.conf
-    dest: /etc/telegraf/telegraf.d/disk.conf
-    mode: '0644'
-    owner: 'root'
-    group: 'root'
-  register: disk_telegram
+    - name: Configure disk at telegraf
+      copy:
+        src: disk.telegraf.conf
+        dest: /etc/telegraf/telegraf.d/disk.conf
+        mode: '0644'
+        owner: 'root'
+        group: 'root'
+      register: disk_telegram
 
-
-- name: Start and enable telegraf
-  service:
-    name: telegraf
-    state: restarted
-    enabled: yes
-  when: dlrn_promoter_telegram.changed or disk_telegram.changed
+    - name: Start and enable telegraf
+      service:
+        name: telegraf
+        state: restarted
+        enabled: yes
+      when:
+        - not setup_staging
+        - dlrn_promoter_telegram.changed or disk_telegram.changed
+  become: true
