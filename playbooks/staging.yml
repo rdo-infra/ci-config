@@ -1,7 +1,58 @@
 - hosts: all
   vars:
     promoter_user: zuul
+    local_path_dlrnapi_secret: /tmp/dlrnapi_secret
   tasks:
+    - name: Include defaults from the role
+      include_vars:
+        file: "{{ zuul.executor.work_root}}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}/ci-scripts/ci-scripts/infra-setup/roles/promoter/defaults/main.yml"
+
+    # Set up credentials
+
+    - name: Make sure .ssh dir exists
+      file:
+        path: "/home/{{ promoter_user }}/.ssh"
+        state: directory
+        mode: '0700'
+
+    - copy:
+       content: export DLRNAPI_PASSWORD='test'
+       dest: "{{ local_path_dlrnapi_secret }}"
+      delegate_to: localhost
+
+    - copy:
+       content: export DLRNAPI_PASSWORD='test'
+       dest: "{{ remote_path_dlrnapi_secret }}"
+
+
+    - name: check for auth token from docker
+      stat:
+        path: "/home/{{ promoter_user }}/.docker/config.json"
+      register: docker_token_podman
+
+    # TODO)gcerami) change this into a fail when we are ready
+    - debug:
+        msg: registry credentials in zuul enviroment require a token from pre authentication
+      when: not docker_token_docker.stat.exists
+
+    - openssh_keypair:
+        path: "{{ remote_path_uploader_key }}"
+        size: 1024
+      register: uploader_key
+
+    - name: Allow passwordless ssh to localhost (for sftp)
+      copy:
+        remote_src: true
+        src: "{{ uploader_key.public_key }}"
+        dest: "/home/{{ promoter_user }}/.ssh/authorized_keys"
+
+    - name: prepare ci-config for zuul environment
+      file:
+        src: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
+        state: link
+        path: "{{ ci_config_remote_src_dir }}"
+      when: zuul is defined
+
     - name: Run promotion server provisioning role
       include_role:
         name: promoter
