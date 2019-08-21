@@ -7,6 +7,11 @@ import re
 import requests
 import yaml
 
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
+
 from diskcache import Cache
 
 OOO_PROJECTS = [
@@ -93,7 +98,7 @@ def get_file_from_build(build, file_relative_path):
             build['log_url'] = build['log_url'].replace('html/', '')
         if build['log_url'].endswith("/cover/"):
             build['log_url'] = build['log_url'].replace('cover/', '')
-        file_path = build['log_url'] + file_relative_path
+        file_path = urljoin(build['log_url'], file_relative_path)
         if file_path not in cache:
             r = requests.get(file_path)
             if r.ok:
@@ -109,7 +114,7 @@ def get_file_from_build(build, file_relative_path):
 
 def add_inventory_info(build):
     try:
-        inventory = get_file_from_build(build, "/zuul-info/inventory.yaml")
+        inventory = get_file_from_build(build, "zuul-info/inventory.yaml")
         hosts = inventory['all']['hosts']
         host = hosts[hosts.keys()[0]]
         if 'nodepool' in host:
