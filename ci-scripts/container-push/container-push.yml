@@ -54,6 +54,13 @@
         release_url: "https://opendev.org/openstack/tripleo-common/raw/branch/master/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}"
       when: release == 'master'
 
+    - name: Set the release_url for staging containers - master
+      set_fact:
+        release_url: "{{ zuul.project.src_dir }}/ci-scripts/push-containers/staging_containers.yaml.j2"
+      when:
+        - release == 'master'
+        - setup_staging | default(false) | bool
+
     - name: Set the release_url - stable
       set_fact:
         release_url: "https://opendev.org/openstack/tripleo-common/raw/branch/stable/{{ release }}/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}"
