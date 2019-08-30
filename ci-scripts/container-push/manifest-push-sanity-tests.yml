@@ -1,0 +1,29 @@
+---
+# Test tasks to be included after the manifest-push.yml has created
+# and pushed manifests to {{ manifest_registry }}.
+#
+- name: Pull {{ x86_tag }} tagged container images from {{ manifest_registry }}
+  docker_image:
+    name: "{{ manifest_registry }}/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item }}"
+    tag: "{{ full_hash }}_{{ x86_tag }}"
+    source: pull
+  loop: "{{ built_images.stdout_lines }}"
+  retries: 3
+
+- name: Pull {{ ppc_tag }} tagged container images from {{ manifest_registry }}
+  docker_image:
+    name: "{{ manifest_registry }}/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item }}"
+    tag: "{{ full_hash }}_{{ ppc_tag }} "
+    source: pull
+  loop: "{{ built_images.stdout_lines }}"
+  loop_control:
+    index_var: index
+  when: check_ppc_containers.results[index].status_code != 404
+  retries: 3
+
+- name: Inspect manifests in {{ manifest_registry }}
+  shell: |
+    docker manifest inspect {{ manifest_registry }}/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }}
+  loop: "{{ built_images.stdout_lines }}"
+  retries: 3
+
