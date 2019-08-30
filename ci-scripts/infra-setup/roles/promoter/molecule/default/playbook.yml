@@ -1,5 +1,14 @@
 ---
 - hosts: centos7
+  vars:
+    manifest_containers: "base\nrabbitmq" # centos-binary-base, centos-binary-rabbitmq
+    registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleomaster/imagestreamtags"
+    full_hash: d2b0cf1e01d3e29cf73746cddff7956fb8fda1dd_2894fda1
+    distro_name: centos
+    rdoproject_namespace: tripleomaster
+    ppc_tag: ppc64le
+    x86_tag: x86_64
+    manifest_registry: localhost:5000
   tasks:
     # use role defaults
     - include_vars:
@@ -93,6 +102,28 @@
     - include_tasks: functional_tests.yml
       tags:
         - functional
+
+    #- name: start docker service for manifest-push testing
+    #  service:
+    #    name: docker
+    #    state: started
+
+    #- start a local registry
+    - name: Start a local registry for manifest-push testing
+      shell: |
+        export DOCKER_HOST=unix:///tmp/docker.sock
+        docker pull registry
+        docker run -d -p 5000:5000 --name manifest-local-registry1 registry
+
+    #- register built_images result from manifest_containers var
+    - name: Register the built_images for manifest-push testing
+      shell: |
+        echo "{{ manifest_containers }}"
+      register: built_images
+
+    - include_tasks: ../../../../../container-push/manifest-push.yml
+
+    #- include_tasks: ci-scripts/container-push/manifest-push-test.yml
 
     - name: Stage setup
       include_role:
