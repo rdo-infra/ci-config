@@ -159,6 +159,42 @@ def tag_containers(new_hashes, distro, release, promote_name):
         raise
 
 
+def create_push_manifest(new_hashes, distro, release):
+    logger = logging.getLogger('promoter')
+    env = os.environ
+    relpath = "ci-scripts/dlrnapi_promoter"
+    script_root = os.path.abspath(sys.path[0]).replace(relpath, "")
+    env['RELEASE'] = release
+    env['COMMIT_HASH'] = new_hashes['commit_hash']
+    env['DISTRO_HASH'] = new_hashes['distro_hash']
+    env['FULL_HASH'] = new_hashes['full_hash']
+    env['PROMOTE_NAME'] = promote_name
+    env['SCRIPT_ROOT'] = script_root
+    # TODO: This will be de-harcoded at preparing promoer for f28
+    distro_name, distro_version = distro
+    env['DISTRO_NAME'] = distro_name
+    env['DISTRO_VERSION'] = distro_version
+    manifest_playbook = (
+        script_root + 'ci-scripts/container-push/manifest-push.yml'
+    )
+    commit_hash = new_hashes['commit_hash']
+    try:
+        logger.info('Creating and pushing container manifest for dlrn hash %s on '
+                    '%s ', commit_hash, release)
+        manifest_logs = \
+            subprocess.check_output(
+                ['ansible-playbook', manifest_playbook],
+                env=env, stderr=subprocess.STDOUT).split("\n")
+        for line in manifest_logs:
+            logger.info(line)
+    except subprocess.CalledProcessError as ex:
+        logger.error('CONTAINER MANIFEST PUSH FAILED LOGS BELOW:')
+        logger.error(ex.output)
+        logger.exception(ex)
+        logger.error('END OF CONTAINER MANIFEST PUSH FAILURE')
+        raise
+
+
 def tag_qcow_images(new_hashes, distro, release, promote_name):
     logger = logging.getLogger('promoter')
     relpath = "ci-scripts/dlrnapi_promoter"
@@ -293,6 +329,11 @@ def promote_all_links(
                             distro,
                             release,
                             promote_name)
+                        # create manifest with amd64 & ppc64le containers
+                        create_push_manifest(
+                            new_hashes,
+                            distro,
+                            release)
 
                     # For fedora we just run standalone let's not tag images
                     distro_name, _ = distro

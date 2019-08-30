@@ -1,0 +1,31 @@
+---
+- name: manifest create
+  hosts: localhost
+  become: yes
+  become_user: root
+  vars:
+    containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ lookup('env','RELEASE') }}.txt"
+    dockerhub_namespace: "tripleo{{ lookup('env','RELEASE') }}"
+    full_hash: "{{ lookup('env', 'FULL_HASH')}}"
+    distro_name: "{{ lookup('env', 'DISTRO_NAME') }}"
+    ppc_tag: "ppc64le"
+    x86_tag: "amd64"
+  tasks:
+    - name: ensure the dockerc is installed
+      shell: >
+        # install dockerc community
+    - name: ensure experimental is enabled
+      shell: >
+        # crudini sthing or ansible ini module
+    - name: register the containers list
+      shell: >
+        cat {{containers_file }}
+      register: built_images
+
+    - name: create and push manifest for each container
+      shell: >
+        docker manifest create {{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }} {{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ ppc_tag }} {{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }}
+        docker manifest annotate {{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ ppc_tag }} --arch {{ ppc_tag }}
+        docker manifest annotate {{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }} --arch {{ x86_tag }}
+        docker manifest push {{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}
+      with_items: "{{ built_images.stdout_lines }}"
