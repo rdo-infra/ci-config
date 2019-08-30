@@ -1,4 +1,15 @@
 - hosts: all
+  vars:
+    manifest_containers: "base\nrabbitmq" # centos-binary-base, centos-binary-rabbitmq
+    registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleomaster/imagestreamtags"
+    full_hash: b1e8b74033769f79bc7913e5bbd85bf4fd50c9b9_f2e9ca6b
+    distro_name: centos
+    rdoproject_namespace: tripleomaster
+    dockerhub_namespace: tripleomaster
+    ppc_tag: ppc64le
+    x86_tag: x86_64
+    localhost_registry_container: manifest-local-registry
+    manifest_registry: localhost:5000
   tasks:
     - name: Include defaults from the role
       include_vars:
@@ -78,3 +89,66 @@
     - name: Run promotion server provisioning role
       include_role:
         name: promoter
+
+      #- register built_images result from manifest_containers var
+    - name: Register the built_images for manifest-push testing
+      shell: |
+        echo "{{ manifest_containers }}"
+      register: built_images
+
+    - name: Get docker socket group
+      stat:
+        path: /tmp/docker.sock
+      register: docker_on_docker_socket
+
+    - name: Find out docker group name
+      shell: |
+        set -euo pipefail
+        grep docker_{{ docker_on_docker_socket.stat.gid }} /etc/group | cut -d":" -f1 | head -1
+      register: docker_group
+      changed_when: false
+      failed_when: false
+      tags:
+        - staging_prepare
+
+    - when: not docker_group.stdout
+      block:
+        - name: Create docker group
+          become: true
+          group:
+            name: "docker_{{ docker_on_docker_socket.stat.gid }}"
+            gid: "{{ docker_on_docker_socket.stat.gid }}"
+            state: present
+          tags:
+            - staging_prepare
+        - name: Storing new created docker group
+          set_fact:
+            docker_group:
+              stdout: "docker_{{ docker_on_docker_socket.stat.gid }}"
+          tags:
+            - staging_prepare
+
+    - name: Check if {{ promoter_user }} is in docker group
+      command: "groups {{ promoter_user }}"
+      register: user_groups
+      changed_when: false
+
+    - name: Add user to docker group
+      become: true
+      user:
+        name: '{{ promoter_user }}'
+        groups: '{{ docker_group.stdout }}'
+        append: true
+      register: groupadd
+      when: "docker_group.stdout not in user_groups.stdout"
+
+    - name: Run docker registry for {{ manifest_registry }}
+      become: true
+      become_user: "{{ promoter_user }}"
+      shell: |
+        docker pull registry
+        docker run -d -p 5000:5000 --restart=always --name manifest-local-registry registry
+
+    - name: Include the manifest-push tasks for testing
+      include_tasks: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}/ci-scripts/container-push/manifest-push.yml"
+
