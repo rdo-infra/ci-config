@@ -1,0 +1,36 @@
+---
+- name: manifest create
+  hosts: localhost
+  become: yes
+  become_user: root
+  vars:
+    containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ lookup('env','RELEASE') }}.txt"
+    dockerhub_namespace: "tripleo{{ lookup('env','RELEASE') }}"
+    full_hash: "{{ lookup('env', 'FULL_HASH')}}"
+    distro_name: "{{ lookup('env', 'DISTRO_NAME') }}"
+    ppc_tag: "ppc64le"
+    x86_tag: "x86_64"
+  tasks:
+    - name: register the containers list
+      shell: >
+        cat {{containers_file }}
+      register: built_images
+
+    - name: create and annotate manifest for each container
+      shell: >
+        # TODO(marios) remove export https://review.rdoproject.org/r/#/c/21909/45/ci-scripts/infra-setup/roles/promoter/tasks/main.yml@134
+        export DOCKER_CLI_EXPERIMENTAL=enabled
+        # docker manifest create masandreful/task1260:latest masandreful/task1260:latest_x86_64 masandreful/task1260:latest_ppc64le
+        docker manifest create {{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }} {{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ ppc_tag }} {{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }}
+        # docker manifest annotate --arch ppc64le masandreful/task1260:latest masandreful/task1260:latest_ppc64le
+        docker manifest annotate --arch {{ ppc_tag }}  {{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }} {{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ ppc_tag }}
+        docker manifest annotate --arch amd64  {{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }} {{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }}
+      with_items: "{{ built_images.stdout_lines }}"
+
+    - name: push container manifests
+      shell: >
+        export DOCKER_CLI_EXPERIMENTAL=enabled
+        docker manifest push {{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}
+      retries: 3
+      with_items: "{{ built_images.stdout_lines }}"
+
