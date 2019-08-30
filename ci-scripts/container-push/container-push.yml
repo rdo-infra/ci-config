@@ -25,6 +25,8 @@
     rdoproject_password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
     containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ lookup('env','RELEASE') }}.txt"
     registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleo{{ lookup('env', 'RELEASE') }}/imagestreamtags"
+    ppc_tag: "ppc64le"
+    x86_tag: "x86_64"
   tasks:
     - name: print out hash, label and namespaces in play
       debug:
@@ -170,6 +172,9 @@
           retries: 1
           tags:
             - dockerhub_push
+
+        - name: Create and push _arch containers and manifest to dockerhub
+          include_tasks: manifest-push.yml
 
       always:
         - name: Delete the local images from rdoproject registry
