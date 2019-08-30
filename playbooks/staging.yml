@@ -1,5 +1,85 @@
 - hosts: all
+  vars:
+    manifest_containers: "base\nrabbitmq" # centos-binary-base, centos-binary-rabbitmq
+    registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleomaster/imagestreamtags"
+    full_hash: b1e8b74033769f79bc7913e5bbd85bf4fd50c9b9_f2e9ca6b
+    distro_name: centos
+    rdoproject_namespace: tripleomaster
+    dockerhub_namespace: tripleomaster
+    ppc_tag: ppc64le
+    x86_tag: x86_64
+    localhost_registry_container: manifest-local-registry
   tasks:
+    - name: Include defaults from the role
+      include_vars:
+        file: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}/ci-scripts/infra-setup/roles/promoter/defaults/main.yml"
+
+    - name: override defaults for zuul
+      set_fact:
+        promoter_user: zuul
+        local_path_dlrnapi_secret: "{{ zuul.executor.work_root }}/dlrnapi_secret"
+        local_path_registry_secret: "{{ zuul.executor.work_root }}/dlrnapi_secret"
+        local_path_uploader_key: "{{ zuul.executor.work_root }}/uploader_key"
+        ci_config_local_src_dir: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
+        setup_staging: true
+    - name: Gather network facts for ansible_default_ipv4 on localhost
+      setup:
+        gather_subset: network
+
+    - name: Set fact for the manifest_registry
+      set_fact:
+        manifest_registry: "{{ hostvars['localhost']['ansible_default_ipv4']['address'] }}:443"
+
+    - name: Add the localhost IP into openssl.cnf v3_ca section
+      become: true
+      ini_file:
+        path: /etc/pki/tls/openssl.cnf
+        section: v3_ca
+        option: subjectAltName
+        value: "IP:{{ hostvars['localhost']['ansible_default_ipv4']['address'] }}"
+        backup: yes
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Create /home/{{ promoter_user }}/certs directory
+      delegate_to: localhost
+      file:
+        path: /home/{{ promoter_user }}/certs/
+        state: directory
+
+    - name: Create /etc/docker/certs.d/{{ manifest_registry }} directory
+      delegate_to: localhost
+      become: true
+      file:
+        path: /etc/docker/certs.d/{{ manifest_registry }}
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Shell openssl create certs/domain.key and domain.crt
+      delegate_to: localhost
+      shell: |
+        openssl req -newkey rsa:4096 -nodes -sha256 -keyout certs/domain.key   -x509 -days 365 -out certs/domain.crt -subj "/CN={{ hostvars['localhost']['ansible_default_ipv4']['address'] }}"
+
+    - name: Copy certs/domain.crt to /etc/docker/certs.d/{{ manifest_registry }}
+      become: true
+      copy:
+        src: /home/{{ promoter_user }}/certs/domain.crt
+        dest: /etc/docker/certs.d/{{ manifest_registry }}/ca.crt
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Run docker registry for {{ manifest_registry }}
+      shell: |
+        docker pull registry
+        docker run -d -p 443:443 --restart=always --name manifest-local-registry   -v "$(pwd)"/certs:/certs   -e REGISTRY_HTTP_ADDR=0.0.0.0:443   -e REGISTRY_HTTP_TLS_CERTIFICATE=/home/{{ promoter_user }}/certs/domain.crt -e REGISTRY_HTTP_TLS_KEY=/home/{{ promoter_user }}/certs/domain.key registry
+
+    - name: Include the manifest-push tasks for testing
+      include_tasks: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}/ci-scripts/container-push/manifest-push.yml"
+
     - name: Include defaults from the role
       include_vars:
         file: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}/ci-scripts/infra-setup/roles/promoter/defaults/main.yml"
