@@ -1,4 +1,15 @@
 - hosts: all
+  vars:
+    manifest_containers: "base\nrabbitmq" # centos-binary-base, centos-binary-rabbitmq
+    registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleomaster/imagestreamtags"
+    full_hash: b1e8b74033769f79bc7913e5bbd85bf4fd50c9b9_f2e9ca6b
+    distro_name: centos
+    rdoproject_namespace: tripleomaster
+    dockerhub_namespace: tripleomaster
+    ppc_tag: ppc64le
+    x86_tag: x86_64
+    localhost_registry_container: manifest-local-registry
+    manifest_registry: localhost:5000
   tasks:
     - name: Include defaults from the role
       include_vars:
@@ -78,3 +89,20 @@
     - name: Run promotion server provisioning role
       include_role:
         name: promoter
+
+      #- register built_images result from manifest_containers var
+    - name: Register the built_images for manifest-push testing
+      shell: |
+        echo "{{ manifest_containers }}"
+      register: built_images
+
+    - name: Run docker registry for {{ manifest_registry }}
+      become: true
+      become_user: "{{ promoter_user }}"
+      shell: |
+        docker pull registry
+        docker run -d -p 5000:5000 --restart=always --name manifest-local-registry registry
+
+    - name: Include the manifest-push tasks for testing
+      include_tasks: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}/ci-scripts/container-push/manifest-push.yml"
+
