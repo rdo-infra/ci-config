@@ -1,4 +1,16 @@
 - hosts: all
+  vars:
+    manifest_containers: "base" # centos-binary-base only for now memory testing WIP, centos-binary-rabbitmq
+    registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleomaster/imagestreamtags"
+    full_hash: 0012fdfdc387da97d1d396e5ebda152d7c10b091_f2e9ca6b
+    distro_name: centos
+    rdoproject_namespace: tripleomaster
+    dockerhub_namespace: tripleomaster
+    ppc_tag: ppc64le
+    x86_tag: x86_64
+    localhost_registry_container: manifest-local-registry
+    manifest_registry: localhost:5000
+    manifest_tag: "_manifest"
   tasks:
     - name: Include defaults from the role
       include_vars:
@@ -78,3 +90,48 @@
     - name: Run promotion server provisioning role
       include_role:
         name: promoter
+
+      #- register built_images result from manifest_containers var
+    - name: Register the built_images for manifest-push testing
+      shell: |
+        echo "{{ manifest_containers }}"
+      register: built_images
+
+    - name: Find out docker group name
+      shell: |
+        set -euo pipefail
+        grep docker /etc/group | cut -d":" -f1 | head -1
+      register: docker_group
+      changed_when: false
+      failed_when: false
+      tags:
+        - staging_prepare
+
+    - name: Check if {{ promoter_user }} is in docker group
+      command: "groups {{ promoter_user }}"
+      register: user_groups
+      changed_when: false
+
+    - name: Add user to docker group
+      become: true
+      user:
+        name: '{{ promoter_user }}'
+        groups: '{{ docker_group.stdout }}'
+        append: true
+      register: groupadd
+      when: "docker_group.stdout not in user_groups.stdout"
+
+    - name: Run docker registry for {{ manifest_registry }}
+      become: true
+      become_user: "{{ promoter_user }}"
+      shell: |
+        pip install docker --user
+        docker pull registry
+        docker run -d -p 5000:5000 --restart=always --name manifest-local-registry registry
+        docker system prune -a -f
+
+
+
+    - name: Include the manifest-push tasks for testing
+      include_tasks: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}/ci-scripts/container-push/manifest-push.yml"
+
