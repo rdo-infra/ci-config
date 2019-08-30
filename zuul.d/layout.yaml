@@ -6,12 +6,15 @@
 - job:
     name: tox-jjb
     run: playbooks/tox-jjb-run.yml
+
 - project:
     check:
       jobs:
         - sova-tracking-jobs: &sovatrack
             files:
               - ^ci-scripts/infra-setup/scheduler/.*$
+        - rdo-tox-molecule:
+            voting: false
         - tox-jjb
         - tox-py27: &py27
             pre-run: playbooks/pre-run-docker.yml
