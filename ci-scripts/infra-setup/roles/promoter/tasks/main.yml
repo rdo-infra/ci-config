@@ -139,6 +139,70 @@
       }
     dest: /home/{{ promoter_user }}/.docker/config.json
 
+#
+# when setup_staging: setup registry + certs for promoter manifest push testing
+#
+- name: Setup local registry with certs for promoter manifest push testing
+  when: setup_staging
+  block:
+  - name: Gather network facts for ansible_default_ipv4 on localhost
+    delegate_to: localhost
+    delegate_facts: true
+    setup:
+      gather_subset: network
+
+  - name: Set fact for the manifest_registry
+    set_fact:
+      manifest_registry: "{{ hostvars['localhost']['ansible_default_ipv4']['address'] }}:443"
+
+  - name: Add the localhost IP into openssl.cnf v3_ca section
+    become: true
+    become_user: "{{ promoter_user }}"
+    delegate_to: localhost
+    ini_file:
+      path: /etc/pki/tls/openssl.cnf
+      section: v3_ca
+      option: subjectAltName
+      value: "IP:{{ hostvars['localhost']['ansible_default_ipv4']['address'] }}"
+      backup: yes
+      mode: preserve
+
+  - name: Create /home/{{ promoter_user }}/manifest_certs directory
+    delegate_to: localhost
+    file:
+      path: /home/{{ promoter_user }}/manifest_certs/
+      state: directory
+
+  - name: Create /etc/docker/certs.d/{{ manifest_registry }} directory
+    delegate_to: localhost
+    become: true
+    file:
+      path: /etc/docker/certs.d/{{ manifest_registry }}
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+
+  - name: Shell openssl create manifest_certs/domain.key and domain.crt
+    delegate_to: localhost
+    shell: |
+      openssl req -newkey rsa:4096 -nodes -sha256 -keyout manifest_certs/domain.key   -x509 -days 365 -out manifest_certs/domain.crt -subj "/CN={{ hostvars['localhost']['ansible_default_ipv4']['address'] }}"
+
+  - name: Copy manifest_certs/domain.crt to /etc/docker/certs.d/{{ manifest_registry }}
+    delegate_to: localhost
+    become: true
+    copy:
+      src: /home/{{ promoter_user }}/manifest_certs/domain.crt
+      dest: /etc/docker/certs.d/{{ manifest_registry }}/ca.crt
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Run docker registry for {{ manifest_registry }}
+    delegate_to: localhost
+    shell: |
+      docker pull registry
+      docker run -d -p 443:443 --restart=always --name manifest-local-registry   -v "$(pwd)"/certs:/certs   -e REGISTRY_HTTP_ADDR=0.0.0.0:443   -e REGISTRY_HTTP_TLS_CERTIFICATE=/home/{{ promoter_user }}/manifest_certs/domain.crt -e REGISTRY_HTTP_TLS_KEY=/home/{{ promoter_user }}/manifest_certs/domain.key registry
 
 #
 # Promoter logs and httpd service setup

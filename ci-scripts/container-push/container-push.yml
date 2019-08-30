@@ -25,6 +25,10 @@
     rdoproject_password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
     containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ lookup('env','RELEASE') }}.txt"
     registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleo{{ lookup('env', 'RELEASE') }}/imagestreamtags"
+    ppc_tag: "ppc64le"
+    x86_tag: "x86_64"
+    manifest_tag: "_manifest"
+    manifest_registry: "docker.io"
   tasks:
     - name: print out hash, label and namespaces in play
       debug:
@@ -140,7 +144,7 @@
             - dockerhub_push
 
         # Nested loop order here is on purpose, so we push first all the images with the full hash, then we tag with the named label.
-        - name: Tag and push images to docker hub
+        - name: Tag and push images to docker hub - dlrn hash and named label
           docker_image:
             name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item[1] }}"
             tag: "{{ item[0] }}"
@@ -152,6 +156,9 @@
           retries: 3
           tags:
             - dockerhub_push
+
+        - name: Push _arch containers and manifests to {{ manifest_registry }}
+          include_tasks: manifest-push.yml
 
         - name: Check if dockerhub has all images
           shell: |
