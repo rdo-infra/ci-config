@@ -8,7 +8,7 @@ curl -sLo $BUILD_TAG.yaml $(echo $DELOREAN_URL | sed 's/delorean\.repo/commit.ya
 commit_hash=$(cat $BUILD_TAG.yaml| shyaml get-value commits.0.commit_hash)
 distro_hash=$(cat $BUILD_TAG.yaml| shyaml get-value commits.0.distro_hash)
 
-dlrnapi --url https://$DELOREAN_HOST/api-$RDO_VERSION \
+dlrnapi --url https://$DELOREAN_PUBLIC_HOST/api-$RDO_VERSION \
     --username ciuser \
     report-result \
     --job-id $JOB_NAME \
