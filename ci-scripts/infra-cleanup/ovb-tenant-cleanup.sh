@@ -63,9 +63,17 @@ usage () {
 set -e
 
 # Check that we can talk with the cloud
-if ! openstack token issue >/dev/null; then
-    echo "ERROR: Failed to talk with cloud, credentials should be sourced or configured in cloud.yaml file." >&2
-    exit 1;
+if ! openstack token issue 2>&1 >/dev/null; then
+    # we attempt to load credentials and avoid xtrace during sourcing
+    old_trace_value=$( [[ $- = *x* ]] && echo '-x' || echo '+x')
+    set +x
+    source /etc/nodepoolrc
+    set ${old_trace_value}
+
+    if ! openstack token issue >/dev/null; then
+        echo "ERROR: Failed to talk with cloud, credentials should be sourced, configured in cloud.yaml file or stored inside /etc/nodepoolrc file." >&2
+        exit 1;
+    fi
 fi
 
 # Input argument assignments
