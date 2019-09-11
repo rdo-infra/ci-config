@@ -136,6 +136,26 @@
         docker build -t localhost:5000/tripleomaster/hello-world:cc26d47faedf3643237cfb494d001d1add50267c .
       register: build
 
+- become: true
+  become_user: "{{ promoter_user }}"
+  tags:
+    - staging_prepare
+  block:
+    - name: get date-time-stamp
+      set_fact:
+        date_time_stamp: ansible_date_time.epoch
+        cacheable: true
+
+#    - name: render container and image names with date_time_stamp
+#      template:
+#        src: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/samples/{{ item.source }}.j2"
+#        dest: "{{ working_dir }}/{{ item.dest }}"
+#        mode: 0755
+#      with_items:
+#        - { source: 'docker_images.txt', dest: 'docker_images.txt' }
+#        - { source: 'meta.yaml', dest: 'meta.yaml' }
+#        - { source: 'overcloud_containers.txt' dest: 'overcloud_containers.txt' }
+
 # This block is the setup / run/ teardown
 - become: true
   become_user: "{{ promoter_user }}"
