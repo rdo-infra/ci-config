@@ -7,15 +7,36 @@ list of containers created.
 
 Uses standard pytest fixture as a setup/teardown method
 """
-import mock
+import docker
 import os
 import pytest
+import tempfile
 import yaml
+
 from staging_environment import StagedEnvironment, load_config
 
 
 @pytest.fixture()
-def staged_env():
+def source_image():
+
+
+    client = docker.DockerClient(version="1.25")
+    config = load_config(db_filepath="/tmp/sqlite-test.db")
+    temp_dir = tempfile.mkdtemp()
+    with open(os.path.join(temp_dir, "nothing"), "w"):
+        pass
+    with open(os.path.join(temp_dir, "Dockerfile"), "w") as dockerfile:
+        dockerfile.write("FROM scratch\nCOPY nothing /\n")
+    build_tag = config["containers"]["source_image"]
+    image, _ = client.images.build(path=temp_dir, tag=build_tag)
+
+    yield image
+
+    client.images.remove(image.id, force=True)
+
+
+@pytest.fixture()
+def staged_env(source_image):
     """
     Fixture that runs the staging environment provisioner, yields the files
     produced and cleans up after
@@ -41,7 +62,9 @@ def staged_env():
 
     os.chdir(root_dir)
     tree = []
-    for i in os.walk("."):
+    for r,d,f in sorted(os.walk(".")):
+	i = (r, sorted(d), sorted(f))
+
         tree.append(i)
     tree_yaml = yaml.safe_dump(tree)
 
@@ -51,7 +74,6 @@ def staged_env():
     staged_env.teardown()
 
 
-@pytest.mark.docker
 def test_samples(staged_env):
     """
     This test loads all the sample files, gets the files produced by the
@@ -71,9 +93,10 @@ def test_samples(staged_env):
     with open(overcloud_yaml_sample_file) as of:
         overcloud_yaml_sample = of.read()
 
+#    image = source_image
+
     meta, overcloud_container_yaml, tree_yaml = staged_env
 
-    print(overcloud_container_yaml)
     assert meta == meta_sample
     assert overcloud_container_yaml == overcloud_yaml_sample
     assert tree_yaml == tree_sample
