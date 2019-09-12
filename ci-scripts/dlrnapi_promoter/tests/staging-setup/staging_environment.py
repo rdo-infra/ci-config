@@ -143,7 +143,7 @@ class StagedHash(object):
             for image, tag in images_list:
                 self.log.debug("Pushing container %s:%s", image, tag)
                 source_image.tag(image, tag=tag)
-                # self.docker_client.images.push(image, tag=tag)
+                self.docker_client.images.push(image, tag=tag)
 
         return images
 
