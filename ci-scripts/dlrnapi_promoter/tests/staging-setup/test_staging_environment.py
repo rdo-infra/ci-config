@@ -81,6 +81,7 @@ def test_samples(staged_env):
     """
 
     base_path = os.path.dirname(os.path.abspath(__file__))
+    config = load_config(db_filepath="/tmp/sqlite-test.db")
     meta_sample_file = os.path.join(base_path, "samples/meta.yaml")
     overcloud_yaml_sample_file = os.path.join(
         base_path, "samples/overcloud_containers.txt")
