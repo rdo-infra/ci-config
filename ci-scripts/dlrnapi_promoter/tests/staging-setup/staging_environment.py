@@ -116,9 +116,13 @@ class StagedHash(object):
 
         # Containers
         source_base_image = self.config['containers']['source_image']
-        registry_data = self.docker_client.images.get_registry_data(
-            source_base_image)
-        source_image = registry_data.pull(platform="x86_64")
+        # Try locally first, then contact registry
+        try:
+            source_image = self.docker_client.images.get(source_base_image)
+        except docker.errors.ImageNotFound:
+            registry_data = self.docker_client.images.get_registry_data(
+                source_base_image)
+            source_image = registry_data.pull(platform="x86_64")
         base_image_registry = self.config['containers']['target_registry_url']
         images = {}
         tags = []
