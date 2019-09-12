@@ -124,6 +124,7 @@ class StagedHash(object):
                 source_base_image)
             source_image = registry_data.pull(platform="x86_64")
         base_image_registry = self.config['containers']['target_registry_url']
+        namespace = self.config['containers']['namespace']
         images = {}
         tags = []
 
@@ -137,8 +138,8 @@ class StagedHash(object):
                 target_image_name = "promoter-staging-{}-{}-{}".format(
                                             distro, image_name, self.stage_id)
                 for tag in tags:
-                    full_image = "{}/{}".format(
-                        base_image_registry, target_image_name)
+                    full_image = "{}/{}/{}".format(
+                        base_image_registry, namespace, target_image_name)
                     images[distro].append((full_image, tag))
                     meta['containers'].append("{}:{}".format(full_image, tag))
 
@@ -147,7 +148,7 @@ class StagedHash(object):
             for image, tag in images_list:
                 self.log.debug("Pushing container %s:%s", image, tag)
                 source_image.tag(image, tag=tag)
-                # self.docker_client.images.push(image, tag=tag)
+                self.docker_client.images.push(image, tag=tag)
 
         return images
 
@@ -181,7 +182,7 @@ class StagedHash(object):
 
             image_set = []
             for repo_name, tag in image_list:
-                repo, image_name = repo_name.split("/")
+                repo, namespace, image_name = repo_name.split("/")
                 if image_name not in image_set:
                     image_set.append(image_name)
 
