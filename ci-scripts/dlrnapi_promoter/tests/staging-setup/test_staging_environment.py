@@ -60,7 +60,11 @@ def test_samples(staged_env):
     """
 
     base_path = os.path.dirname(os.path.abspath(__file__))
-    meta_sample_file = os.path.join(base_path, "samples/meta.yaml")
+    config = load_config(db_filepath="/tmp/sqlite-test.db")
+    if config['containers']['target_registry_url'] == 'localhost:5000':
+        meta_sample_file = os.path.join(base_path, "samples/meta_local.yaml")
+    else:
+        meta_sample_file = os.path.join(base_path, "samples/meta.yaml")
     overcloud_yaml_sample_file = os.path.join(
         base_path, "samples/overcloud_containers.txt")
     tree_sample_file = os.path.join(base_path, "samples/tree.yaml")
