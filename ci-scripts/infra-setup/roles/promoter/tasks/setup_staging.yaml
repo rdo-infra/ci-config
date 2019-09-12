@@ -133,8 +133,14 @@
         fi
         cd /tmp/tempimage
         touch nothing
-        docker build -t localhost:5000/tripleomaster/hello-world:cc26d47faedf3643237cfb494d001d1add50267c .
+        docker build -t source-test/tripleomaster/hello-world:v1 .
       register: build
+
+    - name: Create two local insecure registries
+      command: "docker run -d -p {{ item.port }}:{{ item.port }} --restart=always --name {{ item.name }} registry:2"
+      with_items:
+        - { port: "5000", name: "registry_local_rdo" }
+        - { port: "5050", name: "registry_local_dockerio" }
 
 # This block is the setup / run/ teardown
 - become: true
