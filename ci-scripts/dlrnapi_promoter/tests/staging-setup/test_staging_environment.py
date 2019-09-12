@@ -7,11 +7,32 @@ list of containers created.
 
 Uses standard pytest fixture as a setup/teardown method
 """
-import mock
+import docker
 import os
 import pytest
+import tempfile
 import yaml
+
 from staging_environment import StagedEnvironment, load_config
+
+
+@pytest.fixture()
+def source_image():
+
+
+    client = docker.from_env()
+    config = load_config(db_filepath="/tmp/sqlite-test.db")
+    temp_dir = tempfile.mkdtemp()
+    with open(os.path.join(temp_dir, "nothing"), "w"):
+        pass
+    with open(os.path.join(temp_dir, "Dockerfile"), "w") as dockerfile:
+        dockerfile.write("FROM scratch\nCOPY nothing /\n")
+    build_tag = config["containers"]["source_image"]
+    image, _ = client.images.build(path=temp_dir, tag=build_tag)
+
+    yield image
+
+    client.images.remove(image.id)
 
 
 @pytest.fixture()
@@ -51,8 +72,7 @@ def staged_env():
     staged_env.teardown()
 
 
-@pytest.mark.docker
-def test_samples(staged_env):
+def test_samples(staged_env, source_image):
     """
     This test loads all the sample files, gets the files produced by the
     staging environment provision fixture and compares them
