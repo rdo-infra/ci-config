@@ -573,7 +573,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"Duration",
+                        "alias":"Job Time ( mean )",
                         "colorMode":null,
                         "colors":[
                             "#2f575e",
@@ -581,14 +581,14 @@
                             "rgba(245, 54, 54, 0.9)"
                         ],
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":0,
+                        "decimals":2,
                         "mappingType":1,
-                        "pattern":"sum",
+                        "pattern":"mean",
                         "thresholds":[
                             ""
                         ],
                         "type":"number",
-                        "unit":"dtdurations"
+                        "unit":"s"
                     },
                     {
                         "alias":"Count",
@@ -638,11 +638,43 @@
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
-                        "pattern":"/.*/",
+                        "mappingType":1,
+                        "pattern":"",
                         "thresholds":[],
                         "type":"number",
                         "unit":"short"
+                    },
+                    {
+                        "alias":"Job Time ( median )",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"median",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Job Time ( max )",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"max",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"s"
                     }
                 ],
                 "targets":[
@@ -658,7 +690,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"autogen",
-                        "query":"SELECT count(\"result_num\"), sum(\"duration\"),sum(\"result_num\")*100/count(\"result_num\") FROM \"autogen\".\"build\" WHERE (\"type\" = 'upstream') AND $timeFilter GROUP BY \"job_name\"",
+                        "query":"SELECT count(\"result_num\"), mean(\"duration\"), median(\"duration\"),max(\"duration\"), sum(\"result_num\")*100/count(\"result_num\") FROM \"autogen\".\"build\" WHERE (\"type\" = 'upstream') AND $timeFilter GROUP BY \"job_name\"",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -1177,6 +1209,7 @@
                 }
             }
         ],
+        "refresh":false,
         "schemaVersion":18,
         "style":"dark",
         "tags":[],
