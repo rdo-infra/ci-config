@@ -900,6 +900,8 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
+                        "query":"SELECT median(\"duration\") FROM \"build\" WHERE $timeFilter GROUP BY time(30m)",
+                        "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
                         "select":[
@@ -1212,6 +1214,174 @@
                 "yaxis":{
                     "align":false,
                     "alignLevel":1
+                }
+            },
+            {
+                "alert":{
+                    "conditions":[
+                        {
+                            "evaluator":{
+                                "params":[
+                                    10800
+                                ],
+                                "type":"gt"
+                            },
+                            "operator":{
+                                "type":"and"
+                            },
+                            "query":{
+                                "params":[
+                                    "A",
+                                    "5m",
+                                    "now"
+                                ]
+                            },
+                            "reducer":{
+                                "params":[],
+                                "type":"avg"
+                            },
+                            "type":"query"
+                        }
+                    ],
+                    "executionErrorState":"alerting",
+                    "for":"5m",
+                    "frequency":"3h",
+                    "handler":1,
+                    "name":"Job Time: tripleo-ci-centos-7-containers-multinode alert",
+                    "noDataState":"no_data",
+                    "notifications":[]
+                },
+                "aliasColors":{},
+                "bars":true,
+                "cacheTimeout":null,
+                "dashLength":10,
+                "dashes":false,
+                "datasource":"telegraf",
+                "decimals":2,
+                "description":"job run time for  tripleo-ci-centos-7-containers-multinode",
+                "fill":1,
+                "gridPos":{
+                    "h":9,
+                    "w":24,
+                    "x":0,
+                    "y":53
+                },
+                "id":16,
+                "legend":{
+                    "alignAsTable":false,
+                    "avg":false,
+                    "current":false,
+                    "max":false,
+                    "min":true,
+                    "rightSide":false,
+                    "show":true,
+                    "total":false,
+                    "values":true
+                },
+                "lines":true,
+                "linewidth":1,
+                "links":[
+                    {
+                        "keepTime":false,
+                        "title":"zuul builds",
+                        "type":"absolute",
+                        "url":"http://zuul.openstack.org/builds?job_name=tripleo-ci-centos-7-containers-multinode"
+                    }
+                ],
+                "nullPointMode":"null",
+                "percentage":false,
+                "pointradius":5,
+                "points":false,
+                "renderer":"flot",
+                "seriesOverrides":[],
+                "spaceLength":10,
+                "stack":false,
+                "steppedLine":false,
+                "targets":[
+                    {
+                        "alias":"Build duration media every 30 minutes",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "30m"
+                                ],
+                                "type":"time"
+                            }
+                        ],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT max(\"duration\")  FROM \"build\" WHERE  (\"job_name\") = 'tripleo-ci-centos-7-containers-multinode'  GROUP BY time(30m)\n",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"median"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "thresholds":[
+                    {
+                        "colorMode":"critical",
+                        "fill":true,
+                        "line":true,
+                        "op":"gt",
+                        "value":10800,
+                        "yaxis":"left"
+                    }
+                ],
+                "timeFrom":null,
+                "timeRegions":[],
+                "timeShift":null,
+                "title":"Job Time: tripleo-ci-centos-7-containers-multinode",
+                "tooltip":{
+                    "shared":true,
+                    "sort":0,
+                    "value_type":"individual"
+                },
+                "transparent":true,
+                "type":"graph",
+                "xaxis":{
+                    "buckets":null,
+                    "mode":"time",
+                    "name":null,
+                    "show":true,
+                    "values":[]
+                },
+                "yaxes":[
+                    {
+                        "decimals":2,
+                        "format":"s",
+                        "label":"",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    },
+                    {
+                        "format":"short",
+                        "label":null,
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":false
+                    }
+                ],
+                "yaxis":{
+                    "align":false,
+                    "alignLevel":null
                 }
             }
         ],
