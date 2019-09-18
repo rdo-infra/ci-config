@@ -91,7 +91,10 @@
             name: promoter
             tasks_from: promotion_run
 
-    - name: Test promotion
-      shell: |
-        python /path/to/staging/tests
-        exit 1
+    - name: Test stage promotion
+      become_user: "{{ promoter_user }}"
+      shell:
+        cmd: |
+          source /home/{{ promoter_user }}/promoter_venv/bin/activate
+          python /home/{{ promoter_user }}/ci-config/ci-scripts/dlrnapi_promoter/tests/staging-setup/test_promoter.py --config_file test-config.yaml
+          exit 1
