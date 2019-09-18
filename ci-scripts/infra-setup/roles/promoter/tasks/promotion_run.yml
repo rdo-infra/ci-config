@@ -19,3 +19,16 @@
   become: true
   become_user: "{{ promoter_user }}"
   command: "grep 'FINISHED promotion process' {{ log_file_grep.stdout }}"
+
+- name: run the promoter workflow tests
+  become: true
+  become_user: "{{ promoter_user }}"
+  shell:
+    cmd: |
+      source /home/{{ promoter_user }}/promoter_venv/bin/activate
+        # Export the path to the mounted docker socket so all docker client commands will use it
+        if [ -S /tmp/docker.sock ]; then
+            export DOCKER_HOST=unix:///tmp/docker.sock
+            export DOCKER_OPTS="--insecure-registry localhost:{{ initial_registry['port'] }}"
+        fi
+        # python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/test_promoter.py
