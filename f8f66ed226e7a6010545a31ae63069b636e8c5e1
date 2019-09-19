@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2c3dbde2_ff956ec3",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 17
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 502
+      },
+      "writtenOn": "2019-09-19T17:14:53Z",
+      "side": 1,
+      "message": "rationale for this?",
+      "range": {
+        "startLine": 30,
+        "startChar": 4,
+        "endLine": 30,
+        "endChar": 24
+      },
+      "revId": "f8f66ed226e7a6010545a31ae63069b636e8c5e1",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4c1403b1_a7d70f36",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 17
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 502
+      },
+      "writtenOn": "2019-09-19T17:14:53Z",
+      "side": 1,
+      "message": "this is not reflecting our design. We should push container:tag in addition to the new temporary manifest container:manifest, for example:\n- container:full_hash as the x86 image\n- container:full_hash_x86_64 as the x86_64 image\n- container:full_hash_ppc64le as the ppc64le image\nand \n- container:multi_arch_full_hash as the temporary manifest",
+      "range": {
+        "startLine": 159,
+        "startChar": 9,
+        "endLine": 159,
+        "endChar": 33
+      },
+      "revId": "f8f66ed226e7a6010545a31ae63069b636e8c5e1",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4847e848_76bb9656",
+        "filename": "ci-scripts/container-push/manifest-push.yml",
+        "patchSetId": 17
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 502
+      },
+      "writtenOn": "2019-09-19T17:14:53Z",
+      "side": 1,
+      "message": "is this right? my local test says results is not a valid field in get_url",
+      "range": {
+        "startLine": 39,
+        "startChar": 29,
+        "endLine": 39,
+        "endChar": 36
+      },
+      "revId": "f8f66ed226e7a6010545a31ae63069b636e8c5e1",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b927782a_620f48e6",
+        "filename": "ci-scripts/container-push/manifest-push.yml",
+        "patchSetId": 17
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 502
+      },
+      "writtenOn": "2019-09-19T17:14:53Z",
+      "side": 1,
+      "message": "no, please no. This does not reflect our design.\n\nWe agreed to create a temporary manifest for now that does not override the current image:tag.\nSo we should push image:tag plus the temporary manifest image:manifest, where:\n- tag\u003dfull_hash and tag\u003dfull_hash_x86_64 for x86\n- tag\u003dfull_hash_ppc64le for ppc64le\n- manifest\u003dmulti_arch_full_hash\n\nso we end up with container :\n- centos-binary-blah:ffffffffffffffff\n- centos-binary-blah:ffffffffffffffff_x86_64\n- centos-binary-blah:ffffffffffffffff_ppc64le\n- centos-binary-blah:multi_arch_fffffffffffffff\n\nwhere\n- tag\u003dfull_hash\u003dffffffffffffffff\n- manifest\u003dmulti_arch_ffffffffffffffff\n\n\nIn other words we\u0027ll push manifest w/ a temp name \"multi_arch_full_hash\" and will switch to \"full_hash\" in a second step.\n\nLet\u0027s carefully review https://tree.taiga.io/project/tripleo-ci-board/task/1245 together.",
+      "range": {
+        "startLine": 82,
+        "startChar": 142,
+        "endLine": 82,
+        "endChar": 151
+      },
+      "revId": "f8f66ed226e7a6010545a31ae63069b636e8c5e1",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d72fb02d_36b93406",
+        "filename": "ci-scripts/infra-setup/roles/promoter/molecule/default/playbook.yml",
+        "patchSetId": 17
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 502
+      },
+      "writtenOn": "2019-09-19T17:14:53Z",
+      "side": 1,
+      "message": "pls move this to teardown.yml, called at the very end",
+      "revId": "f8f66ed226e7a6010545a31ae63069b636e8c5e1",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
