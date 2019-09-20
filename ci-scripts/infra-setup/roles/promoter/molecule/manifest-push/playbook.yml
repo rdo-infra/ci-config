@@ -1,0 +1,104 @@
+---
+- hosts: instance
+  tasks:
+    - setup:
+        gather_subset:
+          - network
+
+- hosts: instance
+  vars:
+    manifest_tag: _manifest
+    manifest_containers: "base\nrabbitmq" # centos-binary-base, centos-binary-rabbitmq
+    manifest_registry: localhost:5000
+    registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleomaster/imagestreamtags"
+    full_hash: b1e8b74033769f79bc7913e5bbd85bf4fd50c9b9_f2e9ca6b
+    distro_name: centos
+    rdoproject_namespace: tripleomaster
+    dockerhub_namespace: tripleomaster
+    ppc_tag: ppc64le
+    x86_tag: x86_64
+    localhost_registry_container: manifest-local-registry
+  tasks:
+    # use role defaults
+    - include_vars:
+        file: ../../defaults/main.yml
+      tags:
+        - always
+    - name: set local src dir for ci-config
+      shell: "pwd"
+      args:
+        chdir: "{{ playbook_dir }}/../../../../../../"
+      register: ci_config_dir
+      delegate_to: localhost
+    - name: set vars for molecule env
+      set_fact:
+        ci_config_local_src_dir: "{{ ci_config_dir.stdout }}"
+        molecule_testing: true
+        setup_staging: true
+        promoter_user: "{{ ansible_user }}"
+
+    - name: Get docker socket group
+      stat:
+        path: /var/run/docker.sock
+      register: docker_socket
+
+    - name: assert docker socket
+      assert:
+        that: docker_socket.stat.exists
+        fail_msg: no docker socket found
+        success_msg: Docket socket present
+
+    - name: Find out docker group name
+      shell: |
+        set -euo pipefail
+        getent group {{ docker_socket.stat.gid }} | cut -d":" -f1
+      register: docker_group
+      changed_when: false
+      failed_when: false
+
+    - name: Check if user is in docker group
+      command: "groups {{ promoter_user }}"
+      register: user_groups
+      changed_when: false
+
+    - name: Add user to docker group
+      become: true
+      user:
+        name: '{{ promoter_user }}'
+        groups: '{{ docker_group.stdout }}'
+        append: true
+      register: groupadd
+      when: docker_group.stdout in user_groups.stdout_lines
+
+    - name: Test promoter container manifest-push.yml
+      block:
+      - name: Run docker registry for {{ manifest_registry }}
+        shell: |
+          docker pull registry
+          docker run -d -p 5000:5000 --restart=always --name manifest-local-registry registry
+          docker tag registry:2 {{ manifest_registry }}/tripleomaster/centos-binary-base:b1e8b74033769f79bc7913e5bbd85bf4fd50c9b9_f2e9ca6b_x86_64
+          docker tag registry:2 {{ manifest_registry }}/tripleomaster/centos-binary-rabbitmq:b1e8b74033769f79bc7913e5bbd85bf4fd50c9b9_f2e9ca6b_x86_64
+          docker push {{ manifest_registry }}/tripleomaster/centos-binary-base:b1e8b74033769f79bc7913e5bbd85bf4fd50c9b9_f2e9ca6b_x86_64
+          docker push {{ manifest_registry }}/tripleomaster/centos-binary-rabbitmq:b1e8b74033769f79bc7913e5bbd85bf4fd50c9b9_f2e9ca6b_x86_64
+
+      #- register built_images result from manifest_containers var
+      - name: Register the built_images for manifest-push testing
+        shell: |
+          echo "{{ manifest_containers }}"
+        register: built_images
+
+    - environment:
+        DOCKER_CLI_EXPERIMENTAL: enabled
+      block:
+      #- run the manifest-push tasks
+        - include_tasks: ../../../../../container-push/manifest-push.yml
+
+      #- include_tasks: manifest-push-tests.yml
+
+      always:
+      #- cleanup stop and remove local registry
+      # Where is this started ?
+      - name: 'Stop and remove {{ localhost_registry_container }}'
+        shell: |
+          docker container stop {{ localhost_registry_container }}
+          docker container rm {{ localhost_registry_container }}
