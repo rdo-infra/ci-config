@@ -9,3 +9,14 @@
       primary:
         ansible_user: root
     voting: false
+
+# This job is needed until pytest-molecule accepts scenarios that use
+# the delegated driver. After it's fixed, these scenarios will be handled
+# by rdo-tox-molecule job directly
+#
+- job:
+    name: molecule-delegated
+    parent: base
+    pre-run: playbooks/molecule-delegated-pre.yml
+    run: playbooks/molecule-delegated.yml
+    voting: false

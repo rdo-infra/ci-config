@@ -84,6 +84,13 @@
         name: promoter
         tasks_from: setup_staging
 
+    - name: Staging images pattern file
+      copy:
+        content: |
+            ^neutron-server$
+            ^nova-compute$
+        dest: /tmp/images_pattern_file
+
     - name: Staged promotion run
       block:
         - name: Try promotion_run

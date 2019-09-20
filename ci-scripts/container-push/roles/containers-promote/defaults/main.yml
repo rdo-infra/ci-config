@@ -1,0 +1,14 @@
+named_label: "{{ lookup('env', 'PROMOTE_NAME') }}"
+full_hash: "{{ lookup('env', 'FULL_HASH')}}"
+script_root: "{{ lookup('env', 'SCRIPT_ROOT') }}"
+distro_name: "{{ lookup('env', 'DISTRO_NAME') }}"
+distro_version: "{{ lookup('env', 'DISTRO_VERSION') }}"
+release: "{{ lookup('env','RELEASE') }}"
+containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ lookup('env','RELEASE') }}.txt"
+registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleo{{ lookup('env', 'RELEASE') }}/imagestreamtags"
+source_registry:
+  host: trunk.registry.rdoproject.org
+  namespace: "tripleo{{ lookup('env','RELEASE') }}"
+  username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
+  password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
+pattern_file: /tmp/images_pattern_file
