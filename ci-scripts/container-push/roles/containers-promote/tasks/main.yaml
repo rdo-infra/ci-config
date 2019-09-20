@@ -1,0 +1,290 @@
+---
+- name: print out hash, label and namespaces in play
+  debug:
+    var: "{{ item }}"
+  with_items:
+    - full_hash
+    - named_label
+    - dockerhub_namespace
+    - rdoproject_namespace
+    - quaydotio_namespace
+    - release
+
+- name: Construct dlrn_dir from full_hash (turn xxyyz* into xx/yy/xxyyz*)
+  set_fact:
+    dlrn_dir: "{{ full_hash | regex_replace('^(?P<first>.{2})(?P<second>.{2})(?P<third>.+)$', '\\g<first>/\\g<second>/\\g<first>\\g<second>\\g<third>') }}"
+
+- name: Construct the DLRN URL for the promoted hash
+  set_fact:
+    dlrn_url: "https://trunk.rdoproject.org/{{ distro_name }}{{ distro_version }}-{{ release }}/{{ dlrn_dir }}/versions.csv"
+
+- name: Get the tripleo-common commit in the promoted hash
+  shell: >
+    curl {{ dlrn_url }} | grep ',openstack-tripleo-common-[0-9]' | cut -f3 -d','
+  register: local_release
+
+- name: Set the release_url - master
+  set_fact:
+    release_url: "https://opendev.org/openstack/tripleo-common/raw/branch/master/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}"
+  when:
+    - release == 'master'
+    - not setup_staging | default(false) | bool
+
+- name: Set the release_url to the generated staging containers list - master
+  set_fact:
+    release_url: "{{ root-dir }}/{{ overcloud_containers_yaml_base_dir }}/{{ distro_name }}/{{ full_hash }}/overcloud_containers.yaml.j2"
+  when:
+    - release == 'master'
+    - setup_staging | default(false) | bool
+
+- name: Set the release_url - stable
+  set_fact:
+    release_url: "https://opendev.org/openstack/tripleo-common/raw/branch/stable/{{ release }}/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}"
+  when: release != 'master'
+
+- debug:
+    var: release_url
+
+- name: Generate list of containers to push
+  shell: |
+    export DOCKER_CLI_EXPERIMENTAL=enabled
+    echo -n > {{ containers_file }};
+    for image in $(curl -fk {{ release_url }} 2>/dev/null | grep -o -P '(?<=name_prefix).*(?=name_suffix)' | sed "s/[{}]//g"); do
+    #for image in a b; do
+        echo -n "Checking {{ source_registry }}/{{ source_registry_namespace }}/{{ distro_name }}-binary-$image:{{ full_hash }} ... ";
+        if docker manifest inspect --insecure "{{ source_registry }}/{{ source_registry_namespace }}/{{ distro_name }}-binary-$image:{{ full_hash }}" &>/dev/null; then
+            echo $image >> {{ containers_file }};
+            echo "OK";
+        else
+            echo "FAIL";
+            echo "ERROR ========== {{ distro_name}}-binary-$image IS NOT BUILT! FIX THIS ASAP! ==========";
+        fi
+    done
+    # fail the script and exit with error if the container list is empty
+    if [ ! -s {{ containers_file }} ]; then
+        echo "FAIL";
+        echo "ERROR =========== container list is empty THIS IS A CRITICAL BUG in the container push playbook";
+        exit 1
+    fi
+    echo "base" >> {{ containers_file }}
+    echo "openstack-base" >> {{ containers_file }}
+
+- name: run container tagging and always cleanup at the end
+  block:
+    - name: Retrieve list of built images
+      shell: >
+        cat {{containers_file }}
+      register: built_images
+      tags:
+        - rdoproject_pull
+        - rdoproject_push
+        - dockerhub_push
+        - quaydotio_push
+        - remove_local_containers
+
+    - name: Pull the images from source registry
+      docker_image:
+        name: "{{ source_registry }}/{{ source_registry_namespace }}/{{ distro_name }}-binary-{{ item }}"
+        tag: "{{ full_hash }}"
+      with_items: "{{ built_images.stdout_lines }}"
+      retries: 3
+      tags:
+        - rdoproject_pull
+
+    - name: Login to rdoproject registry
+      docker_login:
+        registry_url: "{{ source_registry }}"
+        username: "{{ rdoproject_username }}"
+        password: "{{ rdoproject_password }}"
+        reauthorize: "yes"
+      no_log: "yes"
+      tags:
+        - rdoproject_push
+
+    - name: Tag images to source registry with named label
+      shell: >
+        docker tag
+        {{ source_registry }}/{{ source_registry_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}
+        {{ source_registry }}/{{ source_registry_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ named_label }}
+      with_items: "{{ built_images.stdout_lines }}"
+      tags:
+        - rdoproject_push
+
+    - name: Push images to source registry with named label
+      shell: >
+        docker push {{ source_registry }}/{{ source_registry_namespace  }}/{{ distro_name }}-binary-{{ item  }}:{{ named_label  }}
+      with_items: "{{ built_images.stdout_lines }}"
+      retries: 3
+      tags:
+        - rdoproject_push
+
+    - name: Login to dockerhub
+      docker_login:
+        registry_url: "localhost:5000"
+        username: "{{ dockerhub_username }}"
+        password: "{{ dockerhub_password }}"
+        reauthorize: "yes"
+      no_log: "yes"
+      tags:
+        - dockerhub_push
+
+    - name: Login to quay.io
+      docker_login:
+        registry_url: "localhost:5000"
+        username: "{{ quaydotio_username }}"
+        password: "{{ quaydotio_password }}"
+        reauthorize: "yes"
+      no_log: "yes"
+      tags:
+        - quaydotio_push
+
+    - set_fact:
+        pushed_containers: []
+    # Nested loop order here is on purpose, so we push first all the images with the full hash, then we tag with the named label.
+    - name: Tag and push images to docker hub
+      docker_image:
+        name: "localhost:5000/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item[1] }}"
+        tag: "{{ item[0] }}"
+        repository: "localhost:5000/{{ dockerhub_namespace}}/{{ distro_name }}-binary-{{ item[1] }}"
+        push: yes
+      with_nested:
+        - ["{{ full_hash }}", "{{ named_label }}"]
+        - "{{ built_images.stdout_lines }}"
+      register: pushed
+      retries: 3
+      tags:
+        - dockerhub_push
+
+    - set_fact:
+        pushed_containers: "{{ pushed_containers + [item.invocation.module_args.repository + ':' + item.invocation.module_args.tag] }}"
+      with_items: "{{ pushed.results }}"
+
+    - debug:
+        var: pushed_containers
+
+    - name: Check if dockerhub has all images
+      shell: |
+        tag={{ full_hash }}
+        for image in $(cat {{containers_file }})
+        do
+            if curl --silent -fk -lSL "https://index.docker.io/v1/repositories/{{ dockerhub_namespace}}/{{ distro_name }}-binary-${image}/tags/${tag}" 1>/dev/null;
+            then
+                echo "$image OK";
+            else
+                echo "$image ERROR";
+            fi
+        done
+      register: command_result
+      failed_when: "'ERROR' in command_result.stdout or command_result.rc != 0"
+      retries: 1
+      tags:
+        - dockerhub_push
+
+    - name: Create public empty repositories on quay.io
+      uri:
+        url: https://quay.io/api/v1/repository
+        method: POST
+        body_format: json
+        body:
+          namespace: "{{ quaydotio_namespace }}"
+          repository: "{{ distro_name }}-binary-{{ item }}"
+          description: "TripleO container for {{ distro_name }}-binary-{{ item }}"
+          visibility: public
+        headers:
+          Authorization: "Bearer {{ quaydotio_token }}"
+          Content-Type: "application/json"
+        status_code:
+          - 400
+          - 201
+      loop: "{{ built_images.stdout_lines }}"
+      register: image_result
+      until: image_result is success
+      retries: 2
+      tags:
+        - quaydotio_push
+
+    # Nested loop order here is on purpose, so we push first all the images with the full hash, then we tag with the named label.
+    - name: Tag and push images to quay.io
+      docker_image:
+        name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item[1] }}"
+        tag: "{{ item[0] }}"
+        repository: "quay.io/{{ quaydotio_namespace}}/{{ distro_name }}-binary-{{ item[1] }}"
+        push: yes
+      with_nested:
+        - ["{{ full_hash }}", "{{ named_label }}"]
+        - "{{ built_images.stdout_lines }}"
+      retries: 3
+      tags:
+        - quaydotio_push
+
+    - name: Check if quay.io has all images
+      shell: |
+        tag={{ full_hash }}
+        for image in $(cat {{containers_file }})
+        do
+            if curl --silent -fk -lSL "https://quay.io/api/v1/repository/{{ quaydotio_namespace}}/{{ distro_name }}-binary-${image}/tag/${tag}/images" 1>/dev/null;
+            then
+                echo "$image OK";
+            else
+                echo "$image ERROR";
+            fi
+        done
+      register: command_result
+      failed_when: "'ERROR' in command_result.stdout or command_result.rc != 0"
+      retries: 1
+      tags:
+        - quaydotio_push
+
+  always:
+    - name: Delete the pushed containers
+      docker_image:
+        name: "{{ item }}"
+        state: absent
+        force: yes
+      with_items: "{{ pushed_containers }}"
+      retries: 3
+      ignore_errors: yes
+      tags:
+        - remove_local_containers
+
+    - name: Delete the local images from rdoproject registry
+      docker_image:
+        name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item[0] }}"
+        tag: "{{ item[1] }}"
+        state: absent
+        force: yes
+      with_nested:
+        - "{{ built_images.stdout_lines }}"
+        - ["{{ full_hash }}", "{{ named_label }}"]
+      retries: 3
+      ignore_errors: yes
+      tags:
+        - remove_local_containers
+
+    - name: Delete the local images from docker hub
+      docker_image:
+        name: "docker.io/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item[0] }}"
+        tag: "{{ item[1] }}"
+        state: absent
+        force: yes
+      with_nested:
+        - "{{ built_images.stdout_lines }}"
+        - ["{{ full_hash }}", "{{ named_label }}"]
+      retries: 3
+      ignore_errors: yes
+      tags:
+        - remove_local_containers
+
+    - name: Delete the local images from quay.io
+      docker_image:
+        name: "quay.io/{{ quaydotio_namespace }}/{{ distro_name }}-binary-{{ item[0] }}"
+        tag: "{{ item[1] }}"
+        state: absent
+        force: yes
+      with_nested:
+        - "{{ built_images.stdout_lines }}"
+        - ["{{ full_hash }}", "{{ named_label }}"]
+      retries: 3
+      ignore_errors: yes
+      tags:
+        - remove_local_containers
