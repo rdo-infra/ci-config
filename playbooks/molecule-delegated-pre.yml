@@ -1,0 +1,78 @@
+---
+
+- hosts: all
+  vars:
+    molecule_requirements:
+      - ansible
+      - ansi2html
+      - docker
+      - pytest
+      - pytest-cov
+      - pytest-html
+      - pytest-xdist
+      - mock
+      - molecule>=2.22rc1
+
+  tasks:
+    - name: Packages
+      become: true
+      block:
+        - name: Configure docker-ce repo
+          command: yum-config-manager --add-repo \
+              https://download.docker.com/linux/centos/docker-ce.repo
+
+        - name: Removed old/distro version of docker
+          yum:
+            name:
+              - docker
+              - docker-client
+              - docker-client-latest
+              - docker-common
+              - docker-latest
+              - docker-latest-logrotate
+              - docker-logrotate
+              - docker-engine
+            state: absent
+
+        - name: Install required packages
+          yum:
+            name:
+              - python-virtualenv
+              - yum-utils
+              - docker-ce
+              - docker-ce-cli
+            state: present
+
+        - name: Start docker
+          service:
+            name: docker
+            state: started
+
+        - name: Stat docker on docker socket
+          stat:
+            path: "/var/run/docker.sock"
+          register: docker_socket_stat
+
+        - name: Find out docker group name
+          shell: |
+            set -euo pipefail
+            getent group {{ docker_socket_stat.stat.gid }} | cut -d":" -f1 | head -1
+          register: docker_group
+          changed_when: false
+          failed_when: false
+
+        - name: Add user to docker group
+          become: true
+          user:
+            name: zuul
+            groups: '{{ docker_group.stdout }}'
+            append: true
+
+    - name: Setup test-python
+      become: true
+      pip:
+        name: "{{ molecule_requirements }}"
+        virtualenv: "{{ ansible_user_dir }}/test-python"
+        virtualenv_site_packages: true
+
+
