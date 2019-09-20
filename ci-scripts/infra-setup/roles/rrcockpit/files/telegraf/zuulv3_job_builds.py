@@ -1,11 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
 import argparse
-import datetime
+from datetime import datetime, timedelta
 import time
 import re
 import requests
 import yaml
+import urllib
+import urllib2
 
 try:
     from urlparse import urljoin
@@ -51,7 +53,7 @@ cache.expire()
 
 
 def to_ts(d, seconds=False, pattern=TIMESTAMP_PATTERN):
-    return datetime.datetime.strptime(
+    return datetime.strptime(
         d, pattern).strftime('%s') + ('' if seconds else "000000000")
 
 
@@ -127,6 +129,57 @@ def add_inventory_info(build):
         pass
 
 
+def add_container_prep_time(build):
+    if build['log_url'] is not None:
+        job_terms = ['featureset', 'oooq', 'multinode']
+        if any(x in build['job_name'] for x in job_terms):
+            target_url = build['log_url'] + \
+                "logs/undercloud/home/zuul/install-undercloud.log.txt.gz"
+        elif 'standalone' in build['job_name']:
+            target_url = build['log_url'] + \
+                "logs/undercloud/home/zuul/standalone_deploy.log.txt.gz"
+        else:
+            build['container_prep_time'] = 0
+            return build
+        try:
+            req = urllib2.Request(target_url)
+            resp = urllib2.urlopen(req)
+            respData = resp.readlines()
+            #length = len(respData)
+            #respData = get(target_url)
+        except urllib2.HTTPError as err:
+            build['container_prep_time'] = 0
+            return build
+
+        # loop through the file looking for the container prep
+        # signature
+        count = 0
+        container_prep_begin = ""
+        container_prep_end = ""
+        container_prep_line = 'tripleo-container-image-prepare.log'
+        for line in respData:
+            count += 1
+            match = re.search(r'.*'+container_prep_line+'.*',str(line))
+            if match:
+                container_prep_begin = \
+                    "-".join(line.decode("utf-8").split(" ")[0:2])
+                count = count + 2
+                end_line = respData[count]
+                container_prep_end = \
+                    "-".join(end_line.decode("utf-8").split(" ")[0:2])
+                break
+        try:
+            begin = datetime.strptime(container_prep_begin, \
+                                      '%Y-%m-%d-%H:%M:%S.%f' )
+            end = datetime.strptime(container_prep_end, \
+                                      '%Y-%m-%d-%H:%M:%S.%f' )
+            prep_container_time = end - begin
+            build['container_prep_time'] = prep_container_time
+        except ValueError as err:
+            build['container_prep_time'] = 1
+        return build
+
+
 def fix_task_name(task_name):
     return re.sub(r'/tmp/tripleo-modify-image.*', '/tmp/tripleo-modify-image',
                   task_name).replace(',', '_')
@@ -160,6 +213,10 @@ def print_influx_ara_tasks(build, ara_json_file):
 def influx(build):
 
     add_inventory_info(build)
+    add_container_prep_time(build)
+
+    if 'container_prep_time' not in build:
+        build['container_prep_time'] = 0
 
     if build['end_time'] is None:
         build['end_time'] = datetime.datetime.fromtimestamp(
@@ -172,6 +229,7 @@ def influx(build):
         duration = 0
     # Get the nodename
     return ('build,'
+            'container_prep_time=%s,'
             'type=%s,'
             'pipeline=%s,'
             'branch=%s,'
@@ -198,7 +256,8 @@ def influx(build):
             'provider="%s"'
             ' '
             '%s' %
-            (build['type'], build['pipeline'], 'none' if not build['branch']
+            (build['container_prep_time'], build['type'], 
+             build['pipeline'], 'none' if not build['branch']
              else build['branch'], build['project'], build['job_name'],
              build['voting'], build['change'], build['patchset'], 'True'
              if build['result'] == 'SUCCESS' else 'False',
@@ -221,7 +280,6 @@ def print_influx(build_type, builds):
             for ara_json in ARA_JSONS:
                 print_influx_ara_tasks(build, ara_json)
             print(influx(build))
-
 
 def main():
 

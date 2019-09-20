@@ -34,8 +34,8 @@
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
-                    "col":0,
-                    "desc":true
+                    "col":null,
+                    "desc":false
                 },
                 "styles":[
                     {
@@ -257,11 +257,27 @@
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
-                        "pattern":"/.*/",
+                        "mappingType":1,
+                        "pattern":"",
                         "thresholds":[],
                         "type":"number",
                         "unit":"short"
+                    },
+                    {
+                        "alias":"Container Prep Time",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"container_prep_time",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"dtdurations"
                     }
                 ],
                 "targets":[
@@ -270,6 +286,8 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"container_prep_time\",\"result_num\", \"result\", \"cloud\", \"region\" FROM \"build\" WHERE $timeFilter",
+                        "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
                         "select":[
