@@ -1,0 +1,142 @@
+---
+- name: print out hash, label and namespaces in play
+  debug:
+    var: "{{ item }}"
+  with_items:
+    - full_hash
+    - named_label
+    - dockerhub_namespace
+    - rdoproject_namespace
+    - quaydotio_namespace
+    - release
+
+- set_fact:
+    pushed_containers: []
+
+- name: Construct dlrn_dir from full_hash (turn xxyyz* into xx/yy/xxyyz*)
+  set_fact:
+    dlrn_dir: "{{ full_hash | regex_replace('^(?P<first>.{2})(?P<second>.{2})(?P<third>.+)$', '\\g<first>/\\g<second>/\\g<first>\\g<second>\\g<third>') }}"
+
+- name: Construct the DLRN URL for the promoted hash
+  set_fact:
+    dlrn_url: "https://trunk.rdoproject.org/{{ distro_name }}{{ distro_version }}-{{ release }}/{{ dlrn_dir }}/versions.csv"
+
+- name: Get the tripleo-common commit in the promoted hash
+  shell: >
+    curl {{ dlrn_url }} | grep ',openstack-tripleo-common-[0-9]' | cut -f3 -d','
+  register: local_release
+
+- name: Set the release_url - master
+  set_fact:
+    release_url: "https://opendev.org/openstack/tripleo-common/raw/branch/master/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}"
+  when:
+    - release == 'master'
+    - not setup_staging | default(false) | bool
+
+- name: Set the release_url to the generated staging containers list - master
+  set_fact:
+    release_url: "{{ root-dir }}/{{ overcloud_containers_yaml_base_dir }}/{{ distro_name }}/{{ full_hash }}/overcloud_containers.yaml.j2"
+  when:
+    - release == 'master'
+    - setup_staging | default(false) | bool
+
+- name: Set the release_url - stable
+  set_fact:
+    release_url: "https://opendev.org/openstack/tripleo-common/raw/branch/stable/{{ release }}/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}"
+  when: release != 'master'
+
+- debug:
+    var: release_url
+
+- name: Generate list of containers to push
+  shell: |
+    export DOCKER_CLI_EXPERIMENTAL=enabled
+    echo -n > {{ containers_file }};
+    for image in $(curl -fk {{ release_url }} 2>/dev/null | grep -o -P '(?<=name_prefix).*(?=name_suffix)' | sed "s/[{}]//g"); do
+    #for image in a b; do
+        echo -n "Checking {{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-$image:{{ full_hash }} ... ";
+        if docker manifest inspect --insecure "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-$image:{{ full_hash }}" &>/dev/null; then
+            echo $image >> {{ containers_file }};
+            echo "OK";
+        else
+            echo "FAIL";
+            echo "ERROR ========== {{ distro_name}}-binary-$image IS NOT BUILT! FIX THIS ASAP! ==========";
+        fi
+    done
+    # fail the script and exit with error if the container list is empty
+    if [ ! -s {{ containers_file }} ]; then
+        echo "FAIL";
+        echo "ERROR =========== container list is empty THIS IS A CRITICAL BUG in the container push playbook";
+        exit 1
+    fi
+    echo "base" >> {{ containers_file }}
+    echo "openstack-base" >> {{ containers_file }}
+
+- name: run container tagging and always cleanup at the end
+  block:
+    - name: Retrieve list of built images
+      shell: >
+        cat {{containers_file }}
+      register: built_images
+      tags:
+        - rdoproject_pull
+        - rdoproject_push
+        - dockerhub_push
+        - quaydotio_push
+        - remove_local_containers
+
+    - name: Login to source registry
+      docker_login:
+        registry_url: "{{ source_registry.host }}"
+        username: "{{ source_registry.username }}"
+        password: "{{ source_registry.password }}"
+        reauthorize: "yes"
+        #no_log: "yes"
+      tags:
+        - rdoproject_push
+
+    - name: Pull the images from source registry
+      docker_image:
+        name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ item }}"
+        tag: "{{ full_hash }}"
+      with_items: "{{ built_images.stdout_lines }}"
+      retries: 3
+      tags:
+        - rdoproject_pull
+
+    - name: Tag images to source registry with named label
+      shell: >
+        docker tag
+        {{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}
+        {{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ named_label }}
+      with_items: "{{ built_images.stdout_lines }}"
+      tags:
+        - rdoproject_push
+
+    - name: Push images to source registry with named label
+      shell: >
+        docker push {{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ item  }}:{{ named_label  }}
+      with_items: "{{ built_images.stdout_lines }}"
+      retries: 3
+      tags:
+        - rdoproject_push
+
+    - include_tasks: registry-push.yml
+      loop: "{{ target_registries }}"
+      loop_control:
+        loop_var: registry
+        label: "{{ registry.host }}"
+
+  always:
+    # TODO: remove source registry containers too
+    - name: Delete the pushed containers
+      docker_image:
+        name: "{{ item }}"
+        state: absent
+        force: yes
+      with_items: "{{ pushed_containers }}"
+      retries: 3
+      ignore_errors: yes
+      tags:
+        - remove_local_containers
+

@@ -1,0 +1,86 @@
+---
+# other than installing docker, need to install docker-python and ansible
+# also need to start docker
+
+
+# This playbook can be used to download the container images which
+# passed CI and tag them back to rdoproject registry.
+# It will also mirror the images to docker.io.
+- name: Download and repush container images
+  hosts: all
+  vars:
+    localhost_registry_container: manifest-local-registry
+    release: master
+    named_label: triple-ci-staging-promoted
+    full_hash: 82a1e08b25e42f1e8ea99d7c9b6957bb06423a34_dae2ef8
+    script_root: UNUSED
+    distro_name: centos
+    distro_version: 7
+    containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+    source_registry:
+      host: localhost:5000
+      username: unused
+      password: unused
+      namespace: "tripleo{{ release }}"
+    target_registries:
+      - host: localhost:5500
+        username: unused
+        password: unused
+        namespace: "tripleo{{ release }}"
+        token: unused
+  tasks:
+    - name: Test promoter container manifest-push.yml
+      block:
+        - name: Mock source and target registries
+          shell: |
+            docker pull registry:2
+            docker run -d -p 5000:5000 --restart=always --name source-registry registry:2
+            docker tag registry:2 {{ source_registry.host }}/tripleomaster/centos-binary-base:{{ full_hash }}
+            docker tag registry:2 {{ source_registry.host }}/tripleomaster/centos-binary-openstack-base:{{ full_hash }}
+            docker push {{ source_registry.host }}/tripleomaster/centos-binary-base:{{ full_hash }}
+            docker push {{ source_registry.host }}/tripleomaster/centos-binary-openstack-base:{{ full_hash }}
+            docker rmi {{ source_registry.host }}/tripleomaster/centos-binary-base:{{ full_hash }}
+            docker rmi {{ source_registry.host }}/tripleomaster/centos-binary-openstack-base:{{ full_hash }}
+
+            docker run -d -p 5500:5000 --restart=always --name target-registry-1 registry:2
+            docker tag registry:2 {{ target_registries[0].host }}/test:v1
+            docker push {{ target_registries[0].host }}/test:v1
+
+
+        - copy:
+            content: |
+                {% raw -%}
+                {{name_prefix}}base{{name_suffix}}
+                {{name_prefix}}openstack-base{{name_suffix}}
+                {%- endraw %}
+            dest: /tmp/release_url
+
+
+        - include_role:
+            name: ../../../../../container-push/roles/containers-promote
+          # The way the container-push works, there's currently no way to test the vars lookup directly
+          # so we are passing the vars directly here, but this reduces coverage: if we
+          # change the lookup, they don't get any test
+          # Unfortunately ading coverage for those requires a refactoring of the way vars are passed
+          # to the container-push in general, which is way too difficult to do right now.
+          vars:
+            release_url: file:///tmp/release_url
+
+        # TODO(gcerami)
+        - name: Check that the containers are pushed correctly to all target registries
+          debug:
+            msg: Not Implemented
+
+        - name: Check that the run left no dangling containers
+          debug:
+            msg: Not Implemented
+
+      always:
+
+        - name: 'Stop and remove {{ localhost_registry_container }}'
+          shell: |
+            docker container stop source-registry
+            docker container rm source-registry
+            docker container stop target-registry-1
+            docker container rm target-registry-1
+
