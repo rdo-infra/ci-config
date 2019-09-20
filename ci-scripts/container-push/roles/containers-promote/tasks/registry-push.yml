@@ -1,0 +1,66 @@
+---
+- name: Login to registry
+  docker_login:
+    registry_url: "{{ registry.host }}"
+    username: "{{ registry.username }}"
+    password: "{{ registry.password }}"
+    reauthorize: "yes"
+    #no_log: "yes"
+
+- name: Create public empty repositories on registry
+  uri:
+    url: "https://{{ registry.host }}/api/v1/repository"
+    method: POST
+    body_format: json
+    body:
+      namespace: "{{ registry.namespace }}"
+      repository: "{{ distro_name }}-binary-{{ item }}"
+      description: "TripleO container for {{ distro_name }}-binary-{{ item }}"
+      visibility: public
+    headers:
+      Authorization: "Bearer {{ registry.token }}"
+      Content-Type: "application/json"
+    status_code:
+      - 400
+      - 201
+  loop: "{{ built_images.stdout_lines }}"
+  register: image_result
+  until: image_result is success
+  retries: 2
+  when: registry.create_repo|default(false)|bool
+
+# Nested loop order here is on purpose, so we push first all the images with the full hash, then we tag with the named label.
+- name: Tag and push images to registry
+  docker_image:
+    name: "{{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item[1] }}"
+    tag: "{{ item[0] }}"
+    repository: "{{ registry.host }}/{{ registry.namespace}}/{{ distro_name }}-binary-{{ item[1] }}"
+    push: yes
+  with_nested:
+    - ["{{ full_hash }}", "{{ named_label }}"]
+    - "{{ built_images.stdout_lines }}"
+  register: pushed
+  retries: 3
+  tags:
+    - dockerhub_push
+
+- name: Check if images were pushed
+  shell: |
+    export DOCKER_CLI_EXPERIMENTAL=enabled
+    tag={{ full_hash }}
+    for image in $(cat {{containers_file }})
+    do
+        if docker manifest inspect --insecure "{{ registry.host }}/{{ registry.namespace}}/{{ distro_name }}-binary-${image}:${tag}" 1>/dev/null;
+        then
+            echo "$image OK";
+        else
+            echo "$image ERROR";
+        fi
+    done
+  register: command_result
+  failed_when: "'ERROR' in command_result.stdout or command_result.rc != 0"
+  retries: 1
+
+- set_fact:
+    pushed_containers: "{{ pushed_containers + [item.invocation.module_args.repository + ':' + item.invocation.module_args.tag] }}"
+  with_items: "{{ pushed.results }}"
