@@ -23,6 +23,9 @@
     rdoproject_namespace: "tripleo{{ lookup('env','RELEASE') }}"
     rdoproject_username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
     rdoproject_password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
+    quaydotio_namespace: "tripleo{{ lookup('env','RELEASE') }}"
+    quaydotio_username: "{{ lookup('env','QUAYDOTIO_USERNAME') }}"
+    quaydotio_password: "{{ lookup('env','QUAYDOTIO_PASSWORD') }}"
     containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ lookup('env','RELEASE') }}.txt"
     registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleo{{ lookup('env', 'RELEASE') }}/imagestreamtags"
   tasks:
@@ -34,6 +37,7 @@
         - named_label
         - dockerhub_namespace
         - rdoproject_namespace
+        - quaydotio_namespace
         - release
 
     - name: Construct dlrn_dir from full_hash (turn xxyyz* into xx/yy/xxyyz*)
@@ -100,6 +104,7 @@
             - rdoproject_pull
             - rdoproject_push
             - dockerhub_push
+            - quaydotio_push
             - remove_local_containers
 
         - name: Pull the images from rdoproject registry
@@ -148,6 +153,16 @@
           tags:
             - dockerhub_push
 
+        - name: Login to quay.io
+          docker_login:
+            registry_url: "quay.io"
+            username: "{{ quaydotio_username }}"
+            password: "{{ quaydotio_password }}"
+            reauthorize: "yes"
+          no_log: "yes"
+          tags:
+            - quaydotio_push
+
         # Nested loop order here is on purpose, so we push first all the images with the full hash, then we tag with the named label.
         - name: Tag and push images to docker hub
           docker_image:
@@ -180,6 +195,38 @@
           tags:
             - dockerhub_push
 
+        # Nested loop order here is on purpose, so we push first all the images with the full hash, then we tag with the named label.
+        - name: Tag and push images to quay.io
+          docker_image:
+            name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item[1] }}"
+            tag: "{{ item[0] }}"
+            repository: "quay.io/{{ quaydotio_namespace}}/{{ distro_name }}-binary-{{ item[1] }}"
+            push: yes
+          with_nested:
+            - ["{{ full_hash }}", "{{ named_label }}"]
+            - "{{ built_images.stdout_lines }}"
+          retries: 3
+          tags:
+            - quaydotio_push
+
+        - name: Check if quay.io has all images
+          shell: |
+            tag={{ full_hash }}
+            for image in $(cat {{containers_file }})
+            do
+                if curl --silent -fk -lSL "https://quay.io/api/v1/repository/{{ quaydotio_namespace}}/{{ distro_name }}-binary-${image}/tag/${tag}/images" 1>/dev/null;
+                then
+                    echo "$image OK";
+                else
+                    echo "$image ERROR";
+                fi
+            done
+          register: command_result
+          failed_when: "'ERROR' in command_result.stdout or command_result.rc != 0"
+          retries: 1
+          tags:
+            - quaydotio_push
+
       always:
         - name: Delete the local images from rdoproject registry
           docker_image:
@@ -198,6 +245,20 @@
         - name: Delete the local images from docker hub
           docker_image:
             name: "docker.io/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item[0] }}"
+            tag: "{{ item[1] }}"
+            state: absent
+            force: yes
+          with_nested:
+            - "{{ built_images.stdout_lines }}"
+            - ["{{ full_hash }}", "{{ named_label }}"]
+          retries: 3
+          ignore_errors: yes
+          tags:
+            - remove_local_containers
+
+        - name: Delete the local images from quay.io
+          docker_image:
+            name: "quay.io/{{ quaydotio_namespace }}/{{ distro_name }}-binary-{{ item[0] }}"
             tag: "{{ item[1] }}"
             state: absent
             force: yes
