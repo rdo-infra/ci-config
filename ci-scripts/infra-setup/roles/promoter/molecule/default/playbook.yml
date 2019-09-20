@@ -9,17 +9,20 @@
     ppc_tag: ppc64le
     x86_tag: x86_64
     localhost_registry_container: manifest-local-registry
-    manifest_registry: localhost:5000
   tasks:
     # use role defaults
     - include_vars:
         file: ../../defaults/main.yml
+      tags:
+        - always
+
     - name: set local src dir for ci-config
       shell: "pwd"
       args:
         chdir: "{{ playbook_dir }}/../../../../../../"
       register: ci_config_dir
       delegate_to: localhost
+
     - name: set vars for molecule env
       set_fact:
         ci_config_local_src_dir: "{{ ci_config_dir.stdout }}"
@@ -103,46 +106,6 @@
     - include_tasks: functional_tests.yml
       tags:
         - functional
-
-    - name: Test promoter container manifest-push.yml
-      environment:
-        DOCKER_HOST: unix:///tmp/docker.sock
-        DOCKER_CLI_EXPERIMENTAL: enabled
-        DOCKER_OPTS: "--insecure-registry {{ manifest_registry }}"
-      block:
-      - name: Get a current working hash from {{ registry_api }} for centos-binary-base
-        shell: |
-          base_name="$(curl -s -k {{ registry_api }} | grep centos-binary-base:.*_x86_64 | head -1 | cut -d ':' -f 3 )"
-          echo "${base_name::-9}"
-        register: container_hash
-
-      - name: set fact from container_hash
-        set_fact:
-          cacheable: true
-          full_hash: "{{ container_hash.stdout_lines[0] }}"
-
-        #- install docker for docker_image module
-      - name: Pip install docker for docker_image module used by manifest-push
-        shell: |
-          pip install docker
-
-      #- register built_images result from manifest_containers var
-      - name: Register the built_images for manifest-push testing
-        shell: |
-          echo "{{ manifest_containers }}"
-        register: built_images
-
-      #- run the manifest-push tasks and sanity checks
-      - include_tasks: ../../../../../container-push/manifest-push.yml
-      - include_tasks: ../../../../../container-push/manifest-push-sanity-tests.yml
-
-
-      always:
-      #- cleanup stop and remove local registry
-      - name: Stop and remove {{ localhost_registry_container }}
-        shell: |
-          docker container stop {{ localhost_registry_container }}
-          docker container rm {{ localhost_registry_container }}
 
     - name: Stage setup
       include_role:

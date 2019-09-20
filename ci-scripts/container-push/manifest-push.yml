@@ -44,7 +44,7 @@
   when: check_ppc_containers.results[index].status_code != 404
   retries: 3
 
-- name: tag and push {{ x86_tag }} container images to {{ manifest_registry }}
+- name: 'tag and push {{ x86_tag }} container images to {{ manifest_registry }}'
   docker_image:
     name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item }}"
     tag: "{{ full_hash }}_{{ x86_tag }}"
@@ -54,7 +54,7 @@
   retries: 3
   loop: "{{ built_images.stdout_lines }}"
 
-- name: tag and push {{ ppc_tag }} container images to {{ manifest_registry }}
+- name: 'tag and push {{ ppc_tag }} container images to {{ manifest_registry }}'
   docker_image:
     name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item }}"
     tag: "{{ full_hash }}_{{ ppc_tag }}"
@@ -73,7 +73,7 @@
     manifest_extra_opts: "{% if manifest_registry is match('.*:5000') %}--insecure{% else %}{% endif %}"
 
 # First create manifest for those containers built both in x86 and ppc
-- name: create manifests for containers with both {{ x86_tag }} {{ ppc_tag }}
+- name: 'create manifests for containers with both {{ x86_tag }} {{ ppc_tag }}'
   shell: |
     docker manifest create {{ manifest_extra_opts }} {{ manifest_registry }}/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }} {{ manifest_registry }}/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }} {{ manifest_registry }}/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ ppc_tag }}
     docker manifest annotate --arch amd64 {{ manifest_registry }}/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }} {{ manifest_registry }}/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }}
@@ -84,7 +84,7 @@
   when: check_ppc_containers.results[index].status_code != 404
 
 # Now create manifest for the rest of the x86 only containers
-- name: create manifests for {{ x86_tag }} only containers
+- name: 'create manifests for {{ x86_tag }} only containers'
   shell: |
     docker manifest create {{ manifest_extra_opts }} {{ manifest_registry }}/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }} {{ manifest_registry }}/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }}
     docker manifest annotate --arch amd64 {{ manifest_registry }}/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }} {{ manifest_registry }}/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }}
@@ -93,8 +93,8 @@
   loop: "{{ built_images.stdout_lines }}"
   when: check_ppc_containers.results[index].status_code == 404
 
-- name: push container manifests to {{ manifest_registry }}
+- name: 'push container manifests to {{ manifest_registry }}'
   shell: |
-    docker manifest push {{ manifest_registry }}/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }}
+    docker manifest push {{ manifest_extra_opts }} {{ manifest_registry }}/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }}
   retries: 3
   with_items: "{{ built_images.stdout_lines }}"
