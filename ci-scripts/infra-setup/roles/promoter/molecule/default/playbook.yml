@@ -2,6 +2,7 @@
 - hosts: centos7
   vars:
     manifest_containers: "base\nrabbitmq" # centos-binary-base, centos-binary-rabbitmq
+    manifest_registry: "{{ hostvars['localhost']['ansible_default_ipv4']['address']}}:443"
     registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleomaster/imagestreamtags"
     full_hash: b1e8b74033769f79bc7913e5bbd85bf4fd50c9b9_f2e9ca6b
     distro_name: centos
@@ -107,10 +108,13 @@
     - name: Test promoter container manifest-push.yml
       environment:
         DOCKER_HOST: unix:///tmp/docker.sock
-        DOCKER_CLI_EXPERIMENTAL: enabled
-        DOCKER_OPTS: "--insecure-registry {{ manifest_registry }}"
+        # The experimental commands are enabled globally for the promoter_user already
+        #DOCKER_CLI_EXPERIMENTAL: enabled
+        # This is a deamon opt, it has no effect on the client
+        #DOCKER_OPTS: "--insecure-registry {{ manifest_registry }}"
       block:
       #- install docker for docker_image module
+      # This could be installed elsewhere, and would need a become:
       - name: Pip install docker for docker_image module used by manifest-push
         shell: |
           pip install docker
@@ -128,7 +132,8 @@
 
       always:
       #- cleanup stop and remove local registry
-      - name: Stop and remove {{ localhost_registry_container }}
+      # Where is this started ?
+      - name: 'Stop and remove {{ localhost_registry_container }}'
         shell: |
           docker container stop {{ localhost_registry_container }}
           docker container rm {{ localhost_registry_container }}
