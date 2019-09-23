@@ -9,9 +9,9 @@ import yaml
 import urllib
 
 try:
-    from urlparse import urljoin
+    from urlparse import urljoin, urlparse
 except ImportError:
-    from urllib.parse import urljoin
+    from urllib.parse import urljoin, urlparse
 
 from diskcache import Cache
 
@@ -242,6 +242,13 @@ def influx(build):
     duration = build.get('duration', 0)
     if duration is None:
         duration = 0
+    if 'log_url' in build and build['log_url']:
+        try:
+            build['log_url'] = urlparse(build['log_url'])._replace(
+                    scheme='https').geturl()
+        except TypeError:
+            pass
+
     # Get the nodename
     return ('build,'
             'type=%s,'
@@ -279,8 +286,9 @@ def influx(build):
              build.get('cloud', 'null'), build.get('region', 'null'),
              build.get('provider', 'null'), build['result'], build['result'], 1
              if build['result'] == 'SUCCESS' else 0, build['log_url'],
-             "<a href={} target='_blank'>{}</a>".format(
-                 build['log_url'], build['job_name']),
+             "<a href='{}' target='_blank'>{}</a>".format(
+                 build['log_url'],
+                 build['job_name']),
              duration,
              to_ts(build['start_time'], seconds=True),
              to_ts(build['end_time'], seconds=True), build.get(
