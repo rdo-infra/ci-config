@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "129ac52c_62b30548",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 2
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 629
+      },
+      "writtenOn": "2019-09-23T14:21:53Z",
+      "side": 1,
+      "message": "this is probably fine for now, however I think we can do this with the `uri` module.\n\nmaybe something like so \n\n    - name: Read containers file\n      slurp:\n        src: \"{{ containers_file }}\"\n      register: containers_contents\n      tags:\n        - quaydotio_push\n\n    - name: Create public empty repositories on quay.io\n      uri:\n        url: https://quay.io/api/v1/repository\n        method: POST\n        body_format: json\n        body:\n          namespace: \"{{ quaydotio_namespace }}\"\n          repository: \"{{ distro_name }}-binary-{{ item }}\"\n          description: \"TripleO container for {{ distro_name }}-binary-{{ item }}\"\n          visibility: public\n        headers:\n          Authorization: \"Bearer {{ quaydotio_token }}\"\n          Content-Type: \"application/json\"\n        status_code:\n          - 400\n          - 201\n      loop: \"{{ (containers_contents | b64decode).splitlines() }}\"\n      register: image_result\n      until: image_result is success\n      retries: 2\n      tags:\n        - quaydotio_push",
+      "range": {
+        "startLine": 198,
+        "startChar": 0,
+        "endLine": 216,
+        "endChar": 28
+      },
+      "revId": "8bbaca32a8e434218539515a25d1b26d3007f492",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b668765e_4b5d4cf8",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 2
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 629
+      },
+      "writtenOn": "2019-09-23T14:21:53Z",
+      "side": 1,
+      "message": "same as above. I think we can use the URI module for this as well.\n\n    - name: Check if quay.io has all images\n      uri:\n        url: \"https://quay.io/api/v1/repository/{{ quaydotio_namespace}}/{{ distro_name }}-binary-{{ item }}/tag/{{ full_hash }}/images\"\n        method: GET\n        headers:\n          Authorization: \"Bearer {{ quaydotio_token }}\"\n          Content-Type: \"application/json\"\n        status_code:\n          - 200\n      loop: \"{{ (containers_contents | b64decode).splitlines() }}\"\n      register: image_result_check\n      until: image_result_check is success\n      retries: 2\n      tags:\n        - quaydotio_push",
+      "range": {
+        "startLine": 232,
+        "startChar": 0,
+        "endLine": 248,
+        "endChar": 28
+      },
+      "revId": "8bbaca32a8e434218539515a25d1b26d3007f492",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
