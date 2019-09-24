@@ -317,6 +317,7 @@ def promote_all_links(
                 except Exception:
                     logger.info('FAILED promoting %s as %s (%s)',
                                 current_name, promote_name, new_hashes)
+                    raise
 
 
 def promoter(config):

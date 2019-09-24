@@ -405,13 +405,16 @@
     group: 'root'
   become: true
 
+# In staging setup the service file is a dumbed down version
+# and we can start it to check that at least part of the syntax
+# is ok
 - name: Start and enable promoter
-  service:
+  systemd:
     name: dlrn-promoter
     state: started
+    daemon_reload: yes
     enabled: yes
   become: true
-  when: not setup_staging
 
 #
 # Monitoring setup

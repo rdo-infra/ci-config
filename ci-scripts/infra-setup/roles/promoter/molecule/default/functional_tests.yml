@@ -106,10 +106,22 @@
   shell: |
     source ~/promoter_venv/bin/activate
     python --version
+    ansible-playbook --version
+
+# Quite difficult to test at the moment, we should be able to do
+# a rerun of the task that installs and enable a new service file
+# to check if a "deamon-reload needed" message is shown
+- name: Ensure daemon-reload is called if this is not a fresh run
+  debug:
+    msg: Not implemented
 
 - name: Ensure dlrn-promoter service unit file is correctly installed
   become: true
   command: systemd-analyze verify dlrn-promoter.service
+
+- name: Ensure dlrn-promoter service is running
+  become: true
+  command: systemctl status dlrn-promoter
 
 - name: Ensure monitoring service unit file is correctly installed
   become: true
