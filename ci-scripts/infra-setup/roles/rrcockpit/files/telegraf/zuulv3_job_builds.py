@@ -144,11 +144,9 @@ def add_container_prep_time(build):
         skip_branch = ['stable/rocky', 'stable/queens']
 
         if any(x in build['job_name'] for x in skip_terms):
-            build['container_prep_time'] = 0
-            return build
+            return
         elif any(x in build['branch'] for x in skip_branch):
-            build['container_prep_time'] = 0
-            return build
+            return
         elif any(x in build['job_name'] for x in job_terms):
             file_relative_path = ("logs/undercloud/home/zuul/"
                                   "install-undercloud.log.txt.gz")
@@ -161,38 +159,27 @@ def add_container_prep_time(build):
             respData = get_file_from_build(build, file_relative_path,
                                            json_view=False)
         else:
-            build['container_prep_time'] = 0
-            return build
+            return
 
         if respData is None:
-            build['container_prep_time'] = 0
-            return build
+            return
 
-        # loop through the file looking for the container prep
-        # signature
-        container_prep_line = (r'(\d{4}-\d{2}-\d{2}\s(?:[01]\d|2[0-3]):'
-                               r'(?:[0-5]\d):(?:[0-5]\d))\s\|.*(tripleo-'
-                               r'container-image-prepare.log).*\n^.*(\d{4}-'
-                               r'\d{2}-\d{2}\s(?:[01]\d|2[0-3]):(?:[0-5]\d):'
-                               r'(?:[0-5]\d))\s\|\schanged')
+        # This is the old regular expression, commented here because it's hard
+        # to remember
+        # container_prep_line = (r'(\d{4}-\d{2}-\d{2}\s(?:[01]\d|2[0-3]):'
+        #                        r'(?:[0-5]\d):(?:[0-5]\d))\s\|.*(tripleo-'
+        #                        r'container-image-prepare.log).*\n^.*(\d{4}-'
+        #                        r'\d{2}-\d{2}\s(?:[01]\d|2[0-3]):(?:[0-5]\d):'
+        #                        r'(?:[0-5]\d))\s\|\schanged')
+
+        container_prep_line = (r'\d{4}-\d{2}-\d{2}\s(?:[01]\d|2[0-3]):(?:[0-5]'
+                               r'\d):(?:[0-5]\d)\s\|.*tripleo-container-image'
+                               r'-prepare.log\s*([1-9]*\.?[1-9]*)s')
 
         match = re.findall(container_prep_line, respData, re.MULTILINE)
 
         if len(match) > 0:
-            try:
-                begin = datetime.strptime(match[0][0], '%Y-%m-%d %H:%M:%S.%f')
-                end = datetime.strptime(match[0][2], '%Y-%m-%d %H:%M:%S.%f')
-                prep_container_time = end - begin
-                build['container_prep_time'] = prep_container_time
-            except ValueError:
-                try:
-                    begin = datetime.strptime(match[0][0], '%Y-%m-%d %H:%M:%S')
-                    end = datetime.strptime(match[0][2], '%Y-%m-%d %H:%M:%S')
-                    prep_container_time = end - begin
-                    build['container_prep_time'] = prep_container_time
-                except ValueError:
-                    build['container_prep_time'] = 0
-                    return build
+            build['container_prep_time'] = float(match[0])
 
 
 def fix_task_name(task_name):
@@ -229,9 +216,6 @@ def influx(build):
 
     add_inventory_info(build)
     add_container_prep_time(build)
-
-    if 'container_prep_time' not in build:
-        build['container_prep_time'] = 0
 
     if build['end_time'] is None:
         build['end_time'] = datetime.datetime.fromtimestamp(
