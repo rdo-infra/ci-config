@@ -24,7 +24,7 @@
                 "fontSize":"100%",
                 "gridPos":{
                     "h":10,
-                    "w":18,
+                    "w":19,
                     "x":0,
                     "y":0
                 },
@@ -363,8 +363,8 @@
                 "format":"none",
                 "gridPos":{
                     "h":10,
-                    "w":6,
-                    "x":18,
+                    "w":5,
+                    "x":19,
                     "y":0
                 },
                 "id":14,
@@ -544,7 +544,7 @@
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
-                    "col":3,
+                    "col":6,
                     "desc":true
                 },
                 "styles":[
@@ -685,6 +685,44 @@
                         "thresholds":[],
                         "type":"number",
                         "unit":"s"
+                    },
+                    {
+                        "alias":"Container Prep ( mean)",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"mean_1",
+                        "thresholds":[
+                            "1400",
+                            "1500"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Container Prep (max)",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"max_1",
+                        "thresholds":[
+                            "1400",
+                            "1500"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
                     }
                 ],
                 "targets":[
@@ -700,7 +738,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"autogen",
-                        "query":"SELECT count(\"result_num\"), mean(\"duration\"), max(\"duration\"),sum(\"duration\"), sum(\"result_num\")*100/count(\"result_num\") FROM \"autogen\".\"build\" WHERE (\"type\" = 'upstream') AND $timeFilter GROUP BY \"job_name\"",
+                        "query":"SELECT count(\"result_num\"), mean(\"duration\"), max(\"duration\"), mean(\"container_prep_time_u\"), max(\"container_prep_time_u\"), sum(\"duration\"), sum(\"result_num\")*100/count(\"result_num\") FROM \"autogen\".\"build\" WHERE (\"type\" = 'upstream') AND $timeFilter GROUP BY \"job_name\"",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
