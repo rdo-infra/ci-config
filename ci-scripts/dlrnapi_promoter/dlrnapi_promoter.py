@@ -314,7 +314,8 @@ def promote_all_links(
                                 current_name, promote_name, new_hashes)
                     # stop here, don't try to promote other hashes
                     break
-                except Exception:
+                except Exception as e:
+                    logger.error("ERROR while promoting: %s (%s)", e.message, e.args)
                     logger.info('FAILED promoting %s as %s (%s)',
                                 current_name, promote_name, new_hashes)
 

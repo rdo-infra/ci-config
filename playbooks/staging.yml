@@ -7,7 +7,7 @@
       set_fact:
         promoter_user: zuul
         local_path_dlrnapi_secret: "{{ zuul.executor.work_root }}/dlrnapi_secret"
-        local_path_registry_secret: "{{ zuul.executor.work_root }}/dlrnapi_secret"
+        local_path_registry_secret: "{{ zuul.executor.work_root }}/registry_secret"
         local_path_uploader_key: "{{ zuul.executor.work_root }}/uploader_key"
         ci_config_local_src_dir: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
         setup_staging: true
@@ -78,3 +78,20 @@
     - name: Run promotion server provisioning role
       include_role:
         name: promoter
+
+    - name: Stage setup
+      include_role:
+        name: promoter
+        tasks_from: setup_staging
+
+    - name: Staged promotion run
+      block:
+        - name: Try promotion_run
+          include_role:
+            name: promoter
+            tasks_from: promotion_run
+
+    - name: Test promotion
+      shell: |
+        python /path/to/staging/tests
+        exit 1
