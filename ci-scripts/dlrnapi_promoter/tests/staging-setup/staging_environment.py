@@ -374,7 +374,7 @@ def load_config(db_filepath=None):
         config = yaml.safe_load(cf)
 
     if db_filepath is None:
-        db_filepath = os.path.join(os.environ['HOME'], "sqlite.commits")
+        db_filepath = os.path.join(os.environ['HOME'], "commits.sqlite")
 
     config['db_fixtures'] = os.path.join(
         base_path, "fixtures", "scenario-1.yaml")
