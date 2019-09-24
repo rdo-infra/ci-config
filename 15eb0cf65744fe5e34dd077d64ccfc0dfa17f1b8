@@ -2,6 +2,144 @@
   "comments": [
     {
       "key": {
+        "uuid": "174f32b4_895f9de3",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 629
+      },
+      "writtenOn": "2019-09-24T00:36:36Z",
+      "side": 1,
+      "message": "maybe something like this here:\n\n        - name: Read containers file\n          slurp:\n            src: \"{{ containers_file }}\"\n          register: containers_contents\n          tags:\n            - always\n\n        - name: Read containers file\n          set_facts:\n            built_images: \"{{ (containers_contents | b64decode).splitlines() }}\"\n          tags:\n            - always",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 37
+      },
+      "revId": "15eb0cf65744fe5e34dd077d64ccfc0dfa17f1b8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dcf2597c_2f8598ed",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 629
+      },
+      "writtenOn": "2019-09-24T00:36:36Z",
+      "side": 1,
+      "message": "if we change to a fact then this could be changed to `{{ built_images }}`",
+      "range": {
+        "startLine": 115,
+        "startChar": 26,
+        "endLine": 115,
+        "endChar": 51
+      },
+      "revId": "15eb0cf65744fe5e34dd077d64ccfc0dfa17f1b8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e8f73c58_9456bef7",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 629
+      },
+      "writtenOn": "2019-09-24T00:36:36Z",
+      "side": 1,
+      "message": "if we change to a fact then this could be changed to `{{ built_images }}`",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 55
+      },
+      "revId": "15eb0cf65744fe5e34dd077d64ccfc0dfa17f1b8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "075a6607_4dcdf3ed",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 629
+      },
+      "writtenOn": "2019-09-24T00:36:36Z",
+      "side": 1,
+      "message": "if we change to a fact then this could be changed to `{{ built_images }}`",
+      "range": {
+        "startLine": 142,
+        "startChar": 0,
+        "endLine": 142,
+        "endChar": 55
+      },
+      "revId": "15eb0cf65744fe5e34dd077d64ccfc0dfa17f1b8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "572969a2_05d4739b",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 629
+      },
+      "writtenOn": "2019-09-24T00:36:36Z",
+      "side": 1,
+      "message": "if we change to a fact then this could be changed to `{{ built_images }}`",
+      "range": {
+        "startLine": 176,
+        "startChar": 0,
+        "endLine": 176,
+        "endChar": 47
+      },
+      "revId": "15eb0cf65744fe5e34dd077d64ccfc0dfa17f1b8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "06cc751e_a694af87",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 629
+      },
+      "writtenOn": "2019-09-24T00:36:36Z",
+      "side": 1,
+      "message": "this can use the uri module - \n\n    - name: Check if quay.io has all images\n      uri:\n        url: \"https://index.docker.io/v1/repositories/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item }}/tags/{{ full_hash }}\"\n        method: GET\n        status_code:\n          - 200\n      loop: \"{{ (containers_contents | b64decode).splitlines() }}\"\n      register: image_result_check\n      until: image_result_check is success\n      retries: 2\n      tags:\n        - dockerhub_push",
+      "range": {
+        "startLine": 181,
+        "startChar": 0,
+        "endLine": 197,
+        "endChar": 28
+      },
+      "revId": "15eb0cf65744fe5e34dd077d64ccfc0dfa17f1b8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9c5924a3_f1e71324",
         "filename": "ci-scripts/container-push/container-push.yml",
         "patchSetId": 3
@@ -42,6 +180,145 @@
         "startChar": 0,
         "endLine": 204,
         "endChar": 28
+      },
+      "revId": "15eb0cf65744fe5e34dd077d64ccfc0dfa17f1b8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8817debd_52838914",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 629
+      },
+      "writtenOn": "2019-09-24T00:36:36Z",
+      "side": 1,
+      "message": "If we use this in a couple of places, I\u0027d suggest we move to slurp with a set fact, then all of the tasks within this file can use the fact as needed.",
+      "parentUuid": "100b095e_8f7904b2",
+      "range": {
+        "startLine": 199,
+        "startChar": 0,
+        "endLine": 204,
+        "endChar": 28
+      },
+      "revId": "15eb0cf65744fe5e34dd077d64ccfc0dfa17f1b8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4575891_303c938e",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 629
+      },
+      "writtenOn": "2019-09-24T00:36:36Z",
+      "side": 1,
+      "message": "if we change to a fact then this could be changed to `{{ built_images }}`",
+      "range": {
+        "startLine": 238,
+        "startChar": 0,
+        "endLine": 238,
+        "endChar": 47
+      },
+      "revId": "15eb0cf65744fe5e34dd077d64ccfc0dfa17f1b8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcc8cdef_c8c5417b",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 629
+      },
+      "writtenOn": "2019-09-24T00:36:36Z",
+      "side": 1,
+      "message": "this can use the uri module.\n\n    - name: Check if quay.io has all images\n      uri:\n        url: \"https://quay.io/api/v1/repository/{{ quaydotio_namespace }}/{{ distro_name }}-binary-{{ item }}/tag/{{ full_hash }}/images\"\n        method: GET\n        headers:\n          Authorization: \"Bearer {{ quaydotio_token }}\"\n          Content-Type: \"application/json\"\n        status_code:\n          - 200\n      loop: \"{{ (containers_contents | b64decode).splitlines() }}\"\n      register: image_result_check\n      until: image_result_check is success\n      retries: 2\n      tags:\n        - quaydotio_push",
+      "range": {
+        "startLine": 243,
+        "startChar": 0,
+        "endLine": 259,
+        "endChar": 28
+      },
+      "revId": "15eb0cf65744fe5e34dd077d64ccfc0dfa17f1b8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f0ef0ed2_87305daa",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 629
+      },
+      "writtenOn": "2019-09-24T00:36:36Z",
+      "side": 1,
+      "message": "if we change to a fact then this could be changed to `{{ built_images }}`",
+      "range": {
+        "startLine": 269,
+        "startChar": 0,
+        "endLine": 269,
+        "endChar": 47
+      },
+      "revId": "15eb0cf65744fe5e34dd077d64ccfc0dfa17f1b8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8c5cdbb9_c9c2e6be",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 629
+      },
+      "writtenOn": "2019-09-24T00:36:36Z",
+      "side": 1,
+      "message": "if we change to a fact then this could be changed to `{{ built_images }}`",
+      "range": {
+        "startLine": 283,
+        "startChar": 0,
+        "endLine": 283,
+        "endChar": 47
+      },
+      "revId": "15eb0cf65744fe5e34dd077d64ccfc0dfa17f1b8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ccfaa9b9_a4de96d2",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 629
+      },
+      "writtenOn": "2019-09-24T00:36:36Z",
+      "side": 1,
+      "message": "if we change to a fact then this could be changed to `{{ built_images }}`",
+      "range": {
+        "startLine": 297,
+        "startChar": 0,
+        "endLine": 297,
+        "endChar": 47
       },
       "revId": "15eb0cf65744fe5e34dd077d64ccfc0dfa17f1b8",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
