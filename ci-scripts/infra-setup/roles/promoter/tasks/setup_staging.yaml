@@ -22,11 +22,19 @@
   tags:
     - staging_prepare
 
+- name:  remove epel
+  become: true
+  package:
+    name: epel-release
+    state: absent
+  tags:
+    - staging_prepare
 # Epel is needed to install uWSGI
 - name:  install epel
   become: true
   package:
     name: epel-release
+    state: present
   tags:
     - staging_prepare
 
@@ -42,7 +50,7 @@
     name:
       - uwsgi
       - uwsgi-plugin-python2
-      - python-gunicorn
+    state: present
   tags:
     - staging_prepare
 
@@ -62,58 +70,63 @@
   tags:
     - staging_prepare
 
-- name: Find out docker group name
-  shell: |
-    set -euo pipefail
-    grep docker_{{ docker_on_docker_socket.stat.gid }} /etc/group | cut -d":" -f1 | head -1
-  register: docker_group
-  changed_when: false
-  failed_when: false
-  tags:
-    - staging_prepare
-
-- when: not docker_group.stdout
+- name: Adjust docker on docker setup
+  when: docker_on_docker_socket.stat.exists
   block:
-    - name: Create docker group
-      become: true
-      group:
-        name: "docker_{{ docker_on_docker_socket.stat.gid }}"
-        gid: "{{ docker_on_docker_socket.stat.gid }}"
-        state: present
-      tags:
-        - staging_prepare
-    - name: Storing new created docker group
-      set_fact:
-        docker_group:
-          stdout: "docker_{{ docker_on_docker_socket.stat.gid }}"
+    - set_fact:
+        docker_host: unix:///tmp/docker.sock
+    - name: Find out docker group name
+      shell: |
+        set -euo pipefail
+        grep docker_{{ docker_on_docker_socket.stat.gid }} /etc/group | cut -d":" -f1 | head -1
+      register: docker_group
+      changed_when: false
+      failed_when: false
       tags:
         - staging_prepare
 
-- name: Check if user is in docker group
-  command: "groups {{ promoter_user }}"
-  register: user_groups
-  changed_when: false
-  tags:
-    - staging_prepare
+    - when: not docker_group.stdout
+      block:
+        - name: Create docker group
+          become: true
+          group:
+            name: "docker_{{ docker_on_docker_socket.stat.gid }}"
+            gid: "{{ docker_on_docker_socket.stat.gid }}"
+            state: present
+          tags:
+            - staging_prepare
+        - name: Storing new created docker group
+          set_fact:
+            docker_group:
+              stdout: "docker_{{ docker_on_docker_socket.stat.gid }}"
+          tags:
+            - staging_prepare
 
-- when: "docker_group.stdout not in user_groups.stdout"
-  block:
-    - name: Add user to docker group
-      become: true
-      user:
-        name: '{{ promoter_user }}'
-        groups: '{{ docker_group.stdout }}'
-        append: true
-      register: groupadd
+    - name: Check if user is in docker group
+      command: "groups {{ promoter_user }}"
+      register: user_groups
+      changed_when: false
       tags:
         - staging_prepare
+
+    - when: "docker_group.stdout not in user_groups.stdout"
+      block:
+        - name: Add user to docker group
+          become: true
+          user:
+            name: '{{ promoter_user }}'
+            groups: '{{ docker_group.stdout }}'
+            append: true
+          register: groupadd
+          tags:
+            - staging_prepare
 
 - name: Create staging containers
   when: docker_on_docker_socket.stat.exists
   become: true
   become_user: "{{ promoter_user }}"
   environment:
-    DOCKER_HOST: unix:///tmp/docker.sock
+    DOCKER_HOST: "{{ docker_host|default(omit) }}"
   tags:
     - staging_prepare
   block:
@@ -149,7 +162,6 @@
 - become: true
   become_user: "{{ promoter_user }}"
   block:
-
     - name: setup dlrn-server
       shell: |
         rm sqlite.commits
