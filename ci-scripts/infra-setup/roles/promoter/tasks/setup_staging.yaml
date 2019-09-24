@@ -23,10 +23,20 @@
     - staging_prepare
 
 # Epel is needed to install uWSGI
+# Sometimes the epel.repo file is removed even if the package is installed.
+# So to get back the epel.repo file again we need to remove and install again.
+- name:  remove epel
+  become: true
+  package:
+    name: epel-release
+    state: absent
+  tags:
+    - staging_prepare
 - name:  install epel
   become: true
   package:
     name: epel-release
+    state: present
   tags:
     - staging_prepare
 
@@ -42,7 +52,7 @@
     name:
       - uwsgi
       - uwsgi-plugin-python2
-      - python-gunicorn
+    state: present
   tags:
     - staging_prepare
 
@@ -55,17 +65,40 @@
 # Here we are getting the group from the socket file in the host, and adding the group to
 # the user that is going to use the socket
 # Sets up docker on docker socket
-- name: Get docker socket group
+- name: set default docker socket
+  set_fact:
+    docker_socket: /tmp/docker.sock
+
+- name: Stat docker on docker socket
   stat:
-    path: /tmp/docker.sock
-  register: docker_on_docker_socket
+    path: "{{ docker_socket }}"
+  register: docker_socket_stat
   tags:
     - staging_prepare
+
+- name: Adjust docker on docker setup
+  when: not docker_socket_stat.stat.exists
+  block:
+    - name: set default docker socket
+      set_fact:
+        docker_socket: /var/run/docker.sock
+
+- name: Stat docker socket again
+  stat:
+    path: "{{ docker_socket }}"
+  register: docker_socket_stat
+  tags:
+    - staging_prepare
+
+- name: Fail if no docker socket still
+  when: not docker_socket_stat.stat.exists
+  fail:
+    msg: No docker socket
 
 - name: Find out docker group name
   shell: |
     set -euo pipefail
-    grep docker_{{ docker_on_docker_socket.stat.gid }} /etc/group | cut -d":" -f1 | head -1
+    getent group {{ docker_socket_stat.stat.gid }} | cut -d":" -f1 | head -1
   register: docker_group
   changed_when: false
   failed_when: false
@@ -77,15 +110,15 @@
     - name: Create docker group
       become: true
       group:
-        name: "docker_{{ docker_on_docker_socket.stat.gid }}"
-        gid: "{{ docker_on_docker_socket.stat.gid }}"
+        name: "docker_{{ docker_socket_stat.stat.gid }}"
+        gid: "{{ docker_socket_stat.stat.gid }}"
         state: present
       tags:
         - staging_prepare
     - name: Storing new created docker group
       set_fact:
         docker_group:
-          stdout: "docker_{{ docker_on_docker_socket.stat.gid }}"
+          stdout: "docker_{{ docker_socket.stat.gid }}"
       tags:
         - staging_prepare
 
@@ -109,11 +142,10 @@
         - staging_prepare
 
 - name: Create staging containers
-  when: docker_on_docker_socket.stat.exists
   become: true
   become_user: "{{ promoter_user }}"
   environment:
-    DOCKER_HOST: unix:///tmp/docker.sock
+      DOCKER_HOST: "unix://{{ docker_socket|default(omit) }}"
   tags:
     - staging_prepare
   block:
@@ -149,12 +181,11 @@
 - become: true
   become_user: "{{ promoter_user }}"
   block:
-
     - name: setup dlrn-server
       shell: |
-        rm sqlite.commits
+        rm commits.sqlite
         # This runs uWSGI server as a daemon to expose dlrn api
-        uwsgi --http-socket 127.0.0.1:8080 --plugin python --manage-script-name --virtualenv promoter_venv/ \
+        /usr/sbin/uwsgi --http-socket 127.0.0.1:8080 --plugin python --manage-script-name --virtualenv promoter_venv/ \
               --mount /=dlrn.api:app --daemonize ./dlrnapi.log
       args:
         chdir: "/home/{{ promoter_user }}"
