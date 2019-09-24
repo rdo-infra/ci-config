@@ -1,0 +1,24 @@
+---
+- hosts: all
+  tasks:
+    - name: Ensure artifacts directory exists
+      file:
+        path: '{{ zuul.executor.work_root }}/artifacts'
+        state: directory
+      delegate_to: localhost
+
+    - name: Copy files from /home/promoter_user on node
+      failed_when: false
+      synchronize:
+        src: '/home/{{ promoter_user }}/'
+        dest: '{{ zuul.executor.log_root }}'
+        mode: pull
+        copy_links: true
+        verify_host: true
+        rsync_opts:
+          - --include=/logs/**
+          - --include=*/
+          - --exclude=*
+          - '--exclude={{ ci_config_remote_src_dir }}'
+          - --prune-empty-dirs
+
