@@ -22,11 +22,19 @@
   tags:
     - staging_prepare
 
+- name:  remove epel
+  become: true
+  package:
+    name: epel-release
+    state: absent
+  tags:
+    - staging_prepare
 # Epel is needed to install uWSGI
 - name:  install epel
   become: true
   package:
     name: epel-release
+    state: present
   tags:
     - staging_prepare
 
