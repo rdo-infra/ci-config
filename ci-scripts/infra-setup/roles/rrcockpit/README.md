@@ -8,15 +8,18 @@ ruck|rover cockpit.
 ### Requirements:
 
 The cockpit uses docker containers to run the required services - telegraf,
-grafana, influxdb and mariadb. So docker must be installed and running on
-the development box before proceeding. Make sure the user is also added to
-the docker group to avoid the following permissions error:
-
+grafana, influxdb and mariadb.
+To install
+i. [docker](https://docs.docker.com/install/)
+ii. [docker compose](https://docs.docker.com/compose/install/)
+Make sure the user is also added to the [docker group](https://docs.docker.com/install/linux/linux-postinstall/)
+and start the docker daemon to avoid the following
+permissions error:
 ```
 + docker volume create telegraf-volume
-Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Post http://%2Fvar%2Frun%2Fdocker.sock
+Got permission denied while trying to connect to the Docker daemon socket at
+unix:///var/run/docker.sock: Post http://%2Fvar%2Frun%2Fdocker.sock
 ```
-
 ### Starting the cockpit
 
 There is a simiple script included in this repo that will help start up the
