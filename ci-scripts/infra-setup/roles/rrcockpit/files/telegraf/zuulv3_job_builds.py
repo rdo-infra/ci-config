@@ -184,7 +184,7 @@ def add_container_prep_time(build):
         match = re.findall(container_prep_line, respData, re.MULTILINE)
 
         if len(match) > 0:
-            build['container_prep_time'] = float(match[0])
+            build['container_prep_time_u'] = float(match[0])
 
 
 def fix_task_name(task_name):
@@ -257,7 +257,7 @@ def influx(build):
             'cloud="%s",'
             'region="%s",'
             'provider="%s",'
-            'container_prep_time=%.1f'
+            'container_prep_time_u=%.1f'
             ' '
             '%s' %
             (build['type'],
@@ -275,7 +275,7 @@ def influx(build):
              to_ts(build['end_time'], seconds=True), build.get(
                  'cloud', 'null'), build.get('region', 'null'),
              build.get('provider', 'null'),
-             build.get('container_prep_time', 0),
+             build.get('container_prep_time_u', 0),
              to_ts(build['end_time'])))
 
 
