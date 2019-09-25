@@ -257,7 +257,7 @@ def influx(build):
             'cloud="%s",'
             'region="%s",'
             'provider="%s",'
-            'container_prep_time=%.1f'
+            'container_prep_time_u=%.1f'
             ' '
             '%s' %
             (build['type'],
