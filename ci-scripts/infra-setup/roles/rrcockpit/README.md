@@ -8,13 +8,36 @@ ruck|rover cockpit.
 ### Requirements:
 
 The cockpit uses docker containers to run the required services - telegraf,
-grafana, influxdb and mariadb. So docker must be installed and running on
-the development box before proceeding. Make sure the user is also added to
-the docker group to avoid the following permissions error:
+grafana, influxdb and mariadb. So [docker](https://docs.docker.com/install/)
+and [docker compose](https://docs.docker.com/compose/install/) must be
+installed and running on the development box before proceeding.
+Make sure the user is also added to the docker group to avoid the following
+permissions error:
 
 ```
 + docker volume create telegraf-volume
-Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Post http://%2Fvar%2Frun%2Fdocker.sock
+Got permission denied while trying to connect to the Docker daemon socket at
+unix:///var/run/docker.sock: Post http://%2Fvar%2Frun%2Fdocker.sock
+```
+Add user to docker group to run all commands with non-root user
+```
++ sudo groupadd docker
++ sudo usermod -aG docker $USER
++ newgrp docker
+```
+Here logout and login back to re-evaluate the group membership steps.
+Enable & Start docker daemon on boot
+```
+sudo systemctl enable docker.service
+```
+Starting docker service
+```
+sudo systemctl start docker.service
+```
+
+Check the status of docker service
+```
+sudo systemctl status docker.service
 ```
 
 ### Starting the cockpit
@@ -71,6 +94,8 @@ influxdb           | [httpd] 172.18.0.5 - - [26/Jul/2019:13:19:30 +0000] "GET /q
 This is important as it also gives you the local address that is serving the
 cockpit on port 3000. So in the case above, you can use http://172.18.0.5:3000
 in a browser to see the cockpit.
+
+or you can use http://localhost:8080
 
 Once you load the page you will have to find "Cockpit" by clicking on Home in
 the top-left of the loaded page. Note that it will take a while before the
