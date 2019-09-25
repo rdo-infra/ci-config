@@ -1,0 +1,29 @@
+---
+# Test tasks to be included after the manifest-push.yml has created + pushed
+# arch tagged containers and their manifests to {{ registry.host }}.
+#
+- name: Pull {{ x86_tag }} tagged container images from {{ registry.host }}
+  docker_image:
+    name: "{{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}"
+    tag: "{{ full_hash }}_{{ x86_tag }}"
+    source: pull
+  loop: "{{ built_images.stdout_lines }}"
+  retries: 3
+
+- name: Pull {{ ppc_tag }} tagged container images from {{ registry.host }}
+  docker_image:
+    name: "{{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}"
+    tag: "{{ full_hash }}_{{ ppc_tag }} "
+    source: pull
+  loop: "{{ built_images.stdout_lines }}"
+  loop_control:
+    index_var: index
+  when: check_ppc_containers.results[index].status_code != 404
+  retries: 3
+
+- name: Inspect manifests in {{ registry.host }}
+  shell: |
+    docker manifest inspect {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }}
+  loop: "{{ built_images.stdout_lines }}"
+  retries: 3
+
