@@ -12,8 +12,10 @@ set -x
 TIMEOUT=115m
 KILLTIME=120m
 
-RELEASES=( "CentOS-7/master" "CentOS-7/stein" "CentOS-7/rocky" \
-           "CentOS-7/queens" "RedHat-8/master" )
+# To add when ready: "RedHat-8/train"
+RELEASES=( "CentOS-7/master" "CentOS-7/train" "CentOS-7/stein" \
+           "CentOS-7/rocky" "CentOS-7/queens" \
+           "RedHat-8/master" )
 
 while getopts "t:k:sh" arg; do
     case $arg in
