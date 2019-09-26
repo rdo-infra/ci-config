@@ -1,0 +1,24 @@
+<h3>Table for RPM diff</h3>
+<table id=job_data class='table table-hover display' cellspacing=0 width=50%>
+{% if uniq1 or uniq2 %}
+<tr><th>Unique in good job</th><th>Unique in bad job</th></tr>
+{% for i in range(rpms_diff_max_length) %}
+<tr>
+    <td>{{ uniq1[i]|default('') }}</td>
+    <td>{{ uniq2[i]|default('') }}</td>
+</tr>
+{% endfor %}
+{% endif %}
+{% if inline %}
+<tr><th colspan="2">Different RPMs and their changes</th></tr>
+{% for j in inline %}
+<tr>
+    <td colspan="2">
+        {{ j[0] }}<br/>
+        {{ j[1] }}<br/>
+        {% if j[2] %}<a href="{{ j[2] }}">Compare diff on Github</a>{% endif %}
+    </td>
+</tr>
+{% endfor %}
+{% endif %}
+</table>
