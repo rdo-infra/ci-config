@@ -1,0 +1,17 @@
+---
+# placeholder: pull mock image as an isolated test
+- name: Call image prepare to consume staging containers
+  shell: |
+    set -eux
+
+    # prep placeholder: inject a mock container
+    docker pull docker.io/rfolco/hello-world:multi-arch
+    docker tag rfolco/hello-world:multi-arch 127.0.0.1:{{ promote_registry['port'] }}/rfolco/hello-world:current-tripleo
+    docker push 127.0.0.1:{{ promote_registry['port'] }}/rfolco/hello-world
+
+    openstack tripleo container image prepare --verbose \
+        -e containers-prepare-parameter.yaml \
+        --output-env-file containers-default-parameters.yaml \
+  args:
+    chdir: "/home/{{ promoter_user}}"
+  become: true

@@ -10,8 +10,8 @@
     if [ -S /tmp/docker.sock ]; then
         export DOCKER_HOST=unix:///tmp/docker.sock
         export DOCKER_OPTS="--insecure-registry localhost:{{ initial_registry['port'] }}"
-        docker container stop {{ initial_registry['name'] }} {{ promote_registry['name'] }}
-        docker container rm {{ initial_registry['name'] }} {{ promote_registry['name'] }}
+        docker container stop {{ initial_registry['name'] }} {{ promote_registry['name'] }} {{ undercloud_registry['name'] }}
+        docker container rm -f {{ initial_registry['name'] }} {{ promote_registry['name'] }} {{ undercloud_registry['name'] }}
     fi
     python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py teardown --env-id 12345
     rm -f /home/{{ promoter_user }}/dlrnapi.log
