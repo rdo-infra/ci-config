@@ -1,0 +1,20 @@
+<h3>Table for PIP modules diff</h3>
+<table id=job_data class='table table-hover display' cellspacing=0 width=50%>
+{% if pip_uniq1 or pip_uniq2 %}
+<tr><th>Unique in good job</th><th>Unique in bad job</th></tr>
+{% for i in range(pip_diff_max_length) %}
+<tr>
+    <td>{{ pip_uniq1[i]|default('') }}</td>
+    <td>{{ pip_uniq2[i]|default('') }}</td>
+</tr>
+{% endfor %}
+{% endif %}
+{% if pip_inline %}
+<tr><th colspan="2">Different PIP modules and their changes</th></tr>
+{% for j in pip_inline %}
+<tr>
+    <td colspan="2">{{ j[0] }}<br/>{{ j[1] }}</td>
+</tr>
+{% endfor %}
+{% endif %}
+</table>

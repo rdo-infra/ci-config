@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <!-- JQuery Datatables.net -->
+    <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.15/js/jquery.dataTables.js"></script>
+    <!-- JQuery Datatables.net CSS -->
+    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.15/css/jquery.dataTables.css">
+
+    <title>Compare jobs times</title>
+
+<script type=text/javascript>
+    $(function() {
+      $('a#compare').bind('click', function() {
+        $.get('/compare', {
+          good: $('input[name="good"]').val(),
+          bad: $('input[name="bad"]').val()
+        }, function(data) {
+          $("#result").replaceWith(data);
+          var table = $('#job_data').DataTable();
+        });
+        return false;
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>Compare jobs</h1>
+
+  <h3>Good job</h3><input type=text size=70 name="good">
+  <p>Link to logs (i.e. http://logs.openstack.org/26/606126/1/check/tripleo-ci-centos-7-scenario002-multinode-oooq-container/0bc55a2/)</p>
+  <h3>Bad job</h3><input type=text size=70 name="bad">
+  <p>Link to logs (i.e. http://logs.openstack.org/43/607343/3/check/tripleo-ci-centos-7-scenario002-multinode-oooq-container/1fd8194/)</p>
+  <br><br>
+  <h3><b><a href=# id=compare>Compare jobs</a></b></h3>
+  <span id=result></span>
+<script>
+    $(function () {
+        $('table').DataTable( {
+            "order": [[ 0, "desc" ]],
+            "pageLength": 100
+        } );
+      });
+</script>
+  </body>
+  </html>
