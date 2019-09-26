@@ -1,0 +1,24 @@
+{% for i in ans_data %}
+<h3>Table for {{ i }}</h3>
+<table id=job_data class='table table-hover display' cellspacing=0 width=50%>
+<tr><th>Task name</th><th>Good job</th><th>Bad job</th><th>Delta</th><th>Percentage</th></tr>
+{%if ans_data[i] %}
+{% for line in ans_data[i] %}
+    <tr>
+        <td>{{ line[0] }}</td>
+        <td>{{ line[1] }}</td>
+        <td>{{ line[2] }}</td>
+        <td><span style="color:{% if line[1] < line[2] %}red{% else %}green{% endif %}">
+            {% if line[2] > line[1] %}+{% endif %}{{ line[2] - line[1] }} sec</span></td>
+        <td>
+            {% if line[1] != 0 %}
+            {% set perc=100*((line[2] - line[1])/line[1]) %}
+            {% if perc >75 %}<b>{% endif %}{{ perc|int }}%{% if perc >75 %}</b>{% endif %}
+            {% endif %}
+        </td>
+    </tr>
+{% endfor %}
+{% endif %}
+
+</table>
+{% endfor %}
