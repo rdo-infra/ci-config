@@ -1,0 +1,23 @@
+---
+# placeholder: pull mock image as an isolated test
+- name: pull a mock container
+  docker_image:
+    name: rfolco/hello-world:multi-arch
+    source: pull
+
+- name: Tag and push to promote_registry registry
+  docker_image:
+    name: hello-world
+    repository: "{{ promote_registry['name'] }}:{{ promote_registry['port'] }}/staging"
+    tag: multi-arch
+    push: yes
+    source: local
+
+- name: Call image prepare to consume staging containers
+  shell: |
+    set -eux
+    openstack tripleo container image prepare --verbose \
+        -e containers-prepare-parameter.yaml \
+        --output-env-file containers-default-parameters.yaml \
+  chdir: "/home/{{ promoter_user}}"
+  become: true

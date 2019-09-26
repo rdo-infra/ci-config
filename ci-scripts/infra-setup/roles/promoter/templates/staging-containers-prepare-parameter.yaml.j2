@@ -1,0 +1,26 @@
+parameter_defaults:
+  ContainerImagePrepare:
+  - push_destination: "{{ undercloud_registry['name'] }}:{{ undercloud_registry['port']"
+    set:
+      ceph_alertmanager_image: alertmanager
+      ceph_alertmanager_namespace: docker.io/prom
+      ceph_alertmanager_tag: latest
+      ceph_grafana_image: grafana
+      ceph_grafana_namespace: docker.io/grafana
+      ceph_grafana_tag: latest
+      ceph_image: daemon
+      ceph_namespace: docker.io/ceph
+      ceph_node_exporter_image: node-exporter
+      ceph_node_exporter_namespace: docker.io/prom
+      ceph_node_exporter_tag: latest
+      ceph_prometheus_image: prometheus
+      ceph_prometheus_namespace: docker.io/prom
+      ceph_prometheus_tag: latest
+      ceph_tag: v4.0.1-stable-4.0-nautilus-centos-7-x86_64
+      name_prefix: ''
+      name_suffix: ''
+      namespace: "{{ promote_registry['name'] }}:{{ promote_registry['port'] }}/staging"
+      neutron_driver: ovn
+      rhel_containers: false
+      tag: current-tripleo
+    tag_from_label: rdo_version
