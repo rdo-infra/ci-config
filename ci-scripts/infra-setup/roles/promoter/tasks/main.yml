@@ -14,9 +14,26 @@
 #
 #   ALL refers to all environments above
 
+
+
 #
 # Repos and packages
 #
+
+- name: Check user id
+  command: id -u
+  register: user_id
+
+# This part of the role is continuously called by the production server
+# as a mean for continuous delivery and code update in the server.
+# The call is currently done by a root crontab installed a intance creation
+# time. 
+# This can be changed in the future, but currently this role *MUST* be run
+# as root especially in the tests, to mimic what's happening in production
+- name: fail if this role is not run as root
+  fail:
+    msg: This role must be run as root.
+  when: user_id.stdout == 0
 
 - name: Packages
   become: true
@@ -139,12 +156,79 @@
         state: started
         enabled: yes
 
+# Allow promoter_user to use docker without sudo
+
+- name: set default docker socket
+  set_fact:
+    docker_socket: /tmp/docker.sock
+
+- name: Stat docker on docker socket
+  stat:
+    path: "{{ docker_socket }}"
+  register: docker_socket_stat
+
+- name: Adjust docker on docker setup
+  when: not docker_socket_stat.stat.exists
+  block:
+    - name: set default docker socket
+      set_fact:
+        docker_socket: /var/run/docker.sock
+
+- name: Stat docker socket again
+  stat:
+    path: "{{ docker_socket }}"
+  register: docker_socket_stat
+
+- name: Fail if no docker socket still
+  when: not docker_socket_stat.stat.exists
+  fail:
+    msg: No docker socket
+
+- name: Find out docker group name
+  shell: |
+    set -euo pipefail
+    getent group {{ docker_socket_stat.stat.gid }} | cut -d":" -f1 | head -1
+  register: docker_group
+  changed_when: false
+  failed_when: false
+
+- when: not docker_group.stdout
+  block:
+    - name: Create docker group
+      group:
+        name: "docker_{{ docker_socket_stat.stat.gid }}"
+        gid: "{{ docker_socket_stat.stat.gid }}"
+        state: present
+
+    - name: Storing new created docker group
+      set_fact:
+        docker_group:
+          stdout: "docker_{{ docker_socket_stat.stat.gid }}"
+
+- name: List groups for user
+  command: "groups {{ promoter_user }}"
+  register: user_groups
+  changed_when: false
+
+- name: Check if user is in docker group
+  when: "docker_group.stdout not in user_groups.stdout"
+  block:
+    - name: Add user to docker group
+      user:
+        name: '{{ promoter_user }}'
+        groups: '{{ docker_group.stdout }}'
+        append: true
+      register: groupadd
+
 - name: Create user config dir
   file:
     path: /home/{{ promoter_user }}/.docker/
+    owner: "{{ promoter_user }}"
     state: directory
 
 - name: Enable experimental commands in user config
+  become: true
+  become_user: "{{ promoter_user }}"
   copy:
     content: |
       {

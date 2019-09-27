@@ -59,7 +59,6 @@
 
 - name: Generate list of containers to push
   shell: |
-    export DOCKER_CLI_EXPERIMENTAL=enabled
     echo -n > {{ containers_file }};
     for image in {{ release_images.stdout_lines|join(" ") }}; do
     #$(curl -fk {{ release_url }} 2>/dev/null | grep -o -P '(?<=name_prefix).*(?=name_suffix)' | sed "s/[{}]//g"); do
