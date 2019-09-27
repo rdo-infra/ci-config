@@ -16,24 +16,18 @@
     # to the container-push in general, which is way too difficult to do right now.
     release: master
     named_label: triple-ci-staging-promoted
-    full_hash: 82a1e08b25e42f1e8ea99d7c9b6957bb06423a34_dae2ef8
+
     script_root: UNUSED
     distro_name: centos
     distro_version: 7
     containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
     source_registry:
-      # Name and port are mandatory only during test
-      name: local-source-registry
-      port: 5000
       host: localhost:5000
       username: unused
       password: unused
       namespace: "tripleo{{ release }}"
     target_registries:
-      # Name and port are mandatory only during test
       - host: localhost:5500
-        name: local-target-registry-1
-        port: 5500
         username: unused
         password: unused
         namespace: "tripleo{{ release }}"
@@ -43,66 +37,19 @@
   tasks:
     - name: Test promoter container manifest-push.yml
       block:
-        - name: Mock source and target registries -- pull registry image
-          docker_image:
-            name: registry:2
-            source: pull
-
-        - name: Mock source and target registries -- run registries
-          docker_container:
-            image: registry:2
-            name: "{{ registry.name }}"
-            restart: true
-            restart_policy: always
-            ports:
-              - "{{ registry.port }}:5000"
-          loop: "{{ target_registries + [source_registry] }}"
-          loop_control:
-            loop_var: registry
-            label: "{{ registry.host }}"
-
-        - name: Mock source and target registries -- create fake images
+        - name: launch staging setup scripts
           shell: |
-            CONTAINER_LIST="base openstack-base neutron-server nova-compute"
-            for container in $CONTAINER_LIST; do
-              docker tag registry:2 {{ source_registry.host }}/{{ source_registry.namespace }}/centos-binary-$container:{{ full_hash }}
-              docker tag registry:2 {{ source_registry.host }}/{{ source_registry.namespace }}/centos-binary-$container:{{ full_hash }}_x86_64
-            done
-            CONTAINER_LIST="base openstack-base"
-            for container in $CONTAINER_LIST; do
-              docker tag registry:2 {{ source_registry.host }}/{{ source_registry.namespace }}/centos-binary-$container:{{ full_hash }}_ppc64le
-            done
+            # Export the path to the mounted docker socket so all docker client commands will use it
+            python ../../../../../dlrnapi_promoter/tests/staging-setup/staging_environment.py setup --components registries,container-images
 
-        - name: Mock source and target registries -- Gather fake images infos
-          shell: |
-            docker images --filter=reference='{{ source_registry.host }}/{{ source_registry.namespace }}/*:{{ full_hash }}*' --format {% raw %}'{{ .Repository }}:{{ .Tag }}'{% endraw %};
-            docker images --filter=reference='{{ source_registry.host }}/{{ source_registry.namespace }}/*:{{ named_label }}' --format {% raw %}'{{ .Repository  }}:{{ .Tag  }}'{% endraw %}
-          register: images
+        - name: include stage setup variables
+          include_vars: stage-info.yaml
 
-        - name: Mock souce and target registries - push fake images to source registry
-          docker_image:
-            name: "{{ item }}"
-            push: yes
-            force_tag: yes
-          loop: "{{ images.stdout_lines }}"
-          loop_control:
-            label: "{{ item }}"
+        - set_fact:
+            full_hash: "{{ commits.0 }}"
 
-        - name: Mock souce and target registries - remove fake images locally
-          docker_image:
-            name: "{{ item }}"
-            state: absent
-            force_absent: yes
-          loop: "{{ images.stdout_lines }}"
-          loop_control:
-            label: "{{ item }}"
-
-        - name: Create pattern file
-          copy:
-            content: |
-                ^neutron-server$
-                ^nova-compute$
-            dest: /tmp/images_pattern_file
+        - debug:
+            var: containers
 
         - name: Include containers-promote role to test
           include_role:
@@ -113,7 +60,7 @@
           loop: "{{ target_registries }}"
           shell: |
             export DOCKER_CLI_EXPERIMENTAL=enabled
-            for image in {{ images.stdout_lines|join(" ") }}; do
+            for image in {{ containers|join(" ") }}; do
               docker manifest inspect --insecure $image
             done
           loop_control:
@@ -138,20 +85,10 @@
             label: "{{ item.registry.host }}"
 
       always:
+        - name: Teardown
+          shell: |
+            python ../../../../../dlrnapi_promoter/tests/staging-setup/staging_environment.py teardown --components registries,container-images
 
-        - name: remove pattern file
-          file:
-            path: /tmp/images_pattern_file
-            state: absent
-
-        - name: 'Stop and remove registries'
-          docker_container:
-            name: "{{ registry.name }}"
-            state: absent
-          loop: "{{ target_registries + [source_registry] }}"
-          loop_control:
-            loop_var: registry
-            label: "{{ registry.name }}"
           tags:
             - registry_cleanup
 
