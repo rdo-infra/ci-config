@@ -7,7 +7,8 @@
       shell: |-
         . {{ ansible_user_dir }}/test-python/bin/activate
         # Add all the delegated scenarios here.
-        molecule test -s container-push
+        molecule test -s container-push -- --skip-tags=registry_cleanup
+        molecule test -s tripleo-common-integration
       args:
         chdir: "{{ ansible_user_dir }}/{{ zuul.project.src_dir }}/roles/promoter"
         executable: /bin/bash
