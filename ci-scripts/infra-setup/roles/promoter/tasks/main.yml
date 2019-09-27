@@ -14,6 +14,23 @@
 #
 #   ALL refers to all environments above
 
+
+# This part of the role is continuously called by the production server
+# as a mean for continuous delivery and code update in the server.
+# The call in production is currently done by a root crontab installed a
+# intance creation time by cloud-init.
+# This can be changed in the future, but currently this role *MUST* be run
+# as root especially in the tests, to mimic what's happening in production
+
+- name: Check user id
+  command: id -u
+  register: user_id
+
+- name: fail if this role is not run as root
+  fail:
+    msg: This role must be run as root.
+  when: user_id.stdout != '0'
+
 #
 # Repos and packages
 #
@@ -139,12 +156,79 @@
         state: started
         enabled: yes
 
+# Allow promoter_user to use docker without sudo
+
+- name: set default docker socket
+  set_fact:
+    docker_socket: /tmp/docker.sock
+
+- name: Stat docker on docker socket
+  stat:
+    path: "{{ docker_socket }}"
+  register: docker_socket_stat
+
+- name: Adjust docker on docker setup
+  when: not docker_socket_stat.stat.exists
+  block:
+    - name: set default docker socket
+      set_fact:
+        docker_socket: /var/run/docker.sock
+
+- name: Stat docker socket again
+  stat:
+    path: "{{ docker_socket }}"
+  register: docker_socket_stat
+
+- name: Fail if no docker socket still
+  when: not docker_socket_stat.stat.exists
+  fail:
+    msg: No docker socket
+
+- name: Find out docker group name
+  shell: |
+    set -euo pipefail
+    getent group {{ docker_socket_stat.stat.gid }} | cut -d":" -f1 | head -1
+  register: docker_group
+  changed_when: false
+  failed_when: false
+
+- when: not docker_group.stdout
+  block:
+    - name: Create docker group
+      group:
+        name: "docker_{{ docker_socket_stat.stat.gid }}"
+        gid: "{{ docker_socket_stat.stat.gid }}"
+        state: present
+
+    - name: Storing new created docker group
+      set_fact:
+        docker_group:
+          stdout: "docker_{{ docker_socket_stat.stat.gid }}"
+
+- name: List groups for user
+  command: "groups {{ promoter_user }}"
+  register: user_groups
+  changed_when: false
+
+- name: Check if user is in docker group
+  when: "docker_group.stdout not in user_groups.stdout"
+  block:
+    - name: Add user to docker group
+      user:
+        name: '{{ promoter_user }}'
+        groups: '{{ docker_group.stdout }}'
+        append: true
+      register: groupadd
+
 - name: Create user config dir
   file:
     path: /home/{{ promoter_user }}/.docker/
+    owner: "{{ promoter_user }}"
     state: directory
 
 - name: Enable experimental commands in user config
+  become: true
+  become_user: "{{ promoter_user }}"
   copy:
     content: |
       {
@@ -250,97 +334,33 @@
     mode: '0700'
 
 #
-# Credentials setup
+# No credentials are handled in this part of the role
+# Credentials are setup at instance creation time by cloud-init
+# Continuous delivery doens't handle credentials at all, and credentials
+# modification usually doesn't involve launching a whol provisioning role.
 #
-- name: Stat for local credentials
-  block:
-    - name: Stat for local dlrnapi secrets file
-      stat:
-        path: "{{ local_path_dlrnapi_secret }}"
-      register: dlrnapi_secret_local
-      delegate_to: localhost
 
-    - name: Stat for local registry secrets file
-      stat:
-        path: "{{ local_path_registry_secret }}"
-      register: registry_secret_local
-      delegate_to: localhost
-
-    - name: Stat for uploader_key file
-      stat:
-        path: "{{ local_path_uploader_key }}"
-      register: uploader_key_local
-      delegate_to: localhost
-
-- name: Handle credentials for standalone environment
-  when:
-    - dlrnapi_secret_local.stat.exists
-    - registry_secret_local.stat.exists
-    - uploader_key_local.stat.exists
-  block:
-    - copy:
-        src: "{{ item.src }}"
-        dest: "{{ item.dest }}"
-      with_items:
-        - src: "{{ local_path_dlrnapi_secret }}"
-          dest: "{{ remote_path_dlrnapi_secret }}"
-        - src: "{{ local_path_registry_secret }}"
-          dest: "{{ remote_path_registry_secret }}"
-        - src: "{{ local_path_uploader_key }}"
-          dest: "{{ remote_path_uploader_key }}"
-
-    - name: Change key file permission
+# in CD mode, this part of the role will at least keep these files
+# restricted.
+- block:
+    - name: Fix owners of the files
       file:
-        path: "{{ remote_path_uploader_key }}"
-        mode: 0600
-
-    - name: Generate public key from private key for uploader user
-      shell: >
-        ssh-keygen -y -t rsa -q -C '' -N '' -f {{ remote_path_uploader_key }} > {{ remote_path_uploader_key }}.pub
-      args:
-        creates: "{{ remote_path_uploader_key }}.pub"
-
-#
-# Credentials check (ALL)
-#
-- name: Stat for dlrnapi secrets file on server
-  stat:
-    path: "{{ remote_path_dlrnapi_secret }}"
-  register: remote_dlrnapi_secret
-
-- name: Stat for registry secrets file on server
-  stat:
-    path: "{{ remote_path_registry_secret }}"
-  register: remote_registry_secret
-
-- name: Stat for uploader_key
-  stat:
-    path: "{{ remote_path_uploader_key }}"
-  register: remote_uploader_key
-
-- name: Check if we have any credential to use.
-  assert:
-    that: >
-      remote_dlrnapi_secret.stat.exists
-      or remote_registry_secret.stat.exists
-      or remote_uploader_key.stat.exists
-    fail_msg: Credentials are missing, installation cannot continue
-    success_msg: All credentials present
-
-- name: Fix owners of the files
-  file:
-    path: '{{ item }}'
-    mode: '0600'
-    owner: "{{ promoter_user }}"
-  with_items:
-      - "{{ remote_path_dlrnapi_secret  }}"
-      - "{{ remote_path_registry_secret  }}"
-      - "{{ remote_path_uploader_key  }}"
+        path: '{{ item }}'
+        mode: '0600'
+        owner: "{{ promoter_user }}"
+      with_items:
+          - "{{ remote_path_dlrnapi_secret  }}"
+          - "{{ remote_path_registry_secret  }}"
+          - "{{ remote_path_uploader_key  }}"
+  rescue:
+    - debug:
+        msg: Credentials ownership fix failed, probably a first run
 
 #
 # Ci-config repo handling
 #
 - name: Check for presence of repo on local machine
+  become: false
   stat:
     path: "{{ ci_config_local_src_dir }}"
   register: ci_config_local_src_dir_stat
