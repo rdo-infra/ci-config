@@ -162,7 +162,7 @@ fi
 
 # DOWN port cleanup
 PORT_TIME_EXPIRED=300
-DATE_TIME_EXPIRED=$(`which date date|head -n1` -d " $PORT_TIME_EXPIRED minutes ago" -u  "+%Y-%m-%dT%H:%M:%SZ")
+DATE_TIME_EXPIRED=$(`which gdate date|head -n1` -d " $PORT_TIME_EXPIRED minutes ago" -u  "+%Y-%m-%dT%H:%M:%SZ")
 # Get a list of ports which are DOWN
 echo "INFO: Getting a list of ports which are DOWN"
 DOWN_PORT_LIST=$(openstack port list -f json | jq -r '.[]| select(.["Status"] == "DOWN") | .["ID"]')
