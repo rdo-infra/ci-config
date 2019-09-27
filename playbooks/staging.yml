@@ -12,6 +12,19 @@
         ci_config_local_src_dir: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
         setup_staging: true
 
+    # Unfortunately this cannot be done easily for rdo registry, as
+    # the host is used at different points for real data gathering.
+    - name: override docker registry IP
+      lineinfile:
+        path: /etc/hosts
+        line: 127.0.0.1      docker.io
+
+    - name: override quay registry IP
+      lineinfile:
+        path: /etc/hosts
+        line: 127.0.0.1      quay.io
+
+
     # Set up credentials
     - copy:
        content: export DLRNAPI_PASSWORD='test'
@@ -83,13 +96,6 @@
       include_role:
         name: promoter
         tasks_from: setup_staging
-
-    - name: Staging images pattern file
-      copy:
-        content: |
-            ^neutron-server$
-            ^nova-compute$
-        dest: /tmp/images_pattern_file
 
     - name: Staged promotion run
       block:

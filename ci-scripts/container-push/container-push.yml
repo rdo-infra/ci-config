@@ -11,200 +11,29 @@
   become: yes
   become_user: root
   vars:
-    named_label: "{{ lookup('env', 'PROMOTE_NAME') }}"
-    full_hash: "{{ lookup('env', 'FULL_HASH')}}"
-    script_root: "{{ lookup('env', 'SCRIPT_ROOT') }}"
-    distro_name: "{{ lookup('env', 'DISTRO_NAME') }}"
-    distro_version: "{{ lookup('env', 'DISTRO_VERSION') }}"
-    release: "{{ lookup('env','RELEASE') }}"
-    dockerhub_namespace: "tripleo{{ lookup('env','RELEASE') }}"
-    dockerhub_username: "{{ lookup('env','DOCKERHUB_USERNAME') }}"
-    dockerhub_password: "{{ lookup('env','DOCKERHUB_PASSWORD') }}"
-    rdoproject_namespace: "tripleo{{ lookup('env','RELEASE') }}"
-    rdoproject_username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
-    rdoproject_password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
-    containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ lookup('env','RELEASE') }}.txt"
-    registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleo{{ lookup('env', 'RELEASE') }}/imagestreamtags"
+    target_registries:
+      - host: docker.io
+        namespace: "tripleo{{ lookup('env','RELEASE') }}"
+        username: "{{ lookup('env','DOCKERHUB_USERNAME') }}"
+        password: "{{ lookup('env','DOCKERHUB_PASSWORD') }}"
+      - host: quay.io
+        namespace: "tripleo{{ lookup('env','RELEASE') }}"
+        username: "{{ lookup('env','QUAYDOTIO_USERNAME') }}"
+        password: "{{ lookup('env','QUAYDOTIO_PASSWORD') }}"
+        token: "{{ lookup('env','QUAYDOTIO_TOKEN') }}"
   tasks:
-    - name: print out hash, label and namespaces in play
-      debug:
-        var: "{{ item }}"
-      with_items:
-        - full_hash
-        - named_label
-        - dockerhub_namespace
-        - rdoproject_namespace
-        - release
+    - name: stat stage-info file
+      stat:
+        path: "/tmp/stage-info.yaml"
+      register: stage_info_stat
 
-    - name: Construct dlrn_dir from full_hash (turn xxyyz* into xx/yy/xxyyz*)
+    - name: Include info from staging environment
+      include-vars: "/tmp/stage-info.yaml"
+      when: stage_info_stat.stat.exists
+
+    - name: override source registry if running under test
       set_fact:
-        dlrn_dir: "{{ full_hash | regex_replace('^(?P<first>.{2})(?P<second>.{2})(?P<third>.+)$', '\\g<first>/\\g<second>/\\g<first>\\g<second>\\g<third>') }}"
+        source_registry: "{{ registries.source_registry }}"
 
-    - name: Construct the DLRN URL for the promoted hash
-      set_fact:
-        dlrn_url: "https://trunk.rdoproject.org/{{ distro_name }}{{ distro_version }}-{{ release }}/{{ dlrn_dir }}/versions.csv"
-
-    - name: Get the tripleo-common commit in the promoted hash
-      shell: >
-        curl {{ dlrn_url }} | grep ',openstack-tripleo-common-[0-9]' | cut -f3 -d','
-      register: local_release
-
-    - name: Set the release_url - master
-      set_fact:
-        release_url: "https://opendev.org/openstack/tripleo-common/raw/branch/master/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}"
-      when:
-        - release == 'master'
-        - not setup_staging | default(false) | bool
-
-    - name: Set the release_url to the generated staging containers list - master
-      set_fact:
-        release_url: "{{ root-dir }}/{{ overcloud_containers_yaml_base_dir }}/{{ distro_name }}/{{ full_hash }}/overcloud_containers.yaml.j2"
-      when:
-        - release == 'master'
-        - setup_staging | default(false) | bool
-
-    - name: Set the release_url - stable
-      set_fact:
-        release_url: "https://opendev.org/openstack/tripleo-common/raw/branch/stable/{{ release }}/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}"
-      when: release != 'master'
-
-    - name: Generate list of containers to push
-      shell: |
-        echo -n > {{ containers_file }};
-        for image in $(curl -fk {{ release_url }} 2>/dev/null | grep -o -P '(?<=name_prefix).*(?=name_suffix)' | sed "s/[{}]//g"); do
-            echo -n "Checking {{ registry_api }}/{{ distro_name }}-binary-$image:{{ full_hash }} ... ";
-            if curl -fk "{{ registry_api }}/{{ distro_name }}-binary-$image:{{ full_hash }}" &>/dev/null; then
-                echo $image >> {{ containers_file }};
-                echo "OK";
-            else
-                echo "FAIL";
-                echo "ERROR ========== {{ distro_name}}-binary-$image IS NOT BUILT! FIX THIS ASAP! ==========";
-            fi
-        done
-        # fail the script and exit with error if the container list is empty
-        if [ ! -s {{ containers_file }} ]; then
-            echo "FAIL";
-            echo "ERROR =========== container list is empty THIS IS A CRITICAL BUG in the container push playbook";
-            exit 1
-        fi
-        echo "base" >> {{ containers_file }}
-        echo "openstack-base" >> {{ containers_file }}
-
-    - name: run container tagging and always cleanup at the end
-      block:
-        - name: Retrieve list of built images
-          shell: >
-            cat {{containers_file }}
-          register: built_images
-          tags:
-            - rdoproject_pull
-            - rdoproject_push
-            - dockerhub_push
-            - remove_local_containers
-
-        - name: Pull the images from rdoproject registry
-          docker_image:
-            name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item }}"
-            tag: "{{ full_hash }}"
-          with_items: "{{ built_images.stdout_lines }}"
-          retries: 3
-          tags:
-            - rdoproject_pull
-
-        - name: Login to rdoproject registry
-          docker_login:
-            registry_url: "trunk.registry.rdoproject.org"
-            username: "{{ rdoproject_username }}"
-            password: "{{ rdoproject_password }}"
-            reauthorize: "yes"
-          no_log: "yes"
-          tags:
-            - rdoproject_push
-
-        - name: Tag images to rdoproject registry with named label
-          shell: >
-            docker tag
-            trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}
-            trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item }}:{{ named_label }}
-          with_items: "{{ built_images.stdout_lines }}"
-          tags:
-            - rdoproject_push
-
-        - name: Push images to rdoproject registry with named label
-          shell: >
-            docker push trunk.registry.rdoproject.org/{{ rdoproject_namespace  }}/{{ distro_name }}-binary-{{ item  }}:{{ named_label  }}
-          with_items: "{{ built_images.stdout_lines }}"
-          retries: 3
-          tags:
-            - rdoproject_push
-
-        - name: Login to dockerhub
-          docker_login:
-            registry_url: "docker.io"
-            username: "{{ dockerhub_username }}"
-            password: "{{ dockerhub_password }}"
-            reauthorize: "yes"
-          no_log: "yes"
-          tags:
-            - dockerhub_push
-
-        # Nested loop order here is on purpose, so we push first all the images with the full hash, then we tag with the named label.
-        - name: Tag and push images to docker hub
-          docker_image:
-            name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item[1] }}"
-            tag: "{{ item[0] }}"
-            repository: "docker.io/{{ dockerhub_namespace}}/{{ distro_name }}-binary-{{ item[1] }}"
-            push: yes
-          with_nested:
-            - ["{{ full_hash }}", "{{ named_label }}"]
-            - "{{ built_images.stdout_lines }}"
-          retries: 3
-          tags:
-            - dockerhub_push
-
-        - name: Check if dockerhub has all images
-          shell: |
-            tag={{ full_hash }}
-            for image in $(cat {{containers_file }})
-            do
-                if curl --silent -fk -lSL "https://index.docker.io/v1/repositories/{{ dockerhub_namespace}}/{{ distro_name }}-binary-${image}/tags/${tag}" 1>/dev/null;
-                then
-                    echo "$image OK";
-                else
-                    echo "$image ERROR";
-                fi
-            done
-          register: command_result
-          failed_when: "'ERROR' in command_result.stdout or command_result.rc != 0"
-          retries: 1
-          tags:
-            - dockerhub_push
-
-      always:
-        - name: Delete the local images from rdoproject registry
-          docker_image:
-            name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item[0] }}"
-            tag: "{{ item[1] }}"
-            state: absent
-            force: yes
-          with_nested:
-            - "{{ built_images.stdout_lines }}"
-            - ["{{ full_hash }}", "{{ named_label }}"]
-          retries: 3
-          ignore_errors: yes
-          tags:
-            - remove_local_containers
-
-        - name: Delete the local images from docker hub
-          docker_image:
-            name: "docker.io/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item[0] }}"
-            tag: "{{ item[1] }}"
-            state: absent
-            force: yes
-          with_nested:
-            - "{{ built_images.stdout_lines }}"
-            - ["{{ full_hash }}", "{{ named_label }}"]
-          retries: 3
-          ignore_errors: yes
-          tags:
-            - remove_local_containers
+    - include_role:
+        name: containers-promote
