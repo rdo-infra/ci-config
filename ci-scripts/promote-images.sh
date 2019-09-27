@@ -19,7 +19,7 @@ EOF
 function finish {
     rc=$?
     if [[ $rc -eq 0 ]]; then
-        echo "INFO: $0 succeded updating ${TARGET_URL:-} to point to ${SOURCE_URL:-} " >&2
+        echo "INFO: $0 succeeded updating ${TARGET_URL:-} to point to ${SOURCE_URL:-} " >&2
     else
         echo "ERROR: $0 failed with $rc exit code" >&2
     fi
