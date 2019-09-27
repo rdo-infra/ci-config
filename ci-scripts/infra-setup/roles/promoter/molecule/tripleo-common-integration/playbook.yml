@@ -1,0 +1,153 @@
+---
+- name: tripleo-common integration scenario
+  hosts: all
+  vars:
+    release: master
+    named_label: triple-ci-staging-promoted
+    full_hash: 82a1e08b25e42f1e8ea99d7c9b6957bb06423a34_dae2ef8
+    script_root: UNUSED
+    distro_name: centos
+    distro_version: 7
+    containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+    undercloud_registry:
+      name: local-undercloud-registry
+      port: 8787
+      host: localhost:8787
+      username: unused
+      password: unused
+      namespace: "tripleo{{ release }}"
+    target_registries:
+      # Name and port are mandatory only during test
+      - host: localhost:5500
+        name: local-target-registry-1
+        port: 5500
+        username: unused
+        password: unused
+        namespace: "tripleo{{ release }}"
+        token: unused
+    container_list:
+      - nova-compute:
+          param: ContainerNovaComputeImage
+          service: OS::TripleO::Services::NovaCompute
+  environment:
+    DOCKER_CLI_EXPERIMENTAL: enabled
+  tasks:
+    - name: Test tripleo-common
+      block:
+        - name: Mock undercloud registry -- pull registry image
+          docker_image:
+            name: registry:2
+            source: pull
+
+        - name: Mock undercloud registry -- run registry
+          docker_container:
+            image: registry:2
+            name: "{{ undercloud_registry['name'] }}"
+            restart: true
+            restart_policy: always
+            ports:
+              - "{{ undercloud_registry['port'] }}:5000"
+
+        - name: Generate containers template file
+          copy:
+            content: |
+                container_images_template:
+            dest: /tmp/staging_overcloud_containers.yaml.j2
+
+        - name: Populate template file w/ staging containers
+          blockinfile:
+            path: /tmp/staging_overcloud_containers.yaml.j2
+            block: |
+                - imagename: "{{namespace}}/{{name_prefix}}{{ item }}{{name_suffix}}:{{tag}}"
+                  image_source: kolla
+                  params:
+                  - {{ item.param }}
+                  services:
+                  - {{ item.service }}
+          with_items: {{ container_list }}
+
+        - name: generate staging-container-prepare-parameter.yaml
+          copy:
+            content: |
+                parameter_defaults:
+                  ContainerImagePrepare:
+                  - push_destination: "{{ undercloud_registry['name'] }}:{{ undercloud_registry['port'] }}"
+                    set:
+                      ceph_alertmanager_image: alertmanager
+                      ceph_alertmanager_namespace: docker.io/prom
+                      ceph_alertmanager_tag: latest
+                      ceph_grafana_image: grafana
+                      ceph_grafana_namespace: docker.io/grafana
+                      ceph_grafana_tag: latest
+                      ceph_image: daemon
+                      ceph_namespace: docker.io/ceph
+                      ceph_node_exporter_image: node-exporter
+                      ceph_node_exporter_namespace: docker.io/prom
+                      ceph_node_exporter_tag: latest
+                      ceph_prometheus_image: prometheus
+                      ceph_prometheus_namespace: docker.io/prom
+                      ceph_prometheus_tag: latest
+                      ceph_tag: v4.0.1-stable-4.0-nautilus-centos-7-x86_64
+                      name_prefix: ''
+                      name_suffix: ''
+                      namespace: "{{ target_registries[0]['name'] }}:{{ target_registries[0]['port'] }}/{{ target_registries[0]['namespace'] }}"
+                      neutron_driver: ovn
+                      rhel_containers: false
+                      tag: "{{ full_hash }}"
+                    tag_from_label: rdo_version
+            dest: "/tmp/staging-containers-prepare-parameter.yaml"
+
+        - name: copy staging_overcloud_containers.yaml.j2
+          copy:
+            src: "/tmp/staging_overcloud_containers.yaml.j2"
+            dest: "/home/{{ promoter_user }}/promoter_venv/share/tripleo-common/container-images/overcloud_containers.yaml.j2"
+
+        - name: run container image prepare
+          shell: |
+            openstack tripleo container image prepare --verbose \
+                -e /tmp/staging-containers-prepare-parameter.yaml \
+                --output-env-file /tmp/containers-default-parameters.yaml \
+                2&>1 > tripleo-container-image.prepare.log
+          become: true
+
+        - name: Gather list of local images referencing registries
+          shell: |
+            docker images --filter=reference='{{ registry.host }}/{{ registry.namespace }}/*:*' --format {% raw %}'{{ .ID }}'{% endraw %}
+          loop: "{{ target_registries + [undercloud_registry] }}"
+          register: inspections
+          loop_control:
+            loop_var: registry
+            label: "{{ registry.host }}"
+
+        - name: Check that image prepare run did not leave any image behind
+          assert:
+            that: item.stdout == ""
+            fail_msg: "Some images for '{{ item.registry.name }}({{ item.registry.host }})' were left behind"
+            success_msg: "All images for '{{ item.registry.name }}({{ item.registry.host }})' removed properly"
+          loop: "{{ inspections.results }}"
+          loop_control:
+            label: "{{ item.registry.host }}"
+
+      always:
+
+        # push-containers + tripleo-common integration cleanups
+        - name: remove staging files
+          file:
+            path: {{ item }}
+            state: absent
+          with_items:
+            - /tmp/images_pattern_file
+            - /tmp/staging_overcloud_containers.yaml.j2
+            - /tmp/staging-containers-prepare-parameter.yaml
+
+        - name: 'Stop and remove registries'
+          docker_container:
+            name: "{{ registry.name }}"
+            state: absent
+          loop: "{{ target_registries + [source_registry] + [undercloud_registry] }}"
+          loop_control:
+            loop_var: registry
+            label: "{{ registry.name }}"
+          tags:
+            - registry_cleanup
+

@@ -11,6 +11,14 @@
         - "--no-motd"
         - "--exclude=.tox"
 
+# required by pip tripleo-common and tripleoclient
+- name: install gcc
+  become: true
+  package:
+    name: gcc
+  tags:
+    - staging_prepare
+
 # Same as above, the test requirements are usually run only by tox
 # so when we are testing, it's nice to have them in the same virtual env
 - name: install test requirements
