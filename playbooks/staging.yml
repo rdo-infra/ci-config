@@ -79,32 +79,29 @@
       include_role:
         name: promoter
 
-    - name: Stage setup
-      include_role:
-        name: promoter
-        tasks_from: setup_staging
-
-    - name: Staging images pattern file
-      copy:
-        content: |
-            ^neutron-server$
-            ^nova-compute$
-        dest: /tmp/images_pattern_file
-
-    - name: Staged promotion run
+    - name: Promotion main block
+      become: true
+      become_user: "{{ promoter_user }}"
       block:
-        - name: Try promotion_run
+        - name: Stage setup
           include_role:
             name: promoter
-            tasks_from: promotion_run
+            tasks_from: setup_staging
 
-    - name: Test stage promotion
-      become_user: "{{ promoter_user }}"
-      shell:
-        cmd: |
-          export DOCKER_HOST=unix:///tmp/docker.sock
-          export DOCKER_OPTS="--insecure-registry localhost:{{ initial_registry['port'] }}"
-          export DOCKER_OPTS="--insecure-registry localhost:{{ promote_registry['port'] }}"
-          source /home/{{ promoter_user }}/promoter_venv/bin/activate
-          python /home/{{ promoter_user }}/ci-config/ci-scripts/dlrnapi_promoter/tests/staging-setup/promoter_test.py --config_file /home/{{ promoter_user }}/ci-config/ci-scripts/dlrnapi_promoter/tests/staging-setup/test-config.yaml
-          exit 1
+        - name: Staged promotion run
+          block:
+            - name: Try promotion_run
+              include_role:
+                name: promoter
+                tasks_from: promotion_run
+
+        - name: Test stage promotion
+          become_user: "{{ promoter_user }}"
+          shell:
+            cmd: |
+              export DOCKER_HOST=unix:///tmp/docker.sock
+              export DOCKER_OPTS="--insecure-registry localhost:{{ initial_registry['port'] }}"
+              export DOCKER_OPTS="--insecure-registry localhost:{{ promote_registry['port'] }}"
+              source /home/{{ promoter_user }}/promoter_venv/bin/activate
+              python /home/{{ promoter_user }}/ci-config/ci-scripts/dlrnapi_promoter/tests/staging-setup/promoter_test.py --config_file /home/{{ promoter_user }}/ci-config/ci-scripts/dlrnapi_promoter/tests/staging-setup/test-config.yaml
+              exit 1

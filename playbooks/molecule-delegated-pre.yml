@@ -2,7 +2,7 @@
 
 - hosts: all
   vars:
-    molecule_requirements:
+    test_requirements:
       - ansible
       - ansi2html
       - docker
@@ -12,6 +12,8 @@
       - pytest-xdist
       - mock
       - molecule>=2.22rc1
+      - dlrn
+      - dlrnapi_client
 
   tasks:
     - name: Packages
@@ -71,7 +73,7 @@
     - name: Setup test-python
       become: true
       pip:
-        name: "{{ molecule_requirements }}"
+        name: "{{ test_requirements }}"
         virtualenv: "{{ ansible_user_dir }}/test-python"
         virtualenv_site_packages: true
 
