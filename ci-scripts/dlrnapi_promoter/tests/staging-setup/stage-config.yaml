@@ -1,17 +1,23 @@
 root-dir: /tmp/promoter-staging
 candidate_name: tripleo-ci-testing
+registries:
+    # you can add multiple targets, but only the first source will win
+    - type: source
+      name: local-source-registry
+      port: 6000
+    - type: target
+      name: local-target-registry-1
+      port: 6500
 containers:
-  source_image: source-test/tripleomaster/hello-world:v1
-  target_images:
-  - base-nova
-  - base-neutron
-  target_registry_url: localhost:5000
+  # Not less than three, leave base and openstack-base alone
+  images-suffix:
+  - base
+  - openstack-base
+  - nova-compute
+  - neutron-server
   namespace: tripleomaster
-  template_dir: ''
-  overcloud_containers_yaml_base_dir: overcloud_containers_yaml
-distros:
-- centos7
-- redhat8
+  pattern_file_path: /tmp/images_pattern_file
+distro: centos
 dlrn:
   repo_root: data/repos
 overcloud_images_base_dir: overcloud_images
