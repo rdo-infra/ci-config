@@ -9,7 +9,8 @@
     - target_registries
     - release
 
-- set_fact:
+- name: Initialize list of pushed containers. Will be used for cleanup
+  set_fact:
     pushed_containers: []
 
 - name: Construct dlrn_dir from full_hash (turn xxyyz* into xx/yy/xxyyz*)
@@ -24,7 +25,7 @@
   shell: >
     curl {{ dlrn_url }} | grep ',openstack-tripleo-common-[0-9]' | cut -f3 -d','
   args:
-    # Disable warning about get_url being better than curl
+    # shut up ansible. get_url is not enough here
     warn: false
   register: local_release
 
@@ -56,10 +57,12 @@
      | grep -f {{ pattern_file }}
      {% endif %}
   register: release_images
+  args:
+    # shut up ansible. get_url is not enough here.
+    warn: false
 
 - name: Generate list of containers to push
   shell: |
-    export DOCKER_CLI_EXPERIMENTAL=enabled
     echo -n > {{ containers_file }};
     for image in {{ release_images.stdout_lines|join(" ") }}; do
     #$(curl -fk {{ release_url }} 2>/dev/null | grep -o -P '(?<=name_prefix).*(?=name_suffix)' | sed "s/[{}]//g"); do
@@ -103,7 +106,7 @@
         username: "{{ source_registry.username }}"
         password: "{{ source_registry.password }}"
         reauthorize: "yes"
-        #no_log: "yes"
+      no_log: "yes"
       tags:
         - rdoproject_push
 
