@@ -1,3 +1,6 @@
+# This playbook is run in zuul to drive the end to end promoter integration test
+#
+---
 - hosts: all
   tasks:
     - name: Include defaults from the role
@@ -75,28 +78,22 @@
         name: promoter
         tasks_from: setup_loop
 
-    - name: Run promotion server provisioning role
-      include_role:
-        name: promoter
-
-    - name: Stage setup
-      include_role:
-        name: promoter
-        tasks_from: setup_staging
-
-    - name: Staging images pattern file
-      copy:
-        content: |
-            ^neutron-server$
-            ^nova-compute$
-        dest: /tmp/images_pattern_file
-
-    - name: Staged promotion run
+    - name: Promotion main block
+      become: true
       block:
-        - name: Try promotion_run
+        - name: Run promotion server provisioning role
           include_role:
             name: promoter
-            tasks_from: promotion_run
+
+        - name: Stage setup
+          include_role:
+            name: promoter
+            tasks_from: setup_staging
+
+    - name: Try promotion_run
+      include_role:
+        name: promoter
+        tasks_from: promotion_run
 
     - name: Test stage promotion
       become_user: "{{ promoter_user }}"
