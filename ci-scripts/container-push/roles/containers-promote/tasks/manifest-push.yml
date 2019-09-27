@@ -114,7 +114,7 @@
 
 - name: 'Push container manifests to {{ registry.host }}'
   shell: |
-    docker manifest push {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }}
+    docker manifest push {{ manifest_extra_opts }} {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }}
   retries: 3
   with_items: "{{ built_images.stdout_lines }}"
 
