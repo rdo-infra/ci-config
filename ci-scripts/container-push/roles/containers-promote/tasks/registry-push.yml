@@ -5,7 +5,7 @@
     username: "{{ registry.username }}"
     password: "{{ registry.password }}"
     reauthorize: "yes"
-    #no_log: "yes"
+  no_log: "yes"
 
 - name: Create public empty repositories on registry
   uri:
@@ -36,11 +36,10 @@
     tag: "{{ item[0] }}"
     repository: "{{ registry.host }}/{{ registry.namespace}}/{{ distro_name }}-binary-{{ item[1] }}"
     push: yes
+    source: local
     # This force-tag is absolutely needed, if image exists with this tag,
-    # docker_image will no try a push without this flag
+    # docker_image will not try a push without this flag
     force_tag: yes
-    #loop: "{{ [full_hash, named_label]|product(built)images.stdout_lines|list }}"
-  #loop_control
   with_nested:
     - ["{{ full_hash }}", "{{ named_label }}"]
     - "{{ built_images.stdout_lines }}"
@@ -56,7 +55,6 @@
 
 - name: Check if images were pushed
   shell: |
-    export DOCKER_CLI_EXPERIMENTAL=enabled
     tag={{ full_hash }}
     for image in $(cat {{containers_file }})
     do
