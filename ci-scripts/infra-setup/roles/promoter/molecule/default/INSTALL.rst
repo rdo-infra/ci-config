@@ -8,7 +8,7 @@ Requirements
 * Docker Engine
 
 Install
-=======
+========
 
 Please refer to the `Virtual environment`_ documentation for installation best
 practices. If not using a virtual environment, please consider passing the

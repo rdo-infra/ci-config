@@ -25,119 +25,37 @@
 # Epel is needed to install uWSGI
 # Sometimes the epel.repo file is removed even if the package is installed.
 # So to get back the epel.repo file again we need to remove and install again.
-- name:  remove epel
+- name: Install packages for staging env
   become: true
-  package:
-    name: epel-release
-    state: absent
-  tags:
-    - staging_prepare
-- name:  install epel
-  become: true
-  package:
-    name: epel-release
-    state: present
-  tags:
-    - staging_prepare
-
-# uWSGI is used to expose and daemonize the delorean API without the need
-# to run and configure an apache server
-# Alternatives are:
-#   flask run directly, but there is not support daemonization, so the result would be an hack
-#   gunicorn which is similar to uWSGI and doesn't require EPEL. I found gunicorn after uWSGI so we may
-#   test it and see if it's a more viable solution
-- name: install uwsgi
-  become: true
-  package:
-    name:
-      - uwsgi
-      - uwsgi-plugin-python2
-    state: present
-  tags:
-    - staging_prepare
-
-# Molecule docker driver it's the default and easiest provisioner to use
-# unfortunately it has some limitations: you can't run docker daemon in it.
-# so to test docker client actions we need to trick the client and the container itself.
-# we are mounting the docker socket from the host to the container, but in a different
-# location than default (it's a long story).
-# So with the docker daemon mounted, the docker client can create containers in the host.
-# Here we are getting the group from the socket file in the host, and adding the group to
-# the user that is going to use the socket
-# Sets up docker on docker socket
-- name: set default docker socket
-  set_fact:
-    docker_socket: /tmp/docker.sock
-
-- name: Stat docker on docker socket
-  stat:
-    path: "{{ docker_socket }}"
-  register: docker_socket_stat
-  tags:
-    - staging_prepare
-
-- name: Adjust docker on docker setup
-  when: not docker_socket_stat.stat.exists
   block:
-    - name: set default docker socket
-      set_fact:
-        docker_socket: /var/run/docker.sock
-
-- name: Stat docker socket again
-  stat:
-    path: "{{ docker_socket }}"
-  register: docker_socket_stat
-  tags:
-    - staging_prepare
-
-- name: Fail if no docker socket still
-  when: not docker_socket_stat.stat.exists
-  fail:
-    msg: No docker socket
-
-- name: Find out docker group name
-  shell: |
-    set -euo pipefail
-    getent group {{ docker_socket_stat.stat.gid }} | cut -d":" -f1 | head -1
-  register: docker_group
-  changed_when: false
-  failed_when: false
-  tags:
-    - staging_prepare
-
-- when: not docker_group.stdout
-  block:
-    - name: Create docker group
+    - name:  remove epel
       become: true
-      group:
-        name: "docker_{{ docker_socket_stat.stat.gid }}"
-        gid: "{{ docker_socket_stat.stat.gid }}"
+      package:
+        name: epel-release
+        state: absent
+      tags:
+        - staging_prepare
+    - name:  install epel
+      become: true
+      package:
+        name: epel-release
         state: present
       tags:
         - staging_prepare
-    - name: Storing new created docker group
-      set_fact:
-        docker_group:
-          stdout: "docker_{{ docker_socket_stat.stat.gid }}"
-      tags:
-        - staging_prepare
 
-- name: Check if user is in docker group
-  command: "groups {{ promoter_user }}"
-  register: user_groups
-  changed_when: false
-  tags:
-    - staging_prepare
-
-- when: "docker_group.stdout not in user_groups.stdout"
-  block:
-    - name: Add user to docker group
+    # uWSGI is used to expose and daemonize the delorean API without the need
+    # to run and configure an apache server
+    # Alternatives are:
+    #   flask run directly, but there is not support daemonization, so the result would be an hack
+    #   gunicorn which is similar to uWSGI and doesn't require EPEL. I found gunicorn after uWSGI so we may
+    #   test it and see if it's a more viable solution
+    - name: install uwsgi
       become: true
-      user:
-        name: '{{ promoter_user }}'
-        groups: '{{ docker_group.stdout }}'
-        append: true
-      register: groupadd
+      package:
+        name:
+          - uwsgi
+          - uwsgi-plugin-python2
+        state: present
       tags:
         - staging_prepare
 
@@ -145,7 +63,7 @@
   become: true
   become_user: "{{ promoter_user }}"
   environment:
-      DOCKER_HOST: "unix://{{ docker_socket|default(omit) }}"
+      DOCKER_HOST: "unix://tmp/docker.sock"
   tags:
     - staging_prepare
   block:
@@ -189,6 +107,8 @@
               --mount /=dlrn.api:app --daemonize ./dlrnapi.log
       args:
         chdir: "/home/{{ promoter_user }}"
+        # Shut up ansible. We are not just using "rm" here
+        warn: false
 
     - name: Wait until spawned uWSGI appeared in the log
       wait_for:
@@ -206,4 +126,4 @@
             export DOCKER_HOST=unix:///tmp/docker.sock
             export DOCKER_OPTS="--insecure-registry localhost:{{ initial_registry['port'] }}"
         fi
-        python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py setup --env-id 12345
+        python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py setup
