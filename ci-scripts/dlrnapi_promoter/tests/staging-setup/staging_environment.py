@@ -174,9 +174,9 @@ class StagedHash(object):
         distro = self.config['distro']
         target = os.path.join(self.images_dirs[distro], self.full_hash)
         link = os.path.join(
-            self.images_dirs[distro], self.config['candidate_name'])
+            self.images_dirs[distro], candidate_name)
         self.log.info("Link %s to %s as it was promoted to %s", target,
-                      link, self.config['candidate_name'])
+                      link, candidate_name)
         try:
             os.symlink(target, link)
         except OSError:
@@ -292,27 +292,26 @@ class StagedEnvironment(object):
         with open(self.fixture_file) as ff:
             self.fixture = yaml.safe_load(ff)
 
-        self.config['results']['commits'] = []
-        for commit in self.fixture["commits"]:
+        self.analyze_commits(self.fixture)
+
+        for commit in self.config['results']['commits']:
             stage = StagedHash(
                 self.config, commit["commit_hash"], commit["distro_hash"])
             self.stages[stage.full_hash] = stage
-            full_hash = get_full_hash(commit['commit_hash'],
-                                      commit['distro_hash'])
-            self.config['results']['commits'].append(full_hash)
 
         self.overcloud_images_base_dir = os.path.join(
             self.config['root-dir'], self.config['overcloud_images_base_dir'])
 
         self.docker_client = docker.from_env()
 
-    def promote_overcloud_images(self, full_hash, candidate_name):
+    def promote_overcloud_images(self):
         """
         Creates the links for the images hierarchy
         TODO: create the previous-* links
         """
-        staged_hash = self.stages[full_hash]
-        staged_hash.promote_overcloud_images(candidate_name)
+        for _, promotion in self.config['results']['promotions'].items():
+            staged_hash = self.stages[promotion['full_hash']]
+            staged_hash.promote_overcloud_images(promotion['name'])
 
     def inject_dlrn_fixtures(self):
         """
@@ -423,17 +422,41 @@ class StagedEnvironment(object):
 
         if (self.config['components'] == "all"
            or "overcloud-images" in self.config['components']):
-            # The first commit in the fixture will be the one faking
-            # a tripleo-ci-config promotion
-            candidate_commit = self.fixture['commits'][0]
-            candidate_full_hash = get_full_hash(
-                candidate_commit['commit_hash'],
-                candidate_commit['distro_hash'])
-            self.promote_overcloud_images(
-                candidate_full_hash, self.config['candidate_name'])
+            self.promote_overcloud_images()
 
         with open(self.config['stage-info-path'], "w") as stage_info:
             stage_info.write(yaml.dump(self.config['results']))
+
+    def analyze_commits(self, fixture_data):
+        commits = []
+        for db_commit in fixture_data['commits']:
+            commit = {
+                'commit_hash': db_commit['commit_hash'],
+                'distro_hash': db_commit['distro_hash'],
+                'full_hash': get_full_hash(db_commit['commit_hash'],
+                                           db_commit['distro_hash']),
+            }
+            # Find name for commit in promotions if exists
+            for promotion in fixture_data['promotions']:
+                if promotion['commit_id'] == db_commit['id']:
+                    commit['name'] = promotion['promotion_name']
+            commits.append(commit)
+
+
+        self.config['results']['commits'] = commits
+        # First commit is currently promoted
+        currently_promoted = commits[0]
+        # Second commit is currently promoted
+        previously_promoted = commits[1]
+        # Last commit is the promotion candidate
+        promotion_candidate = commits[-1]
+
+        self.config['results']['promotions'] = {
+            'currently_promoted': currently_promoted,
+            'previously_promoted': previously_promoted,
+            'promotion_candidate': promotion_candidate,
+        }
+
 
     def teardown(self):
         with open(self.config['stage-info-path'], "r") as stage_info:
