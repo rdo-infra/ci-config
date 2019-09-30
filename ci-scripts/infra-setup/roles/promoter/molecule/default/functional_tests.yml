@@ -7,7 +7,7 @@
 # Manifest command introduced in version 18.02.0
 - name: Ensure Docker version is recent enough
   assert:
-    that: docker_version.stdout|version("18.02.0", ">")
+    that: docker_version.stdout is version("18.02.0", ">")
     success_msg: "Docker version installed in > 18.02.0"
     fail_msg: "Docker version installed is not recent enough"
 
@@ -18,6 +18,8 @@
   register: docker_manifest
 
 - name: Ensure docker manifest command is enabled by default
+  become:
+  become_user: "{{ promoter_user }}"
   assert:
     that: '"docker manifest is only supported on a Docker cli with experimental cli features enabled" not in docker_manifest.stderr'
     success_msg: "Docker manifest enabled by default"
@@ -25,6 +27,9 @@
 
 - name: Ensure influxdb repo is present and configured correctly
   command: yum repoinfo influxdb
+  args:
+    # shut up ansible. Yum module doesn't offer repoinfo functionality as of 2.8
+    warn: false
 
 - name: Ensure /var/lib/docker is from a different partition
   command: findmnt -P /var/lib/docker
@@ -94,7 +99,7 @@
       args:
         chdir: "{{ ci_config_remote_src_dir }}"
       register: ci_config_commit
-    - name: Ensure commit is not master
+    - name: Ensure commit is not master (@dev, make sure any change in test is committed)
       assert:
         that: ci_config_commit.stdout != ci_config_commit_master.stdout
         fail_msg: "No value in testing master commit in ci-config repo"
