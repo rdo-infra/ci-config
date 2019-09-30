@@ -143,7 +143,12 @@ def test_samples(staged_env):
     )
     check_paths = []
     existing_paths = []
-    for full_hash in stage_info['commits']:
+    for commit in stage_info['commits']:
+        # check commit attributes are there
+        assert 'commit_hash' in commit
+        assert 'distro_hash' in commit
+        assert 'full_hash' in commit
+        full_hash = commit['full_hash']
         hash_path = os.path.join(base_path, full_hash)
         check_paths.append(hash_path)
         # We don't block at the first path found, I want to see all
@@ -158,8 +163,9 @@ def test_samples(staged_env):
 
     # check if we have a leaf with the symbolic link
     # and the dir linked exists
-    promotion_link = os.path.join(base_path, config['candidate_name'])
+    promotion_name = stage_info['promotions']['currently_promoted']['name']
+    promotion_link = os.path.join(base_path, promotion_name)
     promotion_target = os.readlink(promotion_link)
     # The fist commit is "the current promotion link"
-    sample_path = os.path.join(base_path, stage_info['commits'][0])
+    sample_path = os.path.join(base_path, stage_info['commits'][0]['full_hash'])
     assert promotion_target == sample_path
