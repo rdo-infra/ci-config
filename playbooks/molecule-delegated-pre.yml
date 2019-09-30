@@ -2,8 +2,8 @@
 
 - hosts: all
   vars:
+    # DO not add ansible here, the production server needs to use ansible from package
     test_requirements:
-      - ansible
       - ansi2html
       - docker
       - pytest
@@ -22,6 +22,19 @@
         - name: Configure docker-ce repo
           command: yum-config-manager --add-repo \
               https://download.docker.com/linux/centos/docker-ce.repo
+
+        # Install EPEL so we can get ansible 2.8
+        # Sometimes the epel.repo file is removed even if the package is installed.
+        # So to get back the epel.repo file again we need to remove and install again.
+        - name:  remove epel
+          package:
+            name: epel-release
+            state: absent
+
+        - name:  install epel
+          package:
+            name: epel-release
+            state: present
 
         - name: Removed old/distro version of docker
           yum:
@@ -43,6 +56,8 @@
               - yum-utils
               - docker-ce
               - docker-ce-cli
+              - ansible
+              - python-docker-py
             state: present
 
         - name: Start docker
@@ -76,5 +91,4 @@
         name: "{{ test_requirements }}"
         virtualenv: "{{ ansible_user_dir }}/test-python"
         virtualenv_site_packages: true
-
 

@@ -42,6 +42,19 @@
       command: yum-config-manager --add-repo \
           https://download.docker.com/linux/centos/docker-ce.repo
 
+    # Install EPEL so we can get ansible 2.8
+    # Sometimes the epel.repo file is removed even if the package is installed.
+    # So to get back the epel.repo file again we need to remove and install again.
+    - name:  remove epel
+      package:
+        name: epel-release
+        state: absent
+
+    - name:  install epel
+      package:
+        name: epel-release
+        state: present
+
     - name: Install influxdb repo to get telegraf
       yum_repository:
         name: influxdb
