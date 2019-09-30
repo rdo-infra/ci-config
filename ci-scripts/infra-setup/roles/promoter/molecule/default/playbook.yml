@@ -78,17 +78,37 @@
 # While testing, we usually not provisioning a second disk for the server
 # So we emulate the second disk with a loopback device
 #
-    - include_role:
-        name: promoter
-        tasks_from: setup_loop
-      tags:
-        - provisioning
+    - name: Begin production code
+      become: true
+      block:
+        - name: Promoter provisioning
+          include_role:
+            name: promoter
+            tasks_from: setup_loop
+          tags:
+            - provisioning
 
-    - name: promoter staging provisioning
-      include_role:
-        name: promoter
-      tags:
-        - provisioning
+        - name: promoter staging provisioning
+          include_role:
+            name: promoter
+          tags:
+            - provisioning
+
+        - name: Run credentials setup
+          include_role:
+            name: promoter
+            tasks_from: update_credentials
+          tags:
+            - provisioning
+
+    - name: Check if we have any credential to use.
+      assert:
+        that: >
+          remote_dlrnapi_secret.stat.exists
+          or remote_registry_secret.stat.exists
+          or remote_uploader_key.stat.exists
+        fail_msg: Credentials are missing, installation cannot continue
+        success_msg: All credentials present
 
     - include_tasks: functional_tests.yml
       tags:
