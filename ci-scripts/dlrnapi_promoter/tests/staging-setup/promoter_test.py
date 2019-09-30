@@ -11,24 +11,27 @@ This script tests the steps of the promoter workflow.
 """
 
 import argparse
+import dlrnapi_client
 import docker
-import filecmp
 import logging
 import os
 import re
 import urllib
 import yaml
-import dlrnapi_client
 
 
 def get_full_hash(commit_hash, distro_hash):
     return "{}_{}".format(commit_hash, distro_hash[:8])
 
 
-def check_dlrn_promoted_hash(dlrn_host, promotion_target,
-                             commit_hash, distro_hash):
+def check_dlrn_promoted_hash(test_config):
     ''' Check that the commit, distro hash has been promoted to
         promotion_target as recorded in DLRN. '''
+
+    dlrn_host = test_config['dlrn_host']
+    promotion_target = test_config['promotion_target']
+    commit_hash = test_config['commit_hash']
+    distro_hash = test_config['distro_hash']
 
     logger = logging.getLogger('TestPromoter')
     api_client = dlrnapi_client.ApiClient(host=dlrn_host)
@@ -43,34 +46,35 @@ def check_dlrn_promoted_hash(dlrn_host, promotion_target,
         logger.error('Exception when calling api_promotions_get: %s',
                      dlrnapi_client.rest.ApiException)
         raise
-    try:
-        assert any(
-            [(promotion.promote_name == promotion_target)
-             for promotion in api_response])
-    except AssertionError as e:
-        print(
-            "Expected commit hash: "
-            + commit_hash
-            + " has not been promoted to." + promotion_target)
-        raise e
+
+    error_message = ("Expected commit hash: {}"
+                     " has not been promoted to {}."
+                     "".format(commit_hash, promotion_target))
+    conditions = [(promotion.promote_name == promotion_target)
+                  for promotion in api_response]
+    assert any(conditions), error_message
 
 
-def query_container_registry_promotion(registry_rdo, registry_docker_io,
-                                       promotion_target, commit_hash,
-                                       distro_hash):
+def query_container_registry_promotion(test_config)
     ''' Check that the hash containers have been pushed to the
         promotion registry with the promotion_target tag. '''
 
+    registry_rdo = test_config['registry_rdo']
+    registry_docker_io = test_config['registry_docker_io']
+    promotion_target = test_config['promotion_target']
+    commit_hash = test_config['commit_hash']
+    distro_hash = test_config['distro_hash']
     # logger = logging.getLogger('TestPromoter')
     full_hash = get_full_hash(commit_hash, distro_hash)
     docker_client = docker.DockerClient(base_url=registry_docker_io)
     # docker_client = docker.from_env()
     if 'localhost' in registry_rdo:
         base_path = os.path.dirname(os.path.abspath(__file__))
-        images_promoted = open(os.path.join(
-                               base_path,
-                               'samples/docker_images.txt'), 'r')
-        lines = images_promoted.readlines()
+        images_path = os.path.join(base_path,
+                                   'samples/docker_images.txt')
+        with open(images_path) as images_promoted:
+            lines = images_promoted.read_lines()
+
         for line in lines:
             if full_hash in line:
                 try:
@@ -78,24 +82,31 @@ def query_container_registry_promotion(registry_rdo, registry_docker_io,
                         registry_rdo, registry_docker_io)
                     docker_client.images.get(line)
                 except docker.errors.ImageNotFound:
-                    docker_client.images.get_registry_data(
-                        line)
-                    line = line.replace(full_hash, promotion_target)
-                    docker_client.images.get(line)
-                except docker.errors.ImageNotFound:
-                    docker_client.images.get_registry_data(
-                        line)
+                    try:
+                        docker_client.images.get_registry_data(
+                            line)
+                        line = line.replace(full_hash, promotion_target)
+                        docker_client.images.get(line)
+                    except docker.errors.ImageNotFound:
+                        docker_client.images.get_registry_data(
+                            line)
     else:
         # TODO: how to verify promoter containers
         print("Compare images tagged with hash and promotion target:")
 
 
-def compare_tagged_image_hash(images_base_dir, user, key_path,
-                              distro, release, promotion_target,
-                              commit_hash, distro_hash):
+def compare_tagged_image_hash(test_config):
     ''' Ensure that the promotion target images directory
         is a soft link to the promoted full hash images directory. '''
 
+    images_base_dir = test_config['images_base_dir']
+    user = test_config['user']
+    key_path = test_config['key_path']
+    distro = test_config['distro']
+    release = test_config['release']
+    promotion_target = test_config['promotion_target']
+    commit_hash = test_config['commit_hash']
+    distro_hash = test_config['distro_hash']
     # logger = logging.getLogger('TestPromoter')
     full_hash = get_full_hash(commit_hash, distro_hash)
 
@@ -105,37 +116,37 @@ def compare_tagged_image_hash(images_base_dir, user, key_path,
         sftp = pysftp.Connection(
             host=images_base_dir,
             username=user, private_key=key_path)
-        try:
-            images_dir = os.path.join(
-                '/var/www/html/images',
-                release, 'rdo_trunk')
-            assert os.path.join(
-                images_dir,
-                full_hash) == sftp.readlink(
-                os.path.join(images_dir, promotion_target))
-        except AssertionError as e:
-            print("Promotion target dir is not a softlink.")
-            raise e
+
+        images_dir = os.path.join(
+            '/var/www/html/images',
+            release, 'rdo_trunk')
+        hash_path = os.path.join(images_dir, full_hash)
+        rl_module = sftp
     else:
         # Check that the promotion_target dir is a soft link
-        try:
-            images_dir = os.path.join(
-                images_base_dir, 'overcloud_images',
-                distro, release, 'rdo_trunk')
-            assert os.path.join(
-                images_dir,
-                full_hash) == os.readlink(
-                os.path.join(images_dir, promotion_target))
-        except AssertionError as e:
-            print("Promotion target dir is not a softlink.")
-            raise e
+        images_dir = os.path.join(
+            images_base_dir, 'overcloud_images',
+            distro, release, 'rdo_trunk')
+        rl_module = os
+
+    error_message = "Promotion target dir is not a softlink"
+    hash_path = os.path.join(images_dir, full_hash)
+    promoted_hash_path = rl_module.readlink(
+        os.path.join(images_dir, promotion_target))
+
+    assert hash_path == promoted_hash_path, error_message
 
 
-def parse_promotion_logs(logfile, release, promotion_target,
-                         commit_hash, distro_hash, status):
+def parse_promotion_logs(test_config):
     ''' Check that the promotion logs have the right
         strings printed for the promotion status '''
 
+    logfile = test_config['logfile']
+    release = test_config['release']
+    promotion_target = test_config['promotion_target']
+    commit_hash = test_config['commit_hash']
+    distro_hash = test_config['distro_hash']
+    status = test_config['status']
     logger = logging.getLogger('TestPromoter')
     logger.debug("Open promoter file for reading")
 
@@ -149,14 +160,12 @@ def parse_promotion_logs(logfile, release, promotion_target,
         logfile_contents = soup.get_text()
     else:
         logger.debug("Reading local log file")
-        logfile_contents = open(logfile, 'r').read()
+        with open(logfile, 'r') as lf:
+            logfile_contents = lf.read()
 
     # Check that the promoter process finished
-    try:
-        assert 'promoter FINISHED' in logfile_contents
-    except AssertionError as e:
-        print("Promoter never finished")
-        raise e
+    error_message = "Promoter never finished"
+    assert 'promoter FINISHED' in logfile_contents, error_message
 
     if status == 'success':
         # Check strings for passing hashes
@@ -179,16 +188,15 @@ def parse_promotion_logs(logfile, release, promotion_target,
             + re.escape(full_hash) + r'\', \'commit_hash\': \''
             + re.escape(commit_hash) + r'\'}')
 
-        for pattern in [
-                success_pattern, success_pattern_images,
-                success_pattern_container]:
-            try:
-                success_pattern_search = pattern.search(
-                    logfile_contents)
-                assert success_pattern_search.group()
-            except AttributeError as e:
-                print("Success text pattern not found - ", pattern)
-                raise e
+        success_patterns = [
+            success_pattern,
+            success_pattern_images,
+            success_pattern_container
+        ]
+        for pattern in success_patterns:
+            success_pattern_search = pattern.search(logfile_contents)
+            error_message = "Success text pattern not found - %s" % pattern
+            assert success_pattern_search.group(), error_message
 
     elif status == 'failed':
         # Check string for failing hashes
@@ -202,12 +210,9 @@ def parse_promotion_logs(logfile, release, promotion_target,
             + r'\', \'repo_hash\': \''
             + re.escape(full_hash) + r'\', \'commit_hash\': \''
             + re.escape(commit_hash) + r'\'}')
-        try:
-            fail_pattern_search = fail_pattern.search(logfile_contents)
-            assert fail_pattern_search.group()
-        except AttributeError as e:
-            print("Fail text pattern not found - ", fail_pattern)
-            raise e
+        error_message("Fail text pattern not found - %s" % fail_pattern)
+        fail_pattern_search = fail_pattern.search(logfile_contents)
+        assert fail_pattern_search.group(), error_message
 
 
 def main():
@@ -222,35 +227,16 @@ def main():
     args = parser.parse_args()
 
     test_config_file = args.config_file
-    tcf = open(test_config_file)
-    test_config = yaml.safe_load(tcf)
+    with open(test_config_file) as tcf:
+        test_config = yaml.safe_load(tcf)
 
-    check_dlrn_promoted_hash(
-        test_config['dlrn_host'],
-        test_config['promotion_target'],
-        test_config['commit_hash'], test_config['distro_hash'])
-    query_container_registry_promotion(
-        test_config['registry_rdo'],
-        test_config['registry_docker_io'],
-        test_config['promotion_target'],
-        test_config['commit_hash'],
-        test_config['distro_hash'])
-    compare_tagged_image_hash(
-        test_config['images_base_dir'],
-        test_config['user'],
-        test_config['key_path'],
-        test_config['distro'],
-        test_config['release'],
-        test_config['promotion_target'],
-        test_config['commit_hash'],
-        test_config['distro_hash'])
-    parse_promotion_logs(
-        test_config['logfile'],
-        test_config['release'],
-        test_config['promotion_target'],
-        test_config['commit_hash'],
-        test_config['distro_hash'],
-        test_config['status'])
+    with open(test_config['stage-info-path']) as si:
+        stage_info = yaml.safe_load(si)
+
+    check_dlrn_promoted_hash(test_config)
+    query_container_registry_promotion(test_config)
+    compare_tagged_image_hash(test_config)
+    parse_promotion_logs(test_config)
 
 
 if __name__ == "__main__":
