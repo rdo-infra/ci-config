@@ -8,7 +8,6 @@ the list of containers created.
 Uses standard pytest fixture as a setup/teardown method
 """
 import docker
-import fnmatch
 import os
 import pytest
 import pprint
@@ -23,7 +22,7 @@ import yaml
 from staging_environment import StagedEnvironment, load_config
 
 
-@pytest.fixture()
+@pytest.fixture(scope='session')
 def staged_env():
     """
     Fixture that runs the staging environment provisioner, yields the files
@@ -33,27 +32,22 @@ def staged_env():
     components = "registries, container-images, overcloud-images"
     config = load_config(components, db_filepath="/tmp/sqlite-test.db")
     config['stage-info-path'] = "/tmp/stage-info.yaml"
+    config['dry-run'] = False
     staged_env = StagedEnvironment(config)
     staged_env.setup()
 
-    yield config
+    with open(config['stage-info-path'], "r") as stage_info_path:
+        stage_info = yaml.safe_load(stage_info_path)
+
+    yield config, stage_info
 
     staged_env.teardown()
 
 
-def test_samples(staged_env):
-    """
-    This test loads all the sample files, gets the files produced by the
-    staging environment provision fixture and compares them
-    (TODO) Optimize the file load and comparison with loops
-    """
+def test_registries(staged_env):
 
     docker_client = docker.from_env()
-
-    config = staged_env
-
-    with open(config['stage-info-path'], "r") as stage_info_path:
-        stage_info = yaml.safe_load(stage_info_path)
+    config, stage_info = staged_env
 
     # TODO(gcerami) Check db injection (needs sqlite3 import)
 
@@ -82,6 +76,9 @@ def test_samples(staged_env):
         assert "username" in registry
         assert "password" in registry
 
+
+def test_containers(staged_env):
+    config, stage_info = staged_env
     # Check that all decleare containers are realy pushed
     ppc64le_count = 0
     found = []
@@ -108,6 +105,9 @@ def test_samples(staged_env):
     ppc64le_ratio = float(ppc64le_count) / images_count
     assert ppc64le_ratio < 1 / 3.0
 
+
+def test_pattern_file(staged_env):
+    config, stage_info = staged_env
     # Check patterns file
     # THe pattern file should be valid for use with grep
     # and should return all images matching suffixes
@@ -132,6 +132,9 @@ def test_samples(staged_env):
     os.unlink(images_list_path)
     assert output == images_suffix_text
 
+
+def test_overcloud_images(staged_env):
+    config, stage_info = staged_env
     # Check images subtree, all full hases should be there
     overcloud_images_path = os.path.join(config['root-dir'],
                                          config['overcloud_images_base_dir'])
@@ -143,7 +146,12 @@ def test_samples(staged_env):
     )
     check_paths = []
     existing_paths = []
-    for full_hash in stage_info['commits']:
+    for commit in stage_info['commits']:
+        # check commit attributes are there
+        assert 'commit_hash' in commit
+        assert 'distro_hash' in commit
+        assert 'full_hash' in commit
+        full_hash = commit['full_hash']
         hash_path = os.path.join(base_path, full_hash)
         check_paths.append(hash_path)
         # We don't block at the first path found, I want to see all
@@ -158,8 +166,9 @@ def test_samples(staged_env):
 
     # check if we have a leaf with the symbolic link
     # and the dir linked exists
-    promotion_link = os.path.join(base_path, config['candidate_name'])
+    promotion_name = stage_info['promotions']['currently_promoted']['name']
+    promotion_link = os.path.join(base_path, promotion_name)
     promotion_target = os.readlink(promotion_link)
     # The fist commit is "the current promotion link"
-    sample_path = os.path.join(base_path, stage_info['commits'][0])
+    sample_path = os.path.join(base_path, stage_info['commits'][0]['full_hash'])
     assert promotion_target == sample_path
