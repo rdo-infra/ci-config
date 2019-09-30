@@ -28,21 +28,6 @@
 - name: Install packages for staging env
   become: true
   block:
-    - name:  remove epel
-      become: true
-      package:
-        name: epel-release
-        state: absent
-      tags:
-        - staging_prepare
-    - name:  install epel
-      become: true
-      package:
-        name: epel-release
-        state: present
-      tags:
-        - staging_prepare
-
     # uWSGI is used to expose and daemonize the delorean API without the need
     # to run and configure an apache server
     # Alternatives are:
