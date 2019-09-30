@@ -59,41 +59,6 @@
       tags:
         - staging_prepare
 
-- name: Create staging containers
-  become: true
-  become_user: "{{ promoter_user }}"
-  environment:
-      DOCKER_HOST: "unix://tmp/docker.sock"
-  tags:
-    - staging_prepare
-  block:
-    - name: create build dir
-      file:
-        path: /tmp/tempimage
-        state: directory
-
-    - name: create Dockerfile
-      copy:
-        content: |
-          FROM scratch
-          ADD nothing /
-        dest: /tmp/tempimage/Dockerfile
-
-    - name: Build tripleomaster/hello-worldtest image
-      shell: |
-        if [ -S /tmp/docker.sock ]; then
-            export DOCKER_HOST=unix:///tmp/docker.sock
-        fi
-        cd /tmp/tempimage
-        touch nothing
-        docker build -t source-test/tripleomaster/hello-world:v1 .
-      register: build
-
-    - name: Create two local insecure registries
-      command: "docker run -d -p {{ item.port }}:{{ item.port }} --restart=always --name {{ item.name }} registry:2"
-      with_items:
-        - { port: "{{ initial_registry['port'] }}", name: "{{ initial_registry['name'] }}" }
-        - { port: "{{ promote_registry['port'] }}", name: "{{ promote_registry['name'] }}" }
 
 # This block is the setup / run
 - become: true
@@ -126,4 +91,4 @@
             export DOCKER_HOST=unix:///tmp/docker.sock
             export DOCKER_OPTS="--insecure-registry localhost:{{ initial_registry['port'] }}"
         fi
-        python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py setup --env-id 12345
+        python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py setup
