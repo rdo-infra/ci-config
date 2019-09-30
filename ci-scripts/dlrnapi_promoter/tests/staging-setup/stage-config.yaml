@@ -1,5 +1,5 @@
-root-dir: /tmp/promoter-staging
-candidate_name: tripleo-ci-testing
+dlrn_host: 'http://localhost:8080'
+promotion_target: tripleo-ci-staging-promoted
 registries:
     # you can add multiple targets, but only the first source will win
     - type: source
@@ -20,7 +20,11 @@ containers:
   namespace: tripleomaster
   pattern_file_path: /tmp/images_pattern_file
 distro: centos
+distro_version: 7
 dlrn:
   repo_root: data/repos
-overcloud_images_base_dir: overcloud_images
+overcloud_images:
+  base_dir: /tmp/promoter-staging/overcloud_images
+  key: "sample_key"
 release: master
+logfile_template: '/home/${promoter_user}/promoter_logs/${distro}${distro_version}_${release}.log'
