@@ -2,10 +2,9 @@
 
 - hosts: all
   vars:
+    # DO not add ansible here, the production server needs to use ansible from package
     test_requirements:
-      - ansible
       - ansi2html
-      - docker
       - pytest
       - pytest-cov
       - pytest-html
@@ -43,6 +42,8 @@
               - yum-utils
               - docker-ce
               - docker-ce-cli
+              - ansible
+              - python-docker-py
             state: present
 
         - name: Start docker
