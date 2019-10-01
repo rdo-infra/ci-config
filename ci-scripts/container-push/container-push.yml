@@ -111,15 +111,15 @@
           tags:
             - rdoproject_pull
 
-        - name: Login to rdoproject registry
-          docker_login:
-            registry_url: "trunk.registry.rdoproject.org"
-            username: "{{ rdoproject_username }}"
-            password: "{{ rdoproject_password }}"
-            reauthorize: "yes"
-          no_log: "yes"
-          tags:
-            - rdoproject_push
+        # - name: Login to rdoproject registry
+        #   docker_login:
+        #     registry_url: "trunk.registry.rdoproject.org"
+        #     username: "{{ rdoproject_username }}"
+        #     password: "{{ rdoproject_password }}"
+        #     reauthorize: "yes"
+        #   no_log: "yes"
+        #   tags:
+        #     - rdoproject_push
 
         - name: Tag images to rdoproject registry with named label
           shell: >
@@ -138,15 +138,15 @@
           tags:
             - rdoproject_push
 
-        - name: Login to dockerhub
-          docker_login:
-            registry_url: "docker.io"
-            username: "{{ dockerhub_username }}"
-            password: "{{ dockerhub_password }}"
-            reauthorize: "yes"
-          no_log: "yes"
-          tags:
-            - dockerhub_push
+        # - name: Login to dockerhub
+        #   docker_login:
+        #     registry_url: "docker.io"
+        #     username: "{{ dockerhub_username }}"
+        #     password: "{{ dockerhub_password }}"
+        #     reauthorize: "yes"
+        #   no_log: "yes"
+        #   tags:
+        #     - dockerhub_push
 
         # Nested loop order here is on purpose, so we push first all the images with the full hash, then we tag with the named label.
         - name: Tag and push images to docker hub
