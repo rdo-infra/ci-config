@@ -84,7 +84,7 @@
   when: 'pushed_ppc.results[index].skipped is not defined'
   loop: "{{ pushed_ppc.results }}"
   loop_control:
-    label: "{% if pushed_ppc.results[index].skipped is defined %}{{pushed_ppc.results[index].item}}{% else %}{{ item.invocation.module_args.repository + ':' + item.invocation.module_args.tag }}{% endif %}"
+    label: "{% if pushed_ppc.results[index].skipped is defined %}{{ pushed_ppc.results[index].item }}{% else %}{{ item.invocation.module_args.repository + ':' + item.invocation.module_args.tag }}{% endif %}"
     index_var: index
 
 - name: Registry manifest_create_command with --insecure for local registry

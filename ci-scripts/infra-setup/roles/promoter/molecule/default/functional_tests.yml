@@ -2,7 +2,7 @@
 - name: Check docker version
   command: docker version --format {% raw %} '{{ .Client.Version }}' {% endraw %}
   register: docker_version
-  failed_when: docker_version.stdout == ""
+  failed_when: docker_version.stdout is empty
 
 # Manifest command introduced in version 18.02.0
 - name: Ensure Docker version is recent enough
