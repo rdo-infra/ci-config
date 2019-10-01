@@ -1,7 +1,7 @@
 ---
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.1.0
+    rev: v2.3.0
     hooks:
       - id: trailing-whitespace
       - id: mixed-line-ending
@@ -24,3 +24,11 @@ repos:
         # E040: Syntax error determined using `bash -n` (as many scripts
         #       use jinja templating, this will often fail and the syntax
         #       error will be discovered in execution anyway)
+  - repo: https://github.com/ansible/ansible-lint.git
+    rev: v4.1.1a0
+    hooks:
+      - id: ansible-lint
+        files: (playbooks|roles).*\.(yaml|yml)$
+        exclude: ^(ci-scripts/jenkins/|ci-scripts/infra-setup/tenant_vars/rdo/networks.yml|.*molecule.yml)
+        entry: ansible-lint --force-color -v
+        verbose: true
