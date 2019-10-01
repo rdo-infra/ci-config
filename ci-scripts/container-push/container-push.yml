@@ -121,6 +121,16 @@
           tags:
             - rdoproject_push
 
+        # Workaround for https://github.com/ansible/ansible/issues/32868
+        - name: Validate rdoproject registry login
+          shell: >
+            docker build -t trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/nop -
+            && docker push trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/nop
+          args:
+            stdin: |
+              FROM bash
+              CMD /bin/sh -c exit
+
         - name: Tag images to rdoproject registry with named label
           shell: >
             docker tag
@@ -147,6 +157,16 @@
           no_log: "yes"
           tags:
             - dockerhub_push
+
+        # Workaround for https://github.com/ansible/ansible/issues/32868
+        - name: Validate docker login
+          shell: >
+            docker build -t docker.io/{{ dockerhub_namespace }}/nop -
+            && docker push docker.io/{{ dockerhub_namespace }}/nop
+          args:
+            stdin: |
+              FROM bash
+              CMD /bin/sh -c exit
 
         # Nested loop order here is on purpose, so we push first all the images with the full hash, then we tag with the named label.
         - name: Tag and push images to docker hub
