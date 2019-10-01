@@ -21,13 +21,14 @@
   set_fact:
     dlrn_url: "https://trunk.rdoproject.org/{{ distro_name }}{{ distro_version }}-{{ release }}/{{ dlrn_dir }}/versions.csv"
 
-- name: Get the tripleo-common commit in the promoted hash
+- name: Get the tripleo-common commit in the promoted hash  # noqa 306
   shell: >
     curl {{ dlrn_url }} | grep ',openstack-tripleo-common-[0-9]' | cut -f3 -d','
   args:
     # shut up ansible. get_url is not enough here
     warn: false
   register: local_release
+  changed_when: false
 
 - name: Set the release_url - master
   set_fact:
@@ -49,7 +50,7 @@
     path: "{{ pattern_file }}"
   register: pattern_file_stat
 
-- name: Get release containers
+- name: Get release containers  # noqa 306
   shell: |
     curl -fk {{ release_url }} 2>/dev/null | grep -o -P \
      '(?<=name_prefix).*(?=name_suffix)' | sed "s/[{}]//g" \
@@ -60,8 +61,9 @@
   args:
     # shut up ansible. get_url is not enough here.
     warn: false
+  changed_when: false
 
-- name: Generate list of containers to push
+- name: Generate list of containers to push  # noqa 306
   shell: |
     echo -n > {{ containers_file }};
     for image in {{ release_images.stdout_lines|join(" ") }}; do
@@ -86,6 +88,7 @@
     echo "openstack-base" >> {{ containers_file }}
   args:
     executable: /bin/bash
+  changed_when: true
 
 - name: run container tagging and always cleanup at the end
   block:

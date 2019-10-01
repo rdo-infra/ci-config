@@ -3,6 +3,7 @@
   command: docker version --format {% raw %} '{{ .Client.Version }}' {% endraw %}
   register: docker_version
   failed_when: docker_version.stdout | length == 0
+  changed_when: false
 
 # Manifest command introduced in version 18.02.0
 - name: Ensure Docker version is recent enough
@@ -16,6 +17,7 @@
   become_user: "{{ promoter_user }}"
   command: docker manifest --help
   register: docker_manifest
+  changed_when: false
 
 - name: Ensure docker manifest command is enabled by default
   become:
@@ -30,14 +32,17 @@
   args:
     # shut up ansible. Yum module doesn't offer repoinfo functionality as of 2.8
     warn: false
+  changed_when: false
 
 - name: Ensure /var/lib/docker is from a different partition
   command: findmnt -P /var/lib/docker
+  changed_when: false
 
 # We can't run the daemon in molecule without virsh driver for now
 - name: Ensure docker deamon is using the overlay driver
   command: "docker info --format {% raw %} '{{ json .Driver  }}' {% endraw %}"
   failed_when: false
+  changed_when: false
 
 - name: Ensure we can access logs from apache
   get_url:
@@ -51,6 +56,7 @@
 - name: Dry run log rotation
   command: logrotate -d /etc/logrotate.d/promoter
   register: logrotate_run
+  changed_when: true
 
 - name: Ensure Log rotation is configured properly
   assert:
@@ -65,8 +71,11 @@
     success_msg: "Rotating pattern in rotation is correct"
 
 - name: Ensure selinux policy is installed
-  shell: semanage module -l | grep logrotate-promoter
+  shell: |
+    set -euo pipefail
+    semanage module -l | grep logrotate-promoter
   become: true
+  changed_when: false
 
 - name: Ensure selinux policy for promoter is configured correctly
   debug:
@@ -111,6 +120,7 @@
   shell: |
     source ~/promoter_venv/bin/activate
     python --version
+  changed_when: false
 
 # Quite difficult to test at the moment, we should be able to do
 # a rerun of the task that installs and enable a new service file
@@ -122,14 +132,17 @@
 - name: Ensure dlrn-promoter service unit file is correctly installed
   become: true
   command: systemd-analyze verify dlrn-promoter.service
+  changed_when: false
 
 - name: Ensure dlrn-promoter service is running
   become: true
   command: systemctl status dlrn-promoter
+  changed_when: false
 
 - name: Ensure monitoring service unit file is correctly installed
   become: true
   command: systemd-analyze verify telegraf.service
+  changed_when: false
 
 # Not sure how to verify this
 - name: Ensure monitoring is enabled and working correctly
