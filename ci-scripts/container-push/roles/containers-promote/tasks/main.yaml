@@ -21,12 +21,14 @@
     dlrn_url: "https://trunk.rdoproject.org/{{ distro_name }}{{ distro_version }}-{{ release }}/{{ dlrn_dir }}/versions.csv"
 
 - name: Get the tripleo-common commit in the promoted hash
-  shell: >
+  shell: |
+    set -euo pipefail
     curl {{ dlrn_url }} | grep ',openstack-tripleo-common-[0-9]' | cut -f3 -d','
   args:
     # Disable warning about get_url being better than curl
     warn: false
   register: local_release
+  changed_when: false
 
 - name: Set the release_url - master
   set_fact:
@@ -50,15 +52,18 @@
 
 - name: Get release containers
   shell: |
+    set -euo pipefail
     curl -fk {{ release_url }} 2>/dev/null | grep -o -P \
      '(?<=name_prefix).*(?=name_suffix)' | sed "s/[{}]//g" \
      {% if pattern_file_stat.stat.exists %}
      | grep -f {{ pattern_file }}
      {% endif %}
   register: release_images
+  changed_when: false
 
 - name: Generate list of containers to push
   shell: |
+    set -uo pipefail
     export DOCKER_CLI_EXPERIMENTAL=enabled
     echo -n > {{ containers_file }};
     for image in {{ release_images.stdout_lines|join(" ") }}; do
@@ -83,6 +88,7 @@
     echo "openstack-base" >> {{ containers_file }}
   args:
     executable: /bin/bash
+  changed_when: true
 
 - name: run container tagging and always cleanup at the end
   block:
