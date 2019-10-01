@@ -19,6 +19,7 @@
   failed_when: false
   loop: "{{ built_images.stdout_lines }}"
   retries: 1
+  changed_when: false
 
 - debug:
     msg: "manifest-push.yml debug:{{ ppc_tag }} container not found for {{ item }}"
@@ -111,12 +112,14 @@
     index_var: index
   loop: "{{ built_images.stdout_lines }}"
   when: '"ERROR" in check_ppc_containers.results[index].stdout'
+  changed_when: true
 
 - name: 'Push container manifests to {{ registry.host }}'
   shell: |
     docker manifest push {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }}
   retries: 3
   with_items: "{{ built_images.stdout_lines }}"
+  changed_when: true
 
 # Check that we pushed all the things correctly to {{ registry.host }}
 - name: 'Inspect manifests and {{ x86_tag }} containers in {{ registry.host }}'
@@ -126,6 +129,7 @@
     - "{{ built_images.stdout_lines }}"
     - ["{{ manifest_tag }}", "_{{ x86_tag }}"]
   retries: 3
+  changed_when: false
 
 - name: 'Inspect manifests and {{ ppc_tag }} containers in {{ registry.host }}'
   shell: |
