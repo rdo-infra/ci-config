@@ -1,0 +1,78 @@
+---
+# Setup the promoter-staging environment (--components 'overcloud-images') then
+# run ci-config/ci-scripts/promote-images.sh, then verify staging environment
+# promoted OK
+- name: Setup staging promotion and promote-images.sh and verify
+  hosts: all
+  vars:
+    images_path: "/tmp/promoter-staging/overcloud_images"
+  environment:
+    ANSIBLE_VERBOSITY: 1
+  tasks:
+    - name: Test promoter container manifest-push.yml
+      block:
+        - name: launch staging setup scripts
+          shell: |
+            # Export the path to the mounted docker socket so all docker client commands will use it
+            {{ ansible_python_interpreter }} ../../../../../dlrnapi_promoter/tests/staging-setup/staging_environment.py setup --components overcloud-images
+
+        - name: include stage setup variables
+          include_vars: /tmp/stage-info.yaml
+
+        - name: debug
+          shell: |
+                echo $(ls -l "{{ images_path }}/centos/master/rdo_trunk/")
+          register: contents
+
+        - debug:
+            msg: "{{ contents }}"
+        - set_fact:
+            full_hash: "{{ commits.0 }}"
+
+        - name: run promote-images.sh
+          environment:
+            OPT_WEBSITE: "file://{{ images_path }}"
+            OPT_DISTRO_VERSION: ""
+            IMAGE_SERVER_USER_HOST: "{{ ansible_user_id }}@127.0.0.1"
+            OPT_WEBROOT: "{{ images_path }}"
+          shell: |
+             ../../../../../promote-images.sh master {{ full_hash }} current-tripleo
+          register: promote_images_result # need to check this as sftp can fail
+
+        - name: Ensure current-tripleo exists and get info for checking
+          stat:
+            path: "{{ images_path }}/centos/master/rdo_trunk/current-tripleo"
+          register: current_tripleo
+
+        - name: debug
+          shell: |
+                echo $(ls -l "{{ images_path }}/centos/master/rdo_trunk/")
+          register: contents
+
+        - debug:
+            msg: "{{ contents }}"
+
+        - name: 'Check that current-tripleo is a symlink and it points to {{ full_hash }}'
+          assert:
+            that:
+              - current_tripleo.stat.islnk is defined
+              - current_tripleo.stat.lnk_target == "{{ images_path }}/centos/master/rdo_trunk/{{ full_hash }}"
+
+        - name: Ensure previous-current-tripleo exists and get info for checking
+          stat:
+            path: "{{ images_path }}/centos/master/rdo_trunk/previous-current-tripleo"
+          register: previous_current_tripleo
+
+        - name: 'Check that previous-current-tripleo is a symlink and it does not point to {{ full_hash }}'
+          debug:
+            msg: "not implemented yet"
+          #assert:
+          #  that:
+              #- previous_current_tripleo.stat.islnk is defined
+              #- previous_current_tripleo.stat.lnk_target != "{{ images_path }}/centos/master/rdo_trunk/{{ full_hash }}"
+
+      always:
+        - name: Teardown
+          shell: |
+            {{ ansible_python_interpreter }} ../../../../../dlrnapi_promoter/tests/staging-setup/staging_environment.py teardown --components overcloud-images
+
