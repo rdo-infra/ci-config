@@ -1,0 +1,33 @@
+
+---
+# Setup the promoter-staging environment (--components 'overcloud-images') then
+# run ci-config/ci-scripts/promote-images.sh, then verify staging environment
+# promoted OK
+- name: Setup staging promotion and promote-images.sh and verify
+  hosts: all
+  vars:
+  tasks:
+    - name: Test promoter container manifest-push.yml
+      block:
+        - name: launch staging setup scripts
+          shell: |
+            # Export the path to the mounted docker socket so all docker client commands will use it
+            {{ ansible_python_interpreter }} ../../../../../dlrnapi_promoter/tests/staging-setup/staging_environment.py setup --components overcloud-images
+
+        - name: include stage setup variables
+          include_vars: /tmp/stage-info.yaml
+
+        - set_fact:
+            full_hash: "{{ commits.0 }}"
+
+        - name: run promote-images.sh
+          shell: |
+             promote-images.sh master {{ full_hash }} current-tripleo
+
+        - debug:
+            msg: "Check the promotion - NOT IMPLEMENTED"
+
+      always:
+        - name: Teardown
+          shell: |
+            {{ ansible_python_interpreter }} ../../../../../dlrnapi_promoter/tests/staging-setup/staging_environment.py teardown --components overcloud-images
