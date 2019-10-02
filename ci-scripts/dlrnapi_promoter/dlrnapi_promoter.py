@@ -128,27 +128,43 @@ def tag_containers(new_hashes, distro, release, promote_name):
     env = os.environ
     relpath = "ci-scripts/dlrnapi_promoter"
     script_root = os.path.abspath(sys.path[0]).replace(relpath, "")
+    logfile = os.path.abspath(os.path.join(
+        script_root,
+        "../promoter_logs/container-push/%s.log" %
+        datetime.now().strftime("%Y%m%d-%H%M%S")))
     env['RELEASE'] = release
     env['COMMIT_HASH'] = new_hashes['commit_hash']
     env['DISTRO_HASH'] = new_hashes['distro_hash']
     env['FULL_HASH'] = new_hashes['full_hash']
     env['PROMOTE_NAME'] = promote_name
     env['SCRIPT_ROOT'] = script_root
-    # TODO: This will be de-harcoded at preparing promoer for f28
     distro_name, distro_version = distro
     env['DISTRO_NAME'] = distro_name
     env['DISTRO_VERSION'] = distro_version
     promote_playbook = (
         script_root + 'ci-scripts/container-push/container-push.yml'
     )
-    commit_hash = new_hashes['commit_hash']
     try:
         logger.info('Promoting the container images for dlrn hash %s on '
-                    '%s to %s', commit_hash, release, promote_name)
+                    '%s to %s', new_hashes['commit_hash'], release,
+                    promote_name)
+
+        # Use single string to make it easy to copy/paste from logs
+        cmd = "env " \
+            "ANSIBLE_LOG_PATH=%s RELEASE=%s " \
+            "COMMIT_HASH=%s DISTRO_HASH=%s FULL_HASH=%s " \
+            "PROMOTE_NAME=%s SCRIPT_ROOT=%s DISTRO_NAME=%s DISTRO_VERSION=%s " \
+            "ansible-playbook %s" % (
+                logfile,
+                release, new_hashes['commit_hash'], new_hashes['distro_hash'],
+                new_hashes['full_hash'], promote_name, script_root, distro_name,
+                distro_version, promote_playbook
+            )
+        logger.info('Running: %s', cmd)
         container_logs = \
             subprocess.check_output(
-                ['ansible-playbook', promote_playbook],
-                env=env, stderr=subprocess.STDOUT).split("\n")
+                cmd.split(" "),
+                stderr=subprocess.STDOUT).split("\n")
         for line in container_logs:
             logger.info(line)
     except subprocess.CalledProcessError as ex:
