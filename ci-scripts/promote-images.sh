@@ -76,6 +76,15 @@ $1
 EOF
 }
 
+# Check if this is promotion staging environment and override vars
+# See if the file /tmp/stage-info.yaml exists and source vars from there
+if [[ -f /tmp/stage-info.yaml ]]; then
+    images_path=$(cat /tmp/stage-info.yaml  | shyaml get-value overcloud_images.base_dir)
+    OPT_WEBSITE="file://$images_path"
+    IMAGE_SERVER_USER_HOST="$USER@127.0.0.1"
+    OPT_WEBROOT="$images_path"
+fi
+
 # check if target url exists and fail-fast if it doesn't
 SOURCE_URL=${OPT_WEBSITE}/$DISTRO_AND_VERSION/$RELEASE/rdo_trunk/$PROMOTED_HASH
 curl -L --silent --head --fail $SOURCE_URL >/dev/null || {
