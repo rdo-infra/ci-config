@@ -159,17 +159,6 @@
           tags:
             - dockerhub_push
 
-        # Workaround for https://github.com/ansible/ansible/issues/32868
-        - name: Validate docker login
-          shell: >
-            docker build -t docker.io/{{ dockerhub_namespace }}/nop - &&
-            docker push docker.io/{{ dockerhub_namespace }}/nop
-          args:
-            stdin: |
-              FROM scratch
-              CMD touch foo
-              ENTRYPOINT ""
-
         # Nested loop order here is on purpose, so we push first all the images with the full hash, then we tag with the named label.
         - name: Tag and push images to docker hub
           docker_image:
