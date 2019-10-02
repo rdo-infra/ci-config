@@ -177,9 +177,22 @@ def add_container_prep_time(build):
         # container-image-prepare.log] ***\n
         # 2019-09-23 10:15:25 | changed: [undercloud]
 
-        container_prep_line = (r'\d{4}-\d{2}-\d{2}\s(?:[01]\d|2[0-3]):(?:[0-5]'
-                               r'\d):(?:[0-5]\d)\s\|.*tripleo-container-image'
-                               r'-prepare.log\s*([1-9]*\.?[1-9]*)s')
+        # This is the previous regular expression.
+        # Example:
+        # 2019-09-30 08:51:23 | tripleo-container-image-prepare :
+        # Run tripleo-container-image-prepare logged to:
+        # /var/log/tripleo-container-image-prepare.log  4335.64s
+
+        # container_prep_line = (r'\d{4}-\d{2}-\d{2}\s(?:[01]\d|2[0-3])'
+        #                        r':(?:[0-5]'
+        #                        r'\d):(?:[0-5]\d)\s\|.*tripleo-container-image'
+        #                        r'-prepare.log\s*([1-9]*\.?[1-9]*)s')
+
+        # The regex below matches the new Warning log and the previous one
+        # where the regex commented above also match
+
+        container_prep_line = (r'Run.*tripleo-container-image-prepare.log'
+                               r'\s*\-?\s*([1-9]*\.?[1-9]*)s')
 
         match = re.findall(container_prep_line, respData, re.MULTILINE)
 
