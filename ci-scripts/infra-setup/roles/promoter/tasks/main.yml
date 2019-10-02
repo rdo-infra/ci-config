@@ -215,6 +215,15 @@
     backup: yes
   become: true
 
+- name: Configure Apache autoindex
+  lineinfile:
+    path: '/etc/httpd/conf.d/autoindex.conf'
+    create: yes
+    regexp: '^IndexOptions '
+    line: 'IndexOptions FancyIndexing HTMLTable VersionSort NameWidth=* FoldersFirst SuppressDescription'
+  register: apache_config_autoindex
+  become: true
+
 - name: Add config file for Apache to expose the logs
   blockinfile:
     path: '/etc/httpd/conf.d/promoter_logs.conf'
@@ -239,8 +248,7 @@
     state: restarted
     enabled: yes
   become: true
-  when: apache_config|changed
-
+  when: apache_config is changed or apache_config_autoindex is changed
 
 #
 # Credential prepare
