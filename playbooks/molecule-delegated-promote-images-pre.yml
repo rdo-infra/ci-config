@@ -1,0 +1,59 @@
+
+---
+
+- hosts: all
+  vars:
+    test_requirements:
+      - ansible
+      - ansi2html
+      - pytest
+      - pytest-cov
+      - pytest-html
+      - pytest-xdist
+      - mock
+      - molecule>=2.22rc1
+      - dlrn
+      - dlrnapi_client
+      - docker
+      - shyaml
+
+  tasks:
+    - name: Packages
+      become: true
+      block:
+        - name: Install required packages
+          yum:
+            name:
+              - python-virtualenv
+              - yum-utils
+            state: present
+
+    - name: Setup test-python
+      become: true
+      pip:
+        name: "{{ test_requirements }}"
+        virtualenv: "{{ ansible_user_dir }}/test-python"
+        virtualenv_site_packages: true
+
+    - name: 'Check if {{ ansible_user_id }} already has a public key in {{ ansible_user_dir }}/.ssh'
+      stat:
+        path: "{{ ansible_user_dir }}/.ssh/id_rsa.pub"
+      register: pub_key
+
+    - name: Create id_rsa.pub if it doesn't exist
+      shell: |
+        ssh-keygen -m PEM -t rsa -N "" -f id_rsa
+        mv id_rsa id_rsa.pub {{ ansible_user_dir }}/.ssh/
+      when: pub_key.stat.exists != True
+
+    - name: Check if id_rsa.pub is in authorized_keys
+      shell: |
+        grep "$(cat {{ ansible_user_dir }}/.ssh/id_rsa.pub)" {{ ansible_user_dir }}/ssh/authorized_keys
+      register: authorized_keys
+      failed_when: false
+
+    - name: Add id_rsa.pub to authorized_keys if needed
+      when: "{{ authorized_keys.rc }} != 0"
+      shell: |
+        cat {{ ansible_user_dir }}/.ssh/id_rsa.pub >> {{ ansible_user_dir }}/.ssh/authorized_keys
+      when: pub_key.stat.exists != True
