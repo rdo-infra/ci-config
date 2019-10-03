@@ -11,6 +11,7 @@
   become: yes
   become_user: root
   vars:
+    min_ansible_version: "2.8.0"
     named_label: "{{ lookup('env', 'PROMOTE_NAME') }}"
     full_hash: "{{ lookup('env', 'FULL_HASH')}}"
     script_root: "{{ lookup('env', 'SCRIPT_ROOT') }}"
@@ -26,6 +27,12 @@
     containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ lookup('env','RELEASE') }}.txt"
     registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleo{{ lookup('env', 'RELEASE') }}/imagestreamtags"
   tasks:
+
+    - name: Fail fast if ansible_min_version is not met
+      assert:
+        that: "ansible_version.full is version_compare(min_ansible_version, '>=')"
+        fail: "This playbook requires Ansible >= {{ min_ansible_version }}"
+
     - name: print out hash, label and namespaces in play
       debug:
         var: "{{ item }}"
@@ -106,6 +113,7 @@
           docker_image:
             name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item }}"
             tag: "{{ full_hash }}"
+            source: pull
           with_items: "{{ built_images.stdout_lines }}"
           retries: 3
           tags:
@@ -197,7 +205,7 @@
             name: "trunk.registry.rdoproject.org/{{ rdoproject_namespace }}/{{ distro_name }}-binary-{{ item[0] }}"
             tag: "{{ item[1] }}"
             state: absent
-            force: yes
+            force_absent: true
           with_nested:
             - "{{ built_images.stdout_lines }}"
             - ["{{ full_hash }}", "{{ named_label }}"]
@@ -211,7 +219,7 @@
             name: "docker.io/{{ dockerhub_namespace }}/{{ distro_name }}-binary-{{ item[0] }}"
             tag: "{{ item[1] }}"
             state: absent
-            force: yes
+            force_absent: true
           with_nested:
             - "{{ built_images.stdout_lines }}"
             - ["{{ full_hash }}", "{{ named_label }}"]
