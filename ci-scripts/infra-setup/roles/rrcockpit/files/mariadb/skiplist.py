@@ -1,48 +1,57 @@
-import requests
+# Copyright 2016 Red Hat, Inc.
+# All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+import tempest_file_downloader
+import tempest_html_json
+import glob
 import os
-#import pdb; pdb.set_trace()
-
-RELEASES = ['master', 'stein', 'rocky', 'queens']
-JOB_NAME = 'periodic-tripleo-ci-centos-7-ovb-1ctlr_2comp-featureset021-'
-ZUUL_API_BUILD = 'https://review.rdoproject.org/zuul/api/builds?job_name='
-TEMPEST_LOG = 'logs/tempest.html.gz'
-TEMPEST_DUMP_DIR = '/tmp/skip'
+import json
 
 
-def get_last_build():
-    """It will first get the log_url for each supported release of FS021
-    job and then appends logs/tempest.html.gz file and check whether new
-    log_url exists or not. If exists, It will download the tempest file in
-    temp directory.
-    
-    Returns: job_name and log_file
+parse_result = []
+previously_processed_files = [
+    'tempest.master.html',
+    'tempest.stein.html']
+recent_files = []
+
+
+def get_diff():
     """
-    tempest = []
-    for release in RELEASES:
-        zuul_job_url = '{}{}{}'.format(ZUUL_API_BUILD, JOB_NAME, release)
-        resp = requests.get(zuul_job_url)
-        if resp.status_code == 200:
-            zuul_log_url = resp.json()[0]['log_url']
-            tempest_log_url = '{}{}'.format(zuul_log_url, TEMPEST_LOG)
-            if requests.get(tempest_log_url).status_code == 200:
-                if not os.path.exists(TEMPEST_DUMP_DIR):
-                    os.mkdir(TEMPEST_DUMP_DIR)
-                file_name = download_tempest_file(
-                    tempest_log_url, TEMPEST_DUMP_DIR)
-                tempest.append((file_name, JOB_NAME+release))
-    return tempest
+    This function gives the difference of previously proccessed files and
+    recent files
+    """
+    list_of_files = glob.glob('/tmp/skip/*.html')
+    recent_files = max(list_of_files, key=os.path.getctime)
+    return list(set(previously_processed_files) - set(recent_files))
 
-def download_tempest_file(url, local_dir):
-    local_filename = url.split('/')[-1]
-    with requests.get(url, stream=True) as r:
-        r.raise_for_status()
-        with open(os.path.join(local_dir, local_filename), 'wb') as f:
-            for chunk in r.iter_content(chunk_size=8192):
-                if chunk:  # filter out keep-alive new chunks
-                    f.write(chunk)
-    return local_filename
+
+def get_files():
+    """
+    This function gives the result of all the files parsed from html to json
+    """
+    tempest_file_downloader.get_last_build()
+    previously_processed_files.extend(get_diff())
+    for file in get_diff():
+        parse_result.append(tempest_html_json.main())
+        return parse_result
+
+
+def get_output_file():
+    with open('/tmp/out.txt', 'w+') as outfile:
+        json.dump(get_files(), outfile, sort_keys=True, indent=2)
 
 
 if __name__ == "__main__":
-    get_last_build()
-
+    get_files()
+    get_output_file()
