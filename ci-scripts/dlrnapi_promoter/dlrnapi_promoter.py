@@ -236,7 +236,8 @@ def get_latest_hashes(api, promote_name, current_name, latest_hashes_count):
                        promote_name)
     else:
         for hashes in old_hashes:
-            full_hash = "%s_%s" % (hashes['commit_hash'], hashes['distro_hash'])
+            full_hash = "%s_%s" % (
+                hashes['commit_hash'], hashes['distro_hash'])
             # it may happen that an hash appears in this list, but it's not from
             # our list of candindates. If this happens we're just ignoring it
             if full_hash in candidate_hashes:
@@ -270,7 +271,8 @@ def promote_all_links(
         dry_run,
         distro,
         release,
-        latest_hashes_count):
+        latest_hashes_count,
+        api_url):
     '''Promote DLRN API links as a different one when all jobs are
     successful'''
     logger = logging.getLogger('promoter')
@@ -299,11 +301,19 @@ def promote_all_links(
                     'Skipping promotion of %s from %s to %s, missing '
                     'successful jobs: %s',
                     new_hashes, current_name, promote_name, missing_jobs)
+                logger.info('Check Results at:')
+                logger.info(
+                    '%s \n%s/api/civotes_detail.html?'
+                    'commit_hash=%s&distro_hash=%s'.replace(" ", ""),
+                    'DETAILED MISSING JOBS: ',
+                    api_url,
+                    new_hashes['commit_hash'],
+                    new_hashes['distro_hash'])
                 continue
             if dry_run:
                 logger.info('DRY RUN: promotion conditions satisfied, '
-                            'skipping promotion of %s to %s (%s)',
-                            current_name, promote_name, new_hashes)
+                            'skipping promotion of %s-%s %s to %s (%s)',
+                            distro, release, current_name, promote_name, new_hashes)
                 break
             else:
                 try:
@@ -326,13 +336,27 @@ def promote_all_links(
                             promote_name)
 
                     promote_link(api, new_hashes, promote_name)
-                    logger.info('SUCCESS promoting %s as %s (%s)',
-                                current_name, promote_name, new_hashes)
+                    logger.info('SUCCESS promoting %s-%s %s as %s (%s)',
+                                distro, release, current_name, promote_name, new_hashes)
+                    logger.info(
+                        '%s \n%s/api/civotes_detail.html?\
+                        commit_hash=%s&distro_hash=%s'.replace(" ", ""),
+                        'DETAILED SUCCESSFUL STATUS: ',
+                        api_url,
+                        new_hashes['commit_hash'],
+                        new_hashes['distro_hash'])
                     # stop here, don't try to promote other hashes
                     break
                 except Exception:
-                    logger.info('FAILED promoting %s as %s (%s)',
-                                current_name, promote_name, new_hashes)
+                    logger.info('FAILED promoting %s-%s %s as %s (%s)',
+                                distro, release, current_name, promote_name, new_hashes)
+                    logger.info(
+                        '%s \n%s/api/civotes_detail.html?'
+                        'commit_hash=%s&distro_hash=%s'.replace(" ", ""),
+                        'DETAILED FAILED STATUS: ',
+                        api_url,
+                        new_hashes['commit_hash'],
+                        new_hashes['distro_hash'])
                     raise
 
 
@@ -343,6 +367,7 @@ def promoter(config):
               config.get('main', 'distro_version'))
 
     release = config.get('main', 'release')
+    api_url = config.get('main', 'api_url')
 
     logger.info('STARTED promotion process for release: %s', release)
 
@@ -391,7 +416,8 @@ def promoter(config):
         dry_run,
         distro,
         release,
-        latest_hashes_count)
+        latest_hashes_count,
+        api_url)
     logger.info("FINISHED promotion process")
 
 
