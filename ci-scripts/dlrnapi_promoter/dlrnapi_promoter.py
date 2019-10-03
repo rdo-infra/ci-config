@@ -299,6 +299,13 @@ def promote_all_links(
                     'Skipping promotion of %s from %s to %s, missing '
                     'successful jobs: %s',
                     new_hashes, current_name, promote_name, missing_jobs)
+                logger.info('Check Results at:')
+                logger.info(
+                    'https://%s/api/civotes_detail.html?\
+                    commit_hash=%s&distro_hash=%s',
+                    api_instance,
+                    new_hash['commit_hash'],
+                    new_hash['distro_hash'])
                 continue
             if dry_run:
                 logger.info('DRY RUN: promotion conditions satisfied, '
@@ -326,6 +333,7 @@ def promote_all_links(
                             promote_name)
 
                     promote_link(api, new_hashes, promote_name)
+                    logger.info('\0/ \0/ \0/ woot!!!')
                     logger.info('SUCCESS promoting %s as %s (%s)',
                                 current_name, promote_name, new_hashes)
                     # stop here, don't try to promote other hashes
@@ -333,6 +341,13 @@ def promote_all_links(
                 except Exception:
                     logger.info('FAILED promoting %s as %s (%s)',
                                 current_name, promote_name, new_hashes)
+                    logger.info('Check Results at:')
+                    logger.info(
+                        'https://%s/api/civotes_detail.html?\
+                        commit_hash=%s&distro_hash=%s',
+                        api_instance,
+                        new_hash['commit_hash'],
+                        new_hash['distro_hash'])
                     raise
 
 
