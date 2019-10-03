@@ -5,6 +5,22 @@ This is where the code behind
 README will help you setup a development environment for the tripleo-ci
 ruck|rover cockpit.
 
+### Note for Fedora 31:
+
+The Docker package has been removed from Fedora 31. It has been replaced by the upstream
+package moby-engine, which includes the Docker CLI as well as the Docker Engine. However, we
+recommend instead that you use Package-x-generic-16.pngpodman, which is a Cgroups v2-
+compatible container engine whose CLI is compatible with Docker's. Fedora 31 uses Cgroups v2 by
+default.
+The moby-engine package does not support Cgroups v2 yet, so if you need to run the moby-engine
+or run the Docker CE package, then you need to switch the system to using Cgroups v1, by passing
+the kernel parameter
+To do this permanently,
+run sudo grubby --update-kernel=ALL --args="systemd.unified_cgroup_hierarchy=0"
+This command reverts the systemd configuration to use cgroup v1.
+Or if you have a vm running fedora 30 with docker installed use the export DOCKER_HOST
+export DOCKER_HOST = "tcp://system-IP:custom-port"
+
 ### Requirements:
 
 The cockpit uses docker containers to run the required services - telegraf,
