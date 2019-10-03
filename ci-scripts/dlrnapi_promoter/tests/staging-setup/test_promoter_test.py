@@ -53,7 +53,7 @@ class TestIntegrationTests(unittest.TestCase):
             " 'full_hash': '1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc_8170b868',"
             " 'repo_hash': '1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc_8170b868',"
             " 'commit_hash': '1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc'}: \n"
-            "promoter SUCCESS promoting tripleo-ci-staging as"
+            "promoter SUCCESS promoting centos7-master tripleo-ci-staging as"
             " tripleo-ci-staging-promoted \n"
             "promoter FINISHED promotion process"
         )
