@@ -195,7 +195,8 @@ def parse_promotion_logs(stage_info):
         + re.escape(full_hash) + r"', 'commit_hash': '"
         + re.escape(commit_hash) + r"'}")
     success_pattern_target = re.compile(
-        "promoter SUCCESS promoting "
+        "promoter SUCCESS promoting centos7-"
+        + re.escape(release) + ' '
         + re.escape(candidate_name) + r" as "
         + re.escape(promotion_target))
 
