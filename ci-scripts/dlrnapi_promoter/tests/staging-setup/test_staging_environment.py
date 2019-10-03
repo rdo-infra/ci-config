@@ -51,9 +51,8 @@ def staged_env():
     staged_env.teardown()
 
 
-# Uncomment when session fixture works and remove def below
-# def test_registries(staged_env):
-def test_staging_env(staged_env):
+@pytest.mark.serial
+def test_registries(staged_env):
 
     docker_client = docker.from_env()
     config, stage_info = staged_env
@@ -138,9 +137,9 @@ def test_staging_env(staged_env):
     assert ppc64le_ratio < 1 / 3.0
 
 
-# Uncomment when session fixture works
-# def test_pattern_file(staged_env):
-#     config, stage_info = staged_env
+@pytest.mark.serial
+def test_pattern_file(staged_env):
+    config, stage_info = staged_env
     # Check patterns file
     # THe pattern file should be valid for use with grep
     # and should return all images matching suffixes
@@ -166,9 +165,9 @@ def test_staging_env(staged_env):
     assert output == images_suffix_text
 
 
-# Uncomment when session fixture works
-# def test_overcloud_images(staged_env):
-#     config, stage_info = staged_env
+@pytest.mark.serial
+def test_overcloud_images(staged_env):
+    config, stage_info = staged_env
     # Check images subtree, all full hases should be there
     overcloud_images_path = config['overcloud_images']['base_dir']
     distro_path = "{}{}".format(config['distro'], config['distro_version'])
