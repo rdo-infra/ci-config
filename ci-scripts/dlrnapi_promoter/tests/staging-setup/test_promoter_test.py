@@ -4,8 +4,10 @@ import pytest
 import unittest
 try:
     from unittest.mock import Mock, patch, mock_open
+    builtin_str = "builtins.open"
 except ImportError:
     from mock import Mock, patch, mock_open
+    builtin_str = "__builtin__.open"
 try:
     import urllib2 as url_lib
 except ImportError:
@@ -39,12 +41,19 @@ class TestIntegrationTests(unittest.TestCase):
 
         self.success_pattern_container_positive = (
             "promoter Promoting the container images for dlrn hash"
-            " 1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc"
-        )
-
-        self.success_patter_container_negative = (
-            "promoter Promoting the container images for dlrn hash"
-            " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            " 1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc \n"
+            " Promoting the qcow image for dlrn hash"
+            " 1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc_8170b868"
+            " on master to tripleo-ci-staging-promoted \n"
+            " promoter Successful jobs for {'timestamp': 1503307099,"
+            " 'distro_hash': '8170b8686c38bafb6021d998e2fb268ab26ccf65',"
+            " 'promote_name': 'tripleo-ci-staging', 'user': 'foo',"
+            " 'repo_url':"
+            " 'None/1c/67/1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc_8170b868',"
+            " 'full_hash': '1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc_8170b868',"
+            " 'repo_hash': '1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc_8170b868',"
+            " 'commit_hash': '1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc'}: \n"
+            " promoter FINISHED promotion process"
         )
 
     def Teardown(self):
@@ -78,16 +87,13 @@ class TestIntegrationTests(unittest.TestCase):
     @patch('os.readlink')
     # @patch('pysftp')
     def test_compare_tagged(self, mock_readlink):
-        mock_readlink.return_value = \
+        mock_readlink.return_value = (
+            "/tmp/promoter-staging/overcloud_images/centos7/master/rdo_trunk/"
             "1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc_8170b868"
+        )
         compare_tagged_image_hash(self.stage_info)
 
-
-#    def test_parse(self):
-#        data = self.success_pattern_container_positive
-#        with patch("builtins.open", mock_open(read_data=data)) as mock_file:
-#            parse_promotion_logs(self.stage_info)
-#
-#        data = self.success_pattern_container_negative
-#        with patch("builtins.open", mock_open(read_data=data)) as mock_file:
-#            parse_promotion_logs(self.stage_info)
+    def test_parse(self):
+        data = self.success_pattern_container_positive
+        with patch(builtin_str, mock_open(read_data=data)):
+            parse_promotion_logs(self.stage_info)
