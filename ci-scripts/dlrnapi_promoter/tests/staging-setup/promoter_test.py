@@ -63,33 +63,38 @@ def query_container_registry_promotion(stage_info):
         promotion registry with the promotion_target tag. '''
 
     # TODO(gcerami) Retain the possibility to specify custom values easily
-    registry_rdo = stage_info['registries']['source']['host']
-    registry_docker_io = stage_info['registries']['targets'][0]
+    registry_source = stage_info['registries']['source']['host']
+    registry_target = stage_info['registries']['targets'][0]['host']
     promotion_target = stage_info['promotion_target']
     full_hash = stage_info['promotions']['promotion_candidate']['full_hash']
     # logger = logging.getLogger('TestPromoter')
     # docker_client = docker.from_env()
     missing_images = []
-    if 'localhost' in registry_rdo:
+    if 'localhost' in registry_source:
         for line in stage_info['containers']:
             # TODO(gcerami) we should check that manifests are there, and
             # contain the proper information
-            reg_url = "http://{}/v2/{}/manifests/{}".format(
-                registry_docker_io, line, full_hash
+            reg_url = "http://{}/v2/{}".format(
+                registry_target, line
+            )
+            print(reg_url)
+            try:
+                url_lib.urlopen(reg_url)
+            except url_lib.HTTPError:
+                print("Image not found - " + line)
+                # missing_images.append((line, full_hash))
+                missing_images.append(line)
+            # reg_url = "http://{}/v2/{}/manifests/{}".format(
+            #    registry_target, line, promotion_target
+            lne = line.replace(full_hash, promotion_target)
+            reg_url = "http://{}/v2/{}".format(
+                registry_target, line
             )
             try:
                 url_lib.urlopen(reg_url)
             except url_lib.HTTPError:
-                print("Image not found")
-                missing_images.append((line, full_hash))
-            reg_url = "http://{}/v2/{}/manifests/{}".format(
-                registry_docker_io, line, promotion_target
-            )
-            try:
-                url_lib.urlopen(reg_url)
-            except url_lib.HTTPError:
-                print("Image with named tag not found")
-                missing_images.append((line, full_hash))
+                print("Image with named tag not found - " + line)
+                missing_images.append(line)
     else:
         # TODO: how to verify promoter containers
         print("Compare images tagged with hash and promotion target:")
@@ -233,7 +238,7 @@ def main():
     parser.add_argument('--stage-info-file', default="/tmp/stage-info.yaml")
     args = parser.parse_args()
 
-    with open(args.stage_info_path) as si:
+    with open(args.stage_info_file) as si:
         stage_info = yaml.safe_load(si)
 
     check_dlrn_promoted_hash(stage_info)
