@@ -98,16 +98,19 @@
 
 - name: Ensure role did not clone git from master
   block:
-    - name: Retrieve master commit
+
+    - name: Retrieve master commit  # noqa 303
       shell: |
         git ls-remote https://github.com/rdo-infra/ci-config.git \
           | grep HEAD | awk '{ print $1 }'
       register: ci_config_commit_master
-    - name: Retrieve actual commit from local ci-config
+
+    - name: Retrieve actual commit from local ci-config  # noqa 303
       command: git rev-parse HEAD
       args:
         chdir: "{{ ci_config_remote_src_dir }}"
       register: ci_config_commit
+
     - name: Ensure commit is not master (@dev, make sure any change in test is committed)
       assert:
         that: ci_config_commit.stdout != ci_config_commit_master.stdout
@@ -129,12 +132,12 @@
   debug:
     msg: Not implemented
 
-- name: Ensure dlrn-promoter service unit file is correctly installed
+- name: Ensure dlrn-promoter service unit file is correctly installed  # noqa 303
   become: true
   command: systemd-analyze verify dlrn-promoter.service
   changed_when: false
 
-- name: Ensure dlrn-promoter service is running
+- name: Ensure dlrn-promoter service is running  # noqa 303
   become: true
   command: systemctl status dlrn-promoter
   changed_when: false

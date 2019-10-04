@@ -32,13 +32,15 @@
 
 - name: Set the release_url - master
   set_fact:
-    release_url: "https://opendev.org/openstack/tripleo-common/raw/branch/master/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}"
+    release_url: |-
+      https://opendev.org/openstack/tripleo-common/raw/branch/master/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}
   when:
     - release == 'master'
 
 - name: Set the release_url - stable
   set_fact:
-    release_url: "https://opendev.org/openstack/tripleo-common/raw/branch/stable/{{ release }}/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}"
+    release_url: |-
+      https://opendev.org/openstack/tripleo-common/raw/branch/stable/{{ release }}/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}
   when: release != 'master'
 
 # The next two tasks are created mainly for testing the role
@@ -51,9 +53,9 @@
   register: pattern_file_stat
 
 - name: Get release containers  # noqa 306
-  shell: |
-    curl -fk {{ release_url }} 2>/dev/null | grep -o -P \
-     '(?<=name_prefix).*(?=name_suffix)' | sed "s/[{}]//g" \
+  shell: >
+    curl -fk {{ release_url }} 2>/dev/null | grep -o -P
+     '(?<=name_prefix).*(?=name_suffix)' | sed "s/[{}]//g"
      {% if pattern_file_stat.stat.exists %}
      | grep -f {{ pattern_file }}
      {% endif %}
@@ -69,7 +71,8 @@
     for image in {{ release_images.stdout_lines|join(" ") }}; do
     #$(curl -fk {{ release_url }} 2>/dev/null | grep -o -P '(?<=name_prefix).*(?=name_suffix)' | sed "s/[{}]//g"); do
         echo -n "Checking {{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-$image:{{ full_hash }} ... ";
-        docker manifest inspect --insecure "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-$image:{{ full_hash }}" &>/dev/null
+        docker manifest inspect \
+            --insecure "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-$image:{{ full_hash }}" &>/dev/null
         if [[ "$?" == "0" ]]; then
             echo $image >> {{ containers_file }};
             echo "OK";
@@ -165,9 +168,11 @@
 
   always:
     - name: list all local images from source registry
-      shell: |
-        docker images --filter=reference='{{ source_registry.host }}/{{ source_registry.namespace }}/*:{{ full_hash }}*' --format {% raw %}'{{ .Repository }}:{{ .Tag }}'{% endraw %};
-        docker images --filter=reference='{{ source_registry.host }}/{{ source_registry.namespace }}/*:{{ named_label }}' --format {% raw %}'{{ .Repository }}:{{ .Tag }}'{% endraw %}
+      shell: >
+        docker images --filter=reference='{{ source_registry.host }}/{{ source_registry.namespace }}/*:{{ full_hash }}*' \
+        --format {% raw %}'{{ .Repository }}:{{ .Tag }}'{% endraw %};
+        docker images --filter=reference='{{ source_registry.host }}/{{ source_registry.namespace }}/*:{{ named_label }}' \
+        --format {% raw %}'{{ .Repository }}:{{ .Tag }}'{% endraw %}
       register: source_registry_images
 
     - name: Locally remove source registry images

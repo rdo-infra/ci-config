@@ -8,7 +8,8 @@
 #
 - name: 'Check if {{ ppc_tag }} container exists in {{ source_registry.host }}'
   shell: |
-    if docker manifest inspect --insecure "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ ppc_tag }}"  1>/dev/null;
+    if docker manifest inspect \
+    --insecure "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ ppc_tag }}"  1>/dev/null;
         then
             echo "$image OK";
         else
@@ -85,7 +86,12 @@
   when: 'pushed_ppc.results[index].skipped is not defined'
   loop: "{{ pushed_ppc.results }}"
   loop_control:
-    label: "{% if pushed_ppc.results[index].skipped is defined %}{{ pushed_ppc.results[index].item }}{% else %}{{ item.invocation.module_args.repository + ':' + item.invocation.module_args.tag }}{% endif %}"
+    label: |-
+      {% if pushed_ppc.results[index].skipped is defined -%}
+      {{ pushed_ppc.results[index].item }}
+      {%- else -%}
+      {{ item.invocation.module_args.repository + ':' + item.invocation.module_args.tag }}
+      {%- endif %}
     index_var: index
 
 - name: Registry manifest_create_command with --insecure for local registry
@@ -95,9 +101,16 @@
 # First create manifest for those containers built both in x86 and ppc
 - name: 'Create manifests for containers with both {{ x86_tag }} {{ ppc_tag }}'
   shell: |
-    docker manifest create {{ manifest_extra_opts }} {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }} {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }} {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ ppc_tag }}
-    docker manifest annotate --arch amd64 {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }} {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }}
-    docker manifest annotate --arch {{ ppc_tag }}  {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }} {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ ppc_tag }}
+    docker manifest create {{ manifest_extra_opts }} \
+    {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }} \
+    {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }} \
+    {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ ppc_tag }}
+    docker manifest annotate --arch amd64 \
+    {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }} \
+    {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }}
+    docker manifest annotate --arch {{ ppc_tag }} \
+    {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }} \
+    {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ ppc_tag }}
   loop_control:
     index_var: index
   loop: "{{ built_images.stdout_lines }}"
@@ -106,8 +119,12 @@
 # Now create manifest for the rest of the x86 only containers
 - name: 'Create manifests for {{ x86_tag }} only containers'
   shell: |
-    docker manifest create {{ manifest_extra_opts }} {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }} {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }}
-    docker manifest annotate --arch amd64 {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }} {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }}
+    docker manifest create {{ manifest_extra_opts }} \
+    {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }} \
+    {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }}
+    docker manifest annotate --arch amd64 \
+    {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }} \
+    {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}_{{ x86_tag }}
   loop_control:
     index_var: index
   loop: "{{ built_images.stdout_lines }}"
@@ -115,8 +132,9 @@
   changed_when: true
 
 - name: 'Push container manifests to {{ registry.host }}'
-  shell: |
-    docker manifest push -p {{ manifest_extra_opts }} {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }}
+  shell: >
+    docker manifest push -p {{ manifest_extra_opts }}
+    {{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}{{ manifest_tag }}
   retries: 3
   with_items: "{{ built_images.stdout_lines }}"
   changed_when: true

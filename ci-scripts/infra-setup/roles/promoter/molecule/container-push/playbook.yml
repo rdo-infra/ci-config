@@ -54,12 +54,14 @@
         - name: launch staging setup scripts
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
-            {{ ansible_python_interpreter }} ../../../../../dlrnapi_promoter/tests/staging-setup/staging_environment.py setup --components registries,container-images
+            {{ ansible_python_interpreter }} \
+            ../../../../../dlrnapi_promoter/tests/staging-setup/staging_environment.py setup --components registries,container-images
 
         - name: include stage setup variables
           include_vars: /tmp/stage-info.yaml
 
-        - set_fact:
+        - name: sets full_hash
+          set_fact:
             full_hash: "{{ promotions.promotion_candidate.full_hash }}"
 
         - debug:
@@ -105,15 +107,18 @@
         # TODO(gcerami) gather the actual manifest for comparison, not just
         # blindly the whole dir, which may contain other manifest wehn testing with
         # delegated driver
-        - assert:
+        - name: asserts no manifest leftovers
+          assert:
             that: manifest_files.matched == 0
             fail_msg: Manifest push left some files in manifest dir
             success_msg: Manifest directory left clean
 
       always:
         - name: Teardown
-          shell: |
-            {{ ansible_python_interpreter }} ../../../../../dlrnapi_promoter/tests/staging-setup/staging_environment.py teardown --components registries,container-images
+          shell: >
+            {{ ansible_python_interpreter }}
+            ../../../../../dlrnapi_promoter/tests/staging-setup/staging_environment.py
+            teardown --components registries,container-images
 
           tags:
             - registry_cleanup
