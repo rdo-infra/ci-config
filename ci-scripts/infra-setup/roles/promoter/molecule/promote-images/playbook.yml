@@ -23,32 +23,32 @@
 
         - name: Run the image promotion script promote-images.sh
           shell: |
-             ../../../../../promote-images.sh master {{ full_hash }} current-tripleo
+             ../../../../../promote-images.sh master {{ full_hash }} tripleo-ci-staging-promoted
           register: promote_images_result # need to check this as sftp can fail
 
-        - name: Get current-tripleo info for checking
+        - name: Get tripleo-ci-staging-promoted info for checking
           stat:
-            path: "{{ images_path }}/centos7/master/rdo_trunk/current-tripleo"
-          register: current_tripleo
+            path: "{{ images_path }}/centos7/master/rdo_trunk/tripleo-ci-staging-promoted"
+          register: triple_-ci_staging_promoted
 
-        - name: 'Check that current-tripleo is a symlink and it points to the hash we promoted {{ full_hash }}'
+        - name: 'Check that tripleo-ci-staging-promoted is a symlink and it points to the hash we promoted {{ full_hash }}'
           assert:
             that:
-              - current_tripleo.stat.islnk is defined
-              - current_tripleo.stat.lnk_target == "{{ images_path }}/centos7/master/rdo_trunk/{{ full_hash }}"
+              - tripleo_ci_staging_promoted.stat.islnk is defined
+              - tripleo_ci_staging_promoted.stat.lnk_target == "{{ images_path }}/centos7/master/rdo_trunk/{{ full_hash }}"
 
-        - name: Get previous-current-tripleo info for checking
+        - name: Get previous-tripleo-ci-staging-promoted info for checking
           stat:
-            path: "{{ images_path }}/centos7/master/rdo_trunk/previous-current-tripleo"
-          register: previous_current_tripleo
+            path: "{{ images_path }}/centos7/master/rdo_trunk/previous-tripleo-ci-staging-promoted"
+          register: previous_tripleo_ci_staging_promoted
 
         - name: >
-            Check that previous-current-tripleo is a symlink and it points to the
+            Check that previous-tripleo-ci-staging-promoted is a symlink and it points to the
              promoted hash when we started {{ promotions.currently_promoted.full_hash }}
           assert:
             that:
-              - previous_current_tripleo.stat.islnk is defined
-              - previous_current_tripleo.stat.lnk_target == "{{ images_path }}/centos7/master/rdo_trunk/{{ promotions.currently_promoted.full_hash }}"
+              - previous_tripleo_ci_staging_promoted.stat.islnk is defined
+              - previous_tripleo_ci_staging_promoted.stat.lnk_target == "{{ images_path }}/centos7/master/rdo_trunk/{{ promotions.currently_promoted.full_hash }}"
 
       always:
         - name: Teardown
