@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env pmeython
 """
 This script tests the steps of the promoter workflow.
  - Checks the dlrn API that the hash under test has been promoted
@@ -63,33 +63,39 @@ def query_container_registry_promotion(stage_info):
         promotion registry with the promotion_target tag. '''
 
     # TODO(gcerami) Retain the possibility to specify custom values easily
-    registry_rdo = stage_info['registries']['source']['host']
-    registry_docker_io = stage_info['registries']['targets'][0]
+    registry_source = stage_info['registries']['source']['host']
+    registry_target = stage_info['registries']['targets'][0]['host']
     promotion_target = stage_info['promotion_target']
     full_hash = stage_info['promotions']['promotion_candidate']['full_hash']
     # logger = logging.getLogger('TestPromoter')
-    # docker_client = docker.from_env()
     missing_images = []
-    if 'localhost' in registry_rdo:
+    if 'localhost' in registry_source:
         for line in stage_info['containers']:
             # TODO(gcerami) we should check that manifests are there, and
             # contain the proper information
+            line_split = line.split(":")
+            # name, tag = line.split(":")
+            # format(name, tag)
             reg_url = "http://{}/v2/{}/manifests/{}".format(
-                registry_docker_io, line, full_hash
+                registry_target, line_split[0], line_split[1]
             )
             try:
                 url_lib.urlopen(reg_url)
             except url_lib.HTTPError:
-                print("Image not found")
-                missing_images.append((line, full_hash))
-            reg_url = "http://{}/v2/{}/manifests/{}".format(
-                registry_docker_io, line, promotion_target
-            )
-            try:
-                url_lib.urlopen(reg_url)
-            except url_lib.HTTPError:
-                print("Image with named tag not found")
-                missing_images.append((line, full_hash))
+                print("Image not found - " + line)
+                missing_images.append(line)
+            # For the full_hash lines only, check that there is
+            # an equivalent promotion_target entry
+            if line_split[1] == full_hash:
+                reg_url = "http://{}/v2/{}/manifests/{}".format(
+                    registry_target, line_split[0], promotion_target
+                )
+                try:
+                    url_lib.urlopen(reg_url)
+                except url_lib.HTTPError:
+                    print("Image with named tag not found - " + line)
+                    promo_tgt_line = line.replace(full_hash, promotion_target)
+                    missing_images.append(promo_tgt_line)
     else:
         # TODO: how to verify promoter containers
         print("Compare images tagged with hash and promotion target:")
@@ -105,6 +111,7 @@ def compare_tagged_image_hash(stage_info):
     user = stage_info['overcloud_images']['user']
     key_path = stage_info['overcloud_images']['key_path']
     distro = stage_info['distro']
+    distro_version = stage_info['distro_version']
     release = stage_info['release']
     promotion_target = stage_info['promotion_target']
     full_hash = stage_info['promotions']['promotion_candidate']['full_hash']
@@ -122,14 +129,18 @@ def compare_tagged_image_hash(stage_info):
         rl_module = sftp
     else:
         # Check that the promotion_target dir is a soft link
+        distro_full = distro + str(distro_version)
         images_dir = os.path.join(
-            images_base_dir, 'overcloud_images',
-            distro, release, 'rdo_trunk')
+            images_base_dir,
+            distro_full, release, 'rdo_trunk')
         rl_module = os
 
     error_message = "Promotion target dir is not a softlink"
+    print(os.path.join(images_dir, promotion_target))
     promoted_hash_path = rl_module.readlink(
         os.path.join(images_dir, promotion_target))
+    print(promoted_hash_path)
+    print(full_hash)
 
     assert full_hash == promoted_hash_path, error_message
 
@@ -233,12 +244,16 @@ def main():
     parser.add_argument('--stage-info-file', default="/tmp/stage-info.yaml")
     args = parser.parse_args()
 
-    with open(args.stage_info_path) as si:
+    with open(args.stage_info_file) as si:
         stage_info = yaml.safe_load(si)
 
+    print('Running test: check_dlrn_promoted_hash')
     check_dlrn_promoted_hash(stage_info)
-    query_container_registry_promotion(stage_info)
+    #print('Running test: query_container_registry_promotion')
+    #query_container_registry_promotion(stage_info)
+    print('Running test: compare_tagged_image_hash')
     compare_tagged_image_hash(stage_info)
+    print('Running test: parse_promotion_logs')
     parse_promotion_logs(stage_info)
 
 
