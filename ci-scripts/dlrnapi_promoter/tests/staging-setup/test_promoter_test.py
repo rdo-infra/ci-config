@@ -1,3 +1,7 @@
+try:
+    import __builtin__ as builtin_str
+except ImportError:
+    import builtins as builtin_str
 import dlrnapi_client
 import os
 import pytest
@@ -40,11 +44,13 @@ class TestIntegrationTests(unittest.TestCase):
         self.success_pattern_container_positive = (
             "promoter Promoting the container images for dlrn hash"
             " 1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc"
+            " promoter FINISHED promotion process"
         )
 
         self.success_patter_container_negative = (
             "promoter Promoting the container images for dlrn hash"
             " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            " promoter FINISHED promotion process"
         )
 
     def Teardown(self):
@@ -78,16 +84,17 @@ class TestIntegrationTests(unittest.TestCase):
     @patch('os.readlink')
     # @patch('pysftp')
     def test_compare_tagged(self, mock_readlink):
-        mock_readlink.return_value = \
+        mock_readlink.return_value = (
+            "/tmp/promoter-staging/overcloud_images/centos7/master/rdo_trunk/"
             "1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc_8170b868"
+        )
         compare_tagged_image_hash(self.stage_info)
 
+    def test_parse(self):
+        data = self.success_pattern_container_positive
+        with patch("builtin_str.open", mock_open(read_data=data)) as mock_file:
+            parse_promotion_logs(self.stage_info)
 
-#    def test_parse(self):
-#        data = self.success_pattern_container_positive
-#        with patch("builtins.open", mock_open(read_data=data)) as mock_file:
-#            parse_promotion_logs(self.stage_info)
-#
-#        data = self.success_pattern_container_negative
-#        with patch("builtins.open", mock_open(read_data=data)) as mock_file:
-#            parse_promotion_logs(self.stage_info)
+        data = self.success_pattern_container_negative
+        with patch("builtin_str.open", mock_open(read_data=data)) as mock_file:
+            parse_promotion_logs(self.stage_info)
