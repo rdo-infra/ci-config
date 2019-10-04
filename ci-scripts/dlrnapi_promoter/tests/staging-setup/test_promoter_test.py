@@ -83,11 +83,11 @@ class TestIntegrationTests(unittest.TestCase):
         compare_tagged_image_hash(self.stage_info)
 
 
-#    def test_parse(self):
-#        data = self.success_pattern_container_positive
-#        with patch("builtins.open", mock_open(read_data=data)) as mock_file:
-#            parse_promotion_logs(self.stage_info)
-#
-#        data = self.success_pattern_container_negative
-#        with patch("builtins.open", mock_open(read_data=data)) as mock_file:
-#            parse_promotion_logs(self.stage_info)
+    def test_parse(self):
+        data = self.success_pattern_container_positive
+        with patch("builtins.open", mock_open(read_data=data)) as mock_file:
+            parse_promotion_logs(self.stage_info)
+
+        data = self.success_pattern_container_negative
+        with patch("builtins.open", mock_open(read_data=data)) as mock_file:
+            parse_promotion_logs(self.stage_info)
