@@ -16,14 +16,29 @@
               - ^ci-scripts/container-push/.*
               - ^ci-scripts/promote-images.sh
               - ^ci-scripts/infra-setup/roles/promoter/.*
-              - ^playbooks/staging.yaml.*
+              - ^playbooks/staging.*
         - sova-tracking-jobs: &sovatrack
             files:
               - ^ci-scripts/infra-setup/scheduler/.*$
         - rdo-tox-molecule
-        - molecule-delegated
-        - molecule-tripleo-common
-        - molecule-delegated-promote-images
+        - molecule-container-push:
+            files:
+              - ^ci-scripts/container-push/.*
+              - ^ci-scripts/infra-setup/roles/promoter/molecule/container-push/.*
+              - ^playbooks/molecule-delegated-pre.yml
+              - ^playbooks/molecule-delegated.yml
+        - molecule-tripleo-common:
+            files:
+              - ^ci-scripts/container-push/.*
+              - ^ci-scripts/infra-setup/roles/promoter/molecule/tripleo-common-integration.*
+              - ^playbooks/molecule-delegated-pre.yml
+              - ^playbooks/molecule-tripleo-common.yml
+        - molecule-delegated-promote-images:
+            files:
+              - ^ci-scripts/promote-images.sh
+              - ^ci-scripts/infra-setup/roles/promoter/molecule/promote-images/.*
+              - ^playbooks/molecule-delegated-promote-images-pre.yml
+              - ^playbooks/molecule-delegated-promote-images.yml
         - tox-jjb
         - tox-py27: &py27
             pre-run: playbooks/pre-run-docker.yml

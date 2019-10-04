@@ -307,6 +307,8 @@ class StagedEnvironment(object):
         self.stages = {}
         self.registries = {}
         self.fixture_file = self.config['db_fixtures']
+        self.dlrn_repo_dir = os.path.join(os.environ.get('HOME', '/tmp'),
+                                          'data')
         with open(self.fixture_file) as ff:
             self.fixture = yaml.safe_load(ff)
 
@@ -342,6 +344,7 @@ class StagedEnvironment(object):
         if self.config['dry-run']:
             return
 
+        os.makedirs(os.path.join(self.dlrn_repo_dir, 'repos'))
         try:
             utils.loadYAML(session, self.config['db_fixtures'])
         except sqlite3.IntegrityError:
@@ -518,6 +521,7 @@ class StagedEnvironment(object):
         if (self.config['components'] == "all"
            or "inject-dlrn-fixtures" in self.config['components']):
             os.unlink(self.config['db_filepath'])
+            shutil.rmtree(self.dlrn_repo_dir)
 
         if (self.config['components'] == "all"
            or "registries" in self.config['components']):
