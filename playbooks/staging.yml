@@ -18,7 +18,7 @@
     # Set up credentials
     - name: save DLRNAPI_PASSWORD
       copy:
-       content: export DLRNAPI_PASSWORD='test'
+       content: export DLRNAPI_PASSWORD='bar'
        dest: "{{ local_path_dlrnapi_secret }}"
       delegate_to: localhost
 
@@ -101,6 +101,12 @@
       include_role:
         name: promoter
         tasks_from: promotion_run
+
+    - name: gather stage info
+      copy:
+        src: /tmp/stage_info.yaml
+        dest: "/hone/{{ promoter_user }}"
+        remote_src: yes
 
     - name: Test stage promotion
       become: true
