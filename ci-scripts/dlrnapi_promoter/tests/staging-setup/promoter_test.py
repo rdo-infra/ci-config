@@ -233,7 +233,7 @@ def main():
     parser.add_argument('--stage-info-file', default="/tmp/stage-info.yaml")
     args = parser.parse_args()
 
-    with open(args.stage_info_path) as si:
+    with open(args.stage_info_file) as si:
         stage_info = yaml.safe_load(si)
 
     check_dlrn_promoted_hash(stage_info)
