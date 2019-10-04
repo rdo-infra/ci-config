@@ -504,11 +504,14 @@ class StagedEnvironment(object):
         previously_promoted = commits[1]
         # Last commit is the promotion candidate
         promotion_candidate = commits[-1]
+        # Third commit is a failed attempt
+        failed_attempt = commits[2]
 
         self.config['promotions'] = {
             'currently_promoted': currently_promoted,
             'previously_promoted': previously_promoted,
             'promotion_candidate': promotion_candidate,
+            'failed_attempt': failed_attempt,
         }
         self.config['results']['promotions'] = self.config['promotions']
 
