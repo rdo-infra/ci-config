@@ -8,6 +8,7 @@ the list of containers created.
 Uses standard pytest fixture as a setup/teardown method
 """
 import docker
+import dlrnapi_client
 import os
 import pytest
 import pprint
@@ -20,6 +21,7 @@ except ImportError:
 import yaml
 
 from staging_environment import StagedEnvironment, load_config
+from dlrnapi_client.rest import ApiException
 
 
 # FIXME(gcerami) I don't know why, but test via tox doesn't honour the scope
@@ -58,6 +60,27 @@ def test_staging_env(staged_env):
     docker_client = docker.from_env()
     config, stage_info = staged_env
 
+    # os.stat(stage_info[''])
+    # TODO(gcerami) Check dlrnapi response (needs to spawn uwsgi+ api)
+    # TODO(gcerami) Check db injection (needs sqlite3 import)
+    # api_client = dlrnapi_client.ApiClient(host=stage_info['dlrn_host'])
+    # dlrnapi_client.configuration.username = 'foo'
+    # dlrnapi_client.configuration.password = 'bar'
+    # api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
+
+    # params = dlrnapi_client.Promotion()
+    # params.commit_hash = \
+    #    stage_info['promotions']['promotion_candidate']['commit_hash']
+    # params.distro_hash = \
+    # stage_info['promotions']['promotion_candidate']['distro_hash']
+    # params.distro_hash = stage_info['promotion_target']
+
+    # try:
+    #    api_response = api_instance.api_promote_post(params=params)
+    #    pprint(api_response)
+    # except ApiException as e:
+    #    print("Exception when calling DefaultApi->api_promote_post: %s\n" % e)
+
     # Check neede top level attributes
     attributes = [
         "dlrn_host",
@@ -70,7 +93,6 @@ def test_staging_env(staged_env):
     ]
     for attribute in attributes:
         assert attribute in stage_info
-    # TODO(gcerami) Check db injection (needs sqlite3 import)
 
     # Check registries
     for registry in config['registries']:

@@ -307,6 +307,8 @@ class StagedEnvironment(object):
         self.stages = {}
         self.registries = {}
         self.fixture_file = self.config['db_fixtures']
+        self.dlrn_repo_dir = os.path.join(os.environ.get('HOME', '/tmp'),
+                                          'data')
         with open(self.fixture_file) as ff:
             self.fixture = yaml.safe_load(ff)
 
@@ -338,6 +340,8 @@ class StagedEnvironment(object):
         db_filepath = self.config['db_filepath']
         self.config['results']['inject-dlrn-fixtures'] = db_filepath
         self.config['results']['dlrn_host'] = self.config['dlrn_host']
+
+        os.makedirso(os.path.join(self.dlrn_repo_dir, 'repos'))
 
         if self.config['dry-run']:
             return
@@ -518,6 +522,7 @@ class StagedEnvironment(object):
         if (self.config['components'] == "all"
            or "inject-dlrn-fixtures" in self.config['components']):
             os.unlink(self.config['db_filepath'])
+            shutil.rmtree(self.dlrn_repo_dir)
 
         if (self.config['components'] == "all"
            or "registries" in self.config['components']):

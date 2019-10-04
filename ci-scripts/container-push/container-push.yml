@@ -45,5 +45,9 @@
             target_registries: "{{ registries.targets }}"
             full_hash: "{{ promotions.promotion_candidate.full_hash }}"
 
+    # TODO(gcerami) assert that the hash associated to promote_name in dlrn is
+    # different from full_hash. If that happens it means that promoted_name was
+    # promoted before pushing the containers, and it's an error
+    # Print out the two hashes anyway
     - include_role:
         name: containers-promote
