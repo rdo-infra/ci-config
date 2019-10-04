@@ -5,7 +5,7 @@
   tasks:
     - name: Include defaults from the role
       include_vars:
-        file: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}/ci-scripts/infra-setup/roles/promoter/defaults/main.yml"
+        file: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}/ci-scripts/infra-setup/roles/promoter/defaults/main.yml"  # noqa 204
     - name: override defaults for zuul
       set_fact:
         promoter_user: zuul
@@ -16,7 +16,8 @@
         setup_staging: true
 
     # Set up credentials
-    - copy:
+    - name: save DLRNAPI_PASSWORD
+      copy:
        content: export DLRNAPI_PASSWORD='test'
        dest: "{{ local_path_dlrnapi_secret }}"
       delegate_to: localhost
@@ -31,7 +32,8 @@
         msg: registry credentials in zuul enviroment require a token from pre authentication
       when: not docker_token.stat.exists
 
-    - copy:
+    - name: save REGISTRY_PASSWORD
+      copy:
         content: export REGISTRY_PASSWORD='test'
         dest: "{{ local_path_registry_secret }}"
       delegate_to: localhost
