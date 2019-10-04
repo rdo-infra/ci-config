@@ -120,7 +120,7 @@
                 2>&1 > /tmp/tripleo-container-image.prepare.log
 
         # check if containers were pushed to undercloud_registry
-        - name: emulate deploy -- check containers in undercloud_registry
+        - name: emulate deploy -- check containers in undercloud_registry  # noqa 303
           shell: |
             curl --verbose -X GET {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}/tags/list
           with_items: "{{ lookup('file', containers_file ).splitlines() }}"
@@ -128,7 +128,8 @@
         # check manifests in undercloud_registry
         - name: emulate deploy -- inspect manifests in undercloud_registry
           shell: |
-            docker manifest inspect --insecure {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}
+            docker manifest inspect --insecure \
+            {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}
           with_items: "{{ lookup('file', containers_file ).splitlines() }}"
 
         # pull staging containers from undercloud_registry
