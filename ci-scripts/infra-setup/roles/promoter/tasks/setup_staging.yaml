@@ -53,7 +53,8 @@
       shell: |
         rm commits.sqlite
         # This runs uWSGI server as a daemon to expose dlrn api
-        /usr/sbin/uwsgi --http-socket 127.0.0.1:8080 --plugin python --manage-script-name --virtualenv promoter_venv/ \
+        /usr/sbin/uwsgi --http-socket 127.0.0.1:58080 --plugin python --manage-script-name --virtualenv promoter_venv/ \
+              --logdate --log-sendfile --log-ioerror  --log-5xx --log-4xx \
               --mount /=dlrn.api:app --daemonize ./dlrnapi.log
       args:
         chdir: "/home/{{ promoter_user }}"
