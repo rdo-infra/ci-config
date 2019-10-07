@@ -43,6 +43,17 @@
       https://opendev.org/openstack/tripleo-common/raw/branch/stable/{{ release }}/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}
   when: release != 'master'
 
+### REMOVE ME AT BRANCH TIME
+### TripleO-Common has not branched for train
+### We would still like to promote train containers
+# https://bugs.launchpad.net/tripleo/+bug/1847135
+- name: Set the release_url - train
+  set_fact:
+    release_url: |-
+      https://opendev.org/openstack/tripleo-common/raw/branch/master/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}
+  when:
+    - release == 'train'
+
 # The next two tasks are created mainly for testing the role
 # if a file is present at pattern_file location
 # it will be used to reduce the set of containers taken into consideration, mainly
