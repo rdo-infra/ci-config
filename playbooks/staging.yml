@@ -108,6 +108,10 @@
         dest: "/home/{{ promoter_user }}"
         remote_src: yes
 
+    - name: gather net info
+      become: true
+      shell: "netstat -ntupa > /home/{{ promoter_user }}/netstat.txt"
+
     - name: Test stage promotion
       become: true
       become_user: "{{ promoter_user }}"
