@@ -1,0 +1,178 @@
+---
+- name: Test tripleo-common
+  block:
+    - name: Mock undercloud registry -- pull registry image
+      docker_image:
+        name: registry:2
+        source: pull
+
+    - name: Mock undercloud registry -- run registry
+      docker_container:
+        image: registry:2
+        name: "{{ undercloud_registry['name'] }}"
+        restart: true
+        restart_policy: always
+        ports:
+          - "{{ undercloud_registry['host'] }}:5000"
+
+    - name: load stage_info file
+      shell: >
+        cat /home/{{ promoter_user }}/stage-info.yaml
+      register: stage_info_yaml
+
+    - name: set stage_info var from yaml dict
+      set_fact:
+        stage_info: "{{ stage_info_yaml.stdout | from_yaml }}"
+
+    - name: show stage_info
+      debug:
+        var: stage_info
+
+    - name: set full_hash
+      set_fact:
+        full_hash: "{{ stage_info.promotions.promotion_candidate.full_hash }}"
+
+    - name: show full_hash
+      debug:
+        var: full_hash
+
+    - name: fetch parsed_containers file
+      fetch:
+        src: "{{ containers_file }}"
+        dest: "{{ containers_file }}"
+      failed_when: false
+
+    - name: get list of containers
+      shell: >
+        cat {{ containers_file }}
+      register: containers_list
+      failed_when: false
+
+    - name: show containers list
+      debug:
+        var: containers_list.stdout_lines
+
+    - name: workaround to get parsed_containers file
+      set_fact:
+        containers_list:
+          - base
+          - openstack-base
+          - nova-compute
+          - neutron-server
+
+    - name: Generate containers template file
+      copy:
+        content: |
+            container_images_template:
+        dest: "/home/{{ promoter_user }}/staging_overcloud_containers.yaml.j2"
+
+    - name: Populate template file w/ staging containers
+      blockinfile:
+        path: "/home/{{ promoter_user }}/staging_overcloud_containers.yaml.j2"
+        block: |
+            - imagename: {% raw %}{{ namespace }}/{{ name_prefix }}{% endraw %}{{ item }}{% raw %}{{ name_suffix }}:{{ tag }}
+              image_source: kolla
+              params:
+              - ContainerTripleoclientImage
+              services:
+              - OS::TripleO::Services::TripleoClient
+              {%endraw%}
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
+      with_items: "{{ containers_list }}"
+
+    - name: generate staging-containers-prepare-parameter.yaml
+      copy:
+        content: |
+            parameter_defaults:
+              ContainerImagePrepare:
+              - push_destination: "{{ undercloud_registry['host'] }}"
+                set:
+                  ceph_alertmanager_image: alertmanager
+                  ceph_alertmanager_namespace: docker.io/prom
+                  ceph_alertmanager_tag: latest
+                  ceph_grafana_image: grafana
+                  ceph_grafana_namespace: docker.io/grafana
+                  ceph_grafana_tag: latest
+                  ceph_image: daemon
+                  ceph_namespace: docker.io/ceph
+                  ceph_node_exporter_image: node-exporter
+                  ceph_node_exporter_namespace: docker.io/prom
+                  ceph_node_exporter_tag: latest
+                  ceph_prometheus_image: prometheus
+                  ceph_prometheus_namespace: docker.io/prom
+                  ceph_prometheus_tag: latest
+                  ceph_tag: v4.0.1-stable-4.0-nautilus-centos-7-x86_64
+                  name_prefix: "{{ distro_name }}-binary-"
+                  name_suffix: ''
+                  namespace: "{{ promote_registries[0]['host'] }}/{{ promote_registries[0]['namespace'] }}"
+                  neutron_driver: ovn
+                  rhel_containers: false
+                  tag: "{{ full_hash }}"
+                tag_from_label: rdo_version
+        dest: "/home/{{ promoter_user }}/staging-containers-prepare-parameter.yaml"
+
+    - name: copy staging_overcloud_containers.yaml.j2
+      copy:
+        src: "/home/{{ promoter_user }}/staging_overcloud_containers.yaml.j2"
+        dest: "/home/{{ promoter_user }}/promoter_venv/share/tripleo-common/container-images/overcloud_containers.yaml.j2"
+        remote_src: yes
+
+    # image prepare pulls from promote_registry and pushes to undercloud_registry
+    - name: run container image prepare
+      shell: |
+        source /home/{{ promoter_user }}/promoter_venv/bin/activate
+        openstack tripleo container image prepare --verbose \
+            -e /home/{{ promoter_user }}/staging-containers-prepare-parameter.yaml \
+            --output-env-file /home/{{ promoter_user }}/containers-default-parameters.yaml \
+            2>&1 > /home/{{ promoter_user }}/tripleo-container-image.prepare.log
+
+    # check if containers were pushed to undercloud_registry
+    - name: emulate deploy -- check containers in undercloud_registry
+      shell: >
+        curl --verbose -X GET
+            {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}/tags/list
+      args:
+        # shut up ansible, get_url is not enough here
+        warn: false
+      with_items: "{{ containers_list }}"
+
+    # check manifests in undercloud_registry
+    - name: emulate deploy -- inspect manifests in undercloud_registry
+      shell: >
+        docker manifest inspect --insecure
+            {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}
+      with_items: "{{ containers_list }}"
+
+    # pull staging containers from undercloud_registry
+    - name: emulate deploy -- pull staging containers from undercloud_registry
+      docker_image:
+        name: "{{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}"
+        source: pull
+      with_items: "{{ containers_list }}"
+
+  always:
+
+    - name: remove staging files
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "/home/{{ promoter_user }}/staging_overcloud_containers.yaml.j2"
+        - "/home/{{ promoter_user }}/staging-containers-prepare-parameter.yaml"
+      tags:
+        - registry_cleanup
+
+    - name: remove local containers
+      docker_image:
+        name: "{{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}"
+        state: absent
+      with_items: "{{ containers_list }}"
+      tags:
+        - registry_cleanup
+
+    - name: Stop and remove registries
+      docker_container:
+        name: "{{ undercloud_registry['name'] }}"
+        state: absent
+      tags:
+        - registry_cleanup
