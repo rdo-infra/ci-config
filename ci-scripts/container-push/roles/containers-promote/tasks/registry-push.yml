@@ -54,6 +54,7 @@
 
 # Nested loop order here is on purpose, so we push first all the images with the full hash, then we tag with the named label.
 - name: Tag and push images to registry
+  when: not manifest_push|bool
   docker_image:
     name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ item[1] }}"
     tag: "{{ item[0] }}"
@@ -71,14 +72,31 @@
   tags:
     - dockerhub_push
 
+# Push containers tagged with only label if we are also pushing manifests
 # Create and push container manifests to registry.host with _x86_64 and ppc64le
-# tagged containers. Disabled by default https://tree.taiga.io/project/tripleo-ci-board/task/1394
-# Multi arch manifest is only compatible with v2_s2 API schema
-- name: 'Push {{ x86_tag }} {{ ppc_tag }} containers and manifests to {{ registry.host }}'
-  include_tasks: manifest-push.yml
+# tagged containers. Multi arch manifest is only compatible with v2_s2 API schema
+- name: 'Tag and push container with {{ named_label }} then push manifests'
   when:
-    - "manifest_push|default(false)|bool"
+    - "manifest_push|bool"
     - "registry.schema|default('v2_s1') == 'v2_s2'"
+  block:
+    - name: 'Tag with {{ named_label }} and push to {{ registry.host }}'
+      docker_image:
+        name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ item.1 }}"
+        tag: "{{ item.0 }}"
+        repository: "{{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item.1 }}"
+        push: yes
+        source: local
+        # This force-tag is absolutely needed, if image exists with this tag,
+        # docker_image will not try a push without this flag
+        force_tag: yes
+      loop: "{{ [named_label]|product(built_images.stdout_lines) |list }}"
+      register: pushed
+      retries: 3
+      tags:
+        - dockerhub_push
+    - name: 'Push {{ x86_tag }} {{ ppc_tag }} containers and manifests to {{ registry.host }}'
+      include_tasks: manifest-push.yml
 
 
 - name: Check if images were pushed
