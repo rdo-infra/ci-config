@@ -103,3 +103,14 @@
         virtualenv: "{{ ansible_user_dir }}/test-python"
         virtualenv_site_packages: true
 
+    - name: use python-tripleoclient from zuul if it's in the correct dir
+      pip:
+        name: "file://{{ zuul.executor.work_root }}/{{ zuul.projects['opendev.org/openstack/python-tripleoclient'].src_dir  }}"
+        state: forcereinstall
+      when: "opendev.org/openstack/python-tripleoclient" in zuul.projects
+
+    - name: use tripleo-common from zuul if it's in the correct dir
+      pip:
+        name: "file://{{ zuul.executor.work_root }}/{{ zuul.projects['opendev.org/openstack/tripleo-common'].src_dir  }}"
+        state: forcereinstall
+      when: "opendev.org/openstack/tripleo-common" in zuul.projects
