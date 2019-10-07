@@ -37,3 +37,21 @@ initial_registry:
 promote_registry:
   name: registry_local_dockerio
   port: 5050
+
+named_label: triple-ci-staging-promoted
+containers_file: "../container-push/parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+
+undercloud_registry:
+  name: local-undercloud-registry
+  host: 127.0.0.1:8787
+  username: unused
+  password: unused
+  namespace: "tripleo{{ release }}"
+promote_registries:
+  - host: 127.0.0.1:6500
+    name: local-promote-registry-1
+    username: unused
+    password: unused
+    namespace: "tripleo{{ release }}"
+    token: unused
+
