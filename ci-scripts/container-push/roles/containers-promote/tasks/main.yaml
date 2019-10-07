@@ -37,6 +37,17 @@
   when:
     - release == 'master'
 
+### REMOVE ME AT BRANCH TIME
+### TripleO-Common has not branched for train
+### We would still like to promote train containers
+# https://bugs.launchpad.net/tripleo/+bug/1847135
+- name: Set the release_url - train
+  set_fact:
+    release_url: |-
+      https://opendev.org/openstack/tripleo-common/raw/branch/master/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}
+  when:
+    - release == 'train'
+
 - name: Set the release_url - stable
   set_fact:
     release_url: |-
