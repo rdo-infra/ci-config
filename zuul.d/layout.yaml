@@ -17,58 +17,58 @@
               - ^ci-scripts/promote-images.sh
               - ^ci-scripts/infra-setup/roles/promoter/.*
               - ^playbooks/staging.*
-        - sova-tracking-jobs: &sovatrack
-            files:
-              - ^ci-scripts/infra-setup/scheduler/.*$
-        - rdo-tox-molecule
-        - molecule-container-push:
-            files:
-              - ^ci-scripts/container-push/.*
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/container-push/.*
-              - ^playbooks/molecule-delegated-pre.yml
-              - ^playbooks/molecule-delegated.yml
-        - molecule-tripleo-common:
-            files:
-              - ^ci-scripts/container-push/.*
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/tripleo-common-integration.*
-              - ^playbooks/molecule-delegated-pre.yml
-              - ^playbooks/molecule-tripleo-common.yml
-        - molecule-delegated-promote-images:
-            files:
-              - ^ci-scripts/promote-images.sh
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/promote-images/.*
-              - ^playbooks/molecule-delegated-promote-images-pre.yml
-              - ^playbooks/molecule-delegated-promote-images.yml
-        - tox-jjb
-        - tox-py27: &py27
-            pre-run: playbooks/pre-run-docker.yml
-            success-url: "tox/reports.html"
-            failure-url: "tox/reports.html"
-            files:
-              - ^ci-scripts/infra-.*/.*
-              - ^requirements.txt
-              - ^test-requirements.txt
-              - ^setup.cfg
-              - ^setup.py
-              - ^tox.ini
-              - ^molecule/.*
-              - ^playbooks/.*
-              - .*\.py
-        - tox-py36: &py36
-            pre-run: playbooks/pre-run-docker.yml
-            success-url: "tox/reports.html"
-            failure-url: "tox/reports.html"
-            nodeset: rdo-fedora-28
-            files:
-              - ^ci-scripts/infra-.*/.*
-              - ^requirements.txt
-              - ^test-requirements.txt
-              - ^setup.cfg
-              - ^setup.py
-              - ^tox.ini
-              - ^molecule/.*
-              - ^playbooks/.*
-              - .*\.py
+#        - sova-tracking-jobs: &sovatrack
+#            files:
+#              - ^ci-scripts/infra-setup/scheduler/.*$
+#        - rdo-tox-molecule
+#        - molecule-container-push:
+#            files:
+#              - ^ci-scripts/container-push/.*
+#              - ^ci-scripts/infra-setup/roles/promoter/molecule/container-push/.*
+#              - ^playbooks/molecule-delegated-pre.yml
+#              - ^playbooks/molecule-delegated.yml
+#        - molecule-tripleo-common:
+#            files:
+#              - ^ci-scripts/container-push/.*
+#              - ^ci-scripts/infra-setup/roles/promoter/molecule/tripleo-common-integration.*
+#              - ^playbooks/molecule-delegated-pre.yml
+#              - ^playbooks/molecule-tripleo-common.yml
+#        - molecule-delegated-promote-images:
+#            files:
+#              - ^ci-scripts/promote-images.sh
+#              - ^ci-scripts/infra-setup/roles/promoter/molecule/promote-images/.*
+#              - ^playbooks/molecule-delegated-promote-images-pre.yml
+#              - ^playbooks/molecule-delegated-promote-images.yml
+#        - tox-jjb
+#        - tox-py27: &py27
+#            pre-run: playbooks/pre-run-docker.yml
+#            success-url: "tox/reports.html"
+#            failure-url: "tox/reports.html"
+#            files:
+#              - ^ci-scripts/infra-.*/.*
+#              - ^requirements.txt
+#              - ^test-requirements.txt
+#              - ^setup.cfg
+#              - ^setup.py
+#              - ^tox.ini
+#              - ^molecule/.*
+#              - ^playbooks/.*
+#              - .*\.py
+#        - tox-py36: &py36
+#            pre-run: playbooks/pre-run-docker.yml
+#            success-url: "tox/reports.html"
+#            failure-url: "tox/reports.html"
+#            nodeset: rdo-fedora-28
+#            files:
+#              - ^ci-scripts/infra-.*/.*
+#              - ^requirements.txt
+#              - ^test-requirements.txt
+#              - ^setup.cfg
+#              - ^setup.py
+#              - ^tox.ini
+#              - ^molecule/.*
+#              - ^playbooks/.*
+#              - .*\.py
     gate:
       jobs:
         - tox-jjb
