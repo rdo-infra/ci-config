@@ -1,14 +1,4 @@
 ---
-- name: print out hash, label and namespaces in play
-  debug:
-    var: "{{ item }}"
-  with_items:
-    - full_hash
-    - named_label
-    - source_registry
-    - target_registries
-    - release
-
 - name: Initialize list of pushed containers. Will be used for cleanup
   set_fact:
     pushed_containers: []
@@ -30,18 +20,22 @@
   register: local_release
   changed_when: false
 
-- name: Set the release_url - master
+- name: Set the release_url
   set_fact:
     release_url: |-
-      https://opendev.org/openstack/tripleo-common/raw/branch/master/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}
-  when:
-    - release == 'master'
+      https://opendev.org/openstack/tripleo-common/raw/commit/{{ local_release.stdout }}/container-images/overcloud_containers.yaml.j2
 
-- name: Set the release_url - stable
-  set_fact:
-    release_url: |-
-      https://opendev.org/openstack/tripleo-common/raw/branch/stable/{{ release }}/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}
-  when: release != 'master'
+- name: print out hash, label and namespaces in play
+  debug:
+    var: "{{ item }}"
+  with_items:
+    - full_hash
+    - named_label
+    - source_registry
+    - target_registries
+    - release
+    - local_release.stdout
+    - release_url
 
 # The next two tasks are created mainly for testing the role
 # if a file is present at pattern_file location
