@@ -46,6 +46,8 @@
             CICO_USER_DIR="${CICO_USER_DIR:-/root}"
             VENV="${WORKSPACE}/venv"
             OPENSTACK_GIT_URL="https://opendev.org/openstack"
+            RELEASE="${RELEASE:-master}
+            RDO_CONFIG_DIR="${RDO_CONFIG_DIR:-src/rdo-infra/review.rdoproject.org-config}"
 
             [[ ! -d "${VENV}" ]] && virtualenv "${VENV}"
             source "${VENV}/bin/activate"
@@ -78,7 +80,7 @@
                     name: docker
                     state: started
 
-            - name: 'Clone git dependencies'
+            - name: 'Clone OpenStack git dependencies'
               hosts: openstack_nodes
               tasks:
                 - name: 'Clone git dependency'
@@ -91,6 +93,14 @@
                     - 'kolla'
                     - 'python-tripleoclient'
                     - 'tripleo-common'
+
+            - name: 'Clone RDO git dependencies'
+              hosts: openstack_nodes
+              tasks:
+                - name: 'Clone rdo-infra/review.rdoproject.org-config'
+                  git:
+                     repo: 'https://github.com/rdo-infra/review.rdoproject.org-config.git'
+                     dest: '${CICO_USER_DIR}/${RDO_CONFIG_DIR}'
 
             - name: 'Login to RDO registry'
               hosts: openstack_nodes
@@ -106,6 +116,19 @@
                       with_items:
                        - true
                        - false
+
+            - name: Populate hash.info required for dlrn reporting
+              hosts: openstack_nodes
+              tasks:
+                - shell: |
+                      pushd "${CICO_USER_DIR}"
+                        export WORKSPACE="${CICO_USER_DIR}/workspace"
+                        export RELEASE="${RELEASE}"
+                        export PROMOTE_NAME="tripleo-ci-testing"
+                        export DLRNAPI_DISTRO={{ ansible_distribution }}
+                        export DLRNAPI_DISTRO_VERSION={{ ansible_distribution_major_version }}
+                        bash -xe "${CICO_USER_DIR}/${RDO_CONFIG_DIR}/ci-scripts/tripleo-upstream/get-hash.sh"
+                      popd
 
             - name: 'Setup TripleO Container Registry and repos mirror'
               hosts: openstack_nodes
