@@ -1,5 +1,6 @@
 import mock
 import pytest
+import urllib
 
 # avoid pytest --collect-only errors with missing imports:
 dlrnapi_promoter = pytest.importorskip('dlrnapi_promoter')
@@ -143,3 +144,29 @@ def test_old_hashes_get_filtered_from_candidates(fetch_hashes_mock):
         mock.call('dlrn_api', 'promote_name', count=-1)])
 
     assert(obtained_hashes == expected_hashes)
+
+
+def test_named_hashes_unchanged():
+    # WIP this needs iteration latest changes to fetch_current_named_hashes
+    promote_from = {"current-tripleo": "foo", "current-tripleo-rdo": "bar"}
+    start_named_hashes = dlrnapi_promoter.fetch_current_named_hashes(
+        ("centos", "7"), "master", promote_from, "foo")
+    named_hashes_now = dlrnapi_promoter.fetch_current_named_hashes(
+        ("centos", "7"), "master", promote_from)
+
+    # assert hashes are retrieved correctly by fetch_current_named_hashes
+    assert(start_named_hashes.keys() == promote_from.keys())
+
+    # assert they are equal - this might fail if run during promotion
+    assert(start_named_hashes == named_hashes_now)
+
+    # positive test for hashes_unchanged
+    dlrnapi_promoter.start_named_hashes = start_named_hashes
+    dlrnapi_promoter.check_named_hashes_unchanged(("centos", "7"), "master",
+                                                  promote_from)
+
+    # negative test
+    dlrnapi_promoter.start_named_hashes = {"foo": "bar"}
+    with pytest.raises(Exception):
+        dlrnapi_promoter.check_named_hashes_unchanged(
+            ("centos", "7"), "master", promote_from)
