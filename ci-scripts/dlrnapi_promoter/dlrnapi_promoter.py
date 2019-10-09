@@ -8,9 +8,46 @@ import logging.handlers
 import os
 import subprocess
 import sys
+import urllib
 
 from dlrnapi_client.rest import ApiException
 import dlrnapi_client
+
+# current_named_hashes: {'current-tripleo': 'xyz', 'previous-current-tripleo':
+# 'abc' ... } stores the state of the currently named hashes so we can check
+# they are not altered during a promotion.
+current_named_hashes = {'current-tripleo': 'uninitialised',
+                        'previous-current-tripleo': 'uninitialised',
+                        'tripleo-ci-testing': 'uninitialised', }
+
+
+def fetch_current_named_hashes(distro, release):
+    ''' Get latest known named hashes from trunk.rdoproject.org '''
+    distro_name, distro_version = distro
+    named_hashes_result = {}
+    for hash_name in current_named_hashes.keys():
+        hash_url = ('https://trunk.rdoproject.org/%s%s-%s/%s/delorean.repo' %
+                    (distro_name, distro_version, release, hash_name))
+        hash_repo_contents = urllib.urlopen(hash_url)
+        for repo_line in hash_repo_contents.readlines():
+            name, val = repo_line.partition("=")[::2]
+            if name != 'baseurl':
+                continue
+            else:
+                hash_val = val.split('/')[-1]
+                named_hashes_result.update({hash_name: hash_val})
+                break
+    return named_hashes_result
+
+
+def check_named_hashes_unchanged(distro, release):
+    ''' fetch all named hash values and compare with the current values
+        stored in current_named_hashes global variable '''
+    # fetch them and compare with current_named_hashes
+    candidate_list = fetch_current_named_hashes(distro, release)
+    if candidate_list != current_named_hashes:
+        return False  # raise Exception("Changed!")
+    return True
 
 
 def check_promoted(dlrn, link, hashes):
@@ -280,6 +317,10 @@ def promote_all_links(
         # Cycle over latest unpromoted hashes
         for new_hashes in get_latest_hashes(api, promote_name, current_name,
                                             latest_hashes_count):
+
+            if not check_named_hashes_unchanged(distro, release):
+                raise Exception("woo")  # error right?
+
             logger.info('Checking hash %s from %s for promotion criteria',
                         new_hashes, current_name)
             new_hashes['full_hash'] = \
@@ -343,6 +384,9 @@ def promoter(config):
               config.get('main', 'distro_version'))
 
     release = config.get('main', 'release')
+
+    global current_named_hashes
+    current_named_hashes = fetch_current_named_hashes(distro, release)
 
     logger.info('STARTED promotion process for release: %s', release)
 
