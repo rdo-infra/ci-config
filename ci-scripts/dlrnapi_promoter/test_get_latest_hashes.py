@@ -1,5 +1,7 @@
+from mock import patch, mock_open
 import mock
 import pytest
+import urllib
 
 # avoid pytest --collect-only errors with missing imports:
 dlrnapi_promoter = pytest.importorskip('dlrnapi_promoter')
@@ -143,3 +145,19 @@ def test_old_hashes_get_filtered_from_candidates(fetch_hashes_mock):
         mock.call('dlrn_api', 'promote_name', count=-1)])
 
     assert(obtained_hashes == expected_hashes)
+
+
+DLRN_TEST_DATA="[delorean]\nname=delorean-openstack-mistral-66d1776f1b992d3b5f593240f4a9bfa75e572f76\nbaseurl=https://trunk.rdoproject.org/centos7/66/d1/66d1776f1b992d3b5f593240f4a9bfa75e572f76_ae355860\nenabled=1\ngpgcheck=0\npriority=1\n"
+def dummy_urlopen(url):
+    return DLRN_TEST_DATA.splitlines()
+
+#@mock.patch('dlrnapi_promoter.fetch_current_named_hashes')
+@mock.patch.object(urllib, 'urlopen')
+def test_fetch_current_named_hashes(mock_urllib):
+    DLRN_TEST_DATA="[delorean]\nname=delorean-openstack-mistral-66d1776f1b992d3b5f593240f4a9bfa75e572f76\nbaseurl=https://trunk.rdoproject.org/centos7/66/d1/66d1776f1b992d3b5f593240f4a9bfa75e572f76_ae355860\nenabled=1\ngpgcheck=0\npriority=1\n"
+    mock_urllib.return_value = dummy_urlopen("")
+    #with patch("__builtin__.open", mock_open(read_data=DLRN_TEST_DATA)) as mock_file:
+#    with mock.patch('__main__.open', mock_open(read_data=DLRN_TEST_DATA)) as m:
+    thehashes = dlrnapi_promoter.fetch_current_named_hashes(("centos", "7"), "master", {"curent-tripleo": "foo", "current-tripleo-rdo": "bar"})
+        #    fetch_named_hashes_mockashedsfdasfa
+
