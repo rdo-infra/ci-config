@@ -8,9 +8,36 @@ import logging.handlers
 import os
 import subprocess
 import sys
+import urllib
 
 from dlrnapi_client.rest import ApiException
 import dlrnapi_client
+
+# start_named_hashes: {'current-tripleo': 'xyz', 'previous-current-tripleo':
+# 'abc' ... } stores the state of the currently named hashes so we can check
+# they are not altered during a promotion.
+start_named_hashes = {'current-tripleo': 'uninitialised',
+                      'previous-current-tripleo': 'uninitialised',
+                      'tripleo-ci-testing': 'uninitialised', }
+
+
+def fetch_current_named_hashes(distro, release):
+    ''' Get latest known named hashes from trunk.rdoproject.org '''
+    distro_name, distro_version = distro
+    named_hashes_result = {}
+    for hash_name in start_named_hashes.keys():
+        hash_url = ('https://trunk.rdoproject.org/%s%s-%s/%s/delorean.repo' %
+                    (distro_name, distro_version, release, hash_name))
+        hash_repo_contents = urllib.urlopen(hash_url)
+        for repo_line in hash_repo_contents.readlines():
+            name, val = repo_line.partition("=")[::2]
+            if name != 'baseurl':
+                continue
+            else:
+                hash_val = val.split('/')[-1]
+                named_hashes_result.update({hash_name: hash_val})
+                break
+    return named_hashes_result
 
 
 def check_promoted(dlrn, link, hashes):
@@ -282,6 +309,7 @@ def promote_all_links(
         # Cycle over latest unpromoted hashes
         for new_hashes in get_latest_hashes(api, promote_name, current_name,
                                             latest_hashes_count):
+
             logger.info('Checking hash %s from %s for promotion criteria',
                         new_hashes, current_name)
             new_hashes['full_hash'] = \
@@ -311,12 +339,20 @@ def promote_all_links(
                     new_hashes['commit_hash'],
                     new_hashes['distro_hash'])
                 continue
+            # fetch current named hashes to ensure they didn't change
+            current_named_hashes = fetch_current_named_hashes(distro, release)
             if dry_run:
                 logger.info('DRY RUN: promotion conditions satisfied, '
                             'skipping promotion of %s-%s %s to %s (%s)',
                             distro, release, current_name,
                             promote_name, new_hashes)
                 break
+            elif current_named_hashes != start_named_hashes:
+                logger.error('ERROR: Aborting promotion named hashes changed '
+                             'since promotion started. Named hashes at '
+                             'start: %s. Named hashes now: %s ',
+                             start_named_hashes, current_named_hashes)
+                return
             else:
                 try:
                     # ocata does not have containers to upload
@@ -372,6 +408,9 @@ def promoter(config):
 
     release = config.get('main', 'release')
     api_url = config.get('main', 'api_url')
+
+    global start_named_hashes
+    start_named_hashes = fetch_current_named_hashes(distro, release)
 
     logger.info('STARTED promotion process for release: %s', release)
 
