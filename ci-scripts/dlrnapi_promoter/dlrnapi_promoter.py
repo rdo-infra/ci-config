@@ -8,9 +8,44 @@ import logging.handlers
 import os
 import subprocess
 import sys
+import urllib
 
 from dlrnapi_client.rest import ApiException
 import dlrnapi_client
+
+# start_named_hashes - named hashes at promotion start
+# can check they are not changed before we push containers/images/links.
+# {'current-tripleo': 'xyz', 'previous-current-tripleo': 'abc' ... }
+# https://tree.taiga.io/project/tripleo-ci-board/task/1325
+start_named_hashes = {}
+
+
+def fetch_current_named_hashes(release, promote_from, dlrn):
+    ''' Get latest known named hashes from dlrn
+        Returns a dictionary with name to hash {'current-tripleo': 'xyz', '''
+    named_hashes_result = {}
+
+    for promote_name in promote_from.keys():
+        latest_named = fetch_hashes(dlrn, promote_name, 1)
+        full_hash = '{0}_{1}'.format(
+                  latest_named['commit_hash'], latest_named['distro_hash'][:8])
+        named_hashes_result.update({promote_name: full_hash})
+
+    return named_hashes_result
+
+
+def check_named_hashes_unchanged(release, promote_from, dlrn):
+    ''' Fetch latest named hashes and compare to start_named_hashes
+        If they are different log error and raise Exception
+    '''
+    logger = logging.getLogger('promoter')
+    latest_named_hashes = fetch_current_named_hashes(
+                                                   release, promote_from, dlrn)
+    if latest_named_hashes != start_named_hashes:
+        logger.error('ERROR: Aborting promotion named hashes changed since '
+                     'promotion started. Hashes at start: %s. Hashes now: %s ',
+                     start_named_hashes, latest_named_hashes)
+        raise Exception("Named Hashes Changed!")
 
 
 def check_promoted(dlrn, link, hashes):
@@ -321,6 +356,7 @@ def promote_all_links(
                 try:
                     # ocata does not have containers to upload
                     # this can be removed once ocata is EOL
+                    check_named_hashes_unchanged(release, promote_from, api)
                     if release not in ['ocata']:
                         tag_containers(
                             new_hashes,
@@ -329,6 +365,7 @@ def promote_all_links(
                             promote_name)
 
                     # For fedora we just run standalone let's not tag images
+                    check_named_hashes_unchanged(release, promote_from, api)
                     distro_name, _ = distro
                     if distro_name != 'fedora':
                         tag_qcow_images(
@@ -337,6 +374,7 @@ def promote_all_links(
                             release,
                             promote_name)
 
+                    check_named_hashes_unchanged(release, promote_from, api)
                     promote_link(api, new_hashes, promote_name)
                     logger.info('SUCCESS promoting %s%s-%s %s as %s (%s)',
                                 distro[0], distro[1], release, current_name,
@@ -412,6 +450,12 @@ def promoter(config):
     for section in sections:
         job_reqs[section] = [k for k, v in config.items(section)]
     logger.debug('Promotion requirements loaded: %s', job_reqs)
+
+    global start_named_hashes
+    start_named_hashes = fetch_current_named_hashes(
+                                           release, promote_from, api_instance)
+    logger.info('Named hashes at start of promotion process: %s',
+                start_named_hashes)
 
     promote_all_links(
         api_instance,
