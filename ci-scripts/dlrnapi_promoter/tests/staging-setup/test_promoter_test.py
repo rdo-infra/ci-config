@@ -99,3 +99,12 @@ class TestIntegrationTests(unittest.TestCase):
         data = self.success_pattern_container_positive
         with patch(builtin_str, mock_open(read_data=data)):
             parse_promotion_logs(self.stage_info)
+
+    DLRN_TEST_DATA="[delorean]\nname=delorean-openstack-mistral-66d1776f1b992d3b5f593240f4a9bfa75e572f76\nbaseurl=https://trunk.rdoproject.org/centos7/66/d1/66d1776f1b992d3b5f593240f4a9bfa75e572f76_ae355860\nenabled=1\ngpgcheck=0\npriority=1\n"
+
+    @patch.object(url_lib, 'urlopen')
+    def test_get_named_promotions(self, mock_urllib):
+        # positive test:
+        # with patch('__main__.open', mock_open(read_data=DLRN_TEST_DATA)) as m:
+        # this the kind of thing you have in mind @panda?)
+
