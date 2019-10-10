@@ -8,7 +8,6 @@
     host-vars:
       primary:
         ansible_user: root
-    voting: false
 
 # These jobs could be handled by rdo-tox-molecule job, when the pytest-molecule
 # supports delegated driver, but as delegated tests don't run in isolation,
@@ -21,18 +20,15 @@
     parent: base
     pre-run: playbooks/molecule-delegated-pre.yml
     run: playbooks/molecule-delegated.yml
-    voting: false
 
 - job:
     name: molecule-tripleo-common
     parent: base
     pre-run: playbooks/molecule-delegated-pre.yml
     run: playbooks/molecule-tripleo-common.yml
-    voting: false
 
 - job:
     name: molecule-delegated-promote-images
     parent: base
     pre-run: playbooks/molecule-delegated-promote-images-pre.yml
     run: playbooks/molecule-delegated-promote-images.yml
-    voting: false
