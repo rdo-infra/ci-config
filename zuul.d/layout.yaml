@@ -11,7 +11,7 @@
     check:
       jobs:
         - tripleo-ci-promotion-staging:
-            files:
+            files: &promotion-staging-files
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
               - ^ci-scripts/promote-images.sh
@@ -22,6 +22,9 @@
               - ^ci-scripts/infra-setup/scheduler/.*$
         - rdo-tox-molecule:
             voting: false
+            files:
+              - ^playbooks/molecule.*
+              <<: *promotion-staging-files
         - molecule-container-push:
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
