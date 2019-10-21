@@ -26,13 +26,13 @@
     publishers:
         - post-tasks:
             - matches:
-                - log-text: marked build as failure
+                - log-text: Container build and upload failed
               script: |
                   export SUCCESS="false"
                   bash -ex scripts/tripleo-upstream-dlrn-report.sh
         - post-tasks:
             - matches:
-                - log-text: congratulations
+                - log-text: Container build and upload was successful
               run-if-job-successful: true
               script: |
                 export SUCCESS="true"
