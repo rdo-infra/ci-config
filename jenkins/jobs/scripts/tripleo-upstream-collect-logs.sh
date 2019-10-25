@@ -25,7 +25,7 @@ pushd $WORKSPACE
 mkdir -p $WORKSPACE/logs
 
 # Collect terminal output from centos-ci job regardless of job/cico status
-curl -o $WORKSPACE/logs/consoleText.txt ${CI_CENTOS_URL}/consoleText
+curl -o $WORKSPACE/logs/consoleText.txt ${CI_CENTOS_URL}/consoleText || true
 
 cat << EOF > collect-logs.yaml
 # Create a playbook to pull the logs down from our cico node
@@ -34,11 +34,12 @@ cat << EOF > collect-logs.yaml
   gather_facts: no
   tasks:
    - shell: |
-        mkdir -p ${CICO_USER_DIR}/workspace/logs
+        mkdir -p ${CICO_USER_DIR}/workspace/logs/buildah-builds/
 
         pushd ${CICO_USER_DIR}/workspace
-            cp *.log ./logs/
-            cp *.conf ./logs/
+            cp *.log ./logs/ || true
+            cp *.conf ./logs/ || true
+            cp -r /tmp/kolla-* ./logs/buildah-builds/ || true
         popd
 
 - name: Collect logs from cico node
