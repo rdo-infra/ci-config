@@ -25,12 +25,10 @@ repos:
         #       use jinja templating, this will often fail and the syntax
         #       error will be discovered in execution anyway)
   - repo: https://github.com/ansible/ansible-lint.git
-    rev: v4.1.1a0
+    rev: v4.1.1a2
     hooks:
       - id: ansible-lint
         files: (playbooks|roles).*\.(yaml|yml)$
         exclude: ^(ci-scripts/jenkins/|ci-scripts/infra-setup/tenant_vars/rdo/networks.yml|.*molecule.yml)
         entry: ansible-lint --force-color -v
         verbose: true
-        # https://github.com/ansible/ansible-lint/issues/564
-        require_serial: true
