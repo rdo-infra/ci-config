@@ -43,4 +43,3 @@ for r in "${RELEASES[@]}"; do
     /usr/bin/timeout --preserve-status -k $KILLTIME $TIMEOUT \
         python $DIR/dlrnapi_promoter.py $DIR/config/${r}.ini
 done
-
