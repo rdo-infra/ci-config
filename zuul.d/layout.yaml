@@ -18,6 +18,9 @@
               - ^ci-scripts/infra-setup/roles/promoter/.*
               - ^playbooks/staging.*
         - sova-tracking-jobs: &sovatrack
+            # broken for more than a month, incorrect file pattern as job
+            # can be brake by changes outside it.
+            voting: false
             files:
               - ^ci-scripts/infra-setup/scheduler/.*$
         - rdo-tox-molecule:
@@ -80,8 +83,6 @@
             <<: *py27
         - tox-py36:
             <<: *py36
-        - sova-tracking-jobs:
-            <<: *sovatrack
 
     openstack-periodic-24hr:
       jobs:
