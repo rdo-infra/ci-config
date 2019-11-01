@@ -1,0 +1,2 @@
+DROP DATABASE IF EXISTS rrcockpit;
+CREATE DATABASE rrcockpit;

@@ -74,8 +74,9 @@ ansible-playbook /tmp/wait-mariadb.yaml
 while true; do
     # noop jobs have been disabled
     # load_mariadb noop 2>&1 | tee /tmp/run.log
+    load_mariadb drop 2>&1 | tee /tmp/run.log
     load_mariadb lp 2>&1 | tee /tmp/run.log
     load_mariadb bz 2>&1 | tee /tmp/run.log
     load_mariadb recent_lp 2>&1 | tee /tmp/run.log
-    sleep 360;
+    sleep 1440;
 done
