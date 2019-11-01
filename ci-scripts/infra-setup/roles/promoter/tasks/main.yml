@@ -25,6 +25,7 @@
 - name: Check user id
   command: id -u
   register: user_id
+  changed_when: false
 
 - name: fail if this role is not run as root
   fail:
@@ -412,7 +413,7 @@
       when: ci_config_local_src_dir_stat.stat.exists
 
     - name: When dir is not present on the node, or locally, clone from git
-      git:
+      git:  # noqa 401
         repo: 'https://review.rdoproject.org/r/p/rdo-infra/ci-config.git'
         dest: "{{ ci_config_remote_src_dir }}"
       when:

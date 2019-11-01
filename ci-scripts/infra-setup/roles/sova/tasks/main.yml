@@ -15,7 +15,9 @@
     version: 1.15.0
 
 - name: Find out docker group name
-  shell: grep docker /etc/group | cut -d":" -f1 | head -1
+  shell: |
+    set -euo pipefail
+    grep docker /etc/group | cut -d":" -f1 | head -1
   register: docker_group
   changed_when: false
 
@@ -48,7 +50,7 @@
   service:
     name: docker
     state: reloaded
-  when: docker_config|changed
+  when: docker_config is changed
 
 - name: Start and enable docker
   service:
@@ -71,6 +73,7 @@
 
 - name: Fix selinux
   shell: >
+    set -euo pipefail;
     ls -Zd {{ logs_http_path }} |
     grep httpd_sys_content_t ||
     chcon -Rt httpd_sys_content_t {{ logs_http_path }}
@@ -115,7 +118,7 @@
       dest: '{{ docker_compose_file }}'
 
   - name: Run docker-compose from repo
-    docker_service:
+    docker_compose:
       project_src: '{{ work_dir }}'
       state: present
       pull: yes
