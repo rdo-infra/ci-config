@@ -10,13 +10,15 @@
   tasks:
 
     - name: Check if pip is installed
-      shell: command -v pip
+      command: command -v pip
       register: pip_installed
       ignore_errors: true
+      changed_when: false
 
     - name: Install if pip is not installed
       become: true
       shell: |
+        set -euo pipefail
         curl https://bootstrap.pypa.io/get-pip.py | python
       when: pip_installed is failed
 
@@ -40,6 +42,7 @@
       command: "{{ script_dir }}/sova-check --master --repo {{ base_dir }}/sova-master"
       ignore_errors: true
       register: master
+      changed_when: true
 
     - name: Clone gates sova
       git:
@@ -54,6 +57,7 @@
       command: "{{ script_dir }}/sova-check --gates --repo {{ base_dir }}/sova-gates"
       ignore_errors: true
       register: gates
+      changed_when: false
 
     - name: Clone promotion sova
       git:
@@ -68,6 +72,7 @@
       command: "{{ script_dir }}/sova-check --promotion --repo {{ base_dir }}/sova-promotion"
       ignore_errors: true
       register: promotion
+      changed_when: false
 
     - name: Fail if there are differences
       fail:
