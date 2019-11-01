@@ -13,7 +13,9 @@
     version: "{{ docker_compose_version }}"
 
 - name: Find out docker group name
-  shell: grep docker /etc/group | cut -d":" -f1 | head -1
+  shell: |
+    set -euo pipefail
+    grep docker /etc/group | cut -d":" -f1 | head -1
   register: docker_group
   changed_when: false
 
