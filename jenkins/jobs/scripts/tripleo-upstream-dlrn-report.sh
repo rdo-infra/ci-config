@@ -29,6 +29,6 @@ cat << EOF > delorean-report.yaml
 EOF
 
 # Run the playbook.
-ansible-playbook -i "${ANSIBLE_HOSTS}" delorean-report.yaml
+ansible-playbook -vvv -i "${ANSIBLE_HOSTS}" delorean-report.yaml
 
 popd
