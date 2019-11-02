@@ -71,6 +71,6 @@ cat << EOF > collect-logs.yaml
 EOF
 
 # Run the playbooks.
-ansible-playbook -i "${ANSIBLE_HOSTS}" collect-logs.yaml
+ansible-playbook -vvv -i "${ANSIBLE_HOSTS}" collect-logs.yaml
 
 popd
