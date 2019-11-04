@@ -150,20 +150,6 @@
                 - name: Run build containers tasks
                   include_role:
                     name: build-containers
-
-            - name: 'Report build & upload status through console'
-              hosts: openstack_nodes
-              tasks:
-                - name: Check error log
-                  shell: |
-                    ERROR_LOG={CICO_USER_DIR}/logs/containers-build-errors.log
-                    # If the error log exists and is empty we should
-                    # have a successful build and upload
-                    if [ -f $ERROR_LOG ] && ! [[ -s $ERROR_LOG ]] ; then
-                      echo "Container build and upload was successful"
-                    else
-                      echo "Container build and upload failed"
-                    fi
             EOF
 
             # cico-get-node requests a duffy node and generates an ansible-compatible
