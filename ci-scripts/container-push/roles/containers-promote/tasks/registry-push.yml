@@ -1,11 +1,18 @@
 ---
-- name: Login to registry
+- name: Login to registry (ansible module)
   docker_login:
     registry_url: "{{ registry.host }}"
     username: "{{ registry.username }}"
     password: "{{ registry.password }}"
     reauthorize: "yes"
   no_log: "yes"
+
+# pushing to registry w/ shell commands requires docker login command
+# docker login assumes auth info has been recorded in ~/.docker/config.json
+- name: Login to source registry (shell command)
+  command: "docker login {{ registry.host }}"
+  no_log: "yes"
+  changed_when: false
 
 # Workaround for https://github.com/ansible/ansible/issues/32868
 - name: Validate target registry login
