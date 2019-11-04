@@ -107,13 +107,14 @@
 
     - name: Login to source registry
       docker_login:
-        registry_url: "{{ source_registry.host }}"
+        registry_url: "{{ source_registry.auth_url }}"
         username: "{{ source_registry.username }}"
         password: "{{ source_registry.password }}"
         reauthorize: "yes"
       no_log: "yes"
       tags:
         - rdoproject_push
+      when: "source_registry.auth_url is defined and source_registry.auth_url != 'unused'"
 
     # Workaround for https://github.com/ansible/ansible/issues/32868
     - name: Validate source registry login
