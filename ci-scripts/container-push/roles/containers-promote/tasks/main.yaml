@@ -105,7 +105,7 @@
         - quaydotio_push
         - remove_local_containers
 
-    - name: Login to source registry
+    - name: Login to source registry (ansible module)
       docker_login:
         registry_url: "{{ source_registry.host }}"
         username: "{{ source_registry.username }}"
@@ -115,9 +115,17 @@
       tags:
         - rdoproject_push
 
+    # pushing to registry w/ shell commands requires docker login command
+    - name: Login to source registry (shell command)
+      command: docker login --username {{ source_registry.username }} --password-stdin
+      args:
+        stdin: "{{ source_registry.password }}"
+      no_log: "yes"
+
     # Workaround for https://github.com/ansible/ansible/issues/32868
     - name: Validate source registry login
       block:
+
         - name: attempt a push to the logged in registry
           shell: >
             docker build -t {{ source_registry.host }}/{{ source_registry.namespace }}/nop - &&
