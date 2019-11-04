@@ -1,10 +1,17 @@
 ---
-- name: Login to registry
+- name: Login to registry (ansible module)
   docker_login:
     registry_url: "{{ registry.host }}"
     username: "{{ registry.username }}"
     password: "{{ registry.password }}"
     reauthorize: "yes"
+  no_log: "yes"
+
+# pushing to registry w/ shell commands requires docker login command
+- name: Login to source registry (shell command)
+  command: docker login --username {{ source_registry.username }} --password-stdin
+  args:
+    stdin: "{{ source_registry.password }}"
   no_log: "yes"
 
 # Workaround for https://github.com/ansible/ansible/issues/32868
