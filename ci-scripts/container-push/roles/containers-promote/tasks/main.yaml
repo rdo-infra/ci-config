@@ -132,7 +132,7 @@
           shell: |
             docker rmi {{ source_registry.host  }}/{{ source_registry.namespace  }}/nop || true
 
-    - when: "'rhel' not in distro_name and 'docker' not in source_registry.host"
+    - when: "'rhel' not in distro_name or 'docker' not in source_registry.host"
       block:
 
         - name: Pull the images from source registry
