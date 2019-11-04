@@ -105,7 +105,7 @@
         - quaydotio_push
         - remove_local_containers
 
-    - name: Login to source registry
+    - name: Login to source registry (ansible module)
       docker_login:
         registry_url: "{{ source_registry.host }}"
         username: "{{ source_registry.username }}"
@@ -114,6 +114,12 @@
       no_log: "yes"
       tags:
         - rdoproject_push
+
+    # pushing to registry w/ shell commands requires docker login command
+    # docker login assumes auth info has been recorded in ~/.docker/config.json
+    - name: Login to source registry (shell command)
+      command: docker login
+      no_log: "yes"
 
     # Workaround for https://github.com/ansible/ansible/issues/32868
     - name: Validate source registry login
