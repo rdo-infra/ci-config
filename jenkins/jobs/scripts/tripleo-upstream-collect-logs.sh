@@ -50,6 +50,8 @@ cat << EOF > collect-logs.yaml
           mode: pull
           src: "${SOURCE}"
           dest: "${WORKSPACE}/logs/"
+          recursive: yes
+          dirs: no
 
 - name: Send logs to the log server
   hosts: logserver
@@ -65,6 +67,8 @@ cat << EOF > collect-logs.yaml
       synchronize:
         src: "${WORKSPACE}/logs"
         dest: "${DESTINATION}/"
+        recursive: yes
+        dirs: no
 
     - shell: |
         echo "All collected logs are available at ${LOG_DISPLAY_URL}"
