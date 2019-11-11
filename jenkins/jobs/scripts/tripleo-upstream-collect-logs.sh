@@ -40,6 +40,7 @@ cat << EOF > collect-logs.yaml
             cp *.log ./logs/ || true
             cp *.conf ./logs/ || true
             cp -r /tmp/kolla-* ./logs/buildah-builds/ || true
+            chmod -R 755 ./logs
         popd
 
 - name: Collect logs from cico node
