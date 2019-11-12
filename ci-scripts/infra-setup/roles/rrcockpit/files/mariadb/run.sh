@@ -44,7 +44,7 @@ read_lp(){
 
 read_recent_lp(){
     launchpad_bugs_mariadb.py \
-        --previous_days=1
+        --previous_days=5
 }
 
 read_bz(){
