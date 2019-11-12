@@ -48,18 +48,18 @@ def print_as_csv(bug_tasks):
     if bug_tasks:
         for bug_task in bug_tasks:
             print(('{},{},{},{},"{}"').format(
-                    bug_task.bug.id,
-                    bug_task.status,
-                    json.dumps(bug_task.bug.tags).replace(
-                        ',', ' ').replace(
-                        '"', '').replace(
-                        '[', '').replace(
-                        ']', ''),
-                    bug_task.web_link,
-                    json.dumps(bug_task.bug.title).replace(
-                        '"', "'").replace(
-                        "\\n", "").replace(
-                        "\\", "")))
+                bug_task.bug.id,
+                bug_task.status,
+                json.dumps(bug_task.bug.tags).replace(
+                    ',', ' ').replace(
+                    '"', '').replace(
+                    '[', '').replace(
+                    ']', ''),
+                bug_task.web_link,
+                json.dumps(bug_task.bug.title).replace(
+                    '"', "'").replace(
+                    "\\n", "").replace(
+                    "\\", "")))
 
 
 def main():
@@ -69,7 +69,8 @@ def main():
 
     parser.add_argument('--tag')
     parser.add_argument('--status', nargs='+',
-                        default=['New', 'Triaged', 'In Progress']),
+                        default=['New', 'Triaged', 'In Progress',
+                                 'Confirmed', 'Fix Committed']),
     parser.add_argument('--previous_days', default=365)
     args = parser.parse_args()
 
@@ -80,3 +81,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
