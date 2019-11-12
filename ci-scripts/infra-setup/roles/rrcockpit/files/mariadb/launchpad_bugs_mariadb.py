@@ -69,7 +69,7 @@ def main():
 
     parser.add_argument('--tag')
     parser.add_argument('--status', nargs='+',
-                        default=['New', 'Triaged', 'In Progress']),
+                        default=['New', 'Triaged', 'In Progress', 'Confirmed', 'Fix Committed']),
     parser.add_argument('--previous_days', default=365)
     args = parser.parse_args()
 
