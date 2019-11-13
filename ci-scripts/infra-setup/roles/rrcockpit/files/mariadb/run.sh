@@ -51,6 +51,10 @@ read_bz(){
     bugzilla_bugs_mariadb.py
 }
 
+read_pass(){
+    skiplist.py
+}
+
 read_noop(){
     releases="master rocky queens pike"
     types="upstream rdo tempest"
@@ -74,7 +78,8 @@ ansible-playbook /tmp/wait-mariadb.yaml
 while true; do
     # noop jobs have been disabled
     # load_mariadb noop 2>&1 | tee /tmp/run.log
-    load_mariadb drop 2>&1 | tee /tmp/run.log
+
+    load_mariadb pass 2>&1 | tee /tmp/myscript.log
     load_mariadb lp 2>&1 | tee /tmp/run.log
     load_mariadb bz 2>&1 | tee /tmp/run.log
     load_mariadb recent_lp 2>&1 | tee /tmp/run.log
