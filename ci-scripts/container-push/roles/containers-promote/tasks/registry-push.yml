@@ -72,9 +72,11 @@
     - dockerhub_push
 
 # Create and push container manifests to registry.host with _x86_64 and ppc64le
-# tagged containers.
+# tagged containers. Disabled by default https://tree.taiga.io/project/tripleo-ci-board/task/1394
 - name: 'Push {{ x86_tag }} {{ ppc_tag }} containers and manifests to {{ registry.host }}'
   include_tasks: manifest-push.yml
+  when: manifest_push|default(false)|bool
+
 
 - name: Check if images were pushed
   shell: |
