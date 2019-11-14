@@ -123,7 +123,7 @@ def setup_logging(log_file):
     logger.addHandler(log_handler)
 
 
-def tag_containers(new_hashes, distro, release, promote_name):
+def tag_containers(new_hashes, distro, release, promote_name, manifest_push):
     logger = logging.getLogger('promoter')
     env = os.environ
     relpath = "ci-scripts/dlrnapi_promoter"
@@ -144,6 +144,8 @@ def tag_containers(new_hashes, distro, release, promote_name):
     promote_playbook = (
         script_root + 'ci-scripts/container-push/container-push.yml'
     )
+
+    manifest_opts = "-e manifest_push=%s" % manifest_push
     try:
         logger.info('Promoting the container images for dlrn hash %s on '
                     '%s to %s', new_hashes['commit_hash'], release,
@@ -154,11 +156,11 @@ def tag_containers(new_hashes, distro, release, promote_name):
             "ANSIBLE_LOG_PATH=%s RELEASE=%s " \
             "COMMIT_HASH=%s DISTRO_HASH=%s FULL_HASH=%s " \
             "PROMOTE_NAME=%s SCRIPT_ROOT=%s DISTRO_NAME=%s DISTRO_VERSION=%s " \
-            "ansible-playbook %s" % (
+            "ansible-playbook %s %s" % (
                 logfile,
                 release, new_hashes['commit_hash'], new_hashes['distro_hash'],
                 new_hashes['full_hash'], promote_name, script_root, distro_name,
-                distro_version, promote_playbook
+                distro_version, manifest_opts, promote_playbook
             )
         logger.info('Running: %s', cmd)
         container_logs = \
@@ -272,7 +274,8 @@ def promote_all_links(
         distro,
         release,
         latest_hashes_count,
-        api_url):
+        api_url,
+        manifest_push):
     '''Promote DLRN API links as a different one when all jobs are
     successful'''
     logger = logging.getLogger('promoter')
@@ -326,7 +329,8 @@ def promote_all_links(
                             new_hashes,
                             distro,
                             release,
-                            promote_name)
+                            promote_name,
+                            manifest_push)
 
                     # For fedora we just run standalone let's not tag images
                     distro_name, _ = distro
@@ -372,6 +376,11 @@ def promoter(config):
 
     release = config.get('main', 'release')
     api_url = config.get('main', 'api_url')
+
+    try:
+        manifest_push = config.get('main', 'manifest_push')
+    except configparser.ConfigParser.InterpolationMissingOptionError:
+        manifest_push = False
 
     logger.info('STARTED promotion process for release: %s', release)
 
@@ -421,7 +430,8 @@ def promoter(config):
         distro,
         release,
         latest_hashes_count,
-        api_url)
+        api_url,
+        manifest_push)
     logger.info("FINISHED promotion process")
 
 
