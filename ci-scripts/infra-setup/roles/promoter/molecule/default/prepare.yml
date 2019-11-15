@@ -1,6 +1,18 @@
 ---
 - hosts: all
   tasks:
+      #    - name: update packages # noqa 403
+      #      become: yes
+      #      yum:
+      #       name: '*'
+      #       state: latest
+
+    - name: disable getty
+      systemd:
+        name: getty
+        state: stopped
+        enabled: false
+
     - name: install development tools
       become: yes
       yum:
