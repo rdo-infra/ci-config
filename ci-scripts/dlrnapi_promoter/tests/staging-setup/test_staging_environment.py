@@ -20,6 +20,7 @@ except ImportError:
     import urllib.request as url
 import yaml
 
+
 from staging_environment import StagedEnvironment, load_config
 from dlrnapi_client.rest import ApiException
 
@@ -51,6 +52,16 @@ def staged_env():
     yield config, stage_info
 
     staged_env.teardown()
+
+    # Check registries are correctly cleared after teardown
+    docker_client = docker.from_env()
+    for registry in config['registries']:
+        try:
+            docker_client.containers.get(registry['name'])
+            assert False, "Registry {} still running".format(registry['name'])
+        except docker.errors.NotFound:
+            assert True
+    # TODO(gcerami) Check the rest of teardown works correctly
 
 
 # Uncomment when session fixture works and remove def below
@@ -105,6 +116,21 @@ def test_staging_env(staged_env):
             for target in stage_info['registries']['targets']:
                 if registry['name'] == target['name']:
                     found = True
+                    if registry['secure']:
+                        # Check that registry marked as secure
+                        # have a auth_url defined
+                        assert "auth_url" in target
+                        # And we can log in with info provided
+                        try:
+                            docker_client.login(
+                                registry=target['auth_url'],
+                                username=target['username'],
+                                password=target['password'],
+                                dockercfg_path="/dev/null",
+                                reauth=True
+                            )
+                        except docker.errors.APIError:
+                            assert False, "Login failed"
             assert found
         # Check that the registries are up and running
         assert docker_client.containers.get(registry['name'])
