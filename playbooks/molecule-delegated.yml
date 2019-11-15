@@ -7,7 +7,7 @@
       shell: |-
         . {{ ansible_user_dir }}/test-python/bin/activate
         # Add all the delegated scenarios here.
-        molecule test -s container-push
+        tox -emolecule_delegated -- roles/promoter/molecule/container-push/molecule.yml
       args:
         chdir: "{{ ansible_user_dir }}/{{ zuul.project.src_dir }}/roles/promoter"
         executable: /bin/bash
