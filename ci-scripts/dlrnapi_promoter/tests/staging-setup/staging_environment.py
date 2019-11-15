@@ -43,6 +43,38 @@ from dlrn import db as dlrn_db
 from dlrn import utils
 from string import Template
 
+domain_key = '''
+-----BEGIN PRIVATE KEY-----
+MIIBVQIBADANBgkqhkiG9w0BAQEFAASCAT8wggE7AgEAAkEA45UGl1ZcyDOqY3ZP
+/JlTyzSbPjgNc6feIi3VdgA1kXoVlvvDU40+E6RrRj2TjSVMo3Dtci+d72HIe+3/
+ZW5vzQIDAQABAkEAhn4peQI2rrGpvkHLH1JVbL9YBzsE6BaKddR0U9nnzmIkS4cN
+w3qheYMXwwJW+qvpF9y0AwCNe/tr+8A/39zmWQIhAPY1wmw1DNh4FeGLevld9AQI
+gL9tyodatfQt/6aon6MnAiEA7KGl5GUUPXH2ujtmkQ5ZTSC8hJT2Slvfju7JgXd9
+3esCIG1Tr9J2uA6DPEwbsG58jrcfw3O9X9o8qGEV79hkNgavAiAfAh/HCifY1XJL
+fTU3lPXG0Z9ikFKl89wb0ta9DHeF+QIhAOVIvYiRt5NIjVQApscF5I29VLAiCTbK
+w+U3R5J223s/
+-----END PRIVATE KEY-----
+'''
+
+domain_crt = '''
+-----BEGIN CERTIFICATE-----
+MIIB1jCCAYCgAwIBAgIJAIhu0kwOc4vYMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
+BAYTAkFVMRMwEQYDVQQIDApTb21lLVN0YXRlMSEwHwYDVQQKDBhJbnRlcm5ldCBX
+aWRnaXRzIFB0eSBMdGQwHhcNMTkxMTE1MTExODI3WhcNMjAxMTE0MTExODI3WjBF
+MQswCQYDVQQGEwJBVTETMBEGA1UECAwKU29tZS1TdGF0ZTEhMB8GA1UECgwYSW50
+ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAOOV
+BpdWXMgzqmN2T/yZU8s0mz44DXOn3iIt1XYANZF6FZb7w1ONPhOka0Y9k40lTKNw
+7XIvne9hyHvt/2Vub80CAwEAAaNTMFEwHQYDVR0OBBYEFGDiDqwoC133Ajf0SvbB
+/guLaJapMB8GA1UdIwQYMBaAFGDiDqwoC133Ajf0SvbB/guLaJapMA8GA1UdEwEB
+/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADQQBtZx3kFw6cWBM7OBccvO0tg1G2DdjQ
+ROqmK1Dhcd2F0NUvAevJMhWDj5Cy6rehMBRlhgfCYZs9tMAlG6mCm6q9
+-----END CERTIFICATE-----
+'''
+
+# "username":"password"
+htpasswd = ("username:"
+            "$2y$05$awdjjCuIy8riH6xLa37EJeC4hFbjZ4KRIVaoMMqEFaktoAfy8B2XW")
+
 
 def get_full_hash(commit_hash, distro_hash):
     return "{}_{}".format(commit_hash, distro_hash[:8])
@@ -76,32 +108,96 @@ class BaseImage(object):
 
 
 class Registry(object):
+    """
+    This class handles creation of registries using basic registry image
+    eventually applying configuration when a password protected registry
+    is needed.
+    """
 
     log = logging.getLogger("promoter-staging")
 
-    def __init__(self, name, port=None):
+    def __init__(self, name, port=None, secure=False):
         self.port = port
         self.name = name
         self.docker_client = docker.from_env()
         self.docker_containers = self.docker_client.containers
         self.docker_images = self.docker_client.images
         self.container = None
+        self.secure = secure
+        self.base_image = "registry:2"
+        self.base_secure_image = "registry:2secure"
+        if self.secure:
+            self.registry_image = self.get_secure_image()
+        else:
+            self.registry_image = self.get_base_image()
+
+    def get_base_image(self):
+        """
+        Get the base registry image, trying locally first
+        """
         try:
-            self.container = self.docker_containers.get(name)
-            self.log.info("Reusing existing registry %s", name)
+            registry_image = self.docker_images.get(
+                self.base_image)
+        except docker.errors.ImageNotFound:
+            self.log.info("Downloading registry image")
+            registry_image = self.docker_images.pull(
+                "docker.io/{}".format(self.base_image))
+
+        return registry_image
+
+    def get_secure_image(self):
+        """
+        Try to get image locally, then eventually build it
+        """
+        try:
+            registry_image = self.docker_images.get(
+                self.base_secure_image)
+        except docker.errors.ImageNotFound:
+            self.get_base_image()
+            registry_image = self.build_secure_image()
+
+        return registry_image
+
+    def build_secure_image(self):
+        """
+        The method build a new image using the default registry:2 image as a
+        starting point, restricting access with credentials and injecting a
+        self-signed certificate
+        """
+        temp_dir = tempfile.mkdtemp()
+        os.mkdir(os.path.join(temp_dir, "auth"))
+        os.mkdir(os.path.join(temp_dir, "certs"))
+        domain_key_path = os.path.join(temp_dir, "certs", "domain.key")
+        with open(domain_key_path, "w") as key_file:
+            key_file.write(domain_key)
+        domain_crt_path = os.path.join(temp_dir, "certs", "domain.crt")
+        with open(domain_crt_path, "w") as crt_file:
+            crt_file.write(domain_crt)
+        htpasswd_path = os.path.join(temp_dir, "auth", "htpasswd")
+        with open(htpasswd_path, "w") as pass_file:
+            pass_file.write(htpasswd)
+        with open(os.path.join(temp_dir, "Dockerfile"), "w") as df:
+            df.write("FROM {}\n"
+                     "COPY auth/ /auth/\n"
+                     "COPY certs/ /certs/\n"
+                     "".format(self.base_image))
+        image, _ = self.docker_client.images.build(path=temp_dir,
+                                                   tag=self.base_secure_image)
+        shutil.rmtree(temp_dir)
+
+        return image
+
+    def is_running(self):
+        try:
+            self.container = self.docker_containers.get(self.name)
+            return True
         except docker.errors.NotFound:
-            self.registry_image_name = "registry:2"
-            # Try locally first, then contact registry
-            try:
-                self.registry_image = self.docker_images.get(
-                    self.registry_image_name)
-            except docker.errors.ImageNotFound:
-                self.log.info("Downloading registry image")
-                self.registry_image = self.docker_images.pull(
-                    "docker.io/{}".format(self.registry_image_name))
+            self.container = None
+            return False
 
     def run(self):
-        if self.container is not None:
+        if self.is_running():
+            self.log.info("Registry %s already running", self.name)
             return
 
         kwargs = {
@@ -114,15 +210,26 @@ class Registry(object):
                 '5000/tcp': self.port
             },
         }
+        if self.secure:
+            kwargs["environment"] = {
+                "REGISTRY_AUTH": "htpasswd",
+                "REGISTRY_AUTH_HTPASSWD_REALM": "Registry Realm",
+                "REGISTRY_AUTH_HTPASSWD_PATH": "/auth/htpasswd",
+                "REGISTRY_HTTP_TLS_CERTIFICATE": "/certs/domain.crt",
+                "REGISTRY_HTTP_TLS_KEY": "/certs/domain.key",
+            }
         self.container = self.docker_containers.run(self.registry_image.id,
                                                     **kwargs)
         self.log.info("Created registry %s", self.name)
 
     def stop(self):
-        if self.container is not None:
-            self.container.stop()
-            self.container.remove()
-            self.container = None
+        if not self.is_running():
+            self.log.info("Registry %s not running, not stopped", self.name)
+            return
+
+        self.container.stop()
+        self.container.remove()
+        self.container = None
 
 
 class StagedHash(object):
@@ -390,18 +497,26 @@ class StagedEnvironment(object):
             else:
                 if "targets" not in results:
                     results['targets'] = []
-                results['targets'].append({
+                result_registry = {
                     'host': "localhost:{}".format(registry_conf['port']),
                     'name': registry_conf['name'],
                     'namespace': self.config['containers']['namespace'],
                     'username': 'unused',
                     'password': 'unused',
-                })
+                }
+                if registry_conf['secure']:
+                    result_registry['username'] = 'username'
+                    result_registry['password'] = 'password'
+                    auth_url = ("https://localhost:{}"
+                                "".format(registry_conf['port']))
+                    result_registry['auth_url'] = auth_url
+                results['targets'].append(result_registry)
             if self.config['dry-run']:
                 continue
 
             registry = Registry(registry_conf['name'],
-                                port=registry_conf['port'])
+                                port=registry_conf['port'],
+                                secure=registry_conf['secure'])
             registry.run()
 
         self.config['results']['registries'] = results
@@ -570,8 +685,9 @@ def load_config(overrides, db_filepath=None):
 
     base_path = os.path.dirname(os.path.abspath(__file__))
 
-    config_file = os.path.join(base_path, "stage-config.yaml")
-    with open(config_file) as cf:
+    config_file = overrides.pop("stage-config-file", "stage-config.yaml")
+    config_path = os.path.join(base_path, config_file)
+    with open(config_path) as cf:
         config = yaml.safe_load(cf)
 
     # fixtures are the basis for all the environment
@@ -615,6 +731,9 @@ def main():
     parser.add_argument('--promoter-user', default=os.environ.get("USER",
                                                                   "centos"),
                         help="The promoter user")
+    parser.add_argument('--stage-config-file', default="stage-config.yaml",
+                        help=("Config file for stage generation"
+                              " (relative to config dir)"))
     args = parser.parse_args()
 
     # Cli argument overrides over config
@@ -622,7 +741,8 @@ def main():
         "components": args.components,
         "stage-info-path": "/tmp/stage-info.yaml",
         "dry-run": args.dry_run,
-        "promoter_user": args.promoter_user
+        "promoter_user": args.promoter_user,
+        "stage-config-file": args.stage_config_file
     }
     config = load_config(overrides)
 

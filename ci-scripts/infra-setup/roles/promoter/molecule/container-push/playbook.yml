@@ -1,40 +1,6 @@
 ---
-# other than installing docker, need to install docker-python and ansible
-# also need to start docker
-
-
-# This playbook can be used to download the container images which
-# passed CI and tag them back to rdoproject registry.
-# It will also mirror the images to docker.io.
-- name: Download and repush container images
+- name: Set up docker experimental commands (common to all tests)
   hosts: all
-  vars:
-    # The way the container-push works, there's currently no way to test the vars lookup directly
-    # so we are passing the vars directly here, but this reduces coverage: if we
-    # change the lookup, they don't get any test
-    # Unfortunately adding coverage for those requires a refactoring of the way vars are passed
-    # to the container-push in general, which is way too difficult to do right now.
-    release: master
-    named_label: triple-ci-staging-promoted
-    # full_hash is provided by the staging environment
-    script_root: UNUSED
-    distro_name: centos
-    distro_version: 7
-    containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
-    manifest_push: true
-    source_registry:
-      name: local-source-registry
-      host: localhost:6000
-      username: unused
-      password: unused
-      namespace: "tripleo{{ release }}"
-    target_registries:
-      - host: localhost:6500
-        name: local-target-registry-1
-        username: unused
-        password: unused
-        namespace: "tripleo{{ release }}"
-        token: unused
   tasks:
     - name: Create user config dir
       file:
@@ -50,6 +16,87 @@
           }
         dest: /home/{{ ansible_user }}/.docker/config.json
 
+# This test is copied and pasted from below with some change:
+# - Manifests are disabled
+# - A password protected registry is used (tests login to registries)
+# - we only check if the containers were pushed
+#
+# This test must be the first in the list, as the tripleo-common integration uses output from
+# the test below that must be available when tripleo-common tests are started
+- name: Download and repush container images to secure registries without multi-arch manifests
+  hosts: all
+  vars:
+    release: master
+    named_label: triple-ci-staging-promoted
+    # full_hash is provided by the staging environment
+    script_root: UNUSED
+    distro_name: centos
+    distro_version: 7
+    containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+    manifest_push: false
+    # Source and target registries are provided by staging environment
+  tasks:
+    - name: Test promoter container-push
+      block:
+        - name: launch staging setup scripts
+          shell: |
+            # Export the path to the mounted docker socket so all docker client commands will use it
+            {{ ansible_python_interpreter }} \
+            ../../../../../dlrnapi_promoter/tests/staging-setup/staging_environment.py setup --components registries,container-images --stage-config-file stage-config-secure.yaml
+
+        - name: include stage setup variables
+          include_vars: /tmp/stage-info.yaml
+
+        - name: sets full_hash
+          set_fact:
+            full_hash: "{{ promotions.promotion_candidate.full_hash }}"
+
+        - name: Include containers-promote role to test
+          include_role:
+            name: ../../../../../container-push/roles/containers-promote
+
+        - name: Check that the containers are pushed correctly to all target registries
+          loop: "{{ target_registries | map(attribute='host') | product(containers) | map('join', '/') | list }}"
+          shell: |
+            docker manifest inspect --insecure {{ image }}
+          # skip multi-arch containers
+          # alternative to this is to add an option to the staging environment
+          # to not produce multi-arch containers
+          when: '"ppc" not in image and "x86" not in image'
+          loop_control:
+            loop_var: image
+
+      always:
+        - name: Teardown
+          shell: >
+            {{ ansible_python_interpreter }}
+            ../../../../../dlrnapi_promoter/tests/staging-setup/staging_environment.py
+            teardown --components registries,container-images
+        # the teardown here must not contain the registry_cleanup tag, or it will not clean up properly
+        # in the tripleo-common integration test
+
+
+# Tests the container-push with:
+# - insecure local registries
+# - multi-arch manifests
+- name: Download and repush container and multi-arch images on insecure registries
+  hosts: all
+  vars:
+    # The way the container-push works, there's currently no way to test the vars lookup directly
+    # so we are passing the vars directly here, but this reduces coverage: if we
+    # change the lookup, they don't get any test
+    # Unfortunately adding coverage for those requires a refactoring of the way vars are passed
+    # to the container-push in general, which is way too difficult to do right now.
+    release: master
+    named_label: triple-ci-staging-promoted
+    # full_hash is provided by the staging environment
+    script_root: UNUSED
+    distro_name: centos
+    distro_version: 7
+    containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+    # Source and target registries are provided by staging environment
+    manifest_push: true
+  tasks:
     - name: Test promoter container manifest-push.yml
       block:
         - name: launch staging setup scripts
