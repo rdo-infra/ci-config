@@ -338,13 +338,26 @@
   register: apache_config
   become: true
 
-- name: Start and enable Apache
-  service:
-    name: httpd
-    state: restarted
-    enabled: yes
+- name: Restarts systemd (workaround for centos container bug)
+  command: kill 1; sleep 2
   become: true
-  when: apache_config is changed
+  when: setup_staging
+
+- block:
+    - name: Start and enable Apache
+      systemd:
+        name: httpd
+        daemon_reexec: yes
+        state: restarted
+        enabled: yes
+      become: true
+      when: apache_config is changed
+  rescue:
+    - shell: journalctl
+      register: jout
+
+    - debug:
+        var: jout
 
 
 #
