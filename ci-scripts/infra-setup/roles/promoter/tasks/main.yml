@@ -338,9 +338,20 @@
   register: apache_config
   become: true
 
+- name: clean up stale systemd sessions (Workaround for https://github.com/systemd/systemd/issues/1961)
+  shell: |
+    set -o pipefail
+
+    find /run/systemd/system -name "session-*.scope" -delete
+    rm -rf /run/systemd/system/session*scope*
+    kill 1
+  become: true
+  when: apache_config is changed and setup_staging
+
 - name: Start and enable Apache
-  service:
+  systemd:
     name: httpd
+    daemon_reexec: yes
     state: restarted
     enabled: yes
   become: true
