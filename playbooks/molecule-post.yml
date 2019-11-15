@@ -1,0 +1,20 @@
+---
+- hosts: all
+  tasks:
+    - name: Ensure logs directory exists
+      file:
+        path: '{{ zuul.executor.log_root }}/logs'
+        state: directory
+      delegate_to: localhost
+
+    - name: Copy files from tox log dir on node
+      failed_when: false
+      synchronize:
+        src: '{{ zuul.project.src_dir }}/.tox/molecule_delegated/log/'
+        dest: '{{ zuul.executor.log_root }}/logs/tox'
+        mode: pull
+        copy_links: true
+        verify_host: true
+        rsync_opts:
+          - --include=reports.html
+          - --exclude=*
