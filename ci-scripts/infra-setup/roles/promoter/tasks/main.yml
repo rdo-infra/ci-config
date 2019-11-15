@@ -338,9 +338,21 @@
   register: apache_config
   become: true
 
+- name: clean up stale systemd sessions (Workaround)
+  shell: |
+    find /run/systemd/system -name "session-*.scope" -delete
+    rm -rf /run/systemd/system/session*scope*
+    systemctl | grep "abandoned" | grep -e "-[[:digit:]]" | sed "s/\.scope.*/.scope/" | xargs systemctl stop
+    systemctl restart dbus-org.freedesktop.login1.service
+    systemctl restart systemd-logind.service
+    systemctl daemon-reload
+  become: true
+  when: apache_config is changed
+
 - name: Start and enable Apache
-  service:
+  systemd:
     name: httpd
+    daemon_reexec: yes
     state: restarted
     enabled: yes
   become: true
