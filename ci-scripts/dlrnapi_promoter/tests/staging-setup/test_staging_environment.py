@@ -20,6 +20,7 @@ except ImportError:
     import urllib.request as url
 import yaml
 
+
 from staging_environment import StagedEnvironment, load_config
 from dlrnapi_client.rest import ApiException
 
@@ -105,6 +106,21 @@ def test_staging_env(staged_env):
             for target in stage_info['registries']['targets']:
                 if registry['name'] == target['name']:
                     found = True
+                    if registry['secure']:
+                        # Check that registry marked as secure
+                        # have a auth_url defined
+                        assert "auth_url" in target
+                        # And we can log in with info provided
+                        try:
+                            docker_client.login(
+                                registry=target['auth_url'],
+                                username=target['username'],
+                                password=target['password'],
+                                dockercfg_path="/dev/null",
+                                reauth=True
+                            )
+                        except docker.errors.APIError:
+                            assert False, "Login failed"
             assert found
         # Check that the registries are up and running
         assert docker_client.containers.get(registry['name'])
