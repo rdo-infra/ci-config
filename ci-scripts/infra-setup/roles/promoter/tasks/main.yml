@@ -339,13 +339,13 @@
   become: true
 
 - name: Start and enable Apache
-  service:
+  systemd:
     name: httpd
+    daemon_reexec: yes
     state: restarted
     enabled: yes
   become: true
   when: apache_config is changed
-
 
 #
 # Credential prepare
