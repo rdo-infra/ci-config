@@ -6,8 +6,7 @@
     - name: Run role test job
       shell: |-
         . {{ ansible_user_dir }}/test-python/bin/activate
-        # Add all the delegated scenarios here.
-        molecule test -s promote-images
+        tox -emolecule_delegated -- roles/promoter/molecule/promote-images/molecule.yml
       args:
         chdir: "{{ ansible_user_dir }}/{{ zuul.project.src_dir }}/roles/promoter"
         executable: /bin/bash
