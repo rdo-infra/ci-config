@@ -9,7 +9,7 @@ RDO_CONFIG_DIR="${RDO_CONFIG_DIR:-src/rdo-infra/review.rdoproject.org-config}"
 source "${VENV}/bin/activate"
 
 # Ensure that ansible is installed.
-pip install ansible==2.5.8
+pip install ansible==2.8.0
 
 pushd $WORKSPACE
 

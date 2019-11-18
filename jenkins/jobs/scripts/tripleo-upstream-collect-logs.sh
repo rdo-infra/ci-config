@@ -13,7 +13,7 @@ VENV="${WORKSPACE}/venv"
 source "${VENV}/bin/activate"
 
 # Ensure that ansible is installed.
-pip install ansible==2.5.8
+pip install ansible==2.8.0
 
 # Add logserver to the ansible_hosts file
 cat << EOF >> ${ANSIBLE_HOSTS}
