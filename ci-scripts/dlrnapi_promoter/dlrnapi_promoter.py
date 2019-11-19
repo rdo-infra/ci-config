@@ -355,9 +355,13 @@ def promote_all_links(
                             promote_name, new_hashes)
                 break
             else:
+                config = {}
+                promoter_agent = rollback.PromoterAgent(config)
+                transaction = promoter_agent.start_transaction(attempt_hash, rollback_hash, promote_name)
                 try:
                     # ocata does not have containers to upload
                     # this can be removed once ocata is EOL
+                    transaction.checkpoint("containers", "start")
                     check_named_hashes_unchanged(release, promote_from, api)
                     if release not in ['ocata']:
                         tag_containers(
@@ -367,6 +371,9 @@ def promote_all_links(
                             promote_name,
                             manifest_push)
 
+                    transaction.checkpoint("containers", "end")
+
+                    transaction.checkpoint("qcow", "start")
                     # For fedora we just run standalone let's not tag images
                     check_named_hashes_unchanged(release, promote_from, api)
                     distro_name, _ = distro
@@ -376,9 +383,15 @@ def promote_all_links(
                             distro,
                             release,
                             promote_name)
+                    transaction.checkpoint("qcow", "end")
 
                     check_named_hashes_unchanged(release, promote_from, api)
+
+                    # If this point fails, we don't need to roll it back
+                    # If this succeeds, we don't need to roll it back
                     promote_link(api, new_hashes, promote_name)
+                    promoter_agent.end_transaction()
+
                     logger.info('SUCCESS promoting %s%s-%s %s as %s (%s)',
                                 distro[0], distro[1], release, current_name,
                                 promote_name, new_hashes)
@@ -402,6 +415,8 @@ def promote_all_links(
                         api_url,
                         new_hashes['commit_hash'],
                         new_hashes['distro_hash'])
+                    logger.info("Attempting rollback")
+                    transaction.rollback()
                     raise
 
 
