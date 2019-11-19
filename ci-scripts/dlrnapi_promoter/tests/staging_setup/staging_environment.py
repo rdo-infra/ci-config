@@ -574,15 +574,16 @@ def load_config(overrides, db_filepath=None):
     with open(config_file) as cf:
         config = yaml.safe_load(cf)
 
-    # fixtures are the basis for all the environment
-    # not just for db injection, they contain the commit info
-    # on which the entire promotion is based.
-    config['db_fixtures'] = os.path.join(
-        base_path, "fixtures", "scenario-1.yaml")
 
     config['results'] = {}
 
     config.update(overrides)
+
+    # fixtures are the basis for all the environment
+    # not just for db injection, they contain the commit info
+    # on which the entire promotion is based.
+    config['db_fixtures'] = os.path.join(
+        base_path, "fixtures", config['fixture_file'])
 
     if (config['components'] == "all"
        or "inject-dlrn-fixtures" in config['components']):
@@ -615,6 +616,9 @@ def main():
     parser.add_argument('--promoter-user', default=os.environ.get("USER",
                                                                   "centos"),
                         help="The promoter user")
+    parser.add_argument('--fixture-file', default="scenario-1.yaml",
+                        help=("Fixture to inject to dlrn server"
+                              " (relative to config dir)"))
     args = parser.parse_args()
 
     # Cli argument overrides over config
@@ -622,7 +626,8 @@ def main():
         "components": args.components,
         "stage-info-path": "/tmp/stage-info.yaml",
         "dry-run": args.dry_run,
-        "promoter_user": args.promoter_user
+        "promoter_user": args.promoter_user,
+        "fixture_file": args.fixture_file,
     }
     config = load_config(overrides)
 
