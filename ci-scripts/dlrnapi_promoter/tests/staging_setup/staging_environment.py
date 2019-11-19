@@ -36,6 +36,7 @@ import os
 import pprint
 import shutil
 import sqlite3
+import subprocess
 import tempfile
 import yaml
 
@@ -75,6 +76,17 @@ ROqmK1Dhcd2F0NUvAevJMhWDj5Cy6rehMBRlhgfCYZs9tMAlG6mCm6q9
 htpasswd = ("username:"
             "$2y$05$awdjjCuIy8riH6xLa37EJeC4hFbjZ4KRIVaoMMqEFaktoAfy8B2XW")
 
+versions_csv = '''
+openstack-tripleo-common,https://git.openstack.org/openstack/tripleo-common,c57d2420a8435af7813b44a772df98c8c444f990,https://github.com/rdo-packages/tripleo-common-distgit.git,25fbd3fa6d8ea905e0b6ae386780f0203d22b732,SUCCESS,1574467338,openstack-tripleo-common-11.4.0-0.20191123000336.c57d242.el7
+python-tripleo-common-tests-tempest,https://git.openstack.org/openstack/tripleo-common-tempest-plugin,b6929550ca4a5b6269b4451ec2250053728b7fa2,https://github.com/rdo-packages/tripleo-common-tempest-plugin-distgit.git,7ae014d193ad00ddb5007431665a0b3347c2c94b,SUCCESS,1573236125,python-tripleo-common-tests-tempest-0.0.1-0.20191108180320.b692955.el7
+'''
+
+containers_yaml_j2 = '''
+- imagename: "{{namespace}}/{{name_prefix}}%s{{name_suffix}}:{{tag}}"
+  image_source: kolla
+  params:
+    - ContainerAodhApiImage
+'''
 
 def get_full_hash(commit_hash, distro_hash):
     return "{}_{}".format(commit_hash, distro_hash[:8])
@@ -104,7 +116,9 @@ class BaseImage(object):
         return self.image
 
     def remove(self):
-        self.client.images.remove(self.image.id, force=True)
+        # Do NOT use build.id here, or this will remove all the other local
+        # images based on it
+        self.client.images.remove(self.build_tag)
 
 
 class Registry(object):
@@ -217,6 +231,7 @@ class Registry(object):
                 "REGISTRY_AUTH_HTPASSWD_PATH": "/auth/htpasswd",
                 "REGISTRY_HTTP_TLS_CERTIFICATE": "/certs/domain.crt",
                 "REGISTRY_HTTP_TLS_KEY": "/certs/domain.key",
+                "REGISTRY_LOG_LEVEL": "debug",
             }
         self.container = self.docker_containers.run(self.registry_image.id,
                                                     **kwargs)
@@ -256,13 +271,11 @@ class StagedHash(object):
         """
         For each hash, configure the images server i.e. configure local paths
         for the sftp client to promote. Paths created here mimic the hierarchy
-        used by the actual images server. It also injects a single empty image
-        in the path. Might consider removing as the promoter cares only about
-        directories and links
+        used by the actual images server. It also injects all the required images
+        in the path as empty file
         """
         distro_images_dir = self.config['distro_images_dir']
-        image_path = os.path.join(distro_images_dir, self.full_hash,
-                                  "{}-image.tar.gz".format(self.full_hash))
+        image_dir = os.path.join(distro_images_dir, self.full_hash)
         self.images_dirs[self.config['distro']] = distro_images_dir
 
         if self.config['dry-run']:
@@ -270,9 +283,11 @@ class StagedHash(object):
 
         os.mkdir(os.path.join(distro_images_dir, self.full_hash))
         # This emulates a "touch" command
-        self.log.info("Create empty image in %s", image_path)
-        with open(image_path, 'w'):
-            pass
+        for image in self.config['overcloud_images']['files']:
+            image_path = os.path.join(image_dir, image)
+            self.log.info("Creating empty images  %s", image_path)
+            with open(image_path, 'w'):
+                pass
 
     def promote_overcloud_images(self, promotion_target):
         """
@@ -295,11 +310,12 @@ class StagedHash(object):
         except OSError:
             self.log.info("Overcloud images already promoted, not creating")
 
-    def setup_containers(self):
+    def setup_containers(self, remove=True):
         """
         This sets up the container both locally and remotely.
         it create a set of containers as defined in the stage-config file
         Duplicating per distribution available
+        if remove is set to false, dont' remove local registries
         """
 
         base_image = BaseImage("promotion-stage-base:v1")
@@ -331,9 +347,6 @@ class StagedHash(object):
                 image = "{}/{}".format(namespace, target_image_name)
                 full_image = "localhost:{}/{}".format(
                     source_registry['port'], image)
-                self.log.debug("Pushing container %s:%s"
-                               " to localhost:%s",
-                               image, tag, source_registry['port'])
                 # Skip ppc tagging on the last image in the list
                 # to emulate real life scenario
                 if ("ppc64le" in tag and image_name == suffixes[-1]):
@@ -344,38 +357,20 @@ class StagedHash(object):
 
                 pushed_images.append("{}:{}".format(image, tag))
 
+                self.log.debug("Pushing container %s:%s"
+                               " to localhost:%s",
+                               image, tag, source_registry['port'])
                 if self.config['dry-run']:
                     continue
 
                 self.docker_client.images.push(full_image, tag=tag)
-                self.docker_client.images.remove(image_tag)
-
-        self.config['results']['containers'] = pushed_images
+                if remove:
+                    self.docker_client.images.remove(image_tag)
 
         if not self.config['dry-run']:
             base_image.remove()
 
-    def setup_repo_path(self):
-        """
-        CANDIDATE FOR REMOVAL
-        This function should setup the repo path for the dlrnapi server
-        emulating the path created during the build of a repo associated
-        to an hash
-        But AFAIU the dlrnapi server doesn't care if directory created or not,
-        the promotion via dlrnapi will create a broken link to a directory that
-        doesn't exist, but doesn't produce any error. Unless we hit some error
-        we can completely ignore this part and remove this TODO(panda)
-        """
-        # Setting up repo path is optional
-        # dlrn hash promoted via api just create a broken link
-        # but we don't care.
-        repo_path = "/tmp/delorean"
-        # TODO(fixme) if we want to keep this we must pass dlrn_hash and
-        # candidate name
-        dlrn_hash = "foo"
-        candidate_name = "bar"
-        os.mkdir(repo_path + dlrn_hash)
-        os.symlink(repo_path + dlrn_hash, candidate_name)
+        return pushed_images
 
     def prepare_environment(self):
         """
@@ -414,8 +409,6 @@ class StagedEnvironment(object):
         self.stages = {}
         self.registries = {}
         self.fixture_file = self.config['db_fixtures']
-        self.dlrn_repo_dir = os.path.join(os.environ.get('HOME', '/tmp'),
-                                          'data')
         with open(self.fixture_file) as ff:
             self.fixture = yaml.safe_load(ff)
 
@@ -437,39 +430,119 @@ class StagedEnvironment(object):
             staged_hash = self.stages[promotion['full_hash']]
             staged_hash.promote_overcloud_images(promotion['name'])
 
-    def inject_dlrn_fixtures(self):
+    def setup_dlrn(self):
         """
         Injects the fixture to the database using the existing utils
         offered by dlrn itself
+        Creates file tree, generates url for access.
+        setup the repo path for the dlrnapi server emulating the
+        path created during the build of a repo associated to an hash. Not
+        necessary for the promotion itself, but needed for testing of other
+        components.
+        Launches dlrn api server
         """
-        session = dlrn_db.getSession(
-            "sqlite:///%s" % self.config['db_filepath'])
-        db_filepath = self.config['db_filepath']
-        self.config['results']['inject-dlrn-fixtures'] = db_filepath
-        self.config['results']['dlrn_host'] = self.config['dlrn_host']
+        root = self.config['dlrn']['root']
+        repo_root = os.path.join(root, 'data', 'repos')
+        db_filepath = os.path.join(root, self.config['dlrn']['db_file'])
+
+        self.config['results']['dlrn'] = {
+            'api_url': 'http://{}:{}'.format(self.config['dlrn']['host'],
+                                             self.config['dlrn']['port']),
+            'repo_url': 'file://{}'.format(repo_root),
+            'username': self.config['dlrn']['username'],
+            'password': self.config['dlrn']['password'],
+            'root': root,
+        }
+
+        launch_cmd = ("gunicorn -w 4 -b {}:{}"
+                      " dlrn.api:app --log-level debug -D"
+                      " --log-file dlrnapi.log"
+                      "".format(self.config['dlrn']['host'],
+                                self.config['dlrn']['port']))
+
+        self.log.debug("Launching DLRN server with command: '{}'", launch_cmd)
+
+        self.log.debug("Injecting %s fixtures to %s", self.config['db_fixtures'],
+                       db_filepath)
 
         if self.config['dry-run']:
             return
 
-        os.makedirs(os.path.join(self.dlrn_repo_dir, 'repos'))
+        # Creates hierarchy
+        try:
+            os.makedirs(repo_root)
+        except OSError:
+            self.log.info("Repo root dir exists, not creating")
+        for target_name, commit in self.config['promotions'].items():
+            full_hash = "{}_{}".format(commit['commit_hash'],
+                                       commit['distro_hash'][:8])
+            commit_dir = os.path.join(repo_root, commit['commit_hash'][:2],
+                                      commit['commit_hash'][2:4],
+                                      full_hash)
+            os.makedirs(commit_dir)
+            versions_path = os.path.join(commit_dir, 'versions.csv')
+            with open(versions_path, "w") as versions_file:
+                versions_file.write(versions_csv)
+            os.symlink(commit_dir, os.path.join(repo_root, commit['name']))
+
+        # Creates db from fixtures
+        session = dlrn_db.getSession("sqlite:///%s" % db_filepath)
         try:
             utils.loadYAML(session, self.config['db_fixtures'])
         except sqlite3.IntegrityError:
             self.log.info("DB is not empty, not injecting fixtures")
 
-    def generate_pattern_file(self):
+        # Launches the server
+        working_dir = os.getcwd()
+        os.chdir(root)
+        subprocess.check_call(launch_cmd.split())
+        os.chdir(working_dir)
+
+    # TODO(gcerami) Currently untested feature
+    def teardown_containers(self, containers):
+        ''' Remove containers from local registries if any were left
+            by setup (for example if remove is false in setup)
+        '''
+        source_registry = None
+        for registry in self.config['registries']:
+            if registry['type'] == "source":
+                source_registry = registry
+                break
+
+        if source_registry is None:
+            raise Exception("No source registry specified in configuration")
+
+        for image in containers:
+            full_image = "localhost:{}/{}".format(
+                source_registry['port'], image)
+            try:
+                self.docker_client.images.remove(full_image)
+            except docker.errors.ImageNotFound:
+                pass
+
+    def teardown_dlrn(self):
+        root = self.config['dlrn']['root']
+        teardown_cmd = "pkill gunicorn"
+        if self.config['dry-run']:
+            return
+        subprocess.check_call(teardown_cmd.split())
+        shutil.rmtree(root)
+
+    def generate_containers_files(self):
         """
         The container-push playbook of the real promoter gets a list of
         containers from a static position in a tripleo-common repo in a file
         called overcloud_containers.yaml.j2.
-        We don't intervene in that part, and it will be tested with the rest.
+        In current tests we don't intervene in that part, and it will be tested with the rest.
         But container-push now allows for this list to match against a grep
         pattern file in a fixed position. We create such file during staging
         setup So the list of containers effectively considered will be reduced.
         """
         image_names = self.config['containers']['images-suffix']
         pattern_file_path = self.config['containers']['pattern_file_path']
+        containers_yaml_path = self.config['containers']['containers_yaml_path']
         self.config['results']['pattern_file_path'] = pattern_file_path
+        self.config['results']['containers_yaml_url'] = "file://{}".format(self.config['root_dir'])
 
         if self.config['dry-run']:
             return
@@ -478,6 +551,17 @@ class StagedEnvironment(object):
             for image_name in image_names:
                 line = ("^{}$\n".format(image_name))
                 pattern_file.write(line)
+
+        try:
+            os.makedirs(os.path.dirname(containers_yaml_path))
+        except IOError:
+            pass
+
+        with open(containers_yaml_path, "w") as containers_yaml_file:
+            # First two images should always be base and openstack-base
+            # and Those don't need an entry in this file
+            for image_name in image_names[2:]:
+                containers_yaml_file.write(containers_yaml_j2 % image_name)
 
     def setup_registries(self):
         results = {}
@@ -504,12 +588,18 @@ class StagedEnvironment(object):
                     'username': 'unused',
                     'password': 'unused',
                 }
+                scheme = "http"
                 if registry_conf['secure']:
                     result_registry['username'] = 'username'
                     result_registry['password'] = 'password'
                     auth_url = ("https://localhost:{}"
                                 "".format(registry_conf['port']))
+                    scheme = "https"
                     result_registry['auth_url'] = auth_url
+                api_url = "{}://localhost:{}/v2".format(scheme,
+                                                 registry_conf['port'])
+                result_registry['api_url'] = api_url
+
                 results['targets'].append(result_registry)
             if self.config['dry-run']:
                 continue
@@ -537,6 +627,7 @@ class StagedEnvironment(object):
         self.config['results']['promotion_target'] = \
             self.config['promotion_target']
 
+        # Setup logfile
         template = Template(self.config['logfile_template'])
         logfile = template.substitute({
             'distro': self.config['distro'],
@@ -545,22 +636,43 @@ class StagedEnvironment(object):
             'release': self.config['release'],
         })
         self.config['results']['logfile'] = logfile
+
+        if not self.config['dry-run']:
+            try:
+                os.makedirs(self.config['root_dir'])
+            except OSError:
+                self.log.info("Root dir exists, not creating")
+
+        # Setup registried
         if (self.config['components'] == "all"
            or "registries" in self.config['components']):
             self.setup_registries()
 
+        # Setup dlrn server and repository
         if (self.config['components'] == "all"
-           or "inject-dlrn-fixtures" in self.config['components']):
-            self.inject_dlrn_fixtures()
+           or "dlrn" in self.config['components']):
+            self.setup_dlrn()
 
+        # Setup pattern file
         if (self.config['components'] == "all"
            or "container-images" in self.config['components']):
             # Select only the stagedhash with the promotion candidate
+            pushed_images = []
             candidate_full_hash = \
                 self.config['promotions']['promotion_candidate']['full_hash']
-            self.stages[candidate_full_hash].setup_containers()
-            self.generate_pattern_file()
+            current_full_hash = \
+                self.config['promotions']['currently_promoted']['full_hash']
+            images = self.stages[current_full_hash].setup_containers(
+                remove=self.config['remove_local_containers'])
+            pushed_images += images
+            images = self.stages[candidate_full_hash].setup_containers(
+                remove=self.config['remove_local_containers'])
+            pushed_images += images
+            self.config['results']['containers'] = pushed_images
 
+            self.generate_containers_files()
+
+        # Setup qcow images
         if (self.config['components'] == "all"
            or "overcloud-images" in self.config['components']):
             try:
@@ -590,10 +702,12 @@ class StagedEnvironment(object):
         for full_hash, stage in self.stages.items():
             stage.prepare_environment()
 
+        # Setup qcow images promotion
         if (self.config['components'] == "all"
            or "overcloud-images" in self.config['components']):
             self.promote_overcloud_images()
 
+        # Dump stage info
         with open(self.config['stage-info-path'], "w") as stage_info:
             stage_info.write(yaml.dump(self.config['results']))
 
@@ -631,12 +745,9 @@ class StagedEnvironment(object):
         with open(self.config['stage-info-path'], "r") as stage_info:
             results = yaml.safe_load(stage_info)
 
-        # We don't cleanup fixtures from the db
-        # remove the db file is cleaner and quicker
         if (self.config['components'] == "all"
-           or "inject-dlrn-fixtures" in self.config['components']):
-            os.unlink(self.config['db_filepath'])
-            shutil.rmtree(self.dlrn_repo_dir)
+           or "dlrn" in self.config['components']):
+            self.teardown_dlrn()
 
         if (self.config['components'] == "all"
            or "registries" in self.config['components']):
@@ -645,6 +756,7 @@ class StagedEnvironment(object):
         if (self.config['components'] == "all"
            or "container-images" in self.config['components']):
             os.unlink(self.config['containers']['pattern_file_path'])
+            self.teardown_containers(results['containers'])
 
         if (self.config['components'] == "all"
            or "overcloud-images" in self.config['components']):
@@ -659,6 +771,8 @@ class StagedEnvironment(object):
         # We don't need to teardown all the containes created. The containers
         # are deleted immediately after pushing them to the source registry
 
+        if not self.config['dry-run']:
+            shutil.rmtree(self.config['root_dir'])
         os.unlink(self.config['stage-info-path'])
 
     def cleanup_containers(self, containers):
@@ -676,7 +790,7 @@ class StagedEnvironment(object):
             self.log.info("remote cleanup is not implemented")
 
 
-def load_config(overrides, db_filepath=None):
+def load_config(overrides):
     """
     This loads the yaml configuration file containing information on paths
     and distributions to stage
@@ -690,21 +804,16 @@ def load_config(overrides, db_filepath=None):
     with open(config_path) as cf:
         config = yaml.safe_load(cf)
 
+    config['results'] = {}
+
+    fixture_file = overrides.pop("fixture_file", "scenario-1.yaml")
+    config.update(overrides)
+
     # fixtures are the basis for all the environment
     # not just for db injection, they contain the commit info
     # on which the entire promotion is based.
     config['db_fixtures'] = os.path.join(
-        base_path, "fixtures", "scenario-1.yaml")
-
-    config['results'] = {}
-
-    config.update(overrides)
-
-    if (config['components'] == "all"
-       or "inject-dlrn-fixtures" in config['components']):
-        if db_filepath is None:
-            db_filepath = os.path.join(os.environ['HOME'], "commits.sqlite")
-        config['db_filepath'] = db_filepath
+        base_path, "fixtures", fixture_file)
 
     return config
 
@@ -719,7 +828,7 @@ def main():
     parser.add_argument('action', choices=['setup', 'teardown'])
     components = [
         "all(default)",
-        "inject-dlrn-fixtures",
+        "dlrn",
         "overcloud-images",
         "container-images",
         "registries",
@@ -734,6 +843,12 @@ def main():
     parser.add_argument('--stage-config-file', default="stage-config.yaml",
                         help=("Config file for stage generation"
                               " (relative to config dir)"))
+    parser.add_argument('--fixture-file', default="scenario-1.yaml",
+                        help=("Fixture to inject to dlrn server"
+                              " (relative to config dir)"))
+    parser.add_argument('--remove-local-containers', default=True,
+                        help=("Remove local containers after pushing"
+                              " to source registry"))
     args = parser.parse_args()
 
     # Cli argument overrides over config
@@ -742,7 +857,9 @@ def main():
         "stage-info-path": "/tmp/stage-info.yaml",
         "dry-run": args.dry_run,
         "promoter_user": args.promoter_user,
-        "stage-config-file": args.stage_config_file
+        "stage-config-file": args.stage_config_file,
+        "fixture_file": args.fixture_file,
+        "remove_local_containers": args.remove_local_containers,
     }
     config = load_config(overrides)
 
