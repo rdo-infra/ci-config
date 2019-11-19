@@ -357,24 +357,20 @@ class StagedHash(object):
 
     def setup_repo_path(self):
         """
-        CANDIDATE FOR REMOVAL
-        This function should setup the repo path for the dlrnapi server
-        emulating the path created during the build of a repo associated
-        to an hash
-        But AFAIU the dlrnapi server doesn't care if directory created or not,
-        the promotion via dlrnapi will create a broken link to a directory that
-        doesn't exist, but doesn't produce any error. Unless we hit some error
-        we can completely ignore this part and remove this TODO(panda)
+        This function setup the repo path for the dlrnapi server emulating the
+        path created during the build of a repo associated to an hash. Not
+        necessary for the promotion itself, but needed for testing of other
+        components.
         """
         # Setting up repo path is optional
         # dlrn hash promoted via api just create a broken link
         # but we don't care.
-        repo_path = "/tmp/delorean"
+        dlr_repo_path = "/tmp/delorean"
         # TODO(fixme) if we want to keep this we must pass dlrn_hash and
         # candidate name
         dlrn_hash = "foo"
         candidate_name = "bar"
-        os.mkdir(repo_path + dlrn_hash)
+        os.makedirs(repo_path + dlrn_hash)
         os.symlink(repo_path + dlrn_hash, candidate_name)
 
     def prepare_environment(self):
@@ -414,8 +410,7 @@ class StagedEnvironment(object):
         self.stages = {}
         self.registries = {}
         self.fixture_file = self.config['db_fixtures']
-        self.dlrn_repo_dir = os.path.join(os.environ.get('HOME', '/tmp'),
-                                          'data')
+        self.dlrn_repo_root = self.config['dlrn']['repo_root']
         with open(self.fixture_file) as ff:
             self.fixture = yaml.safe_load(ff)
 
@@ -437,6 +432,12 @@ class StagedEnvironment(object):
             staged_hash = self.stages[promotion['full_hash']]
             staged_hash.promote_overcloud_images(promotion['name'])
 
+    def launch_dlrn_server(self):
+        pass
+
+    def stop_dlrn_server(self):
+        pass
+
     def inject_dlrn_fixtures(self):
         """
         Injects the fixture to the database using the existing utils
@@ -451,7 +452,7 @@ class StagedEnvironment(object):
         if self.config['dry-run']:
             return
 
-        os.makedirs(os.path.join(self.dlrn_repo_dir, 'repos'))
+        os.makedirs(os.path.join(self.dlrn_repo_root, 'repos'))
         try:
             utils.loadYAML(session, self.config['db_fixtures'])
         except sqlite3.IntegrityError:
@@ -537,6 +538,7 @@ class StagedEnvironment(object):
         self.config['results']['promotion_target'] = \
             self.config['promotion_target']
 
+        # Setup logfile
         template = Template(self.config['logfile_template'])
         logfile = template.substitute({
             'distro': self.config['distro'],
@@ -545,14 +547,18 @@ class StagedEnvironment(object):
             'release': self.config['release'],
         })
         self.config['results']['logfile'] = logfile
+
+        # Setup registried
         if (self.config['components'] == "all"
            or "registries" in self.config['components']):
             self.setup_registries()
 
+        # Setup dlrn database fixtures
         if (self.config['components'] == "all"
            or "inject-dlrn-fixtures" in self.config['components']):
             self.inject_dlrn_fixtures()
 
+        # Setup pattern file
         if (self.config['components'] == "all"
            or "container-images" in self.config['components']):
             # Select only the stagedhash with the promotion candidate
@@ -561,6 +567,7 @@ class StagedEnvironment(object):
             self.stages[candidate_full_hash].setup_containers()
             self.generate_pattern_file()
 
+        # Setup qcow images
         if (self.config['components'] == "all"
            or "overcloud-images" in self.config['components']):
             try:
@@ -590,10 +597,22 @@ class StagedEnvironment(object):
         for full_hash, stage in self.stages.items():
             stage.prepare_environment()
 
+        # Setup dlrn server and repository
+        if (self.config['components'] == "all"
+           or "dlrn-server" in self.config['components']):
+            self.launch_dlrn_server()
+            for commit in self.results['commits']:
+                os.chdir(self.dlrn_repo_root)
+                repo_path = repo_path
+                os.symlink(commit[['name'], repo_path])
+
+
+        # Setup qcow images promotion
         if (self.config['components'] == "all"
            or "overcloud-images" in self.config['components']):
             self.promote_overcloud_images()
 
+        # Dump stage info
         with open(self.config['stage-info-path'], "w") as stage_info:
             stage_info.write(yaml.dump(self.config['results']))
 
@@ -631,12 +650,16 @@ class StagedEnvironment(object):
         with open(self.config['stage-info-path'], "r") as stage_info:
             results = yaml.safe_load(stage_info)
 
+        if (self.config['components'] == "all"
+           or "dlrn-server" in self.config['components']):
+            self.stop_dlrn_server()
+
         # We don't cleanup fixtures from the db
         # remove the db file is cleaner and quicker
         if (self.config['components'] == "all"
            or "inject-dlrn-fixtures" in self.config['components']):
             os.unlink(self.config['db_filepath'])
-            shutil.rmtree(self.dlrn_repo_dir)
+            shutil.rmtree(self.dlrn_repo_root)
 
         if (self.config['components'] == "all"
            or "registries" in self.config['components']):
@@ -690,15 +713,16 @@ def load_config(overrides, db_filepath=None):
     with open(config_path) as cf:
         config = yaml.safe_load(cf)
 
-    # fixtures are the basis for all the environment
-    # not just for db injection, they contain the commit info
-    # on which the entire promotion is based.
-    config['db_fixtures'] = os.path.join(
-        base_path, "fixtures", "scenario-1.yaml")
 
     config['results'] = {}
 
     config.update(overrides)
+
+    # fixtures are the basis for all the environment
+    # not just for db injection, they contain the commit info
+    # on which the entire promotion is based.
+    config['db_fixtures'] = os.path.join(
+        base_path, "fixtures", config['fixture_file'])
 
     if (config['components'] == "all"
        or "inject-dlrn-fixtures" in config['components']):
@@ -734,6 +758,9 @@ def main():
     parser.add_argument('--stage-config-file', default="stage-config.yaml",
                         help=("Config file for stage generation"
                               " (relative to config dir)"))
+    parser.add_argument('--fixture-file', default="scenario-1.yaml",
+                        help=("Fixture to inject to dlrn server"
+                              " (relative to config dir)"))
     args = parser.parse_args()
 
     # Cli argument overrides over config
@@ -742,7 +769,8 @@ def main():
         "stage-info-path": "/tmp/stage-info.yaml",
         "dry-run": args.dry_run,
         "promoter_user": args.promoter_user,
-        "stage-config-file": args.stage_config_file
+        "stage-config-file": args.stage_config_file,
+        "fixture_file": args.fixture_file,
     }
     config = load_config(overrides)
 
