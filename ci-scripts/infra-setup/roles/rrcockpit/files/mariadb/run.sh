@@ -44,11 +44,15 @@ read_lp(){
 
 read_recent_lp(){
     launchpad_bugs_mariadb.py \
-        --previous_days=5
+        --previous_days=1
 }
 
 read_bz(){
     bugzilla_bugs_mariadb.py
+}
+
+read_pass(){
+    skiplist.py
 }
 
 read_noop(){
@@ -74,7 +78,8 @@ ansible-playbook /tmp/wait-mariadb.yaml
 while true; do
     # noop jobs have been disabled
     # load_mariadb noop 2>&1 | tee /tmp/run.log
-    load_mariadb drop 2>&1 | tee /tmp/run.log
+
+    load_mariadb pass 2>&1 | tee /tmp/myscript.log
     load_mariadb lp 2>&1 | tee /tmp/run.log
     load_mariadb bz 2>&1 | tee /tmp/run.log
     load_mariadb recent_lp 2>&1 | tee /tmp/run.log
