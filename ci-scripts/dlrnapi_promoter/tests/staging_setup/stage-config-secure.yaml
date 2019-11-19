@@ -1,4 +1,5 @@
-dlrn_host: 'http://localhost:58080'
+# All paths below are relative to this
+root_dir: /tmp/promoter-staging/
 promotion_target: tripleo-ci-staging-promoted
 registries:
     # you can add multiple targets, but only the first source will win
@@ -10,6 +11,10 @@ registries:
       name: local-target-registry-1
       port: 6500
       secure: False
+    - type: target
+      name: local-secure-registry-1
+      port: 6550
+      secure: True
 containers:
   # When modfying the suffixes, please follow these hints
   # - specify at least three values
@@ -20,13 +25,27 @@ containers:
   - nova-compute
   - neutron-server
   namespace: tripleomaster
-  pattern_file_path: /tmp/images_pattern_file
+  pattern_file_path: /tmp/promoter-staging/images_pattern_file
+  containers_yaml_path: |-
+    /tmp/promoter-staging/openstack/tripleo-common/raw/commit/c57d2420a8435af7813b44a772df98c8c444f990/container-images/overcloud_containers.yaml.j2
 distro: centos
 distro_version: 7
 dlrn:
-  repo_root: data/repos
+  host: localhost
+  port: 58080
+  root: /tmp/promoter-staging/dlrn/
+  db_file: commits.sqlite
+  username: foo
+  password: bar
 overcloud_images:
   base_dir: /tmp/promoter-staging/overcloud_images
   key: "sample_key"
+  files:
+    - ironic-python-agent.tar
+    - ironic-python-agent.tar.md5
+    - overcloud-full.tar
+    - overcloud-full.tar.md5
+    - undercloud.qcow2
+    - undercloud.qcow2.md5
 release: master
 logfile_template: '/home/${promoter_user}/promoter_logs/${distro}${distro_version}_${release}.log'
