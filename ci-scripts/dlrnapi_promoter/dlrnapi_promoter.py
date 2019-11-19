@@ -9,6 +9,9 @@ import os
 import subprocess
 import sys
 
+from agent import PromoterAgent
+from common import PromoterConfig
+
 from dlrnapi_client.rest import ApiException
 import dlrnapi_client
 
@@ -312,7 +315,8 @@ def promote_all_links(
         latest_hashes_count,
         api_url,
         manifest_push,
-        target_registries_push):
+        target_registries_push,
+        promoter_config):
     '''Promote DLRN API links as a different one when all jobs are
     successful'''
     logger = logging.getLogger('promoter')
@@ -358,9 +362,18 @@ def promote_all_links(
                             promote_name, new_hashes)
                 break
             else:
+                config = {}
+                promoter_agent = PromoterAgent(config)
+                attempt_hash = new_hashes
+                # This function doesn't gather this info ATM
+                rollback_hash = "unknown"
+                transaction = promoter_agent.start_transaction(attempt_hash,
+                                                               rollback_hash,
+                                                               promote_name)
                 try:
                     # ocata does not have containers to upload
                     # this can be removed once ocata is EOL
+                    transaction.checkpoint("containers", "start")
                     check_named_hashes_unchanged(release, promote_from, api)
                     if release not in ['ocata']:
                         tag_containers(
@@ -371,6 +384,9 @@ def promote_all_links(
                             manifest_push,
                             target_registries_push)
 
+                    transaction.checkpoint("containers", "end")
+
+                    transaction.checkpoint("qcow", "start")
                     # For fedora we just run standalone let's not tag images
                     check_named_hashes_unchanged(release, promote_from, api)
                     distro_name, _ = distro
@@ -380,9 +396,15 @@ def promote_all_links(
                             distro,
                             release,
                             promote_name)
+                    transaction.checkpoint("qcow", "end")
 
                     check_named_hashes_unchanged(release, promote_from, api)
+
+                    # If this point fails, we don't need to roll it back
+                    # If this succeeds, we don't need to roll it back
                     promote_link(api, new_hashes, promote_name)
+                    promoter_agent.end_transaction()
+
                     logger.info('SUCCESS promoting %s%s-%s %s as %s (%s)',
                                 distro[0], distro[1], release, current_name,
                                 promote_name, new_hashes)
@@ -406,6 +428,8 @@ def promote_all_links(
                         api_url,
                         new_hashes['commit_hash'],
                         new_hashes['distro_hash'])
+                    logger.info("Attempting rollback")
+                    transaction.rollback()
                     raise
 
 
@@ -470,6 +494,7 @@ def promoter(config):
     logger.info('Named hashes at start of promotion process: %s',
                 start_named_hashes)
 
+    promoter_config = PromoterConfig(config)
     promote_all_links(
         api_instance,
         promote_from,
@@ -480,7 +505,8 @@ def promoter(config):
         latest_hashes_count,
         api_url,
         manifest_push,
-        target_registries_push)
+        target_registries_push,
+        promoter_config)
     logger.info("FINISHED promotion process")
 
 
