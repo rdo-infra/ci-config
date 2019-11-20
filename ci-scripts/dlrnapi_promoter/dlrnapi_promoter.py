@@ -157,7 +157,8 @@ def setup_logging(log_file):
     logger.addHandler(log_handler)
 
 
-def tag_containers(new_hashes, distro, release, promote_name, manifest_push):
+def tag_containers(new_hashes, distro, release, promote_name, manifest_push,
+                   target_registries_push):
     logger = logging.getLogger('promoter')
     env = os.environ
     relpath = "ci-scripts/dlrnapi_promoter"
@@ -179,7 +180,8 @@ def tag_containers(new_hashes, distro, release, promote_name, manifest_push):
         script_root + 'ci-scripts/container-push/container-push.yml'
     )
 
-    manifest_opts = "-e manifest_push=%s" % manifest_push
+    push_opts = ("-e manifest_push=%s -e target_registries_push=%s"
+                 "" % (manifest_push, target_registries_push))
     try:
         logger.info('Promoting the container images for dlrn hash %s on '
                     '%s to %s', new_hashes['commit_hash'], release,
@@ -194,7 +196,7 @@ def tag_containers(new_hashes, distro, release, promote_name, manifest_push):
                 logfile,
                 release, new_hashes['commit_hash'], new_hashes['distro_hash'],
                 new_hashes['full_hash'], promote_name, script_root, distro_name,
-                distro_version, manifest_opts, promote_playbook
+                distro_version, push_opts, promote_playbook
             )
         logger.info('Running: %s', cmd)
         container_logs = \
@@ -309,7 +311,8 @@ def promote_all_links(
         release,
         latest_hashes_count,
         api_url,
-        manifest_push):
+        manifest_push,
+        target_registries_push):
     '''Promote DLRN API links as a different one when all jobs are
     successful'''
     logger = logging.getLogger('promoter')
@@ -365,7 +368,8 @@ def promote_all_links(
                             distro,
                             release,
                             promote_name,
-                            manifest_push)
+                            manifest_push,
+                            target_registries_push)
 
                     # For fedora we just run standalone let's not tag images
                     check_named_hashes_unchanged(release, promote_from, api)
@@ -414,10 +418,11 @@ def promoter(config):
     release = config.get('main', 'release')
     api_url = config.get('main', 'api_url')
 
-    try:
-        manifest_push = config.get('main', 'manifest_push')
-    except configparser.ConfigParser.InterpolationMissingOptionError:
-        manifest_push = False
+    # No boolean values here, as these are passed directly to ansible-playbook
+    # command line
+    manifest_push = config.get('main', 'manifest_push', fallback="false")
+    target_registries_push = config.get('main', 'target_registries_push',
+                                        fallback="true")
 
     logger.info('STARTED promotion process for release: %s', release)
 
@@ -474,7 +479,8 @@ def promoter(config):
         release,
         latest_hashes_count,
         api_url,
-        manifest_push)
+        manifest_push,
+        target_registries_push)
     logger.info("FINISHED promotion process")
 
 
