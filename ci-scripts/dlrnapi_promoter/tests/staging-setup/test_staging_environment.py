@@ -20,13 +20,9 @@ except ImportError:
     import urllib.request as url
 import yaml
 
+
 from staging_environment import StagedEnvironment, load_config
 from dlrnapi_client.rest import ApiException
-
-
-# FIXME(gcerami) I don't know why, but test via tox doesn't honour the scope
-# 'session' And the fixture is invoked more than once, so I have to put all the
-# tests on a single function
 
 
 @pytest.fixture(scope='session')
@@ -52,10 +48,19 @@ def staged_env():
 
     staged_env.teardown()
 
+    # Check registries are correctly cleared after teardown
+    docker_client = docker.from_env()
+    for registry in config['registries']:
+        try:
+            docker_client.containers.get(registry['name'])
+            assert False, "Registry {} still running".format(registry['name'])
+        except docker.errors.NotFound:
+            assert True
+    # TODO(gcerami) Check the rest of teardown works correctly
 
-# Uncomment when session fixture works and remove def below
-# def test_registries(staged_env):
-def test_staging_env(staged_env):
+
+@pytest.mark.serial
+def test_registries(staged_env):
 
     docker_client = docker.from_env()
     config, stage_info = staged_env
@@ -81,7 +86,7 @@ def test_staging_env(staged_env):
     # except ApiException as e:
     #    print("Exception when calling DefaultApi->api_promote_post: %s\n" % e)
 
-    # Check neede top level attributes
+    # Check needed top level attributes
     attributes = [
         "dlrn_host",
         "promotions",
@@ -124,9 +129,9 @@ def test_staging_env(staged_env):
             assert attribute in registry
 
 
-# Uncomment when session fixture works
-# def test_containers(staged_env):
-#     config, stage_info = staged_env
+@pytest.mark.serial
+def test_containers(staged_env):
+    config, stage_info = staged_env
     # Check that all decleare containers are realy pushed
     ppc64le_count = 0
     found = []
@@ -160,9 +165,9 @@ def test_staging_env(staged_env):
     assert ppc64le_ratio < 1 / 3.0
 
 
-# Uncomment when session fixture works
-# def test_pattern_file(staged_env):
-#     config, stage_info = staged_env
+@pytest.mark.serial
+def test_pattern_file(staged_env):
+    config, stage_info = staged_env
     # Check patterns file
     # THe pattern file should be valid for use with grep
     # and should return all images matching suffixes
@@ -188,9 +193,9 @@ def test_staging_env(staged_env):
     assert output == images_suffix_text
 
 
-# Uncomment when session fixture works
-# def test_overcloud_images(staged_env):
-#     config, stage_info = staged_env
+@pytest.mark.serial
+def test_overcloud_images(staged_env):
+    config, stage_info = staged_env
     # Check images subtree, all full hases should be there
     overcloud_images_path = config['overcloud_images']['base_dir']
     distro_path = "{}{}".format(config['distro'], config['distro_version'])
