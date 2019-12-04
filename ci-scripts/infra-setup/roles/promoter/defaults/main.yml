@@ -14,6 +14,7 @@ ci_config_remote_src_dir: "/home/{{ promoter_user }}/ci-config"
 local_path_dlrnapi_secret_default: "/tmp/dlrnapi_secret"
 local_path_registry_secret_default: "/tmp/registry_secret"
 local_path_uploader_key_default: "/tmp/uploader_key"
+local_path_rhel_uploader_key_default: "/tmp/uploader_key"
 # env vars can be specified to override the default locations
 local_path_dlrnapi_secret: >-
     {{ lookup('env', 'LOCAL_DLRNAPI_SECRET')
@@ -24,11 +25,15 @@ local_path_registry_secret: >-
 local_path_uploader_key: >-
     {{ lookup('env', 'LOCAL_UPLOADER_KEY')
     |default(local_path_uploader_key_default, true)  }}
+local_path_rhel_uploader_key: >-
+    {{ lookup('env', 'LOCAL_RHEL_UPLOADER_KEY')
+    |default(local_path_rhel_uploader_key_default, true)  }}
 
 # Path on the provisioned server are fixed instead
 remote_path_dlrnapi_secret: "/home/{{ promoter_user }}/dlrnapi_secret"
 remote_path_registry_secret: "/home/{{ promoter_user }}/registry_secret"
 remote_path_uploader_key: "/home/{{ promoter_user }}/.ssh/id_rsa_uploader"
+remote_path_rhel_uploader_key: "/home/{{ promoter_user }}/.ssh/id_rsa_rhel_uploader"
 
 
 release: master
