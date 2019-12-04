@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright 2019 Red Hat, Inc.
 # All Rights Reserved.
 #
@@ -13,14 +14,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-# !/usr/bin/env python
 
 import argparse
-import tempfile
 import os
-import requests
+import tempfile
 
 from diskcache import Cache
+import requests
 
 ZUUL_API_BUILD = 'https://review.rdoproject.org/zuul/api/builds?job_name='
 
@@ -38,8 +38,9 @@ def main():
         description='This will get the tempest_file for fs021.')
     parser.add_argument(
         '--job_name',
-        default='periodic-tripleo-ci-centos-7-ovb-1ctlr_2comp-featureset021-',
-        help="(default: %(default)s)")
+        default='periodic-tripleo-ci-centos-7-ovb-1ctlr_2comp-'
+        'featureset021-master',
+        help="(default: %(default)s)",)
     parser.add_argument(
         '--log_file',
         default='',
@@ -49,16 +50,11 @@ def main():
         default=temp,
         help='specify where to create the tempest_download_file directory')
     args = parser.parse_args()
-    get_last_build(
-        args.job_name,
-        args.log_file,
-        args.tempest_dump_dir)
+    get_last_build(args.job_name, args.log_file, args.tempest_dump_dir)
 
 
 def get_last_build(
-        job_name,
-        tempest_log="tempest.html",
-        tempest_dump_dir=temp):
+        job_name, tempest_log, tempest_dump_dir=temp):
     """
      featureset021 all releases job
 
@@ -95,9 +91,8 @@ def download_tempest_file(url, local_filename):
 
     Parameters:
     url: The complete tempest log url
-    local_file: Result file (tempest.html, tempest.xml)
-
-    Return: filename
+    local_filename: Result file (tempest.html and stestr_results.html)
+    Return: local_filename
     """
     local_filename = url.split('/')[-1]
     with requests.get(url, stream=True) as r:
