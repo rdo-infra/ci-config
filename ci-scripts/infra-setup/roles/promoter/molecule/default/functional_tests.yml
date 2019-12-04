@@ -96,6 +96,17 @@
     fail_msg: "Uploader public key not found"
     success_msg: "Uploader public key was correctly created"
 
+- name: Stat public key
+  stat:
+    path: "{{ remote_path_rhel_uploader_key }}.pub"
+  register: uploader_rhel_public_key
+
+- name: Ensure we have uploader public key created and with correct permissions
+  assert:
+    that: uploader_rhel_public_key.stat.exists
+    fail_msg: "Uploader rhel public key not found"
+    success_msg: "Uploader rhel public key was correctly created"
+
 - name: Ensure role did not clone git from master
   block:
 
