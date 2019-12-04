@@ -60,8 +60,8 @@ def print_as_csv():
     timestamp = datetime.now()
     for file in get_files():
         for result in file.values():
-            for release_name, test in result.iteritems():
-                for testname, status in test.iteritems():
+            for release_name, test in result.items():
+                for testname, status in test.items():
                     print(('{},{},{},{},{}').format(
                         0,
                         release_name,
