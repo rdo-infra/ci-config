@@ -73,9 +73,10 @@
 
 # Create and push container manifests to registry.host with _x86_64 and ppc64le
 # tagged containers. Disabled by default https://tree.taiga.io/project/tripleo-ci-board/task/1394
+# Multi arch manifest is only compatible with v2_s2 API schema
 - name: 'Push {{ x86_tag }} {{ ppc_tag }} containers and manifests to {{ registry.host }}'
   include_tasks: manifest-push.yml
-  when: manifest_push|default(false)|bool
+  when: "manifest_push|default(false)|bool and registry.schema|default('v2_s1') == 'v2_s2'"
 
 
 - name: Check if images were pushed
@@ -94,6 +95,8 @@
   failed_when: "'ERROR' in command_result.stdout or command_result.rc != 0"
   retries: 1
   changed_when: false
+  # manifest commands are only compatible with v2_s2 API schema
+  when: "registry.schema|default('v2_s1') == 'v2_s2'"
 
 - name: Add pushed containers to the cleanup list
   set_fact:
