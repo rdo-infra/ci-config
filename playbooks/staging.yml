@@ -92,6 +92,18 @@
             name: promoter
             tasks_from: update_credentials
 
+        # as qcow images server is emulated locally,
+        # uploader_key must be added to the authorized
+        # TODO(gcerami) staging setup should take care of this
+        - name: create zuul ssh config dir
+          file:
+            state: directory
+            path: "{{ promoter_user }}/.ssh/"
+
+        - name: Add uploader pub key to authorized_keys if needed
+          shell: |
+            cat {{ remote_path_uploader_key }}.pub >> {{ promoter_user }}/.ssh/authorized_keys
+
         - name: Stage setup
           include_role:
             name: promoter
