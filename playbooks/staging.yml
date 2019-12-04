@@ -92,6 +92,21 @@
             name: promoter
             tasks_from: update_credentials
 
+        # as qcow images server is emulated locally,
+        # uploader_key must be added to the authorized
+        # TODO(gcerami) staging setup should take care of this
+        - name: Check if uploader key is in authorized_keys
+          shell: |
+            grep "$(cat {{ remote_path_uploader_key }})" {{ promoter_user }}/ssh/authorized_keys
+          register: authorized_keys
+          failed_when: false
+          changed_when: false
+
+        - name: Add uploader pub key to authorized_keys if needed
+          shell: |
+            cat {{ remote_path_uploader_key }}.pub >> {{ promoter_user }}/.ssh/authorized_keys
+          when: "authorized_keys.rc != 0"
+
         - name: Stage setup
           include_role:
             name: promoter
