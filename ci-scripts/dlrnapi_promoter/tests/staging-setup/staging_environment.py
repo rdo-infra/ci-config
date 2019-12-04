@@ -116,7 +116,7 @@ class Registry(object):
 
     log = logging.getLogger("promoter-staging")
 
-    def __init__(self, name, port=None, secure=False):
+    def __init__(self, name, port=None, secure=False, schema="v2_s2"):
         self.port = port
         self.name = name
         self.docker_client = docker.from_env()
@@ -124,7 +124,11 @@ class Registry(object):
         self.docker_images = self.docker_client.images
         self.container = None
         self.secure = secure
-        self.base_image = "registry:2"
+        self.schema = schema
+        if self.schema != "v2_s2":
+            raise Exception("Only registries with API v2_s2 are supported")
+        else:
+            self.base_image = "registry:2"
         self.base_secure_image = "registry:2secure"
         if self.secure:
             self.registry_image = self.get_secure_image()
@@ -492,6 +496,7 @@ class StagedEnvironment(object):
                         'namespace': self.config['containers']['namespace'],
                         'username': 'unused',
                         'password': 'unused',
+                        'schema': registry_conf['schema']
                     }
                 })
             else:
@@ -503,6 +508,7 @@ class StagedEnvironment(object):
                     'namespace': self.config['containers']['namespace'],
                     'username': 'unused',
                     'password': 'unused',
+                    'schema': registry_conf['schema'],
                 }
                 if registry_conf['secure']:
                     result_registry['username'] = 'username'
@@ -514,9 +520,11 @@ class StagedEnvironment(object):
             if self.config['dry-run']:
                 continue
 
+            # TODO(gcerami) Just pass registry_conf at this point.
             registry = Registry(registry_conf['name'],
                                 port=registry_conf['port'],
-                                secure=registry_conf['secure'])
+                                secure=registry_conf['secure'],
+                                schema=registry_conf['schema'])
             registry.run()
 
         self.config['results']['registries'] = results
