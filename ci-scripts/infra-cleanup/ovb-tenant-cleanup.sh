@@ -294,7 +294,8 @@ else
         done
     fi
 fi
-
+# Give time to stacks to delete their resources
+sleep 60
 # DOWN port cleanup
 PORT_TIME_EXPIRED=${PORT_TIME_EXPIRED:-360}
 DATE_TIME_EXPIRED=$(`which gdate date|head -n1` -d " $PORT_TIME_EXPIRED minutes ago" -u  "+%Y-%m-%dT%H:%M:%SZ")
