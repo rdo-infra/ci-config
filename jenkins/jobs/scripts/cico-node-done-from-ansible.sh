@@ -3,5 +3,5 @@
 SSID_FILE=${SSID_FILE:-$WORKSPACE/cico-ssid}
 
 for ssid in $(cat ${SSID_FILE}); do
-    cico -q node done $ssid
+    cico -q node fail $ssid
 done
