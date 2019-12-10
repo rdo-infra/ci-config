@@ -34,6 +34,16 @@ read_lp(){
             Incomplete
 
     launchpad_bugs_mariadb.py \
+        --tag upgrade \
+        --status \
+            New \
+            Confirmed \
+            Triaged \
+            'In Progress' \
+            'Fix Committed' \
+            Incomplete
+
+    launchpad_bugs_mariadb.py \
         --tag ci \
         --status \
             New
