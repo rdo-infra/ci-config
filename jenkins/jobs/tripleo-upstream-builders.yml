@@ -68,6 +68,8 @@
               tasks:
                 - shell: |
                     iptables -N openstack-INPUT
+                    iptables -I INPUT 1 -j openstack-INPUT
+
                     yum install -y docker gcc git python-devel python-virtualenv python-setuptools python-docker libffi libffi-devel openssl openssl-devel
                     easy_install pip
                     pip install ansible==2.8.0
