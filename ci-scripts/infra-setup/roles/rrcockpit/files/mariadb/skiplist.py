@@ -19,7 +19,7 @@ import tempest_file_downloader
 import tempest_html_json
 
 from datetime import datetime
-
+from collections import Counter
 
 parse_result = []
 
@@ -57,18 +57,15 @@ def print_as_csv():
     """
     This function print the result in csv format
     """
-    timestamp = datetime.now()
     for file in get_files():
         for result in file.values():
-            for release_name, test in result.iteritems():
-                for testname, status in test.iteritems():
-                    print(('{},{},{},{},{}').format(
+            for release_name, test in result.items():
+                for testname, status in test.items():
+                    print(('{},{},{},{}').format(
                         0,
                         release_name,
                         testname.split('(')[-1].replace("']", ""),
-                        str(timestamp),
                         status))
-
 
 if __name__ == "__main__":
     print_as_csv()
