@@ -57,16 +57,14 @@ def print_as_csv():
     """
     This function print the result in csv format
     """
-    timestamp = datetime.now()
     for file in get_files():
         for result in file.values():
             for release_name, test in result.iteritems():
                 for testname, status in test.iteritems():
-                    print(('{},{},{},{},{}').format(
+                    print(('{},{},{},{}').format(
                         0,
                         release_name,
                         testname.split('(')[-1].replace("']", ""),
-                        str(timestamp),
                         status))
 
 
