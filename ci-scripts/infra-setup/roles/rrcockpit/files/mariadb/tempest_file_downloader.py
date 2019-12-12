@@ -27,8 +27,6 @@ ZUUL_API_BUILD = 'https://review.rdoproject.org/zuul/api/builds?job_name='
 cache = Cache('/tmp/skip_cache')
 cache.expire()
 
-temp = tempfile.mkdtemp(prefix="skiplist")
-
 
 def main():
     """
@@ -40,32 +38,30 @@ def main():
         '--job_name',
         default='periodic-tripleo-ci-centos-7-ovb-1ctlr_2comp-'
         'featureset021-master',
-        help="(default: %(default)s)",)
+        help="(default: %(default)s)")
     parser.add_argument(
         '--log_file',
         default='',
-        help='specifiy the file name to be downloaded')
+        help='specify the file name to be downloaded')
     parser.add_argument(
         '--tempest_dump_dir',
-        default=temp,
+        default=None,
         help='specify where to create the tempest_download_file directory')
     args = parser.parse_args()
     get_last_build(args.job_name, args.log_file, args.tempest_dump_dir)
 
 
 def get_last_build(
-        job_name, tempest_log, tempest_dump_dir=temp):
+        job_name, tempest_log, tempest_dump_dir=None):
     """
-     featureset021 all releases job
-
-     This function get the zuul job url and tempest lastest log url
+     This function get the zuul job url and tempest latest log url
      and store into cache
 
      Parameters:
          job_name: complete job_name of the featureset
          tempest_log: tempest.html.gz or stestr.result.html file
-         tempest_log_url: complete job build url
-         release: release name of the job
+         tempest_dump_dir: temporary directory to store the tempest.html.gz
+         or stestr.results.html file
 
      Return: tempest log url and release name
     """
@@ -78,6 +74,7 @@ def get_last_build(
         if cache.get(tempest_log_url) != 200:
             resp_log = requests.get(tempest_log_url)
             if resp_log.status_code == 200:
+                tempest_dump_dir = tempfile.mkdtemp(prefix="skiplist")
                 download_tempest_file(tempest_log_url, tempest_dump_dir)
                 cache.add(tempest_log_url, os.path.join(tempest_dump_dir))
                 return (tempest_log_url, release)
@@ -85,19 +82,20 @@ def get_last_build(
                 pass
 
 
-def download_tempest_file(url, local_filename):
+def download_tempest_file(url, tempest_dump_dir):
     """
     This function will download the result file with temporary directory
 
     Parameters:
     url: The complete tempest log url
-    local_filename: Result file (tempest.html and stestr_results.html)
+    tempest_dump_dir: temporary directory to store the tempest.html.gz
+    or stestr.results.html file
     Return: local_filename
     """
     local_filename = url.split('/')[-1]
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
-        with open(os.path.join(temp, local_filename), 'wb') as f:
+        with open(os.path.join(tempest_dump_dir, local_filename), 'wb') as f:
             for chunk in r.iter_content(chunk_size=8192):
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
