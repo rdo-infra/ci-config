@@ -14,6 +14,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import copy
 import json
 import re
 import os
@@ -22,9 +23,9 @@ from bs4 import BeautifulSoup
 from diskcache import Cache
 from os import path
 
-
 result = {"Release": {
              "master": {"Testname": "Status"},
+             "train": {"Testname": "Status"},
              "stein": {"Testname": "Status"},
              "rocky": {"Testname": "Status"},
              "queens": {"Testname": "Status"}
@@ -131,8 +132,9 @@ def get_result(log_url, release):
     """
     combine = zip(combine_testcases(log_url), combine_status(log_url))
     test_status = {str(x): str(y) for x, y in combine}
-    result['Release'][release] = test_status
-    return result
+    output = copy.deepcopy(result)
+    output['Release'][release] = test_status
+    return output
 
 
 def output(log_url, release):

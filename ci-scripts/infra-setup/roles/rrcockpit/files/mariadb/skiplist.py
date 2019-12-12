@@ -21,13 +21,12 @@ import tempest_html_json
 from datetime import datetime
 
 
-parse_result = []
-
 
 def get_files():
     """
     This function gives the result of all the files parsed
     """
+    parse_result = []
     release_names = ['master', 'train', 'stein', 'rocky', 'queens']
     for release_name in release_names:
         if release_name in ['master', 'train']:
@@ -57,16 +56,14 @@ def print_as_csv():
     """
     This function print the result in csv format
     """
-    timestamp = datetime.now()
     for file in get_files():
         for result in file.values():
             for release_name, test in result.iteritems():
                 for testname, status in test.iteritems():
-                    print(('{},{},{},{},{}').format(
+                    print(('{},{},{},{}').format(
                         0,
                         release_name,
                         testname.split('(')[-1].replace("']", ""),
-                        str(timestamp),
                         status))
 
 
