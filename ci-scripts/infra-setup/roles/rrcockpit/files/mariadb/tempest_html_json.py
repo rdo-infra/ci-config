@@ -14,20 +14,21 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import json
+import copy
 import re
 import os
 
 from bs4 import BeautifulSoup
 from diskcache import Cache
-from os import path
 
-
-result = {"Release": {
-             "master": {"Testname": "Status"},
-             "stein": {"Testname": "Status"},
-             "rocky": {"Testname": "Status"},
-             "queens": {"Testname": "Status"}
+result = {
+    "Release":
+        {
+            "master": {"Testname": "Status"},
+            "train": {"Testname": "Status"},
+            "stein": {"Testname": "Status"},
+            "rocky": {"Testname": "Status"},
+            "queens": {"Testname": "Status"}
         }}
 
 cache = Cache("/tmp/skip_cache")
@@ -64,7 +65,7 @@ def get_pass_tests_name(log_url):
             filter = re.search("setUpClass ", name.text)
             if filter:
                 pass_test_cases_names.append(
-                        re.split("setUpClass ", name.text))
+                    re.split("setUpClass ", name.text))
             else:
                 pass_test_cases_names.append(name.text)
     return pass_test_cases_names
@@ -131,8 +132,9 @@ def get_result(log_url, release):
     """
     combine = zip(combine_testcases(log_url), combine_status(log_url))
     test_status = {str(x): str(y) for x, y in combine}
-    result['Release'][release] = test_status
-    return result
+    output = copy.deepcopy(result)
+    output['Release'][release] = copy.deepcopy(test_status)
+    return output
 
 
 def output(log_url, release):
