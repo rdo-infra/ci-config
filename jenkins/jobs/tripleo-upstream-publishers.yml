@@ -9,46 +9,6 @@
                 !include-raw:
                     - scripts/cico-node-done-from-ansible.sh
 
-- publisher:
-    name: 'tripleo-upstream-determine-success-or-fail'
-    publishers:
-        - post-tasks:
-            - matches:
-                - log-text: Building remotely
-              shell: |
-                WORKSPACE="${WORKSPACE:-/tmp}"
-                CICO_USER_DIR="${CICO_USER_DIR:-/root}"
-                VENV="${WORKSPACE}/venv"
-
-                [[ ! -d "${VENV}" ]] && virtualenv "${VENV}"
-                source "${VENV}/bin/activate"
-
-                # Ensure that ansible is installed
-                pip install ansible==2.8.0
-
-                # We keep connecting onto the same hosts that are continuously reinstalled
-                export ANSIBLE_HOST_KEY_CHECKING=False
-
-                # cat the playbook for determining the statuss to the workspace
-                cat << EOF > ${WORKSPACE}/determine-status.yml
-                ---
-                - name: 'Report build & upload status through console'
-                  hosts: openstack_nodes
-                  tasks:
-                    - name: Check error log
-                      shell: |
-                        ERROR_LOG=${CICO_USER_DIR}/workspace/logs/containers-build-errors.log
-                        # If the error log exists and is empty we should
-                        # have a successful build and upload
-                        if [ -f $ERROR_LOG ] && ! [[ -s $ERROR_LOG ]] ; then
-                          echo "Container build and upload was successful"
-                        else
-                          echo "Container build and upload failed"
-                        fi
-                EOF
-
-                ansible-playbook -vvv -i "${WORKSPACE}/hosts" "${WORKSPACE}/determine-status.yml"
-
 # "Building remotely" shows up regardless of job status,
 # So this publisher should always run.
 - publisher:
@@ -72,7 +32,7 @@
                   bash -ex scripts/tripleo-upstream-dlrn-report.sh
         - post-tasks:
             - matches:
-                - log-text: Container build and upload was successful
+                - log-text: Container build and upload succeeded
               run-if-job-successful: true
               script: |
                 export SUCCESS="true"

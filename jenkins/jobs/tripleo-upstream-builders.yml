@@ -151,6 +151,12 @@
                 - name: Run build containers tasks
                   include_role:
                     name: build-containers
+                  register: result
+                  ignore_errors: true
+
+                - name: Report results
+                  debug:
+                    msg: "{{ 'Container build and upload failed' when result is failed else 'Container build and upload was successful' }}"
             EOF
 
             # cico-get-node requests a duffy node and generates an ansible-compatible
