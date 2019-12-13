@@ -3764,6 +3764,359 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\", \"voting\" FROM \"build\" WHERE (\"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"pipeline\" = 'github-check') AND $timeFilter GROUP BY \"project\"",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "voting"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-check"
+                            }
+                        ]
+                    }
+                ],
+                "title":"RDO github check jobs",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"Running list of all RDO *check* jobs. Click on a particular job name to go to the logs or on the gerrit change number to see the review.",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":11,
+                    "w":24,
+                    "x":0,
+                    "y":98
+                },
+                "id":426,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "project"
+                                ],
+                                "type":"tag"
+                            }
+                        ],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
                         "refId":"A",
                         "resultFormat":"table",
                         "select":[
@@ -3856,6 +4209,359 @@
                 "type":"table"
             },
             {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"Running list of all RDO *check* jobs. Click on a particular job name to go to the logs or on the gerrit change number to see the review.",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":7,
+                    "w":24,
+                    "x":0,
+                    "y":109
+                },
+                "id":427,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "project"
+                                ],
+                                "type":"tag"
+                            }
+                        ],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\", \"voting\" FROM \"build\" WHERE (\"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"pipeline\" = 'github-manual') AND $timeFilter GROUP BY \"project\"",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "voting"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-check"
+                            }
+                        ]
+                    }
+                ],
+                "title":"RDO github manually triggered jobs",
+                "transform":"table",
+                "type":"table"
+            },
+            {
                 "aliasColors":{},
                 "bars":false,
                 "dashLength":10,
@@ -3867,7 +4573,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":98
+                    "y":116
                 },
                 "id":232,
                 "legend":{
@@ -4162,7 +4868,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":106
+                    "y":124
                 },
                 "id":370,
                 "panels":[],
@@ -4178,7 +4884,7 @@
                     "h":9,
                     "w":24,
                     "x":0,
-                    "y":107
+                    "y":125
                 },
                 "id":386,
                 "links":[
@@ -4541,7 +5247,7 @@
                     "h":9,
                     "w":24,
                     "x":0,
-                    "y":116
+                    "y":134
                 },
                 "id":392,
                 "links":[],
@@ -4877,7 +5583,7 @@
                     "h":5,
                     "w":24,
                     "x":0,
-                    "y":125
+                    "y":143
                 },
                 "id":391,
                 "links":[],
@@ -5212,7 +5918,7 @@
                     "h":5,
                     "w":24,
                     "x":0,
-                    "y":130
+                    "y":148
                 },
                 "id":381,
                 "links":[],
@@ -5545,7 +6251,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":135
+                    "y":153
                 },
                 "id":140,
                 "panels":[
@@ -6495,7 +7201,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":136
+                    "y":154
                 },
                 "id":340,
                 "panels":[],
@@ -6510,7 +7216,7 @@
                     "h":11,
                     "w":5,
                     "x":0,
-                    "y":137
+                    "y":155
                 },
                 "id":160,
                 "limit":"100",
@@ -6537,7 +7243,7 @@
                     "h":11,
                     "w":5,
                     "x":5,
-                    "y":137
+                    "y":155
                 },
                 "id":159,
                 "limit":"100",
@@ -6571,7 +7277,7 @@
                     "h":11,
                     "w":5,
                     "x":10,
-                    "y":137
+                    "y":155
                 },
                 "id":165,
                 "limit":"100",
@@ -6604,7 +7310,7 @@
                     "h":11,
                     "w":4,
                     "x":15,
-                    "y":137
+                    "y":155
                 },
                 "id":161,
                 "limit":"100",
@@ -6631,7 +7337,7 @@
                     "h":3,
                     "w":5,
                     "x":19,
-                    "y":137
+                    "y":155
                 },
                 "id":162,
                 "limit":"100",
@@ -6658,7 +7364,7 @@
                     "h":3,
                     "w":5,
                     "x":19,
-                    "y":140
+                    "y":158
                 },
                 "id":192,
                 "limit":10,
@@ -6685,7 +7391,7 @@
                     "h":5,
                     "w":5,
                     "x":19,
-                    "y":143
+                    "y":161
                 },
                 "id":198,
                 "limit":10,
@@ -6711,7 +7417,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":148
+                    "y":166
                 },
                 "id":408,
                 "links":[],
@@ -6932,7 +7638,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":156
+                    "y":174
                 },
                 "id":412,
                 "links":[],
@@ -7152,7 +7858,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":164
+                    "y":182
                 },
                 "id":411,
                 "links":[],
@@ -7372,7 +8078,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":172
+                    "y":190
                 },
                 "id":410,
                 "links":[],
@@ -7592,7 +8298,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":180
+                    "y":198
                 },
                 "id":409,
                 "links":[],
@@ -7809,7 +8515,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":188
+                    "y":206
                 },
                 "id":51,
                 "panels":[],
@@ -7827,7 +8533,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":189
+                    "y":207
                 },
                 "hideTimeOverride":true,
                 "id":157,
@@ -8058,7 +8764,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":196
+                    "y":214
                 },
                 "hideTimeOverride":true,
                 "id":307,
@@ -8290,7 +8996,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":203
+                    "y":221
                 },
                 "id":317,
                 "legend":{
@@ -8541,7 +9247,7 @@
                     "h":6,
                     "w":4,
                     "x":0,
-                    "y":209
+                    "y":227
                 },
                 "id":71,
                 "legend":{
@@ -8713,7 +9419,7 @@
                     "h":6,
                     "w":4,
                     "x":4,
-                    "y":209
+                    "y":227
                 },
                 "id":72,
                 "legend":{
@@ -8880,7 +9586,7 @@
                     "h":6,
                     "w":16,
                     "x":8,
-                    "y":209
+                    "y":227
                 },
                 "id":55,
                 "legend":{
@@ -9098,7 +9804,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":215
+                    "y":233
                 },
                 "id":79,
                 "legend":{
@@ -9296,7 +10002,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":215
+                    "y":233
                 },
                 "id":80,
                 "legend":{
@@ -9483,7 +10189,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":221
+                    "y":239
                 },
                 "id":398,
                 "legend":{
@@ -9655,7 +10361,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":221
+                    "y":239
                 },
                 "id":399,
                 "legend":{
@@ -9778,7 +10484,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":227
+                    "y":245
                 },
                 "id":82,
                 "panels":[],
@@ -9835,7 +10541,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":228
+                    "y":246
                 },
                 "hideTimeOverride":false,
                 "id":110,
@@ -10022,7 +10728,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":228
+                    "y":246
                 },
                 "hideTimeOverride":false,
                 "id":116,
@@ -10208,7 +10914,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":228
+                    "y":246
                 },
                 "id":130,
                 "legend":{
@@ -10343,7 +11049,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":232
+                    "y":250
                 },
                 "id":123,
                 "legend":{
@@ -10498,7 +11204,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":232
+                    "y":250
                 },
                 "id":125,
                 "legend":{
@@ -10688,7 +11394,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":232
+                    "y":250
                 },
                 "id":133,
                 "legend":{
@@ -10857,7 +11563,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":236
+                    "y":254
                 },
                 "hideTimeOverride":false,
                 "id":263,
@@ -11039,7 +11745,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":236
+                    "y":254
                 },
                 "id":273,
                 "legend":{
@@ -11219,7 +11925,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":236
+                    "y":254
                 },
                 "id":274,
                 "legend":{
@@ -11387,7 +12093,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":240
+                    "y":258
                 },
                 "hideTimeOverride":false,
                 "id":213,
@@ -11570,7 +12276,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":240
+                    "y":258
                 },
                 "id":214,
                 "legend":{
@@ -11751,7 +12457,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":240
+                    "y":258
                 },
                 "id":216,
                 "legend":{
@@ -11923,7 +12629,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":244
+                    "y":262
                 },
                 "hideTimeOverride":false,
                 "id":117,
@@ -12106,7 +12812,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":244
+                    "y":262
                 },
                 "id":118,
                 "legend":{
@@ -12291,7 +12997,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":244
+                    "y":262
                 },
                 "id":131,
                 "legend":{
@@ -12419,7 +13125,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":248
+                    "y":266
                 },
                 "id":298,
                 "panels":[],
@@ -12470,7 +13176,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":249
+                    "y":267
                 },
                 "hideTimeOverride":false,
                 "id":284,
@@ -12651,7 +13357,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":249
+                    "y":267
                 },
                 "id":286,
                 "legend":{
@@ -12785,7 +13491,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":253
+                    "y":271
                 },
                 "hideTimeOverride":false,
                 "id":404,
@@ -12966,7 +13672,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":253
+                    "y":271
                 },
                 "id":406,
                 "legend":{
@@ -13094,7 +13800,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":257
+                    "y":275
                 },
                 "id":414,
                 "panels":[],
@@ -13109,7 +13815,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":258
+                    "y":276
                 },
                 "id":416,
                 "links":[],
@@ -13247,7 +13953,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":258
+                    "y":276
                 },
                 "id":418,
                 "links":[],
@@ -13385,7 +14091,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":264
+                    "y":282
                 },
                 "id":417,
                 "links":[],
@@ -13523,7 +14229,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":264
+                    "y":282
                 },
                 "id":420,
                 "links":[],
@@ -13661,7 +14367,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":270
+                    "y":288
                 },
                 "id":419,
                 "links":[],
@@ -13797,7 +14503,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":276
+                    "y":294
                 },
                 "id":4,
                 "panels":[],
@@ -13815,7 +14521,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":277
+                    "y":295
                 },
                 "id":209,
                 "legend":{
@@ -13933,7 +14639,7 @@
                     "h":9,
                     "w":12,
                     "x":0,
-                    "y":285
+                    "y":303
                 },
                 "hideTimeOverride":true,
                 "id":196,
@@ -14069,7 +14775,7 @@
                     "h":9,
                     "w":12,
                     "x":12,
-                    "y":285
+                    "y":303
                 },
                 "hideTimeOverride":true,
                 "id":194,
@@ -14171,7 +14877,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":294
+                    "y":312
                 },
                 "id":173,
                 "panels":[],
@@ -14189,7 +14895,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":295
+                    "y":313
                 },
                 "id":175,
                 "legend":{
@@ -14364,7 +15070,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":295
+                    "y":313
                 },
                 "id":177,
                 "legend":{
@@ -14627,7 +15333,7 @@
                     "h":7,
                     "w":12,
                     "x":0,
-                    "y":301
+                    "y":319
                 },
                 "id":179,
                 "legend":{
@@ -14988,7 +15694,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":301
+                    "y":319
                 },
                 "id":181,
                 "legend":{
@@ -15149,7 +15855,7 @@
                     "h":6,
                     "w":7,
                     "x":0,
-                    "y":308
+                    "y":326
                 },
                 "id":183,
                 "legend":{
@@ -15264,7 +15970,7 @@
                     "h":6,
                     "w":9,
                     "x":7,
-                    "y":308
+                    "y":326
                 },
                 "id":185,
                 "legend":{
@@ -15379,7 +16085,7 @@
                     "h":6,
                     "w":8,
                     "x":16,
-                    "y":308
+                    "y":326
                 },
                 "id":187,
                 "legend":{
@@ -15534,7 +16240,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":314
+                    "y":332
                 },
                 "id":364,
                 "legend":{
