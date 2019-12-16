@@ -30,18 +30,11 @@
   register: local_release
   changed_when: false
 
-- name: Set the release_url - master
+- name: Set the release_url
   set_fact:
-    release_url: |-
-      https://opendev.org/openstack/tripleo-common/raw/branch/master/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}
+    release_url: "https://opendev.org/openstack/tripleo-common/raw/commit/{{ local_release.stdout  }}/container-images/overcloud_containers.yaml.j2"
   when:
-    - release == 'master'
-
-- name: Set the release_url - stable
-  set_fact:
-    release_url: |-
-      https://opendev.org/openstack/tripleo-common/raw/branch/stable/{{ release }}/container-images/overcloud_containers.yaml.j2?id={{ local_release.stdout }}
-  when: release != 'master'
+    - not setup_staging | default(false) | bool
 
 # The next two tasks are created mainly for testing the role
 # if a file is present at pattern_file location
