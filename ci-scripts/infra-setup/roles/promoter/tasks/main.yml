@@ -243,6 +243,17 @@
         append: true
       register: groupadd
 
+    - name: Gather info
+      shell: |
+        id
+        ls -l /tmp/docker.sock
+        ls -l /var/run/docker.sock
+      register: id_info
+
+    - name: verify info
+      debug: var=id_info
+
+
 - name: Create user config dir
   file:
     path: /home/{{ promoter_user }}/.docker/
