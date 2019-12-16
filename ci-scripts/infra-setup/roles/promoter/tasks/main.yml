@@ -499,3 +499,15 @@
         - not setup_staging
         - dlrn_promoter_telegram.changed or disk_telegram.changed
   become: true
+
+- name: Gather info
+  become: yes
+  become_user: "{{ promoter_user }}"
+  shell: |
+    id
+  register: id_info
+
+- name: verify info
+  debug: var=id_info
+
+
