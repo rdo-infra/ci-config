@@ -148,15 +148,17 @@
             - name: 'Build TripleO Containers'
               hosts: openstack_nodes
               tasks:
-                - name: Run build containers tasks
-                  include_role:
-                    name: build-containers
-                  register: result
-                  ignore_errors: true
-
-                - name: Report results
-                  debug:
-                    msg: "{{ 'Container build and upload failed' when result is failed else 'Container build and upload succeeded' }}"
+                - block:
+                    - name: Run build containers tasks
+                      include_role:
+                        name: build-containers
+                    - name: Report success
+                      debug:
+                        msg: Container build and upload succeeded
+                  rescue:
+                    - name: Report failure
+                      fail:
+                        msg: Container build and upload failed
             EOF
 
             # cico-get-node requests a duffy node and generates an ansible-compatible
