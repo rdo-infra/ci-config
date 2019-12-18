@@ -21,6 +21,22 @@
                 !include-raw:
                     - scripts/tripleo-upstream-collect-logs.sh
 
+
+- publisher:
+    name: 'tripleo-upstream-determine-success-or-fail'
+    publishers:
+       - post-task:
+           - matches:
+               - log-text: Building remotely
+             script: |
+                export WORKSPACE="${WORKSPACE:-/tmp}"
+                export BUILD_LOG="${WORKSPACE}/logs/build.log"
+                if grep -q "Congratulations! All containers have been built" $BUILD_LOG; then
+                    echo "Container build and upload succeeded"
+                else
+                    echo "Container build and upload failed"
+                fi
+
 - publisher:
     name: 'tripleo-upstream-dlrn-report'
     publishers:
