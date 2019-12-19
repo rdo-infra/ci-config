@@ -25,6 +25,8 @@ cat << EOF > delorean-report.yaml
         export LOG_HOST_URL="https://centos.logs.rdoproject.org/"
         export LOG_PATH="${JOB_NAME}/${BUILD_NUMBER}/logs"
         export SUCCESS=${SUCCESS}
+        export PATH=$PATH:/root/.local/bin
+
         bash -ex ${CICO_USER_DIR}/${RDO_CONFIG_DIR}/ci-scripts/tripleo-upstream/dlrnapi_report.sh
 EOF
 
