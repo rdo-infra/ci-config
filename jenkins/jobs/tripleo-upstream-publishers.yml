@@ -28,12 +28,16 @@
             - matches:
                 - log-text: Container build and upload failed
               script: |
-                  export SUCCESS="false"
-                  bash -ex scripts/tripleo-upstream-dlrn-report.sh
+                  pushd $WORKSPACE/ci-config/jenkins/jobs
+                    export SUCCESS="false"
+                    bash -ex scripts/tripleo-upstream-dlrn-report.sh
+                  popd
         - post-tasks:
             - matches:
                 - log-text: Container build and upload succeeded
               run-if-job-successful: true
               script: |
-                export SUCCESS="true"
-                bash -ex scripts/tripleo-upstream-dlrn-report.sh
+                pushd $WORKSPACE/ci-config/jenkins/jobs
+                  export SUCCESS="true"
+                  bash -ex scripts/tripleo-upstream-dlrn-report.sh
+                popd
