@@ -140,6 +140,30 @@
       "revId": "f532c612f7ac060c2abc239db44fea74bd21a18a",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5a5e53e_1e112e4c",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/tempest_html_json.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 266
+      },
+      "writtenOn": "2019-12-29T09:26:45Z",
+      "side": 1,
+      "message": "I cannot help myself, the deepcopy here looks weird but I don\u0027t see the whole context so I cannot find what exactly is weird about it..\n\nthis method now returns test_status for just one release (depending on release parameter) and this test_status is wrapped to a dictionary (according the structure of globally defined result variable), that said if release \u003d\u003d \u0027master\u0027 the method returns:\n\n{\"Release\": {\n    \"master\": test_status dict,\n    \"train\": {\"Testname\": \"Status\"},\n    \"stein\": {\"Testname\": \"Status\"},\n    \"rocky\": {\"Testname\": \"Status\"},\n    \"queens\": {\"Testname\": \"Status\"}\n}}\n\nwhy does the return dict contain also \"empty\" results for other releases? why do you want to make the method called get_result return data for more releases?",
+      "parentUuid": "7c262500_bce17b03",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 34
+      },
+      "revId": "f532c612f7ac060c2abc239db44fea74bd21a18a",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
     }
   ]
 }
