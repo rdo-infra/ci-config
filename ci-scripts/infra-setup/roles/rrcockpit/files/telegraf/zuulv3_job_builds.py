@@ -21,7 +21,8 @@ OOO_PROJECTS = [
     'openstack/tripleo-common', 'openstack/tripleo-ci',
     'openstack/tripleo-quickstart', 'openstack/tripleo-heat-templates',
     'openstack/tripleo-ansible', 'openstack/tripleo-validations',
-    'rdo-infra/ansible-role-tripleo-ci-reproducer'
+    'rdo-infra/ansible-role-tripleo-ci-reproducer',
+    'containers/libpod', 'ceph/ceph-ansible'
 ]
 
 TIMESTAMP_PATTERN = '%Y-%m-%dT%H:%M:%S'
