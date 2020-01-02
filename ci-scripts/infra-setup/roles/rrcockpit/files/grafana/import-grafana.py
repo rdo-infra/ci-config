@@ -57,15 +57,19 @@ def main():
     args = parser.parse_args()
 
     with open(args.key) as key_file:
-        key = key_file.read().splitlines()[0]
-        for file_path in glob.glob("*.datasource.json"):
-            import_file(args.host, key, 'datasources', file_path)
+        data = key_file.read()
+        if data:
+            key = data.splitlines()[0]
+            for file_path in glob.glob("*.datasource.json"):
+                import_file(args.host, key, 'datasources', file_path)
 
-        for file_path in glob.glob("*.dashboard.json"):
-            import_file(args.host, key, 'dashboards/db', file_path)
+            for file_path in glob.glob("*.dashboard.json"):
+                import_file(args.host, key, 'dashboards/db', file_path)
 
-        for file_path in glob.glob("*.alert-notification.json"):
-            import_file(args.host, key, 'alert-notifications', file_path)
+            for file_path in glob.glob("*.alert-notification.json"):
+                import_file(args.host, key, 'alert-notifications', file_path)
+        # except IndexError as e:
+        #     print("Failure to load key:Importing {}".format(e))
 
 
 if __name__ == '__main__':

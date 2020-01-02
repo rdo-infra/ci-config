@@ -1,9 +1,13 @@
 #!/bin/bash
-set -x
+set -euxo pipefail
+
+# If not defined compose will use 'files' directory name
+export COMPOSE_PROJECT_NAME=rrcockpit
 
 usage()
 {
     echo "usage: simple script to setup the cockpit"
+    echo " -u, --url, return public URL"
     echo " -s, --start, fire it up "
     echo " -c, --clean, to stop and clean up containers"
     echo " -h, --help, usage"
@@ -11,32 +15,39 @@ usage()
 
 start()
 {
+
     # start up
     docker volume create telegraf-volume
     docker volume create grafana-volume
     docker volume create influxdb-volume
     docker volume create mariadb-volume
-    docker-compose up
+
+    # build is needed in order to avoid getting changes
+    docker-compose up --build
+}
+
+url()
+{
+    IP=$(docker network inspect rrcockpit-public -f '{{ range .Containers }}{{ .IPv4Address }}{{ end }}' | sed 's/\/.*//')
+    echo http://$IP
 }
 
 clean()
 {
-  # clean
-    docker system prune -f
-    running_containers=`docker ps -a --format="{{.ID}}"`
-    for i in $running_containers; do
-        echo $i;
-        docker rm -f $i
-    done
-    sudo docker rmi -f $(sudo docker images -q)\n
+    # clean-up that should not affect other running containers
+    docker-compose down
+    docker system prune -a
 }
 
-if [ -z "$1" ]; then
+if [ -z "${1:-}" ]; then
     usage
 fi
 
-while [ "$1" != "" ]; do
+while [ "${1:-}" != "" ]; do
     case $1 in
+        -u | --url )            shift
+                                url
+                                ;;
         -s | --start )          shift
                                 start
                                 ;;

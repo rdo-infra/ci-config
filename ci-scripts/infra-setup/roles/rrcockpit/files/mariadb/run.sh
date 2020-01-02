@@ -95,7 +95,7 @@ load_mariadb(){
 # We could have just keep sleep 60 before load_db, but this helps dev
 # itearations, you don't have to wait 1 minute everytime you change stuff
 # at mariadb-sidecar
-ansible-playbook /tmp/wait-mariadb.yaml
+ansible-playbook -i mariadb, --connection=local /tmp/wait-mariadb.yaml
 
 while true; do
     # noop jobs have been disabled

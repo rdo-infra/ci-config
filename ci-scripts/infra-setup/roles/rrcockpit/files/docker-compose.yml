@@ -1,8 +1,25 @@
 version: '3.6'
 
+# We are using a user defined bridge in order to allow access and hostnamre
+# resolition between containers.
+# https://docs.docker.com/network/bridge/
+# https://docs.docker.com/compose/networking/
+networks:
+  default:
+    name: rrcockpit
+  rrcockpit-public:
+    name: rrcockpit-public
+    driver: macvlan
+    driver_opts:
+      parent: enp1s0
+    ipam:
+      config:
+        - subnet: 192.168.32.0/20
+
 services:
   mariadb:
-    image: mariadb:10.4.2-bionic
+    hostname: mariadb
+    image: mariadb:latest
     container_name: mariadb
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
@@ -21,31 +38,28 @@ services:
       - mariadb
 
   influxdb:
-    image: influxdb:1.7.1
+    hostname: influxdb
+    image: influxdb:1.7.9
     container_name: influxdb
-    ports:
-      - "8083:8083"
-      - "8086:8086"
-      - "8090:8090"
     volumes:
       - influxdb-volume:/var/lib/influxdb
 
   nginx:
-    image: nginx:latest
+    hostname: nginx
+    build: nginx
     restart: always
     container_name: nginx
-    network_mode: host
     ports:
       - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:z
+    networks:
+      - default
+      - rrcockpit-public
 
   grafana:
-    image: grafana/grafana:6.1.1
+    hostname: grafana
+    image: grafana/grafana:6.5.2
     restart: always
     container_name: grafana
-    ports:
-      - "127.0.0.1:8080:3000"
     environment:
       - GF_SMTP_ENABLED=true
       - GF_SMTP_HOST=smtp.gmail.com:587
@@ -61,8 +75,11 @@ services:
       - influxdb
     volumes:
       - grafana-volume:/var/lib/grafana
+    networks:
+      - default
 
   grafana-sidecar:
+    hostname: grafana-sidecar
     build: grafana
     restart: always
     container_name: grafana-sidecar
@@ -74,10 +91,10 @@ services:
       - grafana-volume:/var/lib/grafana
 
   telegraf:
+    hostname: telegraf
     build: telegraf
     restart: always
     container_name: telegraf
-    hostname: telegraf.rrcockpit
     env_file:
       - 'telegraf/env'
     depends_on:
