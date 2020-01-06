@@ -2,9 +2,9 @@
 
 import argparse
 from datetime import datetime, timedelta
+import time
 import re
 import requests
-import time
 import yaml
 import urllib
 
@@ -14,22 +14,6 @@ except ImportError:
     from urllib.parse import urljoin
 
 from diskcache import Cache
-from os import path
-
-INTERNAL_OOO_PROJECTS = [
-    'openstack/tripleo-ci-internal-jobs',
-    'rhos-release',
-    'openstack-tempest',
-    'openstack-tripleo-common',
-    'openstack-tripleo-heat-templates-compat',
-    'openstack-tripleo-heat-templates',
-    'openstack-tripleo-image-elements',
-    'openstack-tripleo-puppet-elements',
-    'openstack-tripleo-ui',
-    'openstack-tripleo-validations',
-    'openstack-tripleo',
-    'rhos-ops/openstack-tripleo-heat-templates'
-]
 
 OOO_PROJECTS = [
     'openstack/puppet-tripleo', 'openstack/python-tripleoclient',
@@ -62,8 +46,6 @@ ARA_JSONS = [
 
 TASK_DURATION_TRESHOLD = 10
 
-CERT_LOCATION = '/etc/pki/tls/certs/ca-bundle.crt'
-
 cache = Cache('/tmp/ruck_rover_cache')
 cache.expire()
 
@@ -81,32 +63,10 @@ def to_seconds(duration):
         hours=x.tm_hour, minutes=x.tm_min, seconds=x.tm_sec).total_seconds()
 
 
-def resolve_url(url):
-    try:
-        if 'redhat.com' in url:
-            requests.get(url, timeout=20, verify=False)
-        else:
-            requests.get(url, timeout=20)
-    except Exception, e:
-        print('Cannot access ' + url)
-        print(e)
-
-
 def get(url, json_view, query=None, timeout=20):
     query = query or {}
     try:
-        if 'redhat.com' in url:
-            if path.exists(CERT_LOCATION):
-                cert = CERT_LOCATION
-            else:
-                cert = False
-            response = requests.get(
-                url,
-                params=query,
-                timeout=timeout,
-                verify=cert)
-        else:
-            response = requests.get(url, params=query, timeout=timeout)
+        response = requests.get(url, params=query, timeout=timeout)
         if response and response.ok:
             if json_view:
                 return response.json()
@@ -359,15 +319,7 @@ def main():
         '--offset', type=int, default=0, help="(default: %(default)s)")
     args = parser.parse_args()
 
-    # Bail if the url is not accessible
-    resolve_url(args.url)
-
-    if args.type == 'internal':
-        report_projects = INTERNAL_OOO_PROJECTS
-    else:
-        report_projects = OOO_PROJECTS
-
-    for project in report_projects:
+    for project in OOO_PROJECTS:
         print_influx(
             args.type,
             get_builds_info(
