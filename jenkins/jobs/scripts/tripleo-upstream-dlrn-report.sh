@@ -26,11 +26,13 @@ cat << EOF > delorean-report.yaml
         export LOG_PATH="${JOB_NAME}/${BUILD_NUMBER}/logs"
         export SUCCESS=${SUCCESS}
         export PATH=$PATH:/root/.local/bin
+        export DLRNAPI_USERNAME=${DLRNAPI_USER}
+        export DLRNAPI_PASSWORD=${DLRNAPI_PASSWD}
 
         bash -ex ${CICO_USER_DIR}/${RDO_CONFIG_DIR}/ci-scripts/tripleo-upstream/dlrnapi_report.sh
 EOF
 
 # Run the playbook.
-ansible-playbook -vvv -i "${ANSIBLE_HOSTS}" delorean-report.yaml
+ansible-playbook -i "${ANSIBLE_HOSTS}" delorean-report.yaml
 
 popd
