@@ -15,7 +15,8 @@ pip install -U dlrnapi_client shyaml
 : ${DLRNAPI_USERNAME:="ciuser"}
 : ${PROMOTE_TO:="${promotion_symlink}"}
 : ${DLRNAPI_URL:="${delorean_api_url}"}
-: ${DLRNAPI_PASSWORD:="${DLRNAPI_PASSWD}"}
+
+export DLRNAPI_PASSWORD=${DLRNAPI_PASSWD}
 
 for component_url in ${delorean_components_url}; do
     curl -sLo commit.yaml ${component_url}/commit.yaml

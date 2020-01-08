@@ -19,7 +19,7 @@
           # The URL of the delorean-deps .repo file tested against
           export delorean_deps_url=${delorean_deps_url}
           # The URL of all components in delorean .repo file tested against
-          export delorean_components_url=${delorean_components_url}
+          export delorean_components_url="${delorean_components_url}"
           # Version of integration tests used (master, stable/mitaka, stable/mitaka, etc.)
           export version=${version}
           # The name of the OpenStack release to use (master, newton, mitaka, etc.)
@@ -35,7 +35,7 @@
           # Image template to use for creating vm
           export IMAGE="template-rdo-centos8-stable"
           # ANSIBLE_PYTHON_INTERPRETER to set in ansible inventory being created
-          export ANSIBLE_PYTHON_INTERPRETER="/usr/bin/python3"
+          export ANSIBLE_PYTHON_INTERPRETER="/usr/libexec/platform-python"
           EOF
         </pre>
     triggers:
@@ -91,7 +91,7 @@
             # The URL of the delorean-deps .repo file tested against
             export delorean_deps_url=${delorean_deps_url}
             # The URL of all components in delorean .repo file tested against
-            export delorean_components_url=${delorean_components_url}
+            export delorean_components_url="${delorean_components_url}"
             # Version of integration tests used (master, stable/mitaka, etc.)
             export version=${version}
             # The name of the OpenStack release to use (master, newton, mitaka, etc.)
@@ -107,7 +107,7 @@
             # Image template to use for creating vm
             export IMAGE="template-rdo-centos8-stable"
             # ANSIBLE_PYTHON_INTERPRETER to set in ansible inventory being created
-            export ANSIBLE_PYTHON_INTERPRETER="/usr/bin/python3"
+            export ANSIBLE_PYTHON_INTERPRETER="/usr/libexec/platform-python"
             EOF
     publishers:
         - archive:
@@ -187,7 +187,7 @@
             description: The URL to a properties file to be sourced prior to the build
     builders:
         - shell:
-            !include-raw-escape:
+            !include-raw:
                 - scripts/promote-repo-dlrnapi.sh
     publishers:
         - archive:
