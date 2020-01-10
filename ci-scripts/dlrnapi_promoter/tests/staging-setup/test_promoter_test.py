@@ -41,18 +41,18 @@ class TestIntegrationTests(unittest.TestCase):
 
         self.success_pattern_container_positive = (
             "promoter Promoting the container images for dlrn hash"
-            " 1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc \n"
+            " 360d335e94246d7095672c5aa92b59afa380a059 \n"
             "Promoting the qcow image for dlrn hash"
-            " 1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc_8170b868"
+            " 360d335e94246d7095672c5aa92b59afa380a059_9e598812"
             " on master to tripleo-ci-staging-promoted \n"
             "promoter Successful jobs for {'timestamp': 1503307099,"
             " 'distro_hash': '8170b8686c38bafb6021d998e2fb268ab26ccf65',"
             " 'promote_name': 'tripleo-ci-staging', 'user': 'foo',"
             " 'repo_url':"
-            " 'None/1c/67/1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc_8170b868',"
-            " 'full_hash': '1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc_8170b868',"
-            " 'repo_hash': '1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc_8170b868',"
-            " 'commit_hash': '1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc'}: \n"
+            " 'None/36/0d/360d335e94246d7095672c5aa92b59afa380a059_9e598812',"
+            " 'full_hash': '360d335e94246d7095672c5aa92b59afa380a059_9e598812',"
+            " 'repo_hash': '360d335e94246d7095672c5aa92b59afa380a059_9e598812',"
+            " 'commit_hash': '360d335e94246d7095672c5aa92b59afa380a059'}: \n"
             "promoter SUCCESS promoting centos7-master tripleo-ci-staging as"
             " tripleo-ci-staging-promoted \n"
             "promoter FINISHED promotion process"
@@ -91,7 +91,7 @@ class TestIntegrationTests(unittest.TestCase):
     def test_compare_tagged(self, mock_readlink):
         mock_readlink.return_value = (
             "/tmp/promoter-staging/overcloud_images/centos7/master/rdo_trunk/"
-            "1c67b1ab8c6fe273d4e175a14f0df5d3cbbd0edc_8170b868"
+            "360d335e94246d7095672c5aa92b59afa380a059_9e598812"
         )
         compare_tagged_image_hash(self.stage_info)
 
