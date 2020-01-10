@@ -97,6 +97,9 @@
             groups: '{{ docker_group.stdout }}'
             append: true
 
+        - name: Reset connection for group add to take effect in the next tasks
+          meta: reset_connection
+
     - name: Setup test-python
       pip:
         name: "{{ test_requirements }}"
