@@ -44,6 +44,19 @@
   failed_when: false
   changed_when: false
 
+- name: Attempt to use docker command as normal user
+  become: true
+  become_user: "{{ promoter_user }}"
+  command: "docker info > /dev/null"
+  register: docker_info_user
+  changed_when: false
+
+- name: Ensure promoter user can access docker socket
+  assert:
+    that: '"permission denied" not in docker_info_user.stderr'
+    fail_msg: "Promoter user can't use docker commands"
+    success_msg: "Promoter user can correctly use docker"
+
 - name: Ensure we can access logs from apache
   get_url:
     url: http://localhost/
