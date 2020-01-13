@@ -1,4 +1,5 @@
 ---
+
 - name: print out hash, label and namespaces in play
   debug:
     var: "{{ item }}"
@@ -8,6 +9,12 @@
     - source_registry
     - target_registries
     - release
+# TODO(gcerami) replace the above after checking the anti pass leak tests
+#  with_items:
+#    - full_hash
+#    - named_label
+#    - source_registry.namespace
+#    - release
 
 - name: Initialize list of pushed containers. Will be used for cleanup
   set_fact:
