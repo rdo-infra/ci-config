@@ -72,12 +72,14 @@
     - dockerhub_push
 
 # Create and push container manifests to registry.host with _x86_64 and ppc64le
-# tagged containers. Disabled by default https://tree.taiga.io/project/tripleo-ci-board/task/1394
-# Multi arch manifest is only compatible with v2_s2 API schema
+# tagged containers. manifest_push defaults true with
+# https://tree.taiga.io/project/tripleo-ci-board/task/1447 BUT
+# Multi arch manifest is only compatible with v2_s2 API schema.
+#
 - name: 'Push {{ x86_tag }} {{ ppc_tag }} containers and manifests to {{ registry.host }}'
   include_tasks: manifest-push.yml
   when:
-    - "manifest_push|default(false)|bool"
+    - "manifest_push|default(true)|bool"
     - "registry.schema|default('v2_s1') == 'v2_s2'"
 
 

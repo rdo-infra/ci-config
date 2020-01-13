@@ -419,8 +419,9 @@ def promoter(config):
     api_url = config.get('main', 'api_url')
 
     # No boolean values here, as these are passed directly to ansible-playbook
-    # command line
-    manifest_push = config.get('main', 'manifest_push', fallback="false")
+    # command line. Default manifest_push true for
+    # https://tree.taiga.io/project/tripleo-ci-board/task/1447
+    manifest_push = config.get('main', 'manifest_push', fallback="true")
     target_registries_push = config.get('main', 'target_registries_push',
                                         fallback="true")
 
