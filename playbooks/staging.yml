@@ -14,33 +14,9 @@
         local_path_uploader_key: "{{ zuul.executor.work_root }}/uploader_key"
         ci_config_local_src_dir: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
         setup_staging: true
-
-    # Set up credentials
-    - name: save DLRNAPI_PASSWORD
-      copy:
-       content: export DLRNAPI_PASSWORD='bar'
-       dest: "{{ local_path_dlrnapi_secret }}"
-      delegate_to: localhost
-
-    - name: check for auth token from docker
-      stat:
-        path: "/home/{{ promoter_user }}/.docker/config.json"
-      register: docker_token
-
-    # TODO(gcerami) change this into a fail when we are ready
-    - debug:
-        msg: registry credentials in zuul enviroment require a token from pre authentication
-      when: not docker_token.stat.exists
-
-    - name: save REGISTRY_PASSWORD
-      copy:
-        content: export REGISTRY_PASSWORD='test'
-        dest: "{{ local_path_registry_secret }}"
-      delegate_to: localhost
-
-    - name: save fake static uploader key locally
-      copy:
-        content: |
+        dlrnapi_password: "dlrnapi_password00"
+        registry_password: "registry_password00"
+        uploader_key: |
             -----BEGIN RSA PRIVATE KEY-----
             MIIEowIBAAKCAQEAvJ5+qg0sA9rHFouk+tQeBq+FDDqHwzLTd1oyMFl+47Fp89jg
             6njfyBmJEyIeGA/AA1njMHDfHC1IWTN/9cgnxcN//gwtRVIsnDRMG8ylwqJNuKKa
@@ -68,6 +44,33 @@
             PXOzGohcXPGPYFALq1XO8NqDnzVD6sokwkD/n1UKiDOmrB+iRuBXzAleECLarIzi
             WAsyy1Jag5MFgLJysZEKUDPtFWvsrs3gdn63GcrqkOH85a2Y/X2U
             -----END RSA PRIVATE KEY-----
+
+    # Set up credentials
+    - name: save DLRNAPI_PASSWORD
+      copy:
+       content: export DLRNAPI_PASSWORD="{{ dlrnapi_password }}"
+       dest: "{{ local_path_dlrnapi_secret }}"
+      delegate_to: localhost
+
+    - name: check for auth token from docker
+      stat:
+        path: "/home/{{ promoter_user }}/.docker/config.json"
+      register: docker_token
+
+    # TODO(gcerami) change this into a fail when we are ready
+    - debug:
+        msg: registry credentials in zuul enviroment require a token from pre authentication
+      when: not docker_token.stat.exists
+
+    - name: save REGISTRY_PASSWORD
+      copy:
+        content: export REGISTRY_PASSWORD="{{ registry_password }}"
+        dest: "{{ local_path_registry_secret }}"
+      delegate_to: localhost
+
+    - name: save fake static uploader key locally
+      copy:
+        content: "{{ uploader_key }}"
         dest: "{{ local_path_uploader_key }}"
       delegate_to: localhost
 
@@ -116,6 +119,12 @@
         dest: "/home/{{ promoter_user }}"
         remote_src: yes
 
+    - name: fetch stage info into zuul executor
+      fetch:
+        src: /tmp/stage-info.yaml
+        dest: "{{ zuul.executor.work_root }}/"
+        flat: yes
+
     - name: Test stage promotion
       become: true
       become_user: "{{ promoter_user }}"
@@ -125,6 +134,32 @@
           source /home/{{ promoter_user }}/promoter_venv/bin/activate
           python /home/{{ promoter_user }}/ci-config/ci-scripts/dlrnapi_promoter/tests/staging-setup/promoter_test.py --stage-info-file /tmp/stage-info.yaml
       changed_when: true
+
+    - name: include vars from stage info
+      include_vars:
+        file: "{{ zuul.executor.work_root }}/stage-info.yaml"
+
+    - name: Check that no passwords are leaked in the logs
+      shell: |
+        cd /home/{{ promoter_user }}/promoter_logs
+        grep -r "{{ dlrnapi_password }}" .
+        grep -r "{{ registry_password }}" .
+        grep -r -f {{ local_path_uploader_key }} .
+      register: found_pass
+      failed_when: found_pass.stdout | length > 0
+      changed_when: false
+
+    - name: Check that stage target registry pass are not leaked (if they are present)
+      shell: |
+        cd /home/{{ promoter_user }}/promoter_logs
+        grep -r -i "pass.*{{ password }}"
+      register: found_pass
+      failed_when: found_pass.stdout | length > 0
+      changed_when: false
+      loop: "{{ registries.targets | map(attribute='password') | list }}"
+      loop_control:
+        loop_var: password
+
 
     - name: Run tripleo-common scenario tests
       include_role:
