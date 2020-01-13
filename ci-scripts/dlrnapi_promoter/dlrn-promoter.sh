@@ -15,7 +15,7 @@ KILLTIME=120m
 # To add when ready: "RedHat-8/train"
 RELEASES=( "CentOS-7/master" "CentOS-7/train" "CentOS-7/stein" \
            "CentOS-7/rocky" "CentOS-7/queens" \
-           "RedHat-8/master" )
+           "RedHat-8/master" "RedHat-8/train" )
 
 while getopts "t:k:sh" arg; do
     case $arg in
