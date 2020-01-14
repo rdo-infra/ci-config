@@ -6,11 +6,19 @@
       - epel-release
       - python-pip
       - docker
+      - gcc
+      - python-devel
 
 - name: Install docker-compose with pip
   pip:
     name: docker-compose
     version: "{{ docker_compose_version }}"
+    extra_args: --user
+
+- name: Add local bin dir to PATH
+  lineinfile:
+    dest: ~/.bashrc
+    line: export PATH=$PATH:~/.local/bin/
 
 - name: Find out docker group name
   shell: |
