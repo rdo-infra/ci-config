@@ -14,6 +14,16 @@ read_lp(){
             Incomplete
 
     launchpad_bugs_mariadb.py \
+        --tag depcheck \
+        --status \
+            New \
+            Confirmed \
+            Triaged \
+            'In Progress' \
+            'Fix Committed' \
+            Incomplete
+
+    launchpad_bugs_mariadb.py \
         --tag promotion-blocker \
         --status \
             New \
