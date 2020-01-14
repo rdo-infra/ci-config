@@ -34,6 +34,11 @@
     src: /home/centos/grafana_smtp_password
   register: gf_smtp_password
 
+- name: Generate custom nginx.conf
+  template:
+    src: nginx.conf.j2
+    dest: "{{ role_path }}/files/nginx.conf"
+
 - name: Start services
   environment:
     GRAFANA_ADMIN_PASSWORD: "{{ gf_admin_password['content'] | b64decode }}"
