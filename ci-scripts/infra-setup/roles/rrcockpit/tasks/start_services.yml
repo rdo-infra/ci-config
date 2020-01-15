@@ -1,0 +1,9 @@
+---
+- name: Start services
+  environment:
+    GRAFANA_ADMIN_PASSWORD: "{{ gf_admin_password['content'] | b64decode }}"
+    GRAFANA_SMTP_PASSWORD: "{{ gf_smtp_password['content'] | b64decode }}"
+  docker_compose:
+    project_src: "{{ role_path }}/files/"
+    state: present
+    build: yes
