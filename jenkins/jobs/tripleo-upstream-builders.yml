@@ -46,7 +46,7 @@
             VENV="${WORKSPACE}/venv"
             OPENSTACK_GIT_URL="https://opendev.org/openstack"
             RELEASE="${RELEASE:-master}"
-            RDO_CONFIG_DIR="${RDO_CONFIG_DIR:-src/rdo-infra/review.rdoproject.org-config}"
+            RDO_CI_CONFIG_DIR="${RDO_CI_CONFIG_DIR:-src/rdo-infra/ci-config}"
 
             [[ ! -d "${VENV}" ]] && virtualenv "${VENV}"
             source "${VENV}/bin/activate"
@@ -98,10 +98,10 @@
             - name: 'Clone RDO git dependencies'
               hosts: openstack_nodes
               tasks:
-                - name: 'Clone rdo-infra/review.rdoproject.org-config'
+                - name: 'Clone rdo-infra/ci-config'
                   git:
-                     repo: 'https://github.com/rdo-infra/review.rdoproject.org-config.git'
-                     dest: '${CICO_USER_DIR}/${RDO_CONFIG_DIR}'
+                     repo: 'https://github.com/rdo-infra/ci-config.git'
+                     dest: '${CICO_USER_DIR}/${RDO_CI_CONFIG_DIR}'
 
             - name: 'Login to RDO registry'
               hosts: openstack_nodes
@@ -128,7 +128,7 @@
                         export PROMOTE_NAME="tripleo-ci-testing"
                         export DLRNAPI_DISTRO={{ ansible_distribution }}
                         export DLRNAPI_DISTRO_VERSION={{ ansible_distribution_major_version }}
-                        bash -xe "${CICO_USER_DIR}/${RDO_CONFIG_DIR}/ci-scripts/tripleo-upstream/get-hash.sh"
+                        bash -xe "${CICO_USER_DIR}/${RDO_CI_CONFIG_DIR}/ci-scripts/tripleo-upstream/get-hash.sh"
                       popd
 
             - name: 'Setup TripleO Container Registry and repos mirror'
