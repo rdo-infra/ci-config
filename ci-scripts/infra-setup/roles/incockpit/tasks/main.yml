@@ -1,0 +1,33 @@
+---
+- name: Run preparation with regular role
+  include_role:
+    name: rrcockpit
+  vars:
+    start_services: false
+    server_name: "{{ server_name }}"
+    cockpit_server_name: "{{ cockpit_server_name }}"
+    cockpit_url: "{{ cockpit_url }}"
+
+- name: Clone downstream repo if possible
+  git:
+    dest: "{{ down_repo_path }}"
+    repo: "{{ down_repo_url }}"
+    force: yes
+    clone: yes
+    update: yes
+    version: "{{ down_repo_branch }}"
+
+- name: Do downstream tasks
+  include_tasks: "{{ down_repo_path }}/tasks.yml"
+  vars:
+    base_role_path: "{{ role_path }}"
+    local_repo: "{{ down_repo_path }}"
+
+- name: Start zuul services
+  include_role:
+    name: rrcockpit
+    tasks_from: start_services
+  vars:
+    server_name: "{{ server_name }}"
+    cockpit_server_name: "{{ cockpit_server_name }}"
+    cockpit_url: "{{ cockpit_url }}"
