@@ -4,6 +4,16 @@
         - shell: |
             WORKSPACE="${WORKSPACE:-/tmp}"
 
+            # Workaround to ensure skydive container, which isn't supported on ppc64le, doesn't build
+            cat <<EOF >> ${WORKSPACE}/tripleo-ci/roles/build-containers/tasks/venv_setup.yml
+
+            - name: Remove skydive from kolla
+              hosts: openstack_nodes
+              file:
+                path: "${CICO_USER_DIR}/workspace/venv_build/share/kolla/docker/skydive"
+                state: absent
+            EOF
+
             # Place roles for the tripleo-ci container build playbooks in the proper directory
             mkdir ${WORKSPACE}/roles
             cp -r ${WORKSPACE}/tripleo-ci/roles/* ${WORKSPACE}/roles
