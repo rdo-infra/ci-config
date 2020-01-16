@@ -6,14 +6,16 @@ import time
 import re
 import requests
 import yaml
-import urllib
+from diskcache import Cache
+
+import urllib3
+urllib3.disable_warnings()
 
 try:
     from urlparse import urljoin
 except ImportError:
     from urllib.parse import urljoin
 
-from diskcache import Cache
 
 OOO_PROJECTS = [
     'openstack/puppet-tripleo', 'openstack/python-tripleoclient',
@@ -23,6 +25,21 @@ OOO_PROJECTS = [
     'openstack/tripleo-ansible', 'openstack/tripleo-validations',
     'rdo-infra/ansible-role-tripleo-ci-reproducer',
     'containers/libpod', 'ceph/ceph-ansible'
+]
+
+INTERNAL_OOO_PROJECTS = [
+    'openstack/tripleo-ci-internal-jobs',
+    'rhos-release',
+    'openstack-tempest',
+    'openstack-tripleo-common',
+    'openstack-tripleo-heat-templates-compat',
+    'openstack-tripleo-heat-templates',
+    'openstack-tripleo-image-elements',
+    'openstack-tripleo-puppet-elements',
+    'openstack-tripleo-ui',
+    'openstack-tripleo-validations',
+    'openstack-tripleo',
+    'rhos-ops/openstack-tripleo-heat-templates'
 ]
 
 TIMESTAMP_PATTERN = '%Y-%m-%dT%H:%M:%S'
@@ -66,14 +83,14 @@ def to_seconds(duration):
 def get(url, json_view, query=None, timeout=20):
     query = query or {}
     try:
-        response = requests.get(url, params=query, timeout=timeout)
+        response = requests.get(url, params=query, timeout=timeout, verify=False)
         if response and response.ok:
             if json_view:
                 return response.json()
             else:
                 response.encoding = 'utf-8'
                 return response.text
-    except Exception:
+    except Exception as e:
         return None
 
     return None
@@ -319,7 +336,12 @@ def main():
         '--offset', type=int, default=0, help="(default: %(default)s)")
     args = parser.parse_args()
 
-    for project in OOO_PROJECTS:
+    if args.type == 'internal':
+        report_projects = INTERNAL_OOO_PROJECTS
+    else:
+        report_projects = OOO_PROJECTS
+
+    for project in report_projects:
         print_influx(
             args.type,
             get_builds_info(
