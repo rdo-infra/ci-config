@@ -1,4 +1,14 @@
 ---
+- name: Read grafana admin password file
+  slurp:
+    src: /home/centos/grafana_admin_password
+  register: gf_admin_password
+
+- name: Read grafana smtp password file
+  slurp:
+    src: /home/centos/grafana_smtp_password
+  register: gf_smtp_password
+
 - name: Start services
   environment:
     GRAFANA_ADMIN_PASSWORD: "{{ gf_admin_password['content'] | b64decode }}"
