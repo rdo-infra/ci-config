@@ -30,7 +30,7 @@ bug_query1 = bzapi.url_to_query(
     "=notsubstring&o2=substring&o3=notsubstring&o4=isempty&o5=isempty&o7="
     "substring&o8=notsubstring&o9=notsubstring&query_format=advanced&v1="
     "Red%20Hat%20OpenStack&v10=rhos&v12=needinfo&v2"
-    "=DFG%3AOOOCI&v3=doc&v7=Triaged&v8=unspecified&v9=unspecified")
+    "=DFG%3APCCI&v3=doc&v7=Triaged&v8=unspecified&v9=unspecified")
 
 
 def get_bugs(query):
