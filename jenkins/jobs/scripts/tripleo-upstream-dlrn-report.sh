@@ -3,7 +3,7 @@ CICO_USER_DIR=${CICO_USER_DIR:-/root}
 WORKSPACE=${WORKSPACE:-/tmp}
 ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
 VENV="${WORKSPACE}/venv"
-RDO_CONFIG_DIR="${RDO_CONFIG_DIR:-src/rdo-infra/review.rdoproject.org-config}"
+RDO_CONFIG_DIR_PROTECTED="${RDO_CONFIG_DIR_PROTECTED:-src/rdo-infra/review.rdoproject.org-config}"
 
 [[ ! -d "${VENV}" ]] && virtualenv "${VENV}"
 source "${VENV}/bin/activate"
@@ -29,7 +29,7 @@ cat << EOF > delorean-report.yaml
         export DLRNAPI_USERNAME=${DLRNAPI_USER}
         export DLRNAPI_PASSWORD=${DLRNAPI_PASSWD}
 
-        bash -ex ${CICO_USER_DIR}/${RDO_CONFIG_DIR}/ci-scripts/tripleo-upstream/dlrnapi_report.sh
+        bash -ex ${CICO_USER_DIR}/${RDO_CONFIG_DIR_PROTECTED}/ci-scripts/tripleo-upstream/dlrnapi_report.sh
 EOF
 
 # Run the playbook.

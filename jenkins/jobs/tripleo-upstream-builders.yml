@@ -56,7 +56,8 @@
             VENV="${WORKSPACE}/venv"
             OPENSTACK_GIT_URL="https://opendev.org/openstack"
             RELEASE="${RELEASE:-master}"
-            RDO_CONFIG_DIR="${RDO_CONFIG_DIR:-src/rdo-infra/review.rdoproject.org-config}"
+            RDO_CONFIG_DIR="${RDO_CONFIG_DIR:-src/rdo-infra/ci-config}"
+            RDO_CONFIG_DIR_PROTECTED="${RDO_CONFIG_DIR_PROTECTED:-src/rdo-infra/review.rdoproject.org-config}"
 
             [[ ! -d "${VENV}" ]] && virtualenv "${VENV}"
             source "${VENV}/bin/activate"
@@ -105,12 +106,20 @@
                     - 'python-tripleoclient'
                     - 'tripleo-common'
 
-            - name: 'Clone RDO git dependencies'
+            - name: 'Clone RDO git dependencies, protected repo'
               hosts: openstack_nodes
               tasks:
                 - name: 'Clone rdo-infra/review.rdoproject.org-config'
                   git:
                      repo: 'https://github.com/rdo-infra/review.rdoproject.org-config.git'
+                     dest: '${CICO_USER_DIR}/${RDO_CONFIG_DIR_PROTECTED}'
+
+            - name: 'Clone RDO git dependencies'
+              hosts: openstack_nodes
+              tasks:
+                - name: 'Clone rdo-infra/review.rdoproject.org-config'
+                  git:
+                     repo: 'https://github.com/rdo-infra/ci-config.git'
                      dest: '${CICO_USER_DIR}/${RDO_CONFIG_DIR}'
 
             - name: 'Login to RDO registry'
