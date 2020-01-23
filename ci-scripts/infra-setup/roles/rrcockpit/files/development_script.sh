@@ -11,6 +11,10 @@ usage()
 
 start()
 {
+    FILE=nginx.conf
+    if [ ! -f "$FILE" ]; then
+        cp -v nginx.conf.local nginx.conf
+    fi
     # start up
     docker volume create telegraf-volume
     docker volume create grafana-volume
