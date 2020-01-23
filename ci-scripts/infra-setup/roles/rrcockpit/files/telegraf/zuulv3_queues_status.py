@@ -1,16 +1,33 @@
 #!/usr/bin/env python
 
 import argparse
-from time import time
 import json
 import re
 import requests
+
+from os import path
+from time import time
+
+CERT_LOCATION = '/etc/pki/tls/certs/ca-bundle.crt'
 
 
 def find_zuul_queues(zuul_status_url, pipeline_name, queue_name,
                      project_regex):
     queues = []
-    zuul_status = json.loads(requests.get(zuul_status_url).content)
+    # required for internal zuul
+    if 'redhat.com' in zuul_status_url:
+        if path.exists(CERT_LOCATION):
+            cert = CERT_LOCATION
+        else:
+            cert = False
+        zuul_status = json.loads(
+            requests.get(
+                zuul_status_url,
+                verify=cert).content)
+    else:
+        zuul_status = json.loads(
+            requests.get(
+                zuul_status_url).content)
 
     found_pipeline = next(pipeline['change_queues']
                           for pipeline in zuul_status['pipelines']
