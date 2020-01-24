@@ -393,6 +393,14 @@ def promote_all_links(
                         api_url,
                         new_hashes['commit_hash'],
                         new_hashes['distro_hash'])
+                    # update start_named_hashes after promotion for other
+                    # items in promote_from that we will loop for
+                    updated_named_hash = '{0}_{1}'.format(
+                        new_hashes['commit_hash'],
+                        new_hashes['distro_hash'][:8])
+                    global start_named_hashes
+                    start_named_hashes.update(
+                        {promote_from: updated_named_hash})
                     # stop here, don't try to promote other hashes
                     break
                 except Exception:
