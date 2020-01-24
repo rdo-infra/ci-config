@@ -2,17 +2,17 @@ import mock
 import pytest
 
 # avoid pytest --collect-only errors with missing imports:
-dlrnapi_promoter = pytest.importorskip('dlrnapi_promoter')
+legacy_promoter = pytest.importorskip('legacy_promoter')
 
 
-@mock.patch('dlrnapi_promoter.fetch_hashes')
+@mock.patch('legacy_promoter.fetch_hashes')
 def test_no_hashes_fetched_returns_empty_list(fetch_hashes_mock):
 
     old_hashes = []
     candidate_hashes = []
     fetch_hashes_mock.side_effect = [candidate_hashes, old_hashes]
 
-    obtained_hashes = dlrnapi_promoter.get_latest_hashes(
+    obtained_hashes = legacy_promoter.get_latest_hashes(
         'dlrn_api', 'promote_name', 'curent_name', 3)
 
     fetch_hashes_mock.assert_has_calls([
@@ -22,7 +22,7 @@ def test_no_hashes_fetched_returns_empty_list(fetch_hashes_mock):
     assert(len(obtained_hashes) == 0)
 
 
-@mock.patch('dlrnapi_promoter.fetch_hashes')
+@mock.patch('legacy_promoter.fetch_hashes')
 def test_no_candidates_returns_empty_list(fetch_hashes_mock):
 
     old_hashes = [
@@ -36,7 +36,7 @@ def test_no_candidates_returns_empty_list(fetch_hashes_mock):
     candidate_hashes = []
     fetch_hashes_mock.side_effect = [candidate_hashes, old_hashes]
 
-    obtained_hashes = dlrnapi_promoter.get_latest_hashes(
+    obtained_hashes = legacy_promoter.get_latest_hashes(
         'dlrn_api', 'promote_name', 'curent_name', 3)
 
     fetch_hashes_mock.assert_has_calls([
@@ -46,7 +46,7 @@ def test_no_candidates_returns_empty_list(fetch_hashes_mock):
     assert(len(obtained_hashes) == 0)
 
 
-@mock.patch('dlrnapi_promoter.fetch_hashes')
+@mock.patch('legacy_promoter.fetch_hashes')
 def test_no_old_hashes_returns_candidates(fetch_hashes_mock):
 
     old_hashes = []
@@ -65,7 +65,7 @@ def test_no_old_hashes_returns_candidates(fetch_hashes_mock):
     ]
     fetch_hashes_mock.side_effect = [candidate_hashes, old_hashes]
 
-    obtained_hashes = dlrnapi_promoter.get_latest_hashes(
+    obtained_hashes = legacy_promoter.get_latest_hashes(
         'dlrn_api', 'promote_name', 'curent_name', 3)
 
     fetch_hashes_mock.assert_has_calls([
@@ -75,7 +75,7 @@ def test_no_old_hashes_returns_candidates(fetch_hashes_mock):
     assert(obtained_hashes == candidate_hashes)
 
 
-@mock.patch('dlrnapi_promoter.fetch_hashes')
+@mock.patch('legacy_promoter.fetch_hashes')
 def test_old_hashes_get_filtered_from_candidates(fetch_hashes_mock):
 
     old_hashes = [
@@ -135,7 +135,7 @@ def test_old_hashes_get_filtered_from_candidates(fetch_hashes_mock):
 
     fetch_hashes_mock.side_effect = [candidate_hashes, old_hashes]
 
-    obtained_hashes = dlrnapi_promoter.get_latest_hashes(
+    obtained_hashes = legacy_promoter.get_latest_hashes(
         'dlrn_api', 'promote_name', 'curent_name', 3)
 
     fetch_hashes_mock.assert_has_calls([
@@ -145,7 +145,7 @@ def test_old_hashes_get_filtered_from_candidates(fetch_hashes_mock):
     assert(obtained_hashes == expected_hashes)
 
 
-@mock.patch('dlrnapi_promoter.fetch_hashes')
+@mock.patch('legacy_promoter.fetch_hashes')
 def test_named_hashes_unchanged(mock_fetch_hashes):
     dlrn_start_hash = {
             'timestamp': '1528085427',
@@ -162,15 +162,15 @@ def test_named_hashes_unchanged(mock_fetch_hashes):
 
     # positive test for hashes_unchanged
     mock_fetch_hashes.side_effect = [dlrn_start_hash, dlrn_start_hash]
-    start_named_hashes = dlrnapi_promoter.fetch_current_named_hashes(
+    start_named_hashes = legacy_promoter.fetch_current_named_hashes(
         release, promote_from, 'dlrn')
-    dlrnapi_promoter.start_named_hashes = start_named_hashes
+    legacy_promoter.start_named_hashes = start_named_hashes
     mock_fetch_hashes.side_effect = [dlrn_start_hash, dlrn_start_hash]
-    dlrnapi_promoter.check_named_hashes_unchanged(release, promote_from,
+    legacy_promoter.check_named_hashes_unchanged(release, promote_from,
                                                   'dlrn')
 
     # negative test
     mock_fetch_hashes.side_effect = [dlrn_start_hash, dlrn_changed_hash]
     with pytest.raises(Exception):
-        dlrnapi_promoter.check_named_hashes_unchanged(
+        legacy_promoter.check_named_hashes_unchanged(
                                                 release, promote_from, 'dlrn')
