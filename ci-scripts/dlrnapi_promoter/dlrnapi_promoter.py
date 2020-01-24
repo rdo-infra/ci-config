@@ -19,6 +19,16 @@ import dlrnapi_client
 start_named_hashes = {}
 
 
+def set_start_named_hashes(release, promote_from, dlrn):
+    ''' Called at the start of the promoter invocation and after
+        successful promotion to set the state for the global
+        start_named_hashes
+    '''
+    global start_named_hashes
+    start_named_hashes = fetch_current_named_hashes(
+                                           release, promote_from, dlrn)
+
+
 def fetch_current_named_hashes(release, promote_from, dlrn):
     ''' Get latest known named hashes from dlrn
         Returns a dictionary with name to hash {'current-tripleo': 'xyz', '''
@@ -393,6 +403,9 @@ def promote_all_links(
                         api_url,
                         new_hashes['commit_hash'],
                         new_hashes['distro_hash'])
+                    # update start_named_hashes after promotion for other
+                    # items in promote_from that we will loop for
+                    set_start_named_hashes(release, promote_from, api)
                     # stop here, don't try to promote other hashes
                     break
                 except Exception:
@@ -464,9 +477,7 @@ def promoter(config):
         job_reqs[section] = [k for k, v in config.items(section)]
     logger.debug('Promotion requirements loaded: %s', job_reqs)
 
-    global start_named_hashes
-    start_named_hashes = fetch_current_named_hashes(
-                                           release, promote_from, api_instance)
+    set_start_named_hashes(release, promote_from, api_instance)
     logger.info('Named hashes at start of promotion process: %s',
                 start_named_hashes)
 
