@@ -68,8 +68,8 @@ test_ini_configurations = dict(
 )
 
 promotion_criteria_map = {
-    "current-tripleo": ["periodic-tripleo-centos-7-master-containers-build"
-                        "-push"]
+    "current-tripleo": set(["periodic-tripleo-centos-7-master-containers-build"
+                            "-push"])
 }
 
 
