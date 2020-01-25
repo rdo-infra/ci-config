@@ -8,18 +8,12 @@ import dlrnapi_client
 import logging
 import os
 
-
 from legacy_promoter import fetch_current_named_hashes
+from common import str2bool
 
 
 class ConfigError(Exception):
     pass
-
-
-def str2bool(value):
-    if value in ['yes', 'true', 'True', 'on', '1']:
-        return True
-    return False
 
 
 # Global variable needed for the hash check
@@ -78,7 +72,8 @@ class PromoterConfig(object):
             "distro_name",
             "distro_version",
             "release",
-            "api_url"
+            "api_url",
+            "log_file",
         ]
         for param in mandatory_parameters:
             try:
