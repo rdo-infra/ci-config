@@ -3,7 +3,13 @@ import os
 import tempfile
 import unittest
 
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
+
 from config import PromoterConfig, ConfigError
+from dlrnapi_promoter import main as promoter_main
 
 test_ini_configurations = dict(
     not_ini='''
@@ -53,3 +59,24 @@ class TestConfig(unittest.TestCase):
         config = PromoterConfig(self.filepaths['correct'])
         # Test if legacy config has been correctly created
         self.assertIsInstance(config.legacy_config, configparser.ConfigParser)
+
+
+class TestMain(unittest.TestCase):
+
+    @mock.patch('dlrnapi_promoter.setup_logging')
+    @mock.patch('dlrnapi_promoter.legacy_main')
+    @mock.patch('dlrnapi_promoter.promoter')
+    @mock.patch('dlrnapi_promoter.PromoterConfig')
+    def test_main(self, config_mock, promoter_mock,
+                  legacy_main_mock, setup_logging_mock):
+
+        config_mock.legacy_config = {'main': {'log_file': "/dev/null"}}
+
+        promoter_main(cmd_line="config")
+
+        assert promoter_mock.called
+        assert setup_logging_mock.called
+
+        promoter_main(cmd_line="config --force-legacy")
+
+        assert legacy_main_mock.called
