@@ -498,7 +498,6 @@ def legacy_main():
     else:
         config = configparser.SafeConfigParser(allow_no_value=True)
         config.read(sys.argv[1])
-        # setup_logging is imported from legacy code
         setup_logging(config.get('main', 'log_file'))
         logger = logging.getLogger('promoter')
         try:
