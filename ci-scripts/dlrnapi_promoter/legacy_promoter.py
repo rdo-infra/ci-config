@@ -20,12 +20,6 @@ import sys
 from dlrnapi_client.rest import ApiException
 import dlrnapi_client
 
-# start_named_hashes - named hashes at promotion start
-# can check they are not changed before we push containers/images/links.
-# {'current-tripleo': 'xyz', 'previous-current-tripleo': 'abc' ... }
-# https://tree.taiga.io/project/tripleo-ci-board/task/1325
-start_named_hashes = {}
-
 
 def fetch_current_named_hashes(release, promote_from, dlrn):
     ''' Get latest known named hashes from dlrn
