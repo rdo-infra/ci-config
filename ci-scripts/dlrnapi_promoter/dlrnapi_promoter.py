@@ -8,18 +8,46 @@ codebase To prepare for the implementation of component pipeline
 """
 from __future__ import print_function
 
+import argparse
+import logging
+import os
+import sys
+
+from config import PromoterConfig
+from common import str2bool
 # Import previous content from the legacy_promoter file
 from legacy_promoter import legacy_main
+from legacy_promoter import setup_logging
+from legacy_promoter import promoter
 
 
 # Wrappers for the old code
 def main():
-    print("As part of the transition, the new promoter code will still call"
-          "the old promoter code")
-    # This new code will soon do something additional from the old promoter code
-    #
-    # legacy_main is imported from legacy code
-    legacy_main()
+    main_parser = argparse.ArgumentParser(description="Promoter workflow")
+    main_parser.add_argument("config_file", help="The config file")
+    main_parser.add_argument("--force-legacy", action="store_true",
+                             help="Force the use of the legacy code")
+    args = main_parser.parse_args()
+    # Main execution paths branch we either use legacy code or we use
+    # modularized
+    if args.force_legacy or str2bool(os.environ.get("PROMOTER_FORCE_LEGACY",
+                                                    False)):
+
+        # Legacy code supports only a single argument
+        sys.argv = [sys.argv[0], args.config_file]
+        # legacy_main is imported from legacy code
+        legacy_main()
+    else:
+        config = PromoterConfig(args.config_file)
+        # setup_logging is imported from legacy code
+        setup_logging(config.legacy_config.get('main', 'log_file'))
+        logger = logging.getLogger('promoter')
+        logger.warning("This workflow is using the new modularized code")
+        try:
+            # promoter is imported from legacy code
+            promoter(config.legacy_config)
+        except Exception as e:
+            logger.exception(e)
 
 
 if __name__ == '__main__':

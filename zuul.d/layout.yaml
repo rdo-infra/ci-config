@@ -11,12 +11,15 @@
     check:
       jobs:
         - tripleo-ci-promotion-staging:
-            files:
+            files: &integration
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
               - ^ci-scripts/promote-images.sh
               - ^ci-scripts/infra-setup/roles/promoter/.*
               - ^playbooks/staging.*
+        - tripleo-ci-promotion-staging-legacy:
+            files:
+              <<: *integration
         - sova-tracking-jobs: &sovatrack
             # broken for more than a month, incorrect file pattern as job
             # can be brake by changes outside it.
