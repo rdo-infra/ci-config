@@ -47,16 +47,21 @@ class PromoterConfig(object):
             # been migrated
             self.legacy_config = cparser
         except configparser.MissingSectionHeaderError:
-            self.log.error("Unable to load config file {}".format(config_path))
+            self.log.error("Unable to load config file %s", config_path)
             raise ConfigError
+        except ConfigError:
+            self.log.error("Error in configuration file %s", config_path)
+            raise
 
     def load_from_ini(self):
         """
-        Loads configuration from a INI file. There are three fatal exceptions
+        Loads configuration from a INI file. There are several exceptions
         that can block the load
         - Missing main section
         - Missing criteria section for one of the specified candidates
+        - Missing jobs in criteria section
         - Missing mandatory parameters
+        - Missing password
         """
 
         conf_ok = True
@@ -102,6 +107,7 @@ class PromoterConfig(object):
         # Promotion maps
         try:
             self.promotion_steps_map = self.data['promote_from']
+            print(self.data)
         except KeyError:
             self.promotion_steps_map = []
             self.log.error("Missing promotion_from section")
@@ -109,8 +115,13 @@ class PromoterConfig(object):
         self.promotion_criteria_map = {}
         for target_name, candidate_name in self.promotion_steps_map.items():
             try:
-                self.promotion_criteria_map[target_name] = list(self.data[
-                    target_name])
+                criteria = set(list(self.data[target_name]))
+                self.promotion_criteria_map[target_name] = criteria
+                # replaces promote_all_links - label reject condition
+                if not criteria:
+                    self.log.error("No jobs in criteria for target %s",
+                                   target_name)
+                    conf_ok = False
             except KeyError:
                 self.log.error("Missing criteria section for target %s",
                                target_name)
@@ -125,6 +136,15 @@ class PromoterConfig(object):
         self.latest_hashes_count = int(self.get_path(
             "main/latest_hashes_count", 10))
 
+        # Allow promotion for the endpoints. For example, a release like
+        # ocata may specify to no allow containers promotion
+        self.allow_containers_promotion = str2bool(self.get_path(
+            "main/allow_containers_promotion", "true"))
+        self.allow_qcow_promotion = str2bool(self.get_path(
+            "main/allow_qcow_promotion", "true"))
+        self.allow_dlrn_promotion = str2bool(self.get_path(
+            "main/allow_dlrn_promotion", "true"))
+
         # Legacy parameters
         api_client = dlrnapi_client.ApiClient(host=self.api_url)
         self.api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
@@ -135,7 +155,7 @@ class PromoterConfig(object):
         start_named_hashes = hashes
 
         if not conf_ok:
-            raise ConfigError("Error(s) in configuration")
+            raise ConfigError
 
     def get_multikeys(self, search_data, keys):
         """

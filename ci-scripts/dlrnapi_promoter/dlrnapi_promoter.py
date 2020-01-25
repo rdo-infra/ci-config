@@ -18,7 +18,7 @@ from common import str2bool
 # Import previous content from the legacy_promoter file
 from legacy_promoter import legacy_main
 from legacy_promoter import setup_logging
-from legacy_promoter import promote_all_links
+from logic import PromoterLogic
 
 
 def promoter(args):
@@ -28,17 +28,8 @@ def promoter(args):
     logger = logging.getLogger('promoter')
     logger.warning("This workflow is using the new modularized code")
     try:
-        # promote_all_links is imported from legacy code
-        promote_all_links(config.api_instance,
-                          config.promotion_steps_map,
-                          config.promotion_criteria_map,
-                          config.dry_run,
-                          config.distro,
-                          config.release,
-                          config.latest_hashes_count,
-                          config.api_url,
-                          config.manifest_push,
-                          config.target_registries_push)
+        logic = PromoterLogic(config)
+        logic.promote_all_links()
     except Exception as e:
         logger.exception(e)
     logger.info("FINISHED promotion_process")
