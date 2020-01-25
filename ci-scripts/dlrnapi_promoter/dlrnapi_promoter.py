@@ -18,7 +18,30 @@ from common import str2bool
 # Import previous content from the legacy_promoter file
 from legacy_promoter import legacy_main
 from legacy_promoter import setup_logging
-from legacy_promoter import promoter
+from legacy_promoter import promote_all_links
+
+
+def promoter(args):
+    config = PromoterConfig(args.config_file)
+    # setup_logging is imported from legacy code
+    setup_logging(config.legacy_config.get('main', 'log_file'))
+    logger = logging.getLogger('promoter')
+    logger.warning("This workflow is using the new modularized code")
+    try:
+        # promote_all_links is imported from legacy code
+        promote_all_links(config.api_instance,
+                          config.promotion_steps_map,
+                          config.promotion_criteria_map,
+                          config.dry_run,
+                          config.distro,
+                          config.release,
+                          config.latest_hashes_count,
+                          config.api_url,
+                          config.manifest_push,
+                          config.target_registries_push)
+    except Exception as e:
+        logger.exception(e)
+    logger.info("FINISHED promotion_process")
 
 
 # Wrappers for the old code
@@ -32,23 +55,12 @@ def main():
     # modularized
     if args.force_legacy or str2bool(os.environ.get("PROMOTER_FORCE_LEGACY",
                                                     False)):
-
         # Legacy code supports only a single argument
         sys.argv = [sys.argv[0], args.config_file]
         # legacy_main is imported from legacy code
         legacy_main()
     else:
-        config = PromoterConfig(args.config_file)
-        # setup_logging is imported from legacy code
-        setup_logging(config.legacy_config.get('main', 'log_file'))
-        logger = logging.getLogger('promoter')
-        logger.warning("This workflow is using the new modularized code")
-        try:
-            # promoter is imported from legacy code
-            promoter(config.legacy_config)
-        except Exception as e:
-            logger.exception(e)
-
+        promoter(args)
 
 if __name__ == '__main__':
     main()
