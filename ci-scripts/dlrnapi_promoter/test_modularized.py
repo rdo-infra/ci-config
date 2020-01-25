@@ -4,6 +4,10 @@ import tempfile
 import unittest
 
 from config import PromoterConfig, ConfigError
+from dlrn_interface import DlrnClient
+from logic import PromoterLogic
+from qcow import QcowClient
+from registry import RegistryClient
 from six import string_types
 
 test_ini_configurations = dict(
@@ -64,8 +68,8 @@ test_ini_configurations = dict(
 )
 
 promotion_criteria_map = {
-    "current-tripleo": ["periodic-tripleo-centos-7-master-containers-build"
-                        "-push"]
+    "current-tripleo": set(["periodic-tripleo-centos-7-master-containers-build"
+                            "-push"])
 }
 
 
@@ -118,3 +122,71 @@ class TestConfig(unittest.TestCase):
         self.assertDictEqual(promotion_criteria_map,
                              config.promotion_criteria_map)
         self.assertEqual(config.latest_hashes_count, 10)
+
+
+class TestDlrnClient(unittest.TestCase):
+
+    def setUp(self):
+        content = test_ini_configurations['correct']
+        fp, self.filepath = tempfile.mkstemp(prefix="instance_test")
+        with os.fdopen(fp, "w") as test_file:
+            test_file.write(content)
+
+    def tearDown(self):
+        os.unlink(self.filepath)
+
+    def test_instance(self):
+        os.environ["DLRNAPI_PASSWORD"] = "test"
+        config = PromoterConfig(self.filepath)
+        DlrnClient(config)
+
+
+class TestRegistryClient(unittest.TestCase):
+
+    def setUp(self):
+        content = test_ini_configurations['correct']
+        fp, self.filepath = tempfile.mkstemp(prefix="instance_test")
+        with os.fdopen(fp, "w") as test_file:
+            test_file.write(content)
+
+    def tearDown(self):
+        os.unlink(self.filepath)
+
+    def test_instance(self):
+        os.environ["DLRNAPI_PASSWORD"] = "test"
+        config = PromoterConfig(self.filepath)
+        RegistryClient(config)
+
+
+class TestQcowClient(unittest.TestCase):
+
+    def setUp(self):
+        content = test_ini_configurations['correct']
+        fp, self.filepath = tempfile.mkstemp(prefix="instance_test")
+        with os.fdopen(fp, "w") as test_file:
+            test_file.write(content)
+
+    def tearDown(self):
+        os.unlink(self.filepath)
+
+    def test_instance(self):
+        os.environ["DLRNAPI_PASSWORD"] = "test"
+        config = PromoterConfig(self.filepath)
+        QcowClient(config)
+
+
+class TestPromoterLogic(unittest.TestCase):
+
+    def setUp(self):
+        content = test_ini_configurations['correct']
+        fp, self.filepath = tempfile.mkstemp(prefix="instance_test")
+        with os.fdopen(fp, "w") as test_file:
+            test_file.write(content)
+
+    def tearDown(self):
+        os.unlink(self.filepath)
+
+    def test_instance(self):
+        os.environ["DLRNAPI_PASSWORD"] = "test"
+        config = PromoterConfig(self.filepath)
+        PromoterLogic(config)
