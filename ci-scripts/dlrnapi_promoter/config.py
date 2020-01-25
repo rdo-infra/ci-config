@@ -5,6 +5,9 @@ can be passed to all the new and legacy functions in the workflow.
 
 import configparser
 import logging
+import os
+
+from common import str2bool
 
 
 class ConfigError(Exception):
@@ -29,10 +32,146 @@ class PromoterConfig(object):
         try:
             cparser = configparser.ConfigParser(allow_no_value=True)
             cparser.read(config_path)
+            self.data = dict(cparser.items())
+            self.load_from_ini()
 
-            # Legacy method, will be used to pass to functions that have not yep
+            # Legacy method, will be used to pass to functions that have not yet
             # been migrated
             self.legacy_config = cparser
         except configparser.MissingSectionHeaderError:
-            self.log.error("Unable to load config file {}".format(config_path))
+            self.log.error("Unable to load config file %s", config_path)
             raise ConfigError
+        except ConfigError:
+            self.log.error("Error in configuration file %s", config_path)
+            raise
+
+    def load_from_ini(self):
+        """
+        Loads configuration from a INI file. There are several exceptions
+        that can block the load
+        - Missing main section
+        - Missing criteria section for one of the specified candidates
+        - Missing jobs in criteria section
+        - Missing mandatory parameters
+        - Missing password
+        """
+
+        conf_ok = True
+        # Main parameters
+        try:
+            data_main = self.data['main']
+        except KeyError:
+            self.log.error("Missing main section")
+            raise ConfigError
+
+        # Mandatory
+        mandatory_parameters = [
+            "distro_name",
+            "distro_version",
+            "release",
+            "api_url",
+            "log_file",
+            "username"
+        ]
+        for param in mandatory_parameters:
+            try:
+                setattr(self, param, data_main[param])
+            except KeyError:
+                conf_ok = False
+                self.log.error("Missing mandatory parameter: %s", param)
+
+        # Mangling and derivatives
+        if hasattr(self, "distro_name"):
+            self.distro_name = self.distro_name.lower()
+        if hasattr(self, "distro_name") and hasattr(self, "distro_version"):
+            self.distro = "{}{}".format(self.distro_name, self.distro_version)
+        if hasattr(self, "username"):
+            self.dlrnauth_username = self.username
+            delattr(self, "username")
+
+        # DLRN authentication
+        try:
+            self.dlrnauth_password = os.environ["DLRNAPI_PASSWORD"]
+        except KeyError:
+            self.log.error("Missing dlrnapi password")
+            conf_ok = False
+
+        # Promotion maps
+        try:
+            self.promotion_steps_map = self.data['promote_from']
+        except KeyError:
+            self.promotion_steps_map = []
+            self.log.error("Missing promotion_from section")
+            conf_ok = False
+        self.promotion_criteria_map = {}
+        for target_name, candidate_name in self.promotion_steps_map.items():
+            try:
+                criteria = set(list(self.data[target_name]))
+                self.promotion_criteria_map[target_name] = criteria
+                # replaces promote_all_links - label reject condition
+                if not criteria:
+                    self.log.error("No jobs in criteria for target %s",
+                                   target_name)
+                    conf_ok = False
+            except KeyError:
+                self.log.error("Missing criteria section for target %s",
+                               target_name)
+                conf_ok = False
+
+        # Optional parameters
+        self.dry_run = str2bool(self.get_path("main/dry_run", "false"))
+        self.manifest_push = str2bool(self.get_path("main/manifest_push",
+                                                    "false"))
+        self.target_registries_push = str2bool(self.get_path(
+            "main/target_registries_push", "true"))
+        self.latest_hashes_count = int(self.get_path(
+            "main/latest_hashes_count", 10))
+        self.pipeline_type = self.get_path("main/target_registries_push",
+                                           "single")
+
+        # Allow promotion for the endpoints. For example, a release like
+        # ocata may specify to no allow containers promotion
+        self.allow_containers_promotion = str2bool(self.get_path(
+            "main/allow_containers_promotion", "true"))
+        self.allow_qcows_promotion = str2bool(self.get_path(
+            "main/allow_qcows_promotion", "true"))
+        self.allow_dlrn_promotion = str2bool(self.get_path(
+            "main/allow_dlrn_promotion", "true"))
+
+        if not conf_ok:
+            raise ConfigError
+
+    def get_multikeys(self, search_data, keys):
+        """
+        recursive function to retrieve a value from a nested dictionary whose
+        path is specified in keys
+        E.g  get_multikeys(dict, ['main', 'subsection', 'key1']) is the same as
+        dict['main']['subsection']['key1']
+        :param search_data: the dictionary to explore
+        :param keys:  the keys list representing the path
+        :return: the value of the leaf dictionary at the end of the path
+        """
+        if not keys:
+            return search_data
+        else:
+            return self.get_multikeys(search_data[keys[0]], keys[1:])
+
+    def get_path(self, key_string, *args):
+        """
+        translated a string like "main/subsection/key1" in a list of keys as
+        a path to pass to the get_multikeys method, and the calls the method.
+        :param key_string: the string containing the keys path
+        :param args: if specified args[0] is used as default value when a ke
+        does not exist
+        :return: the value if the key_string exists or the default if specified.
+        """
+        keys = key_string.split("/")
+        try:
+            value = self.get_multikeys(self.data, keys)
+        except KeyError:
+            if args[0]:
+                return args[0]
+            else:
+                raise
+
+        return value

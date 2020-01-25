@@ -9,20 +9,81 @@ codebase To prepare for the implementation of component pipeline
 from __future__ import print_function
 
 import argparse
+import dlrnapi_client
 import logging
+import logging.handlers
 import os
 import sys
 
-from config import PromoterConfig
 from common import str2bool
+from config import PromoterConfig
+from logic import PromoterLogic
 # Import previous content from the legacy_promoter file
+import legacy_promoter
 from legacy_promoter import legacy_main
-from legacy_promoter import setup_logging
-from legacy_promoter import promoter
+from legacy_promoter import fetch_current_named_hashes
+
+
+class Promoter(object):
+    """
+    This class will drive the hig level process
+    """
+
+    log = logging.getLogger('promoter')
+
+    def __init__(self, args):
+        self.config = PromoterConfig(args.config_file)
+        self.setup_logging()
+
+    def setup_logging(self):
+        """
+        Sets up logging for the whole workflow, using the file provided in
+        config
+        If the process is start in a tty, we will log to console too
+        :return: None
+        """
+        self.log.setLevel(logging.DEBUG)
+        log_handler = logging.handlers.WatchedFileHandler(
+            os.path.expanduser(self.config.log_file))
+        log_formatter = logging.Formatter('%(asctime)s %(process)d '
+                                          '%(levelname)-8s %(name)s '
+                                          '%(message)s')
+        log_handler.setFormatter(log_formatter)
+        self.log.addHandler(log_handler)
+        if sys.stdout.isatty():
+            log_handler = logging.StreamHandler()
+            log_handler.setFormatter(log_formatter)
+            self.log.addHandler(log_handler)
+
+    def start_process(self):
+        """
+        High level process starter
+        :return: None
+        """
+        self.log.warning("This workflow is using the new modularized code")
+        # Legacy parameters
+        api_client = dlrnapi_client.ApiClient(host=self.config.api_url)
+        dlrnapi_client.configuration.username = self.config.dlrnauth_username
+        dlrnapi_client.configuration.password = self.config.dlrnauth_password
+        api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
+        hashes = fetch_current_named_hashes(self.config.release,
+                                            self.config.promotion_steps_map,
+                                            api_instance)
+        legacy_promoter.start_named_hashes = hashes
+        try:
+            logic = PromoterLogic(self.config)
+            logic.promote_all_links()
+        except Exception as e:
+            self.log.exception(e)
+        self.log.info("FINISHED promotion process")
 
 
 # Wrappers for the old code
 def main(cmd_line=None):
+    """
+    This main will select which execution path to take, between legacy and new
+    code
+    """
     main_parser = argparse.ArgumentParser(description="Promoter workflow")
     main_parser.add_argument("config_file", help="The config file")
     main_parser.add_argument("--force-legacy", action="store_true",
@@ -36,22 +97,13 @@ def main(cmd_line=None):
     # modularized
     if args.force_legacy or str2bool(os.environ.get("PROMOTER_FORCE_LEGACY",
                                                     False)):
-
         # Legacy code supports only a single argument
         sys.argv = [sys.argv[0], args.config_file]
         # legacy_main is imported from legacy code
         legacy_main()
     else:
-        config = PromoterConfig(args.config_file)
-        # setup_logging is imported from legacy code
-        setup_logging(config.legacy_config.get('main', 'log_file'))
-        logger = logging.getLogger('promoter')
-        logger.warning("This workflow is using the new modularized code")
-        try:
-            # promoter is imported from legacy code
-            promoter(config.legacy_config)
-        except Exception as e:
-            logger.exception(e)
+        promoter = Promoter(args)
+        promoter.start_process()
 
 
 if __name__ == '__main__':
