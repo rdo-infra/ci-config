@@ -4,6 +4,11 @@ import tempfile
 import unittest
 
 from config import PromoterConfig, ConfigError
+from dlrn_interface import DlrnHash
+from registry import RegistryClient
+from qcow import QcowClient
+from logic import PromoterLogic
+
 
 test_ini_configurations = dict(
     not_ini='''
@@ -63,8 +68,8 @@ test_ini_configurations = dict(
 )
 
 promotion_criteria_map = {
-    "current-tripleo": ["periodic-tripleo-centos-7-master-containers-build"
-                        "-push"]
+    "current-tripleo": set(["periodic-tripleo-centos-7-master-containers-build"
+                            "-push"])
 }
 
 
@@ -115,3 +120,43 @@ class TestConfig(unittest.TestCase):
         self.assertDictEqual(promotion_criteria_map,
                              config.promotion_criteria_map)
         self.assertEqual(config.latest_hashes_count, 10)
+
+
+valid_dlrn_dict = dict(commit_hash='a', distro_hash='b')
+invalid_dlrn_dict = dict(commit='a', distro='b')
+compare_success_dlrn_dict = dict(commit_hash='a', distro_hash='b')
+compare_fail_dlrn_dict = dict(commit_hash='b', distro_hash='c')
+full_hash = "a_b"
+
+
+class TestDlrnHash(unittest.TestCase):
+
+    def test_create_from_values(self):
+        dh = DlrnHash(commit=valid_dlrn_dict['commit_hash'],
+                      distro=valid_dlrn_dict['distro_hash'])
+        self.assertEqual(dh.commit_hash, valid_dlrn_dict['commit_hash'])
+        self.assertEqual(dh.distro_hash, valid_dlrn_dict['distro_hash'])
+
+    def test_create_from_dict(self):
+        with self.assertRaises(KeyError):
+            DlrnHash(from_dict=invalid_dlrn_dict)
+        dh = DlrnHash(from_dict=valid_dlrn_dict)
+        self.assertEqual(dh.commit_hash, valid_dlrn_dict['commit_hash'])
+        self.assertEqual(dh.distro_hash, valid_dlrn_dict['distro_hash'])
+
+    def test_create_from_api(self):
+        pass
+
+    def test_comparisons(self):
+        dh1 = DlrnHash(from_dict=valid_dlrn_dict)
+        dh2 = DlrnHash(from_dict=compare_success_dlrn_dict)
+        self.assertEqual(dh1, dh2)
+        dh2 = DlrnHash(from_dict=compare_fail_dlrn_dict)
+        self.assertNotEqual(dh1, dh2)
+        with self.assertRaises(TypeError):
+            (dh1 == invalid_dlrn_dict)
+            (dh1 != invalid_dlrn_dict)
+
+    def test_properties(self):
+        dh1 = DlrnHash(from_dict=valid_dlrn_dict)
+        self.assertEqual(dh1.full_hash, full_hash)
