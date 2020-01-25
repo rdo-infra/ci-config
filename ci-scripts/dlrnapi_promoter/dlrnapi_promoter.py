@@ -14,12 +14,12 @@ import logging
 import os
 import sys
 
-from config import PromoterConfig
 from common import str2bool, start_named_hashes
+from config import PromoterConfig
+from logic import PromoterLogic
 # Import previous content from the legacy_promoter file
 from legacy_promoter import legacy_main
 from legacy_promoter import setup_logging
-from legacy_promoter import promote_all_links
 from legacy_promoter import fetch_current_named_hashes
 
 
@@ -38,17 +38,8 @@ def promoter(args):
     global start_named_hashes
     start_named_hashes = hashes
     try:
-        # promote_all_links is imported from legacy code
-        promote_all_links(api_instance,
-                          config.promotion_steps_map,
-                          config.promotion_criteria_map,
-                          config.dry_run,
-                          config.distro,
-                          config.release,
-                          config.latest_hashes_count,
-                          config.api_url,
-                          config.manifest_push,
-                          config.target_registries_push)
+        logic = PromoterLogic(config)
+        logic.promote_all_links()
     except Exception as e:
         logger.exception(e)
     logger.info("FINISHED promotion_process")
