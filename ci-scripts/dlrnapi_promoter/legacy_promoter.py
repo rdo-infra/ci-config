@@ -325,8 +325,10 @@ def promote_all_links(
     successful'''
     logger = logging.getLogger('promoter')
 
+    # promote_all_links - labels loop
     for promote_name, current_name in promote_from.items():
         logger.info('Trying to promote %s to %s', current_name, promote_name)
+        # promote_all_links - candidate hashes selection
         # Cycle over latest unpromoted hashes
         for new_hashes in get_latest_hashes(api, promote_name, current_name,
                                             latest_hashes_count):
@@ -337,6 +339,7 @@ def promote_all_links(
                                  new_hashes['distro_hash'][:8])
             successful_jobs = set(fetch_jobs(api, new_hashes))
             required_jobs = set(job_reqs[promote_name])
+            # promote_all_links - label reject condition
             if not required_jobs:
                 logger.info(
                     'Skipping promotion of %s from %s to %s, no jobs '
@@ -344,6 +347,7 @@ def promote_all_links(
                     new_hashes, current_name, promote_name)
                 break
             missing_jobs = list(required_jobs - successful_jobs)
+            # promote_all_links - hashes reject condition
             if missing_jobs:
                 logger.info(
                     'Skipping promotion of %s%s-%s %s from %s to %s, missing '
@@ -359,6 +363,7 @@ def promote_all_links(
                     new_hashes['commit_hash'],
                     new_hashes['distro_hash'])
                 continue
+            # promote_all_links - noop promotion
             if dry_run:
                 logger.info('DRY RUN: promotion conditions satisfied, '
                             'skipping promotion of %s-%s %s to %s (%s)',
@@ -366,9 +371,11 @@ def promote_all_links(
                             promote_name, new_hashes)
                 break
             else:
+                # promote_all_links - effective promotion
                 try:
                     # ocata does not have containers to upload
                     # this can be removed once ocata is EOL
+                    # promote_all_links - containers promotion
                     check_named_hashes_unchanged(release, promote_from, api)
                     if release not in ['ocata']:
                         tag_containers(
@@ -379,6 +386,7 @@ def promote_all_links(
                             manifest_push,
                             target_registries_push)
 
+                    # promote_all_links - qcows promotion
                     # For fedora we just run standalone let's not tag images
                     check_named_hashes_unchanged(release, promote_from, api)
                     distro_name, _ = distro
@@ -389,6 +397,7 @@ def promote_all_links(
                             release,
                             promote_name)
 
+                    # promote_all_links - dlrn promotion
                     check_named_hashes_unchanged(release, promote_from, api)
                     promote_link(api, new_hashes, promote_name)
                     logger.info('SUCCESS promoting %s%s-%s %s as %s (%s)',
@@ -411,6 +420,7 @@ def promote_all_links(
                         {promote_name: updated_named_hash})
                     # stop here, don't try to promote other hashes
                     break
+                # promote_all_links - effective promotion failure
                 except Exception:
                     logger.info('FAILED promoting %s%s-%s %s as %s (%s)',
                                 distro[0], distro[1], release, current_name,
