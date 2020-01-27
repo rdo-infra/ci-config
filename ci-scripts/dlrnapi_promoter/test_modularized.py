@@ -11,6 +11,7 @@ except ImportError:
 from config import PromoterConfig, ConfigError
 from dlrnapi_promoter import main as promoter_main
 from dlrn_interface import DlrnClient
+from dlrnapi_promoter import Promoter
 from logic import PromoterLogic
 from qcow import QcowClient
 from registry import RegistryClient
@@ -61,7 +62,7 @@ test_ini_configurations = dict(
     api_url: https://trunk.rdoproject.org/api-centos-master-uc
     username: ciuser
     dry_run: no
-    log_file: ~/promoter_logs/centos7_master.log
+    log_file: /dev/null
     latest_hashes_count: 10
     manifest_push: true
 
@@ -133,13 +134,14 @@ class TestConfig(unittest.TestCase):
 class TestMain(unittest.TestCase):
 
     @mock.patch('dlrnapi_promoter.legacy_main')
-    @mock.patch('dlrnapi_promoter.promoter')
-    @mock.patch('dlrnapi_promoter.PromoterConfig')
-    def test_main(self, config_mock, promoter_mock, legacy_main_mock):
+    @mock.patch.object(Promoter, '__init__', autospec=True, return_value=None)
+    @mock.patch.object(Promoter, 'start_process', autospec=True)
+    def test_main(self, start_process_mock, init_mock, legacy_main_mock):
 
         promoter_main(cmd_line="config")
 
-        assert promoter_mock.called
+        assert init_mock.called
+        assert start_process_mock.called
 
         promoter_main(cmd_line="config --force-legacy")
 
@@ -195,6 +197,27 @@ class TestQcowClient(unittest.TestCase):
         os.environ["DLRNAPI_PASSWORD"] = "test"
         config = PromoterConfig(self.filepath)
         QcowClient(config)
+
+
+class TestPromoter(unittest.TestCase):
+
+    def setUp(self):
+        class fakeargs(object):
+            pass
+        self.args = fakeargs()
+        content = test_ini_configurations['correct']
+        fp, self.filepath = tempfile.mkstemp(prefix="instance_test")
+        with os.fdopen(fp, "w") as test_file:
+            test_file.write(content)
+        self.args.log_file = "/dev/null"
+        self.args.config_file = self.filepath
+
+    def tearDown(self):
+        os.unlink(self.filepath)
+
+    def test_instance(self):
+        os.environ["DLRNAPI_PASSWORD"] = "test"
+        Promoter(self.args)
 
 
 class TestPromoterLogic(unittest.TestCase):
