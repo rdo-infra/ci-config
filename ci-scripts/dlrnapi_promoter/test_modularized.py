@@ -5,6 +5,7 @@ import unittest
 
 from config import PromoterConfig, ConfigError
 from dlrn_interface import DlrnClient
+from dlrnapi_promoter import Promoter
 from logic import PromoterLogic
 from qcow import QcowClient
 from registry import RegistryClient
@@ -55,7 +56,7 @@ test_ini_configurations = dict(
     api_url: https://trunk.rdoproject.org/api-centos-master-uc
     username: ciuser
     dry_run: no
-    log_file: ~/promoter_logs/centos7_master.log
+    log_file: /dev/null
     latest_hashes_count: 10
     manifest_push: true
 
@@ -173,6 +174,27 @@ class TestQcowClient(unittest.TestCase):
         os.environ["DLRNAPI_PASSWORD"] = "test"
         config = PromoterConfig(self.filepath)
         QcowClient(config)
+
+
+class TestPromoter(unittest.TestCase):
+
+    def setUp(self):
+        class fakeargs(object):
+            pass
+        self.args = fakeargs()
+        content = test_ini_configurations['correct']
+        fp, self.filepath = tempfile.mkstemp(prefix="instance_test")
+        with os.fdopen(fp, "w") as test_file:
+            test_file.write(content)
+        self.args.log_file = "/dev/null"
+        self.args.config_file = self.filepath
+
+    def tearDown(self):
+        os.unlink(self.filepath)
+
+    def test_instance(self):
+        os.environ["DLRNAPI_PASSWORD"] = "test"
+        Promoter(self.args)
 
 
 class TestPromoterLogic(unittest.TestCase):
