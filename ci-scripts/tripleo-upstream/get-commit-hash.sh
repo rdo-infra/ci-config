@@ -14,9 +14,10 @@ activate_dlrnapi_venv
 
 set -u
 : ${DLRNAPI_DISTRO:="CentOS"}
-: ${DLRNAPI_DISTRO_VERSION:="7"}
+: ${DLRNAPI_DISTRO_VERSION:="8"}
 : ${DLRNAPI_SERVER:="trunk.rdoproject.org"}
 : ${HTTP_PROTOCOL:="https"}
+: ${COMPONENT_NAME:=""}
 
 DLRNAPI_URL="${HTTP_PROTOCOL}://${DLRNAPI_SERVER}/api-${DLRNAPI_DISTRO,,}-$RELEASE"
 if [[ "$RELEASE" == "master"  && "$DLRNAPI_DISTRO" == "CentOS" ]]; then
@@ -25,15 +26,7 @@ if [[ "$RELEASE" == "master"  && "$DLRNAPI_DISTRO" == "CentOS" ]]; then
     export DLRNAPI_URL="${DLRNAPI_URL}-uc"
 fi
 
-# NO release or version in fedora url e.g. https://trunk.rdoproject.org/centos7-master/consistent/commit.yaml
-# vs https://trunk.rdoproject.org/fedora/consistent/commit.yaml
-# for fedora master trunk.rdoproject.org/fedora
-if [[ "$RELEASE" == "master"  && "${DLRNAPI_DISTRO,,}" == "fedora" ]]; then
-    HASHES_URL=${HTTP_PROTOCOL}://${DLRNAPI_SERVER}/${DLRNAPI_DISTRO,,}/$PROMOTE_NAME/commit.yaml
-# for fedora stein  trunk.rdoproject.org/fedora-stein
-# will need an elif here
-
-HASHES_URL=${HTTP_PROTOCOL}://${DLRNAPI_SERVER}/${DLRNAPI_DISTRO,,}${DLRNAPI_DISTRO_VERSION}-$RELEASE/$PROMOTE_NAME/commit.yaml
+HASHES_URL=${HTTP_PROTOCOL}://${DLRNAPI_SERVER}/${DLRNAPI_DISTRO,,}${DLRNAPI_DISTRO_VERSION}-$RELEASE/component/$COMPONENT_NAME/$PROMOTE_NAME/commit.yaml
 
 curl -sLo $WORKSPACE/commit.yaml $HASHES_URL
 COMMIT_HASH=$(shyaml get-value commits.0.commit_hash < $WORKSPACE/commit.yaml)
@@ -46,6 +39,7 @@ export RELEASE=$RELEASE
 export FULL_HASH=$FULL_HASH
 export COMMIT_HASH=$COMMIT_HASH
 export DISTRO_HASH=$DISTRO_HASH
+export COMPONENT_NAME=$COMPONENT_NAME
 EOF
 
 
