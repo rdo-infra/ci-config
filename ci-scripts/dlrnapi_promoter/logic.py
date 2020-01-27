@@ -7,7 +7,7 @@ import logging
 from dlrn_interface import DlrnClient, DlrnHash
 from registry import RegistryClient
 from qcow import QcowClient
-from legacy_promoter import check_named_hashes_unchanged, get_latest_hashes
+from legacy_promoter import check_named_hashes_unchanged
 
 
 class PromotionError(Exception):
@@ -49,14 +49,58 @@ class PromoterLogic(object):
         :param target_label:  The label to which the candidate would be promoted
         :return: A list of candidate hashes
         """
-        if self.config.pipeline_type == "single":
-            # get_latest_hashes is imported from legacy code
-            return get_latest_hashes(self.dlrn_client.api_instance,
-                                     target_label, candidate_label,
-                                     self.config.latest_hashes_count)
-        elif self.config.pipeline_type == "component":
-            self.log.error("Candidate selection for aggregate hashes is not "
-                           "implemented yet")
+        candidate_hashes_list = self.dlrn_client.fetch_hashes(
+            candidate_label, count=self.config.latest_hashes_count,
+            sort="timestamp", reverse=True)
+
+        if candidate_hashes_list is None:
+            self.log.error(
+                'Failed to fetch any hashes for %s, skipping promotion',
+                candidate_label)
+            return []
+
+        # This will be a map of recent hashes candidate for
+        # promotion. We'll map
+        # here the timestamp for each promotion to promote name, if any
+        candidate_hashes = {}
+        for hash in candidate_hashes_list:
+            candidate_hashes[hash.id] = {}
+            candidate_hashes[hash.id][candidate_label] = hash.timestamp
+
+        old_hashes = self.dlrn_client.fetch_hashes(target_label)
+        if old_hashes is None:
+            self.log.warning('Failed to fetch hashes for %s, no previous '
+                             'promotion or typo in the link name',
+                             target_label)
+        else:
+            for hash in old_hashes:
+                # it may happen that an hash appears in this list,
+                # but it's not from
+                # our list of candindates. If this happens we're just
+                # ignoring it
+                if hash.id in candidate_hashes:
+                    candidate_hashes[hash.id][target_label] = \
+                        hash.timestamp
+
+        # returning only the hashes younger than the latest promoted
+        # this list is already in reverse time order
+        for index, hash in enumerate(candidate_hashes_list):
+            if target_label in candidate_hashes[hash.id]:
+                self.log.info(
+                    'Current "%s" hash is %s' % (target_label, hash))
+                candidate_hashes_list = candidate_hashes_list[:index]
+                break
+
+        if candidate_hashes_list:
+            self.log.debug(
+                'Remaining hashes after removing ones older than the '
+                'currently promoted: %s', candidate_hashes_list)
+        else:
+            self.log.debug(
+                'No remaining hashes after removing ones older than the '
+                'currently promoted')
+
+        return candidate_hashes_list
 
     def promote(self, candidate, target_label):
         """
@@ -99,12 +143,10 @@ class PromoterLogic(object):
                                                          target_label):
             self.log.info('Checking hash %s from %s for promotion criteria',
                           selected_candidate, candidate_label)
-            # convert hash. new fetch_jobs function works with DlrnHash
-            selected_candidate = DlrnHash(from_dict=selected_candidate)
             successful_jobs = set(self.dlrn_client.fetch_jobs(
                 selected_candidate))
-            # convert back hash, the promote_* functions still work
-            # with legacy hashes
+            # Convert the dictionary, as the rest of the workflow has not yet
+            # been replaces
             selected_candidate = selected_candidate.dump_to_dict()
             required_jobs = self.config.promotion_criteria_map[target_label]
             # The label reject condition is moved as config time check
