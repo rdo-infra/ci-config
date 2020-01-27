@@ -5,7 +5,7 @@ import unittest
 
 try:
     from unittest.mock import Mock, patch
-    from unittest import mock
+    import unittest.mock as mock
 except ImportError:
     from mock import Mock, patch
     import mock
@@ -150,10 +150,13 @@ class TestMain(unittest.TestCase):
         assert legacy_main_mock.called
 
 
-valid_dlrn_dict = dict(commit_hash='a', distro_hash='b')
+valid_dlrn_dict = dict(commit_hash='a', distro_hash='b', timestamp=1)
+valid_dlrn_dict_no_timestamp = dict(commit_hash='a', distro_hash='b')
 invalid_dlrn_dict = dict(commit='a', distro='b')
-compare_success_dlrn_dict = dict(commit_hash='a', distro_hash='b')
-compare_fail_dlrn_dict = dict(commit_hash='b', distro_hash='c')
+compare_success_dlrn_dict = dict(commit_hash='a', distro_hash='b', timestamp=1)
+compare_success_dlrn_dict_no_timestamp = dict(commit_hash='a',
+                                              distro_hash='b')
+compare_fail_dlrn_dict = dict(commit_hash='b', distro_hash='c', timestamp=1)
 full_hash = "a_b"
 
 
@@ -184,6 +187,9 @@ class TestDlrnHash(unittest.TestCase):
         with self.assertRaises(TypeError):
             (dh1 == invalid_dlrn_dict)
             (dh1 != invalid_dlrn_dict)
+        dh1 = DlrnHash(from_dict=valid_dlrn_dict_no_timestamp)
+        dh2 = DlrnHash(from_dict=compare_success_dlrn_dict_no_timestamp)
+        self.assertEqual(dh1, dh2)
 
     def test_properties(self):
         dh1 = DlrnHash(from_dict=valid_dlrn_dict)
@@ -215,11 +221,22 @@ class TestDlrnClient(unittest.TestCase):
             api_job = Mock()
             api_hash.commit_hash = "a"
             api_hash.distro_hash = "b"
+            api_hash.timestamp = 1
             self.api_hashes.append(api_hash)
             api_job.job_id = "job{}".format(idx)
             api_job.timestamp = 11234567.0
             api_job.url = "https://dev/null"
             self.api_jobs.append(api_job)
+        # Create an unordered list
+        self.api_hashes_unordered = []
+        for idx in range(3):
+            api_hash = Mock()
+            api_hash.commit_hash = "a{}".format(idx)
+            api_hash.distro_hash = "b{}".format(idx)
+            api_hash.timestamp = idx
+            self.api_hashes_unordered.append(api_hash)
+        self.api_hashes_unordered.append(self.api_hashes_unordered.pop(0))
+
         os.environ["DLRNAPI_PASSWORD"] = "test"
         config = PromoterConfig(self.filepath)
         self.client = DlrnClient(config)
@@ -243,6 +260,18 @@ class TestDlrnClient(unittest.TestCase):
             mocked_get.return_value = self.api_hashes
             hash_list = self.client.fetch_hashes("test")
             self.assertEqual(len(hash_list), 1)
+            # TODO(gcerami) test sort by timestamp and reverse
+            mocked_get.return_value = self.api_hashes_unordered
+            hash_list = self.client.fetch_hashes("test", sort="timestamp")
+            self.assertEqual(len(hash_list), 3)
+            self.assertEqual(hash_list[0].timestamp, 0)
+            self.assertEqual(hash_list[1].timestamp, 1)
+            self.assertEqual(hash_list[2].timestamp, 2)
+            hash_list = self.client.fetch_hashes("test", sort="timestamp",
+                                                 reverse=True)
+            self.assertEqual(hash_list[0].timestamp, 2)
+            self.assertEqual(hash_list[1].timestamp, 1)
+            self.assertEqual(hash_list[2].timestamp, 0)
 
     def test_fetch_jobs(self):
         # TODO(gcerami) test with aggregated hash
@@ -317,11 +346,166 @@ class TestPromoterLogic(unittest.TestCase):
         fp, self.filepath = tempfile.mkstemp(prefix="instance_test")
         with os.fdopen(fp, "w") as test_file:
             test_file.write(content)
+        os.environ["DLRNAPI_PASSWORD"] = "test"
+        config = PromoterConfig(self.filepath)
+        self.logic = PromoterLogic(config)
 
     def tearDown(self):
         os.unlink(self.filepath)
 
-    def test_instance(self):
-        os.environ["DLRNAPI_PASSWORD"] = "test"
-        config = PromoterConfig(self.filepath)
-        PromoterLogic(config)
+    @mock.patch('dlrn_interface.DlrnClient.fetch_hashes')
+    def test_no_hashes_fetched_returns_empty_list(self, fetch_hashes_mock):
+
+        old_hashes = []
+        candidate_hashes = []
+        fetch_hashes_mock.side_effect = [candidate_hashes, old_hashes]
+
+        obtained_hashes = self.logic.select_candidates(
+            'candidate_label', 'target_label')
+
+        fetch_hashes_mock.assert_has_calls([
+            mock.call('candidate_label', count=10,
+                      sort="timestamp", reverse=True),
+            mock.call('target_label')
+        ])
+
+        assert(len(obtained_hashes) == 0)
+
+    @mock.patch('dlrn_interface.DlrnClient.fetch_hashes')
+    def test_no_candidates_returns_empty_list(self, fetch_hashes_mock):
+
+        hash_dict = {
+            'timestamp': '1528085424',
+            'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884eda5',
+            'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77eff5'
+        }
+        hash = DlrnHash(from_dict=hash_dict)
+        old_hashes = [hash]
+
+        candidate_hashes = []
+        fetch_hashes_mock.side_effect = [candidate_hashes, old_hashes]
+
+        obtained_hashes = self.logic.select_candidates(
+            'candidate_label', 'target_label')
+        fetch_hashes_mock.assert_has_calls([
+            mock.call('candidate_label', count=10,
+                      sort="timestamp", reverse=True),
+            mock.call('target_label')
+        ])
+
+        assert(len(obtained_hashes) == 0)
+
+    @mock.patch('dlrn_interface.DlrnClient.fetch_hashes')
+    def test_no_old_hashes_returns_candidates(self, fetch_hashes_mock):
+
+        old_hashes = []
+
+        hash1_dict = {
+            'timestamp': '1528085424',
+            'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884eda5',
+            'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77eff5'
+        }
+        hash1 = DlrnHash(from_dict=hash1_dict)
+        hash2_dict = {
+            'timestamp': '1528085434',
+            'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884eda6',
+            'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77eff6'
+        }
+        hash2 = DlrnHash(from_dict=hash2_dict)
+        candidate_hashes = [hash1, hash2]
+
+        fetch_hashes_mock.side_effect = [candidate_hashes, old_hashes]
+
+        obtained_hashes = self.logic.select_candidates(
+            'candidate_label', 'target_label')
+        fetch_hashes_mock.assert_has_calls([
+            mock.call('candidate_label', count=10,
+                      sort="timestamp", reverse=True),
+            mock.call('target_label')
+        ])
+
+        assert(obtained_hashes == candidate_hashes)
+
+    @mock.patch('dlrn_interface.DlrnClient.fetch_hashes')
+    def test_old_hashes_get_filtered_from_candidates(self, fetch_hashes_mock):
+
+        old_hashes_dicts = [
+            {
+                'timestamp': '1528085424',
+                'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884ed24',
+                'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77ef24'
+            },
+            {
+                'timestamp': '1528085425',
+                'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884ed25',
+                'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77ef25'
+            }
+        ]
+
+        old_hashes = []
+        for hash_dict in old_hashes_dicts:
+            old_hashes.append(DlrnHash(from_dict=hash_dict))
+
+        # hashes here must be in order, as fetch_hashes now would return the
+        # list in reverse timestamp order
+        candidate_hashes_dicts = [
+            {
+                'timestamp': '1528085427',
+                'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884ed27',
+                'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77ef27'
+            },
+            {
+                'timestamp': '1528085426',
+                'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884ed26',
+                'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77ef26'
+            },
+            {
+                'timestamp': '1528085425',
+                'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884ed25',
+                'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77ef25'
+            },
+            {
+                'timestamp': '1528085424',
+                'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884ed24',
+                'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77ef24'
+            },
+            {
+                'timestamp': '1528085423',
+                'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884ed23',
+                'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77ef23'
+            },
+        ]
+        candidate_hashes = []
+        for hash_dict in candidate_hashes_dicts:
+            candidate_hashes.append(DlrnHash(from_dict=hash_dict))
+
+        expected_hashes_dicts = [
+            {
+                'timestamp': '1528085427',
+                'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884ed27',
+                'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77ef27'
+            },
+            {
+                'timestamp': '1528085426',
+                'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884ed26',
+                'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77ef26'
+            },
+
+        ]
+        expected_hashes = []
+        for hash_dict in expected_hashes_dicts:
+            expected_hashes.append(DlrnHash(from_dict=hash_dict))
+
+        fetch_hashes_mock.side_effect = [candidate_hashes, old_hashes]
+
+        obtained_hashes = self.logic.select_candidates(
+            'candidate_label', 'target_label')
+        fetch_hashes_mock.assert_has_calls([
+            mock.call('candidate_label', count=10,
+                      sort="timestamp", reverse=True),
+            mock.call('target_label')
+        ])
+
+        print(obtained_hashes)
+        print(expected_hashes)
+        assert(obtained_hashes == expected_hashes)
