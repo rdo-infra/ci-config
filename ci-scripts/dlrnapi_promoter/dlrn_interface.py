@@ -32,64 +32,79 @@ class DlrnHash(dict):
 
     log = logging.getLogger("promoter")
 
-    def __init__(self, commit=None, distro=None, from_api=None, from_dict=None):
+    def __init__(self, commit=None, distro=None, timestamp=None, from_api=None,
+                 from_dict=None):
         """
         Dlrn Hash can be initialized either by direct kwargs value, from a
         dictionary, or from a dlrn api response object
         :param commit: the direct commit hash
         :param distro:  the direct distro hash
+        :param timstamp: the direct timestamp value, must be float
         :param from_api: A valid dlrn api response object
         :param from_dict:  A dictionary that needs to contain commit_hash and
         distro_hash as keys
         """
         self.commit_hash = ""
         self.distro_hash = ""
+        self.timestamp = timestamp
         if from_api is not None:
             try:
-                self.log.debug("Using values from a Promotion object")
                 self.commit_hash = from_api.commit_hash
                 self.distro_hash = from_api.distro_hash
+                if hasattr(from_api, "timestamp"):
+                    self.timestamp = from_api.timestamp
             except AttributeError:
-                raise AttributeError("Cannot create hash,"
+                raise AttributeError("Error while building DlrnHash:"
                                      " invalid source API object")
         elif from_dict is not None:
             try:
-                self.log.debug("Using values from a Promotion object")
                 self.commit_hash = from_dict['commit_hash']
                 self.distro_hash = from_dict['distro_hash']
+                if "timestamp" in from_dict:
+                    self.timestamp = from_dict['timestamp']
             except KeyError:
-                raise KeyError("Cannot create hash:"
+                raise KeyError("Error while building DlrnHash:"
                                " invalid source dict")
-
-        else:
+        elif commit is not None and distro is not None:
             self.commit_hash = commit
             self.distro_hash = distro
+        else:
+            self.log.debug("Creating empty DlrnHash")
 
         # TODO(gcerami) strict dlrn validation
         # check that the hashes are valid hashes with correct size
 
     def __eq__(self, other):
         if not hasattr(other, 'commit_hash') or \
-                not hasattr(other, 'distro_hash'):
+                not hasattr(other, 'distro_hash') or \
+                not hasattr(other, 'timestamp'):
             raise TypeError("One of the objects is not a valid DlrnHash")
 
         return (self.commit_hash == other.commit_hash
-                and self.distro_hash == other.distro_hash)
+                and self.distro_hash == other.distro_hash
+                and self.timestamp == other.timestamp)
 
     def __ne__(self, other):
         if not hasattr(other, 'commit_hash') or \
-                not hasattr(other, 'distro_hash'):
+                not hasattr(other, 'distro_hash') or \
+                not hasattr(other, 'timestamp'):
             raise TypeError("One of the objects is not a valid DlrnHash")
 
         return (self.commit_hash != other.commit_hash
-                or self.distro_hash != other.distro_hash)
+                or self.distro_hash != other.distro_hash
+                or self.timestamp != other.timestamp)
 
     def __str__(self):
-        return "commit: %s, distro: %s" % (self.commit_hash, self.distro_hash)
+        return ("commit: %s, distro: %s, timestamp=%s"
+                "" % (self.commit_hash, self.distro_hash, self.timestamp))
 
     def __repr__(self):
-        return "<DlrnHash object commit: %s, distro: %s>" % (self.commit_hash,
-                                                             self.distro_hash)
+        return ("<DlrnHash object commit: %s, distro: %s, timestamp: %s>"
+                "" % (self.commit_hash, self.distro_hash, self.timestamp))
+
+    @property
+    def id(self):
+        return self.full_hash
 
     @property
     def full_hash(self):
@@ -207,13 +222,15 @@ class DlrnClient(object):
 
         return result
 
-    def fetch_hashes(self, label, count=None):
+    def fetch_hashes(self, label, count=None, sort=None, reverse=False):
         """
         This method fetches a history of hashes that were promoted to a
         specific label, without duplicates.
         :param label: The dlrn identifier
         :param count: Limit the list to count element, If unspecified,
         all the elements will be returned
+        :param sort: Sort the list by the specified supported criteria
+        :param reverse: reverses sort is applied
         :return: A list of hashes
         """
         params = copy.deepcopy(self.hashes_params)
@@ -231,6 +248,13 @@ class DlrnClient(object):
         if len(hash_list) == 0:
             return None
 
+        if sort == "timestamp":
+            hash_list.sort(key=lambda hashes: hashes.timestamp, reverse=reverse)
+
+        print(hash_list)
+        self.log.debug(
+            'Fetch Hashes: fetched %d hashes for name %s: %s',
+            label, self.config.latest_hashes_count, hash_list)
         # if count is None, list[:None] will return the whole list
         return hash_list[:count]
 
