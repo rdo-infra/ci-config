@@ -4,13 +4,15 @@ import tempfile
 import unittest
 
 try:
-    import unittest.mock as mock
+    from unittest.mock import Mock, patch
+    from unittest import mock
 except ImportError:
+    from mock import Mock, patch
     import mock
 
 from config import PromoterConfig, ConfigError
 from dlrnapi_promoter import main as promoter_main
-from dlrn_interface import DlrnClient
+from dlrn_interface import DlrnHash, DlrnClient
 from dlrnapi_promoter import Promoter
 from logic import PromoterLogic
 from qcow import QcowClient
@@ -148,6 +150,52 @@ class TestMain(unittest.TestCase):
         assert legacy_main_mock.called
 
 
+valid_dlrn_dict = dict(commit_hash='a', distro_hash='b')
+invalid_dlrn_dict = dict(commit='a', distro='b')
+compare_success_dlrn_dict = dict(commit_hash='a', distro_hash='b')
+compare_fail_dlrn_dict = dict(commit_hash='b', distro_hash='c')
+full_hash = "a_b"
+
+
+class TestDlrnHash(unittest.TestCase):
+
+    def test_create_from_values(self):
+        dh = DlrnHash(commit=valid_dlrn_dict['commit_hash'],
+                      distro=valid_dlrn_dict['distro_hash'])
+        self.assertEqual(dh.commit_hash, valid_dlrn_dict['commit_hash'])
+        self.assertEqual(dh.distro_hash, valid_dlrn_dict['distro_hash'])
+
+    def test_create_from_dict(self):
+        with self.assertRaises(KeyError):
+            DlrnHash(from_dict=invalid_dlrn_dict)
+        dh = DlrnHash(from_dict=valid_dlrn_dict)
+        self.assertEqual(dh.commit_hash, valid_dlrn_dict['commit_hash'])
+        self.assertEqual(dh.distro_hash, valid_dlrn_dict['distro_hash'])
+
+    def test_create_from_api(self):
+        pass
+
+    def test_comparisons(self):
+        dh1 = DlrnHash(from_dict=valid_dlrn_dict)
+        dh2 = DlrnHash(from_dict=compare_success_dlrn_dict)
+        self.assertEqual(dh1, dh2)
+        dh2 = DlrnHash(from_dict=compare_fail_dlrn_dict)
+        self.assertNotEqual(dh1, dh2)
+        with self.assertRaises(TypeError):
+            (dh1 == invalid_dlrn_dict)
+            (dh1 != invalid_dlrn_dict)
+
+    def test_properties(self):
+        dh1 = DlrnHash(from_dict=valid_dlrn_dict)
+        self.assertEqual(dh1.full_hash, full_hash)
+
+    def test_dump_to_params(self):
+        params = Mock()
+        dh1 = DlrnHash(from_dict=valid_dlrn_dict)
+        dh1.dump_to_params(params)
+        self.assertEqual(params.commit_hash, dh1.commit_hash)
+
+
 class TestDlrnClient(unittest.TestCase):
 
     def setUp(self):
@@ -156,13 +204,37 @@ class TestDlrnClient(unittest.TestCase):
         with os.fdopen(fp, "w") as test_file:
             test_file.write(content)
 
+        self.test_hash = DlrnHash(commit="cmt1", distro="dst1")
+        self.api_hashes = []
+        # Constructs one fake lists with two identical hashes
+        for idx in range(2):
+            api_hash = Mock()
+            api_hash.commit_hash = "a"
+            api_hash.distro_hash = "b"
+            self.api_hashes.append(api_hash)
+        os.environ["DLRNAPI_PASSWORD"] = "test"
+        config = PromoterConfig(self.filepath)
+        self.client = DlrnClient(config)
+
     def tearDown(self):
         os.unlink(self.filepath)
 
-    def test_instance(self):
-        os.environ["DLRNAPI_PASSWORD"] = "test"
-        config = PromoterConfig(self.filepath)
-        DlrnClient(config)
+    def test_hashes_to_hashes(self):
+        # TODO(gcerami) test with aggregated hash
+        hash_list = self.client.hashes_to_hashes(self.api_hashes)
+        self.assertEqual(len(hash_list), 2)
+        self.assertIsInstance(hash_list[0], DlrnHash)
+        hash_list = self.client.hashes_to_hashes(self.api_hashes,
+                                                 remove_duplicates=True)
+        self.assertEqual(len(hash_list), 1)
+
+    def test_fetch_hashes(self):
+        # TODO(gcerami) test with aggregated hash
+        # Patch the promotions_get to not query any server
+        with patch.object(self.client, "promotions_get") as mocked_get:
+            mocked_get.return_value = self.api_hashes
+            hash_list = self.client.fetch_hashes("test")
+            self.assertEqual(len(hash_list), 1)
 
 
 class TestRegistryClient(unittest.TestCase):
