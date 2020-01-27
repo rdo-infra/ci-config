@@ -4,7 +4,7 @@ workflow
 """
 import logging
 
-from dlrn_interface import DlrnClient
+from dlrn_interface import DlrnClient, DlrnHash
 from registry import RegistryClient
 from qcow import QcowClient
 from legacy_promoter import check_named_hashes_unchanged, get_latest_hashes
@@ -99,8 +99,9 @@ class PromoterLogic(object):
                                                          target_label):
             self.log.info('Checking hash %s from %s for promotion criteria',
                           selected_candidate, candidate_label)
+            candidate_hash = DlrnHash(from_dict=selected_candidate)
             successful_jobs = set(self.dlrn_client.fetch_jobs(
-                selected_candidate))
+                candidate_hash))
             required_jobs = self.config.promotion_criteria_map[target_label]
             # The label reject condition is moved as config time check
             # replaces promote_all_links - hashes reject condition
