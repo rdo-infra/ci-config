@@ -7,6 +7,82 @@ import logging
 from legacy_promoter import fetch_jobs, promote_link
 
 
+class DlrnAggregateHash(str):
+    """
+    This class represents the aggregate hash for the component pipeline
+    Not yet implemented
+    """
+    pass
+
+
+class DlrnHash(dict):
+    """
+    This class represent the dlrn hash, It makes it easier to handle, compare
+    and visualize dlrn hashes
+    """
+
+    log = logging.getLogger("promoter")
+
+    def __init__(self, commit=None, distro=None, from_api=None, from_dict=None):
+        self.commit_hash = ""
+        self.distro_hash = ""
+        if from_api is not None:
+            try:
+                self.log.debug("Using values from a Promotion object")
+                self.commit_hash = from_api.commit_hash
+                self.distro_hash = from_api.distro_hash
+            except AttributeError:
+                raise AttributeError("Cannot create hash,"
+                                     " invalid source API object")
+        elif from_dict is not None:
+            try:
+                self.log.debug("Using values from a Promotion object")
+                self.commit_hash = from_dict['commit_hash']
+                self.distro_hash = from_dict['distro_hash']
+            except KeyError:
+                raise KeyError("Cannot create hash:"
+                               " invalid source dict")
+
+        else:
+            self.commit_hash = commit
+            self.distro_hash = distro
+
+        # TODO(gcerami) strict dlrn validation
+        # check that the hashes are valid hashes with correct size
+
+    def __eq__(self, other):
+        if not hasattr(other, 'commit_hash') or \
+                not hasattr(other, 'distro_hash'):
+            raise TypeError("One of the objects is not a valid DlrnHash")
+
+        return (self.commit_hash == other.commit_hash
+                and self.distro_hash == other.distro_hash)
+
+    def __ne__(self, other):
+        if not hasattr(other, 'commit_hash') or \
+                not hasattr(other, 'distro_hash'):
+            raise TypeError("One of the objects is not a valid DlrnHash")
+
+        return (self.commit_hash != other.commit_hash
+                or self.distro_hash != other.distro_hash)
+
+    def __str__(self):
+        return "commit: %s, distro: %s" % (self.commit_hash, self.distro_hash)
+
+    def __repr__(self):
+        return "<DlrnHash object commit: %s, distro: %s>" % (self.commit_hash,
+                                                             self.distro_hash)
+
+    @property
+    def full_hash(self):
+        """
+        Property to abstract the common representation of a full dlrn hash
+        containing full commit and abbreviated distro hashes
+        :return:  The full hash format
+        """
+        return '{0}_{1}'.format(self.commit_hash, self.distro_hash[:8])
+
+
 class DlrnClient(object):
     """
     This class represent a wrapper around dlrnapi client operations to perform
@@ -45,6 +121,15 @@ class DlrnClient(object):
         elif self.config.pipeline_type == "component":
             self.log.error("Fetching from aggregate hash is not yet "
                            "implemented")
+
+    def fetch_hashes(self, label, piepeline_type="single"):
+        """
+        This method fetch hashes for a cspecific label
+        :param dlrn_id:
+        :param pipeline_type:
+        :return: A list of hashes
+        """
+        pass
 
     def promote_hash(self, dlrn_id, target_label):
         """
