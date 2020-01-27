@@ -35,15 +35,21 @@ if [[ "$RELEASE" == "master"  && "${DLRNAPI_DISTRO,,}" == "fedora" ]]; then
 # will need an elif here
 elif [[ "$COMPONENT_NAME" != '' ]]; then
     HASHES_URL=${HTTP_PROTOCOL}://${DLRNAPI_SERVER}/${DLRNAPI_DISTRO,,}${DLRNAPI_DISTRO_VERSION}-$RELEASE/component/$COMPONENT_NAME/$PROMOTE_NAME/commit.yaml
+elif [[ "$DLRNAPI_DISTRO_VERSION" == '8' ]]
+    HASHES_URL=${HTTP_PROTOCOL}://${DLRNAPI_SERVER}/${DLRNAPI_DISTRO,,}${DLRNAPI_DISTRO_VERSION}-$RELEASE/$PROMOTE_NAME/delorean.repo.md5
 else
     HASHES_URL=${HTTP_PROTOCOL}://${DLRNAPI_SERVER}/${DLRNAPI_DISTRO,,}${DLRNAPI_DISTRO_VERSION}-$RELEASE/$PROMOTE_NAME/commit.yaml
 fi
 
-curl -sLo $WORKSPACE/commit.yaml $HASHES_URL
-
-COMMIT_HASH=$(shyaml get-value commits.0.commit_hash < $WORKSPACE/commit.yaml)
-DISTRO_HASH=$(shyaml get-value commits.0.distro_hash < $WORKSPACE/commit.yaml)
-FULL_HASH=${COMMIT_HASH}_${DISTRO_HASH:0:8}
+if [ -f $WORKSPACE/delorean.repo.md5 ]; then
+    curl -sLo $WORKSPACE/delorean.repo.md5 $HASHES_URL
+    FULL_HASH=$(cat $WORKSPACE/delorean.repo.md5)
+else
+    curl -sLo $WORKSPACE/commit.yaml $HASHES_URL
+    COMMIT_HASH=$(shyaml get-value commits.0.commit_hash < $WORKSPACE/commit.yaml)
+    DISTRO_HASH=$(shyaml get-value commits.0.distro_hash < $WORKSPACE/commit.yaml)
+    FULL_HASH=${COMMIT_HASH}_${DISTRO_HASH:0:8}
+fi
 
 cat > $WORKSPACE/hash_info.sh << EOF
 export DLRNAPI_URL=$DLRNAPI_URL
