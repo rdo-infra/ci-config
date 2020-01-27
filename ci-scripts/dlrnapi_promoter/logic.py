@@ -7,7 +7,7 @@ import logging
 from dlrn_interface import DlrnClient, DlrnHash
 from registry import RegistryClient
 from qcow import QcowClient
-from legacy_promoter import check_named_hashes_unchanged, get_latest_hashes
+from legacy_promoter import check_named_hashes_unchanged
 
 
 class PromotionError(Exception):
@@ -50,10 +50,66 @@ class PromoterLogic(object):
         :return: A list of candidate hashes
         """
         if self.config.pipeline_type == "single":
-            # get_latest_hashes is imported from legacy code
-            return get_latest_hashes(self.dlrn_client.api_instance,
-                                     target_label, candidate_label,
-                                     self.config.latest_hashes_count)
+            candidate_hashes_list = self.dlrn_client.fetch_hashes(
+                candidate_label, count=self.config.latest_hashes_count)
+
+            if candidate_hashes_list is None:
+                self.log.error(
+                    'Failed to fetch any hashes for %s, skipping promotion',
+                    candidate_label)
+                return []
+            else:
+                self.log.debug(
+                    'Hashes fetched (tried to get the last %d): %s',
+                    self.config.latest_hashes_count, candidate_hashes_list)
+                candidate_hashes_list.sort(
+                    key=lambda hashes: hashes['timestamp'],
+                    reverse=True)
+
+            # This will be a map of recent hashes candidate for
+            # promotion. We'll map
+            # here the timestamp for each promotion to promote name, if any
+            candidate_hashes = {}
+            for hashes in candidate_hashes_list:
+                candidate_hashes[hashes.full_hash] = {}
+                candidate_hashes[hashes.full_hash][candidate_label] = hashes[
+                    'timestamp']
+
+            old_hashes = self.dlrn_client.fetch_hashes(target_label)
+            if old_hashes is None:
+                self.log.warning('Failed to fetch hashes for %s, no previous '
+                                 'promotion or typo in the link name',
+                                 target_label)
+            else:
+                for hashes in old_hashes:
+                    # it may happen that an hash appears in this list,
+                    # but it's not from
+                    # our list of candindates. If this happens we're just
+                    # ignoring it
+                    if hashes.full_hash in candidate_hashes:
+                        candidate_hashes[hashes.full_hash][target_label] = \
+                            hashes['timestamp']
+
+            # returning only the hashes younger than the latest promoted
+            # this list is already in reverse time order
+            for index, hashes in enumerate(candidate_hashes_list):
+                if target_label in candidate_hashes[hashes.full_hash]:
+                    self.log.info(
+                        'Current "%s" hash is %s' % (target_label, hashes))
+                    candidate_hashes_list = candidate_hashes_list[:index]
+                    break
+
+            if candidate_hashes_list:
+                self.log.debug(
+                    'Remaining hashes after removing ones older than the '
+                    'currently promoted: %s', candidate_hashes_list)
+            else:
+                self.log.debug(
+                    'No remaining hashes after removing ones older than the '
+                    'currently promoted')
+
+            return candidate_hashes_list
+
         elif self.config.pipeline_type == "component":
             self.log.error("Candidate selection for aggregate hashes is not "
                            "implemented yet")
