@@ -19,34 +19,68 @@ from config import PromoterConfig
 from logic import PromoterLogic
 # Import previous content from the legacy_promoter file
 from legacy_promoter import legacy_main
-from legacy_promoter import setup_logging
 from legacy_promoter import fetch_current_named_hashes
 
 
-def promoter(args):
-    config = PromoterConfig(args.config_file)
-    # setup_logging is imported from legacy code
-    setup_logging(config.legacy_config.get('main', 'log_file'))
-    logger = logging.getLogger('promoter')
-    logger.warning("This workflow is using the new modularized code")
-    # Legacy parameters
-    api_client = dlrnapi_client.ApiClient(host=config.api_url)
-    api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
-    hashes = fetch_current_named_hashes(config.release,
-                                        config.promotion_steps_map,
-                                        api_instance)
-    global start_named_hashes
-    start_named_hashes = hashes
-    try:
-        logic = PromoterLogic(config)
-        logic.promote_all_links()
-    except Exception as e:
-        logger.exception(e)
-    logger.info("FINISHED promotion_process")
+class Promoter(object):
+    """
+    This class will drive the hig level process
+    """
+
+    log = logging.getLogger('promoter')
+
+    def __init__(self, args):
+        self.config = PromoterConfig(args.config_file)
+        self.setup_logging()
+
+    def setup_logging(self):
+        """
+        Sets up logging for the whole workflow, using the file provided in
+        config
+        If the process is start in a tty, we will log to console too
+        :return: None
+        """
+        '''Setup logging for the script'''
+        self.log.setLevel(logging.DEBUG)
+        log_handler = logging.handlers.WatchedFileHandler(
+            os.path.expanduser(self.config.log_file))
+        log_formatter = logging.Formatter('%(asctime)s %(process)d '
+                                          '%(levelname)-8s %(name)s '
+                                          '%(message)s')
+        log_handler.setFormatter(log_formatter)
+        self.log.addHandler(log_handler)
+        if sys.stdout.isatty():
+            log_handler = logging.StreamHandler()
+            log_handler.setFormatter(log_formatter)
+            self.log.addHandler(log_handler)
+
+    def start_process(self):
+        """
+        High level process starter
+        :return: None
+        """
+        self.log.warning("This workflow is using the new modularized code")
+        # Legacy parameters
+        api_client = dlrnapi_client.ApiClient(host=self.config.api_url)
+        api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
+        hashes = fetch_current_named_hashes(self.config.release,
+                                            self.config.promotion_steps_map,
+                                            api_instance)
+        global start_named_hashes
+        start_named_hashes = hashes
+        try:
+            logic = PromoterLogic(self.config)
+            logic.promote_all_links()
+        except Exception as e:
+            self.log.exception(e)
+        self.log.info("FINISHED promotion_process")
 
 
-# Wrappers for the old code
 def main():
+    """
+    This main will select which execution path to take, between legacy and new
+    code
+    """
     main_parser = argparse.ArgumentParser(description="Promoter workflow")
     main_parser.add_argument("config_file", help="The config file")
     main_parser.add_argument("--force-legacy", action="store_true",
@@ -61,7 +95,8 @@ def main():
         # legacy_main is imported from legacy code
         legacy_main()
     else:
-        promoter(args)
+        promoter = Promoter(args)
+        promoter.start_process()
 
 
 if __name__ == '__main__':
