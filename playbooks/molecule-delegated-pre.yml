@@ -3,7 +3,7 @@
 - hosts: all
   vars:
     # DO not add ansible here, the production server needs to use ansible from package
-    test_requirements:
+    venv_test_requirements:
       - ansi2html
       - docker
       - pytest
@@ -17,7 +17,11 @@
       - tripleo-common
       - python-tripleoclient
       - selinux
-
+    required_packages:
+      - python-virtualenv
+      - yum-utils
+      # required by tripleo-common
+      - gcc
   tasks:
     - name: Packages
       become: true
@@ -25,30 +29,14 @@
 
         # keep this step separated from the docker-ce install below
         - name: Install required packages
-          yum:
-            name:
-              - python-virtualenv
-              - yum-utils
-              # required by tripleo-common
-              - gcc
-            state: present
+          include_tasks: common_tasks/install-requirements.yml
 
         - name: Configure docker-ce repo
           command: yum-config-manager --add-repo \
               "https://download.docker.com/linux/{{ ansible_distribution|lower }}/docker-ce.repo"
 
-        # Install EPEL so we can get ansible 2.8
-        # Sometimes the epel.repo file is removed even if the package is installed.
-        # So to get back the epel.repo file again we need to remove and install again.
-        - name:  remove epel
-          package:
-            name: epel-release
-            state: absent
-
         - name:  install epel
-          package:
-            name: epel-release
-            state: present
+          include_tasks: common_tasks/install-epel.yml
 
         - name: Removed old/distro version of docker
           yum:
@@ -101,10 +89,7 @@
           meta: reset_connection
 
     - name: Setup test-python
-      pip:
-        name: "{{ test_requirements }}"
-        virtualenv: "{{ ansible_user_dir }}/test-python"
-        virtualenv_site_packages: true
+      include_tasks: common_tasks/install-test-python.yml
 
     - name: use python-tripleoclient from zuul if it's in the correct dir
       pip:

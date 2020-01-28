@@ -1,7 +1,7 @@
 ---
 - hosts: all
   vars:
-    test_requirements:
+    venv_test_requirements:
       - ansi2html
       - cryptography>2.6.1
       - pytest
@@ -14,40 +14,19 @@
       - dlrnapi_client
       - docker
       - shyaml
-
+    required_packages:
+      - python-virtualenv
+      - yum-utils
+      - ansible
   tasks:
-    # Install EPEL so we can get ansible 2.8
-    # Sometimes the epel.repo file is removed even if the package is installed.
-    # So to get back the epel.repo file again we need to remove and install again.
-    - name:  remove epel
-      become: true
-      package:
-        name: epel-release
-        state: absent
-
     - name:  install epel
-      become: true
-      package:
-        name: epel-release
-        state: present
+      include_tasks: common_tasks/install-epel.yml
 
-    - name: Packages
-      become: true
-      block:
-        - name: Install required packages
-          yum:
-            name:
-              - python-virtualenv
-              - yum-utils
-              - ansible
-            state: present
+    - name: Install required packages
+      include_tasks: common_tasks/install-requirements.yml
 
     - name: Setup test-python
-      become: true
-      pip:
-        name: "{{ test_requirements }}"
-        virtualenv: "{{ ansible_user_dir }}/test-python"
-        virtualenv_site_packages: true
+      include_tasks: common_tasks/install-test-python.yml
 
     - name: 'Check if {{ ansible_user_id }} already has a public key in {{ ansible_user_dir }}/.ssh'
       stat:
