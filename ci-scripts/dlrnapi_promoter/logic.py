@@ -115,9 +115,13 @@ class PromoterLogic(object):
 
         # replaces promote_all_links -effective promotion
         # replaces promote_all_links - containers promotion
+        # Convert the dictionary, as the rest of the workflow has not yet
+        # been replaces
+        dict_candidate = candidate.dump_to_dict()
         self.check_named_hashes_unchanged()
         if self.config.allow_containers_promotion:
-            self.registry_client.promote_containers(candidate, target_label)
+            self.registry_client.promote_containers(dict_candidate,
+                                                    target_label)
         # replaces promote_all_links - qcow promotion
         self.check_named_hashes_unchanged()
         if self.config.allow_qcows_promotion:
@@ -125,7 +129,7 @@ class PromoterLogic(object):
         # replaces promote_all_links - dlrn promotion
         self.check_named_hashes_unchanged()
         if self.config.allow_dlrn_promotion:
-            self.dlrn_client.promote_hash(candidate, target_label)
+            self.dlrn_client.promote_hash(dict_candidate, target_label)
 
     def promote_label_to_label(self, candidate_label, target_label):
         """
@@ -145,9 +149,6 @@ class PromoterLogic(object):
                           selected_candidate, candidate_label)
             successful_jobs = set(self.dlrn_client.fetch_jobs(
                 selected_candidate))
-            # Convert the dictionary, as the rest of the workflow has not yet
-            # been replaces
-            selected_candidate = selected_candidate.dump_to_dict()
             required_jobs = self.config.promotion_criteria_map[target_label]
             # The label reject condition is moved as config time check
             # replaces promote_all_links - hashes reject condition
@@ -164,8 +165,8 @@ class PromoterLogic(object):
                         commit_hash=%s&distro_hash=%s'.replace(" ", ""),
                         'DETAILED SUCCESSFUL STATUS: ',
                         self.config.api_url,
-                        selected_candidate['commit_hash'],
-                        selected_candidate['distro_hash'])
+                        selected_candidate.commit_hash,
+                        selected_candidate.distro_hash)
                     # stop here, don't try to promote other hashes
                     break
                 except Exception:
@@ -190,8 +191,8 @@ class PromoterLogic(object):
                     'commit_hash=%s&distro_hash=%s'.replace(" ", ""),
                     'DETAILED MISSING JOBS: ',
                     self.config.api_url,
-                    selected_candidate['commit_hash'],
-                    selected_candidate['distro_hash'])
+                    selected_candidate.commit_hash,
+                    selected_candidate.distro_hash)
 
         self.log.info("No more candidates")
 
