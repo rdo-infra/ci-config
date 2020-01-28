@@ -2,35 +2,51 @@
 This file contains classes and functionto interact with qcow images servers
 """
 import logging
-
-from legacy_promoter import tag_qcow_images
+import os
+import subprocess
+import sys
 
 
 class QcowClient(object):
     """
     This class interacts with qcow images servers
     """
+    log = logging.getLogger("promoter")
 
     def __init__(self, config):
         self.config = config
+        relpath = "ci-scripts/dlrnapi_promoter"
+        script_root = os.path.abspath(sys.path[0]).replace(relpath, "")
+        self.promote_script = script_root + 'ci-scripts/promote-images.sh'
 
-    def promote_images(self, dlrn_id, target_label):
+    def promote_images(self, candidate_hash, target_label):
         """
         This method promotes images contained inside a dir in the server
         whose name is equal to the dlrn_id specified by creating a
         symlink to it named as the target_label
-        Right now is just a wrapper around legacy code to easily pass config
-        information
-        :param dlrn_id:  The dlrn identifier to select images dir
+        :param candidate_hash:  The hash object to select images dir
         :param target_label: The name of the symlink
         :return: None
         """
-        if self.config.pipeline_type == "single":
-            # tag_qcow)images is imported from legacy code
-            tag_qcow_images(dlrn_id, (self.config.distro_name,
-                                      self.config.distro_version),
-                            self.config.release,
-                            target_label)
-        elif self.config.pipeline_type == "component":
-            self.log.error("Images promotion for aggregated hash is not yet"
-                           "immplemented")
+        try:
+            self.log.info(
+                'Promoting the qcow image for dlrn hash %s on %s to %s',
+                candidate_hash.id, self.config.release, target_label)
+            # The script doesn't really use commit/distro or full hash,
+            # it just needs the hash to identify the dir, so it works with
+            # either dlrnhash or aggregated hash.
+            qcow_logs = subprocess.check_output(
+                ['bash', self.promote_script,
+                 '--distro', self.config.distro_name,
+                 '--distro-version', self.config.distro_version,
+                 self.config.release, candidate_hash.id,
+                 target_label],
+                stderr=subprocess.STDOUT).split("\n")
+            for line in qcow_logs:
+                self.log.info(line)
+        except subprocess.CalledProcessError as ex:
+            self.log.error('QCOW IMAGE UPLOAD FAILED LOGS BELOW:')
+            self.log.error(ex.output)
+            self.log.exception(ex)
+            self.log.error('END OF QCOW IMAGE UPLOAD FAILURE')
+            raise
