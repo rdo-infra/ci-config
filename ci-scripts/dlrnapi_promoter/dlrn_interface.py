@@ -10,6 +10,10 @@ from dlrnapi_client.rest import ApiException
 from legacy_promoter import promote_link
 
 
+class HashChangedError(Exception):
+    pass
+
+
 class DlrnAggregatedHash(str):
     """
     This class represents the aggregate hash for the component pipeline
@@ -173,6 +177,46 @@ class DlrnClient(object):
             self.promote_params = dlrnapi_client.Promotion()
             self.hash_class = DlrnAggregatedHash
             self.promotions_get = self.api_instance.api_aggregate_promotions_get
+        # Variable to detect changes on the hash while we are running a
+        # promotion
+        self.named_hashes_map = {}
+
+    def update_current_named_hashes(self, hash, label):
+        self.named_hashes_map.update({label: hash.id})
+
+    def fetch_current_named_hashes(self, store=False):
+        """
+        Get latest known named hashes from dlrn. The latest know will be
+        checked regularly during promotion run to bail out in case of any
+        outside interference that could alter the local state
+        :param store: If true, the local named_hash_map will be modified too
+        :return: A dictionary with name to hash {'current-tripleo': 'xyz',
+        """
+        named_hashes = {}
+        for promote_name in self.config.promotion_steps_map.keys():
+            latest_named = self.fetch_hashes(promote_name, count=1,
+                                             sort="timestamp", reverse=True)
+            update = {promote_name: latest_named.id}
+            if store:
+                self.named_hashes_map.update(update)
+            named_hashes.update(update)
+
+        return named_hashes
+
+    def check_named_hashes_unchanged(self):
+        """
+        Fetch latest named hashes and compare to the initial named_hashes_map
+        If they are different log error and raise Exception
+        :param label: The label to check for changes
+        :return: None
+        """
+        latest_named_hashes = self.fetch_current_named_hashes()
+        if latest_named_hashes != self.named_hashes_map:
+            self.log.error('ERROR: Aborting promotion named hashes changed '
+                           'since promotion started. Hashes at start: %s.'
+                           'Hashes now: %s ',
+                           self.named_hashes_map, latest_named_hashes)
+            raise HashChangedError("Named Hashes Changed!")
 
     def fetch_jobs(self, dlrn_id):
         """
@@ -231,7 +275,7 @@ class DlrnClient(object):
         all the elements will be returned
         :param sort: Sort the list by the specified supported criteria
         :param reverse: reverses sort is applied
-        :return: A list of hashes
+        :return: A single hash when count=1. A list of hashes otherwise
         """
         params = copy.deepcopy(self.hashes_params)
         params.promote_name = label
@@ -255,6 +299,10 @@ class DlrnClient(object):
         self.log.debug(
             'Fetch Hashes: fetched %s hashes for name %s: %s',
             label, self.config.latest_hashes_count, hash_list)
+
+        if count == 1:
+            return hash_list[0]
+
         # if count is None, list[:None] will return the whole list
         return hash_list[:count]
 
