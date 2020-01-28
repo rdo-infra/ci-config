@@ -61,15 +61,6 @@ class Promoter(object):
         :return: None
         """
         self.log.warning("This workflow is using the new modularized code")
-        # Legacy parameters
-        api_client = dlrnapi_client.ApiClient(host=self.config.api_url)
-        dlrnapi_client.configuration.username = self.config.dlrnauth_username
-        dlrnapi_client.configuration.password = self.config.dlrnauth_password
-        api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
-        hashes = fetch_current_named_hashes(self.config.release,
-                                            self.config.promotion_steps_map,
-                                            api_instance)
-        legacy_promoter.start_named_hashes = hashes
         try:
             logic = PromoterLogic(self.config)
             logic.promote_all_links()
