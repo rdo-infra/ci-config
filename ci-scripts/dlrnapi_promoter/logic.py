@@ -110,7 +110,7 @@ class PromoterLogic(object):
         dict_candidate = candidate.dump_to_dict()
         self.dlrn_client.check_named_hashes_unchanged()
         if self.config.allow_containers_promotion:
-            self.registry_client.promote_containers(dict_candidate,
+            self.registry_client.promote_containers(candidate,
                                                     target_label)
         # replaces promote_all_links - qcow promotion
         self.dlrn_client.check_named_hashes_unchanged()
