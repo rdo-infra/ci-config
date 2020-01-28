@@ -12,7 +12,7 @@ except ImportError:
 
 from config import PromoterConfig, ConfigError
 from dlrnapi_promoter import main as promoter_main
-from dlrn_interface import DlrnHash, DlrnClient
+from dlrn_interface import DlrnHash, DlrnClient, HashChangedError
 from dlrnapi_promoter import Promoter
 from logic import PromoterLogic
 from qcow import QcowClient
@@ -258,6 +258,10 @@ class TestDlrnClient(unittest.TestCase):
         # Patch the promotions_get to not query any server
         with patch.object(self.client, "promotions_get") as mocked_get:
             mocked_get.return_value = self.api_hashes
+            # Ensure that fetch_hashes return a single hash and not a list when
+            # count=1
+            hash = self.client.fetch_hashes("test", count=1)
+            self.assertIsInstance(hash, DlrnHash)
             hash_list = self.client.fetch_hashes("test")
             self.assertEqual(len(hash_list), 1)
             # TODO(gcerami) test sort by timestamp and reverse
@@ -282,6 +286,36 @@ class TestDlrnClient(unittest.TestCase):
             job_list = self.client.fetch_jobs(self.test_hash)
             self.assertEqual(len(job_list), 2)
             self.assertEqual(job_list, ["job0", "job1"])
+
+    @mock.patch('dlrn_interface.DlrnClient.fetch_hashes')
+    def test_named_hashes_unchanged(self, mock_fetch_hashes):
+        dlrn_start_hash_dict = {
+            'timestamp': '1528085427',
+            'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884ed27',
+            'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77ef27'
+        }
+        dlrn_changed_hash_dict = {
+            'timestamp': '1528085529',
+            'commit_hash': 'd1c5372341a61effdccfe5dde3e93bd21884ed27',
+            'distro_hash': 'cd4fb616ac30625a51ba9156bbe70ede3d7e1921'
+        }
+        dlrn_changed_hash = DlrnHash(from_dict=dlrn_changed_hash_dict)
+        dlrn_start_hash = DlrnHash(from_dict=dlrn_start_hash_dict)
+
+        mock_fetch_hashes.side_effect = [dlrn_start_hash, dlrn_start_hash,
+                                         dlrn_changed_hash, dlrn_changed_hash]
+        # positive test for hashes_unchanged
+        self.client.fetch_current_named_hashes(store=True)
+        self.client.check_named_hashes_unchanged()
+
+        # negative test
+        with self.assertRaises(HashChangedError):
+            self.client.check_named_hashes_unchanged()
+
+        # positive again after updating
+        self.client.update_current_named_hashes(dlrn_changed_hash,
+                                                "current-tripleo")
+        self.client.check_named_hashes_unchanged()
 
 
 class TestRegistryClient(unittest.TestCase):
