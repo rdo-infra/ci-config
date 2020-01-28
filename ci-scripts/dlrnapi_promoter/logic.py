@@ -4,10 +4,9 @@ workflow
 """
 import logging
 
-from dlrn_interface import DlrnClient, DlrnHash
+from dlrn_interface import DlrnClient
 from registry import RegistryClient
 from qcow import QcowClient
-from legacy_promoter import check_named_hashes_unchanged
 
 
 class PromotionError(Exception):
@@ -27,15 +26,6 @@ class PromoterLogic(object):
         self.dlrn_client = DlrnClient(self.config)
         self.registry_client = RegistryClient(self.config)
         self.qcow_client = QcowClient(self.config)
-
-    def check_named_hashes_unchanged(self):
-        """
-        This function wraps a legacy function to pass config parameters
-        :return: None
-        """
-        check_named_hashes_unchanged(self.config.release,
-                                     self.config.promotion_steps_map,
-                                     self.dlrn_client.api_instance)
 
     def select_candidates(self, candidate_label, target_label):
         """
@@ -118,18 +108,20 @@ class PromoterLogic(object):
         # Convert the dictionary, as the rest of the workflow has not yet
         # been replaces
         dict_candidate = candidate.dump_to_dict()
-        self.check_named_hashes_unchanged()
+        self.dlrn_client.check_named_hashes_unchanged()
         if self.config.allow_containers_promotion:
             self.registry_client.promote_containers(dict_candidate,
                                                     target_label)
         # replaces promote_all_links - qcow promotion
-        self.check_named_hashes_unchanged()
+        self.dlrn_client.check_named_hashes_unchanged()
         if self.config.allow_qcows_promotion:
             self.qcow_client.promote_images(candidate, target_label)
         # replaces promote_all_links - dlrn promotion
-        self.check_named_hashes_unchanged()
+        self.dlrn_client.check_named_hashes_unchanged()
         if self.config.allow_dlrn_promotion:
             self.dlrn_client.promote_hash(dict_candidate, target_label)
+
+        self.dlrn_client.update_current_named_hashes(candidate, target_label)
 
     def promote_label_to_label(self, candidate_label, target_label):
         """
@@ -204,6 +196,8 @@ class PromoterLogic(object):
         :return: None
         """
         # replaces promote_all_links - labels loop
+        self.dlrn_client.fetch_current_named_hashes(store=True)
+
         for target_label, candidate_label in \
                 self.config.promotion_steps_map.items():
             self.promote_label_to_label(candidate_label, target_label)
