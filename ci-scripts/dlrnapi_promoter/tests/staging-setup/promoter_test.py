@@ -182,7 +182,7 @@ def parse_promotion_logs(stage_info):
         r'promoter Promoting the container images for dlrn hash '
         + re.escape(commit_hash))
     success_pattern_images = re.compile(
-        r'Promoting the qcow image for dlrn hash '
+        r'Promoting the qcow image for hash '
         + re.escape(full_hash) + r' on '
         + re.escape(release) + r' to '
         + re.escape(promotion_target))
