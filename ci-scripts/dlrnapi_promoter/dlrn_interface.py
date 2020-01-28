@@ -2,11 +2,12 @@
 This file contains classes and methods to interact with dlrn servers
 """
 import copy
+import datetime
 import dlrnapi_client
 import logging
 
 from dlrnapi_client.rest import ApiException
-from legacy_promoter import promote_link, fetch_jobs
+from legacy_promoter import promote_link
 
 
 class DlrnAggregatedHash(str):
@@ -162,17 +163,29 @@ class DlrnClient(object):
         """
         This method fetch a list of successful jobs from a dlrn server for a
         specific hash identifier.
-        :param dlrn_id: The dlrn identifier to fetch jobs from. Currently
-        implemented only the commit/distro format. Aggregate hash is not
-        implemented
-        :return: None
+        :param dlrn_id: The dlrn identifier to fetch jobs from. It could be
+        either a DlrnHash or a DlrnAggregatedHash
+        :return: A list of job ids (str)
         """
-        if self.config.pipeline_type == "single":
-            # fetch_job is imported from legacy code
-            return fetch_jobs(self.api_instance, dlrn_id)
-        elif self.config.pipeline_type == "component":
-            self.log.error("Fetching from aggregate hash is not yet "
-                           "implemented")
+        params = copy.deepcopy(self.jobs_params)
+        dlrn_id.dump_to_params(params)
+        params.success = str(True)
+
+        try:
+            api_response = self.api_instance.api_repo_status_get(params)
+        except ApiException:
+            self.log.error('Exception when calling api_repo_status_get: %s',
+                           ApiException)
+            raise
+
+        self.log.debug('Successful jobs for %s:', dlrn_id)
+        for result in api_response:
+            self.log.debug('%s at %s, logs at "%s"', result.job_id,
+                           datetime.datetime.fromtimestamp(
+                               result.timestamp).isoformat(),
+                           result.url)
+
+        return [details.job_id for details in api_response]
 
     def hashes_to_hashes(self, api_hashes, remove_duplicates=False):
         """
