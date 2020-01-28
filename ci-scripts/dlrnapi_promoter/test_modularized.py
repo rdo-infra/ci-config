@@ -206,12 +206,20 @@ class TestDlrnClient(unittest.TestCase):
 
         self.test_hash = DlrnHash(commit="cmt1", distro="dst1")
         self.api_hashes = []
-        # Constructs one fake lists with two identical hashes
+        self.api_jobs = []
+        # Constructs two fake lists
+        # one with two identical hashes
+        # the other with two different jobs
         for idx in range(2):
             api_hash = Mock()
+            api_job = Mock()
             api_hash.commit_hash = "a"
             api_hash.distro_hash = "b"
             self.api_hashes.append(api_hash)
+            api_job.job_id = "job{}".format(idx)
+            api_job.timestamp = 11234567.0
+            api_job.url = "https://dev/null"
+            self.api_jobs.append(api_job)
         os.environ["DLRNAPI_PASSWORD"] = "test"
         config = PromoterConfig(self.filepath)
         self.client = DlrnClient(config)
@@ -235,6 +243,16 @@ class TestDlrnClient(unittest.TestCase):
             mocked_get.return_value = self.api_hashes
             hash_list = self.client.fetch_hashes("test")
             self.assertEqual(len(hash_list), 1)
+
+    def test_fetch_jobs(self):
+        # TODO(gcerami) test with aggregated hash
+        # Patch the api_repo_status_get to not query any server
+        with patch.object(self.client.api_instance, "api_repo_status_get") as\
+                mocked_status_get:
+            mocked_status_get.return_value = self.api_jobs
+            job_list = self.client.fetch_jobs(self.test_hash)
+            self.assertEqual(len(job_list), 2)
+            self.assertEqual(job_list, ["job0", "job1"])
 
 
 class TestRegistryClient(unittest.TestCase):
