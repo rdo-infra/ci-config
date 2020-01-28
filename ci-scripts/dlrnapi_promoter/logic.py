@@ -115,17 +115,19 @@ class PromoterLogic(object):
 
         # replaces promote_all_links -effective promotion
         # replaces promote_all_links - containers promotion
-        self.check_named_hashes_unchanged()
+        self.drln_client.check_named_hashes_unchanged(target_label)
         if self.config.allow_containers_promotion:
             self.registry_client.promote_containers(candidate, target_label)
         # replaces promote_all_links - qcow promotion
-        self.check_named_hashes_unchanged()
+        self.drln_client.check_named_hashes_unchanged(target_label)
         if self.config.allow_qcows_promotion:
             self.qcow_client.promote_images(candidate, target_label)
         # replaces promote_all_links - dlrn promotion
-        self.check_named_hashes_unchanged()
+        self.drln_client.check_named_hashes_unchanged(target_label)
         if self.config.allow_dlrn_promotion:
             self.dlrn_client.promote_hash(candidate, target_label)
+
+        self.dlrn_client.update_current_named_hashes(candidate, target_label)
 
     def promote_label_to_label(self, candidate_label, target_label):
         """
@@ -203,6 +205,8 @@ class PromoterLogic(object):
         :return: None
         """
         # replaces promote_all_links - labels loop
+        self.dlrn_client.fetch_current_named_hashes(store=True)
+
         for target_label, candidate_label in \
                 self.config.promotion_steps_map.items():
             self.promote_label_to_label(candidate_label, target_label)
