@@ -194,14 +194,8 @@ def parse_promotion_logs(stage_info):
         + re.escape(full_hash) + r' on '
         + re.escape(release) + r' to '
         + re.escape(promotion_target))
-    success_pattern = re.compile(
-        r"Successful jobs for {'timestamp': (\d+), 'distro_hash': '"
-        + re.escape(distro_hash)
-        + r"', (.*) 'full_hash': '"
-        + re.escape(full_hash)
-        + r"', 'repo_hash': '"
-        + re.escape(full_hash) + r"', 'commit_hash': '"
-        + re.escape(commit_hash) + r"'}")
+    success_pattern = re.compile("Successful jobs for.*{}"
+                                 "".format(re.escape(commit_hash)))
     success_pattern_target = re.compile(
         "promoter SUCCESS promoting centos7-"
         + re.escape(release) + ' '
