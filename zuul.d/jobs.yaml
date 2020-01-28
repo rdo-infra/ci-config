@@ -23,15 +23,29 @@
     pre-run: playbooks/molecule-delegated-pre.yml
     run: playbooks/molecule-delegated.yml
     post-run: playbooks/molecule-post.yml
+    vars:
+      molecule_test_commands: |
+        tox -emolecule_delegated -- roles/promoter/molecule/container-push/molecule.yml
 
 - job:
     name: molecule-tripleo-common
     parent: base
     pre-run: playbooks/molecule-delegated-pre.yml
-    run: playbooks/molecule-tripleo-common.yml
+    run: playbooks/molecule-delegated.yml
+    vars:
+      molecule_test_commands: |
+        # container-push generates staging containers, skip teardown
+        molecule converge -s container-push -- --skip-tags=registry_cleanup
+        # tripleo-common test w/ staging containers
+        molecule test -s tripleo-common-integration
+        # container-push teardown, cleanup registries
+        molecule converge -s container-push -- --tags=registry_cleanup
 
 - job:
     name: molecule-delegated-promote-images
     parent: base
     pre-run: playbooks/molecule-delegated-promote-images-pre.yml
-    run: playbooks/molecule-delegated-promote-images.yml
+    run: playbooks/molecule-delegated.yml
+    vars:
+      molecule_test_commands: |
+        molecule test -s promote-images
