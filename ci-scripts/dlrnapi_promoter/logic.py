@@ -105,9 +105,6 @@ class PromoterLogic(object):
 
         # replaces promote_all_links -effective promotion
         # replaces promote_all_links - containers promotion
-        # Convert the dictionary, as the rest of the workflow has not yet
-        # been replaces
-        dict_candidate = candidate.dump_to_dict()
         self.dlrn_client.check_named_hashes_unchanged()
         if self.config.allow_containers_promotion:
             self.registry_client.promote_containers(candidate,
@@ -119,7 +116,7 @@ class PromoterLogic(object):
         # replaces promote_all_links - dlrn promotion
         self.dlrn_client.check_named_hashes_unchanged()
         if self.config.allow_dlrn_promotion:
-            self.dlrn_client.promote_hash(dict_candidate, target_label)
+            self.dlrn_client.promote_hash(candidate, target_label)
 
         self.dlrn_client.update_current_named_hashes(candidate, target_label)
 
