@@ -306,7 +306,7 @@ class DlrnClient(object):
         # if count is None, list[:None] will return the whole list
         return hash_list[:count]
 
-    def promote_hash(self, dlrn_id, target_label):
+    def promote_hash(self, hash, target_label):
         """
         This method promotes an hash identifier to a target label
         from another POV the hash is labeled as the target
@@ -317,12 +317,29 @@ class DlrnClient(object):
         :param target_label: The label to promote the identifier to
         :return: None
         """
-        if self.config.pipeline_type == "single":
-            # promote_link is imported from legacy code
-            promote_link(self.api_instance, dlrn_id, target_label)
-        elif self.config.pipeline_type == "component":
-            self.log.error("Component pipeline promotion is not yet "
-                           "implemented")
+        incumbent_hash = self.fetch_hashes(target_label, count=1)
+        # Save current hash as previous-$link
+        if incumbent_hash is not None:
+            params = copy.deepcopy(self.promote_params)
+            incumbent_hash.dump_to_params(params)
+            params.promote_name = "previous-" + target_label
+            try:
+                self.api_instance.api_promote_post(params)
+            except ApiException:
+                self.log.error(
+                    'Exception when calling api_promote_post: %s'
+                    ' to store current hashes as previous',
+                    ApiException)
+                raise
+        params = copy.deepcopy(self.promote_params)
+        hash.dump_to_params(params)
+        params.promote_name = target_label
+        try:
+            self.api_instance.api_promote_post(params)
+        except ApiException:
+            self.log.error('Exception when calling api_promote_post: '
+                           '%s', ApiException)
+            raise
 
     def get_civotes_info(self, hash):
         """
