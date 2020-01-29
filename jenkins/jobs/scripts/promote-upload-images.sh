@@ -2,6 +2,7 @@
 image_path="$RDO_VERSION_DIR/$BUILD_SYS/$LOCATION"
 ssh_cmd='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 PROMOTE_HASH=`echo $delorean_current_hash | awk -F '/' '{ print $3}'`
+IMAGE_SERVER=${IMAGE_SERVER:-'images.rdoproject.org'}
 
 # Create local symlink
 mkdir $PROMOTE_HASH
@@ -16,4 +17,4 @@ rsync -av --delete --exclude $PROMOTE_HASH $LOCATION/ uploader@images.rdoproject
 rsync -av stable rdo@artifacts.ci.centos.org::rdo/images/$image_path/stable
 
 # push symlink to RDO file server
-rsync -av stable uploader@images.rdoproject.org:/var/www/html/images/$image_path/stable
+rsync -av stable uploader@$IMAGE_SERVER:/var/www/html/images/$image_path/stable
