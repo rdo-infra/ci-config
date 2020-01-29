@@ -2,6 +2,7 @@
 set -eux
 
 export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
+IMAGE_SERVER=${IMAGE_SERVER:-'images.rdoproject.org'}
 
 # this script is injected via raw-escape (in JJB).  It assumes a few variables are set.
 echo $VIRTHOST
@@ -18,7 +19,7 @@ dest_image_path="$RDO_VERSION_DIR/$BUILD_SYS/$LOCATION"
 dest_centos_artifacts="rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path/$PROMOTE_HASH/"
 
 # images.rdoproject will use rsync as well, but via ssh
-dest_rdo_filer="uploader@images.rdoproject.org:/var/www/html/images/$dest_image_path/$PROMOTE_HASH/"
+dest_rdo_filer="uploader@$IMAGE_SERVER:/var/www/html/images/$dest_image_path/$PROMOTE_HASH/"
 
 ssh_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
@@ -64,10 +65,10 @@ ssh $ssh_args root@$VIRTHOST "cd $virthost_source_location && $rsync_base_cmd -e
 # Delete old testing symlink
 mkdir $LOCATION
 rsync -av --delete --include 'testing**' --exclude '*' $LOCATION/ rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path/
-rsync -av --delete --include 'testing**' --exclude '*' $LOCATION/ uploader@images.rdoproject.org:/var/www/html/images/$dest_image_path/
+rsync -av --delete --include 'testing**' --exclude '*' $LOCATION/ uploader@$IMAGE_SERVER:/var/www/html/images/$dest_image_path/
 
 # push testing symlink so sub-jobs know what to test
 mkdir $PROMOTE_HASH
 ln -s $PROMOTE_HASH testing
 rsync -av testing rdo@artifacts.ci.centos.org::rdo/images/$dest_image_path/testing
-rsync -av testing uploader@images.rdoproject.org:/var/www/html/images/$dest_image_path/testing
+rsync -av testing uploader@$IMAGE_SERVER:/var/www/html/images/$dest_image_path/testing
