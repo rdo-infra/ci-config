@@ -1,0 +1,14 @@
+---
+- hosts: all
+  environment:
+    ANSIBLE_LOG_PATH: "{{ ansible_user_dir }}/zuul-output/logs/ansible-execution.log"
+  tasks:
+    - name: Run role test job
+      shell: |-
+        . {{ ansible_user_dir }}/test-python/bin/activate
+        # Add all the delegated scenarios here.
+        {{ molecule_test_commands }}
+      args:
+        chdir: "{{ ansible_user_dir }}/{{ zuul.project.src_dir }}/roles/get_hash"
+        executable: /bin/bash
+      changed_when: false
