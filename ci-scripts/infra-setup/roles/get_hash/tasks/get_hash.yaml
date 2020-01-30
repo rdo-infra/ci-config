@@ -1,0 +1,84 @@
+---
+
+- name: discover dlrnapi url
+  set_fact:
+    dlrnapi_url: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/api-{{ ansible_distribution | lower }}-{{ release }}"
+
+- name: use the upper constraint url for master
+  set_fact:
+    dlrnapi_url: "{{ dlrnapi_url }}-uc"
+  when: release == 'master'
+
+# commit/distro hashes for the combined repo (legacy)
+- name: discover the hashes url (legacy)
+  set_fact:
+    commit_url: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ ansible_distribution | lower }}{{ ansible_distribution_major_version }}-{{ release }}/{{ promote_name }}/commit.yaml"
+  when:
+    - ansible_distribution == 'CentOS'
+    - ansible_distribution_major_version == '7'
+
+# commit/distro hashes for component pipeline (a unique commit hash for each component)
+- name: discover the hashes url (component)
+  set_fact:
+    commit_url: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ ansible_distribution | lower }}{{ ansible_distribution_major_version }}-{{ release }}/component/{{ component_name }}/{{ promote_name }}/commit.yaml"
+  when:
+    - ansible_distribution == 'CentOS'
+    - ansible_distribution_major_version == '8'
+    - component is defined
+    - component | length > 0
+
+# md5 hash for integration jobs (build id for all components promoted)
+- name: discover the hashes url (integration)
+  set_fact:
+    md5_url: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ ansible_distribution | lower }}{{ ansible_distribution_major_version }}-{{ release }}/{{ promote_name }}/delorean.repo.md5"
+  when:
+    - ansible_distribution == 'CentOS'
+    - ansible_distribution_major_version == '8'
+    - component is not defined or component | length == 0
+
+- name: get hashes from commit.yaml
+  block:
+    - name: get commit.yaml file
+      get_url:
+        url: "{{ commit_url }}"
+        dest: "{{ workspace }}/commit.yaml"
+    - name: fetch to ansible controller
+      fetch:
+        dest: "/tmp/"
+        src: "{{ workspace }}/commit.yaml"
+        flat: yes
+    - name: load hashes
+      include_vars:
+        file: "/tmp/commit.yaml"
+        name: hashes
+    - name: get hashes
+      set_fact:
+        full_hash: "{{ hashes['commits']['full_hash'] }}"
+        distro_hash: "{{ hashes['commits']['distro_hash'] }}"
+        commit_hash: "{{ hashes['commits']['commit_hash'] }}"
+  when: commit_url is defined
+
+- name: get hash from md5 file
+  block:
+    - name: get md5 file
+      get_url:
+        url: "{{ md5_url }}"
+        dest: "{{ workspace }}/delorean.repo.md5"
+    - name: read md5
+      command: "cat {{ workspace }}/delorean.repo.md5"
+      register: md5_hash
+    - name: get hash
+      set_fact:
+        full_hash: "{{ md5_hash.stdout }}"
+  when: md5_url is defined
+
+- name: create hash_info file
+  copy:
+    dest: "{{ workspace }}/hash_info.sh"
+    content: |
+      export DLRNAPI_URL="{{ dlrnapi_url }}"
+      export RELEASE="{{ release }}"
+      export FULL_HASH="{{ full_hash }}"
+      export COMMIT_HASH="{{ commit_hash | default('') }}"
+      export DISTRO_HASH="{{ distro_hash | default('') }}"
+      export COMPONENT_NAME="{{ component | default('')}}"
