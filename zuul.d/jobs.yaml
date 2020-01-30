@@ -49,3 +49,12 @@
     vars:
       molecule_test_commands: |
         molecule test -s promote-images
+
+- job:
+    name: molecule-delegated-get-hash
+    parent: base
+    pre-run: playbooks/molecule-delegated-get_hash-pre.yml
+    run: playbooks/molecule-delegated.yml
+    vars:
+      molecule_test_commands: |
+        tox -emolecule_delegated -- roles/get_hash/molecule/default/molecule.yml
