@@ -1,0 +1,49 @@
+---
+driver:
+  name: delegated
+  options:
+    managed: false
+    login_cmd_template: >-
+      ssh
+      -o UserKnownHostsFile=/dev/null
+      -o StrictHostKeyChecking=no
+      -o Compression=no
+      -o TCPKeepAlive=yes
+      -o VerifyHostKeyDNS=no
+      -o ForwardX11=no
+      -o ForwardAgent=no
+      {instance}
+    ansible_connection_options:
+      ansible_connection: local
+
+log: true
+
+platforms:
+  - name: instance
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      fact_caching: jsonfile
+      fact_caching_connection: /tmp/molecule/facts
+  inventory:
+    hosts:
+      all:
+        hosts:
+          instance:
+            ansible_connection: local
+            ansible_python_interpreter: ${MOLECULE_INTERPRETER:-/home/zuul/test-python/bin/python}
+  log: true
+  env:
+    ANSIBLE_STDOUT_CALLBACK: yaml
+
+scenario:
+  name: default
+  test_sequence:
+    - prepare
+    - converge
+    - verify
+
+verifier:
+  name: testinfra
