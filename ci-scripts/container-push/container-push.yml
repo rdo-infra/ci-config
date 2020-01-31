@@ -14,7 +14,7 @@
       # We would need to force their ip in /etc/hosts, but also reroute ports to
       # Their equivalent target registry
       - host: docker.io
-        namespace: "tripleo{{ lookup('env','RELEASE') }}"
+        namespace: "tripleo{{ release }}"
         username: "{{ lookup('env','DOCKERHUB_USERNAME') }}"
         password: "{{ lookup('env','DOCKERHUB_PASSWORD') }}"
         auth_url: "https://index.docker.io/v1/"
@@ -41,13 +41,19 @@
       when: stage_info_stat.stat.exists
       block:
         - name: Include info from staging environment
-          include_vars: "/tmp/stage-info.yaml"
+          # Setting no_log as this can potentially expose passwords
+          no_log: true
+          include_vars:
+            file: "/tmp/stage-info.yaml"
+            name: stage_info
 
         - name: override source registry if running under test
+          # Setting no_log as this can potentially expose passwords
+          no_log: true
           set_fact:
-            source_registry: "{{ registries.source }}"
-            target_registries: "{{ registries.targets }}"
-            full_hash: "{{ promotions.promotion_candidate.full_hash }}"
+            source_registry: "{{ stage_info.registries.source }}"
+            target_registries: "{{ stage_info.registries.targets }}"
+            full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
 
     # TODO(gcerami) assert that the hash associated to promote_name in dlrn is
     # different from full_hash. If that happens it means that promoted_name was

@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/usr/bin/env /bin/bash
 
 usage(){
     echo "$0 Usage: $ dlrn-promoter.sh [-t 115m] [-k 120m] [-s] [-h]"
@@ -11,11 +11,15 @@ set -x
 
 TIMEOUT=115m
 KILLTIME=120m
+LOG_LEVEL="INFO"
+STAGING_DIR=""
 
-# To add when ready: "RedHat-8/train"
-RELEASES=( "CentOS-7/master" "CentOS-7/train" "CentOS-7/stein" \
-           "CentOS-7/rocky" "CentOS-7/queens" \
-           "RedHat-8/master" "RedHat-8/train" )
+DEFAULT_RELEASES=( "CentOS-7/master" "CentOS-7/train" \
+                    "CentOS-7/stein" "CentOS-7/rocky" \
+                    "CentOS-7/queens" "RedHat-8/master" \
+                    "RedHat-8/train" )
+declare -p DEFAULT_RELEASES
+
 
 while getopts "t:k:sh" arg; do
     case $arg in
@@ -27,7 +31,8 @@ while getopts "t:k:sh" arg; do
         ;;
     s)
         echo "Staging promoter mode enabled"
-        RELEASES=( "CentOS-7/staging" )
+        LOG_LEVEL="DEBUG"
+        STAGING_DIR="staging/"
         export IMAGE_SERVER_USER_HOST="foo@localhost"
         ;;
     h)
@@ -37,9 +42,12 @@ while getopts "t:k:sh" arg; do
     esac
 done
 
+RELEASES=("${TEST_RELEASE:-${DEFAULT_RELEASES[@]}}")
+declare -p RELEASES
+
 DIR=$(dirname $0)
 
 for r in "${RELEASES[@]}"; do
     /usr/bin/timeout --preserve-status -k $KILLTIME $TIMEOUT \
-        python $DIR/dlrnapi_promoter.py $DIR/config/${r}.ini
+        python $DIR/dlrnapi_promoter.py --log-level ${LOG_LEVEL} ${STAGING_DIR}${r}.ini
 done

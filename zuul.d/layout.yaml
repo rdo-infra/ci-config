@@ -10,7 +10,7 @@
 - project:
     check:
       jobs:
-        - tripleo-ci-promotion-staging:
+        - tripleo-ci-promotion-staging-single-pipeline-centos-7:
             files: &integration
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
@@ -19,7 +19,7 @@
               - ^playbooks/staging.*
               - ^requirements.txt
               - ^test-requirements.txt
-        - tripleo-ci-promotion-staging-legacy:
+        - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
             files: *integration
         - sova-tracking-jobs: &sovatrack
             # broken for more than a month, incorrect file pattern as job
@@ -38,11 +38,9 @@
               - ^test-requirements.txt
               - ^tox.ini$
               - ^zuul.d/layout.yaml
-
         - rdo-tox-molecule-delegated-centos-8:
             <<: *molecule
-
-        - molecule-container-push: &molecule-container-push
+        - molecule-container-push-delegated-centos-7: &molecule-container-push
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
@@ -51,7 +49,7 @@
               - ^playbooks/molecule-delegated.yml
               - ^requirements.txt
               - ^test-requirements.txt
-        - molecule-tripleo-common: &molecule-tripleo-common
+        - molecule-tripleo-common-delegated-centos-7: &molecule-tripleo-common
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
@@ -60,7 +58,7 @@
               - ^playbooks/molecule-delegated.yml
               - ^requirements.txt
               - ^test-requirements.txt
-        - molecule-delegated-promote-images: &molecule-promote-images
+        - molecule-delegated-promote-images-delegated-centos-7: &molecule-promote-images
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/promote-images.sh
@@ -105,15 +103,15 @@
               - ^zuul.d/layout.yaml$
     gate:
       jobs:
-        - molecule-container-push:
+        - molecule-container-push-delegated-centos-7:
             <<: *molecule-container-push
-        - molecule-tripleo-common:
+        - molecule-tripleo-common-delegated-centos-7:
             <<: *molecule-tripleo-common
-        - molecule-delegated-promote-images:
+        - molecule-delegated-promote-images-delegated-centos-7:
             <<: *molecule-promote-images
-        - tripleo-ci-promotion-staging:
+        - tripleo-ci-promotion-staging-single-pipeline-centos-7:
             files: *integration
-        - tripleo-ci-promotion-staging-legacy:
+        - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
             files: *integration
         - rdo-tox-molecule:
             <<: *molecule
