@@ -13,77 +13,45 @@
   set_fact:
     pushed_containers: []
 
-- name: Construct dlrn_dir from full_hash (turn xxyyz* into xx/yy/xxyyz*)
-  set_fact:
-    dlrn_dir: "{{ full_hash | regex_replace('^(?P<first>.{2})(?P<second>.{2})(?P<third>.+)$', '\\g<first>/\\g<second>/\\g<first>\\g<second>\\g<third>') }}"
-
-- name: Construct the DLRN URL for the promoted hash
-  set_fact:
-    dlrn_url: "https://trunk.rdoproject.org/{{ distro_name }}{{ distro_version }}-{{ release }}/{{ dlrn_dir }}/versions.csv"
-
-- name: Get the tripleo-common commit in the promoted hash  # noqa 306
-  shell: >
-    curl {{ dlrn_url }} | grep ',openstack-tripleo-common-[0-9]' | cut -f3 -d','
-  args:
-    # shut up ansible. get_url is not enough here
-    warn: false
-  register: local_release
-  changed_when: false
-
-- name: Set the release_url
-  set_fact:
-    release_url: "https://opendev.org/openstack/tripleo-common/raw/commit/{{ local_release.stdout  }}/container-images/overcloud_containers.yaml.j2"
-  when:
-    - not setup_staging | default(false) | bool
-
-# The next two tasks are created mainly for testing the role
-# if a file is present at pattern_file location
-# it will be used to reduce the set of containers taken into consideration, mainly
-# to match the reduced set of images pushed into test repository
-- name: Stat filter pattern
-  stat:
-    path: "{{ pattern_file }}"
-  register: pattern_file_stat
-
-- name: Get release containers  # noqa 306
-  shell: >
-    curl -fk {{ release_url }} 2>/dev/null |
-    grep -o -P '(?<=name_prefix).*(?=name_suffix)' |
-    sed "s/[{}]//g"
-    {% if pattern_file_stat.stat.exists %}| grep -f {{ pattern_file }}{% endif %}
-  register: release_images
-  args:
-    # shut up ansible. get_url is not enough here.
-    warn: false
+- name: Truncate containers file
+  command: truncate -s 0 {{ containers_file }}
   changed_when: false
 
 - name: Generate list of containers to push  # noqa 306
   shell: |
-    echo -n > {{ containers_file }};
-    for image in {{ release_images.stdout_lines|join(" ") }}; do
-    #$(curl -fk {{ release_url }} 2>/dev/null | grep -o -P '(?<=name_prefix).*(?=name_suffix)' | sed "s/[{}]//g"); do
-        echo -n "Checking {{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-$image:{{ full_hash }} ... ";
-        docker manifest inspect \
-            --insecure "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-$image:{{ full_hash }}" &>/dev/null
-        if [[ "$?" == "0" ]]; then
-            echo $image >> {{ containers_file }};
-            echo "OK";
-        else
-            echo "FAIL";
-            echo "ERROR ========== {{ distro_name }}-binary-$image IS NOT BUILT! FIX THIS ASAP! ==========";
-        fi
-    done
-    # fail the script and exit with error if the container list is empty
-    if [ ! -s {{ containers_file }} ]; then
+    echo -n "Checking {{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }} ... ";
+    docker manifest inspect \
+        --insecure "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}"
+    if [[ "$?" == "0" ]]; then
+        echo {{ item }} >> {{ containers_file }};
+        echo "OK";
+    else
         echo "FAIL";
-        echo "ERROR =========== container list is empty THIS IS A CRITICAL BUG in the container push playbook";
+        echo "ERROR ========== {{ distro_name }}-binary-$image IS NOT BUILT! FIX THIS ASAP! ==========";
         exit 1
     fi
-    echo "base" >> {{ containers_file }}
-    echo "openstack-base" >> {{ containers_file }}
+  loop: "{{ containers_list }}"
   args:
     executable: /bin/bash
   changed_when: true
+
+- name: extract file stats
+  stat:
+    path: "{{ containers_file }}"
+  register: containers_file_stat
+
+- name: Fail if containers list contains no images
+  fail:
+    msg: "ERROR =========== container list is empty THIS IS A CRITICAL BUG in the container push playbook"
+  when: containers_file_stat.stat.size == 0
+
+- name: append implicit images to containers list
+  lineinfile:
+    path: "{{ containers_file }}"
+    line: "{{ item }}"
+  loop:
+    - base
+    - openstack-base
 
 - name: run container tagging and always cleanup at the end
   block:
