@@ -27,6 +27,9 @@
         namespace: "tripleo{{ release }}"
         token: unused
     manifest_push: true
+    containers_list:
+      - nova-compute
+      - neutron-server
   tasks:
     - name: Test tripleo-common
       block:
@@ -45,17 +48,19 @@
               - "{{ undercloud_registry['host'] }}:5000"
 
         - name: include stage setup variables
-          include_vars: /tmp/stage-info.yaml
+          include_vars:
+              file: /tmp/stage-info.yaml
+              name: stage_info
 
         - name: set full_hash
           set_fact:
-            full_hash: "{{ promotions.promotion_candidate.full_hash }}"
+            full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
 
         - debug:
             var: full_hash
 
         - debug:
-            var: containers
+            var: stage_info.containers.images
 
         - name: Generate containers template file
           copy:
