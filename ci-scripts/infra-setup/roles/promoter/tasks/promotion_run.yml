@@ -5,14 +5,15 @@
   shell:
     cmd: |
       source /home/{{ promoter_user }}/promoter_venv/bin/activate
-      export PROMOTER_FORCE_LEGACY={{ promoter_force_legacy|default(false) }}
-      {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/dlrn-promoter.sh -s
+      export TEST_RELEASE="{{ test_release }}"
+      cd {{ ci_config_remote_src_dir }}
+      ci-scripts/dlrnapi_promoter/dlrn-promoter.sh -s
   changed_when: true
 
 - name: extract log_file from staging.ini
   shell:
     cmd: |
-       grep log_file config/CentOS-7/staging.ini | awk '{ print $2 }'
+       grep log_file config/{{ test_release }}.ini | awk '{ print $2 }'
   register: log_file_grep
   args:
     chdir: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter"
@@ -21,5 +22,5 @@
 - name: check if dlrn api actually finished a promotion process
   become: true
   become_user: "{{ promoter_user }}"
-  command: "grep 'FINISHED promotion process' {{ log_file_grep.stdout }}"
+  command: "grep -E '(FINISHED promotion process|Promoter terminated normally)' {{ log_file_grep.stdout }}"
   changed_when: false
