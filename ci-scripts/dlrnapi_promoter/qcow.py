@@ -31,7 +31,7 @@ class QcowClient(object):
         try:
             self.log.info(
                 'Promoting the qcow image for dlrn hash %s on %s to %s',
-                candidate_hash.id, self.config.release, target_label)
+                candidate_hash.full_hash, self.config.release, target_label)
             # The script doesn't really use commit/distro or full hash,
             # it just needs the hash to identify the dir, so it works with
             # either dlrnhash or aggregated hash.
@@ -39,7 +39,7 @@ class QcowClient(object):
                 ['bash', self.promote_script,
                  '--distro', self.config.distro_name,
                  '--distro-version', self.config.distro_version,
-                 self.config.release, candidate_hash.id,
+                 self.config.release, candidate_hash.full_hash,
                  target_label],
                 stderr=subprocess.STDOUT).split("\n")
             for line in qcow_logs:
