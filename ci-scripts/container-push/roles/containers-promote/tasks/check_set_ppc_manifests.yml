@@ -5,37 +5,64 @@
     path: "/tmp/stage-info.yaml"
   register: stage_info_stat
 
-- name: 'Production - Pull {{ ppc_pull_attempts }} random {{ ppc_tag }} tagged container images from {{ source_registry.host }} registry'
-  docker_image:
-    name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ built_images.stdout_lines|random }}"
-    tag: "{{ full_hash }}_{{ ppc_tag }}"
-    source: pull
-  loop: "{{ range(0, ppc_pull_attempts)|list }}"
-  loop_control:
-    index_var: index
-  retries: 3
-  ignore_errors: true
-  register: pulled_ppc
-  when: not stage_info_stat.stat.exists
-
-# For testing we want to avoid the use of random in the containers we pull
-- name: 'Testing - Pull first {{ ppc_pull_attempts }} {{ ppc_tag }} tagged container images from {{ source_registry.host }} registry'
-  docker_image:
-    name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ built_images.stdout_lines[index] }}"
-    tag: "{{ full_hash }}_{{ ppc_tag }}"
-    source: pull
-  loop: "{{ range(0, ([containers|length, ppc_pull_attempts]|min))|list }}"
-  loop_control:
-    index_var: index
-  retries: 3
-  ignore_errors: true
-  register: pulled_ppc
+- name: set ppc_manifests into stage-info.yaml when staging environment
+  set_fact:
+    ppc_pull_attempts: 3
   when: stage_info_stat.stat.exists
+
+- block:
+    - name: 'Production - Pull {{ ppc_pull_attempts }} random {{ ppc_tag }} tagged container images from {{ source_registry.host }} registry'
+      docker_image:
+        name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ built_images.stdout_lines|random }}"
+        tag: "{{ full_hash }}_{{ ppc_tag }}"
+        source: pull
+      loop: "{{ range(0, ppc_pull_attempts)|list }}"
+      loop_control:
+        index_var: index
+      retries: 3
+      register: pulled_ppc
+      when: not stage_info_stat.stat.exists
+  rescue:
+    - name: Fail the task for all cases except when we failed to pull images even if we tries
+      fail:
+        msg: Pull task failed even before attempting the pull
+      when: "'results' not in pulled_ppc"
+    - name: Failed to pull (results is present mean that at least we tried)
+      debug:
+        msg: Failed to pull ppc containers.
+    - name: Show debug info on failed pull
+      debug:
+        var: pulled_ppc
+
+- block:
+    # For testing we want to avoid the use of random in the containers we pull
+    - name: 'Testing - Pull first {{ ppc_pull_attempts }} {{ ppc_tag }} tagged container images from {{ source_registry.host }} registry'
+      docker_image:
+        name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ built_images.stdout_lines[index] }}"
+        tag: "{{ full_hash }}_{{ ppc_tag }}"
+        source: pull
+      loop: "{{ range(0, ([stage_info.containers.images|length, ppc_pull_attempts]|min))|list }}"
+      loop_control:
+        index_var: index
+      retries: 3
+      register: pulled_ppc
+      when: stage_info_stat.stat.exists
+  rescue:
+    - name: Fail the task for all cases except when we failed to pull images even if we tries
+      fail:
+        msg: Pull task failed even before attempting the pull
+      when: "'results' not in pulled_ppc"
+    - name: Failed to pull (results is present mean taht at least we tried)
+      debug:
+        msg: Failed to pull ppc containers.
+    - name: Show debug info on failed pull
+      debug:
+        var: pulled_ppc
 
 - name: 'Set fact for ppc_manifests false if any containers failed to pull'
   set_fact:
     ppc_manifests: false
-  when: pulled_ppc.failed is defined
+  when: pulled_ppc.results|map(attribute='failed')|select|list == []
 
 # When staging also set ppc_manifests into stage-info.yaml
 - name: set ppc_manifests into stage-info.yaml when staging environment

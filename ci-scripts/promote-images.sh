@@ -79,7 +79,8 @@ EOF
 # Check if this is promotion staging environment and override vars
 # See if the file /tmp/stage-info.yaml exists and source vars from there
 if [[ -f /tmp/stage-info.yaml ]]; then
-    images_path=$(cat /tmp/stage-info.yaml  | shyaml get-value overcloud_images.base_dir)
+    images_path=$(shyaml get-value overcloud_images.root < /tmp/stage-info.yaml)
+    USER=$(shyaml get-value main.promoter_user < /tmp/stage-info.yaml)
     OPT_WEBSITE="file://$images_path"
     IMAGE_SERVER_USER_HOST="$USER@127.0.0.1"
     OPT_WEBROOT="$images_path"
