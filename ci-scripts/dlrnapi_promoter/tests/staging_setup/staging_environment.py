@@ -42,6 +42,7 @@ import yaml
 from dlrn import db as dlrn_db
 from dlrn import utils
 from string import Template
+from dlrn_interface import DlrnHash
 
 domain_key = '''
 -----BEGIN PRIVATE KEY-----
@@ -74,10 +75,6 @@ ROqmK1Dhcd2F0NUvAevJMhWDj5Cy6rehMBRlhgfCYZs9tMAlG6mCm6q9
 # "username":"password"
 htpasswd = ("username:"
             "$2y$05$awdjjCuIy8riH6xLa37EJeC4hFbjZ4KRIVaoMMqEFaktoAfy8B2XW")
-
-
-def get_full_hash(commit_hash, distro_hash):
-    return "{}_{}".format(commit_hash, distro_hash[:8])
 
 
 class BaseImage(object):
@@ -244,14 +241,10 @@ class StagedHash(object):
 
     log = logging.getLogger("promoter-staging")
 
-    def __init__(self, config, commit_hash, distro_hash):
+    def __init__(self, config, dlrn_hash):
         self.config = config
-        self.commit_hash = commit_hash
-        self.distro_hash = distro_hash
+        self.dlrn_hash = dlrn_hash
         self.images_dirs = {}
-        self.full_hash = get_full_hash(self.commit_hash, self.distro_hash)
-        self.repo_path = "{}/{}/{}".format(
-            commit_hash[:2], commit_hash[2:2], self.full_hash)
         self.overcloud_images_base_dir = \
             self.config['overcloud_images']['base_dir']
         self.docker_client = docker.from_env()
@@ -265,14 +258,15 @@ class StagedHash(object):
         directories and links
         """
         distro_images_dir = self.config['distro_images_dir']
-        image_path = os.path.join(distro_images_dir, self.full_hash,
-                                  "{}-image.tar.gz".format(self.full_hash))
+        image_name = "{}-image.tar.gz".format(self.dlrn_hash.full_hash)
+        image_path = os.path.join(distro_images_dir, self.dlrn_hash.full_hash,
+                                  image_name)
         self.images_dirs[self.config['distro']] = distro_images_dir
 
         if self.config['dry-run']:
             return
 
-        os.mkdir(os.path.join(distro_images_dir, self.full_hash))
+        os.mkdir(os.path.join(distro_images_dir, self.dlrn_hash.full_hash))
         # This emulates a "touch" command
         self.log.info("Create empty image in %s", image_path)
         with open(image_path, 'w'):
@@ -285,7 +279,8 @@ class StagedHash(object):
         promotion happens
         """
         distro = self.config['distro']
-        target = os.path.join(self.images_dirs[distro], self.full_hash)
+        target = os.path.join(self.images_dirs[distro],
+                              self.dlrn_hash.full_hash)
         link = os.path.join(
             self.images_dirs[distro], promotion_target)
 
@@ -321,9 +316,9 @@ class StagedHash(object):
 
         tags = []
         pushed_images = []
-        tags.append(self.full_hash)
+        tags.append(self.dlrn_hash.full_hash)
         for arch in ['ppc64le', 'x86_64']:
-            tags.append("{}_{}".format(self.full_hash, arch))
+            tags.append("{}_{}".format(self.dlrn_hash.full_hash, arch))
 
         suffixes = self.config['containers']['images-suffix']
         namespace = self.config['containers']['namespace']
@@ -426,9 +421,9 @@ class StagedEnvironment(object):
         self.analyze_commits(self.fixture)
 
         for commit in self.config['results']['commits']:
-            stage = StagedHash(
-                self.config, commit["commit_hash"], commit["distro_hash"])
-            self.stages[commit['full_hash']] = stage
+            dlrn_hash = DlrnHash(source=commit)
+            stage = StagedHash(self.config, dlrn_hash)
+            self.stages[dlrn_hash.full_hash] = stage
 
         self.docker_client = docker.from_env()
 
@@ -438,7 +433,8 @@ class StagedEnvironment(object):
         TODO: create the previous-* links
         """
         for _, promotion in self.config['results']['promotions'].items():
-            staged_hash = self.stages[promotion['full_hash']]
+            promotion_hash = DlrnHash(source=promotion)
+            staged_hash = self.stages[promotion_hash.full_hash]
             staged_hash.promote_overcloud_images(promotion['name'])
 
     def inject_dlrn_fixtures(self):
@@ -564,9 +560,10 @@ class StagedEnvironment(object):
         if (self.config['components'] == "all"
            or "container-images" in self.config['components']):
             # Select only the stagedhash with the promotion candidate
-            candidate_full_hash = \
-                self.config['promotions']['promotion_candidate']['full_hash']
-            self.stages[candidate_full_hash].setup_containers()
+            candidate_hash_dict = \
+                self.config['promotions']['promotion_candidate']
+            candidate_hash = DlrnHash(source=candidate_hash_dict)
+            self.stages[candidate_hash.full_hash].setup_containers()
             self.generate_pattern_file()
 
         if (self.config['components'] == "all"
@@ -595,7 +592,7 @@ class StagedEnvironment(object):
 
         # Use the dlrn hashes defined in the fixtures to setup all
         # the needed component per-hash
-        for full_hash, stage in self.stages.items():
+        for __, stage in self.stages.items():
             stage.prepare_environment()
 
         if (self.config['components'] == "all"
@@ -608,12 +605,7 @@ class StagedEnvironment(object):
     def analyze_commits(self, fixture_data):
         commits = []
         for db_commit in fixture_data['commits']:
-            commit = {
-                'commit_hash': db_commit['commit_hash'],
-                'distro_hash': db_commit['distro_hash'],
-                'full_hash': get_full_hash(db_commit['commit_hash'],
-                                           db_commit['distro_hash']),
-            }
+            commit = DlrnHash(source=db_commit).dump_to_dict()
             # Find name for commit in promotions if exists
             for promotion in fixture_data['promotions']:
                 if promotion['commit_id'] == db_commit['id']:

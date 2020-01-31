@@ -3,6 +3,9 @@ import os
 import pytest
 import tempfile
 import unittest
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+
 
 try:
     from unittest.mock import Mock, patch

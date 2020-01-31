@@ -237,19 +237,21 @@ class DlrnHash(object):
         # Gather Sources
         if source is not None and isinstance(source, dict):
             # source is dict, use dict to update unified source
-            _source.update(source)
+            for attribute in valid_attributes:
+                try:
+                    _source[attribute] = source[attribute]
+                except KeyError:
+                    pass
 
         elif source is not None and valid_source_object:
             # try loading from object convert to dict and update the unified
             # source
-            __source = {}
             for attribute in valid_attributes:
                 try:
-                    __source[attribute] = getattr(source, attribute)
+                    _source[attribute] = getattr(source, attribute)
                 except AttributeError:
                     pass
 
-            _source.update(__source)
         elif source is not None:
             raise DlrnHashError("Cannot build: invalid source object {}"
                                 "".format(source))

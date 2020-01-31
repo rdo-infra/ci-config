@@ -24,7 +24,6 @@ import yaml
 from staging_environment import StagedEnvironment, load_config
 from dlrnapi_client.rest import ApiException
 
-
 @pytest.fixture(scope='session')
 def staged_env():
     """
