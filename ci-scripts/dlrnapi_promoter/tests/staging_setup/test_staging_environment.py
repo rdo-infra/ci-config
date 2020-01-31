@@ -12,8 +12,8 @@ import dlrnapi_client
 import os
 import pytest
 import pprint
-import tempfile
 import subprocess
+import tempfile
 try:
     import urllib2 as url
 except ImportError:
@@ -37,6 +37,7 @@ def staged_env():
         'stage-info-path': "/tmp/stage-info.yaml",
         'dry-run': False,
         'promoter_user': "centos",
+        "stage-config-file": "stage-config-secure.yaml",
     }
     config = load_config(overrides, db_filepath="/tmp/sqlite-test.db")
     staged_env = StagedEnvironment(config)
@@ -64,35 +65,12 @@ def staged_env():
 
 
 @pytest.mark.serial
-def test_registries(staged_env):
-
-    docker_client = docker.from_env()
+def test_stage_info(staged_env):
     config, stage_info = staged_env
-
-    # os.stat(stage_info[''])
-    # TODO(gcerami) Check dlrnapi response (needs to spawn uwsgi+ api)
-    # TODO(gcerami) Check db injection (needs sqlite3 import)
-    # api_client = dlrnapi_client.ApiClient(host=stage_info['dlrn_host'])
-    # dlrnapi_client.configuration.username = 'foo'
-    # dlrnapi_client.configuration.password = 'bar'
-    # api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
-
-    # params = dlrnapi_client.Promotion()
-    # params.commit_hash = \
-    #    stage_info['promotions']['promotion_candidate']['commit_hash']
-    # params.distro_hash = \
-    # stage_info['promotions']['promotion_candidate']['distro_hash']
-    # params.distro_hash = stage_info['promotion_target']
-
-    # try:
-    #    api_response = api_instance.api_promote_post(params=params)
-    #    pprint(api_response)
-    # except ApiException as e:
-    #    print("Exception when calling DefaultApi->api_promote_post: %s\n" % e)
 
     # Check needed top level attributes
     attributes = [
-        "dlrn_host",
+        "dlrn",
         "promotions",
         "distro",
         "distro_version",
@@ -102,6 +80,54 @@ def test_registries(staged_env):
     ]
     for attribute in attributes:
         assert attribute in stage_info
+
+    # Check other attributes
+    assert 'api_url' in stage_info['dlrn'], "No api_url in stage-info"
+    assert "repo_url" in stage_info['dlrn'], "No repo_url in stage_info"
+
+
+@pytest.mark.serial
+def test_dlrn(staged_env):
+    config, stage_info = staged_env
+
+    # TODO(gcerami) Check db injection (needs sqlite3 import)
+    # Check we can access dlrnapi
+    api_client = dlrnapi_client.ApiClient(host=stage_info['dlrn']['api_url'])
+    dlrnapi_client.configuration.username = stage_info['dlrn']['username']
+    dlrnapi_client.configuration.password = stage_info['dlrn']['password']
+    api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
+
+    params = dlrnapi_client.Promotion()
+    params.commit_hash = \
+        stage_info['promotions']['promotion_candidate']['commit_hash']
+    params.distro_hash = \
+        stage_info['promotions']['promotion_candidate']['distro_hash']
+    params.promote_name = stage_info['promotion_target']
+
+    try:
+        api_instance.api_promote_post(params=params)
+        assert True, "Dlrn api responding"
+    except ApiException as e:
+        msg = "Exception when calling DefaultApi->api_promote_post: %s\n" % e
+        assert False, msg
+
+    # Check if we can access repo_url and get the versions file
+    versions_url = "{}/{}/{}".format(stage_info['dlrn']['repo_url'],
+                                     stage_info['promotion_target'],
+                                     'versions.csv')
+    try:
+        url.urlopen(versions_url)
+        assert True, "Versions file found"
+    except IOError:
+        print(versions_url)
+        assert False, "No versions file generated"
+
+
+@pytest.mark.serial
+def test_registries(staged_env):
+
+    docker_client = docker.from_env()
+    config, stage_info = staged_env
 
     # Check registries
     for registry in config['registries']:
