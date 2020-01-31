@@ -54,8 +54,8 @@ class PromoterLogic(object):
         # here the timestamp for each promotion to promote name, if any
         candidate_hashes = {}
         for hash in candidate_hashes_list:
-            candidate_hashes[hash.id] = {}
-            candidate_hashes[hash.id][candidate_label] = hash.timestamp
+            candidate_hashes[hash.full_hash] = {}
+            candidate_hashes[hash.full_hash][candidate_label] = hash.timestamp
 
         old_hashes = self.dlrn_client.fetch_hashes(target_label)
         if old_hashes is None:
@@ -68,14 +68,14 @@ class PromoterLogic(object):
                 # but it's not from
                 # our list of candindates. If this happens we're just
                 # ignoring it
-                if hash.id in candidate_hashes:
-                    candidate_hashes[hash.id][target_label] = \
+                if hash.full_hash in candidate_hashes:
+                    candidate_hashes[hash.full_hash][target_label] = \
                         hash.timestamp
 
         # returning only the hashes younger than the latest promoted
         # this list is already in reverse time order
         for index, hash in enumerate(candidate_hashes_list):
-            if target_label in candidate_hashes[hash.id]:
+            if target_label in candidate_hashes[hash.full_hash]:
                 self.log.info(
                     'Current "%s" hash is %s' % (target_label, hash))
                 candidate_hashes_list = candidate_hashes_list[:index]

@@ -3,6 +3,7 @@ import os
 import tempfile
 import unittest
 
+
 try:
     from unittest.mock import Mock, patch
     import unittest.mock as mock
@@ -12,7 +13,8 @@ except ImportError:
 
 from config import PromoterConfig, ConfigError
 from dlrnapi_promoter import main as promoter_main
-from dlrn_interface import DlrnHash, DlrnClient, HashChangedError
+from dlrn_interface import DlrnHash, DlrnClient, HashChangedError, DlrnHashError
+from dlrn_interface import DlrnAggregateHash, DlrnCommitDistroHash
 from dlrnapi_promoter import Promoter
 from logic import PromoterLogic
 from qcow import QcowClient
@@ -150,56 +152,191 @@ class TestMain(unittest.TestCase):
         assert legacy_main_mock.called
 
 
-valid_dlrn_dict = dict(commit_hash='a', distro_hash='b', timestamp=1)
-valid_dlrn_dict_no_timestamp = dict(commit_hash='a', distro_hash='b')
-invalid_dlrn_dict = dict(commit='a', distro='b')
-compare_success_dlrn_dict = dict(commit_hash='a', distro_hash='b', timestamp=1)
-compare_success_dlrn_dict_no_timestamp = dict(commit_hash='a',
-                                              distro_hash='b')
-compare_fail_dlrn_dict = dict(commit_hash='b', distro_hash='c', timestamp=1)
-full_hash = "a_b"
+valid_commitdistro_kwargs = dict(commit_hash='a', distro_hash='b', timestamp=1)
+valid_commitdistro_notimestamp_kwargs = dict(commit_hash='a', distro_hash='b')
+invalid_commitdistro_kwargs = dict(commit='a', distro='b')
+different_commitdistro_kwargs = dict(commit_hash='b', distro_hash='c',
+                                     timestamp=1)
+different_commitdistro_notimestamp_kwargs = dict(commit_hash='a',
+                                                 distro_hash='b')
+valid_aggregate_kwargs = dict(aggregate_hash='a', commit_hash='b',
+                              distro_hash='c', timestamp=1)
+valid_aggregate_notimestamp_kwargs = dict(aggregate_hash='a', commit_hash='b',
+                                          distro_hash='c')
+invalid_aggregate_kwargs = dict(aggregate='a')
+different_aggregate_kwargs = dict(aggregate_hash='c', commit_hash='a',
+                                  distro_hash='c', timestamp=1)
+different_aggregate_notimestamp_kwargs = dict(aggregate_hash='a',
+                                              commit_hash='b',
+                                              distro_hash='c')
+# Structured way to organize test cases by hash type and source type
+# by commitdistro and aggregate hash types and by dict or object source tyep
+sources = {
+    'commitdistro': {
+        "dict": {
+            "valid": valid_commitdistro_kwargs,
+            "valid_notimestamp":
+                valid_commitdistro_notimestamp_kwargs,
+            'invalid': invalid_commitdistro_kwargs,
+            'different': different_commitdistro_kwargs,
+            'different_notimestamp':
+                different_commitdistro_notimestamp_kwargs
+        },
+        "object": {
+            "valid": Mock(spec=type, **valid_commitdistro_kwargs),
+            "valid_notimestamp":
+                Mock(spec=type, **valid_commitdistro_notimestamp_kwargs),
+            'invalid': Mock(spec=type, **invalid_commitdistro_kwargs),
+            'different': Mock(spec=type, **different_commitdistro_kwargs),
+            'different_notimestamp':
+                Mock(spec=type, **different_commitdistro_notimestamp_kwargs)
+        },
+    },
+    'aggregate': {
+        "dict": {
+            "valid": valid_aggregate_kwargs,
+            "valid_notimestamp":
+                valid_aggregate_notimestamp_kwargs,
+            'invalid': invalid_aggregate_kwargs,
+            'different': different_aggregate_kwargs,
+            'different_notimestamp':
+                different_aggregate_notimestamp_kwargs
+        },
+        "object": {
+            "valid": Mock(spec=type, **valid_aggregate_kwargs),
+            "valid_notimestamp":
+                Mock(spec=type, **valid_aggregate_notimestamp_kwargs),
+            'invalid': Mock(spec=type, **invalid_aggregate_kwargs),
+            'different': Mock(spec=type, **different_aggregate_kwargs),
+            'different_notimestamp':
+                Mock(spec=type, **different_aggregate_notimestamp_kwargs),
+        },
+    },
+}
+
+
+class TestDlrnHashSubClasses(unittest.TestCase):
+
+    def test_build_valid(self):
+        for hash_type, source_types in sources.items():
+            values = source_types['dict']['valid']
+            if hash_type == "commitdistro":
+                dh = DlrnCommitDistroHash(commit_hash=values['commit_hash'],
+                                          distro_hash=values['distro_hash'],
+                                          timestamp=values['timestamp'])
+                self.assertEqual(dh.commit_hash,
+                                 source_types['dict']['valid']['commit_hash'])
+                self.assertEqual(dh.distro_hash,
+                                 source_types['dict']['valid']['distro_hash'])
+            elif hash_type == "aggregate":
+                aggregate_hash = source_types['dict']['valid'][
+                    'aggregate_hash']
+                dh = DlrnAggregateHash(aggregate_hash=values['aggregate_hash'],
+                                       commit_hash=values['commit_hash'],
+                                       distro_hash=values['distro_hash'],
+                                       timestamp=values['timestamp'])
+                self.assertEqual(dh.aggregate_hash, aggregate_hash)
+        self.assertEqual(dh.timestamp,
+                         source_types['dict']['valid']['timestamp'])
+
+    def test_build_valid_from_source(self):
+        for hash_type, source_types in sources.items():
+            values = source_types['dict']['valid']
+            if hash_type == "commitdistro":
+                dh = DlrnCommitDistroHash(source=values)
+                self.assertEqual(dh.commit_hash,
+                                 source_types['dict']['valid']['commit_hash'])
+                self.assertEqual(dh.distro_hash,
+                                 source_types['dict']['valid']['distro_hash'])
+            elif hash_type == "aggregate":
+                aggregate_hash = source_types['dict']['valid'][
+                    'aggregate_hash']
+                dh = DlrnAggregateHash(source=values)
+                self.assertEqual(dh.aggregate_hash, aggregate_hash)
+        self.assertEqual(dh.timestamp,
+                         source_types['dict']['valid']['timestamp'])
+
+    def test_build_invalid_from_source(self):
+        with self.assertRaises(DlrnHashError):
+            source = sources['commitdistro']['dict']['invalid']
+            DlrnCommitDistroHash(source=source)
+        with self.assertRaises(DlrnHashError):
+            source = sources['aggregate']['dict']['invalid']
+            DlrnAggregateHash(source=source)
 
 
 class TestDlrnHash(unittest.TestCase):
 
     def test_create_from_values(self):
-        dh = DlrnHash(commit=valid_dlrn_dict['commit_hash'],
-                      distro=valid_dlrn_dict['distro_hash'])
-        self.assertEqual(dh.commit_hash, valid_dlrn_dict['commit_hash'])
-        self.assertEqual(dh.distro_hash, valid_dlrn_dict['distro_hash'])
+        for hash_type, source_types in sources.items():
+            dh = DlrnHash(**source_types['dict']['valid'])
+            print(hash_type)
+            if hash_type == "commitdistro":
+                self.assertEqual(type(dh), DlrnCommitDistroHash)
+            elif hash_type == 'aggregate':
+                self.assertEqual(type(dh), DlrnAggregateHash)
+
+    def test_build_invalid(self):
+        with self.assertRaises(DlrnHashError):
+            DlrnHash(source=[])
 
     def test_create_from_dict(self):
-        with self.assertRaises(KeyError):
-            DlrnHash(from_dict=invalid_dlrn_dict)
-        dh = DlrnHash(from_dict=valid_dlrn_dict)
-        self.assertEqual(dh.commit_hash, valid_dlrn_dict['commit_hash'])
-        self.assertEqual(dh.distro_hash, valid_dlrn_dict['distro_hash'])
+        for hash_type, source_types in sources.items():
+            dh = DlrnHash(source=source_types['dict']['valid'])
+            if hash_type == "commitdistro":
+                self.assertEqual(type(dh), DlrnCommitDistroHash)
+            elif hash_type == "aggregate":
+                self.assertEqual(type(dh), DlrnAggregateHash)
+            with self.assertRaises(DlrnHashError):
+                DlrnHash(source=source_types['dict']['invalid'])
 
-    def test_create_from_api(self):
-        pass
+    def test_create_from_object(self):
+        # Prevent Mock class to identify as dict
+        for hash_type, source_types in sources.items():
+            source_valid = source_types['object']['valid']
+            DlrnHash(source=source_valid)
+            with self.assertRaises(DlrnHashError):
+                source_invalid = source_types['object']['invalid']
+                DlrnHash(source=source_invalid)
 
     def test_comparisons(self):
-        dh1 = DlrnHash(from_dict=valid_dlrn_dict)
-        dh2 = DlrnHash(from_dict=compare_success_dlrn_dict)
-        self.assertEqual(dh1, dh2)
-        dh2 = DlrnHash(from_dict=compare_fail_dlrn_dict)
-        self.assertNotEqual(dh1, dh2)
-        with self.assertRaises(TypeError):
-            (dh1 == invalid_dlrn_dict)
-            (dh1 != invalid_dlrn_dict)
-        dh1 = DlrnHash(from_dict=valid_dlrn_dict_no_timestamp)
-        dh2 = DlrnHash(from_dict=compare_success_dlrn_dict_no_timestamp)
-        self.assertEqual(dh1, dh2)
+        non_dh = {}
+        for hash_type, source_types in sources.items():
+            dh1 = DlrnHash(source=source_types['object']['valid'])
+            dh2 = DlrnHash(source=source_types['object']['valid'])
+            self.assertEqual(dh1, dh2)
+            dh2 = DlrnHash(source=source_types['object']['different'])
+            self.assertNotEqual(dh1, dh2)
+            with self.assertRaises(TypeError):
+                (dh1 == non_dh)
+            with self.assertRaises(TypeError):
+                (dh1 != non_dh)
+            dh1 = DlrnHash(source=source_types['object']['valid_notimestamp'])
+            dh2 = DlrnHash(source=source_types['object']['valid_notimestamp'])
+            self.assertEqual(dh1, dh2)
 
     def test_properties(self):
-        dh1 = DlrnHash(from_dict=valid_dlrn_dict)
-        self.assertEqual(dh1.full_hash, full_hash)
+        for hash_type, source_types in sources.items():
+            source = source_types['object']['valid']
+            dh = DlrnHash(source=source)
+            if hash_type == "commitdistro":
+                full_hash = "{}_{}".format(source.commit_hash,
+                                           source.distro_hash[:8])
+                self.assertEqual(dh.full_hash, full_hash)
+            elif hash_type == "aggregate":
+                self.assertEqual(dh.full_hash, source.aggregate_hash)
 
     def test_dump_to_params(self):
-        params = Mock()
-        dh1 = DlrnHash(from_dict=valid_dlrn_dict)
-        dh1.dump_to_params(params)
-        self.assertEqual(params.commit_hash, dh1.commit_hash)
+        for hash_type, source_types in sources.items():
+            params = Mock()
+            dh = DlrnHash(source=source_types['object']['valid'])
+            dh.dump_to_params(params)
+            if hash_type == "commitdistro":
+                self.assertEqual(params.commit_hash, dh.commit_hash)
+                self.assertEqual(params.distro_hash, dh.distro_hash)
+            elif hash_type == "aggregate":
+                self.assertEqual(params.aggregate_hash, dh.aggregate_hash)
+            self.assertEqual(params.timestamp, dh.timestamp)
 
 
 class TestDlrnClient(unittest.TestCase):
@@ -209,63 +346,100 @@ class TestDlrnClient(unittest.TestCase):
         fp, self.filepath = tempfile.mkstemp(prefix="instance_test")
         with os.fdopen(fp, "w") as test_file:
             test_file.write(content)
-
-        self.test_hash = DlrnHash(commit="cmt1", distro="dst1")
-        self.api_hashes = []
-        self.api_jobs = []
-        # Constructs two fake lists
-        # one with two identical hashes
-        # the other with two different jobs
-        for idx in range(2):
-            api_hash = Mock()
-            api_job = Mock()
-            api_hash.commit_hash = "a"
-            api_hash.distro_hash = "b"
-            api_hash.timestamp = 1
-            self.api_hashes.append(api_hash)
-            api_job.job_id = "job{}".format(idx)
-            api_job.timestamp = 11234567.0
-            api_job.url = "https://dev/null"
-            self.api_jobs.append(api_job)
-        # Create an unordered list
-        self.api_hashes_unordered = []
-        for idx in range(3):
-            api_hash = Mock()
-            api_hash.commit_hash = "a{}".format(idx)
-            api_hash.distro_hash = "b{}".format(idx)
-            api_hash.timestamp = idx
-            self.api_hashes_unordered.append(api_hash)
-        self.api_hashes_unordered.append(self.api_hashes_unordered.pop(0))
-
         os.environ["DLRNAPI_PASSWORD"] = "test"
         config = PromoterConfig(self.filepath)
         self.client = DlrnClient(config)
+
+        # set up fake job list with two different jobs
+        self.api_jobs = []
+        for idx in range(2):
+            api_job = Mock()
+            api_job.job_id = "job{}".format(idx)
+            api_job.timestamp = idx
+            api_job.url = "https://dev/null"
+            self.api_jobs.append(api_job)
+
+        # Set up the matrix of api_hashes to test
+        commitdistrohash_valid_attrs = ['commit_hash', 'distro_hash',
+                                        'timestamp']
+        aggregatehash_valid_attrs = ['aggregate_hash', 'timestamp']
+        self.api_hashes = []
+        self.api_hashes_unordered = []
+
+        # set up fake dlrn api hashes commitdistro objects
+        api_hashes_commitdistro = []
+        for idx in range(2):
+            api_hash = Mock(spec=commitdistrohash_valid_attrs)
+            api_hash.commit_hash = "a"
+            api_hash.distro_hash = "b"
+            api_hash.timestamp = 1
+            api_hashes_commitdistro.append(api_hash)
+        self.api_hashes.append(api_hashes_commitdistro)
+        # Create an unordered list
+        api_hashes_commitdistro_unordered = []
+        for idx in range(3):
+            api_hash = Mock(spec=commitdistrohash_valid_attrs)
+            api_hash.commit_hash = "a{}".format(idx)
+            api_hash.distro_hash = "b{}".format(idx)
+            api_hash.timestamp = idx
+            api_hashes_commitdistro_unordered.append(api_hash)
+        api_hash = api_hashes_commitdistro_unordered.pop(0)
+        api_hashes_commitdistro_unordered.append(api_hash)
+        self.api_hashes_unordered.append(api_hashes_commitdistro_unordered)
+
+        # set up fake dlrn api aggregaed hashes objects
+        api_hashes_aggregate = []
+        for idx in range(2):
+            api_hash = Mock(spec=aggregatehash_valid_attrs)
+            api_hash.aggregate_hash = "a"
+            api_hash.commit_hash = "b"
+            api_hash.distro_hash = "c"
+            api_hash.timestamp = 1
+            api_hashes_aggregate.append(api_hash)
+        self.api_hashes.append(api_hashes_aggregate)
+        # Create an unordered list
+        api_hashes_aggregate_unordered = []
+        for idx in range(3):
+            api_hash = Mock(spec=aggregatehash_valid_attrs)
+            api_hash.aggregate_hash = "a{}".format(idx)
+            api_hash.commit_hash = "b{}".format(idx)
+            api_hash.distro_hash = "c{}".format(idx)
+            api_hash.timestamp = idx
+            api_hashes_aggregate_unordered.append(api_hash)
+        api_hash = api_hashes_aggregate_unordered.pop(0)
+        api_hashes_aggregate_unordered.append(api_hash)
+        self.api_hashes_unordered.append(api_hashes_aggregate_unordered)
 
     def tearDown(self):
         os.unlink(self.filepath)
 
     def test_hashes_to_hashes(self):
-        # TODO(gcerami) test with aggregated hash
-        hash_list = self.client.hashes_to_hashes(self.api_hashes)
-        self.assertEqual(len(hash_list), 2)
-        self.assertIsInstance(hash_list[0], DlrnHash)
-        hash_list = self.client.hashes_to_hashes(self.api_hashes,
-                                                 remove_duplicates=True)
-        self.assertEqual(len(hash_list), 1)
+        # tests both commitdistro and aggregate
+        for api_hash_list in self.api_hashes:
+            hash_list = self.client.hashes_to_hashes(api_hash_list)
+            self.assertEqual(len(hash_list), 2)
+            self.assertIn(type(hash_list[0]), [DlrnCommitDistroHash,
+                                               DlrnAggregateHash])
+            hash_list = self.client.hashes_to_hashes(api_hash_list,
+                                                     remove_duplicates=True)
+            self.assertEqual(len(hash_list), 1)
 
-    def test_fetch_hashes(self):
-        # TODO(gcerami) test with aggregated hash
+    @patch('dlrnapi_client.DefaultApi.api_promotions_get')
+    def test_fetch_hashes(self, promotions_get_mock):
         # Patch the promotions_get to not query any server
-        with patch.object(self.client, "promotions_get") as mocked_get:
-            mocked_get.return_value = self.api_hashes
+        for api_hash_list in self.api_hashes:
+            promotions_get_mock.return_value = api_hash_list
             # Ensure that fetch_hashes return a single hash and not a list when
             # count=1
             hash = self.client.fetch_hashes("test", count=1)
-            self.assertIsInstance(hash, DlrnHash)
+            self.assertIn(type(hash), [DlrnCommitDistroHash,
+                                       DlrnAggregateHash])
             hash_list = self.client.fetch_hashes("test")
             self.assertEqual(len(hash_list), 1)
             # TODO(gcerami) test sort by timestamp and reverse
-            mocked_get.return_value = self.api_hashes_unordered
+
+        for api_hash_list in self.api_hashes_unordered:
+            promotions_get_mock.return_value = api_hash_list
             hash_list = self.client.fetch_hashes("test", sort="timestamp")
             self.assertEqual(len(hash_list), 3)
             self.assertEqual(hash_list[0].timestamp, 0)
@@ -277,15 +451,14 @@ class TestDlrnClient(unittest.TestCase):
             self.assertEqual(hash_list[1].timestamp, 1)
             self.assertEqual(hash_list[2].timestamp, 0)
 
-    def test_fetch_jobs(self):
-        # TODO(gcerami) test with aggregated hash
-        # Patch the api_repo_status_get to not query any server
-        with patch.object(self.client.api_instance, "api_repo_status_get") as\
-                mocked_status_get:
-            mocked_status_get.return_value = self.api_jobs
-            job_list = self.client.fetch_jobs(self.test_hash)
-            self.assertEqual(len(job_list), 2)
-            self.assertEqual(job_list, ["job0", "job1"])
+    @patch('dlrnapi_client.DefaultApi.api_repo_status_get')
+    def test_fetch_jobs(self, api_repo_status_get_mock):
+        api_repo_status_get_mock.return_value = self.api_jobs
+        print(type(self.api_hashes[0][0]))
+        hash = DlrnHash(source=self.api_hashes[0][0])
+        job_list = self.client.fetch_jobs(hash)
+        self.assertEqual(len(job_list), 2)
+        self.assertEqual(job_list, ["job0", "job1"])
 
     @mock.patch('dlrn_interface.DlrnClient.fetch_hashes')
     def test_named_hashes_unchanged(self, mock_fetch_hashes):
@@ -299,8 +472,8 @@ class TestDlrnClient(unittest.TestCase):
             'commit_hash': 'd1c5372341a61effdccfe5dde3e93bd21884ed27',
             'distro_hash': 'cd4fb616ac30625a51ba9156bbe70ede3d7e1921'
         }
-        dlrn_changed_hash = DlrnHash(from_dict=dlrn_changed_hash_dict)
-        dlrn_start_hash = DlrnHash(from_dict=dlrn_start_hash_dict)
+        dlrn_changed_hash = DlrnHash(source=dlrn_changed_hash_dict)
+        dlrn_start_hash = DlrnHash(source=dlrn_start_hash_dict)
 
         mock_fetch_hashes.side_effect = [dlrn_start_hash, dlrn_start_hash,
                                          dlrn_changed_hash, dlrn_changed_hash]
@@ -413,7 +586,7 @@ class TestPromoterLogic(unittest.TestCase):
             'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884eda5',
             'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77eff5'
         }
-        hash = DlrnHash(from_dict=hash_dict)
+        hash = DlrnHash(source=hash_dict)
         old_hashes = [hash]
 
         candidate_hashes = []
@@ -439,13 +612,13 @@ class TestPromoterLogic(unittest.TestCase):
             'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884eda5',
             'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77eff5'
         }
-        hash1 = DlrnHash(from_dict=hash1_dict)
+        hash1 = DlrnHash(source=hash1_dict)
         hash2_dict = {
             'timestamp': '1528085434',
             'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884eda6',
             'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77eff6'
         }
-        hash2 = DlrnHash(from_dict=hash2_dict)
+        hash2 = DlrnHash(source=hash2_dict)
         candidate_hashes = [hash1, hash2]
 
         fetch_hashes_mock.side_effect = [candidate_hashes, old_hashes]
@@ -478,7 +651,7 @@ class TestPromoterLogic(unittest.TestCase):
 
         old_hashes = []
         for hash_dict in old_hashes_dicts:
-            old_hashes.append(DlrnHash(from_dict=hash_dict))
+            old_hashes.append(DlrnHash(source=hash_dict))
 
         # hashes here must be in order, as fetch_hashes now would return the
         # list in reverse timestamp order
@@ -511,7 +684,7 @@ class TestPromoterLogic(unittest.TestCase):
         ]
         candidate_hashes = []
         for hash_dict in candidate_hashes_dicts:
-            candidate_hashes.append(DlrnHash(from_dict=hash_dict))
+            candidate_hashes.append(DlrnHash(source=hash_dict))
 
         expected_hashes_dicts = [
             {
@@ -528,7 +701,7 @@ class TestPromoterLogic(unittest.TestCase):
         ]
         expected_hashes = []
         for hash_dict in expected_hashes_dicts:
-            expected_hashes.append(DlrnHash(from_dict=hash_dict))
+            expected_hashes.append(DlrnHash(source=hash_dict))
 
         fetch_hashes_mock.side_effect = [candidate_hashes, old_hashes]
 
@@ -540,6 +713,4 @@ class TestPromoterLogic(unittest.TestCase):
             mock.call('target_label')
         ])
 
-        print(obtained_hashes)
-        print(expected_hashes)
         assert(obtained_hashes == expected_hashes)
