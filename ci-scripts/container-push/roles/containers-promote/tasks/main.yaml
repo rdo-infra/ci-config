@@ -13,13 +13,21 @@
   set_fact:
     pushed_containers: []
 
-- name: Construct dlrn_dir from full_hash (turn xxyyz* into xx/yy/xxyyz*)
+- name: Construct repo_dir from full_hash (turn xxyyz* into xx/yy/xxyyz*)
   set_fact:
     dlrn_dir: "{{ full_hash | regex_replace('^(?P<first>.{2})(?P<second>.{2})(?P<third>.+)$', '\\g<first>/\\g<second>/\\g<first>\\g<second>\\g<third>') }}"
 
+- name: Construct version.csv path
+  set_fact:
+    versions_path: "{{ distro_name }}{{ distro_version }}-{{ release }}/{{ dlrn_dir }}/versions.csv"
+
+- name: Define dlrn host
+  set_fact:
+    dlrn_host: "{{ stage_info.dlrn.server.repo_url|default(default_dlrn_host) }}"
+
 - name: Construct the DLRN URL for the promoted hash
   set_fact:
-    dlrn_url: "https://trunk.rdoproject.org/{{ distro_name }}{{ distro_version }}-{{ release }}/{{ dlrn_dir }}/versions.csv"
+    dlrn_url: "{{ dlrn_host }}{{ versions_path }}"
 
 - name: Get the tripleo-common commit in the promoted hash  # noqa 306
   shell: >
@@ -33,24 +41,26 @@
 - name: Set the release_url
   set_fact:
     release_url: "https://opendev.org/openstack/tripleo-common/raw/commit/{{ local_release.stdout  }}/container-images/overcloud_containers.yaml.j2"
-  when:
-    - not setup_staging | default(false) | bool
 
 # The next two tasks are created mainly for testing the role
 # if a file is present at pattern_file location
 # it will be used to reduce the set of containers taken into consideration, mainly
 # to match the reduced set of images pushed into test repository
-- name: Stat filter pattern
-  stat:
-    path: "{{ pattern_file }}"
-  register: pattern_file_stat
+- block:
+    - name: Get release url from staging environment if defined
+      set_fact:
+        release_url: "{{ stage_info.containers.containers_yaml_url }}"
+  rescue:
+    - name: Not in staging environment
+      debug:
+        msg: "Not in staging environment"
+
 
 - name: Get release containers  # noqa 306
   shell: >
     curl -fk {{ release_url }} 2>/dev/null |
     grep -o -P '(?<=name_prefix).*(?=name_suffix)' |
     sed "s/[{}]//g"
-    {% if pattern_file_stat.stat.exists %}| grep -f {{ pattern_file }}{% endif %}
   register: release_images
   args:
     # shut up ansible. get_url is not enough here.
@@ -61,10 +71,9 @@
   shell: |
     echo -n > {{ containers_file }};
     for image in {{ release_images.stdout_lines|join(" ") }}; do
-    #$(curl -fk {{ release_url }} 2>/dev/null | grep -o -P '(?<=name_prefix).*(?=name_suffix)' | sed "s/[{}]//g"); do
         echo -n "Checking {{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-$image:{{ full_hash }} ... ";
         docker manifest inspect \
-            --insecure "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-$image:{{ full_hash }}" &>/dev/null
+            --insecure "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-$image:{{ full_hash }}"
         if [[ "$?" == "0" ]]; then
             echo $image >> {{ containers_file }};
             echo "OK";

@@ -3,15 +3,12 @@
   become: true
   become_user: "{{ promoter_user }}"
   shell: |
-    killed=$(pkill -c uwsgi)
-    echo "Killed $killed uWSGI process"
     echo "cleaning up environment"
     source /home/{{ promoter_user }}/promoter_venv/bin/activate
     if [ -S /tmp/docker.sock ]; then
         export DOCKER_HOST=unix:///tmp/docker.sock
     fi
-    python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py teardown
-    #rm -f /home/{{ promoter_user }}/dlrnapi.log
+    python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/staging_environment.py teardown
   args:
     chdir: "/home/{{ promoter_user }}"
   tags:

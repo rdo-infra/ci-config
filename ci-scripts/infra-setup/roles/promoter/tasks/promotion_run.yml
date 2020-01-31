@@ -6,7 +6,8 @@
     cmd: |
       source /home/{{ promoter_user }}/promoter_venv/bin/activate
       export PROMOTER_FORCE_LEGACY={{ promoter_force_legacy|default(false) }}
-      {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/dlrn-promoter.sh -s
+      cd {{ ci_config_remote_src_dir }}
+      ci-scripts/dlrnapi_promoter/dlrn-promoter.sh -s
   changed_when: true
 
 - name: extract log_file from staging.ini
