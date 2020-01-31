@@ -132,12 +132,14 @@
         cmd: |
           export DOCKER_HOST=unix:///tmp/docker.sock
           source /home/{{ promoter_user }}/promoter_venv/bin/activate
-          python /home/{{ promoter_user }}/ci-config/ci-scripts/dlrnapi_promoter/tests/staging-setup/promoter_test.py --stage-info-file /tmp/stage-info.yaml
+          cd /home/{{ promoter_user }}/ci-config
+          python ci-scripts/dlrnapi_promoter/promoter_integration_checks.py --stage-info-file /tmp/stage-info.yaml
       changed_when: true
 
     - name: include vars from stage info
       include_vars:
         file: "{{ zuul.executor.work_root }}/stage-info.yaml"
+        name: stage_info
 
     - name: Check that no passwords are leaked in the logs
       shell: |
@@ -156,7 +158,7 @@
       register: found_pass
       failed_when: found_pass.stdout | length > 0
       changed_when: false
-      loop: "{{ registries.targets | map(attribute='password') | list }}"
+      loop: "{{ stage_info.registries.targets | map(attribute='password') | list }}"
       loop_control:
         loop_var: password
 

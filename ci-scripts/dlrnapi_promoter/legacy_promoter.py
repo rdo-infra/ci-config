@@ -45,7 +45,7 @@ def check_named_hashes_unchanged(release, promote_from, dlrn):
     ''' Fetch latest named hashes and compare to start_named_hashes
         If they are different log error and raise Exception
     '''
-    logger = logging.getLogger('promoter')
+    logger = logging.getLogger('legacy-promoter')
     latest_named_hashes = fetch_current_named_hashes(
                                                    release, promote_from, dlrn)
     if latest_named_hashes != start_named_hashes:
@@ -57,7 +57,7 @@ def check_named_hashes_unchanged(release, promote_from, dlrn):
 
 def check_promoted(dlrn, link, hashes):
     ''' check if hashes has ever been promoted to link'''
-    logger = logging.getLogger('promoter')
+    logger = logging.getLogger('legacy-promoter')
     params = dlrnapi_client.PromotionQuery()
     params.commit_hash = hashes['commit_hash']
     params.distro_hash = hashes['distro_hash']
@@ -72,7 +72,7 @@ def check_promoted(dlrn, link, hashes):
 
 def fetch_hashes(dlrn, link, count=1):
     '''Get the commit and distro hashes for a specific promotion link'''
-    logger = logging.getLogger('promoter')
+    logger = logging.getLogger('legacy-promoter')
     params = dlrnapi_client.PromotionQuery()
     params.promote_name = link
     try:
@@ -104,7 +104,7 @@ def fetch_hashes(dlrn, link, count=1):
 
 def fetch_jobs(dlrn, hash_values):
     '''Fetch the successfully finished jobs for a specific DLRN hash'''
-    logger = logging.getLogger('promoter')
+    logger = logging.getLogger('legacy-promoter')
     params = dlrnapi_client.Params2()
     params.commit_hash = hash_values['commit_hash']
     params.distro_hash = hash_values['distro_hash']
@@ -126,7 +126,7 @@ def fetch_jobs(dlrn, hash_values):
 
 def promote_link(dlrn, hash_values, link):
     '''Promotes a set of hash values as a named link using DLRN API'''
-    logger = logging.getLogger('promoter')
+    logger = logging.getLogger('legacy-promoter')
     current_hashes = fetch_hashes(dlrn, link)
     # Save current hash as previous-$link
     if current_hashes is not None:
@@ -155,7 +155,7 @@ def promote_link(dlrn, hash_values, link):
 
 def setup_logging(log_file):
     '''Setup logging for the script'''
-    logger = logging.getLogger('promoter')
+    logger = logging.getLogger('legacy-promoter')
     logger.setLevel(logging.DEBUG)
     log_handler = logging.handlers.WatchedFileHandler(
         os.path.expanduser(log_file))
@@ -167,7 +167,7 @@ def setup_logging(log_file):
 
 def tag_containers(new_hashes, distro, release, promote_name, manifest_push,
                    target_registries_push):
-    logger = logging.getLogger('promoter')
+    logger = logging.getLogger('legacy-promoter')
     env = os.environ
     relpath = "ci-scripts/dlrnapi_promoter"
     script_root = os.path.abspath(sys.path[0]).replace(relpath, "")
@@ -222,7 +222,7 @@ def tag_containers(new_hashes, distro, release, promote_name, manifest_push,
 
 
 def tag_qcow_images(new_hashes, distro, release, promote_name):
-    logger = logging.getLogger('promoter')
+    logger = logging.getLogger('legacy-promoter')
     relpath = "ci-scripts/dlrnapi_promoter"
     script_root = os.path.abspath(sys.path[0]).replace(relpath, "")
     promote_script = script_root + 'ci-scripts/promote-images.sh'
@@ -249,7 +249,7 @@ def tag_qcow_images(new_hashes, distro, release, promote_name):
 
 def get_latest_hashes(api, promote_name, current_name, latest_hashes_count):
     '''Get and filter eligible hashes for promotion'''
-    logger = logging.getLogger('promoter')
+    logger = logging.getLogger('legacy-promoter')
 
     candidate_hashes_list = fetch_hashes(
         api,
@@ -323,7 +323,7 @@ def promote_all_links(
         target_registries_push):
     '''Promote DLRN API links as a different one when all jobs are
     successful'''
-    logger = logging.getLogger('promoter')
+    logger = logging.getLogger('legacy-promoter')
 
     # promote_all_links - labels loop
     for promote_name, current_name in promote_from.items():
@@ -436,7 +436,7 @@ def promote_all_links(
 
 
 def promoter(config):
-    logger = logging.getLogger('promoter')
+    logger = logging.getLogger('legacy-promoter')
 
     distro = (config.get('main', 'distro_name').lower(),
               config.get('main', 'distro_version'))
@@ -517,7 +517,8 @@ def legacy_main():
         config = configparser.SafeConfigParser(allow_no_value=True)
         config.read(sys.argv[1])
         setup_logging(config.get('main', 'log_file'))
-        logger = logging.getLogger('promoter')
+        logger = logging.getLogger('legacy-promoter')
+        logger.warning("This workflow is using legacy promotion code")
         try:
             promoter(config)
         except Exception as e:
