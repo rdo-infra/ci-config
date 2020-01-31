@@ -11,6 +11,7 @@ set -x
 
 TIMEOUT=115m
 KILLTIME=120m
+LOG_LEVEL="INFO"
 
 # To add when ready: "RedHat-8/train"
 RELEASES=( "CentOS-7/master" "CentOS-7/train" "CentOS-7/stein" \
@@ -27,7 +28,7 @@ while getopts "t:k:sh" arg; do
         ;;
     s)
         echo "Staging promoter mode enabled"
-        RELEASES=( "CentOS-7/staging" )
+        LOG_LEVEL="DEBUG"
         export IMAGE_SERVER_USER_HOST="foo@localhost"
         ;;
     h)
@@ -37,9 +38,13 @@ while getopts "t:k:sh" arg; do
     esac
 done
 
+if [[ ! -z $TEST_RELEASES ]]; then
+    RELEASES=("${TEST_RELEASES[@]}")
+fi
+
 DIR=$(dirname $0)
 
 for r in "${RELEASES[@]}"; do
     /usr/bin/timeout --preserve-status -k $KILLTIME $TIMEOUT \
-        python $DIR/dlrnapi_promoter.py $DIR/config/${r}.ini
+        python $DIR/dlrnapi_promoter.py --log-level ${LOG_LEVEL} $DIR/config/${r}.ini
 done
