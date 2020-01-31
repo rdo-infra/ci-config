@@ -9,7 +9,6 @@ codebase To prepare for the implementation of component pipeline
 from __future__ import print_function
 
 import argparse
-import dlrnapi_client
 import logging
 import logging.handlers
 import os
@@ -19,23 +18,26 @@ from common import str2bool
 from config import PromoterConfig
 from logic import PromoterLogic
 # Import previous content from the legacy_promoter file
-import legacy_promoter
 from legacy_promoter import legacy_main
-from legacy_promoter import fetch_current_named_hashes
 
 
 class Promoter(object):
     """
-    This class will drive the hig level process
+    This class will drive the high level process
     """
 
     log = logging.getLogger('promoter')
 
     def __init__(self, args):
-        # Initiall loggin setup when we don't have the logfile
+        """
+        load config from args and sets up logging
+        :param args: the cli arguments
+        """
+        # Initial logging setup when we don't have the logfile config option yet
         self.setup_logging()
         self.config = PromoterConfig(args.config_file)
         self.setup_logging(self.config.log_file)
+        self.logic = PromoterLogic(self.config)
 
     def setup_logging(self, log_file=None):
         """
@@ -45,12 +47,12 @@ class Promoter(object):
         :return: None
         """
         self.log.setLevel(logging.DEBUG)
+        log_formatter = logging.Formatter('%(asctime)s %(process)d '
+                                          '%(levelname)-8s %(name)s '
+                                          '%(message)s')
         if log_file is not None:
             log_handler = logging.handlers.WatchedFileHandler(
                 os.path.expanduser(log_file))
-            log_formatter = logging.Formatter('%(asctime)s %(process)d '
-                                              '%(levelname)-8s %(name)s '
-                                              '%(message)s')
             log_handler.setFormatter(log_formatter)
             self.log.addHandler(log_handler)
         if sys.stdout.isatty():
@@ -64,19 +66,19 @@ class Promoter(object):
         :return: None
         """
         self.log.warning("This workflow is using the new modularized code")
-        try:
-            logic = PromoterLogic(self.config)
-            logic.promote_all_links()
-        except Exception as e:
-            self.log.exception(e)
-        self.log.info("FINISHED promotion process")
+        promoted_pairs = self.logic.promote_all_links()
+        self.log.info("Summary: Promoted {} hashes this round"
+                      "".format(len(promoted_pairs)))
+        self.log.info("------- -------- Promoter terminated normally")
 
 
-# Wrappers for the old code
 def main(cmd_line=None):
     """
-    This main will select which execution path to take, between legacy and new
-    code
+    This main will gather the cli arguments and select which execution path to
+    take, between legacy and new code
+    :param cmd_line: (optional) we can pass a string simulating a command
+    line string with arguments. Useful for testing the main function
+    :return: None
     """
     main_parser = argparse.ArgumentParser(description="Promoter workflow")
     main_parser.add_argument("config_file", help="The config file")
@@ -87,7 +89,6 @@ def main(cmd_line=None):
         args = main_parser.parse_args(cmd_line.split())
     else:
         args = main_parser.parse_args()
-    logger = logging.getLogger('promoter')
     # Main execution paths branch we either use legacy code or we use
     # modularized
     if args.force_legacy or str2bool(os.environ.get("PROMOTER_FORCE_LEGACY",
@@ -95,6 +96,7 @@ def main(cmd_line=None):
         # Legacy code supports only a single argument
         sys.argv = [sys.argv[0], args.config_file]
         # legacy_main is imported from legacy code
+        logger = logging.getLogger("promoter")
         logger.warning("This workflow is using legacy promotion code")
         legacy_main()
     else:
