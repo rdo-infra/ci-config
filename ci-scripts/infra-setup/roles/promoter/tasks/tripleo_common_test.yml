@@ -28,9 +28,11 @@
       debug:
         var: stage_info
 
-    - name: set full_hash
+    - name: set facts from staging env
       set_fact:
-        full_hash: "{{ stage_info.promotions.promotion_candidate.full_hash }}"
+        full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+        distro_name: "{{ stage_info.main.distro_name }}"
+        distro_version: "{{ stage_info.main.distro_version }}"
 
     - name: show full_hash
       debug:
