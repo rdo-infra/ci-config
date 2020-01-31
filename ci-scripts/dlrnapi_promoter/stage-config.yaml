@@ -1,0 +1,53 @@
+# Stage configuration file for the promoter staging
+# This versions creates only insecure registries
+main:
+  stage_info_path: /tmp/stage-info.yaml
+  dry_run: false
+  promoter_user: centos
+  scenes:
+    - registries
+    - dlrn
+    - containers
+    - overcloud_images
+  stage_root: /tmp/promoter-staging/
+registries:
+    # you can add multiple targets, but only the first source will win
+    - type: source
+      name: local-source-registry
+      port: 6000
+      secure: False
+      schema: v2_s2
+    - type: target
+      name: local-target-registry-1
+      port: 6500
+      secure: False
+      schema: v2_s2
+containers:
+  # When modfying the suffixes, please follow these hints
+  # - specify at least three values
+  # - base and openstack-base are hardcoded and will always be on top of this
+  # list
+  images-suffix:
+  - nova-compute
+  - neutron-server
+  namespace_prefix: tripleo
+  root: containers/
+  containers_list_base: tripleo-common
+dlrn:
+  components:
+    - tripleo
+    - nova
+    - neutron
+  promotion_target: tripleo-ci-staging-promoted
+  server:
+    username: ciuser
+    password: dlrnapi_password00
+    host: localhost
+    port: 58080
+    root: dlrn/
+    repo_root: data/repos/
+    db_file: commits.sqlite
+    db_data_file: single-pipeline.yaml
+overcloud_images:
+  root: overcloud_images/
+  key: "sample_key"

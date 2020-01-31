@@ -1,19 +1,23 @@
 named_label: "{{ lookup('env', 'PROMOTE_NAME') }}"
+candidate_label: "{{ lookup('env', 'CANDIDATE_LABEL') }}"
 full_hash: "{{ lookup('env', 'FULL_HASH') }}"
+hash_repo_dir: >-
+  "{{ full_hash | regex_replace('^(?P<first>.{2})(?P<second>.{2})(?P<third>.+)$', '\\g<first>/\\g<second>/\\g<first>\\g<second>\\g<third>') }}"
 script_root: "{{ lookup('env', 'SCRIPT_ROOT') }}"
 distro_name: "{{ lookup('env', 'DISTRO_NAME') }}"
 distro_version: "{{ lookup('env', 'DISTRO_VERSION') }}"
 release: "{{ lookup('env','RELEASE') }}"
 # This file is truncated at each rerun, so it's safe to put it in a non reantrant location (to be more accessible from other)
-containers_file: "/tmp/parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ lookup('env','RELEASE') }}.txt"
+containers_file: "/tmp/parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
 registry_hostname: trunk.registry.rdoproject.org
-registry_api: "https://{{ registry_hostname }}:8443/oapi/v1/namespaces/tripleo{{ lookup('env', 'RELEASE') }}/imagestreamtags"
+registry_api: "https://{{ registry_hostname }}:8443/oapi/v1/namespaces/tripleo{{ release }}/imagestreamtags"
 source_registry:
   host: "{{ registry_hostname }}"
-  namespace: "tripleo{{ lookup('env','RELEASE') }}"
+  namespace: "tripleo{{ release }}"
   username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
   password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
   auth_url: "https://{{ registry_hostname }}/v2/"
+default_dlrn_host: https://trunk.rdoproject.org
 pattern_file: /tmp/images_pattern_file
 ppc_tag: ppc64le
 x86_tag: x86_64
