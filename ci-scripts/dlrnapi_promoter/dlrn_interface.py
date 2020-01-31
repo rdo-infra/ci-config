@@ -5,117 +5,141 @@ import copy
 import datetime
 import dlrnapi_client
 import logging
+import pprint
 
 from dlrnapi_client.rest import ApiException
-from legacy_promoter import promote_link
 
 
 class HashChangedError(Exception):
+    """
+    Raised when hashes change during a promotion
+    """
     pass
 
 
-class DlrnAggregatedHash(str):
+class DlrnHashError(Exception):
     """
-    This class represents the aggregate hash for the component pipeline
-    Not yet implemented
+    Raised on various errors on DlrnHash operations
     """
-    log = logging.getLogger("promoter")
-
-    def __init__(self, aggregated_hash):
-        pass
-
-    def dump_to_params(self):
-        pass
+    pass
 
 
-class DlrnHash(dict):
+class DlrnHashBase(object):
     """
-    This class represent the dlrn hash, It makes it easier to handle, compare
+    THis is the base class for all type of hashes
+    It represents the dlrn hash, It makes it easier to handle, compare
     and visualize dlrn hashes
     """
 
     log = logging.getLogger("promoter")
 
-    def __init__(self, commit=None, distro=None, timestamp=None, from_api=None,
-                 from_dict=None):
+    def __init__(self, commit_hash=None, distro_hash=None, timestamp=None,
+                 aggregate_hash=None, source=None):
         """
-        Dlrn Hash can be initialized either by direct kwargs value, from a
-        dictionary, or from a dlrn api response object
-        :param commit: the direct commit hash
-        :param distro:  the direct distro hash
-        :param timstamp: the direct timestamp value, must be float
-        :param from_api: A valid dlrn api response object
-        :param from_dict:  A dictionary that needs to contain commit_hash and
-        distro_hash as keys
+        implements mostly sanity checks
+        :param source: A dictionary with the hash informations
         """
-        self.commit_hash = ""
-        self.distro_hash = ""
-        self.timestamp = timestamp
-        if from_api is not None:
-            try:
-                self.commit_hash = from_api.commit_hash
-                self.distro_hash = from_api.distro_hash
-                if hasattr(from_api, "timestamp"):
-                    self.timestamp = from_api.timestamp
-            except AttributeError:
-                raise AttributeError("Error while building DlrnHash:"
-                                     " invalid source API object")
-        elif from_dict is not None:
-            try:
-                self.commit_hash = from_dict['commit_hash']
-                self.distro_hash = from_dict['distro_hash']
-                if "timestamp" in from_dict:
-                    self.timestamp = from_dict['timestamp']
-            except KeyError:
-                raise KeyError("Error while building DlrnHash:"
-                               " invalid source dict")
-        elif commit is not None and distro is not None:
-            self.commit_hash = commit
-            self.distro_hash = distro
-        else:
-            self.log.debug("Creating empty DlrnHash")
+        # Load from default values into unified source
+        _source = {}
+        _source['commit_hash'] = commit_hash
+        _source['distro_hash'] = distro_hash
+        _source['timestamp'] = timestamp
+        _source['aggregate_hash'] = aggregate_hash
 
-        # TODO(gcerami) strict dlrn validation
-        # check that the hashes are valid hashes with correct size
+        # Checks on sources
+        valid_attributes = set(['commit_hash', 'distro_hash', 'aggregate_hash',
+                                'timestamp'])
+        source_attributes = dir(source)
+        valid_source_object = bool(valid_attributes.intersection(
+            source_attributes))
 
-    def __eq__(self, other):
-        if not hasattr(other, 'commit_hash') or \
-                not hasattr(other, 'distro_hash') or \
-                not hasattr(other, 'timestamp'):
-            raise TypeError("One of the objects is not a valid DlrnHash")
+        # Gather Sources
+        if source is not None and isinstance(source, dict):
+            # source is dict, use dict to update unified source
+            for attribute in valid_attributes:
+                try:
+                    _source[attribute] = source[attribute]
+                except KeyError:
+                    pass
 
-        return (self.commit_hash == other.commit_hash
-                and self.distro_hash == other.distro_hash
-                and self.timestamp == other.timestamp)
+        elif source is not None and valid_source_object:
+            # try loading from object convert to dict and update the unified
+            # source
+            for attribute in valid_attributes:
+                try:
+                    _source[attribute] = getattr(source, attribute)
+                except AttributeError:
+                    pass
 
-    def __ne__(self, other):
-        if not hasattr(other, 'commit_hash') or \
-                not hasattr(other, 'distro_hash') or \
-                not hasattr(other, 'timestamp'):
-            raise TypeError("One of the objects is not a valid DlrnHash")
+        elif source is not None:
+            raise DlrnHashError("Cannot build: invalid source object {}"
+                                "".format(source))
 
-        return (self.commit_hash != other.commit_hash
-                or self.distro_hash != other.distro_hash
-                or self.timestamp != other.timestamp)
+        # load from unified source
+        for key, value in _source.items():
+            setattr(self, key, value)
+
+        self.sanity_check()
+
+        # TODO(gcerami) strict dlrn validation: check that the hashes are valid
+        # hashes with correct size
+
+
+class DlrnCommitDistroHash(DlrnHashBase):
+    """
+    This class implements methods for the commit/distro dlrn hash
+    for the single pipeline
+    It inherits from the base class and does not override the init
+    """
+
+    def sanity_check(self):
+        """
+        Checks if the hashes are present
+        """
+        print(self.commit_hash, self.distro_hash)
+        if self.commit_hash is None or self.distro_hash is None:
+            raise DlrnHashError("Invalid commit or distro hash")
+
+    def __repr__(self):
+        return ("<DlrnCommitDistroHash object commit: %s, distro: %s, "
+                "timestamp: %s>"
+                "" % (self.commit_hash, self.distro_hash, self.timestamp))
 
     def __str__(self):
         return ("commit: %s, distro: %s, timestamp=%s"
                 "" % (self.commit_hash, self.distro_hash, self.timestamp))
 
-    def __repr__(self):
-        return ("<DlrnHash object commit: %s, distro: %s, timestamp: %s>"
-                "" % (self.commit_hash, self.distro_hash, self.timestamp))
+    def __ne__(self, other):
 
-    @property
-    def id(self):
-        return self.full_hash
+        try:
+            result = (self.commit_hash != other.commit_hash
+                      or self.distro_hash != other.distro_hash
+                      or self.timestamp != other.timestamp)
+        except AttributeError:
+            raise TypeError("Cannot compare {} with {}"
+                            "".format(type(self), type(other)))
+
+        return result
+
+    def __eq__(self, other):
+
+        try:
+            result = (self.commit_hash == other.commit_hash
+                      and self.distro_hash == other.distro_hash
+                      and self.timestamp == other.timestamp)
+        except AttributeError:
+            raise TypeError("Cannot compare {} with {}"
+                            "".format(type(self), type(other)))
+
+        return result
 
     @property
     def full_hash(self):
         """
         Property to abstract the common representation of a full dlrn hash
         containing full commit and abbreviated distro hashes
-        :return:  The full hash format
+        Work only with single norma dlrn haseh
+        :return:  The full hash format or None
         """
         return '{0}_{1}'.format(self.commit_hash, self.distro_hash[:8])
 
@@ -128,6 +152,7 @@ class DlrnHash(dict):
             commit_hash=self.commit_hash,
             distro_hash=self.distro_hash,
             full_hash=self.full_hash,
+            timestamp=self.timestamp,
         )
         return result
 
@@ -139,6 +164,131 @@ class DlrnHash(dict):
         """
         params.commit_hash = self.commit_hash
         params.distro_hash = self.distro_hash
+        params.timestamp = self.timestamp
+
+
+class DlrnAggregateHash(DlrnHashBase):
+    """
+    This class implements methods for the aggregate hash
+    for the component pipeline
+    It inherits from the base class and does not override the init
+    """
+
+    def sanity_check(self):
+        """
+        Checks if the hashes are present
+        """
+        if self.commit_hash is None or self.distro_hash is None or \
+           self.aggregate_hash is None:
+            raise DlrnHashError("Invalid commit or distro or aggregate_hash")
+
+    def __repr__(self):
+        return ("<DlrnAggregateHash object aggregate: %s, commit: %s,"
+                " distro: %s, timestamp: %s>"
+                "" % (self.aggregate_hash, self.commit_hash, self.distro_hash,
+                      self.timestamp))
+
+    def __str__(self):
+        return ("aggregate: %s, commit: %s,"
+                " distro: %s, timestamp: %s"
+                "" % (self.aggregate_hash, self.commit_hash, self.distro_hash,
+                      self.timestamp))
+
+    def __eq__(self, other):
+
+        try:
+            result = (self.aggregate_hash == other.aggregate_hash
+                      and self.commit_hash == other.commit_hash
+                      and self.distro_hash == other.distro_hash
+                      and self.timestamp == other.timestamp)
+        except AttributeError:
+            raise TypeError("Cannot compare {} with {}"
+                            "".format(type(self), type(other)))
+
+        return result
+
+    def __ne__(self, other):
+        try:
+            result = (self.aggregate_hash != other.aggregate_hash
+                      or self.commit_hash != other.commit_hash
+                      or self.distro_hash != other.distro_hash
+                      or self.timestamp != other.timestamp)
+        except AttributeError:
+            raise TypeError("Cannot compare {} with {}"
+                            "".format(type(self), type(other)))
+
+        return result
+
+    @property
+    def full_hash(self):
+        """
+        Property to abstract the common representation of a full dlrn hash
+        In aggregate hash th full_hash is the aggregate hash itself
+        :return:  The aggregate hash
+        """
+        return self.aggregate_hash
+
+    def dump_to_dict(self):
+        """
+        dumps the hash into a dict
+        :return: A dict
+        """
+        result = dict(
+            aggregate_hash=self.full_hash,
+            timestamp=self.timestamp,
+        )
+        return result
+
+    def dump_to_params(self, params):
+        """
+        Takes a dlrn api params object and dumps the hash informations into it
+        :param params: The params object to fill
+        :return: None
+        """
+        params.aggregate_hash = self.aggregate_hash
+        params.timestamp = self.timestamp
+
+
+class DlrnHash(object):
+    """
+    This is the metaclass that creates and returns the instance of
+    the class equivalent to the hash type handled. It can be return a
+    Dlrn hash for the single pipeline or a Dlrn aggregate hash for the
+    component pipeline It allows the DlrnHashBase class to be polymorhic,
+    and work transparently for the caller as it does not have to worry if
+    the hash is for the single or the component pipelines
+    """
+
+    log = logging.getLogger("promoter")
+
+    def __new__(cls, **kwargs):
+        """
+        Dlrn Hash can be initialized either by direct kwargs value, from a
+        dictionary, or from a dlrn api response object
+        :param commit: the direct commit hash
+        :param distro:  the direct distro hash
+        :param aggregate: the direct aggregate_hash
+        :param timstamp: the direct timestamp value, must be float
+        :param source: A valid dlrn api response object or a dictionary
+        that needs to contain *_hash as keys
+        """
+        hash_instance = DlrnCommitDistroHash(**kwargs)
+
+        try:
+            if kwargs['aggregate_hash'] is not None:
+                hash_instance = DlrnAggregateHash(**kwargs)
+        except KeyError:
+            try:
+                if kwargs['source']['aggregate_hash'] is not None:
+                    hash_instance = DlrnAggregateHash(**kwargs)
+            except (TypeError, KeyError):
+                try:
+                    if kwargs['source'].aggregate_hash is not None:
+                        hash_instance = DlrnAggregateHash(**kwargs)
+                except (KeyError, AttributeError):
+                    pass
+
+        return hash_instance
 
 
 class DlrnClient(object):
@@ -159,30 +309,18 @@ class DlrnClient(object):
         self.log.info('Using API URL: %s', api_client.host)
         self.last_promotions = {}
 
-        # Sets variables and object depending on the pipeline type
-        if self.config.pipeline_type == "single":
-            self.hash_class = DlrnHash
-            # This way of preparing parameters and configuration is copied
-            # directly from dlrnapi CLI and ansible module
-            self.hashes_params = dlrnapi_client.PromotionQuery()
-            self.jobs_params = dlrnapi_client.Params2()
-            self.promote_params = dlrnapi_client.Promotion()
-            self.promotions_get = self.api_instance.api_promotions_get
-        elif self.config.pipeline_type == "component":
-            # Params have not been change for aggregate but api is not stable
-            # yet. If they end up being the same, we can group them in the
-            # section above
-            self.hashes_params = dlrnapi_client.PromotionQuery()
-            self.jobs_params = dlrnapi_client.Params2()
-            self.promote_params = dlrnapi_client.Promotion()
-            self.hash_class = DlrnAggregatedHash
-            self.promotions_get = self.api_instance.api_aggregate_promotions_get
         # Variable to detect changes on the hash while we are running a
         # promotion
         self.named_hashes_map = {}
 
+        # This way of preparing parameters and configuration is copied
+        # directly from dlrnapi CLI and ansible module
+        self.hashes_params = dlrnapi_client.PromotionQuery()
+        self.jobs_params = dlrnapi_client.Params2()
+        self.promote_params = dlrnapi_client.Promotion()
+
     def update_current_named_hashes(self, hash, label):
-        self.named_hashes_map.update({label: hash.id})
+        self.named_hashes_map.update({label: hash.full_hash})
 
     def fetch_current_named_hashes(self, store=False):
         """
@@ -196,7 +334,7 @@ class DlrnClient(object):
         for promote_name in self.config.promotion_steps_map.keys():
             latest_named = self.fetch_hashes(promote_name, count=1,
                                              sort="timestamp", reverse=True)
-            update = {promote_name: latest_named.id}
+            update = {promote_name: latest_named.full_hash}
             if store:
                 self.named_hashes_map.update(update)
             named_hashes.update(update)
@@ -218,16 +356,16 @@ class DlrnClient(object):
                            self.named_hashes_map, latest_named_hashes)
             raise HashChangedError("Named Hashes Changed!")
 
-    def fetch_jobs(self, dlrn_id):
+    def fetch_jobs(self, hash):
         """
         This method fetch a list of successful jobs from a dlrn server for a
         specific hash identifier.
         :param dlrn_id: The dlrn identifier to fetch jobs from. It could be
-        either a DlrnHash or a DlrnAggregatedHash
+        either a DlrnHash or a DlrnAggregateHash
         :return: A list of job ids (str)
         """
         params = copy.deepcopy(self.jobs_params)
-        dlrn_id.dump_to_params(params)
+        hash.dump_to_params(params)
         params.success = str(True)
 
         try:
@@ -237,7 +375,7 @@ class DlrnClient(object):
                            ApiException)
             raise
 
-        self.log.debug('Successful jobs for %s:', dlrn_id)
+        self.log.debug('Successful jobs for %s:', str(hash))
         for result in api_response:
             self.log.debug('%s at %s, logs at "%s"', result.job_id,
                            datetime.datetime.fromtimestamp(
@@ -249,7 +387,7 @@ class DlrnClient(object):
     def hashes_to_hashes(self, api_hashes, remove_duplicates=False):
         """
         Converts a list of hashes provided as response from api to a list
-        of DlrnHash or DlrnAggregatedHash objects
+        of DlrnHash or DlrnAggregateHash objects
         :param api_hashes: The list of hashes to convert
         :param remove_duplicates: If true all the duplicate elements in the
         list will be removed
@@ -257,8 +395,7 @@ class DlrnClient(object):
         """
         result = []
         for hashes in api_hashes:
-            hash_obj = self.hash_class(from_api=hashes)
-
+            hash_obj = DlrnHash(source=hashes)
             # we could use a set, but then we'd lose the order
             if remove_duplicates and hash_obj in result:
                 continue
@@ -281,7 +418,7 @@ class DlrnClient(object):
         params.promote_name = label
 
         try:
-            api_hashes = self.promotions_get(params)
+            api_hashes = self.api_instance.api_promotions_get(params)
             hash_list = self.hashes_to_hashes(api_hashes,
                                               remove_duplicates=True)
         except ApiException:
@@ -295,10 +432,9 @@ class DlrnClient(object):
         if sort == "timestamp":
             hash_list.sort(key=lambda hashes: hashes.timestamp, reverse=reverse)
 
-        print(hash_list)
         self.log.debug(
             'Fetch Hashes: fetched %d hashes for name %s: %s',
-            label, self.config.latest_hashes_count, hash_list)
+            self.config.latest_hashes_count, label, hash_list)
 
         if count == 1:
             return hash_list[0]

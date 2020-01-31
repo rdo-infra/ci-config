@@ -7,8 +7,6 @@ import os
 import subprocess
 import sys
 
-from legacy_promoter import tag_containers
-
 
 class RegistryClient(object):
     """
@@ -52,7 +50,8 @@ class RegistryClient(object):
 
         self.log.info(
             'Promoting the container images for dlrn hash %s on '
-            '%s to %s', candidate_hash.id, self.config.release, target_label)
+            '%s to %s', candidate_hash.full_hash, self.config.release,
+            target_label)
 
         self.promote_env['PROMOTE_NAME'] = target_label
         if self.config.pipeline_type == "single":
