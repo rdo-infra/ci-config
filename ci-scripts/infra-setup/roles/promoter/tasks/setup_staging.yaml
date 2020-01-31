@@ -31,33 +31,13 @@
 # This block is the setup / run
 - become: true
   become_user: "{{ promoter_user }}"
-  block:
-    - name: setup dlrn-server
-      shell: |
-        rm commits.sqlite
-        source ~/promoter_venv/bin/activate
-        pip install gunicorn
-        # This runs gunicorn as daemon to expose dlrn api
-        promoter_venv/bin/gunicorn -w 4 -b 127.0.0.1:58080 dlrn.api:app  --log-level debug -D --log-file dlrnapi.log
-      args:
-        chdir: "/home/{{ promoter_user }}"
-        # Shut up ansible. We are not just using "rm" here
-        warn: false
-
-    - name: Wait until spawned uWSGI appeared in the log
-      wait_for:
-        path: "/home/{{ promoter_user }}/dlrnapi.log"
-        search_regex: '4 workers'
-        delay: 1
-        sleep: 2
-        timeout: 10
-
-    - name: launch staging setup scripts
-      shell: |
-        source ~/promoter_venv/bin/activate
-        # Export the path to the mounted docker socket so all docker client commands will use it
-        if [ -S /tmp/docker.sock ]; then
-            export DOCKER_HOST=unix:///tmp/docker.sock
-            export DOCKER_OPTS="--insecure-registry localhost:{{ initial_registry['port'] }}"
-        fi
-        python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging-setup/staging_environment.py setup
+  name: launch staging setup scripts
+  changed_when: false
+  shell: |
+    source ~/promoter_venv/bin/activate
+    # Export the path to the mounted docker socket so all docker client commands will use it
+    if [ -S /tmp/docker.sock ]; then
+        export DOCKER_HOST=unix:///tmp/docker.sock
+        export DOCKER_OPTS="--insecure-registry localhost:{{ initial_registry['port'] }}"
+    fi
+    python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/tests/staging_setup/staging_environment.py setup
