@@ -10,7 +10,7 @@
 - project:
     check:
       jobs:
-        - tripleo-ci-promotion-staging:
+        - tripleo-ci-promotion-staging-single-pipeline:
             files: &integration
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
@@ -19,15 +19,15 @@
               - ^playbooks/staging.*
               - ^requirements.txt
               - ^test-requirements.txt
-        - tripleo-ci-promotion-staging-legacy:
+        - tripleo-ci-promotion-staging-integration-pipeline:
             files: *integration
-        - sova-tracking-jobs: &sovatrack
-            # broken for more than a month, incorrect file pattern as job
-            # can be brake by changes outside it.
-            voting: false
-            files:
-              - ^ci-scripts/infra-setup/scheduler/.*$
-              - ^zuul.d/layout.yaml$
+#        - sova-tracking-jobs: &sovatrack
+#            # broken for more than a month, incorrect file pattern as job
+#            # can be brake by changes outside it.
+#            voting: false
+#            files:
+#              - ^ci-scripts/infra-setup/scheduler/.*$
+#              - ^zuul.d/layout.yaml$
         - rdo-tox-molecule: &molecule
             files:
               - .*molecule.*
@@ -69,7 +69,7 @@
               - ^playbooks/molecule-delegated.yml
               - ^requirements.txt
               - ^test-requirements.txt
-        - tox-jjb
+#       - tox-jjb
         - tox-py27: &py27
             pre-run: playbooks/pre-run-docker.yml
             post-run: playbooks/post-run.yml
