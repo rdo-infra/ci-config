@@ -35,13 +35,23 @@ import logging
 import os
 import pprint
 import shutil
-import sqlite3
+import socket
+import subprocess
 import tempfile
+import time
 import yaml
 
 from dlrn import db as dlrn_db
 from dlrn import utils
 from string import Template
+from dlrn_interface import DlrnHash
+from sqlalchemy import exc as sql_a_exc
+
+try:
+    # In python 2 ConnectionRefusedError is not a builtin
+    from socket import error as ConnectionRefusedError
+except ImportError:
+    pass
 
 domain_key = '''
 -----BEGIN PRIVATE KEY-----
@@ -75,9 +85,16 @@ ROqmK1Dhcd2F0NUvAevJMhWDj5Cy6rehMBRlhgfCYZs9tMAlG6mCm6q9
 htpasswd = ("username:"
             "$2y$05$awdjjCuIy8riH6xLa37EJeC4hFbjZ4KRIVaoMMqEFaktoAfy8B2XW")
 
+versions_csv = '''
+openstack-tripleo-common,https://git.openstack.org/openstack/tripleo-common,c57d2420a8435af7813b44a772df98c8c444f990,https://github.com/rdo-packages/tripleo-common-distgit.git,25fbd3fa6d8ea905e0b6ae386780f0203d22b732,SUCCESS,1574467338,openstack-tripleo-common-11.4.0-0.20191123000336.c57d242.el7
+python-tripleo-common-tests-tempest,https://git.openstack.org/openstack/tripleo-common-tempest-plugin,b6929550ca4a5b6269b4451ec2250053728b7fa2,https://github.com/rdo-packages/tripleo-common-tempest-plugin-distgit.git,7ae014d193ad00ddb5007431665a0b3347c2c94b,SUCCESS,1573236125,python-tripleo-common-tests-tempest-0.0.1-0.20191108180320.b692955.el7
+'''
 
-def get_full_hash(commit_hash, distro_hash):
-    return "{}_{}".format(commit_hash, distro_hash[:8])
+dlrn_staging_server = '''
+#!/usr/bin/env python
+from dlrn.api import app
+app.run(debug=True, port=58080)
+'''
 
 
 class BaseImage(object):
@@ -244,14 +261,10 @@ class StagedHash(object):
 
     log = logging.getLogger("promoter-staging")
 
-    def __init__(self, config, commit_hash, distro_hash):
+    def __init__(self, config, dlrn_hash):
         self.config = config
-        self.commit_hash = commit_hash
-        self.distro_hash = distro_hash
+        self.dlrn_hash = dlrn_hash
         self.images_dirs = {}
-        self.full_hash = get_full_hash(self.commit_hash, self.distro_hash)
-        self.repo_path = "{}/{}/{}".format(
-            commit_hash[:2], commit_hash[2:2], self.full_hash)
         self.overcloud_images_base_dir = \
             self.config['overcloud_images']['base_dir']
         self.docker_client = docker.from_env()
@@ -265,16 +278,22 @@ class StagedHash(object):
         directories and links
         """
         distro_images_dir = self.config['distro_images_dir']
-        image_path = os.path.join(distro_images_dir, self.full_hash,
-                                  "{}-image.tar.gz".format(self.full_hash))
+        image_name = "{}-image.tar.gz".format(self.dlrn_hash.full_hash)
+        image_path = os.path.join(distro_images_dir, self.dlrn_hash.full_hash,
+                                  image_name)
         self.images_dirs[self.config['distro']] = distro_images_dir
 
         if self.config['dry-run']:
             return
 
-        os.mkdir(os.path.join(distro_images_dir, self.full_hash))
+        try:
+            hash_dir = os.path.join(distro_images_dir, self.dlrn_hash.full_hash)
+            os.mkdir(hash_dir)
+            self.log.info("Created image dir in %s", hash_dir)
+        except OSError:
+            self.log.info("Reusing image in %s", image_path)
+        self.log.info("Creating empty image in %s", hash_dir)
         # This emulates a "touch" command
-        self.log.info("Create empty image in %s", image_path)
         with open(image_path, 'w'):
             pass
 
@@ -285,7 +304,8 @@ class StagedHash(object):
         promotion happens
         """
         distro = self.config['distro']
-        target = os.path.join(self.images_dirs[distro], self.full_hash)
+        target = os.path.join(self.images_dirs[distro],
+                              self.dlrn_hash.full_hash)
         link = os.path.join(
             self.images_dirs[distro], promotion_target)
 
@@ -321,9 +341,9 @@ class StagedHash(object):
 
         tags = []
         pushed_images = []
-        tags.append(self.full_hash)
+        tags.append(self.dlrn_hash.full_hash)
         for arch in ['ppc64le', 'x86_64']:
-            tags.append("{}_{}".format(self.full_hash, arch))
+            tags.append("{}_{}".format(self.dlrn_hash.full_hash, arch))
 
         suffixes = self.config['containers']['images-suffix']
         namespace = self.config['containers']['namespace']
@@ -426,9 +446,9 @@ class StagedEnvironment(object):
         self.analyze_commits(self.fixture)
 
         for commit in self.config['results']['commits']:
-            stage = StagedHash(
-                self.config, commit["commit_hash"], commit["distro_hash"])
-            self.stages[commit['full_hash']] = stage
+            dlrn_hash = DlrnHash(source=commit)
+            stage = StagedHash(self.config, dlrn_hash)
+            self.stages[dlrn_hash.full_hash] = stage
 
         self.docker_client = docker.from_env()
 
@@ -438,28 +458,108 @@ class StagedEnvironment(object):
         TODO: create the previous-* links
         """
         for _, promotion in self.config['results']['promotions'].items():
-            staged_hash = self.stages[promotion['full_hash']]
+            promotion_hash = DlrnHash(source=promotion)
+            staged_hash = self.stages[promotion_hash.full_hash]
             staged_hash.promote_overcloud_images(promotion['name'])
 
-    def inject_dlrn_fixtures(self):
+    def setup_dlrn(self):
         """
         Injects the fixture to the database using the existing utils
         offered by dlrn itself
+        Creates file tree, generates url for access.
+        setup the repo path for the dlrnapi server emulating the
+        path created during the build of a repo associated to an hash. Not
+        necessary for the promotion itself, but needed for testing of other
+        components.
+        Launches dlrn api server
         """
-        session = dlrn_db.getSession(
-            "sqlite:///%s" % self.config['db_filepath'])
-        db_filepath = self.config['db_filepath']
-        self.config['results']['inject-dlrn-fixtures'] = db_filepath
-        self.config['results']['dlrn_host'] = self.config['dlrn_host']
+        root = self.config['dlrn']['root']
+        repo_root = os.path.join(root, 'data', 'repos')
+        db_filepath = os.path.join(root, self.config['dlrn']['db_file'])
+
+        self.config['results']['dlrn'] = {
+            'api_url': 'http://{}:{}'.format(self.config['dlrn']['host'],
+                                             self.config['dlrn']['port']),
+            'repo_url': 'file://{}'.format(repo_root),
+            'username': self.config['dlrn']['username'],
+            'password': self.config['dlrn']['password'],
+            'root': root,
+        }
+
+        launch_cmd = "python dlrn_staging_server.py"
+        self.log.debug("Launching DLRN server with command: '%s'", launch_cmd)
+
+        self.log.debug("Injecting %s fixtures to %s",
+                       self.config['db_fixtures'], db_filepath)
 
         if self.config['dry-run']:
             return
 
-        os.makedirs(os.path.join(self.dlrn_repo_dir, 'repos'))
+        # Creates hierarchy
+        try:
+            os.makedirs(repo_root)
+        except OSError:
+            self.log.info("Repo root dir exists, not creating")
+
+        # Create dlrn staging server script
+        dlrn_server_path = os.path.join(root, "dlrn_staging_server.py")
+        with open(dlrn_server_path, "w") as dlrn_staging_script:
+            dlrn_staging_script.write(dlrn_staging_server)
+
+        for target_name, commit in self.config['promotions'].items():
+            full_hash = "{}_{}".format(commit['commit_hash'],
+                                       commit['distro_hash'][:8])
+            commit_dir = os.path.join(repo_root, commit['commit_hash'][:2],
+                                      commit['commit_hash'][2:4],
+                                      full_hash)
+            try:
+                os.makedirs(commit_dir)
+            except OSError:
+                self.log.debug("Reusing existing commit dir")
+            versions_path = os.path.join(commit_dir, 'versions.csv')
+            with open(versions_path, "w") as versions_file:
+                versions_file.write(versions_csv)
+            try:
+                # Remove existing symlink
+                os.unlink(os.path.join(repo_root, commit['name']))
+            except OSError:
+                pass
+            os.symlink(commit_dir, os.path.join(repo_root, commit['name']))
+
+        # Creates db from fixtures
+        session = dlrn_db.getSession("sqlite:///%s" % db_filepath)
         try:
             utils.loadYAML(session, self.config['db_fixtures'])
-        except sqlite3.IntegrityError:
+        except sql_a_exc.IntegrityError:
             self.log.info("DB is not empty, not injecting fixtures")
+
+        # Launches the server
+        working_dir = os.getcwd()
+        os.chdir(root)
+
+        try:
+            subprocess.Popen(launch_cmd.split())
+        except OSError:
+            self.log.error("Cannot launch DLRN server: requirements missing")
+            raise
+
+        # Wait until port is open
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        timeout = 5
+        connected = False
+        while timeout > 0 and not connected:
+            try:
+                sock.connect(('localhost', 58080))
+                connected = True
+            except ConnectionRefusedError:
+                # retry in 1 sec
+                time.sleep(1)
+                timeout -= 1
+
+        if not connected:
+            raise Exception("DLrn server not listening to port")
+
+        os.chdir(working_dir)
 
     def generate_pattern_file(self):
         """
@@ -557,16 +657,18 @@ class StagedEnvironment(object):
            or "registries" in self.config['components']):
             self.setup_registries()
 
+        # Setup dlrn server and repository
         if (self.config['components'] == "all"
-           or "inject-dlrn-fixtures" in self.config['components']):
-            self.inject_dlrn_fixtures()
+           or "dlrn" in self.config['components']):
+            self.setup_dlrn()
 
         if (self.config['components'] == "all"
            or "container-images" in self.config['components']):
             # Select only the stagedhash with the promotion candidate
-            candidate_full_hash = \
-                self.config['promotions']['promotion_candidate']['full_hash']
-            self.stages[candidate_full_hash].setup_containers()
+            candidate_hash_dict = \
+                self.config['promotions']['promotion_candidate']
+            candidate_hash = DlrnHash(source=candidate_hash_dict)
+            self.stages[candidate_hash.full_hash].setup_containers()
             self.generate_pattern_file()
 
         if (self.config['components'] == "all"
@@ -589,13 +691,17 @@ class StagedEnvironment(object):
             self.config['results']['overcloud_images']['key_path'] = "unknown"
 
             if not self.config['dry-run']:
-                self.log.info("Creating image dir %s",
-                              self.config['distro_images_dir'])
-                os.makedirs(self.config['distro_images_dir'])
+                try:
+                    os.makedirs(self.config['distro_images_dir'])
+                    self.log.info("Created image dir %s",
+                                  self.config['distro_images_dir'])
+                except OSError:
+                    self.log.debug("Reusing image dir %s",
+                                   self.config['distro_images_dir'])
 
         # Use the dlrn hashes defined in the fixtures to setup all
         # the needed component per-hash
-        for full_hash, stage in self.stages.items():
+        for __, stage in self.stages.items():
             stage.prepare_environment()
 
         if (self.config['components'] == "all"
@@ -605,15 +711,22 @@ class StagedEnvironment(object):
         with open(self.config['stage-info-path'], "w") as stage_info:
             stage_info.write(yaml.dump(self.config['results']))
 
+    def teardown_dlrn(self):
+        root = self.config['dlrn']['root']
+        teardown_cmd = "pkill -f dlrn_staging_server"
+        if self.config['dry-run']:
+            return
+        try:
+            subprocess.check_call(teardown_cmd.split())
+        except subprocess.CalledProcessError:
+            self.log.warning("Cannot shut down DLRN: no"
+                             " process running")
+        shutil.rmtree(root)
+
     def analyze_commits(self, fixture_data):
         commits = []
         for db_commit in fixture_data['commits']:
-            commit = {
-                'commit_hash': db_commit['commit_hash'],
-                'distro_hash': db_commit['distro_hash'],
-                'full_hash': get_full_hash(db_commit['commit_hash'],
-                                           db_commit['distro_hash']),
-            }
+            commit = DlrnHash(source=db_commit).dump_to_dict()
             # Find name for commit in promotions if exists
             for promotion in fixture_data['promotions']:
                 if promotion['commit_id'] == db_commit['id']:
@@ -639,12 +752,9 @@ class StagedEnvironment(object):
         with open(self.config['stage-info-path'], "r") as stage_info:
             results = yaml.safe_load(stage_info)
 
-        # We don't cleanup fixtures from the db
-        # remove the db file is cleaner and quicker
         if (self.config['components'] == "all"
-           or "inject-dlrn-fixtures" in self.config['components']):
-            os.unlink(self.config['db_filepath'])
-            shutil.rmtree(self.dlrn_repo_dir)
+           or "dlrn" in self.config['components']):
+            self.teardown_dlrn()
 
         if (self.config['components'] == "all"
            or "registries" in self.config['components']):
@@ -698,21 +808,16 @@ def load_config(overrides, db_filepath=None):
     with open(config_path) as cf:
         config = yaml.safe_load(cf)
 
+    config['results'] = {}
+
+    fixture_file = overrides.pop("fixture_file", "scenario-1.yaml")
+    config.update(overrides)
+
     # fixtures are the basis for all the environment
     # not just for db injection, they contain the commit info
     # on which the entire promotion is based.
     config['db_fixtures'] = os.path.join(
-        base_path, "fixtures", "scenario-1.yaml")
-
-    config['results'] = {}
-
-    config.update(overrides)
-
-    if (config['components'] == "all"
-       or "inject-dlrn-fixtures" in config['components']):
-        if db_filepath is None:
-            db_filepath = os.path.join(os.environ['HOME'], "commits.sqlite")
-        config['db_filepath'] = db_filepath
+        base_path, "fixtures", fixture_file)
 
     return config
 
@@ -742,6 +847,9 @@ def main():
     parser.add_argument('--stage-config-file', default="stage-config.yaml",
                         help=("Config file for stage generation"
                               " (relative to config dir)"))
+    parser.add_argument('--fixture-file', default="scenario-1.yaml",
+                        help=("Fixture to inject to dlrn server"
+                              " (relative to config dir)"))
     args = parser.parse_args()
 
     # Cli argument overrides over config
@@ -750,7 +858,8 @@ def main():
         "stage-info-path": "/tmp/stage-info.yaml",
         "dry-run": args.dry_run,
         "promoter_user": args.promoter_user,
-        "stage-config-file": args.stage_config_file
+        "stage-config-file": args.stage_config_file,
+        "fixture_file": args.fixture_file,
     }
     config = load_config(overrides)
 
