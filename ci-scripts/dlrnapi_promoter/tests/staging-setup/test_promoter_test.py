@@ -1,5 +1,4 @@
 import dlrnapi_client
-import os
 import pytest
 import unittest
 try:

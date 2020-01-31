@@ -3,6 +3,8 @@ import os
 import pytest
 import tempfile
 import unittest
+import sys
+
 
 try:
     from unittest.mock import Mock, patch
