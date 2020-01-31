@@ -3,9 +3,17 @@ This file contains classes and function to build a configuration object that
 can be passed to all the new and legacy functions in the workflow.
 """
 
-import configparser
+try:
+    # Python 3 import
+    import configparser as ini_parser
+except ImportError:
+    # Python 2 import
+    import ConfigParser as ini_parser
+
 import logging
 import os
+import subprocess
+import sys
 
 from common import str2bool
 
@@ -29,32 +37,23 @@ class PromoterConfig(object):
         the legacy object and parameters.
         :param config_path: the path to the configuration file to load
         """
+        # Get git repo root on which to base all relative paths
+        relpath = "ci-scripts/dlrnapi_promoter"
+        script_root = os.path.abspath(sys.path[0]).replace(relpath, "")
+        os.chdir(script_root)
+        # Try to get a more precise value for git root if we can
+        git_root_cmd = 'git rev-parse --show-toplevel'
         try:
-            cparser = configparser.ConfigParser(allow_no_value=True)
-            cparser.read(config_path)
-            self.data = dict(cparser.items())
-            self.load_from_ini()
+            root = subprocess.check_output(git_root_cmd.split())
+            self.git_root = root.decode().strip()
+        except subprocess.CalledProcessError:
+            self.log.error("Unable to get git root dir, using {}"
+                           "".format(script_root))
+            self.git_root = script_root
 
-            # Legacy method, will be used to pass to functions that have not yet
-            # been migrated
-            self.legacy_config = cparser
-        except configparser.MissingSectionHeaderError:
-            self.log.error("Unable to load config file %s", config_path)
-            raise ConfigError
-        except ConfigError:
-            self.log.error("Error in configuration file %s", config_path)
-            raise
-
-    def load_from_ini(self):
-        """
-        Loads configuration from a INI file. There are several exceptions
-        that can block the load
-        - Missing main section
-        - Missing criteria section for one of the specified candidates
-        - Missing jobs in criteria section
-        - Missing mandatory parameters
-        - Missing password
-        """
+        # Legacy method, will be used to pass to functions that have not yet
+        # been migrated
+        self.legacy_config, self.data = self.load_from_ini(config_path)
 
         conf_ok = True
         # Main parameters
@@ -96,6 +95,15 @@ class PromoterConfig(object):
             self.log.error("Missing dlrnapi password")
             conf_ok = False
 
+        # DLRN repo
+        default_repo_host = "trunk.rdoproject.org"
+        if 'repo_url' not in data_main:
+            self.repo_url = "https://{}/{}-{}".format(default_repo_host,
+                                                      self.distro,
+                                                      self.release)
+        else:
+            self.repo_url = data_main['repo_url']
+
         # Promotion maps
         try:
             self.promotion_steps_map = self.data['promote_from']
@@ -131,15 +139,36 @@ class PromoterConfig(object):
 
         # Allow promotion for the endpoints. For example, a release like
         # ocata may specify to no allow containers promotion
-        self.allow_containers_promotion = str2bool(self.get_path(
-            "main/allow_containers_promotion", "true"))
-        self.allow_qcows_promotion = str2bool(self.get_path(
-            "main/allow_qcows_promotion", "true"))
-        self.allow_dlrn_promotion = str2bool(self.get_path(
-            "main/allow_dlrn_promotion", "true"))
+        self.allowed_clients = \
+            self.get_path("main/allowed_clients",
+                          "dlrn_client,qcow_client,registries_client").split(
+                ',')
 
         if not conf_ok:
+            self.log.error("Error in configuration file %s", config_path)
             raise ConfigError
+
+    def load_from_ini(self, config_path):
+        """
+        Loads configuration from a INI file. There are several exceptions
+        that can block the load
+        - Missing main section
+        - Missing criteria section for one of the specified candidates
+        - Missing jobs in criteria section
+        - Missing mandatory parameters
+        - Missing password
+        """
+
+        try:
+            cparser = ini_parser.ConfigParser(allow_no_value=True)
+            cparser.read(config_path)
+            data = dict(cparser.items())
+
+        except ini_parser.MissingSectionHeaderError:
+            self.log.error("Unable to load config file %s", config_path)
+            raise ConfigError
+
+        return cparser, data
 
     def get_multikeys(self, search_data, keys):
         """
