@@ -34,6 +34,7 @@ class Promoter(object):
     def __init__(self, args):
         self.config = PromoterConfig(args.config_file)
         self.setup_logging()
+        self.logic = PromoterLogic(self.config)
 
     def setup_logging(self):
         """
@@ -62,8 +63,7 @@ class Promoter(object):
         """
         self.log.warning("This workflow is using the new modularized code")
         try:
-            logic = PromoterLogic(self.config)
-            logic.promote_all_links()
+            self.logic.promote_all_links()
         except Exception as e:
             self.log.exception(e)
         self.log.info("FINISHED promotion process")
