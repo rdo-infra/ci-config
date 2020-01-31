@@ -8,10 +8,9 @@ codebase To prepare for the implementation of component pipeline
 """
 from __future__ import print_function
 
-import argparse
-import dlrnapi_client
 import logging
 import logging.handlers
+import argparse
 import os
 import sys
 
@@ -19,9 +18,7 @@ from common import str2bool
 from config import PromoterConfig
 from logic import PromoterLogic
 # Import previous content from the legacy_promoter file
-import legacy_promoter
 from legacy_promoter import legacy_main
-from legacy_promoter import fetch_current_named_hashes
 
 
 class Promoter(object):
@@ -36,6 +33,7 @@ class Promoter(object):
         self.setup_logging()
         self.config = PromoterConfig(args.config_file)
         self.setup_logging(self.config.log_file)
+        self.logic = PromoterLogic(self.config)
 
     def setup_logging(self, log_file=None):
         """
@@ -65,8 +63,7 @@ class Promoter(object):
         """
         self.log.warning("This workflow is using the new modularized code")
         try:
-            logic = PromoterLogic(self.config)
-            logic.promote_all_links()
+            self.logic.promote_all_links()
         except Exception as e:
             self.log.exception(e)
         self.log.info("FINISHED promotion process")

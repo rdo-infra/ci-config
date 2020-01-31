@@ -14,6 +14,7 @@ import argparse
 import dlrnapi_client
 import docker
 import logging
+import pprint
 import os
 import re
 try:
@@ -31,7 +32,7 @@ def check_dlrn_promoted_hash(stage_info):
     ''' Check that the commit, distro hash has been promoted to
         promotion_target as recorded in DLRN. '''
 
-    dlrn_host = stage_info['dlrn_host']
+    dlrn_host = stage_info['dlrn']['api_url']
     promotion_target = stage_info['promotion_target']
     commit_hash = stage_info['promotions']['promotion_candidate']['commit_hash']
     distro_hash = stage_info['promotions']['promotion_candidate']['distro_hash']
