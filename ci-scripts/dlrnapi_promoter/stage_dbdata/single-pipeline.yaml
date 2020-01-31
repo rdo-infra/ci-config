@@ -107,8 +107,18 @@ promotions:
 - id: '2'
   commit_id: '5627'
   promotion_name: 'tripleo-ci-staging-promoted'
+  aggregate_hash: null
   timestamp: '1503307094'
 - id: '3'
   commit_id: '5422'
   promotion_name: 'previous-tripleo-ci-staging-promoted'
   timestamp: '1503307090'
+# This will not be injected in the database
+# maps commits list indexes to promotions
+# e.g. 2: ("prom", "current-tripleo") ties commits[2] to the "current-tripleo"
+# promotion, with alias "prom"
+promotions_map:
+  # commit_index: ['promote_name', 'alias']
+  0: ['tripleo-ci-staging-promoted', 'currently_promoted']
+  1: ['previous-tripleo-ci-staging-promoted', 'previously_promoted']
+  2: ['tripleo-ci-staging', 'promotion_candidate']
