@@ -1,0 +1,45 @@
+---
+# Check if this is production or testing - testing when stage-info.yaml exists
+- name: stat stage-info file
+  stat:
+    path: "/tmp/stage-info.yaml"
+  register: stage_info_stat
+
+- name: 'Production - Pull {{ ppc_pull_attempts }} random {{ ppc_tag }} tagged container images from {{ source_registry.host }} registry'
+  docker_image:
+    name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ built_images.stdout_lines|random }}"
+    tag: "{{ full_hash }}_{{ ppc_tag }}"
+    source: pull
+  loop: "{{ range(0, ppc_pull_attempts)|list }}"
+  loop_control:
+    index_var: index
+  retries: 3
+  ignore_errors: true
+  register: pulled_ppc
+  when: not stage_info_stat.stat.exists
+
+# For testing we want to avoid the use of random in the containers we pull
+- name: 'Testing - Pull first 2 {{ ppc_tag }} tagged container images from {{ source_registry.host }} registry'
+  docker_image:
+    name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ built_images.stdout_lines[index] }}"
+    tag: "{{ full_hash }}_{{ ppc_tag }}"
+    source: pull
+  loop: "{{ range(0, 1)|list }}"
+  loop_control:
+    index_var: index
+  retries: 3
+  ignore_errors: true
+  register: pulled_ppc
+  when: stage_info_stat.stat.exists
+
+- name: 'Set fact for ppc_manifests false if any containers failed to pull'
+  set_fact:
+    ppc_manifests: false
+  when: pulled_ppc.failed is defined
+
+# When staging also set ppc_manifests into stage-info.yaml
+- name: set ppc_manifests into stage-info.yaml when staging environment
+  lineinfile:
+    path: /tmp/stage-info.yaml
+    line: "ppc_manifests: {{ ppc_manifests }}"
+  when: stage_info_stat.stat.exists
