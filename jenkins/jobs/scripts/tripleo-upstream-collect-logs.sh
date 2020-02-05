@@ -2,11 +2,11 @@ set -ex
 CICO_USER_DIR=${CICO_USER_DIR:-/root}
 WORKSPACE=${WORKSPACE:-/tmp}
 ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
-LOGSERVER="logs.rdoproject.org ansible_user=uploader"
-LOG_DISPLAY_URL="https://centos.logs.rdoproject.org/${JOB_NAME}/${BUILD_NUMBER}"
+LOGSERVER="logserver.rdoproject.org ansible_user=loguser"
+LOG_DISPLAY_URL="https://centos.logserver.rdoproject.org/${JOB_NAME}/${BUILD_NUMBER}"
 CI_CENTOS_URL="https://ci.centos.org/job/${JOB_NAME}/${BUILD_NUMBER}"
 SOURCE="${CICO_USER_DIR}/workspace/logs"
-DESTINATION="/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
+DESTINATION="/var/www/logs/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
 VENV="${WORKSPACE}/venv"
 
 [[ ! -d "${VENV}" ]] && virtualenv "${VENV}"
