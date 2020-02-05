@@ -6,7 +6,7 @@ JOB_NAME_SIMPLIFIED=$((sed 's/scenario//; s/weirdo-//') <<< $JOB_NAME)
 BUILD_NUMBER=${BUILD_NUMBER:-001}
 ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
 CLOUD_CONFIG=${CLOUD_CONFIG:-~/.config/openstack/clouds.yaml}
-LOGSERVER="logs.rdoproject.org ansible_user=uploader"
+LOGSERVER="logserver.rdoproject.org ansible_user=loguser"
 
 # Ansible config
 CLOUD=${CLOUD:-rdo-cloud}
@@ -56,7 +56,7 @@ cat <<EOF >prep-logs.yml
     - block:
         - name: Create log destination directory
           file:
-            path: "/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
+            path: "/var/www/html/logs/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
             state: "directory"
             recurse: "yes"
 EOF
@@ -81,7 +81,7 @@ cat <<EOF >logs.yml
             ssh_opts: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
             src: "/var/log/weirdo/./"
             host: "{{ hostvars[item]['ansible_user'] }}@{{ vm.openstack.accessIPv4 }}"
-            path: "/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
+            path: "/var/www/logs/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
           shell: |
             rsync -e "{{ ssh_opts }}" -avzR {{ host }}:{{ src }} {{ path }}
           with_items: "{{ groups['openstack_nodes'] }}"
@@ -92,7 +92,7 @@ cat <<EOF >logs.yml
             ssh_opts: "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
             src: "/tmp/kolla/logs/./"
             host: "{{ hostvars[item]['ansible_user'] }}@{{ vm.openstack.accessIPv4 }}"
-            path: "/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
+            path: "/var/www/logs/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
           shell: |
             rsync -e "{{ ssh_opts }}" -avzR {{ host }}:{{ src }} {{ path }}
           with_items: "{{ groups['openstack_nodes'] }}"
@@ -165,18 +165,18 @@ cat <<EOF >wrap-up.yml
     - name: Upload the console log
       synchronize:
         src: "${WORKSPACE}/console.txt.gz"
-        dest: "/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}/"
+        dest: "/var/www/logs/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}/"
       when: console | succeeded
 
     - name: Upload ARA report
       synchronize:
         src: "${WORKSPACE}/ara"
-        dest: "/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}/"
+        dest: "/var/www/logs/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}/"
 
     - name: Upload ARA database
       synchronize:
         src: "${WORKSPACE}/ara-database"
-        dest: "/var/www/html/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}/"
+        dest: "/var/www/logs/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}/"
 EOF
 
 ansible-playbook -i "${ANSIBLE_HOSTS}" wrap-up.yml
