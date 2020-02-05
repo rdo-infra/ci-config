@@ -6,7 +6,7 @@ JOB_NAME_SIMPLIFIED=$((sed 's/scenario//; s/weirdo-//') <<< $JOB_NAME)
 BUILD_NUMBER=${BUILD_NUMBER:-001}
 ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
 CLOUD_CONFIG=${CLOUD_CONFIG:-~/.config/openstack/clouds.yaml}
-LOGSERVER="logs.rdoproject.org ansible_user=uploader"
+LOGSERVER="logserver.rdoproject.org ansible_user=loguser"
 
 # If a properties file is specified, it should overwrite and have priority over other parameters
 if [[ -n "${properties}" ]]; then

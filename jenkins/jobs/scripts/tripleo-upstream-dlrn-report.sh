@@ -22,7 +22,7 @@ cat << EOF > delorean-report.yaml
    - shell: |
         export WORKSPACE=${CICO_USER_DIR}/workspace
         export TOCI_JOBTYPE="${JOB_NAME}"
-        export LOG_HOST_URL="https://centos.logs.rdoproject.org/"
+        export LOG_HOST_URL="https://logserver.rdoproject.org/"
         export LOG_PATH="${JOB_NAME}/${BUILD_NUMBER}/logs"
         export SUCCESS=${SUCCESS}
         export PATH=$PATH:/root/.local/bin
