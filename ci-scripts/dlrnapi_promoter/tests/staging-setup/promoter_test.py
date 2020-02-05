@@ -58,7 +58,7 @@ def check_dlrn_promoted_hash(stage_info):
     assert any(conditions), error_message
 
 
-def query_container_registry_promotion(stage_info):
+def query_container_registry_promotion(stage_info, no_ppc=False):
     ''' Check that the hash containers have been pushed to the
         promotion registry with the promotion_target tag. '''
 
@@ -80,8 +80,11 @@ def query_container_registry_promotion(stage_info):
             try:
                 url_lib.urlopen(reg_url)
             except url_lib.HTTPError:
-                print("Image not found - " + line)
-                missing_images.append(line)
+                if no_ppc and 'ppc64le' in tag:
+                    pass
+                else:
+                    print("Image not found - " + line)
+                    missing_images.append(line)
             # For the full_hash lines only, check that there is
             # an equivalent promotion_target entry
             if tag == full_hash:
@@ -229,6 +232,10 @@ def main():
     parser = argparse.ArgumentParser(
         description='Pass a config file.')
     parser.add_argument('--stage-info-file', default="/tmp/stage-info.yaml")
+    parser.add_argument('--no-ppc',
+                        dest='no_ppc',
+                        action='store_true')
+
     args = parser.parse_args()
 
     with open(args.stage_info_file) as si:
@@ -237,7 +244,7 @@ def main():
     print('Running test: check_dlrn_promoted_hash')
     check_dlrn_promoted_hash(stage_info)
     print('Running test: query_container_registry_promotion')
-    query_container_registry_promotion(stage_info)
+    query_container_registry_promotion(stage_info, args.no_ppc)
     print('Running test: compare_tagged_image_hash')
     compare_tagged_image_hash(stage_info)
     print('Running test: parse_promotion_logs')

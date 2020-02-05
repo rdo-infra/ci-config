@@ -125,6 +125,12 @@
         dest: "{{ zuul.executor.work_root }}/"
         flat: yes
 
+    - name: Set extra-args fact for use by promoter_test.py
+      set_fact:
+        staging_ppc_args: "{% if not ppc_manifests|default(true) %}-no-ppc{% else %}{% endif %}"
+      when:
+        - manifest_push
+
     - name: Test stage promotion
       become: true
       become_user: "{{ promoter_user }}"
@@ -132,7 +138,8 @@
         cmd: |
           export DOCKER_HOST=unix:///tmp/docker.sock
           source /home/{{ promoter_user }}/promoter_venv/bin/activate
-          python /home/{{ promoter_user }}/ci-config/ci-scripts/dlrnapi_promoter/tests/staging-setup/promoter_test.py --stage-info-file /tmp/stage-info.yaml
+          python /home/{{ promoter_user }}/ci-config/ci-scripts/dlrnapi_promoter/tests/staging-setup/promoter_test.py \
+            --stage-info-file /tmp/stage-info.yaml {{ staging_ppc_args }}
       changed_when: true
 
     - name: include vars from stage info
