@@ -1,58 +1,73 @@
 # These tasks create a container manifest in {{registry.host}} with references
-# to both _x86_64 and ppc64le tagged container images. If ppc build is missing
-# the manifest will contain only the x86 container image.
+# to both _x86_64 and ppc64le tagged container images, if the ppc_manifests
+# switch is set to true. Even if ppc_manifests is set, when a ppc build is
+# missing the created manifest will contain only the x86 container image.
 # First pulls _arch tagged images from source_registry, tag and push
 # {{ hash }}_{{ arch }} to {{registry.host}}. Then create and push the
 # manifests pointing to {{ hash }}_{{ arch }} containers. The manifest is named
 # {{container-name}}:{{full_hash}}_manifest
-#
-- name: 'Pull any {{ ppc_tag }} tagged container images from {{ source_registry.host }} registry'
-  docker_image:
-    name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ item }}"
-    tag: "{{ full_hash }}_{{ ppc_tag }}"
-    source: pull
-  loop: "{{ built_images.stdout_lines }}"
-  loop_control:
-    index_var: index
-  retries: 3
-  ignore_errors: true
-  register: pulled_ppc
+# As a safety we check {{ ppc_pull_attempts }} number of ppc containers
+# If any of those fail to pull, we flip ppc_manifests to false
+- name: 'Check if ppc containers are available and can be pulled correctly'
+  when: ppc_manifests
+  include_tasks: check_set_ppc_manifests.yml
 
-- debug:
-    msg: "manifest-push.yml debug: Could not pull {{ ppc_tag }} container {{ item }}"
-  loop_control:
-    index_var: index
-  when:
-    - pulled_ppc.results[index] is failed
-  loop: "{{  built_images.stdout_lines }}"
+- name: 'Handle ppc containers and manifests if ppc_manifests is set true'
+  when: ppc_manifests
+  block:
+  - name: 'Pull any {{ ppc_tag }} tagged container images from {{ source_registry.host }} registry'
+    docker_image:
+      name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ item }}"
+      tag: "{{ full_hash }}_{{ ppc_tag }}"
+      source: pull
+    loop: "{{ built_images.stdout_lines }}"
+    loop_control:
+      index_var: index
+    retries: 3
+    register: pulled_ppc
 
-- name: 'Tag and push {{ ppc_tag }} container images to {{ registry.host }}'
-  docker_image:
-    name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ item }}"
-    tag: "{{ full_hash }}_{{ ppc_tag }}"
-    source: local
-    repository: "{{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}"
-    push: yes
-  retries: 3
-  loop: "{{ built_images.stdout_lines }}"
-  loop_control:
-    index_var: index
-  register: pushed_ppc
-  when: pulled_ppc.results[index] is success
+  - debug:
+      msg: "manifest-push.yml debug: Could not pull {{ ppc_tag }} container {{ item }}"
+    loop_control:
+      index_var: index
+    when: pulled_ppc.results[index] is failed
+    loop: "{{  built_images.stdout_lines }}"
 
-- name: 'Add pushed {{ ppc_tag }} containers to the cleanup list'
-  set_fact:
-    pushed_containers: "{{ pushed_containers + [item.invocation.module_args.repository + ':' + item.invocation.module_args.tag] }}"
-  when: 'pushed_ppc.results[index].skipped is not defined'
-  loop: "{{ pushed_ppc.results }}"
-  loop_control:
-    label: |-
-      {% if pushed_ppc.results[index].skipped is defined -%}
-      {{ pushed_ppc.results[index].item }}
-      {%- else -%}
-      {{ item.invocation.module_args.repository + ':' + item.invocation.module_args.tag }}
-      {%- endif %}
-    index_var: index
+  - name: 'Tag and push {{ ppc_tag }} container images to {{ registry.host }}'
+    docker_image:
+      name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ item }}"
+      tag: "{{ full_hash }}_{{ ppc_tag }}"
+      source: local
+      repository: "{{ registry.host }}/{{ registry.namespace }}/{{ distro_name }}-binary-{{ item }}"
+      push: yes
+    retries: 3
+    loop: "{{ built_images.stdout_lines }}"
+    loop_control:
+      index_var: index
+    register: pushed_ppc
+    when: pulled_ppc.results[index] is success
+
+  - name: 'Add pushed {{ ppc_tag }} containers to the cleanup list'
+    set_fact:
+      pushed_containers: "{{ pushed_containers + [item.invocation.module_args.repository + ':' + item.invocation.module_args.tag] }}"
+    when: 'pushed_ppc.results[index].skipped is not defined'
+    loop: "{{ pushed_ppc.results }}"
+    loop_control:
+      label: |-
+        {% if pushed_ppc.results[index].skipped is defined -%}
+        {{ pushed_ppc.results[index].item }}
+        {%- else -%}
+        {{ item.invocation.module_args.repository + ':' + item.invocation.module_args.tag }}
+        {%- endif %}
+      index_var: index
+
+  rescue:
+    - debug:
+        msg: " {{ ansible_failed_result }} "
+      when: ansible_failed_result is search("404.*Not Found")
+    - name: fail if the error was anything other than container missing
+      command: /bin/false
+      when: ansible_failed_result is not search("404.*Not Found")
 
 - name: 'Pull {{ x86_tag }} tagged container images from {{ source_registry.host }}'
   docker_image:
@@ -100,7 +115,9 @@
   loop_control:
     index_var: index
   loop: "{{ built_images.stdout_lines }}"
-  when: pulled_ppc.results[index] is success
+  when:
+    - ppc_manifests
+    - pulled_ppc.results[index] is success
 
 # Now create manifest for the rest of the x86 only containers
 - name: 'Create manifests for {{ x86_tag }} only containers'
@@ -114,7 +131,7 @@
   loop_control:
     index_var: index
   loop: "{{ built_images.stdout_lines }}"
-  when: pulled_ppc.results[index] is failed
+  when: pulled_ppc.results[index] is failed or pulled_ppc.results[index] is skipped
   changed_when: true
 
 - name: 'Push container manifests to {{ registry.host }}'
@@ -143,4 +160,6 @@
   loop_control:
     index_var: index
   retries: 3
-  when: pulled_ppc.results[index] is success
+  when:
+    - ppc_manifests
+    - pulled_ppc.results[index] is success

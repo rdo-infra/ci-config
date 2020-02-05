@@ -68,6 +68,9 @@ def query_container_registry_promotion(stage_info):
     promotion_target = stage_info['promotion_target']
     full_hash = stage_info['promotions']['promotion_candidate']['full_hash']
     missing_images = []
+    no_ppc = False
+    if not stage_info.get('ppc_manifests', True):
+        no_ppc = True
     if 'localhost' in registry_source:
         for line in stage_info['containers']:
             # TODO(gcerami) we should check that manifests are there, and
@@ -80,8 +83,11 @@ def query_container_registry_promotion(stage_info):
             try:
                 url_lib.urlopen(reg_url)
             except url_lib.HTTPError:
-                print("Image not found - " + line)
-                missing_images.append(line)
+                if no_ppc and '_ppc64le' in tag:
+                    pass
+                else:
+                    print("Image not found - " + line)
+                    missing_images.append(line)
             # For the full_hash lines only, check that there is
             # an equivalent promotion_target entry
             if tag == full_hash:
