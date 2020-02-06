@@ -5,18 +5,22 @@
     path: "/tmp/stage-info.yaml"
   register: stage_info_stat
 
-- name: 'Production - Pull {{ ppc_pull_attempts }} random {{ ppc_tag }} tagged container images from {{ source_registry.host }} registry'
-  docker_image:
-    name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ built_images.stdout_lines|random }}"
-    tag: "{{ full_hash }}_{{ ppc_tag }}"
-    source: pull
-  loop: "{{ range(0, ppc_pull_attempts)|list }}"
-  loop_control:
-    index_var: index
-  retries: 3
-  ignore_errors: true
-  register: pulled_ppc
-  when: not stage_info_stat.stat.exists
+- block:
+    - name: 'Production - Pull {{ ppc_pull_attempts }} random {{ ppc_tag }} tagged container images from {{ source_registry.host }} registry'
+      docker_image:
+        name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ built_images.stdout_lines|random }}"
+        tag: "{{ full_hash }}_{{ ppc_tag }}"
+        source: pull
+      loop: "{{ range(0, ppc_pull_attempts)|list }}"
+      loop_control:
+        index_var: index
+      retries: 3
+      register: pulled_ppc
+      when: not stage_info_stat.stat.exists
+  rescue:
+    - debug:
+        msg: Failed to pull ppc containers.
+
 
 # For testing we want to avoid the use of random in the containers we pull
 - name: 'Testing - Pull first {{ ppc_pull_attempts }} {{ ppc_tag }} tagged container images from {{ source_registry.host }} registry'
@@ -24,7 +28,7 @@
     name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-{{ built_images.stdout_lines[index] }}"
     tag: "{{ full_hash }}_{{ ppc_tag }}"
     source: pull
-  loop: "{{ range(0, ([containers|length, ppc_pull_attempts]|min))|list }}"
+  loop: "{{ range(0, ([stage_info.containers.images|length, ppc_pull_attempts]|min))|list }}"
   loop_control:
     index_var: index
   retries: 3

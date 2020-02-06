@@ -40,23 +40,25 @@
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
             {{ ansible_python_interpreter }} \
-            ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py setup --components registries,container-images
+            ../../../../../dlrnapi_promoter/staging_environment.py setup --scenes dlrn,registries,containers
 
         - name: include stage setup variables
-          include_vars: /tmp/stage-info.yaml
+          include_vars:
+            file: "/tmp/stage-info.yaml"
+            name: stage_info
 
         - name: sets critical variables
           set_fact:
-            full_hash: "{{ promotions.promotion_candidate.full_hash }}"
-            source_registry: "{{ registries.source }}"
-            target_registries: "{{ registries.targets }}"
+            full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+            source_registry: "{{ stage_info.registries.source }}"
+            target_registries: "{{ stage_info.registries.targets }}"
 
         - name: Include containers-promote role to test
           include_role:
             name: ../../../../../container-push/roles/containers-promote
 
         - name: Gather information on containers from registry
-          loop: "{{ target_registries | map(attribute='host') | product(containers) | map('join', '/') | list }}"
+          loop: "{{ target_registries | map(attribute='host') | product(stage_info.containers.images) | map('join', '/') | list }}"
           shell: |
             docker manifest inspect --insecure {{ image }} 2> /dev/null || true
           register: pushed_images
@@ -76,8 +78,8 @@
         - name: Teardown
           shell: >
             {{ ansible_python_interpreter }}
-            ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py
-            teardown --components registries,container-images
+            ../../../../../dlrnapi_promoter/staging_environment.py
+            teardown --scenes dlrn,registries,containers
 
 
 # This test is copied and pasted from below with some change:
@@ -106,24 +108,26 @@
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
             {{ ansible_python_interpreter }} \
-            ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py setup \
-            --components registries,container-images --stage-config-file stage-config-secure.yaml
+            ../../../../../dlrnapi_promoter/staging_environment.py setup \
+            --scenes dlrn,registries,containers --stage-config-file stage-config-secure.yaml
 
         - name: include stage setup variables
-          include_vars: /tmp/stage-info.yaml
+          include_vars:
+            file: "/tmp/stage-info.yaml"
+            name: stage_info
 
         - name: sets critical variables
           set_fact:
-            full_hash: "{{ promotions.promotion_candidate.full_hash }}"
-            source_registry: "{{ registries.source }}"
-            target_registries: "{{ registries.targets }}"
+            full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+            source_registry: "{{ stage_info.registries.source }}"
+            target_registries: "{{ stage_info.registries.targets }}"
 
         - name: Include containers-promote role to test
           include_role:
             name: ../../../../../container-push/roles/containers-promote
 
         - name: Check that the containers are pushed correctly to all target registries
-          loop: "{{ target_registries | map(attribute='host') | product(containers) | map('join', '/') | list }}"
+          loop: "{{ target_registries | map(attribute='host') | product(stage_info.containers.images) | map('join', '/') | list }}"
           shell: |
             docker manifest inspect --insecure {{ image }}
           # skip multi-arch containers
@@ -137,8 +141,8 @@
         - name: Teardown
           shell: >
             {{ ansible_python_interpreter }}
-            ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py
-            teardown --components registries,container-images
+            ../../../../../dlrnapi_promoter/staging_environment.py
+            teardown --scenes dlrn,registries,containers
         # the teardown here must not contain the registry_cleanup tag, or it will not clean up properly
         # in the tripleo-common integration test
 
@@ -174,23 +178,25 @@
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
             {{ ansible_python_interpreter }} \
-            ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py setup --components registries,container-images
+            ../../../../../dlrnapi_promoter/staging_environment.py setup --scenes dlrn,registries,containers
 
         - name: include stage setup variables
-          include_vars: /tmp/stage-info.yaml
+          include_vars:
+            file: "/tmp/stage-info.yaml"
+            name: stage_info
 
         - name: sets critical variables
           set_fact:
-            full_hash: "{{ promotions.promotion_candidate.full_hash }}"
-            source_registry: "{{ registries.source }}"
-            target_registries: "{{ registries.targets }}"
+            full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+            source_registry: "{{ stage_info.registries.source }}"
+            target_registries: "{{ stage_info.registries.targets }}"
 
         - name: Include containers-promote role to test
           include_role:
             name: ../../../../../container-push/roles/containers-promote
 
         - name: Check that the containers are pushed correctly to all target registries
-          loop: "{{ target_registries | map(attribute='host') | product(containers) | map('join', '/') | list }}"
+          loop: "{{ target_registries | map(attribute='host') | product(stage_info.containers.images) | map('join', '/') | list }}"
           shell: |
             docker manifest inspect --insecure {{ image }}
           loop_control:
@@ -247,8 +253,8 @@
         - name: Teardown
           shell: >
             {{ ansible_python_interpreter }}
-            ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py
-            teardown --components registries,container-images
+            ../../../../../dlrnapi_promoter/staging_environment.py
+            teardown --scenes dlrn,registries,containers
         # the teardown here must not contain the registry_cleanup tag, or it will not clean up
         # properly in the tripleo-common integration test
 
@@ -281,16 +287,18 @@
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
             {{ ansible_python_interpreter }} \
-            ../../../../../dlrnapi_promoter/tests/staging-setup/staging_environment.py setup --components registries,container-images
+            ../../../../../dlrnapi_promoter/staging_environment.py setup --scenes dlrn,registries,containers
 
         - name: include stage setup variables
-          include_vars: /tmp/stage-info.yaml
+          include_vars:
+            file: "/tmp/stage-info.yaml"
+            name: stage_info
 
         - name: sets critical variables
           set_fact:
-            full_hash: "{{ promotions.promotion_candidate.full_hash }}"
-            source_registry: "{{ registries.source }}"
-            target_registries: "{{ registries.targets }}"
+            full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+            source_registry: "{{ stage_info.registries.source }}"
+            target_registries: "{{ stage_info.registries.targets }}"
 
 
         - name: Include containers-promote role to test
@@ -298,7 +306,7 @@
             name: ../../../../../container-push/roles/containers-promote
 
         - name: Check that the containers are pushed correctly to all target registries
-          loop: "{{ target_registries | map(attribute='host') | product(containers) | map('join', '/') | list }}"
+          loop: "{{ target_registries | map(attribute='host') | product(stage_info.containers.images) | map('join', '/') | list }}"
           shell: |
             docker manifest inspect --insecure {{ image }}
           when: '"ppc" not in image'
@@ -344,8 +352,8 @@
         - name: Teardown
           shell: >
             {{ ansible_python_interpreter }}
-            ../../../../../dlrnapi_promoter/tests/staging-setup/staging_environment.py
-            teardown --components registries,container-images
+            ../../../../../dlrnapi_promoter/staging_environment.py
+            teardown --scenes dlrn,registries,containers
           tags:
             - registry_cleanup
           # Only the last play should have the registry_cleanup set to work with
