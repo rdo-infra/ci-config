@@ -1,7 +1,10 @@
 import configparser
+import copy
 import os
+import pprint
 import tempfile
 import unittest
+import subprocess
 
 
 try:
@@ -12,15 +15,15 @@ except ImportError:
     import mock
 
 from config import PromoterConfig, ConfigError
-from dlrnapi_promoter import main as promoter_main
 from dlrn_interface import DlrnHash, DlrnClient, HashChangedError, DlrnHashError
 from dlrn_interface import DlrnAggregateHash, DlrnCommitDistroHash
-from dlrnapi_promoter import Promoter
+from dlrnapi_promoter import Promoter, main as promoter_main
 from logic import PromoterLogic
 from qcow import QcowClient
-from registry import RegistryClient
+from registry import RegistriesClient
 from six import string_types
 
+# Cases of ini configuration
 test_ini_configurations = dict(
     not_ini='''
     I am not a ini file
@@ -79,8 +82,8 @@ test_ini_configurations = dict(
 )
 
 promotion_criteria_map = {
-    "current-tripleo": set(["periodic-tripleo-centos-7-master-containers-build"
-                            "-push"])
+    "current-tripleo": {"periodic-tripleo-centos-7-master-containers-build"
+                        "-push"}
 }
 
 
@@ -270,7 +273,6 @@ class TestDlrnHash(unittest.TestCase):
     def test_create_from_values(self):
         for hash_type, source_types in sources.items():
             dh = DlrnHash(**source_types['dict']['valid'])
-            print(hash_type)
             if hash_type == "commitdistro":
                 self.assertEqual(type(dh), DlrnCommitDistroHash)
             elif hash_type == 'aggregate':
@@ -367,14 +369,14 @@ class TestDlrnClient(unittest.TestCase):
         self.api_hashes_unordered = []
 
         # set up fake dlrn api hashes commitdistro objects
-        api_hashes_commitdistro = []
+        self.api_hashes_commitdistro = []
         for idx in range(2):
             api_hash = Mock(spec=commitdistrohash_valid_attrs)
             api_hash.commit_hash = "a"
             api_hash.distro_hash = "b"
             api_hash.timestamp = 1
-            api_hashes_commitdistro.append(api_hash)
-        self.api_hashes.append(api_hashes_commitdistro)
+            self.api_hashes_commitdistro.append(api_hash)
+        self.api_hashes.append(self.api_hashes_commitdistro)
         # Create an unordered list
         api_hashes_commitdistro_unordered = []
         for idx in range(3):
@@ -388,15 +390,15 @@ class TestDlrnClient(unittest.TestCase):
         self.api_hashes_unordered.append(api_hashes_commitdistro_unordered)
 
         # set up fake dlrn api aggregaed hashes objects
-        api_hashes_aggregate = []
+        self.api_hashes_aggregate = []
         for idx in range(2):
             api_hash = Mock(spec=aggregatehash_valid_attrs)
             api_hash.aggregate_hash = "a"
             api_hash.commit_hash = "b"
             api_hash.distro_hash = "c"
             api_hash.timestamp = 1
-            api_hashes_aggregate.append(api_hash)
-        self.api_hashes.append(api_hashes_aggregate)
+            self.api_hashes_aggregate.append(api_hash)
+        self.api_hashes.append(self.api_hashes_aggregate)
         # Create an unordered list
         api_hashes_aggregate_unordered = []
         for idx in range(3):
@@ -431,30 +433,58 @@ class TestDlrnClient(unittest.TestCase):
             promotions_get_mock.return_value = api_hash_list
             # Ensure that fetch_hashes return a single hash and not a list when
             # count=1
-            hash = self.client.fetch_hashes("test", count=1)
+            params = copy.deepcopy(self.client.hashes_params)
+            params.promote_name = "test"
+            hash = self.client.fetch_hashes(params, count=1)
             self.assertIn(type(hash), [DlrnCommitDistroHash,
                                        DlrnAggregateHash])
-            hash_list = self.client.fetch_hashes("test")
+            hash_list = self.client.fetch_hashes(params, sort="timestamp",
+                                                 reverse=False)
             self.assertEqual(len(hash_list), 1)
             # TODO(gcerami) test sort by timestamp and reverse
 
         for api_hash_list in self.api_hashes_unordered:
             promotions_get_mock.return_value = api_hash_list
-            hash_list = self.client.fetch_hashes("test", sort="timestamp")
+            hash_list = self.client.fetch_hashes(params, sort="timestamp",
+                                                 reverse=False)
             self.assertEqual(len(hash_list), 3)
             self.assertEqual(hash_list[0].timestamp, 0)
             self.assertEqual(hash_list[1].timestamp, 1)
             self.assertEqual(hash_list[2].timestamp, 2)
-            hash_list = self.client.fetch_hashes("test", sort="timestamp",
+            hash_list = self.client.fetch_hashes(params, sort="timestamp",
                                                  reverse=True)
             self.assertEqual(hash_list[0].timestamp, 2)
             self.assertEqual(hash_list[1].timestamp, 1)
             self.assertEqual(hash_list[2].timestamp, 0)
 
+    @patch('dlrnapi_client.DefaultApi.api_promotions_get')
+    def test_fetch_promotions(self, promotions_get_mock):
+        for api_hash_list in self.api_hashes:
+            promotions_get_mock.return_value = api_hash_list
+            params = copy.deepcopy(self.client.hashes_params)
+            params.promote_name = "test"
+
+            hash = self.client.fetch_promotions("test", count=1)
+            self.assertIn(type(hash), [DlrnCommitDistroHash,
+                                       DlrnAggregateHash])
+
+    @patch('dlrnapi_client.DefaultApi.api_promotions_get')
+    def test_fetch_promotions_from_hash(self, promotions_get_mock):
+        promotions_get_mock.return_value = self.api_hashes_aggregate
+        dlrn_hash = DlrnHash(source=sources['commitdistro']['dict'][
+            'valid'])
+        hash = self.client.fetch_promotions_from_hash(dlrn_hash, count=1)
+
+        assert type(hash) == DlrnAggregateHash
+
+        promotions_get_mock.return_value = self.api_hashes_commitdistro
+        hash = self.client.fetch_promotions_from_hash(dlrn_hash, count=1)
+
+        assert type(hash) == DlrnCommitDistroHash
+
     @patch('dlrnapi_client.DefaultApi.api_repo_status_get')
     def test_fetch_jobs(self, api_repo_status_get_mock):
         api_repo_status_get_mock.return_value = self.api_jobs
-        print(type(self.api_hashes[0][0]))
         hash = DlrnHash(source=self.api_hashes[0][0])
         job_list = self.client.fetch_jobs(hash)
         self.assertEqual(len(job_list), 2)
@@ -491,21 +521,38 @@ class TestDlrnClient(unittest.TestCase):
         self.client.check_named_hashes_unchanged()
 
 
-class TestRegistryClient(unittest.TestCase):
+class TestRegistriesClient(unittest.TestCase):
 
     def setUp(self):
         content = test_ini_configurations['correct']
         fp, self.filepath = tempfile.mkstemp(prefix="instance_test")
         with os.fdopen(fp, "w") as test_file:
             test_file.write(content)
+        os.environ["DLRNAPI_PASSWORD"] = "test"
+        config = PromoterConfig(self.filepath)
+        self.client = RegistriesClient(config)
 
     def tearDown(self):
         os.unlink(self.filepath)
 
-    def test_instance(self):
-        os.environ["DLRNAPI_PASSWORD"] = "test"
-        config = PromoterConfig(self.filepath)
-        RegistryClient(config)
+    def test_setup(self):
+        error_msg = "Container push logfile is misplaces"
+        assert self.client.logfile != "", error_msg
+
+    @mock.patch('subprocess.check_output')
+    def test_promote(self, check_output_mock):
+        candidate_hash = DlrnHash(source=sources['aggregate']['dict']['valid'])
+        target_label = "test"
+
+        check_output_mock.return_value = "test log"
+        self.client.promote(candidate_hash, target_label)
+
+        assert subprocess.check_output.called
+        exception = subprocess.CalledProcessError(1, 2)
+        exception.output = b"test"
+        check_output_mock.side_effect = exception
+        with self.assertRaises(subprocess.CalledProcessError):
+            self.client.promote(candidate_hash, target_label)
 
 
 class TestQcowClient(unittest.TestCase):
@@ -515,14 +562,27 @@ class TestQcowClient(unittest.TestCase):
         fp, self.filepath = tempfile.mkstemp(prefix="instance_test")
         with os.fdopen(fp, "w") as test_file:
             test_file.write(content)
+        os.environ["DLRNAPI_PASSWORD"] = "test"
+        config = PromoterConfig(self.filepath)
+        self.client = QcowClient(config)
 
     def tearDown(self):
         os.unlink(self.filepath)
 
-    def test_instance(self):
-        os.environ["DLRNAPI_PASSWORD"] = "test"
-        config = PromoterConfig(self.filepath)
-        QcowClient(config)
+    @mock.patch('subprocess.check_output')
+    def test_promote(self, check_output_mock):
+        candidate_hash = DlrnHash(source=sources['aggregate']['dict']['valid'])
+        target_label = "test"
+
+        check_output_mock.return_value = b"test log"
+        self.client.promote(candidate_hash, target_label)
+
+        assert subprocess.check_output.called
+        exception = subprocess.CalledProcessError(1, 2)
+        exception.output = b"test"
+        check_output_mock.side_effect = exception
+        with self.assertRaises(subprocess.CalledProcessError):
+            self.client.promote(candidate_hash, target_label)
 
 
 class TestPromoter(unittest.TestCase):
@@ -537,13 +597,16 @@ class TestPromoter(unittest.TestCase):
             test_file.write(content)
         self.args.log_file = "/dev/null"
         self.args.config_file = self.filepath
+        os.environ["DLRNAPI_PASSWORD"] = "test"
+        self.prom = Promoter(self.args)
 
     def tearDown(self):
         os.unlink(self.filepath)
 
-    def test_instance(self):
-        os.environ["DLRNAPI_PASSWORD"] = "test"
-        Promoter(self.args)
+    @mock.patch('logic.PromoterLogic.promote_all_links')
+    def test_start_process(self, promote_all_links_mock):
+        self.prom.start_process()
+        assert promote_all_links_mock.called
 
 
 class TestPromoterLogic(unittest.TestCase):
@@ -556,11 +619,12 @@ class TestPromoterLogic(unittest.TestCase):
         os.environ["DLRNAPI_PASSWORD"] = "test"
         config = PromoterConfig(self.filepath)
         self.logic = PromoterLogic(config)
+        self.client = DlrnClient(config)
 
     def tearDown(self):
         os.unlink(self.filepath)
 
-    @mock.patch('dlrn_interface.DlrnClient.fetch_hashes')
+    @mock.patch('dlrn_interface.DlrnClient.fetch_promotions')
     def test_no_hashes_fetched_returns_empty_list(self, fetch_hashes_mock):
 
         old_hashes = []
@@ -571,14 +635,12 @@ class TestPromoterLogic(unittest.TestCase):
             'candidate_label', 'target_label')
 
         fetch_hashes_mock.assert_has_calls([
-            mock.call('candidate_label', count=10,
-                      sort="timestamp", reverse=True),
-            mock.call('target_label')
+            mock.call('candidate_label', count=10),
         ])
 
         assert(len(obtained_hashes) == 0)
 
-    @mock.patch('dlrn_interface.DlrnClient.fetch_hashes')
+    @mock.patch('dlrn_interface.DlrnClient.fetch_promotions')
     def test_no_candidates_returns_empty_list(self, fetch_hashes_mock):
 
         hash_dict = {
@@ -594,15 +656,12 @@ class TestPromoterLogic(unittest.TestCase):
 
         obtained_hashes = self.logic.select_candidates(
             'candidate_label', 'target_label')
+        assert(len(obtained_hashes) == 0)
         fetch_hashes_mock.assert_has_calls([
-            mock.call('candidate_label', count=10,
-                      sort="timestamp", reverse=True),
-            mock.call('target_label')
+            mock.call('candidate_label', count=10),
         ])
 
-        assert(len(obtained_hashes) == 0)
-
-    @mock.patch('dlrn_interface.DlrnClient.fetch_hashes')
+    @mock.patch('dlrn_interface.DlrnClient.fetch_promotions')
     def test_no_old_hashes_returns_candidates(self, fetch_hashes_mock):
 
         old_hashes = []
@@ -626,14 +685,13 @@ class TestPromoterLogic(unittest.TestCase):
         obtained_hashes = self.logic.select_candidates(
             'candidate_label', 'target_label')
         fetch_hashes_mock.assert_has_calls([
-            mock.call('candidate_label', count=10,
-                      sort="timestamp", reverse=True),
+            mock.call('candidate_label', count=10),
             mock.call('target_label')
         ])
 
         assert(obtained_hashes == candidate_hashes)
 
-    @mock.patch('dlrn_interface.DlrnClient.fetch_hashes')
+    @mock.patch('dlrn_interface.DlrnClient.fetch_promotions')
     def test_old_hashes_get_filtered_from_candidates(self, fetch_hashes_mock):
 
         old_hashes_dicts = [
@@ -708,8 +766,7 @@ class TestPromoterLogic(unittest.TestCase):
         obtained_hashes = self.logic.select_candidates(
             'candidate_label', 'target_label')
         fetch_hashes_mock.assert_has_calls([
-            mock.call('candidate_label', count=10,
-                      sort="timestamp", reverse=True),
+            mock.call('candidate_label', count=10),
             mock.call('target_label')
         ])
 

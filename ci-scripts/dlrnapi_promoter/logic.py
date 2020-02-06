@@ -3,9 +3,10 @@ This file contains classes and function for high level logic of the promoter
 workflow
 """
 import logging
+import itertools
 
 from dlrn_interface import DlrnClient
-from registry import RegistryClient
+from registry import RegistriesClient
 from qcow import QcowClient
 
 
@@ -24,7 +25,7 @@ class PromoterLogic(object):
     def __init__(self, config):
         self.config = config
         self.dlrn_client = DlrnClient(self.config)
-        self.registry_client = RegistryClient(self.config)
+        self.registries_client = RegistriesClient(self.config)
         self.qcow_client = QcowClient(self.config)
 
     def select_candidates(self, candidate_label, target_label):
@@ -39,11 +40,10 @@ class PromoterLogic(object):
         :param target_label:  The label to which the candidate would be promoted
         :return: A list of candidate hashes
         """
-        candidate_hashes_list = self.dlrn_client.fetch_hashes(
-            candidate_label, count=self.config.latest_hashes_count,
-            sort="timestamp", reverse=True)
+        candidate_hashes_list = self.dlrn_client.fetch_promotions(
+            candidate_label, count=self.config.latest_hashes_count)
 
-        if candidate_hashes_list is None:
+        if not candidate_hashes_list:
             self.log.error(
                 'Failed to fetch any hashes for %s, skipping promotion',
                 candidate_label)
@@ -57,7 +57,7 @@ class PromoterLogic(object):
             candidate_hashes[hash.full_hash] = {}
             candidate_hashes[hash.full_hash][candidate_label] = hash.timestamp
 
-        old_hashes = self.dlrn_client.fetch_hashes(target_label)
+        old_hashes = self.dlrn_client.fetch_promotions(target_label)
         if old_hashes is None:
             self.log.warning('Failed to fetch hashes for %s, no previous '
                              'promotion or typo in the link name',
@@ -65,9 +65,8 @@ class PromoterLogic(object):
         else:
             for hash in old_hashes:
                 # it may happen that an hash appears in this list,
-                # but it's not from
-                # our list of candindates. If this happens we're just
-                # ignoring it
+                # but it's not from our list of candindates. If this happens
+                # we're just ignoring it
                 if hash.full_hash in candidate_hashes:
                     candidate_hashes[hash.full_hash][target_label] = \
                         hash.timestamp
@@ -92,31 +91,39 @@ class PromoterLogic(object):
 
         return candidate_hashes_list
 
-    def promote(self, candidate, target_label):
+    def promote(self, candidate, candidate_label, target_label,
+                allowed_clients=None):
         """
         This method drives the effective promotion of all the single component
         :param candidate: The candidate element to be promoted
+        :param candidate_label: the label to which the element was previously
+        promoted to
         :param target_label: The label to which promote the candidate
+        :param allowed_clients: A list of client we are going to use for the
+        promotion. The default is calling all the client, but when testing,
+        we can decide to launch a single client or group of clients
         :return: None
         """
-        # replaces promote_all_links - noop promotion
         if self.config.dry_run:
             return
 
-        # replaces promote_all_links -effective promotion
-        # replaces promote_all_links - containers promotion
-        self.dlrn_client.check_named_hashes_unchanged()
-        if self.config.allow_containers_promotion:
-            self.registry_client.promote_containers(candidate,
-                                                    target_label)
-        # replaces promote_all_links - qcow promotion
-        self.dlrn_client.check_named_hashes_unchanged()
-        if self.config.allow_qcows_promotion:
-            self.qcow_client.promote_images(candidate, target_label)
-        # replaces promote_all_links - dlrn promotion
-        self.dlrn_client.check_named_hashes_unchanged()
-        if self.config.allow_dlrn_promotion:
-            self.dlrn_client.promote_hash(candidate, target_label)
+        if allowed_clients is None:
+            allowed_clients = self.config.allowed_clients
+
+        # DLRN client should always be called last,
+        # This ensures the order of the called clients, it uses alphabetical
+        # sorting, which is quite weak but works. If it becomes inconvenient,
+        # we can just remove the loop here and act on clients singularly
+        allowed_clients.sort(reverse=True)
+
+        # FIXME: In python2 itertools.repeat needs a length parameter or it
+        # will just repeat self ad libitum. Python3 does not need it.
+        for client in list(map(getattr,
+                               itertools.repeat(self, len(allowed_clients)),
+                               allowed_clients)):
+            self.dlrn_client.check_named_hashes_unchanged()
+            client.promote(candidate, target_label,
+                           candidate_label=candidate_label)
 
         self.dlrn_client.update_current_named_hashes(candidate, target_label)
 
@@ -131,7 +138,7 @@ class PromoterLogic(object):
         promoted
         :return: None
         """
-        # replaces promote_all_links - candidate hashes selection
+        promoted_pair = ()
         for selected_candidate in self.select_candidates(candidate_label,
                                                          target_label):
             self.log.info('Checking hash %s from %s for promotion criteria',
@@ -139,12 +146,26 @@ class PromoterLogic(object):
             successful_jobs = set(self.dlrn_client.fetch_jobs(
                 selected_candidate))
             required_jobs = self.config.promotion_criteria_map[target_label]
-            # The label reject condition is moved as config time check
-            # replaces promote_all_links - hashes reject condition
             missing_jobs = list(required_jobs - successful_jobs)
-            if not missing_jobs:
+            if missing_jobs:
+                self.log.info(
+                    'Skipping promotion of %s/%s from %s to %s, missing '
+                    'successful jobs: %s',
+                    self.config.distro, self.config.release,
+                    candidate_label, target_label, missing_jobs)
+                self.log.info('Check Results at:')
+                self.log.info(
+                    '%s \n%s/api/civotes_detail.html?'
+                    'commit_hash=%s&distro_hash=%s'.replace(" ", ""),
+                    'DETAILED MISSING JOBS: ',
+                    self.config.api_url,
+                    selected_candidate.commit_hash,
+                    selected_candidate.distro_hash)
+            else:
                 try:
-                    self.promote(selected_candidate, target_label)
+                    self.promote(selected_candidate, candidate_label,
+                                 target_label)
+                    promoted_pair = (selected_candidate, target_label)
                     self.log.info('SUCCESS promoting %s-%s %s as %s (%s)',
                                   self.config.distro, self.config.release,
                                   candidate_label, target_label,
@@ -159,7 +180,6 @@ class PromoterLogic(object):
                     # stop here, don't try to promote other hashes
                     break
                 except Exception:
-                    # replaces promot_all_links - effective promotion failure
                     self.log.info('FAILED promoting %s-%s %s as %s (%s)',
                                   self.config.distro, self.config.release,
                                   candidate_label, target_label,
@@ -168,33 +188,23 @@ class PromoterLogic(object):
                         selected_candidate)
                     self.log.info(civotes_info)
                     raise
-            else:
-                self.log.info(
-                    'Skipping promotion of %s-%s from %s to %s, missing '
-                    'successful jobs: %s',
-                    self.config.distro, self.config.release,
-                    candidate_label, target_label, missing_jobs)
-                self.log.info('Check Results at:')
-                self.log.info(
-                    '%s \n%s/api/civotes_detail.html?'
-                    'commit_hash=%s&distro_hash=%s'.replace(" ", ""),
-                    'DETAILED MISSING JOBS: ',
-                    self.config.api_url,
-                    selected_candidate.commit_hash,
-                    selected_candidate.distro_hash)
 
         self.log.info("No more candidates")
+        return promoted_pair
 
     def promote_all_links(self):
         """
         This method loops over all the labels specified in the config file
         and attempt to find and promote suitable candidates
-        This method replaces part of the legacy promote_all_links function
         :return: None
         """
-        # replaces promote_all_links - labels loop
         self.dlrn_client.fetch_current_named_hashes(store=True)
 
+        promoted_pairs = []
         for target_label, candidate_label in \
                 self.config.promotion_steps_map.items():
-            self.promote_label_to_label(candidate_label, target_label)
+            promoted_pair = self.promote_label_to_label(candidate_label,
+                                                        target_label)
+            promoted_pairs.append(promoted_pair)
+
+        return promoted_pairs
