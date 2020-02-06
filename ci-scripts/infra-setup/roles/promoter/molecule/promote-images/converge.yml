@@ -1,25 +1,26 @@
 ---
-# Setup the promoter-staging environment (--components 'overcloud-images') then
+# Setup the promoter-staging environment (--scenes 'overcloud-images') then
 # run ci-config/ci-scripts/promote-images.sh, then verify staging environment
 # promoted OK
 - name: Setup staging promotion and promote-images.sh and verify
   hosts: all
-  vars:
-    images_path: "/tmp/promoter-staging/overcloud_images"
   tasks:
     - name: Test promoter container manifest-push.yml
       block:
         - name: launch staging setup scripts
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
-            {{ ansible_python_interpreter }} ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py setup --components overcloud-images
+            {{ ansible_python_interpreter }} ../../../../../dlrnapi_promoter/staging_environment.py setup --scenes overcloud-images
 
         - name: include stage setup variables
-          include_vars: /tmp/stage-info.yaml
+          include_vars:
+            file: "/tmp/stage-info.yaml"
+            name: stage_info
 
         - name: Set full hash
           set_fact:
-            full_hash: "{{ promotions.promotion_candidate.full_hash }}"
+            full_hash: "{{ stage_info.promotions.promotion_candidate.full_hash }}"
+            images_path: "{{ stage_info.overcloud_images.root }}"
 
         - name: Run the image promotion script promote-images.sh
           shell: |
@@ -48,9 +49,9 @@
           assert:
             that:
               - previous_tripleo_ci_staging_pro.stat.islnk is defined
-              - previous_tripleo_ci_staging_pro.stat.lnk_target == "{{ images_path }}/centos7/master/rdo_trunk/{{ promotions.currently_promoted.full_hash }}"
+              - previous_tripleo_ci_staging_pro.stat.lnk_target == "{{ images_path }}/centos7/master/rdo_trunk/{{ stage_info.promotions.currently_promoted.full_hash }}"
 
       always:
         - name: Teardown
           shell: |
-            {{ ansible_python_interpreter }} ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py teardown --components overcloud-images
+            {{ ansible_python_interpreter }} ../../../../../dlrnapi_promoter/staging_environment.py teardown --scenes overcloud-images
