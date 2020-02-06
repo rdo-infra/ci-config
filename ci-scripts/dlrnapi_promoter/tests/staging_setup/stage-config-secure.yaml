@@ -1,5 +1,18 @@
-dlrn_host: 'http://localhost:58080'
-promotion_target: tripleo-ci-staging-promoted
+main:
+  release: master
+  logfile_template: >-
+    /home/${promoter_user}/promoter_logs/${distro_name}${distro_version}_${release}.log
+  distro_name: centos
+  distro_version: 7
+  stage_info_path: /tmp/stage-info.yaml
+  dry_run: false
+  promoter_user: centos
+  scenes:
+    - registries
+    - dlrn
+    - containers
+    - overcloud_images
+  stage_root: /tmp/promoter-staging/
 registries:
     # you can add multiple targets, but only the first source will win
     - type: source
@@ -20,25 +33,29 @@ registries:
 containers:
   # When modfying the suffixes, please follow these hints
   # - specify at least three values
-  # - base and openstack-base are locked, nothing works without them
+  # - base and openstack-base are hardcoded and will always be on top of this
+  # list
   images-suffix:
-  - base
-  - openstack-base
   - nova-compute
   - neutron-server
-  namespace: tripleomaster
-  pattern_file_path: /tmp/images_pattern_file
-distro: centos
-distro_version: 7
+  namespace_prefix: tripleo
+  root: containers/
+  containers_yaml: overcloud_containers.yaml.j2
 dlrn:
-    host: localhost
-    port: 58080
-    root: /tmp/promoter-staging/dlrn
-    db_file: commits.sqlite
+  components:
+    - tripleo
+    - nova
+    - neutron
+  promotion_target: tripleo-ci-staging-promoted
+  server:
     username: foo
     password: dlrnapi_password00
+    host: localhost
+    port: 58080
+    root: dlrn/
+    repo_root: data/repos/
+    db_file: commits.sqlite
+    db_fixtures: single-pipeline.yaml
 overcloud_images:
-  base_dir: /tmp/promoter-staging/overcloud_images
+  root: overcloud_images/
   key: "sample_key"
-release: master
-logfile_template: '/home/${promoter_user}/promoter_logs/${distro}${distro_version}_${release}.log'
