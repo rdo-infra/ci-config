@@ -18,6 +18,24 @@
           libselinux-python
           {%- endif %}
 
+    - name: assure we have selinux python bindings
+      become: true
+      # TODO: find a better way to establish which libselinux python rpm to
+      # install because using ansible_python.version.major is not correct
+      # as zuul is currently using python2 on fedora nodes.
+      package:
+        name:
+          - epel-release
+
+    - name: assure we have selinux python bindings
+      become: true
+      # TODO: find a better way to establish which libselinux python rpm to
+      # install because using ansible_python.version.major is not correct
+      # as zuul is currently using python2 on fedora nodes.
+      package:
+        name:
+          - ansible
+
     # until docker-install role on redhat distros is fixed by:
     # https://review.openstack.org/#/c/634934
 
@@ -37,8 +55,21 @@
     - include_role:
         name: install-docker
       vars:
-        # upstream role does not yet support upstream docker on redhat distros
-        use_upstream_docker: false
+        use_upstream_docker: true
+
+    - name: Create user config dir
+      file:
+        path: "{{ ansible_user_dir }}/.docker/"
+        owner: "{{ ansible_user }}"
+        state: directory
+
+    - name: Enable experimental commands in user config
+      copy:
+        content: |
+          {
+              "experimental": "enabled"
+          }
+        dest: "{{ ansible_user_dir }}/.docker/config.json"
 
     # Workaround for https://launchpad.net/bugs/1807703 safe to remove only once
     # fetch-zuul-cloner is no longer part of zuul base job.
