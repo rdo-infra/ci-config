@@ -4,11 +4,13 @@ This file contains classes and functionto interact with containers registries
 import datetime
 import logging
 import os
+import pprint
+import re
 import subprocess
 import sys
 
 
-class RegistryClient(object):
+class RegistriesClient(object):
     """
     This class interacts with containers registries
     """
@@ -37,7 +39,7 @@ class RegistryClient(object):
         env['DISTRO_VERSION'] = self.config.distro_version
         self.promote_env = env
 
-    def promote_containers(self, candidate_hash, target_label):
+    def promote(self, candidate_hash, target_label, **kwargs):
         """
         This method promotes containers whose tag is equal to the dlrn_id
         specified by retagging them with the target_label
@@ -54,50 +56,49 @@ class RegistryClient(object):
             target_label)
 
         self.promote_env['PROMOTE_NAME'] = target_label
-        if self.config.pipeline_type == "single":
-            # tag_containers is imported from legacy code
-            self.promote_env['COMMIT_HASH'] = candidate_hash.commit_hash
-            self.promote_env['DISTRO_HASH'] = candidate_hash.distro_hash
-            self.promote_env['FULL_HASH'] = candidate_hash.full_hash
-            # Use single string to make it easy to copy/paste from logs
-            cmd = (
-                "env "
-                "ANSIBLE_LOG_PATH=%s"
-                "RELEASE=%s "
-                "COMMIT_HASH=%s "
-                "DISTRO_HASH=%s "
-                "FULL_HASH=%s "
-                "PROMOTE_NAME=%s "
-                "SCRIPT_ROOT=%s "
-                "DISTRO_NAME=%s "
-                "DISTRO_VERSION=%s "
-                "ansible-playbook %s %s" % (
-                    self.logfile,
-                    self.config.release,
-                    candidate_hash.commit_hash,
-                    candidate_hash.distro_hash,
-                    candidate_hash.full_hash,
-                    target_label,
-                    self.script_root,
-                    self.config.distro_name,
-                    self.config.distro_version,
-                    self.push_opts,
-                    self.promote_playbook
-                )
+        self.promote_env['COMMIT_HASH'] = candidate_hash.commit_hash
+        self.promote_env['DISTRO_HASH'] = candidate_hash.distro_hash
+        self.promote_env['FULL_HASH'] = candidate_hash.full_hash
+        # Use single string to make it easy to copy/paste from logs
+        cmd = (
+            "env "
+            "ANSIBLE_LOG_PATH=%s"
+            "RELEASE=%s "
+            "COMMIT_HASH=%s "
+            "DISTRO_HASH=%s "
+            "FULL_HASH=%s "
+            "PROMOTE_NAME=%s "
+            "SCRIPT_ROOT=%s "
+            "DISTRO_NAME=%s "
+            "DISTRO_VERSION=%s "
+            "ansible-playbook %s %s" % (
+                self.logfile,
+                self.config.release,
+                candidate_hash.commit_hash,
+                candidate_hash.distro_hash,
+                candidate_hash.full_hash,
+                target_label,
+                self.script_root,
+                self.config.distro_name,
+                self.config.distro_version,
+                self.push_opts,
+                self.promote_playbook
             )
-        elif self.config.pipeline_type == "component":
-            self.log.error("Container promotion for aggregated hash is not yet"
-                           "immplemented")
-
+        )
+        ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
         try:
             self.log.info('Running: %s', cmd)
             container_logs = subprocess.check_output(cmd.split(" "),
                                                      stderr=subprocess.STDOUT)
+            # containers_log needs decoding in python3
+            if type(container_logs) is not str:
+                container_logs = container_logs.decode()
             for line in container_logs.split("\n"):
-                self.log.info(line)
+                self.log.info(ansi_escape.sub('', line))
         except subprocess.CalledProcessError as ex:
             self.log.error('CONTAINER IMAGE UPLOAD FAILED LOGS BELOW:')
-            self.log.error(ex.output)
+            for line in ex.output.decode("UTF-8").split("\n"):
+                self.log.error(ansi_escape.sub('', line))
             self.log.exception(ex)
             self.log.error('END OF CONTAINER IMAGE UPLOAD FAILURE')
             raise

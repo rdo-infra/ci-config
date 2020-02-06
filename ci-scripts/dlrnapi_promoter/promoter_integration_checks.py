@@ -23,37 +23,40 @@ except ImportError:
     import urllib.request as url_lib
 import yaml
 
-
-def get_full_hash(commit_hash, distro_hash):
-    return "{}_{}".format(commit_hash, distro_hash[:8])
+from dlrn_interface import (DlrnClient, DlrnCommitDistroHash, DlrnClientConfig,
+                            DlrnHash, DlrnAggregateHash)
 
 
 def check_dlrn_promoted_hash(stage_info):
     ''' Check that the commit, distro hash has been promoted to
         promotion_target as recorded in DLRN. '''
 
-    dlrn_host = stage_info['dlrn']['api_url']
-    promotion_target = stage_info['promotion_target']
-    commit_hash = stage_info['promotions']['promotion_candidate']['commit_hash']
-    distro_hash = stage_info['promotions']['promotion_candidate']['distro_hash']
+    api_url = stage_info['dlrn']['server']['api_url']
+    promotion_target = stage_info['dlrn']['promotion_target']
+    candidate_commit = stage_info['dlrn']['promotions']['promotion_candidate']
+    candidate_hash = DlrnHash(source=candidate_commit)
 
-    logger = logging.getLogger('TestPromoter')
-    api_client = dlrnapi_client.ApiClient(host=dlrn_host)
-    dlrn = dlrnapi_client.DefaultApi(api_client=api_client)
+    logger = logging.getLogger('TestIntegrationChecks')
+    api_client = dlrnapi_client.ApiClient(host=api_url)
+    dlrn_client = dlrnapi_client.DefaultApi(api_client=api_client)
     params = dlrnapi_client.PromotionQuery()
-    params.commit_hash = commit_hash
-    params.distro_hash = distro_hash
+    params.limit = 1
+    params.promote_name = promotion_target
+
     try:
-        api_response = dlrn.api_promotions_get(params)
+        api_response = dlrn_client.api_promotions_get(params)
         logger.debug(api_response)
     except dlrnapi_client.rest.ApiException:
         logger.error('Exception when calling api_promotions_get: %s',
                      dlrnapi_client.rest.ApiException)
         raise
 
-    error_message = ("Expected commit hash: {}"
+    error_msg = "No promotions for hash {}".format(candidate_hash)
+    assert api_response != [], error_msg
+    promotion_hash = DlrnHash(source=api_response[0])
+    error_message = ("Expected full hash: {}"
                      " has not been promoted to {}."
-                     "".format(commit_hash, promotion_target))
+                     "".format(promotion_hash.full_hash, promotion_target))
     conditions = [(promotion.promote_name == promotion_target)
                   for promotion in api_response]
     assert any(conditions), error_message

@@ -2,9 +2,11 @@ import dlrnapi_client
 import pytest
 import unittest
 try:
+    # Python3 imports
     from unittest.mock import Mock, patch, mock_open
     builtin_str = "builtins.open"
 except ImportError:
+    # Python2 imports
     from mock import Mock, patch, mock_open
     builtin_str = "__builtin__.open"
 try:
@@ -13,12 +15,12 @@ except ImportError:
     import urllib.request as url_lib
 import yaml
 
-from promoter_test import (check_dlrn_promoted_hash,
-                           query_container_registry_promotion,
-                           compare_tagged_image_hash,
-                           parse_promotion_logs)
+from promoter_integration_checks import (check_dlrn_promoted_hash,
+                                         query_container_registry_promotion,
+                                         compare_tagged_image_hash,
+                                         parse_promotion_logs)
 
-from staging_environment import StagedEnvironment, load_config
+from staging_environment import StagedEnvironment
 
 
 @pytest.mark.serial

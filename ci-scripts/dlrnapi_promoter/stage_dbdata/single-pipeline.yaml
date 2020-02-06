@@ -94,16 +94,6 @@ civotes:
   timestamp: '1441699026'
   notes: ''
   user: 'foo'
-civotes_agg:
-- id: '1'
-  ref_hash: '12345678'
-  ci_url: "phase2-ci"
-  ci_vote: true
-  ci_in_progress: false
-  timestamp: '1441635095'
-  notes: ''
-  user: 'foo'
-  ci_name: 'phase2-ci'
 users:
 - username: 'foo'
 # passlib.hash.sha512_crypt.encrypt("dlrnapi_password00")
@@ -112,16 +102,23 @@ promotions:
 - id: '1'
   commit_id: '5654'
   promotion_name: 'tripleo-ci-staging'
-  aggregate_hash: '12345678'
   timestamp: '1503307099'
   user: 'foo'
 - id: '2'
   commit_id: '5627'
   promotion_name: 'tripleo-ci-staging-promoted'
-  aggregate_hash: '12345678'
+  aggregate_hash: null
   timestamp: '1503307094'
 - id: '3'
   commit_id: '5422'
-  aggregate_hash: '12345678'
   promotion_name: 'previous-tripleo-ci-staging-promoted'
   timestamp: '1503307090'
+# This will not be injected in the database
+# maps commits list indexes to promotions
+# e.g. 2: ("prom", "current-tripleo") ties commits[2] to the "current-tripleo"
+# promotion, with alias "prom"
+promotions_map:
+  # commit_index: ['promote_name', 'alias']
+  0: ['tripleo-ci-staging-promoted', 'currently_promoted']
+  1: ['previous-tripleo-ci-staging-promoted', 'previously_promoted']
+  2: ['tripleo-ci-staging', 'promotion_candidate']

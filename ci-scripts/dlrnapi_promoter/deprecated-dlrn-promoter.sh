@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Temp retain old promoter config reporting
 
 # promoter script for the master branch
