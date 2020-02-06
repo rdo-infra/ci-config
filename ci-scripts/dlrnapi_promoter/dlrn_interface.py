@@ -84,6 +84,11 @@ class DlrnHashBase(object):
         # TODO(gcerami) strict dlrn validation: check that the hashes are valid
         # hashes with correct size
 
+    @property
+    def commit_dir(self):
+        return "{}/{}/{}".format(self.commit_hash[:2],self.commit_hash[2:4]
+                                 ,self.full_hash)
+
 
 class DlrnCommitDistroHash(DlrnHashBase):
     """
@@ -290,6 +295,19 @@ class DlrnHash(object):
 
         return hash_instance
 
+class DlrnClientConfig(object):
+    """
+    Config class for direct calls to DlrnClient
+    without a full config (e.g. from the staging environment
+    """
+
+    def __init__(self, **kwargs):
+        args = ['dlrnauth_username', 'dlrnauth_password', 'api_url']
+        for arg in args:
+            try:
+                setattr(self, arg, kwargs[arg])
+            except KeyError:
+                pass
 
 class DlrnClient(object):
     """
@@ -476,6 +494,12 @@ class DlrnClient(object):
             self.log.error('Exception when calling api_promote_post: '
                            '%s', ApiException)
             raise
+
+    def promote(self, hash, target_name):
+        params = copy.deepcopy(self.promote_params)
+        hash.dump_to_params(params)
+        params.promote_name = target_name
+        self.api_instance.api_promote_post(params=params)
 
     def get_civotes_info(self, hash):
         """
