@@ -19,7 +19,7 @@ class QcowClient(object):
         script_root = os.path.abspath(sys.path[0]).replace(relpath, "")
         self.promote_script = script_root + 'ci-scripts/promote-images.sh'
 
-    def promote_images(self, candidate_hash, target_label):
+    def promote(self, candidate_hash, target_label, **kwargs):
         """
         This method promotes images contained inside a dir in the server
         whose name is equal to the dlrn_id specified by creating a
@@ -41,8 +41,9 @@ class QcowClient(object):
                  '--distro-version', self.config.distro_version,
                  self.config.release, candidate_hash.full_hash,
                  target_label],
-                stderr=subprocess.STDOUT).split("\n")
-            for line in qcow_logs:
+                stderr=subprocess.STDOUT)
+            qcow_logs_lines = qcow_logs.decode("UTF-8").split("\n")
+            for line in qcow_logs_lines:
                 self.log.info(line)
         except subprocess.CalledProcessError as ex:
             self.log.error('QCOW IMAGE UPLOAD FAILED LOGS BELOW:')

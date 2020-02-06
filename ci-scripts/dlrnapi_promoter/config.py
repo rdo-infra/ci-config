@@ -131,12 +131,10 @@ class PromoterConfig(object):
 
         # Allow promotion for the endpoints. For example, a release like
         # ocata may specify to no allow containers promotion
-        self.allow_containers_promotion = str2bool(self.get_path(
-            "main/allow_containers_promotion", "true"))
-        self.allow_qcows_promotion = str2bool(self.get_path(
-            "main/allow_qcows_promotion", "true"))
-        self.allow_dlrn_promotion = str2bool(self.get_path(
-            "main/allow_dlrn_promotion", "true"))
+        self.allowed_clients = \
+            self.get_path("main/allowed_clients",
+                          "dlrn_client,qcow_client,registries_client").split(
+                ',')
 
         if not conf_ok:
             raise ConfigError
