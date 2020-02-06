@@ -8,9 +8,9 @@ codebase To prepare for the implementation of component pipeline
 """
 from __future__ import print_function
 
+import argparse
 import logging
 import logging.handlers
-import argparse
 import os
 import sys
 
@@ -84,7 +84,6 @@ def main(cmd_line=None):
         args = main_parser.parse_args(cmd_line.split())
     else:
         args = main_parser.parse_args()
-    logger = logging.getLogger('promoter')
     # Main execution paths branch we either use legacy code or we use
     # modularized
     if args.force_legacy or str2bool(os.environ.get("PROMOTER_FORCE_LEGACY",
@@ -92,6 +91,7 @@ def main(cmd_line=None):
         # Legacy code supports only a single argument
         sys.argv = [sys.argv[0], args.config_file]
         # legacy_main is imported from legacy code
+        logger = logging.getLogger("promoter")
         logger.warning("This workflow is using legacy promotion code")
         legacy_main()
     else:
