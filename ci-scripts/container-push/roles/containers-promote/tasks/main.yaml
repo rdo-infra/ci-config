@@ -13,13 +13,21 @@
   set_fact:
     pushed_containers: []
 
-- name: Construct dlrn_dir from full_hash (turn xxyyz* into xx/yy/xxyyz*)
+- name: Construct repo_dir from full_hash (turn xxyyz* into xx/yy/xxyyz*)
   set_fact:
     dlrn_dir: "{{ full_hash | regex_replace('^(?P<first>.{2})(?P<second>.{2})(?P<third>.+)$', '\\g<first>/\\g<second>/\\g<first>\\g<second>\\g<third>') }}"
 
+- name: Construct version.csv path
+  set_fact:
+    versions_path: "{{ distro_name }}{{ distro_version }}-{{ release }}/{{ dlrn_dir }}/versions.csv"
+
+- name: Define dlrn host
+  set_fact:
+    dlrn_host: "{{ stage_info.dlrn.server.repo_url|default(default_dlrn_host) }}"
+
 - name: Construct the DLRN URL for the promoted hash
   set_fact:
-    dlrn_url: "https://trunk.rdoproject.org/{{ distro_name }}{{ distro_version }}-{{ release }}/{{ dlrn_dir }}/versions.csv"
+    dlrn_url: "{{ dlrn_host}}{{ versions_path }}"
 
 - name: Get the tripleo-common commit in the promoted hash  # noqa 306
   shell: >
@@ -42,7 +50,7 @@
 # to match the reduced set of images pushed into test repository
 - name: Stat filter pattern
   stat:
-    path: "{{ pattern_file }}"
+    path: "{{ stage_info.containers.pattern_file_path }}"
   register: pattern_file_stat
 
 - name: Get release containers  # noqa 306
@@ -61,10 +69,9 @@
   shell: |
     echo -n > {{ containers_file }};
     for image in {{ release_images.stdout_lines|join(" ") }}; do
-    #$(curl -fk {{ release_url }} 2>/dev/null | grep -o -P '(?<=name_prefix).*(?=name_suffix)' | sed "s/[{}]//g"); do
         echo -n "Checking {{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-$image:{{ full_hash }} ... ";
         docker manifest inspect \
-            --insecure "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-$image:{{ full_hash }}" &>/dev/null
+            --insecure "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ distro_name }}-binary-$image:{{ full_hash }}"
         if [[ "$?" == "0" ]]; then
             echo $image >> {{ containers_file }};
             echo "OK";
