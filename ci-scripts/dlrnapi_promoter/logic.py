@@ -39,7 +39,7 @@ class PromoterLogic(object):
         :param target_label:  The label to which the candidate would be promoted
         :return: A list of candidate hashes
         """
-        candidate_hashes_list = self.dlrn_client.fetch_hashes(
+        candidate_hashes_list = self.dlrn_client.fetch_promotions(
             candidate_label, count=self.config.latest_hashes_count,
             sort="timestamp", reverse=True)
 

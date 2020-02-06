@@ -21,107 +21,143 @@ except ImportError:
 import yaml
 
 
-from staging_environment import StagedEnvironment, load_config
+from staging_environment import StagedEnvironment, StageConfig
 from dlrnapi_client.rest import ApiException
+from dlrn_interface import DlrnClient, DlrnCommitDistroHash, DlrnClientConfig
 
 
 @pytest.fixture(scope='session')
-def staged_env():
+def staged_env(request):
     """
     Fixture that runs the staging environment provisioner, yields the files
     produced and cleans up after
     """
+    class FakeArgs():
+        pass
 
-    overrides = {
-        'components': "all",
-        'stage-info-path': "/tmp/stage-info.yaml",
-        'dry-run': False,
-        'promoter_user': "centos",
-        "stage-config-file": "stage-config-secure.yaml",
+    fake_args = FakeArgs()
+    test_cases_configs = {
+        'dlrn_single' : {
+            'scenes': ['dlrn'],
+        },
+        'dlrn_component': {
+            'scenes': ['dlrn'],
+            'pipeline_type': 'component',
+            'fixtures_file': 'component-pipeline.yaml'
+        }
     }
-    config = load_config(overrides, db_filepath="/tmp/sqlite-test.db")
-    staged_env = StagedEnvironment(config)
-    staged_env.setup()
-    with open(config['stage-info-path'], "r") as stage_info_path:
-        stage_info = yaml.safe_load(stage_info_path)
 
+    for arg, value in test_cases_configs[request.param].items():
+        setattr(fake_args, arg, value)
+
+    source = "stage-config-secure.yaml"
+    try:
+        source = getattr(fake_args, source)
+    except AttributeError:
+        pass
+    config = StageConfig(source=source, overrides=fake_args)
+
+    staged_env = StagedEnvironment(config)
+
+    staged_env.setup()
+    stage_info_path = config.main['stage_info_path']
+    with open(stage_info_path, "r") as stage_info_file:
+        stage_info = yaml.safe_load(stage_info_file)
     yield config, stage_info
 
-    staged_env.teardown()
+    #staged_env.teardown()
 
-    # Check registries are correctly cleared after teardown
-    docker_client = docker.from_env()
-    for registry in config['registries']:
-        try:
-            docker_client.containers.get(registry['name'])
-            assert False, "Registry {} still running".format(registry['name'])
-        except docker.errors.NotFound:
-            assert True
-    # There are other resources the staging environment creates
-    # We should make sure that the rest of teardown works correctly:
-    # TODO(gcerami) Check that the images tree is removed
-    # TODO(gcerami) Check that stage-info.yaml file is removed.
+    if  "registries" in stage_info['main']['scenes']:
+        # Check registries are correctly cleared after teardown
+        docker_client = docker.from_env()
+        for registry in config['registries']:
+            try:
+                docker_client.containers.get(registry['name'])
+                assert False, "Registry {} still running".format(registry['name'])
+            except docker.errors.NotFound:
+                assert True
+        # There are other resources the staging environment creates
+        # We should make sure that the rest of teardown works correctly:
+        # TODO(gcerami) Check that the images tree is removed
+        # TODO(gcerami) Check that stage-info.yaml file is removed.
+        # TODO(gcerami) Check that dlrn commit database is removed
+
+
+
     # TODO(gcerami) Check that dlrn commit database is removed
 
+
+@pytest.mark.serial
+def test_stage_config(stage_config):
+    config = stage_config
+    config_sections = ['dlrn', 'registries', 'containers', 'main',
+                       'overcloud_images']
+    for section in config_sections:
+        assert hasattr(config, section)
+        assert (getattr(config, section) is not None)
 
 @pytest.mark.serial
 def test_stage_info(staged_env):
     config, stage_info = staged_env
 
     # Check needed top level attributes
-    attributes = [
+    sections = [
         "dlrn",
-        "promotions",
-        "distro",
-        "distro_version",
         "overcloud_images",
-        "release",
-        "logfile",
+        "registries",
+        "container_images"
     ]
     for attribute in attributes:
         assert attribute in stage_info
+    main_attributes = [
+        "distro_name",
+        "distro_version",
+        "release",
+        "logfile",
+    ]
+    for attribute in main_attributes:
+        assert attribute in stage_info['main']
 
     # Check other attributes
-    assert 'api_url' in stage_info['dlrn'], "No api_url in stage-info"
-    assert "repo_url" in stage_info['dlrn'], "No repo_url in stage_info"
-
+    msg ="No api_url in stage-info"
+    assert 'api_url' in stage_info['server']['dlrn'], msg
+    msg = "No repo_url in stage_info"
+    assert "repo_url" in stage_info['server']['dlrn'], msg
 
 @pytest.mark.serial
+@pytest.mark.parametrize("staged_env",
+                         ("dlrn_single", "dlrn_component"),
+                         indirect=True)
 def test_dlrn(staged_env):
     config, stage_info = staged_env
+    api_url = stage_info['dlrn']['server']['api_url']
+    username = stage_info['dlrn']['server']['username']
+    password = stage_info['dlrn']['server']['password']
+    commit = stage_info['dlrn']['promotions']['promotion_candidate']
+    promote_name = stage_info['dlrn']['promotion_target']
+    repo_url = stage_info['dlrn']['server']['repo_url']
+    client_config = DlrnClientConfig(dlrnauth_password=password,
+                                     dlrnauth_username=username,
+                                     api_url=api_url)
+    client = DlrnClient(client_config)
+    hash = DlrnCommitDistroHash(source=commit)
 
     # TODO(gcerami) Check db injection (needs sqlite3 import)
     # Check we can access dlrnapi
-    api_client = dlrnapi_client.ApiClient(host=stage_info['dlrn']['api_url'])
-    dlrnapi_client.configuration.username = stage_info['dlrn']['username']
-    dlrnapi_client.configuration.password = stage_info['dlrn']['password']
-    api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
-
-    params = dlrnapi_client.Promotion()
-    params.commit_hash = \
-        stage_info['promotions']['promotion_candidate']['commit_hash']
-    params.distro_hash = \
-        stage_info['promotions']['promotion_candidate']['distro_hash']
-    params.promote_name = stage_info['promotion_target']
-
     try:
-        api_instance.api_promote_post(params=params)
+        client.promote_hash(hash, promote_name, create_previous=False)
         assert True, "Dlrn api responding"
     except ApiException as e:
         msg = "Exception when calling DefaultApi->api_promote_post: %s\n" % e
         assert False, msg
 
     # Check if we can access repo_url and get the versions file
-    versions_url = "{}/{}/{}".format(stage_info['dlrn']['repo_url'],
-                                     stage_info['promotion_target'],
-                                     'versions.csv')
+    versions_url = os.path.join(repo_url, promote_name, 'versions.csv')
     try:
         url.urlopen(versions_url)
         assert True, "Versions file found"
     except IOError:
-        print(versions_url)
         assert False, "No versions file generated"
-
 
 @pytest.mark.serial
 def test_registries(staged_env):

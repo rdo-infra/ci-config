@@ -84,6 +84,11 @@ class DlrnHashBase(object):
         # TODO(gcerami) strict dlrn validation: check that the hashes are valid
         # hashes with correct size
 
+    @property
+    def commit_dir(self):
+        return "{}/{}/{}".format(self.commit_hash[:2],self.commit_hash[2:4]
+                                 ,self.full_hash)
+
 
 class DlrnCommitDistroHash(DlrnHashBase):
     """
@@ -96,7 +101,6 @@ class DlrnCommitDistroHash(DlrnHashBase):
         """
         Checks if the hashes are present
         """
-        print(self.commit_hash, self.distro_hash)
         if self.commit_hash is None or self.distro_hash is None:
             raise DlrnHashError("Invalid commit or distro hash")
 
@@ -246,6 +250,8 @@ class DlrnAggregateHash(DlrnHashBase):
         :return: None
         """
         params.aggregate_hash = self.aggregate_hash
+        params.commit_hash = self.commit_hash
+        params.distro_hash = self.distro_hash
         params.timestamp = self.timestamp
 
 
@@ -290,6 +296,19 @@ class DlrnHash(object):
 
         return hash_instance
 
+class DlrnClientConfig(object):
+    """
+    Config class for direct calls to DlrnClient
+    without a full config (e.g. from the staging environment
+    """
+
+    def __init__(self, **kwargs):
+        args = ['dlrnauth_username', 'dlrnauth_password', 'api_url']
+        for arg in args:
+            try:
+                setattr(self, arg, kwargs[arg])
+            except KeyError:
+                pass
 
 class DlrnClient(object):
     """
@@ -403,7 +422,22 @@ class DlrnClient(object):
 
         return result
 
-    def fetch_hashes(self, label, count=None, sort=None, reverse=False):
+    def fetch_hash(self, hash, count=None):
+        params = copy.deepcopy(self.hashes_params)
+        hash.dump_to_params(params)
+        hash_list = self.fetch_hashes(self, params, count=count)
+        return hash_list
+
+    def fetch_promotions(self, label, count=None, sort=None, reverse=False):
+        params = copy.deepcopy(self.hashes_params)
+        params.promote_name = label
+        hash_list = self.fetch_hashes(self, params, count=count)
+        self.log.debug(
+            'Fetch Hashes: fetched %d hashes for name %s: %s',
+            count, label, hash_list)
+        return hash_list
+
+    def fetch_hashes(self, params, count=None, sort="timestamp", reverse=False):
         """
         This method fetches a history of hashes that were promoted to a
         specific label, without duplicates.
@@ -414,10 +448,13 @@ class DlrnClient(object):
         :param reverse: reverses sort is applied
         :return: A single hash when count=1. A list of hashes otherwise
         """
-        params = copy.deepcopy(self.hashes_params)
-        params.promote_name = label
+
+        if count is not None:
+            params.limit = count
 
         try:
+            # API documentation says the hashes are returned in reverse
+            # timestamp order (from newest to oldest) by defaut
             api_hashes = self.api_instance.api_promotions_get(params)
             hash_list = self.hashes_to_hashes(api_hashes,
                                               remove_duplicates=True)
@@ -429,20 +466,16 @@ class DlrnClient(object):
         if len(hash_list) == 0:
             return None
 
-        if sort == "timestamp":
+        if sort == "timestamp" and reverse == True:
             hash_list.sort(key=lambda hashes: hashes.timestamp, reverse=reverse)
-
-        self.log.debug(
-            'Fetch Hashes: fetched %d hashes for name %s: %s',
-            self.config.latest_hashes_count, label, hash_list)
 
         if count == 1:
             return hash_list[0]
 
         # if count is None, list[:None] will return the whole list
-        return hash_list[:count]
+        return hash_list
 
-    def promote_hash(self, hash, target_label):
+    def promote_hash(self, hash, target_label, create_previous=True):
         """
         This method promotes an hash identifier to a target label
         from another POV the hash is labeled as the target
@@ -453,23 +486,27 @@ class DlrnClient(object):
         :param target_label: The label to promote the identifier to
         :return: None
         """
-        incumbent_hash = self.fetch_hashes(target_label, count=1)
-        # Save current hash as previous-$link
-        if incumbent_hash is not None:
-            params = copy.deepcopy(self.promote_params)
-            incumbent_hash.dump_to_params(params)
-            params.promote_name = "previous-" + target_label
-            try:
-                self.api_instance.api_promote_post(params)
-            except ApiException:
-                self.log.error(
-                    'Exception when calling api_promote_post: %s'
-                    ' to store current hashes as previous',
-                    ApiException)
-                raise
+        if create_previous:
+            incumbent_hash = self.fetch_hashes(target_label, count=1)
+            # Save current hash as previous-$link
+            if incumbent_hash is not None:
+                previous_target_label = "previous-" + target_label
+                try:
+                    self._promote_hash(incumbent_hash, previous_target_label)
+                except ApiException:
+                    self.log.error('unable'
+                        ' to store current hashes as previous',
+                        ApiException)
+                    raise
+
+        self._promote_hash(hash, target_label)
+
+    def _promote_hash(self, hash, target_label):
         params = copy.deepcopy(self.promote_params)
         hash.dump_to_params(params)
         params.promote_name = target_label
+        print(params.commit_hash)
+        print(params.distro_hash)
         try:
             self.api_instance.api_promote_post(params)
         except ApiException:
