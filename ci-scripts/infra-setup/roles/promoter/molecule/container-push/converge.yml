@@ -40,16 +40,18 @@
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
             {{ ansible_python_interpreter }} \
-            ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py setup --components registries,container-images
+            ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py setup --scenes registries,container-images
 
         - name: include stage setup variables
-          include_vars: /tmp/stage-info.yaml
+          include_vars:
+            file: "/tmp/stage-info.yaml"
+            name: stage_info
 
         - name: sets critical variables
           set_fact:
-            full_hash: "{{ promotions.promotion_candidate.full_hash }}"
-            source_registry: "{{ registries.source }}"
-            target_registries: "{{ registries.targets }}"
+            full_hash: "{{ stage_info.promotions.promotion_candidate.full_hash }}"
+            source_registry: "{{ stage_info.registries.source }}"
+            target_registries: "{{ stage_info.registries.targets }}"
 
         - name: Include containers-promote role to test
           include_role:
@@ -77,7 +79,7 @@
           shell: >
             {{ ansible_python_interpreter }}
             ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py
-            teardown --components registries,container-images
+            teardown --scenes registries,container-images
 
 
 # This test is copied and pasted from below with some change:
@@ -107,16 +109,18 @@
             # Export the path to the mounted docker socket so all docker client commands will use it
             {{ ansible_python_interpreter }} \
             ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py setup \
-            --components registries,container-images --stage-config-file stage-config-secure.yaml
+            --scenes registries,container-images --stage-config-file stage-config-secure.yaml
 
         - name: include stage setup variables
-          include_vars: /tmp/stage-info.yaml
+          include_vars:
+            file: "/tmp/stage-info.yaml"
+            name: stage_info
 
         - name: sets critical variables
           set_fact:
-            full_hash: "{{ promotions.promotion_candidate.full_hash }}"
-            source_registry: "{{ registries.source }}"
-            target_registries: "{{ registries.targets }}"
+            full_hash: "{{ stage_info.promotions.promotion_candidate.full_hash }}"
+            source_registry: "{{ stage_info.registries.source }}"
+            target_registries: "{{ stage_info.registries.targets }}"
 
         - name: Include containers-promote role to test
           include_role:
@@ -138,7 +142,7 @@
           shell: >
             {{ ansible_python_interpreter }}
             ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py
-            teardown --components registries,container-images
+            teardown --scenes registries,container-images
         # the teardown here must not contain the registry_cleanup tag, or it will not clean up properly
         # in the tripleo-common integration test
 
@@ -174,16 +178,18 @@
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
             {{ ansible_python_interpreter }} \
-            ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py setup --components registries,container-images
+            ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py setup --scenes registries,container-images
 
         - name: include stage setup variables
-          include_vars: /tmp/stage-info.yaml
+          include_vars:
+            file: "/tmp/stage-info.yaml"
+            name: stage_info
 
         - name: sets critical variables
           set_fact:
-            full_hash: "{{ promotions.promotion_candidate.full_hash }}"
-            source_registry: "{{ registries.source }}"
-            target_registries: "{{ registries.targets }}"
+            full_hash: "{{ state_info.promotions.promotion_candidate.full_hash }}"
+            source_registry: "{{ stage_info.registries.source }}"
+            target_registries: "{{ stage_info.registries.targets }}"
 
         - name: Include containers-promote role to test
           include_role:
@@ -248,7 +254,7 @@
           shell: >
             {{ ansible_python_interpreter }}
             ../../../../../dlrnapi_promoter/tests/staging_setup/staging_environment.py
-            teardown --components registries,container-images
+            teardown --scenes registries,container-images
         # the teardown here must not contain the registry_cleanup tag, or it will not clean up
         # properly in the tripleo-common integration test
 
