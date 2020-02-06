@@ -15,11 +15,11 @@ class QcowClient(object):
 
     def __init__(self, config):
         self.config = config
-        relpath = "ci-scripts/dlrnapi_promoter"
-        script_root = os.path.abspath(sys.path[0]).replace(relpath, "")
-        self.promote_script = script_root + 'ci-scripts/promote-images.sh'
+        self.git_root = self.config.git_root
+        self.promote_script = os.path.join(self.git_root,
+                                           'ci-scripts', 'promote-images.sh')
 
-    def promote_images(self, candidate_hash, target_label):
+    def promote(self, candidate_hash, target_label, **kwargs):
         """
         This method promotes images contained inside a dir in the server
         whose name is equal to the dlrn_id specified by creating a
@@ -35,18 +35,22 @@ class QcowClient(object):
             # The script doesn't really use commit/distro or full hash,
             # it just needs the hash to identify the dir, so it works with
             # either dlrnhash or aggregated hash.
-            qcow_logs = subprocess.check_output(
-                ['bash', self.promote_script,
-                 '--distro', self.config.distro_name,
-                 '--distro-version', self.config.distro_version,
-                 self.config.release, candidate_hash.full_hash,
-                 target_label],
-                stderr=subprocess.STDOUT).split("\n")
-            for line in qcow_logs:
+            cmd = ['bash',
+                   self.promote_script,
+                   '--distro', self.config.distro_name,
+                   '--distro-version', self.config.distro_version,
+                   self.config.release,
+                   candidate_hash.full_hash,
+                   target_label
+                   ]
+            qcow_logs = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+            qcow_logs_lines = qcow_logs.decode("UTF-8").split("\n")
+            for line in qcow_logs_lines:
                 self.log.info(line)
         except subprocess.CalledProcessError as ex:
             self.log.error('QCOW IMAGE UPLOAD FAILED LOGS BELOW:')
-            self.log.error(ex.output)
+            for line in ex.output.decode("UTF-8").split("\n"):
+                self.log.error(line)
             self.log.exception(ex)
             self.log.error('END OF QCOW IMAGE UPLOAD FAILURE')
             raise

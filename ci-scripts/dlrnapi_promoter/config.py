@@ -3,9 +3,16 @@ This file contains classes and function to build a configuration object that
 can be passed to all the new and legacy functions in the workflow.
 """
 
-import configparser
+try:
+    # Python 3 import
+    import configparser as ini_parser
+except ImportError:
+    # Python 2 import
+    import ConfigParser as ini_parser
+
 import logging
 import os
+import subprocess
 
 from common import str2bool
 
@@ -29,8 +36,16 @@ class PromoterConfig(object):
         the legacy object and parameters.
         :param config_path: the path to the configuration file to load
         """
+        # Get git repo root on which to base all relative paths
+        git_root_cmd = 'git rev-parse --show-toplevel'
         try:
-            cparser = configparser.ConfigParser(allow_no_value=True)
+            root = subprocess.check_output(git_root_cmd.split())
+        except subprocess.CalledProcessError:
+            self.log.error("Unable to get git root dir")
+            raise
+        self.git_root = root.decode().strip()
+        try:
+            cparser = ini_parser.ConfigParser(allow_no_value=True)
             cparser.read(config_path)
             self.data = dict(cparser.items())
             self.load_from_ini()
@@ -38,7 +53,7 @@ class PromoterConfig(object):
             # Legacy method, will be used to pass to functions that have not yet
             # been migrated
             self.legacy_config = cparser
-        except configparser.MissingSectionHeaderError:
+        except ini_parser.MissingSectionHeaderError:
             self.log.error("Unable to load config file %s", config_path)
             raise ConfigError
         except ConfigError:
@@ -131,12 +146,10 @@ class PromoterConfig(object):
 
         # Allow promotion for the endpoints. For example, a release like
         # ocata may specify to no allow containers promotion
-        self.allow_containers_promotion = str2bool(self.get_path(
-            "main/allow_containers_promotion", "true"))
-        self.allow_qcows_promotion = str2bool(self.get_path(
-            "main/allow_qcows_promotion", "true"))
-        self.allow_dlrn_promotion = str2bool(self.get_path(
-            "main/allow_dlrn_promotion", "true"))
+        self.allowed_clients = \
+            self.get_path("main/allowed_clients",
+                          "dlrn_client,qcow_client,registries_client").split(
+                ',')
 
         if not conf_ok:
             raise ConfigError
