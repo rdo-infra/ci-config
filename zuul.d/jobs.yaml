@@ -1,6 +1,6 @@
 ---
 - job:
-    name: tripleo-ci-promotion-staging-legacy
+    name: tripleo-ci-promotion-staging-legacy-single-pipeline
     parent: base
     ansible-version: 2.8
     run: playbooks/staging.yml
@@ -10,9 +10,10 @@
         ansible_user: root
     vars:
       promoter_force_legacy: true
+      pipeline_type: single
 
 - job:
-    name: tripleo-ci-promotion-staging
+    name: tripleo-ci-promotion-staging-single-pipeline
     parent: base
     ansible-version: 2.8
     run: playbooks/staging.yml
@@ -20,6 +21,20 @@
     host-vars:
       primary:
         ansible_user: root
+    vars:
+      pipeline_type: single
+
+- job:
+    name: tripleo-ci-promotion-staging-integration-pipeline
+    parent: base
+    ansible-version: 2.8
+    run: playbooks/staging.yml
+    post-run: playbooks/staging-post.yml
+    host-vars:
+      primary:
+        ansible_user: root
+    vars:
+      pipeline_type: integration
 
 # These jobs could be handled by rdo-tox-molecule job, when the pytest-molecule
 # supports delegated driver, but as delegated tests don't run in isolation,
