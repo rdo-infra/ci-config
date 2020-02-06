@@ -18,10 +18,7 @@ import sys
 from common import str2bool
 from config import PromoterConfig
 from logic import PromoterLogic
-# Import previous content from the legacy_promoter file
-import legacy_promoter
 from legacy_promoter import legacy_main
-from legacy_promoter import fetch_current_named_hashes
 
 
 class Promoter(object):
@@ -69,7 +66,7 @@ class Promoter(object):
         self.log.info("FINISHED promotion process")
 
 
-def main():
+def main(cmd_line=None):
     """
     This main will select which execution path to take, between legacy and new
     code
@@ -78,7 +75,10 @@ def main():
     main_parser.add_argument("config_file", help="The config file")
     main_parser.add_argument("--force-legacy", action="store_true",
                              help="Force the use of the legacy code")
-    args = main_parser.parse_args()
+    if cmd_line is not None:
+        args = main_parser.parse_args(cmd_line.split())
+    else:
+        args = main_parser.parse_args()
     # Main execution paths branch we either use legacy code or we use
     # modularized
     if args.force_legacy or str2bool(os.environ.get("PROMOTER_FORCE_LEGACY",
