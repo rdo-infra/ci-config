@@ -1,11 +1,29 @@
 """
 This file contains classes and methods to interact with dlrn servers
 """
+import contextlib
 import copy
 import datetime
 import dlrnapi_client
 import logging
 import pprint
+import time
+import json
+import yaml
+
+try:
+    import urllib2 as url
+except ImportError:
+    import urllib.request as url
+try:
+    import ConfigParser as ini_parser
+except ImportError:
+    import configparser as ini_parser
+
+try:
+    import StringIO as sio
+except ImportError:
+    import io as sio
 
 from dlrnapi_client.rest import ApiException
 
@@ -34,7 +52,7 @@ class DlrnHashBase(object):
     log = logging.getLogger("promoter")
 
     def __init__(self, commit_hash=None, distro_hash=None, timestamp=None,
-                 aggregate_hash=None, source=None):
+                 aggregate_hash=None, source=None, component=None):
         """
         implements mostly sanity checks
         :param source: A dictionary with the hash informations
@@ -44,11 +62,13 @@ class DlrnHashBase(object):
         _source['commit_hash'] = commit_hash
         _source['distro_hash'] = distro_hash
         _source['timestamp'] = timestamp
+        _source['dt_commit'] = timestamp
         _source['aggregate_hash'] = aggregate_hash
+        _source['component'] = component
 
         # Checks on sources
-        valid_attributes = set(['commit_hash', 'distro_hash', 'aggregate_hash',
-                                'timestamp'])
+        valid_attributes = {'commit_hash', 'distro_hash', 'aggregate_hash',
+                            'timestamp', 'component'}
         source_attributes = dir(source)
         valid_source_object = bool(valid_attributes.intersection(
             source_attributes))
@@ -84,6 +104,11 @@ class DlrnHashBase(object):
         # TODO(gcerami) strict dlrn validation: check that the hashes are valid
         # hashes with correct size
 
+    @property
+    def commit_dir(self):
+        return "{}/{}/{}".format(self.commit_hash[:2], self.commit_hash[2:4],
+                                 self.full_hash)
+
 
 class DlrnCommitDistroHash(DlrnHashBase):
     """
@@ -96,24 +121,26 @@ class DlrnCommitDistroHash(DlrnHashBase):
         """
         Checks if the hashes are present
         """
-        print(self.commit_hash, self.distro_hash)
         if self.commit_hash is None or self.distro_hash is None:
             raise DlrnHashError("Invalid commit or distro hash")
 
     def __repr__(self):
-        return ("<DlrnCommitDistroHash object commit: %s, distro: %s, "
-                "timestamp: %s>"
-                "" % (self.commit_hash, self.distro_hash, self.timestamp))
+        return ("<DlrnCommitDistroHash object commit: %s,"
+                " distro: %s, component: %s, timestamp: %s>"
+                "" % (self.commit_hash, self.distro_hash,
+                      self.component, self.timestamp))
 
     def __str__(self):
-        return ("commit: %s, distro: %s, timestamp=%s"
-                "" % (self.commit_hash, self.distro_hash, self.timestamp))
+        return ("commit: %s, distro: %s, component: %s, timestamp=%s"
+                "" % (self.commit_hash, self.distro_hash,
+                      self.component, self.timestamp))
 
     def __ne__(self, other):
 
         try:
             result = (self.commit_hash != other.commit_hash
                       or self.distro_hash != other.distro_hash
+                      or self.component != other.component
                       or self.timestamp != other.timestamp)
         except AttributeError:
             raise TypeError("Cannot compare {} with {}"
@@ -126,6 +153,7 @@ class DlrnCommitDistroHash(DlrnHashBase):
         try:
             result = (self.commit_hash == other.commit_hash
                       and self.distro_hash == other.distro_hash
+                      and self.component == other.component
                       and self.timestamp == other.timestamp)
         except AttributeError:
             raise TypeError("Cannot compare {} with {}"
@@ -152,6 +180,7 @@ class DlrnCommitDistroHash(DlrnHashBase):
             commit_hash=self.commit_hash,
             distro_hash=self.distro_hash,
             full_hash=self.full_hash,
+            component=self.component,
             timestamp=self.timestamp,
         )
         return result
@@ -164,6 +193,7 @@ class DlrnCommitDistroHash(DlrnHashBase):
         """
         params.commit_hash = self.commit_hash
         params.distro_hash = self.distro_hash
+        params.component = self.component
         params.timestamp = self.timestamp
 
 
@@ -179,20 +209,20 @@ class DlrnAggregateHash(DlrnHashBase):
         Checks if the hashes are present
         """
         if self.commit_hash is None or self.distro_hash is None or \
-           self.aggregate_hash is None:
+                self.aggregate_hash is None:
             raise DlrnHashError("Invalid commit or distro or aggregate_hash")
 
     def __repr__(self):
         return ("<DlrnAggregateHash object aggregate: %s, commit: %s,"
-                " distro: %s, timestamp: %s>"
+                " distro: %s, component: %s, timestamp: %s>"
                 "" % (self.aggregate_hash, self.commit_hash, self.distro_hash,
-                      self.timestamp))
+                      self.component, self.timestamp))
 
     def __str__(self):
         return ("aggregate: %s, commit: %s,"
-                " distro: %s, timestamp: %s"
+                " distro: %s, component: %s, timestamp: %s"
                 "" % (self.aggregate_hash, self.commit_hash, self.distro_hash,
-                      self.timestamp))
+                      self.component, self.timestamp))
 
     def __eq__(self, other):
 
@@ -235,6 +265,9 @@ class DlrnAggregateHash(DlrnHashBase):
         """
         result = dict(
             aggregate_hash=self.full_hash,
+            commit_hash=self.commit_hash,
+            distro_hash=self.distro_hash,
+            full_hash=self.full_hash,
             timestamp=self.timestamp,
         )
         return result
@@ -246,6 +279,8 @@ class DlrnAggregateHash(DlrnHashBase):
         :return: None
         """
         params.aggregate_hash = self.aggregate_hash
+        params.commit_hash = self.commit_hash
+        params.distro_hash = self.distro_hash
         params.timestamp = self.timestamp
 
 
@@ -291,6 +326,21 @@ class DlrnHash(object):
         return hash_instance
 
 
+class DlrnClientConfig(object):
+    """
+    Config class for direct calls to DlrnClient
+    without a full config (e.g. from the staging environment
+    """
+
+    def __init__(self, **kwargs):
+        args = ['dlrnauth_username', 'dlrnauth_password', 'api_url']
+        for arg in args:
+            try:
+                setattr(self, arg, kwargs[arg])
+            except KeyError:
+                pass
+
+
 class DlrnClient(object):
     """
     This class represent a wrapper around dlrnapi client operations to perform
@@ -317,6 +367,8 @@ class DlrnClient(object):
         # directly from dlrnapi CLI and ansible module
         self.hashes_params = dlrnapi_client.PromotionQuery()
         self.jobs_params = dlrnapi_client.Params2()
+        self.jobs_params_aggregate = dlrnapi_client.Params3()
+        self.report_params = dlrnapi_client.Params3()
         self.promote_params = dlrnapi_client.Promotion()
 
     def update_current_named_hashes(self, hash, label):
@@ -332,8 +384,7 @@ class DlrnClient(object):
         """
         named_hashes = {}
         for promote_name in self.config.promotion_steps_map.keys():
-            latest_named = self.fetch_hashes(promote_name, count=1,
-                                             sort="timestamp", reverse=True)
+            latest_named = self.fetch_promotions(promote_name, count=1)
             update = {promote_name: latest_named.full_hash}
             if store:
                 self.named_hashes_map.update(update)
@@ -349,6 +400,7 @@ class DlrnClient(object):
         :return: None
         """
         latest_named_hashes = self.fetch_current_named_hashes()
+        print(latest_named_hashes, self.named_hashes_map)
         if latest_named_hashes != self.named_hashes_map:
             self.log.error('ERROR: Aborting promotion named hashes changed '
                            'since promotion started. Hashes at start: %s.'
@@ -356,7 +408,7 @@ class DlrnClient(object):
                            self.named_hashes_map, latest_named_hashes)
             raise HashChangedError("Named Hashes Changed!")
 
-    def fetch_jobs(self, hash):
+    def fetch_jobs(self, dlrn_hash):
         """
         This method fetch a list of successful jobs from a dlrn server for a
         specific hash identifier.
@@ -364,15 +416,25 @@ class DlrnClient(object):
         either a DlrnHash or a DlrnAggregateHash
         :return: A list of job ids (str)
         """
-        params = copy.deepcopy(self.jobs_params)
-        hash.dump_to_params(params)
+
+        if type(dlrn_hash) == DlrnCommitDistroHash:
+            api_call = self.api_instance.api_repo_status_get
+            jobs_params = self.jobs_params
+        elif type(dlrn_hash) == DlrnAggregateHash:
+            api_call = self.api_instance.api_agg_status_get
+            jobs_params = self.jobs_params_aggregate
+
+        params = copy.deepcopy(jobs_params)
+        dlrn_hash.dump_to_params(params)
         params.success = str(True)
 
         try:
-            api_response = self.api_instance.api_repo_status_get(params)
-        except ApiException:
-            self.log.error('Exception when calling api_repo_status_get: %s',
-                           ApiException)
+            api_response = api_call(params)
+        except ApiException as ae:
+            body = json.loads(ae.body)
+            self.log.error('Exception while fetching jobs from API endpoint '
+                           '(%s) %s: %s'
+                           '', ae.status, ae.reason, body['message'])
             raise
 
         self.log.debug('Successful jobs for %s:', str(hash))
@@ -403,7 +465,26 @@ class DlrnClient(object):
 
         return result
 
-    def fetch_hashes(self, label, count=None, sort=None, reverse=False):
+    def fetch_promotions_from_hash(self, dlrn_hash, count=None):
+        params = copy.deepcopy(self.hashes_params)
+        dlrn_hash.dump_to_params(params)
+        hash_list = self.fetch_hashes(params, count=count)
+        return hash_list
+
+    def fetch_promotions(self, label, count=None):
+        params = copy.deepcopy(self.hashes_params)
+        params.promote_name = label
+        hash_list = self.fetch_hashes(params, count=count)
+        if type(hash_list) == list:
+            hashes = len(hash_list)
+        else:
+            hashes = 1
+        self.log.debug(
+            'Fetch Hashes: fetched %d hashes for name %s: %s',
+            hashes, label, hash_list)
+        return hash_list
+
+    def fetch_hashes(self, params, count=None, sort=None, reverse=None):
         """
         This method fetches a history of hashes that were promoted to a
         specific label, without duplicates.
@@ -414,10 +495,13 @@ class DlrnClient(object):
         :param reverse: reverses sort is applied
         :return: A single hash when count=1. A list of hashes otherwise
         """
-        params = copy.deepcopy(self.hashes_params)
-        params.promote_name = label
+
+        if count is not None:
+            params.limit = int(count)
 
         try:
+            # API documentation says the hashes are returned in reverse
+            # timestamp order (from newest to oldest) by defaut
             api_hashes = self.api_instance.api_promotions_get(params)
             hash_list = self.hashes_to_hashes(api_hashes,
                                               remove_duplicates=True)
@@ -426,23 +510,17 @@ class DlrnClient(object):
                            'through api', ApiException)
             raise
 
-        if len(hash_list) == 0:
-            return None
-
-        if sort == "timestamp":
+        if sort == "timestamp" and reverse is not None:
             hash_list.sort(key=lambda hashes: hashes.timestamp, reverse=reverse)
 
-        self.log.debug(
-            'Fetch Hashes: fetched %d hashes for name %s: %s',
-            self.config.latest_hashes_count, label, hash_list)
-
-        if count == 1:
+        if count == 1 and len(hash_list) != 0:
             return hash_list[0]
 
         # if count is None, list[:None] will return the whole list
-        return hash_list[:count]
+        return hash_list
 
-    def promote_hash(self, hash, target_label):
+    def promote(self, dlrn_hash, target_label, candidate_label=None,
+                create_previous=True):
         """
         This method promotes an hash identifier to a target label
         from another POV the hash is labeled as the target
@@ -453,29 +531,109 @@ class DlrnClient(object):
         :param target_label: The label to promote the identifier to
         :return: None
         """
-        incumbent_hash = self.fetch_hashes(target_label, count=1)
-        # Save current hash as previous-$link
-        if incumbent_hash is not None:
+        if create_previous:
+            incumbent_hash = self.fetch_promotions(target_label, count=1)
+            # Save current hash as previous-$link
+            if incumbent_hash is not None:
+                previous_target_label = "previous-" + target_label
+                try:
+                    self._promote_hash(incumbent_hash, previous_target_label,
+                                       candidate_label=target_label)
+                except ApiException:
+                    self.log.error('unable to store current hashes as previous',
+                                   ApiException)
+                    raise
+
+        self.log.info("Promoting hash {} to {} in DLRN "
+                      "".format(dlrn_hash, target_label))
+        self._promote_hash(dlrn_hash, target_label,
+                           candidate_label=candidate_label)
+
+    def _promote_hash(self, dlrn_hash, target_label, candidate_label=None):
+        promotion_hash_list = []
+        if type(dlrn_hash) == DlrnAggregateHash:
+            # Aggregate hash cannot be promoted directly, we need to promote
+            # all the components the aggregate points to singularly
+            # dowload the delorean.repo
+            # TODO: single endpoint!!!!!!!!
+            repo_url = "{}/{}/delorean.repo".format(self.config.api_url,
+                                                    candidate_label)
+            repo_url = ("file:///tmp/promoter-staging/dlrn/data/repos/"
+                        "{}/delorean.repo".format(candidate_label))
+            repo_config = ini_parser.ConfigParser()
+            # FIXME: in python2 urlopen is not a context manager
+            with contextlib.closing(url.urlopen(repo_url)) as repo_file:
+                # FIXME: in python2 configparser can read a config only from
+                # a file or a file-like obj. But python3 need the file to be
+                # converted first in UTF-8
+                repo_sio = sio.StringIO()
+                repo_sio.write(repo_file.read().decode('UTF-8'))
+                repo_config.readfp(repo_sio)
+                repo_sio.close()
+            for section in repo_config.sections():
+                hash_info = {}
+                # for each section, extract the base_url then the full_hash
+                baseurl = repo_config.get(section, 'baseurl')
+                commits_url = "{}/{}".format(baseurl, "commit.yaml")
+                with url.urlopen(commits_url) as commits_yaml:
+                    # With the baseurl, download the commits.yaml in the
+                    # component repo directory
+                    commits = yaml.safe_load(commits_yaml.read().decode(
+                        "UTF-8"))
+                # from commits.yaml extract commit/distro_hash
+                hash_info['commit_hash'] = commits['commits'][0]['commit_hash']
+                hash_info['distro_hash'] = commits['commits'][0]['distro_hash']
+                hash_info['component'] = commits['commits'][0]['component']
+                hash_info['timestamp'] = commits['commits'][0]['dt_commit']
+                # build commit/distro hash with the information
+                promotion_hash = DlrnCommitDistroHash(source=hash_info)
+                # add hashes to promotion list
+                promotion_hash_list.append(promotion_hash)
+
+            # Promote in the same order the components were promoted
+            # initially
+            promotion_hash_list.sort(key=lambda x: x.timestamp)
+
+        elif type(dlrn_hash) == DlrnCommitDistroHash:
+            promotion_hash_list.append(dlrn_hash)
+
+        for promotion_hash in promotion_hash_list:
             params = copy.deepcopy(self.promote_params)
-            incumbent_hash.dump_to_params(params)
-            params.promote_name = "previous-" + target_label
+            promotion_hash.dump_to_params(params)
+            params.promote_name = target_label
             try:
                 self.api_instance.api_promote_post(params)
+                self.log.info("Promoted {} to {}".format(params, target_label))
             except ApiException:
-                self.log.error(
-                    'Exception when calling api_promote_post: %s'
-                    ' to store current hashes as previous',
-                    ApiException)
+                self.log.error('Exception when calling api_promote_post: '
+                               '%s', ApiException)
                 raise
-        params = copy.deepcopy(self.promote_params)
-        hash.dump_to_params(params)
-        params.promote_name = target_label
+
+    def vote(self, dlrn_hash, job_id, job_url, vote):
+        params = copy.deepcopy(self.report_params)
+
+        if type(dlrn_hash) == DlrnCommitDistroHash:
+            dlrn_hash.dump_to_params(params)
+        elif type(dlrn_hash) == DlrnAggregateHash:
+            # votes for the aggregate hash cannot contain commit and distro
+            params.aggregate_hash = dlrn_hash.aggregate_hash
+
+        params.success = str(vote)
+        params.timestamp = dlrn_hash.timestamp
+        params.job_id = job_id
+
+        params.url = job_url
+
         try:
-            self.api_instance.api_promote_post(params)
-        except ApiException:
-            self.log.error('Exception when calling api_promote_post: '
-                           '%s', ApiException)
+            api_response = self.api_instance.api_report_result_post(params)
+        except ApiException as ae:
+            body = json.loads(ae.body)
+            self.log.error('Exception while voting on API endpoint '
+                           '(%s) %s: %s'
+                           '', ae.status, ae.reason, body['message'])
             raise
+
+        return api_response
 
     def get_civotes_info(self, hash):
         """
