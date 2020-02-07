@@ -1296,7 +1296,7 @@
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
-                    "h":10,
+                    "h":6,
                     "w":6,
                     "x":0,
                     "y":22
@@ -1323,7 +1323,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'master' ) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'master'  AND \"pipeline\" = 'gate') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -1373,7 +1373,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'master' ) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'master' AND \"pipeline\" = 'gate' ) AND $timeFilter",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -1429,7 +1429,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'master' ) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'master'  AND \"pipeline\" = 'gate') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -1481,7 +1481,7 @@
                     }
                 ],
                 "timeFrom":"24h",
-                "title":"Master Branch, Upstream CI",
+                "title":"Master Branch, Upstream Gate",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
@@ -1499,7 +1499,7 @@
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
-                    "h":10,
+                    "h":6,
                     "w":5,
                     "x":6,
                     "y":22
@@ -1518,6 +1518,7 @@
                 "maxDataPoints":3,
                 "nullPointMode":"connected",
                 "pieType":"pie",
+                "pluginVersion":"6.1.1",
                 "strokeWidth":"2",
                 "targets":[
                     {
@@ -1526,7 +1527,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'stable/train' ) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'stable/train'  AND \"pipeline\" = 'gate') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -1576,7 +1577,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/train'   ) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/train'  AND \"pipeline\" = 'gate' ) AND $timeFilter",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -1632,7 +1633,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/train'  ) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/train'  AND \"pipeline\" = 'gate') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -1684,7 +1685,7 @@
                     }
                 ],
                 "timeFrom":"24h",
-                "title":"Train Branch, Upstream CI",
+                "title":"Train Branch, Upstream Gate",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
@@ -1702,7 +1703,7 @@
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
-                    "h":10,
+                    "h":6,
                     "w":5,
                     "x":11,
                     "y":22
@@ -1729,7 +1730,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'stable/stein' ) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'stable/stein' AND \"pipeline\" = 'gate' ) AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -1779,7 +1780,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/stein'   ) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/stein'  AND \"pipeline\" = 'gate' ) AND $timeFilter",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -1835,7 +1836,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/stein'  ) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/stein' AND \"pipeline\" = 'gate' ) AND $timeFilter",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -1887,7 +1888,7 @@
                     }
                 ],
                 "timeFrom":"24h",
-                "title":"Stein Branch, Upstream CI",
+                "title":"Stein Branch, Upstream Gate",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
@@ -1905,7 +1906,7 @@
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
-                    "h":10,
+                    "h":6,
                     "w":4,
                     "x":16,
                     "y":22
@@ -1932,7 +1933,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'stable/rocky' ) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'stable/rocky'  AND \"pipeline\" = 'gate') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -1982,7 +1983,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/rocky'   ) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/rocky'  AND \"pipeline\" = 'gate') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -2038,7 +2039,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/rocky'  ) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/rocky' AND \"pipeline\" = 'gate' ) AND $timeFilter",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -2090,7 +2091,7 @@
                     }
                 ],
                 "timeFrom":"3d",
-                "title":"Rocky Branch, Upstream CI",
+                "title":"Rocky Branch, Upstream Gate",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
@@ -2108,7 +2109,7 @@
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
-                    "h":10,
+                    "h":6,
                     "w":4,
                     "x":20,
                     "y":22
@@ -2135,7 +2136,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'stable/queens' ) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'stable/queens' AND \"pipeline\" = 'gate') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -2185,7 +2186,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/queens'   ) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/queens'  AND \"pipeline\" = 'gate' ) AND $timeFilter",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -2241,7 +2242,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/queens'  ) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/queens'  AND \"pipeline\" = 'gate') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -2293,7 +2294,1822 @@
                     }
                 ],
                 "timeFrom":"7d",
-                "title":"Queens Branch, Upstream CI",
+                "title":"Queens Branch, Upstream Gate",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":6,
+                    "x":0,
+                    "y":28
+                },
+                "id":432,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'master'  AND \"pipeline\" = 'check') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'master' AND \"pipeline\" = 'check' ) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'master'  AND \"pipeline\" = 'check') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"24h",
+                "title":"Master Branch, Upstream Check",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":5,
+                    "x":6,
+                    "y":28
+                },
+                "id":433,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'stable/train'  AND \"pipeline\" = 'check') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/train'   AND \"pipeline\" = 'check') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/train'  AND \"pipeline\" = 'check') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"24h",
+                "title":"Train Branch, Upstream Check",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":5,
+                    "x":11,
+                    "y":28
+                },
+                "id":434,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'stable/stein' AND \"pipeline\" = 'check' ) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/stein'  AND \"pipeline\" = 'check' ) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/stein' AND \"pipeline\" = 'check' ) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"24h",
+                "title":"Stein Branch, Upstream Check",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":4,
+                    "x":16,
+                    "y":28
+                },
+                "id":435,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'stable/rocky'  AND \"pipeline\" = 'check') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/rocky'  AND \"pipeline\" = 'check') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/rocky' AND \"pipeline\" = 'check' ) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"3d",
+                "title":"Rocky Branch, Upstream Check",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":4,
+                    "x":20,
+                    "y":28
+                },
+                "id":436,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'stable/queens' AND \"pipeline\" = 'check') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/queens'  AND \"pipeline\" = 'check' ) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/queens'  AND \"pipeline\" = 'check') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"7d",
+                "title":"Queens Branch, Upstream Gate",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of RDO  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"110%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":6,
+                    "x":0,
+                    "y":34
+                },
+                "id":437,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-rhel-8-scenario.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-rhel-8-scenario.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-rhel-8-scenario.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"24h",
+                "title":"RDO RHEL 8 scenario jobs",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of RDO  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"110%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":5,
+                    "x":6,
+                    "y":34
+                },
+                "id":438,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-rhel-8-ovb.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-rhel-8-ovb.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-rhel-8-ovb.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"24h",
+                "title":"RDO RHEL 8 ovb jobs",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of upstream  CentOS-8 jobs\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":7,
+                    "x":11,
+                    "y":34
+                },
+                "id":439,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /tripleo-ci-centos-8.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci-centos-8.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci-centos-8.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"24h",
+                "title":"Upstream CentOS-8",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of upstream  CentOS-8 jobs\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":6,
+                    "x":18,
+                    "y":34
+                },
+                "id":440,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci-centos-8.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT'  AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci-centos-8.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci-centos-8.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"24h",
+                "title":"RDO CentOS-8",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
@@ -2305,7 +4121,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":32
+                    "y":40
                 },
                 "id":2,
                 "links":[],
@@ -2374,7 +4190,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":39
+                    "y":47
                 },
                 "id":422,
                 "links":[],
@@ -2733,7 +4549,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":49
+                    "y":57
                 },
                 "id":63,
                 "links":[],
@@ -3092,7 +4908,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":59
+                    "y":67
                 },
                 "id":421,
                 "links":[],
@@ -3451,7 +5267,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":69
+                    "y":77
                 },
                 "id":423,
                 "links":[],
@@ -3810,7 +5626,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":79
+                    "y":87
                 },
                 "id":424,
                 "links":[],
@@ -4169,7 +5985,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":89
+                    "y":97
                 },
                 "id":425,
                 "links":[],
@@ -4528,7 +6344,7 @@
                     "h":11,
                     "w":24,
                     "x":0,
-                    "y":99
+                    "y":107
                 },
                 "id":426,
                 "links":[],
@@ -4882,7 +6698,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":110
+                    "y":118
                 },
                 "id":232,
                 "legend":{
@@ -5177,7 +6993,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":118
+                    "y":126
                 },
                 "id":370,
                 "panels":[],
@@ -5193,7 +7009,7 @@
                     "h":9,
                     "w":24,
                     "x":0,
-                    "y":119
+                    "y":127
                 },
                 "id":386,
                 "links":[
@@ -5556,7 +7372,7 @@
                     "h":9,
                     "w":24,
                     "x":0,
-                    "y":128
+                    "y":136
                 },
                 "id":392,
                 "links":[],
@@ -5892,7 +7708,7 @@
                     "h":5,
                     "w":24,
                     "x":0,
-                    "y":137
+                    "y":145
                 },
                 "id":391,
                 "links":[],
@@ -6227,7 +8043,7 @@
                     "h":5,
                     "w":24,
                     "x":0,
-                    "y":142
+                    "y":150
                 },
                 "id":381,
                 "links":[],
@@ -6560,7 +8376,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":147
+                    "y":155
                 },
                 "id":140,
                 "panels":[
@@ -7510,7 +9326,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":148
+                    "y":156
                 },
                 "id":340,
                 "panels":[],
@@ -7525,7 +9341,7 @@
                     "h":11,
                     "w":5,
                     "x":0,
-                    "y":149
+                    "y":157
                 },
                 "id":160,
                 "limit":"100",
@@ -7552,7 +9368,7 @@
                     "h":11,
                     "w":5,
                     "x":5,
-                    "y":149
+                    "y":157
                 },
                 "id":159,
                 "limit":"100",
@@ -7586,7 +9402,7 @@
                     "h":11,
                     "w":5,
                     "x":10,
-                    "y":149
+                    "y":157
                 },
                 "id":165,
                 "limit":"100",
@@ -7619,7 +9435,7 @@
                     "h":11,
                     "w":4,
                     "x":15,
-                    "y":149
+                    "y":157
                 },
                 "id":161,
                 "limit":"100",
@@ -7646,7 +9462,7 @@
                     "h":3,
                     "w":5,
                     "x":19,
-                    "y":149
+                    "y":157
                 },
                 "id":162,
                 "limit":"100",
@@ -7673,7 +9489,7 @@
                     "h":3,
                     "w":5,
                     "x":19,
-                    "y":152
+                    "y":160
                 },
                 "id":192,
                 "limit":10,
@@ -7700,7 +9516,7 @@
                     "h":5,
                     "w":5,
                     "x":19,
-                    "y":155
+                    "y":163
                 },
                 "id":198,
                 "limit":10,
@@ -7726,7 +9542,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":160
+                    "y":168
                 },
                 "id":408,
                 "links":[],
@@ -7947,7 +9763,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":168
+                    "y":176
                 },
                 "id":412,
                 "links":[],
@@ -8167,7 +9983,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":176
+                    "y":184
                 },
                 "id":411,
                 "links":[],
@@ -8387,7 +10203,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":184
+                    "y":192
                 },
                 "id":410,
                 "links":[],
@@ -8607,7 +10423,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":192
+                    "y":200
                 },
                 "id":409,
                 "links":[],
@@ -8824,7 +10640,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":200
+                    "y":208
                 },
                 "id":51,
                 "panels":[],
@@ -8842,7 +10658,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":201
+                    "y":209
                 },
                 "hideTimeOverride":true,
                 "id":157,
@@ -9073,7 +10889,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":208
+                    "y":216
                 },
                 "hideTimeOverride":true,
                 "id":307,
@@ -9305,7 +11121,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":215
+                    "y":223
                 },
                 "id":317,
                 "legend":{
@@ -9556,7 +11372,7 @@
                     "h":6,
                     "w":4,
                     "x":0,
-                    "y":221
+                    "y":229
                 },
                 "id":71,
                 "legend":{
@@ -9728,7 +11544,7 @@
                     "h":6,
                     "w":4,
                     "x":4,
-                    "y":221
+                    "y":229
                 },
                 "id":72,
                 "legend":{
@@ -9895,7 +11711,7 @@
                     "h":6,
                     "w":16,
                     "x":8,
-                    "y":221
+                    "y":229
                 },
                 "id":55,
                 "legend":{
@@ -10113,7 +11929,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":227
+                    "y":235
                 },
                 "id":79,
                 "legend":{
@@ -10311,7 +12127,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":227
+                    "y":235
                 },
                 "id":80,
                 "legend":{
@@ -10498,7 +12314,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":233
+                    "y":241
                 },
                 "id":398,
                 "legend":{
@@ -10670,7 +12486,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":233
+                    "y":241
                 },
                 "id":399,
                 "legend":{
@@ -10793,7 +12609,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":239
+                    "y":247
                 },
                 "id":82,
                 "panels":[],
@@ -10850,7 +12666,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":240
+                    "y":248
                 },
                 "hideTimeOverride":false,
                 "id":110,
@@ -11037,7 +12853,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":240
+                    "y":248
                 },
                 "hideTimeOverride":false,
                 "id":116,
@@ -11223,7 +13039,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":240
+                    "y":248
                 },
                 "id":130,
                 "legend":{
@@ -11358,7 +13174,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":244
+                    "y":252
                 },
                 "id":123,
                 "legend":{
@@ -11513,7 +13329,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":244
+                    "y":252
                 },
                 "id":125,
                 "legend":{
@@ -11703,7 +13519,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":244
+                    "y":252
                 },
                 "id":133,
                 "legend":{
@@ -11872,7 +13688,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":248
+                    "y":256
                 },
                 "hideTimeOverride":false,
                 "id":263,
@@ -12054,7 +13870,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":248
+                    "y":256
                 },
                 "id":273,
                 "legend":{
@@ -12234,7 +14050,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":248
+                    "y":256
                 },
                 "id":274,
                 "legend":{
@@ -12402,7 +14218,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":252
+                    "y":260
                 },
                 "hideTimeOverride":false,
                 "id":213,
@@ -12585,7 +14401,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":252
+                    "y":260
                 },
                 "id":214,
                 "legend":{
@@ -12766,7 +14582,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":252
+                    "y":260
                 },
                 "id":216,
                 "legend":{
@@ -12938,7 +14754,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":256
+                    "y":264
                 },
                 "hideTimeOverride":false,
                 "id":117,
@@ -13121,7 +14937,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":256
+                    "y":264
                 },
                 "id":118,
                 "legend":{
@@ -13306,7 +15122,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":256
+                    "y":264
                 },
                 "id":131,
                 "legend":{
@@ -13434,7 +15250,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":260
+                    "y":268
                 },
                 "id":298,
                 "panels":[],
@@ -13485,7 +15301,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":261
+                    "y":269
                 },
                 "hideTimeOverride":false,
                 "id":284,
@@ -13666,7 +15482,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":261
+                    "y":269
                 },
                 "id":286,
                 "legend":{
@@ -13800,7 +15616,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":265
+                    "y":273
                 },
                 "hideTimeOverride":false,
                 "id":404,
@@ -13981,7 +15797,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":265
+                    "y":273
                 },
                 "id":406,
                 "legend":{
@@ -14109,7 +15925,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":269
+                    "y":277
                 },
                 "id":414,
                 "panels":[],
@@ -14124,7 +15940,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":270
+                    "y":278
                 },
                 "id":416,
                 "links":[],
@@ -14262,7 +16078,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":270
+                    "y":278
                 },
                 "id":418,
                 "links":[],
@@ -14400,7 +16216,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":276
+                    "y":284
                 },
                 "id":417,
                 "links":[],
@@ -14538,7 +16354,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":276
+                    "y":284
                 },
                 "id":420,
                 "links":[],
@@ -14676,7 +16492,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":282
+                    "y":290
                 },
                 "id":419,
                 "links":[],
@@ -14812,7 +16628,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":288
+                    "y":296
                 },
                 "id":4,
                 "panels":[],
@@ -14830,7 +16646,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":289
+                    "y":297
                 },
                 "id":209,
                 "legend":{
@@ -14948,7 +16764,7 @@
                     "h":9,
                     "w":12,
                     "x":0,
-                    "y":297
+                    "y":305
                 },
                 "hideTimeOverride":true,
                 "id":196,
@@ -15084,7 +16900,7 @@
                     "h":9,
                     "w":12,
                     "x":12,
-                    "y":297
+                    "y":305
                 },
                 "hideTimeOverride":true,
                 "id":194,
@@ -15186,7 +17002,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":306
+                    "y":314
                 },
                 "id":173,
                 "panels":[],
@@ -15204,7 +17020,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":307
+                    "y":315
                 },
                 "id":175,
                 "legend":{
@@ -15379,7 +17195,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":307
+                    "y":315
                 },
                 "id":177,
                 "legend":{
@@ -15642,7 +17458,7 @@
                     "h":7,
                     "w":12,
                     "x":0,
-                    "y":313
+                    "y":321
                 },
                 "id":179,
                 "legend":{
@@ -16003,7 +17819,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":313
+                    "y":321
                 },
                 "id":181,
                 "legend":{
@@ -16164,7 +17980,7 @@
                     "h":6,
                     "w":7,
                     "x":0,
-                    "y":320
+                    "y":328
                 },
                 "id":183,
                 "legend":{
@@ -16279,7 +18095,7 @@
                     "h":6,
                     "w":9,
                     "x":7,
-                    "y":320
+                    "y":328
                 },
                 "id":185,
                 "legend":{
@@ -16394,7 +18210,7 @@
                     "h":6,
                     "w":8,
                     "x":16,
-                    "y":320
+                    "y":328
                 },
                 "id":187,
                 "legend":{
@@ -16549,7 +18365,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":326
+                    "y":334
                 },
                 "id":364,
                 "legend":{
