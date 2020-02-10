@@ -197,11 +197,9 @@
           fi
           promotion_hash=$(echo ${delorean_url} |awk -F/ '{ print $7}')
 
-          # Promote on the internal and public dlrn servers
-          ssh_opts="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ~/.ssh/rhos-ci -p 3300"
-          for host in "${delorean_internal_host} ${delorean_public_host}"; do
-              ssh ${ssh_opts} promoter@${host} "sudo /usr/local/bin/promote.sh ${promotion_hash} ${delorean_builder} ${promotion_symlink}"
-          done
+          # Promote on the public dlrn server
+          ssh_opts="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${HOME}/.ssh/rhos-ci -p 3300"
+          ssh ${ssh_opts} promoter@${delorean_public_host} "sudo /usr/local/bin/promote.sh ${promotion_hash} ${delorean_builder} ${promotion_symlink}"
       </pre>
     parameters:
         - string:
@@ -221,11 +219,9 @@
             fi
             promotion_hash=$(echo ${delorean_url} |awk -F/ '{ print $7}')
 
-            # Promote on the internal and public dlrn servers
+            # Promote on the public dlrn server
             ssh_opts="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${HOME}/.ssh/rhos-ci -p 3300"
-            for host in ${delorean_internal_host} ${delorean_public_host}; do
-                ssh ${ssh_opts} promoter@${host} "sudo /usr/local/bin/promote.sh ${promotion_hash} ${delorean_builder} ${promotion_symlink}"
-            done
+            ssh ${ssh_opts} promoter@${delorean_public_host} "sudo /usr/local/bin/promote.sh ${promotion_hash} ${delorean_builder} ${promotion_symlink}"
     publishers:
         - archive:
             artifacts: 'properties'
