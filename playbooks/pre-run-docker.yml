@@ -4,20 +4,6 @@
     docker_group: docker
   tasks:
 
-    # workaround for missing selinux error with ansible:
-    - name: assure we have selinux python bindings
-      become: true
-      # TODO: find a better way to establish which libselinux python rpm to
-      # install because using ansible_python.version.major is not correct
-      # as zuul is currently using python2 on fedora nodes.
-      package:
-        name: >-
-          {%- if ansible_distribution == 'Fedora' -%}
-          python3-libselinux
-          {%- else -%}
-          libselinux-python
-          {%- endif %}
-
     # until docker-install role on redhat distros is fixed by:
     # https://review.openstack.org/#/c/634934
 
