@@ -1,7 +1,7 @@
 - job:
     name: sova-tracking-jobs
     run: ci-scripts/infra-setup/scheduler/sova-check.yml
-    nodeset: rdo-fedora-28
+    nodeset: rdo-centos-8
 
 - job:
     name: tox-jjb
@@ -27,6 +27,11 @@
             voting: false
             files:
               - ^ci-scripts/infra-setup/roles/promoter/.*$
+              - ^requirements.txt
+              - ^setup.cfg
+              - ^test-requirements.txt
+              - ^tox.ini
+              - ^tools/test-setup.sh$
         - molecule-container-push:
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
@@ -60,6 +65,7 @@
               - ^setup.cfg
               - ^setup.py
               - ^tox.ini
+              - ^tools/test-setup.sh$
               - ^molecule/.*
               - ^playbooks/.*
               - .*\.py
@@ -67,7 +73,7 @@
             pre-run: playbooks/pre-run-docker.yml
             success-url: "tox/reports.html"
             failure-url: "tox/reports.html"
-            nodeset: rdo-fedora-28
+            nodeset: rdo-centos-8
             files:
               - ^ci-scripts/infra-.*/.*
               - ^requirements.txt
@@ -75,6 +81,7 @@
               - ^setup.cfg
               - ^setup.py
               - ^tox.ini
+              - ^tools/test-setup.sh$
               - ^molecule/.*
               - ^playbooks/.*
               - .*\.py
