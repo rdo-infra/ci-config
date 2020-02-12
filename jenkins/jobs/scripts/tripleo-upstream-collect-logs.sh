@@ -3,7 +3,7 @@ CICO_USER_DIR=${CICO_USER_DIR:-/root}
 WORKSPACE=${WORKSPACE:-/tmp}
 ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
 LOGSERVER="logserver.rdoproject.org ansible_user=loguser"
-LOG_DISPLAY_URL="https://logserver.rdoproject.org/${JOB_NAME}/${BUILD_NUMBER}"
+LOG_DISPLAY_URL="https://logserver.rdoproject.org/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
 CI_CENTOS_URL="https://ci.centos.org/job/${JOB_NAME}/${BUILD_NUMBER}"
 SOURCE="${CICO_USER_DIR}/workspace/logs"
 DESTINATION="/var/www/logs/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
