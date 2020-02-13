@@ -158,6 +158,20 @@ def add_inventory_info(build, json_view=False):
         pass
 
 
+def add_sova_info(build, json_view=False):
+    try:
+        failures_file = get_file_from_build(build,
+                                            "logs/failures_file",
+                                            json_view)
+        lines = failures_file.split('\n')
+        reason = lines[0]
+        tag = lines[1].split("Reason: ")[1]
+        build['sova_reason'] = reason
+        build['sova_tag'] = tag
+    except Exception:
+        pass
+
+
 def add_container_prep_time(build):
     if build['log_url'] is not None:
         job_terms = ['featureset', 'oooq', 'multinode']
@@ -255,6 +269,7 @@ def influx(build):
 
     add_inventory_info(build)
     add_container_prep_time(build)
+    add_sova_info(build)
 
     if build['end_time'] is None:
         build['end_time'] = datetime.datetime.fromtimestamp(
@@ -291,6 +306,8 @@ def influx(build):
             'cloud="%s",'
             'region="%s",'
             'provider="%s",'
+            'sova_reason="%s",'
+            'sova_tag="%s",'
             'container_prep_time_u=%.1f'
             ' '
             '%s' %
@@ -309,6 +326,8 @@ def influx(build):
              to_ts(build['end_time'], seconds=True), build.get(
                  'cloud', 'null'), build.get('region', 'null'),
              build.get('provider', 'null'),
+             build.get('sova_reason', 'null'),
+             build.get('sova_tag', 'null'),
              build.get('container_prep_time_u', 0),
              to_ts(build['end_time'])))
 
