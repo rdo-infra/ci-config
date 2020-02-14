@@ -326,8 +326,8 @@ def influx(build):
              to_ts(build['end_time'], seconds=True), build.get(
                  'cloud', 'null'), build.get('region', 'null'),
              build.get('provider', 'null'),
-             build.get('sova_reason', 'null'),
-             build.get('sova_tag', 'null'),
+             build.get('sova_reason', ''),
+             build.get('sova_tag', ''),
              build.get('container_prep_time_u', 0),
              to_ts(build['end_time'])))
 
