@@ -32,6 +32,7 @@ cat << EOF > delorean-report.yaml
         bash -ex ${CICO_USER_DIR}/${RDO_CONFIG_DIR_PROTECTED}/ci-scripts/tripleo-upstream/dlrnapi_report.sh
 EOF
 
+export ANSIBLE_HOST_KEY_CHECKING=False
 # Run the playbook.
 ansible-playbook -i "${ANSIBLE_HOSTS}" delorean-report.yaml
 
