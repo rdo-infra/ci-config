@@ -3327,10 +3327,995 @@
                 "fontSize":"110%",
                 "format":"none",
                 "gridPos":{
-                    "h":6,
+                    "h":7,
                     "w":6,
                     "x":0,
                     "y":34
+                },
+                "id":441,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-centos-7-scenario.*/ AND \"branch\" = 'master') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-7-scenario.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-7-scenario.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"24h",
+                "title":"RDO CentOS-7 scenario jobs",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of RDO  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"110%",
+                "format":"none",
+                "gridPos":{
+                    "h":7,
+                    "w":5,
+                    "x":6,
+                    "y":34
+                },
+                "id":442,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-centos-7-ovb.*/ AND \"branch\" = 'master') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-7-ovb.*/ AND \"branch\" = 'master') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-7-ovb.*/ AND \"branch\" = 'master') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"24h",
+                "title":"OVB CentOS-7 Master jobs",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of RDO  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"110%",
+                "format":"none",
+                "gridPos":{
+                    "h":7,
+                    "w":5,
+                    "x":11,
+                    "y":34
+                },
+                "id":444,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-centos-7-ovb.*/ AND \"branch\" = 'stable/train') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-7-ovb.*/ AND \"branch\" = 'stable/train') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-7-ovb.*/ AND \"branch\" = 'stable/train') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"24h",
+                "title":"OVB CentOS-7 Train jobs",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of RDO  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"110%",
+                "format":"none",
+                "gridPos":{
+                    "h":7,
+                    "w":4,
+                    "x":16,
+                    "y":34
+                },
+                "id":445,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-centos-7-ovb.*/ AND \"branch\" = 'stable/stein') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-7-ovb.*/ AND \"branch\" = 'stable/stein') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-7-ovb.*/ AND \"branch\" = 'stable/stein') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"24h",
+                "title":"OVB CentOS-7 Stein jobs",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of RDO  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"110%",
+                "format":"none",
+                "gridPos":{
+                    "h":7,
+                    "w":4,
+                    "x":20,
+                    "y":34
+                },
+                "id":446,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-centos-7-ovb.*/ AND \"branch\" = 'stable/rocky') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-7-ovb.*/ AND \"branch\" = 'stable/rocky') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-7-ovb.*/ AND \"branch\" = 'stable/rocky') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"24h",
+                "title":"OVB CentOS-7 Rocky jobs",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of RDO  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"110%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":6,
+                    "x":0,
+                    "y":41
                 },
                 "id":437,
                 "interval":null,
@@ -3525,9 +4510,9 @@
                 "format":"none",
                 "gridPos":{
                     "h":6,
-                    "w":5,
+                    "w":7,
                     "x":6,
-                    "y":34
+                    "y":41
                 },
                 "id":438,
                 "interval":null,
@@ -3551,7 +4536,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-rhel-8-ovb.*/) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-rhel-8-ovb.*/ AND \"branch\" = 'master') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -3595,7 +4580,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-rhel-8-ovb.*/) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-rhel-8-ovb.*/ AND \"branch\" = 'master') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -3651,7 +4636,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-rhel-8-ovb.*/) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-rhel-8-ovb.*/ AND \"branch\" = 'master') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -3703,7 +4688,7 @@
                     }
                 ],
                 "timeFrom":"24h",
-                "title":"RDO RHEL 8 ovb jobs",
+                "title":"OVB RHEL 8 master",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
@@ -3717,16 +4702,16 @@
                 },
                 "datasource":"telegraf",
                 "decimals":null,
-                "description":"Percentage of upstream  CentOS-8 jobs\n",
-                "fontSize":"120%",
+                "description":"Percentage of RDO  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"110%",
                 "format":"none",
                 "gridPos":{
                     "h":6,
                     "w":7,
-                    "x":11,
-                    "y":34
+                    "x":13,
+                    "y":41
                 },
-                "id":439,
+                "id":451,
                 "interval":null,
                 "legend":{
                     "header":"",
@@ -3748,7 +4733,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /tripleo-ci-centos-8.*/) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-rhel-8-ovb.*/ AND \"branch\" = 'stable/train') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -3782,13 +4767,7 @@
                                 "condition":"AND",
                                 "key":"type",
                                 "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
+                                "value":"rdo"
                             }
                         ]
                     },
@@ -3798,7 +4777,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci-centos-8.*/) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-rhel-8-ovb.*/ AND \"branch\" = 'stable/train') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -3832,7 +4811,7 @@
                                 "condition":"AND",
                                 "key":"type",
                                 "operator":"=",
-                                "value":"upstream"
+                                "value":"rdo"
                             },
                             {
                                 "condition":"AND",
@@ -3854,7 +4833,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci-centos-8.*/) AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-rhel-8-ovb.*/ AND \"branch\" = 'stable/train') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -3888,7 +4867,7 @@
                                 "condition":"AND",
                                 "key":"type",
                                 "operator":"=",
-                                "value":"upstream"
+                                "value":"rdo"
                             },
                             {
                                 "condition":"AND",
@@ -3906,210 +4885,7 @@
                     }
                 ],
                 "timeFrom":"24h",
-                "title":"Upstream CentOS-8",
-                "type":"grafana-piechart-panel",
-                "valueName":"current"
-            },
-            {
-                "aliasColors":{},
-                "breakPoint":"50%",
-                "cacheTimeout":null,
-                "combine":{
-                    "label":"Others",
-                    "threshold":0
-                },
-                "datasource":"telegraf",
-                "decimals":null,
-                "description":"Percentage of upstream  CentOS-8 jobs\n",
-                "fontSize":"120%",
-                "format":"none",
-                "gridPos":{
-                    "h":6,
-                    "w":6,
-                    "x":18,
-                    "y":34
-                },
-                "id":440,
-                "interval":null,
-                "legend":{
-                    "header":"",
-                    "percentage":true,
-                    "percentageDecimals":1,
-                    "show":true,
-                    "values":false
-                },
-                "legendType":"On graph",
-                "links":[],
-                "maxDataPoints":3,
-                "nullPointMode":"connected",
-                "pieType":"pie",
-                "strokeWidth":"2",
-                "targets":[
-                    {
-                        "alias":"PASS",
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci-centos-8.*/) AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"True"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"FAIL",
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT'  AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci-centos-8.*/) AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"B",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"False"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"TIMED_OUT"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"TIMED_OUT",
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci-centos-8.*/) AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"C",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"False"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"=",
-                                "value":"TIMED_OUT"
-                            }
-                        ]
-                    }
-                ],
-                "timeFrom":"24h",
-                "title":"RDO CentOS-8",
+                "title":"OVB RHEL 8 Train",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
@@ -4121,7 +4897,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":40
+                    "y":47
                 },
                 "id":2,
                 "links":[],
@@ -4190,7 +4966,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":47
+                    "y":54
                 },
                 "id":422,
                 "links":[],
@@ -4549,7 +5325,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":57
+                    "y":64
                 },
                 "id":63,
                 "links":[],
@@ -4908,7 +5684,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":67
+                    "y":74
                 },
                 "id":421,
                 "links":[],
@@ -5267,7 +6043,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":77
+                    "y":84
                 },
                 "id":423,
                 "links":[],
@@ -5626,7 +6402,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":87
+                    "y":94
                 },
                 "id":424,
                 "links":[],
@@ -5985,7 +6761,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":97
+                    "y":104
                 },
                 "id":425,
                 "links":[],
@@ -6344,7 +7120,7 @@
                     "h":11,
                     "w":24,
                     "x":0,
-                    "y":107
+                    "y":114
                 },
                 "id":426,
                 "links":[],
@@ -6698,7 +7474,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":118
+                    "y":125
                 },
                 "id":232,
                 "legend":{
@@ -6993,7 +7769,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":126
+                    "y":133
                 },
                 "id":370,
                 "panels":[],
@@ -7009,7 +7785,7 @@
                     "h":9,
                     "w":24,
                     "x":0,
-                    "y":127
+                    "y":134
                 },
                 "id":386,
                 "links":[
@@ -7372,7 +8148,7 @@
                     "h":9,
                     "w":24,
                     "x":0,
-                    "y":136
+                    "y":143
                 },
                 "id":392,
                 "links":[],
@@ -7708,7 +8484,7 @@
                     "h":5,
                     "w":24,
                     "x":0,
-                    "y":145
+                    "y":152
                 },
                 "id":391,
                 "links":[],
@@ -8043,7 +8819,7 @@
                     "h":5,
                     "w":24,
                     "x":0,
-                    "y":150
+                    "y":157
                 },
                 "id":381,
                 "links":[],
@@ -8376,7 +9152,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":155
+                    "y":162
                 },
                 "id":140,
                 "panels":[
@@ -9326,7 +10102,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":156
+                    "y":163
                 },
                 "id":340,
                 "panels":[],
@@ -9341,7 +10117,7 @@
                     "h":11,
                     "w":5,
                     "x":0,
-                    "y":157
+                    "y":164
                 },
                 "id":160,
                 "limit":"100",
@@ -9368,7 +10144,7 @@
                     "h":11,
                     "w":5,
                     "x":5,
-                    "y":157
+                    "y":164
                 },
                 "id":159,
                 "limit":"100",
@@ -9402,7 +10178,7 @@
                     "h":11,
                     "w":5,
                     "x":10,
-                    "y":157
+                    "y":164
                 },
                 "id":165,
                 "limit":"100",
@@ -9435,7 +10211,7 @@
                     "h":11,
                     "w":4,
                     "x":15,
-                    "y":157
+                    "y":164
                 },
                 "id":161,
                 "limit":"100",
@@ -9462,7 +10238,7 @@
                     "h":3,
                     "w":5,
                     "x":19,
-                    "y":157
+                    "y":164
                 },
                 "id":162,
                 "limit":"100",
@@ -9489,7 +10265,7 @@
                     "h":3,
                     "w":5,
                     "x":19,
-                    "y":160
+                    "y":167
                 },
                 "id":192,
                 "limit":10,
@@ -9516,7 +10292,7 @@
                     "h":5,
                     "w":5,
                     "x":19,
-                    "y":163
+                    "y":170
                 },
                 "id":198,
                 "limit":10,
@@ -9542,7 +10318,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":168
+                    "y":175
                 },
                 "id":408,
                 "links":[],
@@ -9763,7 +10539,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":176
+                    "y":183
                 },
                 "id":412,
                 "links":[],
@@ -9983,7 +10759,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":184
+                    "y":191
                 },
                 "id":411,
                 "links":[],
@@ -10203,7 +10979,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":192
+                    "y":199
                 },
                 "id":410,
                 "links":[],
@@ -10423,7 +11199,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":200
+                    "y":207
                 },
                 "id":409,
                 "links":[],
@@ -10640,7 +11416,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":208
+                    "y":215
                 },
                 "id":51,
                 "panels":[],
@@ -10658,7 +11434,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":209
+                    "y":216
                 },
                 "hideTimeOverride":true,
                 "id":157,
@@ -10889,7 +11665,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":216
+                    "y":223
                 },
                 "hideTimeOverride":true,
                 "id":307,
@@ -11121,7 +11897,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":223
+                    "y":230
                 },
                 "id":317,
                 "legend":{
@@ -11372,7 +12148,7 @@
                     "h":6,
                     "w":4,
                     "x":0,
-                    "y":229
+                    "y":236
                 },
                 "id":71,
                 "legend":{
@@ -11544,7 +12320,7 @@
                     "h":6,
                     "w":4,
                     "x":4,
-                    "y":229
+                    "y":236
                 },
                 "id":72,
                 "legend":{
@@ -11711,7 +12487,7 @@
                     "h":6,
                     "w":16,
                     "x":8,
-                    "y":229
+                    "y":236
                 },
                 "id":55,
                 "legend":{
@@ -11929,7 +12705,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":235
+                    "y":242
                 },
                 "id":79,
                 "legend":{
@@ -12127,7 +12903,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":235
+                    "y":242
                 },
                 "id":80,
                 "legend":{
@@ -12314,7 +13090,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":241
+                    "y":248
                 },
                 "id":398,
                 "legend":{
@@ -12486,7 +13262,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":241
+                    "y":248
                 },
                 "id":399,
                 "legend":{
@@ -12609,7 +13385,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":247
+                    "y":254
                 },
                 "id":82,
                 "panels":[],
@@ -12666,7 +13442,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":248
+                    "y":255
                 },
                 "hideTimeOverride":false,
                 "id":110,
@@ -12853,7 +13629,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":248
+                    "y":255
                 },
                 "hideTimeOverride":false,
                 "id":116,
@@ -13039,7 +13815,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":248
+                    "y":255
                 },
                 "id":130,
                 "legend":{
@@ -13174,7 +13950,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":252
+                    "y":259
                 },
                 "id":123,
                 "legend":{
@@ -13329,7 +14105,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":252
+                    "y":259
                 },
                 "id":125,
                 "legend":{
@@ -13519,7 +14295,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":252
+                    "y":259
                 },
                 "id":133,
                 "legend":{
@@ -13688,7 +14464,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":256
+                    "y":263
                 },
                 "hideTimeOverride":false,
                 "id":263,
@@ -13870,7 +14646,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":256
+                    "y":263
                 },
                 "id":273,
                 "legend":{
@@ -14050,7 +14826,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":256
+                    "y":263
                 },
                 "id":274,
                 "legend":{
@@ -14218,7 +14994,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":260
+                    "y":267
                 },
                 "hideTimeOverride":false,
                 "id":213,
@@ -14401,7 +15177,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":260
+                    "y":267
                 },
                 "id":214,
                 "legend":{
@@ -14582,7 +15358,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":260
+                    "y":267
                 },
                 "id":216,
                 "legend":{
@@ -14754,7 +15530,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":264
+                    "y":271
                 },
                 "hideTimeOverride":false,
                 "id":117,
@@ -14937,7 +15713,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":264
+                    "y":271
                 },
                 "id":118,
                 "legend":{
@@ -15122,7 +15898,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":264
+                    "y":271
                 },
                 "id":131,
                 "legend":{
@@ -15250,7 +16026,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":268
+                    "y":275
                 },
                 "id":298,
                 "panels":[],
@@ -15301,7 +16077,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":269
+                    "y":276
                 },
                 "hideTimeOverride":false,
                 "id":284,
@@ -15482,7 +16258,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":269
+                    "y":276
                 },
                 "id":286,
                 "legend":{
@@ -15616,7 +16392,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":273
+                    "y":280
                 },
                 "hideTimeOverride":false,
                 "id":404,
@@ -15797,7 +16573,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":273
+                    "y":280
                 },
                 "id":406,
                 "legend":{
@@ -15925,7 +16701,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":277
+                    "y":284
                 },
                 "id":414,
                 "panels":[],
@@ -15940,7 +16716,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":278
+                    "y":285
                 },
                 "id":416,
                 "links":[],
@@ -16078,7 +16854,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":278
+                    "y":285
                 },
                 "id":418,
                 "links":[],
@@ -16216,7 +16992,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":284
+                    "y":291
                 },
                 "id":417,
                 "links":[],
@@ -16354,7 +17130,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":284
+                    "y":291
                 },
                 "id":420,
                 "links":[],
@@ -16492,7 +17268,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":290
+                    "y":297
                 },
                 "id":419,
                 "links":[],
@@ -16628,7 +17404,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":296
+                    "y":303
                 },
                 "id":4,
                 "panels":[],
@@ -16646,7 +17422,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":297
+                    "y":304
                 },
                 "id":209,
                 "legend":{
@@ -16764,7 +17540,7 @@
                     "h":9,
                     "w":12,
                     "x":0,
-                    "y":305
+                    "y":312
                 },
                 "hideTimeOverride":true,
                 "id":196,
@@ -16900,7 +17676,7 @@
                     "h":9,
                     "w":12,
                     "x":12,
-                    "y":305
+                    "y":312
                 },
                 "hideTimeOverride":true,
                 "id":194,
@@ -17002,7 +17778,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":314
+                    "y":321
                 },
                 "id":173,
                 "panels":[],
@@ -17020,7 +17796,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":315
+                    "y":322
                 },
                 "id":175,
                 "legend":{
@@ -17195,7 +17971,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":315
+                    "y":322
                 },
                 "id":177,
                 "legend":{
@@ -17458,7 +18234,7 @@
                     "h":7,
                     "w":12,
                     "x":0,
-                    "y":321
+                    "y":328
                 },
                 "id":179,
                 "legend":{
@@ -17819,7 +18595,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":321
+                    "y":328
                 },
                 "id":181,
                 "legend":{
@@ -17980,7 +18756,7 @@
                     "h":6,
                     "w":7,
                     "x":0,
-                    "y":328
+                    "y":335
                 },
                 "id":183,
                 "legend":{
@@ -18095,7 +18871,7 @@
                     "h":6,
                     "w":9,
                     "x":7,
-                    "y":328
+                    "y":335
                 },
                 "id":185,
                 "legend":{
@@ -18210,7 +18986,7 @@
                     "h":6,
                     "w":8,
                     "x":16,
-                    "y":328
+                    "y":335
                 },
                 "id":187,
                 "legend":{
@@ -18365,7 +19141,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":334
+                    "y":341
                 },
                 "id":364,
                 "legend":{
