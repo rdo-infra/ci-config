@@ -1,5 +1,11 @@
 #!/bin/bash
 set -ex
+
+if [[ -n "${properties}" ]]; then
+    curl -s -O "${properties}"
+    source "./$(basename ${properties})"
+fi
+
 WORKSPACE=${WORKSPACE:-/tmp}
 JOB_NAME=${JOB_NAME:-rdo-ci}
 JOB_NAME_SIMPLIFIED=$((sed 's/scenario//; s/weirdo-//') <<< $JOB_NAME)
