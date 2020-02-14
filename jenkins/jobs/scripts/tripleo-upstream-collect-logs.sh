@@ -75,8 +75,7 @@ cat << EOF > collect-logs.yaml
         echo "All collected logs are available at ${LOG_DISPLAY_URL}"
 EOF
 
-export ANSIBLE_HOST_KEY_CHECKING=False
 # Run the playbooks.
-ansible-playbook -vvv -i "${ANSIBLE_HOSTS}" collect-logs.yaml
+ansible-playbook --ssh-extra-args="-o UserKnownHostsFile=/dev/null" -vvv -i "${ANSIBLE_HOSTS}" collect-logs.yaml
 
 popd
