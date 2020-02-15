@@ -1028,6 +1028,8 @@
                     "min":false,
                     "rightSide":true,
                     "show":true,
+                    "sort":"current",
+                    "sortDesc":true,
                     "total":false,
                     "values":true
                 },
@@ -1069,6 +1071,8 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
+                        "query":"SELECT median(\"duration\") FROM \"build\" WHERE $timeFilter GROUP BY \"cloud\", \"region\"",
+                        "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
                         "select":[
@@ -1155,6 +1159,8 @@
                     "min":false,
                     "rightSide":true,
                     "show":true,
+                    "sort":"current",
+                    "sortDesc":true,
                     "total":false,
                     "values":true
                 },
@@ -1196,6 +1202,8 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
+                        "query":"SELECT count(\"end\") FROM \"build\" WHERE $timeFilter GROUP BY \"cloud\", \"region\"",
+                        "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
                         "select":[
@@ -1220,6 +1228,396 @@
                 "timeRegions":[],
                 "timeShift":null,
                 "title":"Job builds count per cloud",
+                "tooltip":{
+                    "shared":false,
+                    "sort":0,
+                    "value_type":"individual"
+                },
+                "type":"graph",
+                "xaxis":{
+                    "buckets":null,
+                    "mode":"series",
+                    "name":null,
+                    "show":false,
+                    "values":[
+                        "current"
+                    ]
+                },
+                "yaxes":[
+                    {
+                        "format":"short",
+                        "label":"count",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    },
+                    {
+                        "format":"short",
+                        "label":"",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    }
+                ],
+                "yaxis":{
+                    "align":false,
+                    "alignLevel":1
+                }
+            },
+            {
+                "aliasColors":{},
+                "bars":true,
+                "dashLength":10,
+                "dashes":false,
+                "datasource":"telegraf",
+                "decimals":0,
+                "fill":1,
+                "gridPos":{
+                    "h":8,
+                    "w":24,
+                    "x":0,
+                    "y":53
+                },
+                "id":18,
+                "legend":{
+                    "alignAsTable":true,
+                    "avg":false,
+                    "current":true,
+                    "max":false,
+                    "min":false,
+                    "rightSide":true,
+                    "show":true,
+                    "sort":"current",
+                    "sortDesc":true,
+                    "total":false,
+                    "values":true
+                },
+                "lines":false,
+                "linewidth":1,
+                "links":[],
+                "nullPointMode":"null",
+                "percentage":false,
+                "pointradius":5,
+                "points":false,
+                "renderer":"flot",
+                "seriesOverrides":[
+                    {
+                        "alias":"/build.count/"
+                    },
+                    {
+                        "alias":"/build.median/"
+                    }
+                ],
+                "spaceLength":10,
+                "stack":false,
+                "steppedLine":false,
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "cloud"
+                                ],
+                                "type":"tag"
+                            },
+                            {
+                                "params":[
+                                    "region"
+                                ],
+                                "type":"tag"
+                            }
+                        ],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"end\") FROM \"build\" WHERE ( \"result\" = 'TIMED_OUT' ) AND  $timeFilter GROUP BY \"cloud\", \"region\"",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "thresholds":[],
+                "timeFrom":null,
+                "timeRegions":[],
+                "timeShift":null,
+                "title":"TIMED OUT Job count per cloud",
+                "tooltip":{
+                    "shared":false,
+                    "sort":0,
+                    "value_type":"individual"
+                },
+                "type":"graph",
+                "xaxis":{
+                    "buckets":null,
+                    "mode":"series",
+                    "name":null,
+                    "show":false,
+                    "values":[
+                        "current"
+                    ]
+                },
+                "yaxes":[
+                    {
+                        "format":"short",
+                        "label":"count",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    },
+                    {
+                        "format":"short",
+                        "label":"",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    }
+                ],
+                "yaxis":{
+                    "align":false,
+                    "alignLevel":1
+                }
+            },
+            {
+                "aliasColors":{},
+                "bars":true,
+                "dashLength":10,
+                "dashes":false,
+                "datasource":"telegraf",
+                "decimals":0,
+                "fill":1,
+                "gridPos":{
+                    "h":8,
+                    "w":24,
+                    "x":0,
+                    "y":61
+                },
+                "id":19,
+                "legend":{
+                    "alignAsTable":true,
+                    "avg":false,
+                    "current":true,
+                    "max":false,
+                    "min":false,
+                    "rightSide":true,
+                    "show":true,
+                    "sort":"current",
+                    "sortDesc":true,
+                    "total":false,
+                    "values":true
+                },
+                "lines":false,
+                "linewidth":1,
+                "links":[],
+                "nullPointMode":"null",
+                "percentage":false,
+                "pointradius":5,
+                "points":false,
+                "renderer":"flot",
+                "seriesOverrides":[
+                    {
+                        "alias":"/build.count/"
+                    },
+                    {
+                        "alias":"/build.median/"
+                    }
+                ],
+                "spaceLength":10,
+                "stack":false,
+                "steppedLine":false,
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "cloud"
+                                ],
+                                "type":"tag"
+                            },
+                            {
+                                "params":[
+                                    "region"
+                                ],
+                                "type":"tag"
+                            }
+                        ],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"end\") FROM \"build\" WHERE (\"result\" != 'TIMED_OUT' AND \"result\" != 'SKIPPED' AND \"passed\" = 'False' ) AND  $timeFilter GROUP BY \"cloud\", \"region\"",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "thresholds":[],
+                "timeFrom":null,
+                "timeRegions":[],
+                "timeShift":null,
+                "title":"FAILED Job count per cloud",
+                "tooltip":{
+                    "shared":false,
+                    "sort":0,
+                    "value_type":"individual"
+                },
+                "type":"graph",
+                "xaxis":{
+                    "buckets":null,
+                    "mode":"series",
+                    "name":null,
+                    "show":false,
+                    "values":[
+                        "current"
+                    ]
+                },
+                "yaxes":[
+                    {
+                        "format":"short",
+                        "label":"count",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    },
+                    {
+                        "format":"short",
+                        "label":"",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    }
+                ],
+                "yaxis":{
+                    "align":false,
+                    "alignLevel":1
+                }
+            },
+            {
+                "aliasColors":{},
+                "bars":true,
+                "dashLength":10,
+                "dashes":false,
+                "datasource":"telegraf",
+                "decimals":0,
+                "fill":1,
+                "gridPos":{
+                    "h":8,
+                    "w":24,
+                    "x":0,
+                    "y":69
+                },
+                "id":17,
+                "legend":{
+                    "alignAsTable":true,
+                    "avg":false,
+                    "current":true,
+                    "max":false,
+                    "min":false,
+                    "rightSide":true,
+                    "show":true,
+                    "sort":"current",
+                    "sortDesc":true,
+                    "total":false,
+                    "values":true
+                },
+                "lines":false,
+                "linewidth":1,
+                "links":[],
+                "nullPointMode":"null",
+                "percentage":false,
+                "pointradius":5,
+                "points":false,
+                "renderer":"flot",
+                "seriesOverrides":[
+                    {
+                        "alias":"/build.count/"
+                    },
+                    {
+                        "alias":"/build.median/"
+                    }
+                ],
+                "spaceLength":10,
+                "stack":false,
+                "steppedLine":false,
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "cloud"
+                                ],
+                                "type":"tag"
+                            },
+                            {
+                                "params":[
+                                    "region"
+                                ],
+                                "type":"tag"
+                            }
+                        ],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"end\") FROM \"build\" WHERE (\"passed\" = 'True' ) AND  $timeFilter GROUP BY \"cloud\", \"region\"",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "thresholds":[],
+                "timeFrom":null,
+                "timeRegions":[],
+                "timeShift":null,
+                "title":"Passing Job count per cloud",
                 "tooltip":{
                     "shared":false,
                     "sort":0,
@@ -1306,7 +1704,7 @@
                     "h":9,
                     "w":24,
                     "x":0,
-                    "y":53
+                    "y":77
                 },
                 "id":16,
                 "legend":{
