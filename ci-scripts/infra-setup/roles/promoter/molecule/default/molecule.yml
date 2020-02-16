@@ -1,32 +1,17 @@
 ---
-dependency:
-  name: galaxy
 driver:
-  name: docker
-log: true
+  name: delegated
 
 platforms:
-  - name: ${MOLECULE_PLATFORM:-centos7}
-    hostname: ${MOLECULE_PLATFORM:-centos7}
-    image: ${MOLECULE_IMAGE:-centos:7}
-    privileged: True
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-      - /var/run/docker.sock:/tmp/docker.sock
-    command: "/usr/sbin/init"
-    dockerfile: ../Dockerfile.j2
+  - name: instance
     easy_install:
       - pip
     environment: &env
       http_proxy: "{{ lookup('env', 'http_proxy') }}"
       https_proxy: "{{ lookup('env', 'https_proxy') }}"
-    registry:
-      url: ${MOLECULE_CONTAINER_REGISTRY_URL:-docker.io}
 
 provisioner:
   name: ansible
-  env:
-    ANSIBLE_STDOUT_CALLBACK: yaml
   inventory:
     host_vars:
       centos7:

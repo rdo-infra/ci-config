@@ -16,8 +16,6 @@ driver:
     ansible_connection_options:
       ansible_connection: local
 
-log: true
-
 platforms:
   - name: instance
 
@@ -34,16 +32,9 @@ provisioner:
           instance:
             ansible_connection: local
             ansible_python_interpreter: ${MOLECULE_INTERPRETER:-/home/zuul/test-python/bin/python}
-  log: true
-  env:
-    ANSIBLE_STDOUT_CALLBACK: yaml
 
 scenario:
-  name: container-push
   test_sequence:
     - prepare
     - converge
     - verify
-
-verifier:
-  name: testinfra
