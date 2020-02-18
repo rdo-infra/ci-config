@@ -1,7 +1,7 @@
 ---
 
 - hosts: all
-  gather_facts: false
+#  gather_facts: false
   vars:
     molecule_testing: true
     workspace: "/tmp"
@@ -19,9 +19,6 @@
         - name: test get-hash.yaml for component job
           include_tasks: ../../tasks/get_hash.yaml
           vars:
-            # should be component-ci-testing instead
-            ansible_distribution: CentOS
-            ansible_distribution_major_version: 8
             component: compute
         - name: validate hash_info for component job
           shell: |
@@ -43,8 +40,6 @@
         - name: test get-hash.yaml for integration job
           include_tasks: ../../tasks/get_hash.yaml
           vars:
-            ansible_distribution: CentOS
-            ansible_distribution_major_version: 8
             component: ''
         - name: validate hash_info for integration job
           shell: |
@@ -57,7 +52,6 @@
         - name: test get-hash.yaml for legacy job
           include_tasks: ../../tasks/get_hash.yaml
           vars:
-            ansible_distribution: CentOS
             ansible_distribution_major_version: 7
             component: ''
         - name: validate hash_info for legacy job
