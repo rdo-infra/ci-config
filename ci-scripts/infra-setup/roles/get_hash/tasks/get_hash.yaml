@@ -1,4 +1,19 @@
 ---
+- name: debugging {{ component }}
+  debug:
+    msg: "component == {{ component }}"
+  ignore_errors: yes
+
+- name: debugging {{ ansible_distribution }}
+  debug:
+    msg: "ansible_distribution == {{ ansible_distribution }}"
+  ignore_errors: yes
+
+- name: debugging {{ ansible_distribution_major_version }}
+  debug:
+    msg: "ansible_distribution_major_version == {{ ansible_distribution_major_version }}"
+  ignore_errors: yes
+
 - name: Ensure legacy workspace directory
   file:
     path: '{{ workspace }}'
@@ -69,7 +84,9 @@
     - name: converge into full_hash
       set_fact:
          full_hash: "{{ commit_hash }}_{{ distro_hash[:8] }}"
-  when: commit_url is defined
+  when:
+    - commit_url is defined
+    - component is defined or ansible_distribution_major_version|int >= 8
 
 - name: get hash from md5 file
   block:
@@ -83,7 +100,10 @@
     - name: get hash
       set_fact:
         full_hash: "{{ md5_hash.stdout }}"
-  when: md5_url is defined
+  when:
+    - md5_url is defined
+    - component is not defined or component|length == 0
+    - ansible_distribution_major_version|int >= 8
 
 - name: create hash_info file
   copy:
