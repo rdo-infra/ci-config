@@ -32,6 +32,9 @@ cat << EOF > delorean-report.yaml
         bash -ex ${CICO_USER_DIR}/${RDO_CONFIG_DIR_PROTECTED}/ci-scripts/tripleo-upstream/dlrnapi_report.sh
 EOF
 
+# We keep connecting onto the same hosts that are continuously reinstalled
+export ANSIBLE_HOST_KEY_CHECKING=False
+
 # Run the playbook.
 ansible-playbook --ssh-extra-args="-o UserKnownHostsFile=/dev/null" -i "${ANSIBLE_HOSTS}" delorean-report.yaml
 

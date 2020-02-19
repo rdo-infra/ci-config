@@ -75,6 +75,10 @@ cat << EOF > collect-logs.yaml
         echo "All collected logs are available at ${LOG_DISPLAY_URL}"
 EOF
 
+
+# We keep connecting onto the same hosts that are continuously reinstalled
+export ANSIBLE_HOST_KEY_CHECKING=False
+
 # Run the playbooks.
 ansible-playbook --ssh-extra-args="-o UserKnownHostsFile=/dev/null" -vvv -i "${ANSIBLE_HOSTS}" collect-logs.yaml
 
