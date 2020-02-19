@@ -54,6 +54,7 @@
 - name: discover the hashes url (integration)
   set_fact:
     md5_url: "{{ dlrn_hash_baseurl }}/{{ promote_source }}/delorean.repo.md5"
+    cacheable: true
   when:
     - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
     - ansible_distribution_major_version|int >= 8
@@ -95,6 +96,8 @@
     - name: get hash
       set_fact:
         full_hash: "{{ md5_hash.stdout }}"
+    - name: create component hash files
+      include_tasks: write_component_hashes.yaml
   when: md5_url is defined
 
 - name: create hash_info file
