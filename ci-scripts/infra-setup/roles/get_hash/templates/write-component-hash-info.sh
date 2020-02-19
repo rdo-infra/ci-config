@@ -1,0 +1,20 @@
+set -e
+
+MD5_REPO="$WORKSPACE/delorean.repo"
+COMP_REPO_URL_LIST=$(cat $MD5_REPO  | grep  'baseurl=' | cut -d '=' -f 2)
+echo $COMP_REPO_URL_LIST
+
+for REPO_URL in $COMP_DRLN_REPO_LIST; do
+    curl -sLo commit.yaml $REPO_URL/commit.yaml
+    COMPONENT_NAME=$(shyaml get-value commits.0.component < $WORKSPACE/commit.yaml)
+    COMMIT_HASH=$(shyaml get-value commits.0.commit_hash < $WORKSPACE/commit.yaml)
+    DISTRO_HASH=$(shyaml get-value commits.0.distro_hash < $WORKSPACE/commit.yaml)
+    FULL_HASH=${COMMIT_HASH}_${DISTRO_HASH:0:8}
+
+    cat > $WORKSPACE/${COMPONENT_NAME}_hash_info.sh << EOF
+    export FULL_HASH=$FULL_HASH
+    export COMMIT_HASH=$COMMIT_HASH
+    export DISTRO_HASH=$DISTRO_HASH
+    export COMPONENT_NAME=$COMPONENT_NAME
+EOF
+done
