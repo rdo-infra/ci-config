@@ -19,7 +19,11 @@ set -u
 : ${HTTP_PROTOCOL:="https"}
 : ${COMPONENT_NAME:=""}
 
-DLRNAPI_URL="${HTTP_PROTOCOL}://${DLRNAPI_SERVER}/api-${DLRNAPI_DISTRO,,}-$RELEASE"
+if [[ "$DLRNAPI_DISTRO" == "CentOS" && "$DLRNAPI_DISTRO_VERSION" -ge "8" ]]; then
+    DLRNAPI_URL="${HTTP_PROTOCOL}://${DLRNAPI_SERVER}/api-${DLRNAPI_DISTRO,,}${DLRNAPI_DISTRO_VERSION}-$RELEASE"
+else
+    DLRNAPI_URL="${HTTP_PROTOCOL}://${DLRNAPI_SERVER}/api-${DLRNAPI_DISTRO,,}-$RELEASE"
+fi
 if [[ "$RELEASE" == "master"  && "$DLRNAPI_DISTRO" == "CentOS" ]]; then
     # for master we have two DLRN builders, use the "upper constraint" one that
     # places restrictions on the maximum version of all dependencies
