@@ -95,6 +95,8 @@
     - name: get hash
       set_fact:
         full_hash: "{{ md5_hash.stdout }}"
+    - name: create component hash files
+      include_tasks: write_component_hashes.yaml
   when: md5_url is defined
 
 - name: create hash_info file
