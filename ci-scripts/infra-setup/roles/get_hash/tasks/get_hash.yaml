@@ -6,7 +6,19 @@
 
 - name: discover dlrnapi url
   set_fact:
-    dlrnapi_url: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/api-{{ ansible_distribution | lower }}-{{ release }}"
+    dlrnapi_url:
+       "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/api-{{ ansible_distribution | lower }}-{{ release }}"
+  when:
+    - ansible_distribution == 'RedHat' or ansible_distribution_major_version|int < 8
+    - component is not defined or component|length == 0
+
+- name: discover dlrnapi url
+  set_fact:
+    dlrnapi_url:
+      "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/api-{{ ansible_distribution | lower }}{{ ansible_distribution_major_version }}-{{ release }}"
+  when:
+    - ansible_distribution == "CentOS"
+    - ansible_distribution_major_version|int >= 8
 
 - name: use the upper constraint url for master
   set_fact:
