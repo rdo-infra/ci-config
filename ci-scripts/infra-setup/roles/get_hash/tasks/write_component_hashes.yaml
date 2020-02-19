@@ -1,0 +1,23 @@
+---
+- name: discover the md5 repo file
+  set_fact:
+    md5_url:
+      "{{ dlrn_hash_baseurl }}/{{ promote_source }}/delorean.repo"
+    rdo_infra_ci_config:
+      "{{ ansible_user_dir }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
+    workspace:
+      "{{ ansible_user_dir }}/workspace"
+
+- name: get md5 repo file
+  get_url:
+    url: "{{ md5_url }}"
+    dest: "{{ workspace }}/delorean.repo"
+
+- name: create the component hash info files
+  shell:
+    cmd: |
+      export WORKSPACE="{{ workspace }}"
+      export DLRN_VENV_SCRIPT_PATH="{{ rdo_infra_ci_config }}/ci-scripts/tripleo-upstream"
+      bash -xe {{ rdo_ci_config_repo }}/ci-scripts/tripleo-upstream/write-component-hash-info.sh
+    chdir: '{{ workspace }}'
+  changed_when: true
