@@ -1,0 +1,21 @@
+---
+- name: discover the md5 repo file
+  set_fact:
+    md5_repo_url:
+      "{{ dlrn_hash_baseurl }}/{{ promote_source }}/delorean.repo"
+    workspace:
+      "{{ ansible_user_dir }}/workspace"
+
+- name: get md5 repo file
+  get_url:
+    url: "{{ md5_repo_url }}"
+    dest: "{{ workspace }}/delorean.repo"
+
+- name: get baseurls from delorean.repo
+  shell:
+    cmd: "cat {{ workspace }}/delorean.repo  | grep  'baseurl=' | cut -d '=' -f 2"
+  register: component_base_url_list
+
+- name: create hash_info file for each component
+  include_tasks: combined_get_hash_write_info.yaml
+  loop: "{{ component_base_url_list.stdout_lines }}"
