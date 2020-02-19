@@ -1,0 +1,30 @@
+---
+- name: get commit.yaml file
+  get_url:
+    url: "{{ commit_url }}"
+    dest: "{{ workspace }}/commit.yaml"
+
+- name: fetch to ansible controller
+  fetch:
+    dest: "/tmp/"
+    src: "{{ workspace }}/commit.yaml"
+    flat: yes
+
+- name: load hashes
+  include_vars:
+    file: "/tmp/commit.yaml"
+    name: hashes
+
+- name: get hashes
+  set_fact:
+    distro_hash: "{{ hashes['commits'][0]['distro_hash'] }}"
+    commit_hash: "{{ hashes['commits'][0]['commit_hash'] }}"
+
+- name: converge into full_hash
+  set_fact:
+     full_hash: "{{ commit_hash }}_{{ distro_hash[:8] }}"
+
+- name: get component if it exists and is not known
+  set_fact:
+     component: "{{ hashes['commits'][0]['component'] }}"
+  when: get_component_from_hash|default(false)|bool

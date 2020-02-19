@@ -1,0 +1,33 @@
+---
+- name: discover the md5 repo file
+  set_fact:
+    md5_url:
+      "{{ dlrn_hash_baseurl }}/{{ promote_source }}/delorean.repo"
+    rdo_infra_ci_config:
+      "{{ ansible_user_dir }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
+    workspace:
+      "{{ ansible_user_dir }}/workspace"
+
+- name: get md5 repo file
+  get_url:
+    url: "{{ md5_url }}"
+    dest: "{{ workspace }}/delorean.repo"
+
+- name: get baseurls from delorean.repo
+  shell:
+    cmd: "cat {{ workspace }}/delorean.repo  | grep  'baseurl=' | cut -d '=' -f 2"
+  register: component_base_url_list
+
+- name: create hash_info file for each component
+  with_items: "{{ component_base_url_list.stdout_lines }}"
+  block:
+    - name: get component commit and distro hash
+      import_tasks: get_hashes_from_commit_yaml.yaml
+      vars:
+        commit_url: "{{ item }}/commit.yaml"
+        get_component_from_hash: true
+
+    - name: write the component hash info file
+      import_tasks: create_hash_info_file.yaml
+      vars:
+         hash_info_file_name: "{{ component }}_hash_info.sh"

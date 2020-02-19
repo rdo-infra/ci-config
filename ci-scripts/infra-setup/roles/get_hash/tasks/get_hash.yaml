@@ -54,33 +54,14 @@
 - name: discover the hashes url (integration)
   set_fact:
     md5_url: "{{ dlrn_hash_baseurl }}/{{ promote_source }}/delorean.repo.md5"
+    cacheable: true
   when:
     - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
     - ansible_distribution_major_version|int >= 8
     - component is not defined or component|length == 0
 
 - name: get hashes from commit.yaml
-  block:
-    - name: get commit.yaml file
-      get_url:
-        url: "{{ commit_url }}"
-        dest: "{{ workspace }}/commit.yaml"
-    - name: fetch to ansible controller
-      fetch:
-        dest: "/tmp/"
-        src: "{{ workspace }}/commit.yaml"
-        flat: yes
-    - name: load hashes
-      include_vars:
-        file: "/tmp/commit.yaml"
-        name: hashes
-    - name: get hashes
-      set_fact:
-        distro_hash: "{{ hashes['commits'][0]['distro_hash'] }}"
-        commit_hash: "{{ hashes['commits'][0]['commit_hash'] }}"
-    - name: converge into full_hash
-      set_fact:
-         full_hash: "{{ commit_hash }}_{{ distro_hash[:8] }}"
+  import_tasks: get_hashes_from_commit_yaml.yaml
   when: commit_url is defined
 
 - name: get hash from md5 file
@@ -95,15 +76,9 @@
     - name: get hash
       set_fact:
         full_hash: "{{ md5_hash.stdout }}"
+    - name: create component hash files
+      import_tasks: write_component_hashes.yaml
   when: md5_url is defined
 
 - name: create hash_info file
-  copy:
-    dest: "{{ workspace }}/hash_info.sh"
-    content: |
-      export DLRNAPI_URL="{{ dlrnapi_url }}"
-      export RELEASE="{{ release }}"
-      export FULL_HASH="{{ full_hash }}"
-      export COMMIT_HASH="{{ commit_hash | default('') }}"
-      export DISTRO_HASH="{{ distro_hash | default('') }}"
-      export COMPONENT_NAME="{{ component | default('') }}"
+  import_tasks: create_hash_info_file.yaml
