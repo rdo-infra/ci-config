@@ -76,9 +76,13 @@
     - name: get hash
       set_fact:
         full_hash: "{{ md5_hash.stdout }}"
-    - name: create component hash files
-      import_tasks: write_component_hashes.yaml
   when: md5_url is defined
 
 - name: create hash_info file
   import_tasks: create_hash_info_file.yaml
+
+- name: create component hash files
+  import_tasks: write_component_hashes.yaml
+  when:
+    - md5_url is defined
+    - promote_target is defined
