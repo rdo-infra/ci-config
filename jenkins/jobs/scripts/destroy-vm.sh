@@ -15,7 +15,7 @@ CLOUD_CONFIG=${CLOUD_CONFIG:-~/.config/openstack/clouds.yaml}
 LOGSERVER="logserver.rdoproject.org ansible_user=loguser"
 
 # Ansible config
-CLOUD=${CLOUD:-rdo-cloud}
+CLOUD=${CLOUD:-vexxhost}
 NAME="${JOB_NAME_SIMPLIFIED}-${BUILD_NUMBER}"
 TIMEOUT=${TIMEOUT:-120}
 VM_INFO="${WORKSPACE}/vminfo.json"
