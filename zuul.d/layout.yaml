@@ -1,7 +1,7 @@
 - job:
     name: sova-tracking-jobs
     run: ci-scripts/infra-setup/scheduler/sova-check.yml
-    nodeset: rdo-fedora-28
+    nodeset: rdo-centos-8
 
 - job:
     name: tox-jjb
@@ -27,6 +27,7 @@
             voting: false
             files:
               - ^ci-scripts/infra-setup/scheduler/.*$
+              - ^zuul.d/layout.yaml$
         - rdo-tox-molecule: &molecule
             voting: false
             files:
@@ -66,30 +67,32 @@
             success-url: "tox/reports.html"
             failure-url: "tox/reports.html"
             files:
+              - .*\.py
               - ^ci-scripts/infra-.*/.*
-              - ^requirements.txt
-              - ^test-requirements.txt
-              - ^setup.cfg
-              - ^setup.py
-              - ^tox.ini
               - ^molecule/.*
               - ^playbooks/.*
-              - .*\.py
+              - ^requirements.txt
+              - ^setup.cfg
+              - ^setup.py
+              - ^test-requirements.txt
+              - ^tox.ini
+              - ^zuul.d/layout.yaml$
         - tox-py36: &py36
             pre-run: playbooks/pre-run-docker.yml
             success-url: "tox/reports.html"
             failure-url: "tox/reports.html"
-            nodeset: rdo-fedora-28
+            nodeset: rdo-centos-8
             files:
+              - .*\.py
               - ^ci-scripts/infra-.*/.*
-              - ^requirements.txt
-              - ^test-requirements.txt
-              - ^setup.cfg
-              - ^setup.py
-              - ^tox.ini
               - ^molecule/.*
               - ^playbooks/.*
-              - .*\.py
+              - ^requirements.txt
+              - ^setup.cfg
+              - ^setup.py
+              - ^test-requirements.txt
+              - ^tox.ini
+              - ^zuul.d/layout.yaml$
     gate:
       jobs:
         - tox-jjb
