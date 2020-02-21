@@ -4,7 +4,7 @@
     path: '{{ workspace }}'
     state: directory
 
-- name: discover dlrnapi url for legacy jobs
+- name: discover dlrnapi url (for legacy jobs only)
   set_fact:
     dlrnapi_url:
        "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/api-{{ ansible_distribution | lower }}-{{ release }}"
@@ -12,7 +12,7 @@
     - ansible_distribution == 'RedHat' or ansible_distribution_major_version|int < 8
     - component is not defined or component|length == 0
 
-- name: discover dlrnapi url for centos 8
+- name: discover dlrnapi url (for centos8 jobs)
   set_fact:
     dlrnapi_url:
       "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/api-{{ ansible_distribution | lower }}{{ ansible_distribution_major_version }}-{{ release }}"
@@ -20,7 +20,7 @@
     - ansible_distribution == "CentOS"
     - ansible_distribution_major_version|int >= 8
 
-- name: use the upper constraint url for master
+- name: use the upper constraint url (for master)
   set_fact:
     dlrnapi_url: "{{ dlrnapi_url }}-uc"
   when: release == 'master'
@@ -60,11 +60,11 @@
     - ansible_distribution_major_version|int >= 8
     - component is not defined or component|length == 0
 
-- name: get hashes from commit.yaml
+- name: get hashes from commit.yaml (component and legacy jobs)
   import_tasks: get_hashes_from_commit_yaml.yaml
   when: commit_url is defined
 
-- name: get hash from md5 file
+- name: get aggregated hash from md5 file (integration jobs)
   block:
     - name: get md5 file
       get_url:
