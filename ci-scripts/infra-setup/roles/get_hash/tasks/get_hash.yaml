@@ -11,7 +11,7 @@
   when:
     - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
     - ansible_distribution_major_version|int < 8
-    - component is not defined or component|length == 0
+    - component|default(None) == None
 
 - name: discover dlrnapi url (for centos8/rhel8 jobs)
   set_fact:
@@ -37,7 +37,7 @@
     commit_url: "{{ dlrn_hash_baseurl }}/{{ promote_source }}/commit.yaml"
   when:
     - ansible_distribution == 'RedHat' or ansible_distribution_major_version|int < 8
-    - component is not defined or component|length == 0
+    - component|default(None) == None
 
 # commit/distro hashes for component pipeline (an unique commit hash for each component)
 # component (centos8/rhel8)
@@ -47,8 +47,7 @@
   when:
     - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
     - ansible_distribution_major_version|int >= 8
-    - component is defined
-    - component|length > 0
+    - component|default(None) != None
 
 # md5 hash for integration jobs (md5 build id for all components promoted into individual repos)
 # integration (centos8/rhel8)
@@ -59,7 +58,7 @@
   when:
     - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
     - ansible_distribution_major_version|int >= 8
-    - component is not defined or component|length == 0
+    - component|default(None) == None
 
 - name: get hashes from commit.yaml (component and legacy jobs)
   import_tasks: get_hashes_from_commit_yaml.yaml
