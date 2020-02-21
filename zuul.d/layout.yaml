@@ -19,8 +19,12 @@
               - ^playbooks/staging.*
               - ^requirements.txt
               - ^test-requirements.txt
+            # nv until we fix tripleo-common dependencies
+            voting: false
         - tripleo-ci-promotion-staging-legacy:
             files: *integration
+            # nv until we fix tripleo-common dependencies
+            voting: false
         - sova-tracking-jobs: &sovatrack
             # broken for more than a month, incorrect file pattern as job
             # can be brake by changes outside it.
@@ -62,7 +66,6 @@
               - ^test-requirements.txt
         - tox-jjb
         - tox-py27: &py27
-            voting: false
             pre-run: playbooks/pre-run-docker.yml
             success-url: "tox/reports.html"
             failure-url: "tox/reports.html"
@@ -94,8 +97,8 @@
     gate:
       jobs:
         - tox-jjb
-        # - tox-py27:
-        #     <<: *py27
+        - tox-py27:
+            <<: *py27
         - tox-py36:
             <<: *py36
 
