@@ -5,7 +5,6 @@
     molecule_testing: true
     workspace: "/tmp"
     release: master
-    promote_source: consistent
     zuul:
       molecule: true
   tasks:
@@ -38,6 +37,7 @@
           include_tasks: ../../tasks/get_hash.yaml
           vars:
             component: compute
+            promote_source: consistent
         - name: validate hash_info for component job
           shell: |
             unset COMMIT_HASH
@@ -57,17 +57,11 @@
 
     - name: get-hash for INTEGRATION jobs (.md5)
       block:
-        # TODO(rfolco): Remove this injection when md5
-        # are created by delorean
-        - name: inject a md5 file for testing
-          copy:
-            content: d502da8dd4c7f74376f12076b3e5c4ad
-            dest: "{{ workspace }}/delorean.repo.md5"
-            force: yes
         - name: test get-hash.yaml for integration job
           include_tasks: ../../tasks/get_hash.yaml
           vars:
             component: !!null
+            promote_source: promoted-components
         - name: validate hash_info for integration job
           shell: |
             unset FULL_HASH
@@ -86,6 +80,7 @@
           vars:
             ansible_distribution_major_version: 7
             component: !!null
+            promote_source: consistent
         - name: validate hash_info for legacy job
           shell: |
             unset COMMIT_HASH
