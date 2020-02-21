@@ -5,30 +5,13 @@ driver:
 platforms:
   - name: ${MOLECULE_PLATFORM:-centos8}
     hostname: ${MOLECULE_PLATFORM:-centos8}
-    image: ${MOLECULE_IMAGE:-centos:8}
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-      - /var/run/docker.sock:/tmp/docker.sock
-    command: "/usr/sbin/init"
-    dockerfile: ../Dockerfile.j2
-    easy_install:
-      - pip
+    image: pycontribs/centos:8
     environment: &env
       http_proxy: "{{ lookup('env', 'http_proxy') }}"
       https_proxy: "{{ lookup('env', 'https_proxy') }}"
-    registry:
-      url: ${MOLECULE_CONTAINER_REGISTRY_URL:-docker.io}
 
 provisioner:
   name: ansible
-  inventory:
-    host_vars:
-      fedora30:
-        ansible_python_interpreter: "/usr/bin/python3"
-      centos8:
-        ansible_python_interpreter: "/usr/bin/python3"
-      rhel8:
-        ansible_python_interpreter: "/usr/bin/python3"
 
 scenario:
   test_sequence:
