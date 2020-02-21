@@ -1,7 +1,6 @@
 ---
 
 - hosts: all
-  gather_facts: false
   vars:
     molecule_testing: true
     workspace: "/tmp"
@@ -38,15 +37,16 @@
         - name: test get-hash.yaml for component job
           include_tasks: ../../tasks/get_hash.yaml
           vars:
-            # should be component-ci-testing instead
-            ansible_distribution: CentOS
-            ansible_distribution_major_version: 8
             component: compute
         - name: validate hash_info for component job
           shell: |
+            unset COMMIT_HASH
+            unset DISTRO_HASH
             unset FULL_HASH
             unset COMPONENT_NAME
             source {{ workspace }}/hash_info.sh
+            [[ -n ${COMMIT_HASH+x} ]] || exit 1
+            [[ -n ${DISTRO_HASH+x} ]] || exit 1
             [[ -n ${FULL_HASH+x} ]] || exit 1
             [[ -n ${COMPONENT_NAME+x} ]] || exit 1
 
@@ -67,9 +67,7 @@
         - name: test get-hash.yaml for integration job
           include_tasks: ../../tasks/get_hash.yaml
           vars:
-            ansible_distribution: CentOS
-            ansible_distribution_major_version: 8
-            component: ''
+            component: !!null
         - name: validate hash_info for integration job
           shell: |
             unset FULL_HASH
@@ -86,11 +84,16 @@
         - name: test get-hash.yaml for legacy job
           include_tasks: ../../tasks/get_hash.yaml
           vars:
-            ansible_distribution: CentOS
             ansible_distribution_major_version: 7
-            component: ''
+            component: !!null
         - name: validate hash_info for legacy job
           shell: |
+            unset COMMIT_HASH
+            unset DISTRO_HASH
             unset FULL_HASH
+            unset COMPONENT_NAME
             source {{ workspace }}/hash_info.sh
+            [[ -n ${COMMIT_HASH+x} ]] || exit 1
+            [[ -n ${DISTRO_HASH+x} ]] || exit 1
             [[ -n ${FULL_HASH+x} ]] || exit 1
+            [[ -n ${COMPONENT_NAME+x} ]] || exit 1
