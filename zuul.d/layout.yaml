@@ -27,13 +27,21 @@
             voting: false
             files:
               - ^ci-scripts/infra-setup/scheduler/.*$
+
         - rdo-tox-molecule: &molecule
             files:
+              - .*molecule.*
               - ^ci-scripts/infra-setup/roles/get_hash/.*$
               - ^ci-scripts/infra-setup/roles/promoter/.*$
               - ^requirements.txt
+              - ^requirements.txt
               - ^test-requirements.txt
-              - ^tox.ini
+              - ^tox.ini$
+              - ^zuul.d/layout.yaml
+
+        - rdo-tox-molecule-delegated-centos-8:
+            <<: *molecule
+
         - molecule-container-push:
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
