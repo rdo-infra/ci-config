@@ -14,6 +14,25 @@
     - name: Include required variables
       include_vars: ../../defaults/main.yml
 
+    - block: &clean
+        - name: check artifact file
+          stat:
+            path: "{{ artifact }}"
+          register: artifact_file
+        - name: clean artifact path
+          file:
+            state: absent
+            path: "{{ artifact }}"
+          when:
+            - artifact_file.stat.exists
+      when:
+        - artifact is defined
+
+    - name: cleanup
+      block: *clean
+      vars:
+        artifact: "{{ workspace }}/commit.yaml"
+
     - name: get-hash for COMPONENT jobs (commit.yaml)
       block:
         - name: test get-hash.yaml for component job
@@ -30,6 +49,11 @@
             source {{ workspace }}/hash_info.sh
             [[ -n ${FULL_HASH+x} ]] || exit 1
             [[ -n ${COMPONENT_NAME+x} ]] || exit 1
+
+    - name: cleanup
+      block: *clean
+      vars:
+        artifact: "{{ workspace }}/deorean.repo.md5"
 
     - name: get-hash for INTEGRATION jobs (.md5)
       block:
@@ -51,6 +75,11 @@
             unset FULL_HASH
             source {{ workspace }}/hash_info.sh
             [[ -n ${FULL_HASH+x} ]] || exit 1
+
+    - name: cleanup
+      block: *clean
+      vars:
+        artifact: "{{ workspace }}/commit.yaml"
 
     - name: get-hash for LEGACY jobs (commit.yaml)
       block:
