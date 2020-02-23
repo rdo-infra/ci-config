@@ -62,8 +62,10 @@ ARA_JSONS = [
 ]
 
 TASK_DURATION_TRESHOLD = 10
+CACHE_EXPIRE_SECS = 604800  # a week
+CACHE_SIZE = int(2e9)  # 2GB
 
-cache = Cache('/tmp/ruck_rover_cache')
+cache = Cache('/tmp/ruck_rover_cache', size_limit=CACHE_SIZE)
 cache.expire()
 
 # Convert datetime to timestamp
@@ -130,7 +132,7 @@ def get_file_from_build(build, file_relative_path, json_view):
                 if json_view:
                     cache.add(
                         file_path, yaml.safe_load(resp),
-                        expire=259200)  # expire is 3 days
+                        expire=CACHE_EXPIRE_SECS)
                 else:
                     cache.add(file_path, resp)
             # Add negative cache
@@ -166,7 +168,7 @@ def add_sova_info(build, json_view=False):
         lines = failures_file.split('\n')
         reason = lines[0]
         tag = lines[1].split("Reason: ")[1]
-        build['sova_reason'] = reason
+        build['sova_reason'] = reason[:200]  # Cut long reasons
         build['sova_tag'] = tag
     except Exception:
         pass
@@ -268,7 +270,7 @@ def print_influx_ara_tasks(build, ara_json_file):
 def influx(build):
 
     add_inventory_info(build)
-    add_container_prep_time(build)
+    # add_container_prep_time(build)
     add_sova_info(build)
 
     if build['end_time'] is None:
@@ -308,7 +310,7 @@ def influx(build):
             'provider="%s",'
             'sova_reason="%s",'
             'sova_tag="%s",'
-            'container_prep_time_u=%.1f'
+            'container_prep_time_u=0'
             ' '
             '%s' %
             (build['type'],
@@ -328,7 +330,6 @@ def influx(build):
              build.get('provider', 'null'),
              build.get('sova_reason', ''),
              build.get('sova_tag', ''),
-             build.get('container_prep_time_u', 0),
              to_ts(build['end_time'])))
 
 
