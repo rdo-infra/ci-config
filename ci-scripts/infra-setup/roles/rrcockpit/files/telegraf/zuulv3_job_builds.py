@@ -168,8 +168,9 @@ def add_sova_info(build, json_view=False):
         lines = failures_file.split('\n')
         reason = lines[0]
         tag = lines[1].split("Reason: ")[1]
-        build['sova_reason'] = reason[:200]  # Cut long reasons
-        build['sova_tag'] = tag
+        # Cut long reasons and remove quotes
+        build['sova_reason'] = reason[:200].replace('"', '')
+        build['sova_tag'] = tag.replace('"', '')
     except Exception:
         pass
 
