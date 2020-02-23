@@ -6,13 +6,14 @@ distro_version: "{{ lookup('env', 'DISTRO_VERSION') }}"
 release: "{{ lookup('env','RELEASE') }}"
 # This file is truncated at each rerun, so it's safe to put it in a non reantrant location (to be more accessible from other)
 containers_file: "/tmp/parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ lookup('env','RELEASE') }}.txt"
-registry_api: "https://trunk.registry.rdoproject.org:8443/oapi/v1/namespaces/tripleo{{ lookup('env', 'RELEASE') }}/imagestreamtags"
+registry_hostname: trunk.registry.rdoproject.org
+registry_api: "https://{{ registry_hostname }}:8443/oapi/v1/namespaces/tripleo{{ lookup('env', 'RELEASE') }}/imagestreamtags"
 source_registry:
-  host: trunk.registry.rdoproject.org
+  host: "{{ registry_hostname }}"
   namespace: "tripleo{{ lookup('env','RELEASE') }}"
   username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
   password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
-  auth_url: "https://trunk.registry.rdoproject.org/v2/"
+  auth_url: "https://{{ registry_hostname }}/v2/"
 pattern_file: /tmp/images_pattern_file
 ppc_tag: ppc64le
 x86_tag: x86_64
