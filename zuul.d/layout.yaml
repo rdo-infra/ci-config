@@ -62,6 +62,7 @@
               - ^test-requirements.txt
         - tox-jjb
         - tox-py27: &py27
+            voting: false
             pre-run: playbooks/pre-run-docker.yml
             success-url: "tox/reports.html"
             failure-url: "tox/reports.html"
@@ -93,8 +94,8 @@
     gate:
       jobs:
         - tox-jjb
-        - tox-py27:
-            <<: *py27
+        # - tox-py27:
+        #     <<: *py27
         - tox-py36:
             <<: *py36
 
