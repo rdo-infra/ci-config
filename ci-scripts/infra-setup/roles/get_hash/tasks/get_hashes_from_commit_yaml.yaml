@@ -3,6 +3,7 @@
   get_url:
     url: "{{ commit_url }}"
     dest: "{{ workspace }}/commit.yaml"
+    force: yes
 
 - name: fetch commit.yaml file to ansible controller
   fetch:
@@ -10,7 +11,7 @@
     src: "{{ workspace }}/commit.yaml"
     flat: yes
 
-- name: load commit.yaml file
+- name: load data from commit.yaml file
   include_vars:
     file: "/tmp/commit.yaml"
     name: hashes
@@ -20,7 +21,7 @@
     distro_hash: "{{ hashes['commits'][0]['distro_hash'] }}"
     commit_hash: "{{ hashes['commits'][0]['commit_hash'] }}"
 
-- name: converge commit/distro hashes into full_hash (aggregated hash)
+- name: converge commit/distro hashes into full_hash
   set_fact:
      full_hash: "{{ commit_hash }}_{{ distro_hash[:8] }}"
 
