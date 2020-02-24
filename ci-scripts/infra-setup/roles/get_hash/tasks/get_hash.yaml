@@ -54,7 +54,6 @@
 - name: discover the hashes url (integration)
   set_fact:
     md5_url: "{{ dlrn_hash_baseurl }}/{{ promote_source }}/delorean.repo.md5"
-    cacheable: true
   when:
     - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
     - ansible_distribution_major_version|int >= 8
@@ -62,7 +61,7 @@
 
 - name: get hashes from commit.yaml (component and legacy jobs)
   import_tasks: get_hashes_from_commit_yaml.yaml
-  when: commit_url is defined
+  when: commit_url|default(None) != None
 
 - name: get aggregated hash from md5 file (integration jobs)
   block:
@@ -76,7 +75,7 @@
     - name: get hash
       set_fact:
         full_hash: "{{ md5_hash.stdout }}"
-  when: md5_url is defined
+  when: md5_url|default(None) != None
 
 - name: create hash_info file
   import_tasks: create_hash_info_file.yaml
@@ -84,5 +83,5 @@
 - name: create component hash files
   import_tasks: write_component_hashes.yaml
   when:
-    - md5_url is defined
+    - md5_url|default(None) != None
     - promote_target is defined
