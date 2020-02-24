@@ -1,11 +1,16 @@
 ---
-- name: get component commit and distro hashes
+- name: set commit.yaml url for [{{ component }}] component
+  set_fact:
+    commit_url: "{{ item }}/commit.yaml"
+
+- name: get component commit/distro hashes from commit.yaml
   import_tasks: get_hashes_from_commit_yaml.yaml
   vars:
-    commit_url: "{{ item }}/commit.yaml"
     get_component_from_hash: true
+
+- name: set <component>_hash_info.sh filename
+  set_fact:
+    hash_info_file_name: "{{ component }}_hash_info.sh"
 
 - name: write the component hash info file <component>_hash_info.sh
   import_tasks: create_hash_info_file.yaml
-  vars:
-    hash_info_file_name: "{{ component }}_hash_info.sh"
