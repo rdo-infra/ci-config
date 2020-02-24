@@ -3,7 +3,7 @@
 - hosts: all
   vars:
     molecule_testing: true
-    workspace: "/tmp"
+    workspace: "/var/tmp"
     release: master
     zuul:
       molecule: true
@@ -30,7 +30,10 @@
       block: *clean
       vars:
         artifact: "{{ workspace }}/commit.yaml"
-
+    - name: reset vars
+      set_fact:
+        md5_url: !!null
+        commit_url: !!null
     - name: get-hash for COMPONENT jobs (commit.yaml)
       block:
         - name: test get-hash.yaml for component job
@@ -38,6 +41,7 @@
           vars:
             component: compute
             promote_source: consistent
+            promote_target: component-ci-testing
         - name: validate hash_info for component job
           shell: |
             unset COMMIT_HASH
@@ -54,41 +58,71 @@
       block: *clean
       vars:
         artifact: "{{ workspace }}/deorean.repo.md5"
-
+    - name: reset vars
+      set_fact:
+        md5_url: !!null
+        commit_url: !!null
+        component: !!null
     - name: get-hash for INTEGRATION jobs (.md5)
       block:
         - name: test get-hash.yaml for integration job
           include_tasks: ../../tasks/get_hash.yaml
           vars:
-            component: !!null
             promote_source: promoted-components
-        - name: validate hash_info for integration job
+            promote_target: tripleo-ci-testing
+        # FULL_HASH is only used for tagging containers
+        - name: validate hash_info.sh for integration job
           shell: |
+            set -x
             unset FULL_HASH
             source {{ workspace }}/hash_info.sh
             [[ -n ${FULL_HASH+x} ]] || exit 1
+            echo $FULL_HASH
+        - name: get the list of <component>_hash_info.sh files
+          find:
+            paths: "{{ workspace }}"
+            patterns: "*_hash_info.sh"
+          register: hash_info_files
+        - name: list <component>_hash_info.sh files
+          debug:
+            msg: "{{ item.path }}"
+          loop: "{{ hash_info_files.files }}"
+        # DISTRO_HASH & COMMIT_HASH are used to promote
+        # each individual component to dlrnapi
+        - name: validate <component>_hash_info.sh file
+          shell: |
+            unset COMMIT_HASH
+            unset DISTRO_HASH
+            unset COMPONENT_NAME
+            source {{ item.path }}
+            [[ -n ${COMMIT_HASH+x} ]] || exit 1
+            [[ -n ${DISTRO_HASH+x} ]] || exit 1
+            [[ -n ${COMPONENT_NAME+x} ]] || exit 1
+          loop: "{{ hash_info_files.files }}"
 
     - name: cleanup
       block: *clean
       vars:
         artifact: "{{ workspace }}/commit.yaml"
-
+    - name: reset vars
+      set_fact:
+        md5_url: !!null
+        commit_url: !!null
+        component: !!null
     - name: get-hash for LEGACY jobs (commit.yaml)
       block:
         - name: test get-hash.yaml for legacy job
           include_tasks: ../../tasks/get_hash.yaml
           vars:
             ansible_distribution_major_version: 7
-            component: !!null
             promote_source: consistent
+            promote_target: tripleo-ci-testing
         - name: validate hash_info for legacy job
           shell: |
             unset COMMIT_HASH
             unset DISTRO_HASH
             unset FULL_HASH
-            unset COMPONENT_NAME
             source {{ workspace }}/hash_info.sh
             [[ -n ${COMMIT_HASH+x} ]] || exit 1
             [[ -n ${DISTRO_HASH+x} ]] || exit 1
             [[ -n ${FULL_HASH+x} ]] || exit 1
-            [[ -n ${COMPONENT_NAME+x} ]] || exit 1
