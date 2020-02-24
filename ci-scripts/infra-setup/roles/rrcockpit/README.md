@@ -183,3 +183,11 @@ that telegraf cannot parse
 Best way to fix those is dumping with the python script with the options from
 telegraf to a file and doing with "vim" a ":goto 497" to go to the character
 from this you can iterate until "telegraf --test" passes.
+
+## InfluxDB performance
+
+InfluxDB can have problems with memory consumption. To prevent this it's better
+to use [TSI indexes](https://docs.influxdata.com/influxdb/v1.7/concepts/tsi-details/).
+If you don't use it right now, it's possible to
+[convert existing data](https://docs.influxdata.com/influxdb/v1.7/tools/influx_inspect/#buildtsi)
+to use it, see these [guidelines](https://www.influxdata.com/blog/how-to-overcome-memory-usage-challenges-with-the-time-series-index/).
