@@ -137,7 +137,7 @@ class PromoterLogic(object):
                     raise
             else:
                 self.log.info(
-                    'Skipping promotion of %s-%s %s from %s to %s, missing '
+                    'Skipping promotion of %s-%s from %s to %s, missing '
                     'successful jobs: %s',
                     self.config.distro, self.config.release,
                     candidate_label, target_label, missing_jobs)
