@@ -27,6 +27,34 @@
               popd
 
 - builder:
+    name: 'tripleo-quickstart-centos-8-builder'
+    builders:
+        - shell: |
+              for DIR in /usr/sbin /sbin /usr/local/bin /usr/local/sbin ~/.local/bin ; do
+                if [[ ! ":$PATH:" == *":$DIR:"* ]] && [ -d "$DIR" ]; then
+                  export PATH=$DIR:$PATH
+                fi
+              done
+
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh -r 8
+              export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
+              echo $VIRTHOST
+              export OPT_ENVIRONMENT=$WORKSPACE/tripleo-quickstart/config/environments/ci_centos_libvirt.yml
+              echo $OPT_ENVIRONMENT
+              export OPT_ADDITIONAL_PARAMETERS=' -e deploy_timeout=120 '
+              echo $OPT_ADDITIONAL_PARAMETERS
+
+              pushd $WORKSPACE/tripleo-quickstart
+
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/{test}.sh \
+                {release} \
+                {build_system} \
+                {topology} \
+                {job_type}
+
+              popd
+
+- builder:
     name: 'tripleo-quickstart-rdo-infra-builder'
     builders:
         - shell: |
