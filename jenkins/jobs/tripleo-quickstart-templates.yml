@@ -138,6 +138,23 @@
             topology: '{topology}'
 
 - job-template:
+    name: 'tripleo-quickstart-centos-8-gate-{release}-{build_system}-quick-{test}'
+    defaults: 'tripleo-quickstart-defaults'
+    concurrent: true
+    triggers:
+        - trigger-tripleo-quickstart-gate-quick
+    scm:
+        - repo-tripleo-quickstart-gerrit
+        - repo-tripleo-quickstart-extras
+    builders:
+        - tripleo-quickstart-centos-8-builder:
+            test: '{test}'
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
+
+- job-template:
     name: 'tripleo-quickstart-extras-gate-{release}-{build_system}-quick-{test}'
     defaults: 'tripleo-quickstart-defaults'
     concurrent: true
