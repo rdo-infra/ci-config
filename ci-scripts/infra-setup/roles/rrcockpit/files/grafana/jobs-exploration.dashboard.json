@@ -250,20 +250,20 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"Container Prep Time UC",
+                        "alias":"Reason",
                         "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
-                        "decimals":0,
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
                         "mappingType":1,
-                        "pattern":"container_prep_time_u",
+                        "pattern":"sova_reason",
                         "thresholds":[],
-                        "type":"number",
-                        "unit":"s",
-                        "valueMaps":[]
+                        "type":"string",
+                        "unit":"short"
                     }
                 ],
                 "targets":[
@@ -273,7 +273,7 @@
                         "orderByTime":"ASC",
                         "policy":"default",
                         "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result_num\", \"result\", \"container_prep_time_u\", \"cloud\", \"region\" FROM \"build\" WHERE $timeFilter",
-                        "rawQuery":true,
+                        "rawQuery":false,
                         "refId":"A",
                         "resultFormat":"table",
                         "select":[
@@ -337,6 +337,14 @@
                                 {
                                     "params":[
                                         "region"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "sova_reason"
                                     ],
                                     "type":"field"
                                 }
