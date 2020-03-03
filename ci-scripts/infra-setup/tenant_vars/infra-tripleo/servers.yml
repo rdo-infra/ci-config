@@ -22,6 +22,8 @@ servers:
             - git
         package_upgrade: true
         runcmd:
+          - yum install -y epel-release
+          - yum install -y ansible
           - mkdir -p /etc/ansible/
           - echo 'dns ansible_connection=local' >  /etc/ansible/hosts
           - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
@@ -71,6 +73,8 @@ servers:
               content: |
         {{ uploader_ssh_priv_key | indent(10, true) }}
         runcmd:
+          - yum install -y epel-release
+          - yum install -y ansible
           - mkdir -p /etc/ansible/
           - echo 'promoter ansible_connection=local' >  /etc/ansible/hosts
           - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
