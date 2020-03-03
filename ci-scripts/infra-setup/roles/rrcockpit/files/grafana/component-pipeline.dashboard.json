@@ -37,10 +37,1043 @@
                 "description":"",
                 "fontSize":"100%",
                 "gridPos":{
-                    "h":9,
-                    "w":24,
+                    "h":8,
+                    "w":15,
                     "x":0,
                     "y":1
+                },
+                "id":422,
+                "links":[
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"RDO Zuul builds status",
+                        "type":"absolute",
+                        "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
+                    },
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"Promotion Criteria",
+                        "type":"absolute",
+                        "url":"https://github.com/rdo-infra/ci-config/tree/master/ci-scripts/dlrnapi_promoter/config"
+                    }
+                ],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE (\"pipeline\" = 'openstack-component-baremetal' and \"type\"='rdo') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-24hr"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-latest-released"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-master"
+                            }
+                        ]
+                    }
+                ],
+                "title":"Baremetal",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "aliasColors":{},
+                "bars":true,
+                "dashLength":10,
+                "dashes":false,
+                "datasource":"telegraf",
+                "decimals":0,
+                "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
+                "fill":1,
+                "gridPos":{
+                    "h":8,
+                    "w":9,
+                    "x":15,
+                    "y":1
+                },
+                "hideTimeOverride":false,
+                "id":110,
+                "legend":{
+                    "alignAsTable":true,
+                    "avg":false,
+                    "current":true,
+                    "hideEmpty":false,
+                    "hideZero":false,
+                    "max":false,
+                    "min":false,
+                    "rightSide":true,
+                    "show":false,
+                    "total":false,
+                    "values":true
+                },
+                "lines":false,
+                "linewidth":1,
+                "links":[],
+                "nullPointMode":"null",
+                "percentage":false,
+                "pointradius":2,
+                "points":false,
+                "renderer":"flot",
+                "seriesOverrides":[
+                    {
+                        "alias":"dlrn-promotion.count {name: current-tripleo}"
+                    }
+                ],
+                "spaceLength":10,
+                "stack":false,
+                "steppedLine":true,
+                "targets":[
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "24h"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "name"
+                                ],
+                                "type":"tag"
+                            },
+                            {
+                                "params":[
+                                    "0"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "measurement":"dlrn-promotion",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "repo_hash"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"release",
+                                "operator":"=",
+                                "value":"master"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"name",
+                                "operator":"=",
+                                "value":"current-tripleo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"distro",
+                                "operator":"=",
+                                "value":"CentOS-7"
+                            }
+                        ]
+                    }
+                ],
+                "thresholds":[],
+                "timeFrom":"2w",
+                "timeRegions":[],
+                "timeShift":null,
+                "title":"Baremetal promotions",
+                "tooltip":{
+                    "shared":true,
+                    "sort":0,
+                    "value_type":"individual"
+                },
+                "type":"graph",
+                "xaxis":{
+                    "buckets":null,
+                    "mode":"time",
+                    "name":null,
+                    "show":true,
+                    "values":[]
+                },
+                "yaxes":[
+                    {
+                        "decimals":0,
+                        "format":"short",
+                        "label":"Number of promotions",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    },
+                    {
+                        "format":"short",
+                        "label":null,
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":false
+                    }
+                ],
+                "yaxis":{
+                    "align":false,
+                    "alignLevel":null
+                }
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":8,
+                    "w":15,
+                    "x":0,
+                    "y":9
+                },
+                "id":424,
+                "links":[
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"RDO Zuul builds status",
+                        "type":"absolute",
+                        "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
+                    },
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"Promotion Criteria",
+                        "type":"absolute",
+                        "url":"https://github.com/rdo-infra/ci-config/tree/master/ci-scripts/dlrnapi_promoter/config"
+                    }
+                ],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE (\"pipeline\" = 'openstack-component-cinder' and \"type\"='rdo') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-24hr"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-latest-released"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-master"
+                            }
+                        ]
+                    }
+                ],
+                "title":"Cinder",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "aliasColors":{},
+                "bars":true,
+                "dashLength":10,
+                "dashes":false,
+                "datasource":"telegraf",
+                "decimals":0,
+                "fill":1,
+                "gridPos":{
+                    "h":8,
+                    "w":9,
+                    "x":15,
+                    "y":9
+                },
+                "hideTimeOverride":false,
+                "id":116,
+                "legend":{
+                    "alignAsTable":true,
+                    "avg":false,
+                    "current":true,
+                    "hideEmpty":false,
+                    "hideZero":false,
+                    "max":false,
+                    "min":false,
+                    "rightSide":true,
+                    "show":false,
+                    "total":false,
+                    "values":true
+                },
+                "lines":false,
+                "linewidth":1,
+                "links":[],
+                "nullPointMode":"null",
+                "percentage":false,
+                "pointradius":2,
+                "points":false,
+                "renderer":"flot",
+                "seriesOverrides":[
+                    {
+                        "alias":"dlrn-promotion.count {name: current-tripleo}"
+                    }
+                ],
+                "spaceLength":10,
+                "stack":false,
+                "steppedLine":true,
+                "targets":[
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "24h"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "name"
+                                ],
+                                "type":"tag"
+                            },
+                            {
+                                "params":[
+                                    "0"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "measurement":"dlrn-promotion",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "repo_hash"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"release",
+                                "operator":"=",
+                                "value":"master"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"name",
+                                "operator":"=",
+                                "value":"current-tripleo-rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"distro",
+                                "operator":"=",
+                                "value":"CentOS-7"
+                            }
+                        ]
+                    }
+                ],
+                "thresholds":[],
+                "timeFrom":"2w",
+                "timeRegions":[],
+                "timeShift":null,
+                "title":"Cinder promotions",
+                "tooltip":{
+                    "shared":true,
+                    "sort":0,
+                    "value_type":"individual"
+                },
+                "type":"graph",
+                "xaxis":{
+                    "buckets":null,
+                    "mode":"time",
+                    "name":null,
+                    "show":true,
+                    "values":[]
+                },
+                "yaxes":[
+                    {
+                        "decimals":0,
+                        "format":"short",
+                        "label":"Number of promotions",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    },
+                    {
+                        "format":"short",
+                        "label":null,
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":false
+                    }
+                ],
+                "yaxis":{
+                    "align":false,
+                    "alignLevel":null
+                }
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":8,
+                    "w":15,
+                    "x":0,
+                    "y":17
                 },
                 "id":386,
                 "links":[
@@ -299,7 +1332,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE \"pipeline\" = 'openstack-component-compute' AND $timeFilter",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE (\"pipeline\" = 'openstack-component-clients' and \"type\"='rdo') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -392,7 +1425,7 @@
                         ]
                     }
                 ],
-                "title":"Component Compute",
+                "title":"Clients",
                 "transform":"table",
                 "type":"table"
             },
@@ -402,10 +1435,2565 @@
                 "description":"",
                 "fontSize":"100%",
                 "gridPos":{
-                    "h":9,
-                    "w":24,
+                    "h":8,
+                    "w":15,
                     "x":0,
-                    "y":10
+                    "y":25
+                },
+                "id":425,
+                "links":[
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"RDO Zuul builds status",
+                        "type":"absolute",
+                        "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
+                    },
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"Promotion Criteria",
+                        "type":"absolute",
+                        "url":"https://github.com/rdo-infra/ci-config/tree/master/ci-scripts/dlrnapi_promoter/config"
+                    }
+                ],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE (\"pipeline\" = 'openstack-component-common' and \"type\"='rdo') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-24hr"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-latest-released"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-master"
+                            }
+                        ]
+                    }
+                ],
+                "title":"Common",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":8,
+                    "w":15,
+                    "x":0,
+                    "y":33
+                },
+                "id":426,
+                "links":[
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"RDO Zuul builds status",
+                        "type":"absolute",
+                        "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
+                    },
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"Promotion Criteria",
+                        "type":"absolute",
+                        "url":"https://github.com/rdo-infra/ci-config/tree/master/ci-scripts/dlrnapi_promoter/config"
+                    }
+                ],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE (\"pipeline\" = 'openstack-component-cloudops' and \"type\"='rdo') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-24hr"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-latest-released"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-master"
+                            }
+                        ]
+                    }
+                ],
+                "title":"CloudOps",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":8,
+                    "w":15,
+                    "x":0,
+                    "y":41
+                },
+                "id":423,
+                "links":[
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"RDO Zuul builds status",
+                        "type":"absolute",
+                        "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
+                    },
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"Promotion Criteria",
+                        "type":"absolute",
+                        "url":"https://github.com/rdo-infra/ci-config/tree/master/ci-scripts/dlrnapi_promoter/config"
+                    }
+                ],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE (\"pipeline\" = 'openstack-component-compute' and \"type\"='rdo') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-24hr"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-latest-released"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-master"
+                            }
+                        ]
+                    }
+                ],
+                "title":"Compute",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":8,
+                    "w":15,
+                    "x":0,
+                    "y":49
+                },
+                "id":427,
+                "links":[
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"RDO Zuul builds status",
+                        "type":"absolute",
+                        "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
+                    },
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"Promotion Criteria",
+                        "type":"absolute",
+                        "url":"https://github.com/rdo-infra/ci-config/tree/master/ci-scripts/dlrnapi_promoter/config"
+                    }
+                ],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE (\"pipeline\" = 'openstack-component-glance' and \"type\"='rdo') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-24hr"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-latest-released"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-master"
+                            }
+                        ]
+                    }
+                ],
+                "title":"Glance",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":8,
+                    "w":15,
+                    "x":0,
+                    "y":57
+                },
+                "id":428,
+                "links":[
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"RDO Zuul builds status",
+                        "type":"absolute",
+                        "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
+                    },
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"Promotion Criteria",
+                        "type":"absolute",
+                        "url":"https://github.com/rdo-infra/ci-config/tree/master/ci-scripts/dlrnapi_promoter/config"
+                    }
+                ],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE (\"pipeline\" = 'openstack-component-manila' and \"type\"='rdo') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-24hr"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-latest-released"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-master"
+                            }
+                        ]
+                    }
+                ],
+                "title":"Manila",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":8,
+                    "w":15,
+                    "x":0,
+                    "y":65
+                },
+                "id":429,
+                "links":[
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"RDO Zuul builds status",
+                        "type":"absolute",
+                        "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
+                    },
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"Promotion Criteria",
+                        "type":"absolute",
+                        "url":"https://github.com/rdo-infra/ci-config/tree/master/ci-scripts/dlrnapi_promoter/config"
+                    }
+                ],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE (\"pipeline\" = 'openstack-component-network' and \"type\"='rdo') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-24hr"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-latest-released"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-master"
+                            }
+                        ]
+                    }
+                ],
+                "title":"Network",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":8,
+                    "w":15,
+                    "x":0,
+                    "y":73
+                },
+                "id":430,
+                "links":[
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"RDO Zuul builds status",
+                        "type":"absolute",
+                        "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
+                    },
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"Promotion Criteria",
+                        "type":"absolute",
+                        "url":"https://github.com/rdo-infra/ci-config/tree/master/ci-scripts/dlrnapi_promoter/config"
+                    }
+                ],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE (\"pipeline\" = 'openstack-component-octavia' and \"type\"='rdo') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-24hr"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-latest-released"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-master"
+                            }
+                        ]
+                    }
+                ],
+                "title":"Octavia",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":7,
+                    "w":15,
+                    "x":0,
+                    "y":81
                 },
                 "id":421,
                 "links":[
@@ -664,7 +4252,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE \"pipeline\" = 'openstack-component-keystone' AND $timeFilter",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE (\"pipeline\" = 'openstack-component-security' AND \"type\"='rdo')AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -757,338 +4345,374 @@
                         ]
                     }
                 ],
-                "title":"Component Keystone",
+                "title":" Security",
                 "transform":"table",
                 "type":"table"
             },
             {
-                "collapsed":false,
-                "gridPos":{
-                    "h":1,
-                    "w":24,
-                    "x":0,
-                    "y":19
-                },
-                "id":82,
-                "panels":[],
-                "title":"Component Promotions",
-                "type":"row"
-            },
-            {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
-                "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "description":"",
+                "fontSize":"100%",
                 "gridPos":{
-                    "h":4,
-                    "w":8,
+                    "h":7,
+                    "w":15,
                     "x":0,
-                    "y":20
+                    "y":88
                 },
-                "hideTimeOverride":false,
-                "id":110,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
-                "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "id":431,
+                "links":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"RDO Zuul builds status",
+                        "type":"absolute",
+                        "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
+                    },
+                    {
+                        "dashboard":"",
+                        "targetBlank":true,
+                        "title":"Promotion Criteria",
+                        "type":"absolute",
+                        "url":"https://github.com/rdo-infra/ci-config/tree/master/ci-scripts/dlrnapi_promoter/config"
                     }
                 ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"",
-                        "groupBy":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
                             {
-                                "params":[
-                                    "24h"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "name"
-                                ],
-                                "type":"tag"
-                            },
-                            {
-                                "params":[
-                                    "0"
-                                ],
-                                "type":"fill"
+                                "from":"",
+                                "text":"",
+                                "to":""
                             }
                         ],
-                        "measurement":"dlrn-promotion",
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE (\"pipeline\" = 'openstack-component-tripleo' AND \"type\"='rdo')AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
                                     "params":[
-                                        "repo_hash"
+                                        "branch"
                                     ],
                                     "type":"field"
-                                },
+                                }
+                            ],
+                            [
                                 {
-                                    "params":[],
-                                    "type":"count"
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
                                 }
                             ]
                         ],
                         "tags":[
                             {
-                                "key":"release",
-                                "operator":"=",
-                                "value":"master"
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
                             },
                             {
                                 "condition":"AND",
-                                "key":"name",
+                                "key":"type",
                                 "operator":"=",
-                                "value":"current-tripleo"
+                                "value":"rdo"
                             },
                             {
                                 "condition":"AND",
-                                "key":"distro",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
                                 "operator":"=",
-                                "value":"CentOS-7"
+                                "value":"openstack-periodic-24hr"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-latest-released"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-master"
                             }
                         ]
                     }
                 ],
-                "thresholds":[],
-                "timeFrom":"2w",
-                "timeRegions":[],
-                "timeShift":null,
-                "title":"future home of compute promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
-            },
-            {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
-                "datasource":"telegraf",
-                "decimals":0,
-                "fill":1,
-                "gridPos":{
-                    "h":4,
-                    "w":8,
-                    "x":8,
-                    "y":20
-                },
-                "hideTimeOverride":false,
-                "id":116,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
-                "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
-                    {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
-                    {
-                        "alias":"",
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "24h"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "name"
-                                ],
-                                "type":"tag"
-                            },
-                            {
-                                "params":[
-                                    "0"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "measurement":"dlrn-promotion",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "repo_hash"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"release",
-                                "operator":"=",
-                                "value":"master"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"name",
-                                "operator":"=",
-                                "value":"current-tripleo-rdo"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"distro",
-                                "operator":"=",
-                                "value":"CentOS-7"
-                            }
-                        ]
-                    }
-                ],
-                "thresholds":[],
-                "timeFrom":"2w",
-                "timeRegions":[],
-                "timeShift":null,
-                "title":"future home of keystone promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
-            },
-            {
-                "collapsed":false,
-                "gridPos":{
-                    "h":1,
-                    "w":24,
-                    "x":0,
-                    "y":24
-                },
-                "id":298,
-                "panels":[],
-                "title":"Promotions RHEL",
-                "type":"row"
+                "title":" TripleO",
+                "transform":"table",
+                "type":"table"
             }
         ],
         "refresh":false,
