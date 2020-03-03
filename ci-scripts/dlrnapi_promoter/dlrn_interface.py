@@ -253,7 +253,7 @@ class DlrnClient(object):
 
         print(hash_list)
         self.log.debug(
-            'Fetch Hashes: fetched %d hashes for name %s: %s',
+            'Fetch Hashes: fetched %s hashes for name %s: %s',
             label, self.config.latest_hashes_count, hash_list)
         # if count is None, list[:None] will return the whole list
         return hash_list[:count]
