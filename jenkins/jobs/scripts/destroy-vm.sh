@@ -47,7 +47,7 @@ pushd $WORKSPACE
 # Install dependencies
 [[ ! -d provision_venv ]] && virtualenv provision_venv
 source provision_venv/bin/activate
-pip install ansible==2.5.2 'ara<1.0.0' shade 'cmd2<0.9.0'
+pip install ansible==2.5.2 'ara<1.0.0' shade 'cmd2<0.9.0' 'pyfakefs<4.0.0'
 
 ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
 export ANSIBLE_HOST_KEY_CHECKING=False
