@@ -21,6 +21,12 @@ This command reverts the systemd configuration to use cgroup v1.
 Or if you have a vm running fedora 30 with docker installed use the export DOCKER_HOST
 export DOCKER_HOST = "tcp://system-IP:custom-port"
 
+### Note: Using an OpenStack VM (eg RDO Cloud) for development
+
+It is possible to use a vm for development purposes. Follow the usual installation
+instructions below and then see the section
+[Accessing the cockpit on a remote host](https://github.com/rdo-infra/ci-config/blob/master/ci-scripts/infra-setup/roles/rrcockpit/README.md#accessing-the-cockpit-on-a-remote-host)
+
 ### Requirements:
 
 The cockpit uses docker containers to run the required services - telegraf,
@@ -95,6 +101,42 @@ in a browser to see the cockpit.
 Once you load the page you will have to find "Cockpit" by clicking on Home in
 the top-left of the loaded page. Note that it will take a while before the
 various fields of the cockpit are populated.
+
+### Accessing the cockpit on a remote host
+
+If you are using a VM or other remote host for developing the cockpit you will
+some extra steps to access it from a remote host (like from your local work
+machine for example).
+
+The following assumes a centos 7 vm running in an OpenStack cloud (RDO cloud)
+with a floating IP attached.
+
+First ensure that the security group that your vm belongs to allows ingress
+access. Choose a port that you want to use for accessing grafana remotely and
+allow ingress access to it by adding a rule in the relevant security group.
+
+We will use remote SSH tunnelling to allow remote access to the cockpit. Before
+setting up the tunnel you must ensure your sshd config allows it by enabling
+GatewayPorts:
+
+```
+sudo vim /etc/ssh/sshd_config
+GatewayPorts yes
+sudo systemctl restart sshd
+```
+Then you can setup the SSH tunnel pointing to the local address and port
+serving the ruck|rover cockpit. Assuming:
+
+  * Cockpit running at 172.18.0.6:3000
+  * VM floating IP is 41.125.31.115
+  * You will use port 5000 to reach the cockpit (and this is allowed in the
+    relevant security group).
+  * You will use http://41.125.31.115:5000 to reach the cockpit
+
+The tunnel is created with:
+```
+ssh -R 5000:172.18.0.6:3000 41.125.31.115
+```
 
 ### Developing the ruck|rover cockpit
 
