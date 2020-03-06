@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a1cca97f_d1e80c0b",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 56
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 63
+      },
+      "writtenOn": "2020-03-06T17:26:27Z",
+      "side": 1,
+      "message": "The integration jobs have one additional test, they need to verify that we are not leaking anything that looks like a password in the logs.\nWithout no_logs here, the entire content of that file/variable is dumped, and since they contain the word \"password\" they fail the job.\nWe can either use this, or try to make that check a bit smarter",
+      "parentUuid": "a90912bd_1cbc3e77",
+      "revId": "1f539c3f68fab1c7c2d895732d79e8b4b1cb7cf8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "adcd4ca8_d08531d4",
         "filename": "ci-scripts/container-push/roles/containers-promote/tasks/check_set_ppc_manifests.yml",
         "patchSetId": 56
@@ -53,6 +71,24 @@
       "writtenOn": "2020-03-06T15:50:12Z",
       "side": 1,
       "message": "Continuing \n\n(or somesuch please add)\n\n[EDIT]: why not just add the pulled_ppc here too and remove the next one unnecessary\n\n\"Failed to pull ppc containers - debug pulled_ppc {{ pulled_ppc }}\" should do it?",
+      "revId": "1f539c3f68fab1c7c2d895732d79e8b4b1cb7cf8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "62e31a1b_c8bc80b9",
+        "filename": "ci-scripts/container-push/roles/containers-promote/tasks/check_set_ppc_manifests.yml",
+        "patchSetId": 56
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 63
+      },
+      "writtenOn": "2020-03-06T17:26:27Z",
+      "side": 1,
+      "message": "It\u0027s probably better to discuss in a meeting, but I\u0027ll try to summarize.\nI needed to remove the ignore_errors because when I changed this the first time, I made an error, so I was not able to distinguish anymore what was my error and what was an error in the pull.\nThis is why I think ignore_errors in an antipattern and should be banned ....\nIn this way when the task fails I can run some additional task trying to understand why.\nIn this case we already know how to identify a case of failure. if results is not in pulled_ppc, it means that the task was not even run correctly and debug will be in the ansible exception, if it fails for any other reason, the failure will be ignored (THe original intention) but we dump the debug information to really be sure taht that is the problem)\nIf the task will ever fail again with something  that is not know, we\u0027ll have the debug info, and we\u0027ll be able to add another Fail task with another reason to stop execution.",
+      "parentUuid": "708793cd_4984960e",
       "revId": "1f539c3f68fab1c7c2d895732d79e8b4b1cb7cf8",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": false
