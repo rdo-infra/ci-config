@@ -126,7 +126,7 @@ class PromoterConfig(object):
             "main/target_registries_push", "true"))
         self.latest_hashes_count = int(self.get_path(
             "main/latest_hashes_count", 10))
-        self.pipeline_type = self.get_path("main/target_registries_push",
+        self.pipeline_type = self.get_path("main/pipeline_type",
                                            "single")
 
         # Allow promotion for the endpoints. For example, a release like
