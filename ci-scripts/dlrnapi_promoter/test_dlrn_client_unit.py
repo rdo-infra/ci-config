@@ -422,55 +422,107 @@ class TestFetchJobs(DlrnSetup):
 
 class TestNamedHashes(DlrnSetup):
 
-    @mock.patch('dlrn_client.DlrnClient.fetch_hashes')
-    def test_named_hashes_unchanged(self, mock_fetch_hashes):
+    def setUp(self):
+        super(TestNamedHashes, self).setUp()
         dlrn_start_hash_dict = {
             'timestamp': '1528085427',
-            'commit_hash': 'd1c5379369b24effdccfe5dde3e93bd21884ed27',
-            'distro_hash': 'cd4fb616ac3065794b8a9156bbe70ede3d77ef27'
+            'commit_hash': 'd221f4b33cf2763875fc6394902f7923108a34da',
+            'distro_hash': '70bdcd40eb5cc62e4762a7db0086e09f6edf2e5c'
         }
         dlrn_changed_hash_dict = {
             'timestamp': '1528085529',
-            'commit_hash': 'd1c5372341a61effdccfe5dde3e93bd21884ed27',
-            'distro_hash': 'cd4fb616ac30625a51ba9156bbe70ede3d7e1921'
+            'commit_hash': 'e3d9fffbf82ec71deff60ba914f1db0e1625466a',
+            'distro_hash': 'Iba78e857267ac771d23919fbd1e3c9fcc5813c9'
         }
-        dlrn_changed_hash = DlrnHash(source=dlrn_changed_hash_dict)
-        dlrn_start_hash = DlrnHash(source=dlrn_start_hash_dict)
+        self.dlrn_changed_hash = DlrnHash(source=dlrn_changed_hash_dict)
+        self.dlrn_start_hash = DlrnHash(source=dlrn_start_hash_dict)
 
-        mock_fetch_hashes.side_effect = [dlrn_start_hash, dlrn_start_hash,
-                                         dlrn_changed_hash, dlrn_changed_hash]
+    @patch('logging.Logger.error')
+    @patch('dlrn_client.DlrnClient.fetch_hashes')
+    def test_named_hashes_unchanged(self, mock_fetch_hashes, mock_log_err):
+
+        mock_fetch_hashes.side_effect = [self.dlrn_start_hash,
+                                         self.dlrn_start_hash]
         # positive test for hashes_unchanged
         self.client.fetch_current_named_hashes(store=True)
         self.client.check_named_hashes_unchanged()
+        self.assertFalse(mock_log_err.called)
 
-        # negative test
+    @patch('logging.Logger.error')
+    @patch('dlrn_client.DlrnClient.fetch_hashes')
+    def test_check_named_hashes_changed(self, mock_fetch_hashes, mock_log_err):
+        mock_fetch_hashes.side_effect = [
+            self.dlrn_start_hash, self.dlrn_changed_hash,
+            self.dlrn_changed_hash, self.dlrn_changed_hash
+        ]
+
+        self.client.fetch_current_named_hashes(store=True)
         with self.assertRaises(HashChangedError):
             self.client.check_named_hashes_unchanged()
 
+        mock_log_err.assert_has_calls([
+            mock.call("Check named hashes: named hashes for label "
+                      "'current-tripleo' changed since last check. "
+                      "At promotion start: %s. Now: %s" %
+                      (self.dlrn_start_hash,
+                       self.dlrn_changed_hash))
+        ])
+
         # positive again after updating
-        self.client.update_current_named_hashes(dlrn_changed_hash,
+        self.client.update_current_named_hashes(self.dlrn_changed_hash,
                                                 "current-tripleo")
         self.client.check_named_hashes_unchanged()
 
-    @pytest.mark.xfail(reason="Not Implemented", run=False)
-    def test_check_named_hashes_changed(self):
-        assert False
+    @patch('logging.Logger.warning')
+    @patch('dlrn_client.DlrnClient.fetch_hashes')
+    def test_fetch_current_named_hash(self, mock_fetch_hashes, mock_log_warn):
+        self.client.fetch_current_named_hashes(store=True)
+        self.assertFalse(mock_log_warn.called)
 
-    @pytest.mark.xfail(reason="Not Implemented", run=False)
-    def test_fetch_current_named_hash(self):
-        assert False
+    @patch('logging.Logger.debug')
+    @patch('logging.Logger.warning')
+    @patch('dlrn_client.DlrnClient.fetch_hashes')
+    def test_fetch_current_named_hash_no_store(self, mock_fetch_hashes,
+                                               mock_log_warn, mock_log_debug):
+        mock_fetch_hashes.side_effect = [
+            self.dlrn_start_hash, self.dlrn_start_hash
+        ]
 
-    @pytest.mark.xfail(reason="Not Implemented", run=False)
-    def test_fetch_current_named_hash_no_store(self):
-        assert False
+        self.client.fetch_current_named_hashes(store=False)
+        self.assertFalse(mock_log_warn.called)
+        mock_log_debug.assert_has_calls([
+            mock.call("Check named hashes: Updating value of named hash for "
+                      "current-tripleo to %s" % self.dlrn_start_hash.full_hash)
+        ])
+        self.client.check_named_hashes_unchanged()
 
-    @pytest.mark.xfail(reason="Not Implemented", run=False)
-    def test_update_current_named_hash(self):
-        assert False
+    @patch('logging.Logger.debug')
+    @patch('dlrn_client.DlrnClient.fetch_hashes')
+    def test_update_current_named_hash(
+                                    self, mock_fetch_hashes, mock_log_debug):
+        mock_fetch_hashes.side_effect = [
+            self.dlrn_changed_hash, self.dlrn_changed_hash
+        ]
+        self.client.update_current_named_hashes(self.dlrn_changed_hash,
+                                                "current-tripleo")
+        mock_log_debug.assert_has_calls([
+            mock.call("Check named hashes: Updating stored value of named hash"
+                      " for current-tripleo to %s" % self.dlrn_changed_hash)
+        ])
+        self.client.fetch_current_named_hashes(store=True)
+        self.client.check_named_hashes_unchanged()
 
-    @pytest.mark.xfail(reason="Not Implemented", run=False)
-    def testpromote_hash_failed_repo_download(self):
-        assert False
+    @patch('logging.Logger.warning')
+    @patch('logging.Logger.debug')
+    @patch('dlrn_client.DlrnClient.fetch_promotions')
+    def test_fetch_current_named_hashes_no_hashes(
+                   self, fetch_promotions_mock, mock_log_debug, mock_log_warn):
+        fetch_promotions_mock.return_value = []
+        self.client.fetch_current_named_hashes()
+        self.assertFalse(mock_log_debug.called)
+        mock_log_warn.assert_has_calls([
+            mock.call("No promotions named %s", 'current-tripleo')
+        ])
 
 
 class TestGetHashes(DlrnSetup):
