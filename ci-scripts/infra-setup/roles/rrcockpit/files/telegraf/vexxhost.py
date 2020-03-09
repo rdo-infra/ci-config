@@ -8,8 +8,8 @@ import datetime
 
 # This file is running on te-broker periodically
 
-FILE_PATH = '/var/www/html/tebroker/influxdb_stats'
-SECRETS = "/etc/nodepoolrc"
+FILE_PATH = '/var/www/html/tebroker/influxdb_stats_vexx'
+SECRETS = "/etc/vexxhostrc"
 re_ex = re.compile(r"^export ([^\s=]+)=(\S+)")
 
 
@@ -37,7 +37,7 @@ def _run_cmd(cmd):
 
 def run_server_check():
     cmd = ("openstack server list --project-domain "
-           "5d8fad99d6e14040b794ea2b0c4d91f5 --long -f json")
+           "4b633c451ac74233be3721a3635275e5 --long -f json")
     out = _run_cmd(cmd)[0]
     if not out:
         return None
@@ -47,11 +47,10 @@ def run_server_check():
         d[s] = len([i for i in out if i['Status'] == s])
     d['undercloud'] = len([
         i for i in out
-        if i['Flavor Name'] == 'ci.m1.nodepool'
-        and "upstream-centos-7-rdo-cloud" in i['Name']
+        if i['Flavor Name'] == 'nodepool'
+        and "node" in i['Name']
     ])
-    d['multinode'] = len(
-        [i for i in out if "upstream-centos-7-2-node-rdo-cloud" in i['Name']])
+    d['multinode'] = 0  # can't figure out for vexx
     d['bmc'] = len([i for i in out if i['Image Name'] == 'bmc-template'])
     d['ovb-node'] = len([i for i in out if i['Image Name'] == 'ipxe-boot'])
     d['total'] = len(out)
@@ -129,7 +128,7 @@ def compose_influxdb_data(servers, quotes, stacks, fips, ports_down, ts):
     s = ''
     influxdb_data = ''
     if servers:
-        s = 'rdocloud-servers '
+        s = 'vexxhost-servers '
         s += ('ACTIVE={ACTIVE},BUILD={BUILD},ERROR={ERROR},DELETED={DELETED},'
               ).format(**servers)
         s += ('undercloud={undercloud},multinode={multinode},bmc={bmc},'
@@ -139,7 +138,7 @@ def compose_influxdb_data(servers, quotes, stacks, fips, ports_down, ts):
         if s:
             s += ','
         else:
-            s = 'rdocloud-servers '
+            s = 'vexxhost-servers '
         s += (
             'stacks_total={stacks_total},create_complete={create_complete},'
             'create_failed={create_failed},'
@@ -152,7 +151,7 @@ def compose_influxdb_data(servers, quotes, stacks, fips, ports_down, ts):
     if quotes:
         quotes.update({'fips': fips})
         quotes.update({'ports_down': ports_down})
-        p = 'rdocloud-perf '
+        p = 'vexxhost-perf '
         p += ('instances={instances},cores={cores},ram={ram},gigabytes={gbs},'
               'fips={fips},ports_down={ports_down}'
               ).format(**quotes)
