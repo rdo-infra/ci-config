@@ -106,14 +106,17 @@ class DlrnClient(object):
         named_hashes = {}
         for promote_name in self.config.promotion_steps_map.keys():
             latest_named = self.fetch_promotions(promote_name, count=1)
-            update = {promote_name: latest_named}
-            named_hashes.update(update)
-            self.log.debug("Check named hashes: Updating value of named"
-                           " hash for {} to {}"
-                           "".format(promote_name, latest_named.full_hash))
-            if store:
-                self.named_hashes_map.update(update)
-                self.log.debug("Check named hashes: updated permanent map")
+            if latest_named:
+                update = {promote_name: latest_named}
+                named_hashes.update(update)
+                self.log.debug("Check named hashes: Updating value of named"
+                               " hash for %s to %s" %
+                               (promote_name, latest_named.full_hash))
+                if store:
+                    self.named_hashes_map.update(update)
+                    self.log.debug("Check named hashes: updated permanent map")
+            else:
+                self.log.warning("No promotions named %s", promote_name)
 
         return named_hashes
 
