@@ -7,7 +7,7 @@ import re
 import json
 import datetime
 
-# This file is running on te-broker periodically
+# This file is running on toolbox periodically
 
 FILE_PATH = 'influxdb_stats'
 SECRETS = "/etc/nodepoolrc"
