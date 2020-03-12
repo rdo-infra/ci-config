@@ -138,3 +138,41 @@ servers:
           - mkdir -p /etc/ansible/
           - echo 'rrcockpit ansible_connection=local' >  /etc/ansible/hosts
           - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+
+    - name: toolbox
+      image: "{{ centos8_image }}"
+      flavor: "{{ default_flavor }}"
+      key_name: "{{ default_keypair_name }}"
+      security_groups:
+        - sec_group_http_access_external
+        - sec_group_ssh_access_external
+      ports:
+        - name: toolbox-port
+          network: "{{ servers_internal_network_name  }}"
+          fixed_ip_address: "{{ toolbox_internal_network_ip }}"
+      nics:
+        - port-name: toolbox-port
+      floating_ips:
+        - "{{ toolbox_external_network_ip }}"
+      userdata: |
+        #cloud-config
+        packages:
+            - git
+            - epel-release
+            - vim
+        package_upgrade: true
+        write_files:
+            - path: /etc/nodepoolrc
+              permissions: '0600'
+              content: "{{ rdo_cloud_nodepool_rc | b64encode }}"
+              encoding: b64
+            - path: /etc/vexxhostrc
+              permissions: '0600'
+              content: "{{ vexxhost_nodepool_rc | b64encode }}"
+              encoding: b64
+        runcmd:
+          - dnf install -y epel-release
+          - dnf install -y python3 ansible
+          - mkdir -p /etc/ansible/
+          - echo 'toolbox ansible_connection=local' >  /etc/ansible/hosts
+          - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
