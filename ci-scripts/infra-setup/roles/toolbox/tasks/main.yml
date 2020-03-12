@@ -20,6 +20,28 @@
       name: '{{ packages }}'
       state: present
 
+  - name: Create {{ web_directory }}
+    file:
+      path: "{{ web_directory }}"
+      state: directory
+      mode: u+rwX,g+rX,o+rX
+
+  - name: Check if no server runs
+    command: sudo podman ps -aq -f name=nginx
+    register: container_ps
+    changed_when: false
+
+  - name: Start web server
+    command: >-
+      podman run -d
+      -p 80:80
+      -v {{ web_directory }}:/usr/share/nginx/html:ro,z
+      --name nginx
+      --log-driver=journald
+      nginx
+    when: not container_ps.stdout
+    changed_when: true
+
   - name: Create repo directory
     file:
       path: /opt/stack/
@@ -55,34 +77,52 @@
     cron:
       name: 'Cleaning servers in error'
       minute: 30
-      job: 'source /etc/nodepoolrc && bash /opt/stack/ci-config/ci-scripts/infra-cleanup/cleanup-servers.sh &>>/var/log/clean_errored_servers.log'
+      job: >-
+        source /etc/nodepoolrc &&
+        bash /opt/stack/ci-config/ci-scripts/infra-cleanup/cleanup-servers.sh
+        &>>/var/log/clean_errored_servers.log
 
   - name: Create cron job to run mini cleanup of failed stacks
     cron:
       name: 'Cleaning failed stacks'
       minute: 40
-      job: 'source /etc/nodepoolrc && bash /opt/stack/ci-config/ci-scripts/infra-cleanup/cleanup-failed-stacks.sh &>>/var/log/clean_failed_stacks.log'
+      job: >-
+        source /etc/nodepoolrc &&
+        bash /opt/stack/ci-config/ci-scripts/infra-cleanup/cleanup-failed-stacks.sh
+        &>>/var/log/clean_failed_stacks.log
 
   - name: Create cron job to clean OVB old stacks
     cron:
       name: 'Cleaning old OVB stacks'
       minute: 0
-      job: 'source /etc/nodepoolrc && bash /opt/stack/ci-config/ci-scripts/infra-cleanup/ovb-tenant-cleanup.sh &>>/var/log/clean_stacks_rdo.log'
+      job: >-
+        source /etc/nodepoolrc &&
+        bash /opt/stack/ci-config/ci-scripts/infra-cleanup/ovb-tenant-cleanup.sh
+        &>>/var/log/clean_stacks_rdo.log'
 
   - name: Create cron job to clean OVB old stacks on vexxhost
     cron:
       name: 'Cleaning old OVB stacks on vexxhost'
       minute: 30
-      job: 'source /etc/vexxhostrc && bash /opt/stack/ci-config/ci-scripts/infra-cleanup/ovb-tenant-cleanup.sh &>>/var/log/clean_stacks_vexx.log'
+      job: >-
+        source /etc/vexxhostrc &&
+        bash /opt/stack/ci-config/ci-scripts/infra-cleanup/ovb-tenant-cleanup.sh
+        &>>/var/log/clean_stacks_vexx.log
 
   - name: Create cron job to get influxdb stats
     cron:
       name: 'Get influxdb stats'
       minute: '*/15'
-      job: 'python3 /opt/stack/ci-config/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf/rdocloud.py &>/var/log/influxdb_stats.log'
+      job: >-
+        python3 /opt/stack/ci-config/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf/rdocloud.py
+        --webdir {{ web_directory }}
+        &>/var/log/influxdb_stats.log
 
   - name: Create cron job to get influxdb stats on vexxhost
     cron:
       name: 'Get influxdb stats vexx'
       minute: '*/15'
-      job: 'python3 /opt/stack/ci-config/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf/vexxhost.py &>/var/log/influxdb_stats_vexx.log'
+      job: >-
+        python3 /opt/stack/ci-config/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf/vexxhost.py
+        --webdir {{ web_directory }}
+        &>/var/log/influxdb_stats_vexx.log

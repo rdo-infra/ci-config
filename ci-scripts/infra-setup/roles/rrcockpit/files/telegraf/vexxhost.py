@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import argparse
 import os
 import subprocess
 import time
@@ -8,7 +9,7 @@ import datetime
 
 # This file is running on te-broker periodically
 
-FILE_PATH = '/var/www/html/tebroker/influxdb_stats_vexx'
+FILE_PATH = 'influxdb_stats_vexx'
 SECRETS = "/etc/vexxhostrc"
 re_ex = re.compile(r"^export ([^\s=]+)=(\S+)")
 
@@ -164,12 +165,19 @@ def compose_influxdb_data(servers, quotes, stacks, fips, ports_down, ts):
     return influxdb_data
 
 
-def write_influxdb_file(influxdb_data):
-    with open(FILE_PATH, "w") as f:
+def write_influxdb_file(webdir, influxdb_data):
+    with open(os.path.join(webdir, FILE_PATH), "w") as f:
         f.write(influxdb_data)
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Retrieve cloud statistics")
+
+    parser.add_argument(
+        '--webdir', default="/var/www/html/", help="(default: %(default)s)")
+    args = parser.parse_args()
+
     servers = run_server_check()
     quotes = run_quote_check()
     stacks = run_stacks_check()
@@ -177,7 +185,7 @@ def main():
     ports_down = run_ports_down_count()
     influxdb_data = compose_influxdb_data(
                         servers, quotes, stacks, fips, ports_down, time.time())
-    write_influxdb_file(influxdb_data)
+    write_influxdb_file(args.webdir, influxdb_data)
 
 
 if __name__ == '__main__':
