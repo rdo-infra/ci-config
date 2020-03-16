@@ -107,6 +107,7 @@ def test_dlrn_server(staged_env):
 
     client = promoter.dlrn_client
     dlrn_hash = DlrnHash(source=commit)
+    dlrn_hash.label = candidate_label
 
     # TODO: Check db injection (needs sqlite3 import)
     #  Check we can access dlrnapi
