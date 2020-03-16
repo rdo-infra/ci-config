@@ -163,6 +163,8 @@ def test_promote_qcows(staged_env):
     promoter_integration_checks.compare_tagged_image_hash(stage_info=stage_info)
 
 
+# These are the closest test to integration jobs
+
 @pytest.mark.parametrize("staged_env", ("all_single", "all_integration"),
                          indirect=True)
 def test_promote_all(staged_env):
@@ -174,25 +176,17 @@ def test_promote_all(staged_env):
     stage_info, promoter = staged_env
 
     promoted_pairs = promoter.promote_all()
-    error_msg = "Nothing promoted"
-    assert promoted_pairs != [()], error_msg
-    for promoted_hash, label in promoted_pairs:
-        dlrn_hash = DlrnHash(source=stage_info['dlrn']['commits'][-1])
-        if stage_info['main']['pipeline_type'] == "single":
-            candidate_hash = dlrn_hash
-        elif stage_info['main']['pipeline_type'] == "integration":
-            candidate_hash = promoter.dlrn_client.fetch_promotions_from_hash(
-                dlrn_hash, count=1)
-        # We don't care about timestamp during this comparison.
-        # But we maintain it for after
 
-        stored_timestamp = promoted_hash.timestamp
-        promoted_hash.timestamp = None
-        candidate_hash.timestamp = None
-        assert promoted_hash == candidate_hash
-        promoted_hash.timestamp = stored_timestamp
+    promoter_integration_checks.compare_tagged_image_hash(
+        stage_info=stage_info)
+    promoter_integration_checks.query_container_registry_promotion(
+        stage_info=stage_info)
+    promoter_integration_checks.check_dlrn_promoted_hash(
+        stage_info=stage_info)
+    promoter_integration_checks.parse_promotion_logs(stage_info=stage_info)
 
-        promoter_integration_checks.parse_promotion_logs(stage_info=stage_info)
+    error_msg = "Nothing promoted, and checks did not complain"
+    assert len(promoted_pairs) != 0, error_msg
 
 
 @pytest.mark.parametrize("staged_env", ("all_single", "all_integration"),
