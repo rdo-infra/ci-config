@@ -286,9 +286,12 @@ def parse_promotion_logs(stage_info=None, **kwargs):
         "Qcow promote '{}' to tripleo-ci-staging-promoted: "
         "Successful promotion".format(candidate_hash_pattern)
     )
-    success_pattern = re.compile(
+    success_pattern_criteria = re.compile(
         "Candidate hash '{}': criteria met, attempting promotion to "
         "tripleo-ci-staging-promoted".format(candidate_hash_pattern)
+    )
+    success_pattern_summary = re.compile(
+        "Summary: Promoted 1 hashes this round"
     )
     success_pattern_target = re.compile(
         "Candidate hash '{}': SUCCESSFUL promotion to "
@@ -296,7 +299,8 @@ def parse_promotion_logs(stage_info=None, **kwargs):
     )
 
     success_patterns = [
-        success_pattern,
+        success_pattern_summary,
+        success_pattern_criteria,
         success_pattern_images,
         success_pattern_target,
         success_pattern_container,

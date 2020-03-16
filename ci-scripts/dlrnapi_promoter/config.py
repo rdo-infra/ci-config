@@ -191,10 +191,16 @@ class PromoterConfig(PromoterConfigBase):
         :return: the overridden _config dict
         """
 
-        main_overrides = ['log_file', 'promotion_steps_map',
-                          'promotion_criteria_map', 'api_url', 'username',
-                          'repo_url', 'experimental', 'log_level',
-                          'containers_list_base_url']
+        main_overrides = ['log_file',
+                          'promotion_steps_map',
+                          'promotion_criteria_map',
+                          'api_url',
+                          'username',
+                          'repo_url',
+                          'experimental',
+                          'log_level',
+                          'containers_list_base_url',
+                          'allowed_clients']
         for override in main_overrides:
             try:
                 attr = getattr(overrides, override)
