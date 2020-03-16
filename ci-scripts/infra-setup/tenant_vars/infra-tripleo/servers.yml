@@ -124,6 +124,7 @@ servers:
         packages:
             - git
             - epel-release
+            - vim
         package_upgrade: true
         write_files:
             - path: /root/grafana_admin_password
@@ -133,8 +134,8 @@ servers:
               permissions: '0600'
               content: "{{ grafana_smtp_password }}"
         runcmd:
-          - yum install -y python-pip
-          - pip install ansible==2.5.5
+          - yum install -y epel-release
+          - yum install -y ansible python-pip
           - mkdir -p /etc/ansible/
           - echo 'rrcockpit ansible_connection=local' >  /etc/ansible/hosts
           - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
