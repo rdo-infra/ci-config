@@ -443,7 +443,7 @@ class DlrnClient(object):
         # Aggregate promotion step 1: download the full delorean repo
         # and save it locally for parsing
         candidate_url = ("{}/{}/delorean.repo"
-                         "".format(self.config.repo_url, candidate_label))
+                         "".format(self.config.repo_url, dlrn_hash.commit_dir))
         self.log.debug("Dlrn promote '%s': URL for candidate label repo: %s",
                        dlrn_hash, candidate_url)
         try:
