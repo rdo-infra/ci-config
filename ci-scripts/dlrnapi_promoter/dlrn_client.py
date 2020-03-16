@@ -25,6 +25,7 @@ except ImportError:
     JSONDecodeError = ValueError
     import urllib2 as url
 
+from collections import OrderedDict
 from common import PromotionError
 from dlrnapi_client.rest import ApiException
 
@@ -358,28 +359,6 @@ class DlrnClient(object):
         self.promote_hash(log_header, dlrn_hash, target_label,
                           candidate_label=candidate_label)
 
-    def get_promotion_commitdistro_hashes(self, log_header, dlrn_hash,
-                                          candidate_label,
-                                          target_label):
-        """
-        Return the hashes needed for the promotion of a commidistro hash
-        :param log_header: the header for all logging messages
-        :param dlrn_hash: The hash to use as a starting point
-        :param candidate_label: The name the hash was recently promoted to,
-        if any
-        :param target_label: The name to promote the hash to
-        :return: A list with all the hashes needed to promote,  to have
-        the starting hash correctly promoted. In commitdistro case, this is
-        just the starting hash
-        """
-        promotion_hash_list = []
-        self.log.debug("%s adding '%s' to promotion list for single pipeline",
-                       log_header, dlrn_hash)
-
-        promotion_hash_list.append(dlrn_hash)
-
-        return promotion_hash_list
-
     def get_hash_from_component(self, log_header, component_name, base_url):
         """
         Downloads the commit.yaml file relative to the component, and creates
@@ -437,7 +416,7 @@ class DlrnClient(object):
         the starting hash correctly promoted. In aggregate case these are all
         the hashes from the component that form the aggregate hash
         """
-        promotion_hash_list = []
+        promotion_parameters_list = []
         # Aggregate hash cannot be promoted directly, we need to promote
         # all the components the aggregate points to singularly
 
@@ -493,110 +472,84 @@ class DlrnClient(object):
             promotion_hash = self.get_hash_from_component(log_header,
                                                           component_name,
                                                           base_url)
-            promotion_hash_list.append(promotion_hash)
+            promotion_parameters = copy.deepcopy(self.promote_params)
+            promotion_hash.dump_to_params(promotion_parameters)
+            promotion_parameters.promote_name = target_label
+            promotion_parameters_list.append(promotion_parameters)
 
-        return promotion_hash_list
+        return sorted(promotion_parameters_list, key=lambda x: x.timestamp)
 
     def promote_hash(self, log_header, dlrn_hash, target_label,
                      candidate_label=None):
         """
-        Calls the proper list creation method depending on the hash type,
-        then passes the list to the api promotion wrapper
+        Select the promotion parameters creation method and the proper api
+        call to promote the type of hashes, then call the api.
         :param log_header: Header of all logging message in this function
         :param dlrn_hash: The dlrn hash to promote
         :param target_label: The label/name to promote dlrn_hash to
         :param candidate_label: The name/label the dlrn_hash was recently
         promoted to, if any (mandatory for aggregate promotion)
-        :return: None
+        :return: the promoted hash. It's the same hash for commitdistro,
+        and the last component promoted for the aggregate hash
         """
         hash_type = type(dlrn_hash)
         self.log.debug("%s promoting a %s", log_header, hash_type)
 
-        promotion_hash_list = []
-
         if hash_type is DlrnCommitDistroHash:
-            promotion_hash_list = \
-                self.get_promotion_commitdistro_hashes(log_header,
-                                                       dlrn_hash,
-                                                       candidate_label,
-                                                       target_label)
+            promotion_parameters = copy.deepcopy(self.promote_params)
+            dlrn_hash.dump_to_params(promotion_parameters)
+            promotion_parameters.promote_name = target_label
+            api_call = self.api_instance.api_promote_post
+
         elif hash_type is DlrnAggregateHash:
-            promotion_hash_list = \
+            promotion_parameters = \
                 self.get_promotion_aggregate_hashes(log_header,
                                                     dlrn_hash,
                                                     candidate_label,
                                                     target_label)
+            api_call = self.api_instance.api_promote_batch_post
 
-        if not promotion_hash_list:
-            self.log.error("%s No hashes ended up in the list to promote",
-                           log_header)
-            raise PromotionError("Dlrn promote: No hashes to promote")
-
-        self.promote_hash_list(log_header, promotion_hash_list,
-                               target_label)
-
-    def promote_hash_list(self, log_header, promotion_hash_list, target_label):
-        """
-        This method promotes a list of hashes to a target label
-        from another POV the hash is labeled as the target
-        from another yet POV the label becomes a link to the hash identifier
-        :param log_header:
-        :param promotion_hash_list: A list of DlrnHashes
-        :param target_label: The label to promote the hashes to
-        :return: The list of promoted hashes (used mainly for tests)
-        """
-
-        # Promote in the same order the components were promoted
-        # initially
-        promotion_hash_list.sort(key=lambda x: x.timestamp)
-
-        promoted_list = []
-        for promotion_hash in promotion_hash_list:
-            params = copy.deepcopy(self.promote_params)
-            promotion_hash.dump_to_params(params)
-            params.promote_name = target_label
+        try:
+            promoted_info = api_call(promotion_parameters)
+        except ApiException as ae:
+            message = ae.body
             try:
-                promoted_info = self.api_instance.api_promote_post(params)
-            except ApiException as ae:
-                message = ae.body
-                try:
-                    body = json.loads(ae.body)
-                    message = body['message']
-                except JSONDecodeError:
-                    pass
-                self.log.error(
-                    "Exception while promoting hashes to API endpoint "
-                    "(%s) %s: %s", ae.status, ae.reason, message)
-                self.log.error("------- -------- Promoter aborted")
-                raise ae
+                body = json.loads(ae.body)
+                message = body['message']
+            except JSONDecodeError:
+                pass
+            self.log.error(
+                "Exception while promoting hashes to API endpoint "
+                "(%s) %s: %s", ae.status, ae.reason, message)
+            self.log.error("------- -------- Promoter aborted")
+            raise ae
 
-            # The promoted info will sometimes return the aggregate,
-            # and always the timestamp
-            # but we'll always be interested in comparing just commit and
-            # distro hashes
-            promoted_info.timestamp = None
-            stored_timestamp = promotion_hash.timestamp
-            promotion_hash.timestamp = None
-            promoted_hash = DlrnCommitDistroHash(source=promoted_info)
+        # The promoted info will sometimes return the aggregate,
+        # and always the timestamp
+        # but we'll always be interested in comparing just commit and
+        # distro hashes
+        stored_timestamp = dlrn_hash.timestamp
+        dlrn_hash.timestamp = None
+        promoted_hash = DlrnHash(source=promoted_info)
+        promoted_hash.timestamp = None
 
-            # This seemingly stupid check already helped find at least 3 bugs
-            # in code and tests.
-            if promoted_hash == promotion_hash:
-                self.log.info("%s (subhash %s) Successfully promoted",
-                              log_header, promotion_hash)
-            else:
-                self.log.error("%s (subhash %s) API returned different"
-                               " promoted hash: '%s'", log_header,
-                               promotion_hash, promoted_hash)
-                raise PromotionError("API returned different promoted hash")
+        # This seemingly stupid check already helped find at least 3 bugs
+        # in code and tests.
+        if dlrn_hash == promoted_hash:
+            self.log.info("%s (subhash %s) Successfully promoted",
+                          log_header, dlrn_hash)
+        else:
+            self.log.error("%s (subhash %s) API returned different"
+                           " promoted hash: '%s'", log_header,
+                           dlrn_hash, promoted_hash)
+            raise PromotionError("API returned different promoted hash")
 
-            # For every hash promoted, we need to update the named hashes.
-            self.update_current_named_hashes(promotion_hash, target_label)
-            # Add back timestamp
-            promotion_hash.timestamp = stored_timestamp
-            promoted_list.append(promotion_hash)
+        # For every hash promoted, we need to update the named hashes.
+        self.update_current_named_hashes(dlrn_hash, target_label)
+        # Add back timestamp
+        dlrn_hash.timestamp = stored_timestamp
 
-        return promoted_list
+        return dlrn_hash
 
     def vote(self, dlrn_hash, job_id, job_url, vote):
         """

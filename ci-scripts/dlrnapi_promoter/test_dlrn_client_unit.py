@@ -36,7 +36,8 @@ class DlrnSetup(unittest.TestCase):
         setup_logging("promoter", logging.DEBUG)
         self.config = DlrnClientConfig(dlrnauth_username='foo',
                                        dlrnauth_password='bar',
-                                       api_url="http://api.url")
+                                       api_url="http://api.url",
+                                       repo_url="file:///tmp")
         self.config.promotion_steps_map = {
             'current-tripleo': 'tripleo-ci-testing'
         }
@@ -531,16 +532,6 @@ class TestNamedHashes(DlrnSetup):
 
 class TestGetHashes(DlrnSetup):
 
-    @patch('logging.Logger.debug')
-    def test_get_promotion_commitdistro_hashes_success(self, mock_log_debug):
-        get_hash_method = self.client.get_promotion_commitdistro_hashes
-        promotion_list = get_hash_method("",
-                                         self.dlrn_hash_commitdistro1,
-                                         'tripleo-ci-testing',
-                                         'current-tripleo')
-        self.assertNotEqual(promotion_list, [])
-        self.assertTrue(mock_log_debug.called)
-
     @patch('logging.Logger.error')
     @patch('logging.Logger.info')
     @patch('logging.Logger.debug')
@@ -551,19 +542,31 @@ class TestGetHashes(DlrnSetup):
                                                     mock_log_info,
                                                     mock_log_error):
 
+        self.maxDiff = None
         delorean_repo_path, tmp_dir = self.get_tmp_delorean_repo()
         # Extremely important that we ensure this method does not produce
         # aggregate hashes, as they're not the one to promote at this stage,
         # and all the commitdistro hashes must have a component
+        promotion_hash1 = self.dlrn_hash_commitdistro1
+        params1 = copy.deepcopy(self.client.promote_params)
+        promotion_hash1.dump_to_params(params1)
+        promotion_hash2 = self.dlrn_hash_commitdistro2
+        params2 = copy.deepcopy(self.client.promote_params)
+        promotion_hash2.dump_to_params(params2)
+        params1.promote_name = 'current-tripleo'
+        params2.promote_name = 'current-tripleo'
+        promotion_parameters = [params1, params2]
+
         promotion_hashes = [self.dlrn_hash_commitdistro1,
                             self.dlrn_hash_commitdistro2]
+
         get_hash_mock.side_effect = promotion_hashes
         promotion_hash_list = \
             self.client.get_promotion_aggregate_hashes("",
                                                        self.dlrn_hash_aggregate,
                                                        'tripleo-ci-testing',
                                                        'current-tripleo')
-        self.assertEqual(promotion_hash_list, promotion_hashes)
+        self.assertEqual(promotion_hash_list, promotion_parameters)
         get_hash_mock.assert_has_calls([
             mock.call("", "delorean-component1", "http://base.url"),
             mock.call("", "delorean-component2", "http://base.url"),
@@ -676,106 +679,69 @@ class TestGetHashes(DlrnSetup):
 class TestPromoteHash(DlrnSetup):
 
     @patch('logging.Logger.error')
-    @patch('logging.Logger.debug')
-    @patch('dlrn_client.DlrnClient.promote_hash_list')
-    @patch('dlrn_client.DlrnClient.get_promotion_aggregate_hashes')
-    @patch('dlrn_client.DlrnClient.get_promotion_commitdistro_hashes')
-    def test_promote_hash_commitdistro(self, get_hash_cd_mock,
-                                       get_hash_agg_mock,
-                                       promote_list_mock,
-                                       mock_log_debug,
-                                       mock_log_error):
-        get_hash_cd_mock.return_value = [self.dlrn_hash_commitdistro1]
-        self.client.promote_hash("", self.dlrn_hash_commitdistro1,
-                                 'current-tripleo',
-                                 candidate_label='tripleo-ci-testing')
-        get_hash_cd_mock.assert_has_calls([
-            mock.call("", self.dlrn_hash_commitdistro1,
-                      'tripleo-ci-testing', 'current-tripleo')
-        ])
-        promote_list_mock.assert_has_calls([
-            mock.call("", [self.dlrn_hash_commitdistro1], 'current-tripleo')
-        ])
-        self.assertFalse(get_hash_agg_mock.called)
-        mock_log_debug.assert_has_calls([
-            mock.call("%s promoting a %s", '', type(
-                self.dlrn_hash_commitdistro1))
-        ])
-        self.assertFalse(mock_log_error.called)
-
-    @patch('logging.Logger.error')
-    @patch('logging.Logger.debug')
-    @patch('dlrn_client.DlrnClient.promote_hash_list')
-    @patch('dlrn_client.DlrnClient.get_promotion_aggregate_hashes')
-    @patch('dlrn_client.DlrnClient.get_promotion_commitdistro_hashes')
-    def test_promote_hash_aggregate(self, get_hash_cd_mock,
-                                    get_hash_agg_mock,
-                                    promote_list_mock,
-                                    mock_log_debug,
-                                    mock_log_error):
-        promotion_list = [self.dlrn_hash_commitdistro1,
-                          self.dlrn_hash_commitdistro2]
-        get_hash_agg_mock.return_value = promotion_list
-        self.client.promote_hash("", self.dlrn_hash_aggregate,
-                                 'current-tripleo',
-                                 candidate_label='tripleo-ci-testing')
-        get_hash_agg_mock.assert_has_calls([
-            mock.call("", self.dlrn_hash_aggregate,
-                      'tripleo-ci-testing', 'current-tripleo')
-        ])
-        promote_list_mock.assert_has_calls([
-            mock.call("", promotion_list, 'current-tripleo')
-        ])
-        self.assertFalse(get_hash_cd_mock.called)
-        mock_log_debug.assert_has_calls([
-            mock.call("%s promoting a %s", '', type(
-                self.dlrn_hash_aggregate))
-        ])
-        self.assertFalse(mock_log_error.called)
-
-    @patch('logging.Logger.error')
-    @patch('dlrn_client.DlrnClient.promote_hash_list')
-    @patch('dlrn_client.DlrnClient.get_promotion_commitdistro_hashes')
-    def test_promote_hash_commitdistro_no_hashes(self, get_hash_cd_mock,
-                                                 promote_list_mock,
-                                                 mock_log_error):
-        get_hash_cd_mock.return_value = []
-        with self.assertRaises(PromotionError):
-            self.client.promote_hash("", self.dlrn_hash_commitdistro1,
-                                     'current-tripleo',
-                                     candidate_label='tripleo-ci-testing')
-        self.assertTrue(get_hash_cd_mock.called)
-        self.assertFalse(promote_list_mock.called)
-        mock_log_error.assert_has_calls([
-            mock.call("%s No hashes ended up in the list to promote", '')
-        ])
-
-
-class TestPromoteHashList(DlrnSetup):
-
-    @patch('logging.Logger.error')
     @patch('logging.Logger.info')
+    @patch('dlrn_client.DlrnClient.get_promotion_aggregate_hashes')
+    @patch('dlrnapi_client.DefaultApi.api_promote_batch_post')
     @patch('dlrnapi_client.DefaultApi.api_promote_post')
-    def test_promote_hash_success(self, api_promote_mock,
-                                  mock_log_info,
-                                  mock_log_error):
-        # The order here is important, we need to be sure the method sorts
-        # the hases by reverse timestamp order, to promote them correctly
-        promotion_list = [self.dlrn_hash_commitdistro2,
-                          self.dlrn_hash_commitdistro1]
-        rev_promotion_list = [self.dlrn_hash_commitdistro1,
-                              self.dlrn_hash_commitdistro2]
+    def test_promote_hash_success_aggregate(self, api_promote_mock,
+                                            api_promote_batch_mock,
+                                            get_hashes_mock,
+                                            mock_log_info,
+                                            mock_log_error):
         # In reality api_promote_post returns api_response objects, not hashes.
         # But,for the purpose of the testing, hashes are good enough
-        api_promote_mock.side_effect = rev_promotion_list
-        promoted_list = self.client.promote_hash_list("", promotion_list,
-                                                      'current-tripleo')
-        self.assertEqual(promoted_list, rev_promotion_list)
-        self.assertTrue(api_promote_mock.called)
+        promoted_hash = self.dlrn_hash_aggregate
+        promotion_hash1 = self.dlrn_hash_commitdistro1
+        params1 = copy.deepcopy(self.client.promote_params)
+        promotion_hash1.dump_to_params(params1)
+        promotion_hash2 = self.dlrn_hash_commitdistro2
+        params2 = copy.deepcopy(self.client.promote_params)
+        promotion_hash2.dump_to_params(params2)
+        params2.timestamp = 1
+        params1.timestamp = 1
+        params1.promote_name = 'current-tripleo'
+        params2.promote_name = 'current-tripleo'
+        get_hashes_mock.return_value = []
+        api_promote_batch_mock.return_value = promoted_hash
+        promoted_hash = self.client.promote_hash("",
+                                                 self.dlrn_hash_aggregate,
+                                                 'current-tripleo')
+        self.assertEqual(self.dlrn_hash_aggregate, promoted_hash)
+        self.assertTrue(api_promote_batch_mock.called)
         mock_log_info.assert_has_calls([
             mock.call("%s (subhash %s) Successfully promoted", '', mock.ANY)
         ])
-        self.assertFalse(mock_log_error.called)
+        mock_log_error.assert_not_called()
+        api_promote_mock.assert_not_called()
+
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.info')
+    @patch('dlrnapi_client.DefaultApi.api_promote_batch_post')
+    @patch('dlrnapi_client.DefaultApi.api_promote_post')
+    def test_promote_hash_success_commitdistro(self, api_promote_mock,
+                                               api_promote_batch_mock,
+                                               mock_log_info,
+                                               mock_log_error):
+        # In reality api_promote_post returns api_response objects, not hashes.
+        # But,for the purpose of the testing, hashes are good enough
+        promoted_hash = self.dlrn_hash_commitdistro1
+        api_promote_mock.return_value = promoted_hash
+        promoted_hash = self.client.promote_hash("",
+                                                 self.dlrn_hash_commitdistro1,
+                                                 'current-tripleo')
+        self.assertEqual(self.dlrn_hash_commitdistro1, promoted_hash)
+        promotion_parameters = copy.deepcopy(self.client.promote_params)
+        promoted_hash.dump_to_params(promotion_parameters)
+        promotion_parameters.timestamp = 1
+        promotion_parameters.promote_name = 'current-tripleo'
+        api_promote_mock.assert_has_calls([
+            mock.call(promotion_parameters),
+        ])
+        mock_log_info.assert_has_calls([
+            mock.call("%s (subhash %s) Successfully promoted", '', mock.ANY)
+        ])
+        mock_log_error.assert_not_called()
+        api_promote_batch_mock.assert_not_called()
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.info')
@@ -783,14 +749,10 @@ class TestPromoteHashList(DlrnSetup):
     def test_promote_hash_api_error(self, api_promote_mock,
                                     mock_log_info,
                                     mock_log_error):
-        # The order here is important, we need to be sure the method sorts
-        # the hases by reverse timestamp order, to promote them correctly
-        promotion_list = [self.dlrn_hash_commitdistro1]
         api_promote_mock.side_effect = self.api_exception
         with self.assertRaises(ApiException):
-            self.client.promote_hash_list("", promotion_list,
-                                          'current-tripleo')
-        self.assertTrue(api_promote_mock.called)
+            self.client.promote_hash("", self.dlrn_hash_commitdistro1,
+                                     'current-tripleo')
         mock_log_error.assert_has_calls([
             mock.call("Exception while promoting hashes to API endpoint "
                       "(%s) %s: %s",
@@ -798,7 +760,7 @@ class TestPromoteHashList(DlrnSetup):
                       self.api_exception.reason,
                       self.api_exception.message),
         ])
-        self.assertFalse(mock_log_info.called)
+        mock_log_info.assert_not_called()
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.info')
@@ -806,19 +768,19 @@ class TestPromoteHashList(DlrnSetup):
     def test_promote_hash_inconsistent_response(self, api_promote_mock,
                                                 mock_log_info,
                                                 mock_log_error):
-        promotion_list = [self.dlrn_hash_commitdistro2,
-                          self.dlrn_hash_commitdistro1]
         # In reality api_promote_post returns api_response objects, not hashes.
         # But,for the purpose of the testing, hashes are good enough
         api_promote_mock.return_value = self.dlrn_hash_commitdistro2
         with self.assertRaises(PromotionError):
-            self.client.promote_hash_list("", promotion_list,
-                                          'current-tripleo')
+            self.client.promote_hash("", self.dlrn_hash_commitdistro1,
+                                     'current-tripleo')
         self.assertTrue(api_promote_mock.called)
+        h = copy.deepcopy(self.dlrn_hash_commitdistro2)
+        h.timestamp = None
         mock_log_error.assert_has_calls([
             mock.call("%s (subhash %s) API returned different promoted hash:"
                       " '%s'", '', self.dlrn_hash_commitdistro1,
-                      self.dlrn_hash_commitdistro2)
+                      h)
         ])
         self.assertFalse(mock_log_info.called)
 
