@@ -131,8 +131,7 @@ class Promoter(object):
 
         self.log.info("Candidate hash '%s': attempting promotion"
                       "", candidate_hash)
-        # FIXME: In python2 itertools.repeat needs a length parameter or it
-        #  will just repeat self ad libitum. Python3 does not need it.
+        candidate_hash.label = candidate_label
         for client_name in allowed_clients:
             client = getattr(self, client_name)
             self.dlrn_client.check_named_hashes_unchanged()

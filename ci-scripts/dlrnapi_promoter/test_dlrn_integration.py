@@ -80,6 +80,7 @@ def staged_env(request):
     overrides = {
         'log_file': stage_info['main']['log_file'],
         'repo_url': stage_info['dlrn']['server']['repo_url'],
+        'allowed_clients': 'dlrn_client',
     }
 
     overrides_obj = type("FakeArgs", (), overrides)
@@ -107,6 +108,7 @@ def test_dlrn_server(staged_env):
 
     client = promoter.dlrn_client
     dlrn_hash = DlrnHash(source=commit)
+    dlrn_hash.label = candidate_label
 
     # TODO: Check db injection (needs sqlite3 import)
     #  Check we can access dlrnapi
@@ -162,24 +164,16 @@ def test_promote_all_links(staged_env):
     stage_info, promoter = staged_env
 
     promoted_pairs = promoter.promote_all()
-    error_msg = "Nothing promoted"
-    assert promoted_pairs != [()], error_msg
     for promoted_hash, label in promoted_pairs:
-        dlrn_hash = DlrnHash(source=stage_info['dlrn']['commits'][-1])
         if stage_info['main']['pipeline_type'] == "single":
-            candidate_hash = dlrn_hash
             error_msg = "Single pipeline should promote a commit/distro hash"
             assert type(promoted_hash) == DlrnCommitDistroHash, error_msg
         elif stage_info['main']['pipeline_type'] == "integration":
-            candidate_hash = \
-                promoter.dlrn_client.fetch_promotions_from_hash(dlrn_hash,
-                                                                count=1)
             error_msg = "Integration pipeline should promote an aggregate hash"
             assert type(promoted_hash) == DlrnAggregateHash, error_msg
-        # We don't care about timestamp
-        promoted_hash.timestamp = None
-        candidate_hash.timestamp = None
-        assert promoted_hash == candidate_hash
 
-        promoter_integration_checks.check_dlrn_promoted_hash(
-            stage_info=stage_info)
+    promoter_integration_checks.check_dlrn_promoted_hash(
+        stage_info=stage_info)
+
+    error_msg = "Nothing promoted, and checks failed to detect issues"
+    assert len(promoted_pairs) != 0, error_msg
