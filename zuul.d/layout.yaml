@@ -42,7 +42,7 @@
         - rdo-tox-molecule-delegated-centos-8:
             <<: *molecule
 
-        - molecule-container-push:
+        - molecule-container-push: &molecule-container-push
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
@@ -51,7 +51,7 @@
               - ^playbooks/molecule-delegated.yml
               - ^requirements.txt
               - ^test-requirements.txt
-        - molecule-tripleo-common:
+        - molecule-tripleo-common: &molecule-tripleo-common
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
@@ -60,7 +60,7 @@
               - ^playbooks/molecule-delegated.yml
               - ^requirements.txt
               - ^test-requirements.txt
-        - molecule-delegated-promote-images:
+        - molecule-delegated-promote-images: &molecule-promote-images
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/promote-images.sh
@@ -71,7 +71,6 @@
               - ^test-requirements.txt
         - tox-jjb
         - tox-py27: &py27
-            voting: false
             pre-run: playbooks/pre-run-docker.yml
             post-run: playbooks/post-run.yml
             success-url: "tox/reports.html"
@@ -106,9 +105,23 @@
               - ^zuul.d/layout.yaml$
     gate:
       jobs:
+        - molecule-container-push:
+            <<: *molecule-container-push
+        - molecule-tripleo-common:
+            <<: *molecule-tripleo-common
+        - molecule-delegated-promote-images:
+            <<: *molecule-promote-images
+        - tripleo-ci-promotion-staging:
+            files: *integration
+        - tripleo-ci-promotion-staging-legacy:
+            files: *integration
+        - rdo-tox-molecule: &molecule
+            <<: *molecule
+        - rdo-tox-molecule-delegated-centos-8:
+            <<: *molecule
         - tox-jjb
-        # - tox-py27:
-        #     <<: *py27
+        - tox-py27:
+            <<: *py27
         - tox-py36:
             <<: *py36
 
