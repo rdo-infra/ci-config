@@ -1,7 +1,7 @@
 servers:
 
     - name: dns
-      image: "{{ default_image }}"
+      image: "{{ centos8_image }}"
       flavor: "{{ default_flavor }}"
       key_name: "{{ default_keypair_name }}"
       security_groups:
@@ -22,11 +22,12 @@ servers:
             - git
         package_upgrade: true
         runcmd:
-          - yum install -y epel-release
-          - yum install -y ansible
+          - dnf install -y epel-release
+          - dnf install -y python3 ansible vim git
           - mkdir -p /etc/ansible/
           - echo 'dns ansible_connection=local' >  /etc/ansible/hosts
           - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+          - reboot
 
     - name: promoter
       image: "{{ default_image }}"
@@ -78,6 +79,7 @@ servers:
           - mkdir -p /etc/ansible/
           - echo 'promoter ansible_connection=local' >  /etc/ansible/hosts
           - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+          - reboot
 
     - name: sova
       image: "{{ default_image }}"
@@ -103,6 +105,7 @@ servers:
           - mkdir -p /etc/ansible/
           - echo 'sova ansible_connection=local' >  /etc/ansible/hosts
           - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+          - reboot
 
     - name: rrcockpit
       image: "{{ default_image }}"
@@ -139,6 +142,7 @@ servers:
           - mkdir -p /etc/ansible/
           - echo 'rrcockpit ansible_connection=local' >  /etc/ansible/hosts
           - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+          - reboot
 
     - name: toolbox
       image: "{{ centos8_image }}"
@@ -177,3 +181,4 @@ servers:
           - mkdir -p /etc/ansible/
           - echo 'toolbox ansible_connection=local' >  /etc/ansible/hosts
           - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+          - reboot
