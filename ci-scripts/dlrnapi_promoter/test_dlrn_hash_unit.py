@@ -147,6 +147,14 @@ class TestDlrnHash(unittest.TestCase):
                 dh.label = "label"
                 self.assertEqual(dh.commit_dir, "label/ab/cd/abcd")
 
+    def test_commit_dir_no_label(self):
+        for hash_type, source_types in hashes_test_cases.items():
+            dh = DlrnHash(source=source_types['object']['valid'])
+            if hash_type == "commitdistro":
+                self.assertEqual(dh.commit_dir, "ab/cd/abcd_defg")
+            elif hash_type == "aggregate":
+                self.assertEqual(dh.commit_dir, "ab/cd/abcd")
+
     def test_commit_dir_component(self):
         for hash_type, source_types in hashes_test_cases.items():
             dh = DlrnHash(source=source_types['object']['valid'])

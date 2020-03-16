@@ -30,7 +30,7 @@ class DlrnHashBase(object):
     log = logging.getLogger("promoter")
 
     def __init__(self, commit_hash=None, distro_hash=None, timestamp=None,
-                 aggregate_hash=None, source=None, component=None):
+                 aggregate_hash=None, source=None, component=None, label=None):
         """
         Takes care of filling the hash attributes from the instantiation
         parameters.
@@ -43,13 +43,15 @@ class DlrnHashBase(object):
         :param component:  the eventual component of the hash
         """
         # Load from default values into unified source
-        _source = {}
-        _source['commit_hash'] = commit_hash
-        _source['distro_hash'] = distro_hash
-        _source['timestamp'] = timestamp
-        _source['dt_commit'] = timestamp
-        _source['aggregate_hash'] = aggregate_hash
-        _source['component'] = component
+        _source = {
+            'commit_hash': commit_hash,
+            'distro_hash': distro_hash,
+            'timestamp': timestamp,
+            'dt_commit': timestamp,
+            'aggregate_hash': aggregate_hash,
+            'component': component,
+            'label': label
+        }
 
         # Checks on sources
         valid_attributes = {'commit_hash', 'distro_hash', 'aggregate_hash',
