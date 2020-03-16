@@ -122,12 +122,11 @@ class RepoSetup(unittest.TestCase):
 
         # Create versions.csv files
         for dlrn_hash in self.hashes:
-            dlrn_hash.label = "tripleo-ci-testing"
             versions_csv_dir = os.path.join(self.temp_dir,
+                                            "tripleo-ci-testing",
                                             dlrn_hash.commit_dir)
             os.makedirs(versions_csv_dir)
             versions_csv_path = os.path.join(versions_csv_dir, "versions.csv")
-            print(versions_csv_path)
             with open(versions_csv_path, "w") as versions_csv_file:
                 csv_writer = csv.DictWriter(versions_csv_file,
                                             fieldnames=fieldnames)
@@ -151,6 +150,7 @@ class TestGetVersionsCsv(RepoSetup):
             self.client.get_versions_csv(self.dlrn_hash_commitdistro,
                                          candidate_label="tripleo-ci-testing")
 
+        self.assertNotEqual(out_versions_csv_reader, None)
         self.assertIsInstance(out_versions_csv_reader, csv.DictReader)
         out_row = next(out_versions_csv_reader)
         self.assertEqual(out_row, self.versions_csv_rows[0])
@@ -169,6 +169,7 @@ class TestGetVersionsCsv(RepoSetup):
             self.client.get_versions_csv(self.dlrn_hash_aggregate,
                                          candidate_label="tripleo-ci-testing")
 
+        self.assertNotEqual(out_versions_csv_reader, None)
         out_row = next(out_versions_csv_reader)
         self.assertIsInstance(out_versions_csv_reader, csv.DictReader)
         self.assertEqual(out_row, self.versions_csv_rows[0])

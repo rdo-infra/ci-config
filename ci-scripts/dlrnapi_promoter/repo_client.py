@@ -35,9 +35,9 @@ class RepoClient(object):
         :param candidate_label:
         :return: A csv reader (None in case of error)
         """
-        dlrn_hash.label = candidate_label
-        versions_url = ("{}/{}/versions.csv"
+        versions_url = ("{}/{}/{}/versions.csv"
                         "".format(self.root_url,
+                                  candidate_label,
                                   dlrn_hash.commit_dir))
         self.log.debug("Accessing versions at %s", versions_url)
         try:

@@ -67,9 +67,9 @@ class DlrnSetup(unittest.TestCase):
                                                             distro_hash='d',
                                                             component="comp2",
                                                             timestamp=2)
-        self.dlrn_hash_aggregate = DlrnAggregateHash(commit_hash='a',
-                                                     distro_hash='b',
-                                                     aggregate_hash='c',
+        self.dlrn_hash_aggregate = DlrnAggregateHash(commit_hash='abc',
+                                                     distro_hash='def',
+                                                     aggregate_hash='ghjk',
                                                      timestamp=1)
         self.promote_log_header = ("Dlrn promote '{}' from {} to {}:"
                                    "".format(self.dlrn_hash_commitdistro1,
@@ -145,9 +145,12 @@ class DlrnSetup(unittest.TestCase):
         repo_config.set('delorean-component1', "baseurl", "http://base.url")
         repo_config.set('delorean-component2', "baseurl", "http://base.url")
         tmp_dir = tempfile.mkdtemp()
-        candidate_label_dir = os.path.join(tmp_dir, 'tripleo-ci-testing')
-        os.mkdir(candidate_label_dir)
-        delorean_repo_path = os.path.join(candidate_label_dir, "delorean.repo")
+        candidate_label_dir = \
+            os.path.join(tmp_dir, 'tripleo-ci-testing',
+                         self.dlrn_hash_aggregate.commit_dir)
+        os.makedirs(candidate_label_dir)
+        delorean_repo_path = os.path.join(candidate_label_dir,
+                                          "delorean.repo")
         if not empty:
             with open(delorean_repo_path, "w") as delorean_repo:
                 repo_config.write(delorean_repo)
