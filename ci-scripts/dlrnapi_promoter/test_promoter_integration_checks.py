@@ -176,6 +176,7 @@ success_pattern_container_positive_single_pipeline = (
     "Containers promote 'commit: 360d335e94246d7095672c5aa92b59afa380a059, "
     "distro: 9e5988125e88f803ba20743be7aa99079dd275f2, component: None, "
     "timestamp: None' to tripleo-ci-staging-promoted: Successful promotion\n"
+    "Summary: Promoted 1 hashes this round\n"
     "Promoter terminated normally\n"
 )
 
@@ -197,6 +198,7 @@ success_pattern_container_positive_integration_pipeline = (
     "360d335e94246d7095672c5aa92b59afa380a061, distro: "
     "9e5988125e88f803ba20743be7aa99079dd275f4, component: None, "
     "timestamp: None' to tripleo-ci-staging-promoted: Successful promotion\n"
+    "Summary: Promoted 1 hashes this round\n"
     "Promoter terminated normally\n"
 )
 
