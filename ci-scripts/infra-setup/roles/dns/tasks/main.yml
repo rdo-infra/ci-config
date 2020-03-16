@@ -5,12 +5,13 @@
   block:
 
   - name: Install dnsmasq and bind-utils
-    yum:
-      name: "{{ item }}"
+    package:
+      name: "{{ packages }}"
       state: present
-    with_items:
-      - dnsmasq
-      - bind-utils
+    vars:
+      packages:
+        - dnsmasq
+        - bind-utils
 
   - name: Configure - change cache size
     lineinfile:
