@@ -9,7 +9,7 @@ import pytest
 import unittest
 
 from common import str2bool, check_port, setup_logging, LoggingError, \
-    close_logging, str_api_object, get_root_paths
+    close_logging, str_api_object, get_root_paths, get_lock
 
 try:
     # Python3 imports
@@ -149,3 +149,14 @@ class TestGetRootPaths(unittest.TestCase):
         self.assertEqual(repo_root, "/path/to/orig_root")
         self.assertEqual(code_root,
                          "/path/to/orig_root/ci-scripts/dlrnapi_promoter")
+
+
+class TestGeLock(unittest.TestCase):
+
+    def test_get_lock(self):
+        get_lock('test')
+        # We need a different process trying to access the same lock and fail
+        with self.assertRaises(subprocess.CalledProcessError):
+            subprocess.check_output(['python', '-c',
+                                     'from common import get_lock;'
+                                               'get_lock("test")'])

@@ -76,4 +76,4 @@ It's recommended to run the script with various release configurations
 periodically from crontab, specifying the config file as the first argument of
 the script:
 
-    python dlrnapi_promoter.py config/master.ini
+    python dlrnapi_promoter.py --config-file config/master.ini promote-all
