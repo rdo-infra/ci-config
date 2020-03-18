@@ -180,7 +180,7 @@ class ConfigSetup(unittest.TestCase):
         fp, self.filepath = tempfile.mkstemp(prefix="instance_test")
         with os.fdopen(fp, "w") as test_file:
             test_file.write(content)
-        cli = self.filepath
+        cli = "--config-file {} promote-all".format(self.filepath)
         args = arg_parser(cmd_line=cli)
         os.environ["DLRNAPI_PASSWORD"] = "test"
         self.promoter = Promoter(config_file=args.config_file)
