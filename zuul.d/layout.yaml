@@ -10,24 +10,24 @@
 - project:
     check:
       jobs:
-        - tripleo-ci-promotion-staging-single-pipeline-centos-7:
-            files: &integration
-              - ^ci-scripts/dlrnapi_promoter/.*
-              - ^ci-scripts/container-push/.*
-              - ^ci-scripts/promote-images.sh
-              - ^ci-scripts/infra-setup/roles/promoter/.*
-              - ^playbooks/staging.*
-              - ^requirements.txt
-              - ^test-requirements.txt
-        - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
-            files: *integration
-        - sova-tracking-jobs: &sovatrack
-            # broken for more than a month, incorrect file pattern as job
-            # can be brake by changes outside it.
-            voting: false
-            files:
-              - ^ci-scripts/infra-setup/scheduler/.*$
-              - ^zuul.d/layout.yaml$
+        # - tripleo-ci-promotion-staging-single-pipeline-centos-7:
+        #     files: &integration
+        #       - ^ci-scripts/dlrnapi_promoter/.*
+        #       - ^ci-scripts/container-push/.*
+        #       - ^ci-scripts/promote-images.sh
+        #       - ^ci-scripts/infra-setup/roles/promoter/.*
+        #       - ^playbooks/staging.*
+        #       - ^requirements.txt
+        #       - ^test-requirements.txt
+        # - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
+        #     files: *integration
+        # - sova-tracking-jobs: &sovatrack
+        #     # broken for more than a month, incorrect file pattern as job
+        #     # can be brake by changes outside it.
+        #     voting: false
+        #     files:
+        #       - ^ci-scripts/infra-setup/scheduler/.*$
+        #       - ^zuul.d/layout.yaml$
         - rdo-tox-molecule: &molecule
             files:
               - .*molecule.*
@@ -38,8 +38,14 @@
               - ^test-requirements.txt
               - ^tox.ini$
               - ^zuul.d/layout.yaml
+            vars:
+              tox_environment:
+                PYTEST_REQPASS: 1
         - rdo-tox-molecule-delegated-centos-8:
             <<: *molecule
+            vars:
+              tox_environment:
+                PYTEST_REQPASS: 4
         - molecule-container-push-delegated-centos-7: &molecule-container-push
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
