@@ -14,6 +14,7 @@ import promoter_integration_checks
 
 from common import close_logging
 from dlrn_hash import DlrnCommitDistroHash, DlrnAggregateHash, DlrnHash
+from dlrnapi_promoter import main as promoter_main
 from logic import Promoter
 
 from stage import main as stage_main
@@ -45,6 +46,9 @@ def staged_env(request):
     config_file = "stage-config-secure.yaml"
     promoter_config_file = \
         "staging/CentOS-7/master.ini"
+
+    test_case = "all_integration"
+
     try:
         test_case = request.param
     except AttributeError:
@@ -164,6 +168,14 @@ def test_promote_qcows(staged_env):
 
 
 # These are the closest test to integration jobs
+def test_single_promote(staged_env):
+    stage_info, promoter = staged_env
+
+    candidate_dict = stage_info['dlrn']['promotions']['promotion_candidate']
+    candidate_hash = DlrnHash(source=candidate_dict)
+
+    promoter.promote(candidate_hash, "tripleo-ci-staging",
+                     "tripleo-ci-staging-promoted")
 
 @pytest.mark.parametrize("staged_env", ("all_single", "all_integration"),
                          indirect=True)
