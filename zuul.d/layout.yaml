@@ -37,8 +37,14 @@
               - ^test-requirements.txt
               - ^tox.ini$
               - ^zuul.d/layout.yaml
+            vars:
+              tox_environment:
+                PYTEST_REQPASS: 1
         - rdo-tox-molecule-delegated-centos-8:
             <<: *molecule
+            vars:
+              tox_environment:
+                PYTEST_REQPASS: 1
         - molecule-container-push-delegated-centos-7: &molecule-container-push
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
@@ -85,6 +91,9 @@
               - ^tox.ini
               - ^zuul.d/layout.yaml$
             nodeset: rdo-centos-7
+            vars:
+              tox_environment:
+                PYTEST_REQPASS: 188
         - tox-py36: &py36
             pre-run: playbooks/pre-run-docker.yml
             post-run: playbooks/post-run.yml
@@ -102,6 +111,9 @@
               - ^test-requirements.txt
               - ^tox.ini
               - ^zuul.d/layout.yaml$
+            vars:
+              tox_environment:
+                PYTEST_REQPASS: 188
     gate:
       jobs:
         - molecule-container-push-delegated-centos-7:
