@@ -1,7 +1,6 @@
 - job:
     name: sova-tracking-jobs
     run: ci-scripts/infra-setup/scheduler/sova-check.yml
-    nodeset: rdo-centos-8
 
 - job:
     name: tox-jjb
@@ -75,6 +74,7 @@
             failure-url: "tox/reports.html"
             files:
               - .*\.py
+              - .*\.ini
               - ^ci-scripts/infra-.*/.*
               - ^molecule/.*
               - ^playbooks/.*
@@ -84,15 +84,16 @@
               - ^test-requirements.txt
               - ^tox.ini
               - ^zuul.d/layout.yaml$
+            nodeset: rdo-centos-7
         - tox-py36: &py36
             pre-run: playbooks/pre-run-docker.yml
             post-run: playbooks/post-run.yml
             success-url: "tox/reports.html"
             failure-url: "tox/reports.html"
-            nodeset: rdo-centos-8
             files:
               - .*\.py
               - ^ci-scripts/infra-.*/.*
+              - .*\.ini
               - ^molecule/.*
               - ^playbooks/.*
               - ^requirements.txt
