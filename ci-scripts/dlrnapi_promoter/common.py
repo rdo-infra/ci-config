@@ -30,6 +30,10 @@ class PromotionError(Exception):
     pass
 
 
+class LockError(Exception):
+    pass
+
+
 class LoggingError(Exception):
     pass
 
@@ -179,3 +183,20 @@ def str_api_object(api_object):
     :return: A string with the conversion of the api_object.__str__ method
     """
     return str(api_object).replace('\n', ' ').replace('\r', ' ')
+
+
+# Use atomic abstract socket creation as process lock
+# no pid files to deal with
+def get_lock(process_name):
+    # Without holding a reference to our socket somewhere it gets garbage
+    # collected when the function exits
+    get_lock._lock_socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+
+    print('Trying to acquire promoter lock')
+    try:
+        get_lock._lock_socket.bind('\0' + process_name)
+    except (OSError, socket.error):
+        print('Another promoter process is running.')
+        raise LockError
+
+    print('Acquired promoter lock')
