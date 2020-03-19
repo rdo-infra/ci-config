@@ -27,7 +27,7 @@ class RepoClient(object):
         self.containers_list_base_url = config.containers_list_base_url
         self.containers_list_path = config.containers_list_path
 
-    def get_versions_csv(self, dlrn_hash, candidate_label):
+    def get_versions_csv(self, dlrn_hash):
         """
         Download a versions.csv file relative to a commit referenced by
         hash. Aggregate Hash also require the label to be specified

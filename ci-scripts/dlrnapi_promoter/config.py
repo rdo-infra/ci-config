@@ -387,4 +387,16 @@ class PromoterConfig(PromoterConfigBase):
         self.qcow_server = experimental_config['overcloud_images'][
             'qcow_servers'][default_qcow_server]
 
+        registries = experimental_config['registries']
+        registries['source']['namespace'] = \
+            "tripleo{}".format(config['release'])
+
+        for registry in registries['targets']:
+            registry['namespace'] = "tripleo{}".format(config['release'])
+
+        config['registries'] = {
+            'source': registries['source'],
+            'targets': registries['targets']
+        }
+
         return config
