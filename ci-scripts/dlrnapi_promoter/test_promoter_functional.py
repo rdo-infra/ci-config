@@ -257,3 +257,21 @@ def test_promote_qcows_experimental(staged_env):
     promoter.qcow_client.promote_experimental(candidate_hash, target_label)
 
     promoter_integration_checks.compare_tagged_image_hash(stage_info=stage_info)
+
+
+@pytest.mark.parametrize("staged_env", ("containers_single_experimental",
+                                        "containers_integration_experimental"),
+                         indirect=True)
+def test_promote_containers_experimental(staged_env):
+    stage_info, promoter = staged_env
+    candidate_dict = stage_info['dlrn']['promotions']['promotion_candidate']
+    candidate_hash = DlrnHash(source=candidate_dict)
+    candidate_label = candidate_dict['name']
+    target_label = stage_info['dlrn']['promotion_target']
+    promoter.dlrn_client.fetch_current_named_hashes(store=True)
+    promote_method = promoter.registries_orchestrator.promote_experimental
+    promote_method(candidate_hash, target_label,
+                   candidate_label=candidate_label)
+
+    promoter_integration_checks.query_container_registry_promotion(
+        stage_info=stage_info)

@@ -11,7 +11,9 @@ import tempfile
 import yaml
 
 from common import PromotionError
+from images_sets import ImagesSets
 from repo_client import RepoClient
+from registry_client import TargetRegistryClient, SourceRegistryClient
 
 
 class RegistriesClient(object):
@@ -43,9 +45,8 @@ class RegistriesClient(object):
         }
         self.repo_client = RepoClient(self.config)
 
-    def prepare_extra_vars(self, candidate_hash, target_label, candidate_label):
-        versions_reader = self.repo_client.get_versions_csv(candidate_hash,
-                                                            candidate_label)
+    def get_containers_list(self, candidate_hash):
+        versions_reader = self.repo_client.get_versions_csv(candidate_hash)
         if versions_reader is None:
             self.log.error("No versions.csv found")
             raise PromotionError
@@ -59,8 +60,12 @@ class RegistriesClient(object):
             raise PromotionError
 
         containers_list = self.repo_client.get_containers_list(tripleo_sha)
+        return containers_list
+
+    def prepare_extra_vars(self, candidate_hash, target_label, candidate_label):
+        containers_list = self.get_containers_list(candidate_hash)
         if not containers_list:
-            self.log.error("Containers list is empty")
+            self.log.error("containers list is empty")
             raise PromotionError
 
         extra_vars = {
@@ -145,3 +150,92 @@ class RegistriesClient(object):
         self.log.debug("%s Successful "
                        "promotion end logs -----------------------------",
                        log_header)
+
+
+class RegistriesOrchestrator(RegistriesClient):
+
+    log = logging.getLogger("promoter")
+
+    def __init__(self, config):
+        super(RegistriesOrchestrator, self).__init__(config)
+        self.images_sets = ImagesSets()
+        self.source_registry = SourceRegistryClient(config.registries['source'],
+                                                    self.images_sets)
+        self.target_registries = {}
+        for registry_config in config.registries['targets']:
+            self.target_registries[registry_config['name']] = \
+                TargetRegistryClient(registry_config, self.images_sets)
+
+        self.base_names = None
+
+    def get_containers_list(self, candidate_hash):
+        partial_names = super(RegistriesOrchestrator, self).get_containers_list(
+            candidate_hash)
+        partial_names.append("base")
+        partial_names.append("openstack-base")
+        base_names = \
+            list(map(lambda partial_name: "{}-binary-{}"
+                                          "".format(self.config.distro_name,
+                                                    partial_name),
+                     partial_names))
+
+        if not base_names:
+            self.log.error("containers list is empty")
+            raise PromotionError
+
+        return base_names
+
+    def promote_experimental(self, candidate_hash, target_label,
+                             candidate_label=None):
+
+        base_names = self.get_containers_list(candidate_hash)
+
+        candidate_tag = candidate_hash.full_hash
+        target_tag = target_label
+        self.log.debug("Setting promotion parameters for source registry")
+        self.source_registry.set_promotion_parameters(base_names,
+                                                      candidate_tag,
+                                                      target_tag)
+        self.log.debug("Promotion for target registries %s",
+                       ", ".join(map(lambda r:
+                                     r.registry,
+                                     self.target_registries.values())))
+
+        try:
+            for registry in self.target_registries.values():
+                self.log.debug("setting promotion parameter for target "
+                               "registry %s", registry.registry)
+                registry.set_promotion_parameters(base_names,
+                                                  candidate_tag,
+                                                  target_tag)
+
+                self.log.debug("adding images to download for the source "
+                               "registry: %s", registry.images_to_upload)
+                self.images_sets.copy_set(registry.images_to_upload,
+                                          self.source_registry.images_to_check)
+
+            self.log.debug("Images to check in %s: %s",
+                           self.source_registry.registry,
+                           self.source_registry.images_to_check)
+            self.source_registry.check_status()
+
+            self.log.info("Promoting images in the source registry, from  %s "
+                          "to %s", candidate_tag, target_tag)
+            self.source_registry.promote_images()
+            self.log.info("Downloading images from the source registry")
+            self.source_registry.download_images()
+
+            for registry in self.target_registries.values():
+                self.log.info("Uploading images to registry %s",
+                              registry.registry)
+                registry.upload_images(self.source_registry.images_downloaded)
+                self.log.info("Promoting images in registry %s from %s to "
+                              "%s", registry.registry,
+                              candidate_tag, target_tag)
+                registry.promote_images()
+
+                if not registry.validate_promotion:
+                    raise Exception
+        finally:
+            self.log.info("Cleaning up all images from all sets")
+            self.images_sets.remove_all_sets()
