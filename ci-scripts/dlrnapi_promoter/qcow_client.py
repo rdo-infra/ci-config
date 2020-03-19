@@ -37,25 +37,15 @@ class QcowClient(object):
             self.images_dir = os.path.join(self.root, config.distro,
                                            config.release, "rdo_trunk")
 
-            client = paramiko.SSHClient()
-            client.load_system_host_keys()
-            client.set_missing_host_key_policy(paramiko.WarningPolicy)
+            self.ssh_client = paramiko.SSHClient()
+            self.ssh_client.load_system_host_keys()
+            self.ssh_client.set_missing_host_key_policy(paramiko.WarningPolicy)
 
             keypath = os.path.expanduser('~/.ssh/id_rsa')
-            key = paramiko.rsakey.RSAKey(filename=keypath)
-            kwargs = {}
+            self.key = paramiko.rsakey.RSAKey(filename=keypath)
+            self.connection_vars = {}
             if self.user is not None:
-                kwargs['username'] = self.user
-            client.connect(self.host, pkey=key, **kwargs)
-            self.client = client.open_sftp()
-            try:
-                self.client.chdir(self.images_dir)
-            except IOError as ex:
-                self.log.error("Qcow-client: Image root dir %s does not exist "
-                               "in the server")
-                self.log.exception(ex)
-                self.client.close()
-                raise
+                self.connection_vars['username'] = self.user
 
     def promote(self, candidate_hash, target_label, **kwargs):
         """
@@ -165,6 +155,19 @@ class QcowClient(object):
     def promote_experimental(self, candidate_hash, target_label,
                              candidate_label=None,
                              create_previous=True):
+        self.ssh_client.connect(self.host, pkey=self.key,
+                                **self.connection_vars)
+        self.client = self.ssh_client.open_sftp()
+
+        try:
+            self.client.chdir(self.images_dir)
+        except IOError as ex:
+            self.log.error("Qcow-client: Image root dir %s does not exist "
+                           "in the server")
+            self.log.exception(ex)
+            self.client.close()
+            raise
+
         log_header = "Qcow promote '{}' to {}:".format(candidate_hash,
                                                        target_label)
         self.log.info("%s Attempting promotion", log_header)
