@@ -150,10 +150,12 @@ def compare_tagged_image_hash(stage_info=None, **kwargs):
         images_top_root = images_top_root.rstrip("/")
         images_root = os.path.join(images_top_root, distro, release,
                                    "rdo_trunk")
+        os.chdir(images_root)
         promotion_link = os.path.join(images_root, target_label)
         candidate_dict = stage_info['dlrn']['promotions']['promotion_candidate']
         candidate_hash = DlrnHash(source=candidate_dict)
-        promotion_dir = os.path.join(images_root, candidate_hash.full_hash)
+        promotion_dir = os.path.basename(os.path.join(images_root,
+                                                      candidate_hash.full_hash))
         current_dict = stage_info['dlrn']['promotions']['currently_promoted']
         current_hash = DlrnHash(source=current_dict)
         previous_dict = stage_info['dlrn']['promotions']['previously_promoted']
@@ -187,9 +189,9 @@ def compare_tagged_image_hash(stage_info=None, **kwargs):
         assert True
     except OSError:
         assert False, "No link was created"
-
+    linked_dir = os.path.basename(rl_module.readlink(promotion_link))
     assert stat.S_ISLNK(file_mode), "promoter dir is not a symlink"
-    linked_dir = rl_module.readlink(promotion_link)
+
     error_msg = "{} points to wrong dir {} instead of {}".format(target_label,
                                                                  linked_dir,
                                                                  promotion_dir)
