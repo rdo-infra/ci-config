@@ -231,7 +231,7 @@ def test_promote_all_two_promotions_in_a_row(staged_env):
     assert False
 
 
-@pytest.mark.xfail(reason="Experimental Feature")
+#@pytest.mark.xfail(reason="Experimental Feature")
 @pytest.mark.parametrize("staged_env", ("qcow_single_experimental",
                                         "qcow_integration_experimental"),
                          indirect=True)
@@ -256,7 +256,6 @@ def test_promote_qcows_experimental(staged_env):
     target_label = stage_info['dlrn']['promotion_target']
 
     promoter.dlrn_client.fetch_current_named_hashes(store=True)
-    promoter.qcow_client.promote_experimental(candidate_hash, candidate_label,
-                                              target_label)
+    promoter.qcow_client.promote_experimental(candidate_hash, target_label)
 
     promoter_integration_checks.compare_tagged_image_hash(stage_info=stage_info)
