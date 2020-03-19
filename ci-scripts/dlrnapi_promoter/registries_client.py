@@ -12,6 +12,7 @@ import yaml
 
 from common import PromotionError
 from repo_client import RepoClient
+from registry_client import RegistryClient
 
 
 class RegistriesClient(object):
@@ -43,7 +44,7 @@ class RegistriesClient(object):
         }
         self.repo_client = RepoClient(self.config)
 
-    def prepare_extra_vars(self, candidate_hash, target_label, candidate_label):
+    def get_containers_list(self, candidate_hash, candidate_label):
         versions_reader = self.repo_client.get_versions_csv(candidate_hash,
                                                             candidate_label)
         if versions_reader is None:
@@ -59,8 +60,13 @@ class RegistriesClient(object):
             raise PromotionError
 
         containers_list = self.repo_client.get_containers_list(tripleo_sha)
+        return containers_list
+
+    def prepare_extra_vars(self, candidate_hash, target_label, candidate_label):
+        containers_list = self.get_containers_list(candidate_hash,
+                                                   candidate_label)
         if not containers_list:
-            self.log.error("Containers list is empty")
+            self.log.error("containers list is empty")
             raise PromotionError
 
         extra_vars = {
@@ -145,3 +151,64 @@ class RegistriesClient(object):
         self.log.debug("%s Successful "
                        "promotion end logs -----------------------------",
                        log_header)
+
+
+class RegistriesOrchestrator(RegistriesClient):
+
+    def __init__(self, config):
+        super(RegistriesOrchestrator, self).__init__(config)
+        self.source_registry = RegistryClient(config.registries['source'])
+        self.target_registries = {}
+        for registry_config in config.registries['targets']:
+            self.target_registries[registry_config['name']] = \
+                RegistryClient(registry_config)
+
+    def promote_experimental(self, candidate_hash, target_label,
+                             candidate_label=None):
+        containers_list = self.get_containers_list(candidate_hash,
+                                                   candidate_label)
+        # Move to get_containers_list when experimentation is finished.
+        containers_list.append("base")
+        containers_list.append("openstack-base")
+        containers_list = \
+            list(map(lambda partial_name: "{}-binary-{}"
+                                          "".format(self.config.distro_name,
+                                                    partial_name),
+                     containers_list))
+
+        if not containers_list:
+            self.log.error("containers list is empty")
+            raise PromotionError
+
+        validation = self.source_registry.validate_containers(candidate_hash,
+                                                              containers_list)
+        if validation['containers_missing']:
+            raise Exception
+        try:
+            self.source_registry.add_batch("hash_tagged", containers_list,
+                                           candidate_hash.full_hash)
+            self.source_registry.repo_pull(batch_name="hash_tagged")
+            self.source_registry.local_retag(target_label,
+                                             src_batch_name="hash_tagged",
+                                             dest_batch_name="label_tagged")
+
+            self.source_registry.remote_retag(containers_list, target_label)
+            for registry in self.target_registries.values():
+                registry.push_list(containers_list, candidate_hash.full_hash)
+                registry.remote_tag(containers_list, target_label)
+                registry.check_manifest_exist()
+                registry.pull_ppc()
+                registry.push_list_ppc(containers_list)
+                registry.pull_x86()
+                registry.push_list_x86(containers_list)
+                registry.create_multi_arch_manifest()
+                validation = registry.validate_containers(containers_list,
+                                                          candidate_hash)
+                if validation['containers_missing']:
+                    raise Exception
+        except Exception:
+            raise
+        finally:
+            self.source_registry.cleanup()
+            # for registry in self.target_repository:
+            #    registry.cleanup(containers_list)
