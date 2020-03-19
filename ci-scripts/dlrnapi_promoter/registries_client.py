@@ -12,6 +12,7 @@ import yaml
 
 from common import PromotionError
 from repo_client import RepoClient
+from registry_client import TargetRegistryClient, SourceRegistryClient
 
 
 class RegistriesClient(object):
@@ -43,7 +44,7 @@ class RegistriesClient(object):
         }
         self.repo_client = RepoClient(self.config)
 
-    def prepare_extra_vars(self, candidate_hash, target_label, candidate_label):
+    def get_containers_list(self, candidate_hash, candidate_label):
         versions_reader = self.repo_client.get_versions_csv(candidate_hash,
                                                             candidate_label)
         if versions_reader is None:
@@ -59,8 +60,13 @@ class RegistriesClient(object):
             raise PromotionError
 
         containers_list = self.repo_client.get_containers_list(tripleo_sha)
+        return containers_list
+
+    def prepare_extra_vars(self, candidate_hash, target_label, candidate_label):
+        containers_list = self.get_containers_list(candidate_hash,
+                                                   candidate_label)
         if not containers_list:
-            self.log.error("Containers list is empty")
+            self.log.error("containers list is empty")
             raise PromotionError
 
         extra_vars = {
@@ -145,3 +151,69 @@ class RegistriesClient(object):
         self.log.debug("%s Successful "
                        "promotion end logs -----------------------------",
                        log_header)
+
+
+class RegistriesOrchestrator(RegistriesClient):
+
+    def __init__(self, config):
+        super(RegistriesOrchestrator, self).__init__(config)
+        self.source_registry = SourceRegistryClient(config.registries['source'])
+        self.target_registries = {}
+        for registry_config in config.registries['targets']:
+            self.target_registries[registry_config['name']] = \
+                TargetRegistryClient(registry_config)
+
+        self.base_names = None
+        self.validations = {}
+        self.validations['source_registry'] = {}
+        self.validations['target_registries'] = []
+
+    def get_containers_list(self, candidate_hash, candidate_label):
+        partial_names = super(RegistriesOrchestrator, self).get_containers_list(
+            candidate_hash, candidate_label)
+        partial_names.append("base")
+        partial_names.append("openstack-base")
+        base_names = \
+            list(map(lambda partial_name: "{}-binary-{}"
+                                          "".format(self.config.distro_name,
+                                                    partial_name),
+                     partial_names))
+
+        if not base_names:
+            self.log.error("containers list is empty")
+            raise PromotionError
+
+        return base_names
+
+    def promote_experimental(self, candidate_hash, target_label,
+                             candidate_label=None):
+        base_names = self.get_containers_list(candidate_hash, candidate_label)
+
+        self.source_registry.set_promotion_parameters(base_names,
+                                                      candidate_hash,
+                                                      target_label)
+
+        try:
+            for registry in self.target_registries.values():
+                registry.set_promotion_parameters(base_names, candidate_hash,
+                                                  target_label)
+
+                self.source_registry.to_check.add_images(registry.to_upload)
+
+            self.source_registry.check_status()
+
+            self.source_registry.promote_images()
+            downloaded = self.source_registry.download_images()
+
+            for registry in self.target_registries.values():
+                registry.upload_images(downloaded)
+                registry.promote_images()
+
+                if not registry.validate_promotion:
+                    raise Exception
+        except Exception:
+            raise
+        finally:
+            self.source_registry.cleanup()
+            for registry in self.target_repository:
+                registry.cleanup()

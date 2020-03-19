@@ -5,10 +5,10 @@ workflow
 import logging
 
 from dlrn_client import DlrnClient
-from registries_client import RegistriesClient
+from registries_client import RegistriesClient, RegistriesOrchestrator
 from qcow_client import QcowClient
 from common import PromotionError
-from config import PromoterConfig
+from config import PromoterConfig, ConfigError
 
 
 class Promoter(object):
@@ -28,9 +28,20 @@ class Promoter(object):
         """
         self.config = PromoterConfig(config_file,
                                      overrides=overrides)
-        self.dlrn_client = DlrnClient(self.config)
-        self.registries_client = RegistriesClient(self.config)
-        self.qcow_client = QcowClient(self.config)
+        clients_map = {
+            'dlrn_client': DlrnClient,
+            'registried_client': RegistriesClient,
+            'qcow_client': QcowClient,
+        }
+        for client_name, client_class in clients_map.items():
+            try:
+                setattr(self, client_name, client_class(self.config))
+            except ConfigError:
+                self.log.error("Error initializing a client")
+
+        # Experimental client
+        if hasattr(self.config, 'registries'):
+            self.registries_orchestrator = RegistriesOrchestrator(self.config)
 
     def select_candidates(self, candidate_label, target_label):
         """
