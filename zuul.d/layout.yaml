@@ -37,14 +37,16 @@
               - ^test-requirements.txt
               - ^tox.ini$
               - ^zuul.d/layout.yaml
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 1
         - rdo-tox-molecule-delegated-centos-8:
+            tox_envlist: molecule_delegated
             <<: *molecule
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 1
+        - molecule-provision-promoter-delegated-centos-8: &molecule-provision
+            files:
+              - ^ci-scripts/dlrnapi_promoter/.*
+              - ^ci-scripts/infra-setup/roles/promoter/molecule/provision/.*
+              - ^playbooks/molecule-pre.yml
+              - ^requirements.txt
+              - ^test-requirements.txt
         - molecule-container-push-delegated-centos-7: &molecule-container-push
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
@@ -91,9 +93,6 @@
               - ^tox.ini
               - ^zuul.d/layout.yaml$
             nodeset: rdo-centos-7
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 188
         - tox-py36: &py36
             pre-run: playbooks/pre-run-docker.yml
             post-run: playbooks/post-run.yml
@@ -110,12 +109,11 @@
               - ^setup.py
               - ^test-requirements.txt
               - ^tox.ini
-              - ^zuul.d/layout.yaml$
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 188
+             - ^zuul.d/layout.yaml$
     gate:
       jobs:
+        - molecule-provision-promoter-delegated-centos-8:
+            <<: *molecule-provision
         - molecule-container-push-delegated-centos-7:
             <<: *molecule-container-push
         - molecule-tripleo-common-delegated-centos-7:
