@@ -1,0 +1,30 @@
+- name: Set up external partition
+  become: true
+  block:
+    - name: Mount external volume - create a partition
+      parted:
+        device: "{{ docker_device }}"
+        number: 1
+        state: present
+
+    - name: Be sure to reread partition table
+      command: kpartx -a "{{ docker_device }}"
+      when: setup_staging
+
+    - name: Mount external volume - create a filesystem
+      filesystem:
+        fstype: xfs
+        dev: "{{ docker_partition }}"
+
+    - name: create a mount folder
+      file:
+        path: /var/lib/docker
+        state: directory
+
+    - name: Mount external volume - mount the partition
+      mount:
+        path: /var/lib/docker
+        src: "{{ docker_partition }}"
+        fstype: xfs
+        state: mounted
+
