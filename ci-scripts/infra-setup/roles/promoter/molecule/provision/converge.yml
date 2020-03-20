@@ -1,0 +1,48 @@
+---
+- hosts: localhost
+  tasks:
+#
+# While testing, we usually not provisioning a second disk for the server
+# So we emulate the second disk with a loopback device
+#
+    - name: include promoter provisioner defaults
+      include_vars: ../../defaults/main.yml
+
+    - name: stat extra variables file
+      stat:
+       path: "{{ extra_variables_path }}"
+      register: extra_variables_stat
+
+    - name: include extra vars if present
+      include_vars: "{{ extra_variables_path }}"
+      when: extra_variables_stat.stat.exists
+
+    - name: set repo dir from zuu if defined
+      set_fact:
+        ci_config_local_src_dir: "/home/{{ promoter_user }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir  }}"
+      when: zuul is defined
+
+    - name: Begin production code
+      become: true
+      block:
+        - name: Promoter provisioning
+          include_role:
+            name: promoter
+            tasks_from: setup_loop
+          tags:
+            - provisioning
+
+        - name: promoter staging provisioning
+          include_role:
+            name: promoter
+          vars:
+            run_service: false
+          tags:
+            - provisioning
+
+        - name: Run credentials setup
+          include_role:
+            name: promoter
+            tasks_from: update_credentials
+          tags:
+            - provisioning
