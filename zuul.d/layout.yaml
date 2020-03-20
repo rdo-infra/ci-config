@@ -9,133 +9,123 @@
 - project:
     check:
       jobs:
-        - tripleo-ci-promotion-staging-single-pipeline-centos-7:
-            files: &integration
-              - ^ci-scripts/dlrnapi_promoter/.*
-              - ^ci-scripts/container-push/.*
-              - ^ci-scripts/promote-images.sh
-              - ^ci-scripts/infra-setup/roles/promoter/.*
-              - ^playbooks/staging.*
-              - ^requirements.txt
-              - ^test-requirements.txt
-        - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
-            files: *integration
-        - sova-tracking-jobs: &sovatrack
-            # broken for more than a month, incorrect file pattern as job
-            # can be brake by changes outside it.
-            voting: false
-            files:
-              - ^ci-scripts/infra-setup/scheduler/.*$
-              - ^zuul.d/layout.yaml$
-        - rdo-tox-molecule: &molecule
-            files:
-              - .*molecule.*
-              - ^ci-scripts/infra-setup/roles/get_hash/.*$
-              - ^ci-scripts/infra-setup/roles/promoter/.*$
-              - ^requirements.txt
-              - ^requirements.txt
-              - ^test-requirements.txt
-              - ^tox.ini$
-              - ^zuul.d/layout.yaml
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 1
-        - rdo-tox-molecule-delegated-centos-8:
-            <<: *molecule
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 1
-        - molecule-container-push-delegated-centos-7: &molecule-container-push
-            files:
-              - ^ci-scripts/dlrnapi_promoter/.*
-              - ^ci-scripts/container-push/.*
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/container-push/.*
-              - ^playbooks/molecule-delegated-pre.yml
-              - ^playbooks/molecule-delegated.yml
-              - ^requirements.txt
-              - ^test-requirements.txt
-        - molecule-tripleo-common-delegated-centos-7: &molecule-tripleo-common
-            files:
-              - ^ci-scripts/dlrnapi_promoter/.*
-              - ^ci-scripts/container-push/.*
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/tripleo-common-integration.*
-              - ^playbooks/molecule-delegated-pre.yml
-              - ^playbooks/molecule-delegated.yml
-              - ^requirements.txt
-              - ^test-requirements.txt
-        - molecule-delegated-promote-images-delegated-centos-7: &molecule-promote-images
-            files:
-              - ^ci-scripts/dlrnapi_promoter/.*
-              - ^ci-scripts/promote-images.sh
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/promote-images/.*
-              - ^playbooks/molecule-delegated-promote-images-pre.yml
-              - ^playbooks/molecule-delegated.yml
-              - ^requirements.txt
-              - ^test-requirements.txt
-        - tox-jjb
-        - tox-py27: &py27
-            pre-run: playbooks/pre-run-docker.yml
-            post-run: playbooks/post-run.yml
-            success-url: "tox/reports.html"
-            failure-url: "tox/reports.html"
-            files:
-              - .*\.py
-              - .*\.ini
-              - ^ci-scripts/infra-.*/.*
-              - ^molecule/.*
-              - ^playbooks/.*
-              - ^requirements.txt
-              - ^setup.cfg
-              - ^setup.py
-              - ^test-requirements.txt
-              - ^tox.ini
-              - ^zuul.d/layout.yaml$
-            nodeset: rdo-centos-7
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 188
-        - tox-py36: &py36
-            pre-run: playbooks/pre-run-docker.yml
-            post-run: playbooks/post-run.yml
-            success-url: "tox/reports.html"
-            failure-url: "tox/reports.html"
-            files:
-              - .*\.py
-              - ^ci-scripts/infra-.*/.*
-              - .*\.ini
-              - ^molecule/.*
-              - ^playbooks/.*
-              - ^requirements.txt
-              - ^setup.cfg
-              - ^setup.py
-              - ^test-requirements.txt
-              - ^tox.ini
-              - ^zuul.d/layout.yaml$
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 188
+        - molecule-provision-promoter-delegated-centos-8
+#        - tripleo-ci-promotion-staging-single-pipeline-centos-7:
+#            files: &integration
+#              - ^ci-scripts/dlrnapi_promoter/.*
+#              - ^ci-scripts/container-push/.*
+#              - ^ci-scripts/promote-images.sh
+#              - ^ci-scripts/infra-setup/roles/promoter/.*
+#              - ^playbooks/staging.*
+#              - ^requirements.txt
+#              - ^test-requirements.txt
+#        - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
+#            files: *integration
+#        - sova-tracking-jobs: &sovatrack
+#            # broken for more than a month, incorrect file pattern as job
+#            # can be brake by changes outside it.
+#            voting: false
+#            files:
+#              - ^ci-scripts/infra-setup/scheduler/.*$
+#              - ^zuul.d/layout.yaml$
+#        - rdo-tox-molecule: &molecule
+#            files:
+#              - .*molecule.*
+#              - ^ci-scripts/infra-setup/roles/get_hash/.*$
+#              - ^ci-scripts/infra-setup/roles/promoter/.*$
+#              - ^requirements.txt
+#              - ^requirements.txt
+#              - ^test-requirements.txt
+#              - ^tox.ini$
+#              - ^zuul.d/layout.yaml
+#        - rdo-tox-molecule-delegated-centos-8:
+#            tox_envlist: molecule_delegated
+#            <<: *molecule
+#        - molecule-container-push-delegated-centos-7: &molecule-container-push
+#            files:
+#              - ^ci-scripts/dlrnapi_promoter/.*
+#              - ^ci-scripts/container-push/.*
+#              - ^ci-scripts/infra-setup/roles/promoter/molecule/container-push/.*
+#              - ^playbooks/molecule-delegated-pre.yml
+#              - ^playbooks/molecule-delegated.yml
+#              - ^requirements.txt
+#              - ^test-requirements.txt
+#        - molecule-tripleo-common-delegated-centos-7: &molecule-tripleo-common
+#            files:
+#              - ^ci-scripts/dlrnapi_promoter/.*
+#              - ^ci-scripts/container-push/.*
+#              - ^ci-scripts/infra-setup/roles/promoter/molecule/tripleo-common-integration.*
+#              - ^playbooks/molecule-delegated-pre.yml
+#              - ^playbooks/molecule-delegated.yml
+#              - ^requirements.txt
+#              - ^test-requirements.txt
+#        - molecule-delegated-promote-images-delegated-centos-7: &molecule-promote-images
+#            files:
+#              - ^ci-scripts/dlrnapi_promoter/.*
+#              - ^ci-scripts/promote-images.sh
+#              - ^ci-scripts/infra-setup/roles/promoter/molecule/promote-images/.*
+#              - ^playbooks/molecule-delegated-promote-images-pre.yml
+#              - ^playbooks/molecule-delegated.yml
+#              - ^requirements.txt
+#              - ^test-requirements.txt
+#        - tox-jjb
+#        - tox-py27: &py27
+#            pre-run: playbooks/pre-run-docker.yml
+#            post-run: playbooks/post-run.yml
+#            success-url: "tox/reports.html"
+#            failure-url: "tox/reports.html"
+#            files:
+#              - .*\.py
+#              - .*\.ini
+#              - ^ci-scripts/infra-.*/.*
+#              - ^molecule/.*
+#              - ^playbooks/.*
+#              - ^requirements.txt
+#              - ^setup.cfg
+#              - ^setup.py
+#              - ^test-requirements.txt
+#              - ^tox.ini
+#              - ^zuul.d/layout.yaml$
+#            nodeset: rdo-centos-7
+#        - tox-py36: &py36
+#            pre-run: playbooks/pre-run-docker.yml
+#            post-run: playbooks/post-run.yml
+#            success-url: "tox/reports.html"
+#            failure-url: "tox/reports.html"
+#            files:
+#              - .*\.py
+#              - ^ci-scripts/infra-.*/.*
+#              - .*\.ini
+#              - ^molecule/.*
+#              - ^playbooks/.*
+#              - ^requirements.txt
+#              - ^setup.cfg
+#              - ^setup.py
+#              - ^test-requirements.txt
+#              - ^tox.ini
+#              - ^zuul.d/layout.yaml$
     gate:
       jobs:
-        - molecule-container-push-delegated-centos-7:
-            <<: *molecule-container-push
-        - molecule-tripleo-common-delegated-centos-7:
-            <<: *molecule-tripleo-common
-        - molecule-delegated-promote-images-delegated-centos-7:
-            <<: *molecule-promote-images
-        - tripleo-ci-promotion-staging-single-pipeline-centos-7:
-            files: *integration
-        - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
-            files: *integration
-        - rdo-tox-molecule:
-            <<: *molecule
-        - rdo-tox-molecule-delegated-centos-8:
-            <<: *molecule
+#        - molecule-container-push-delegated-centos-7:
+#            <<: *molecule-container-push
+#        - molecule-tripleo-common-delegated-centos-7:
+#            <<: *molecule-tripleo-common
+#        - molecule-delegated-promote-images-delegated-centos-7:
+#            <<: *molecule-promote-images
+#        - tripleo-ci-promotion-staging-single-pipeline-centos-7:
+#            files: *integration
+#        - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
+#            files: *integration
+#        - rdo-tox-molecule:
+#            <<: *molecule
+#        - rdo-tox-molecule-delegated-centos-8:
+#            <<: *molecule
         - tox-jjb
-        - tox-py27:
-            <<: *py27
-        - tox-py36:
-            <<: *py36
-
+#        - tox-py27:
+#            <<: *py27
+#        - tox-py36:
+#            <<: *py36
+#
     openstack-periodic-24hr:
       jobs:
         - sova-tracking-jobs
