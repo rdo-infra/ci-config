@@ -1,12 +1,14 @@
 setup_staging: false
 rrcockpit_internal_network_ip: 127.0.0.1
-promoter_user: centos
+promoter_user: "{{ lookup('env', 'PROMOTER_USER')|default('centos', true) }}"
 molecule_testing: false
 docker_device: /dev/vdb
 docker_partition: /dev/vdb1
+docker_socket: /var/run/docker.sock
 
 ci_config_local_src_dir: ""
 ci_config_remote_src_dir: "/home/{{ promoter_user }}/ci-config"
+dlrn_exec_path: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/dlrn-promoter-service.sh"
 #
 # Credential paths
 #
@@ -61,3 +63,5 @@ promote_registries:
     namespace: "tripleo{{ release }}"
     token: unused
     auth_url: unused
+
+run_service: true

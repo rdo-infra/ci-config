@@ -1,0 +1,49 @@
+#
+# Promoter logs
+#
+
+- name: Fix home directory permissions
+  file:
+    path: "/home/{{ promoter_user }}"
+    mode: 0755
+
+- name: Create a directory for the promoter logs
+  file:
+    path: "/home/{{ promoter_user }}/promoter_logs"
+    state: directory
+    setype: httpd_sys_content_t
+    owner: "{{ promoter_user }}"
+
+- name: copy logrotate selinux policy
+  copy:
+    src: logrotate-promoter.te
+    dest: /tmp/logrotate-promoter.te
+  register: policy
+
+- name: compile and permanently install policy
+  shell: |
+    checkmodule -M -m -o /tmp/logrotate-promoter.mod /tmp/logrotate-promoter.te
+    semodule_package -m /tmp/logrotate-promoter.mod -o /tmp/logrotate-promoter.pp
+    semodule -i /tmp/logrotate-promoter.pp
+    rm -f /tmp/logrotate-promoter.pp /tmp/logrotate-promoter.mod
+  when: policy is changed
+
+- name: add configuration for the log rotation
+  copy:
+    content: |
+      /home/{{ promoter_user }}/promoter_logs/*.log {
+          daily
+          missingok
+          su {{ promoter_user }} {{ promoter_user }}
+          dateext
+          dateyesterday
+          notifempty
+          delaycompress
+          rotate 60
+      }
+    dest: /etc/logrotate.d/promoter
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
