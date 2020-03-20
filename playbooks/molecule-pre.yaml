@@ -1,0 +1,25 @@
+- hosts: all
+  tasks:
+    - name: remove any docker package
+      become: true
+      package:
+        name:
+          - docker-ce
+          - containerd.io
+          - docker-ce-cli
+        state: absent
+
+    - name: remove docker repo
+      become: true
+      file:
+        path: /etc/yum.repos.d/docker-ce.repo
+        state: absent
+
+    - name: "set zuul_dump var to gather "
+      set_fact:
+        zuul_dump: "{{ {'zuul': zuul, 'promoter_user': promoter_user } }}"
+
+    - name: Dump zuul variables on the host so it can be reaused by molecule
+      copy:
+        content: "{{ zuul_dump|to_nice_yaml }}"
+        dest: "/tmp/extra_variables.yml"
