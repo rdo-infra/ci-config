@@ -1,0 +1,12 @@
+- hosts: localhost
+  tasks:
+    - name: call tasks to manage variables
+      include_tasks: manage_variables.yml
+
+    # the test requirements are usually run only by tox
+    # so when we are testing, it's nice to have them in the same virtual env
+    - name: provisioner functional tests
+      include_tasks: tests_provisioner_functional.yml
+      vars:
+        run_service: false
+        monitoring: false

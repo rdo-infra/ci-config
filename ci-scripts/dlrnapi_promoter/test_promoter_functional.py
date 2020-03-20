@@ -84,9 +84,10 @@ def staged_env(request):
         promoter_config_file = \
             "staging/CentOS-8/master.ini"
         setup_cmd_line += " --db-data integration-pipeline.yaml"
-        setup_cmd_line += (" --promoter-config-file {}"
-                           "".format(promoter_config_file))
         teardown_cmd_line += " --db-data integration-pipeline.yaml"
+
+    setup_cmd_line += (" --promoter-config-file {}"
+                       "".format(promoter_config_file))
 
     log.info("Running cmd line: {}".format(setup_cmd_line))
 

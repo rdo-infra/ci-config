@@ -1,0 +1,16 @@
+- name: include promoter provisioner defaults
+  include_vars: ../../defaults/main.yml
+
+- name: stat extra variables file
+  stat:
+   path: "{{ extra_variables_path }}"
+  register: extra_variables_stat
+
+- name: include extra vars if present
+  include_vars: "{{ extra_variables_path }}"
+  when: extra_variables_stat.stat.exists
+
+- name: set repo dir from zuul if defined
+  set_fact:
+    ci_config_local_src_dir: "/home/{{ promoter_user }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir  }}"
+  when: zuul is defined
