@@ -44,6 +44,7 @@
             PXOzGohcXPGPYFALq1XO8NqDnzVD6sokwkD/n1UKiDOmrB+iRuBXzAleECLarIzi
             WAsyy1Jag5MFgLJysZEKUDPtFWvsrs3gdn63GcrqkOH85a2Y/X2U
             -----END RSA PRIVATE KEY-----
+      when: zuul is defined
 
     # Set up credentials
     - name: save DLRNAPI_PASSWORD
@@ -128,12 +129,13 @@
     - name: Test stage promotion
       become: true
       become_user: "{{ promoter_user }}"
-      shell:
-        cmd: |
+      vars:
+        ansible_python_interpreter: /home/{{ promoter_user }}/promoter_venv/bin/python3
+      shell: |
           export DOCKER_HOST=unix:///tmp/docker.sock
           source /home/{{ promoter_user }}/promoter_venv/bin/activate
           cd /home/{{ promoter_user }}/ci-config
-          python ci-scripts/dlrnapi_promoter/promoter_integration_checks.py --stage-info-file /tmp/stage-info.yaml
+          /home/{{ promoter_user }}/promoter_venv/bin/python3 ci-scripts/dlrnapi_promoter/promoter_integration_checks.py --stage-info-file /tmp/stage-info.yaml
       changed_when: true
 
     - name: include vars from stage info
