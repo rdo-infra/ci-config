@@ -1,0 +1,65 @@
+- name: Packages
+  become: true
+  block:
+    - name: Configure docker-ce repo
+      command: yum-config-manager --add-repo \
+        https://download.docker.com/linux/centos/docker-ce.repo
+
+    # Install EPEL so we can get ansible 2.8
+    # Sometimes the epel.repo file is removed even if the package is installed.
+    # So to get back the epel.repo file again we need to remove and install again.
+    - name:  remove epel
+      package:
+        name: epel-release
+        state: absent
+
+    - name:  install epel
+      package:
+        name: epel-release
+        state: present
+
+    - name: Install influxdb repo to get telegraf
+      yum_repository:
+        name: influxdb
+        description: InfluxDB Repository - RHEL \$releasever
+        baseurl: https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://repos.influxdata.com/influxdb.key
+
+    - name: Removed old/distro version of docker
+      package:
+        name:
+          - docker
+          - docker-client
+          - docker-client-latest
+          - docker-common
+          - docker-latest
+          - docker-latest-logrotate
+          - docker-logrotate
+          - docker-engine
+        state: absent
+
+    - name: Install required packages
+      package:
+        name:
+          - logrotate
+          - httpd
+          - python-virtualenv
+          - telegraf
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+          - openssh
+          - git
+          - parted
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - parted
+          - xfsprogs
+          - policycoreutils
+          - setools-console
+          - ansible
+          - python-docker-py
+        state: present
