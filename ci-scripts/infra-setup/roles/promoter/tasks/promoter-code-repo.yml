@@ -1,0 +1,29 @@
+#
+# Ci-config repo handling
+#
+
+# ci_config_remote_src_dir is where zuul clones ci-config repo
+- name: set ci-config remote src dir
+  set_fact:
+    ci_config_remote_src_dir: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
+  when: zuul is defined
+
+# repo dir is present?
+- name: Check for presence of repo
+  stat:
+    path: "{{ ci_config_remote_src_dir }}"
+  register: ci_config_remote_src_dir_stat
+
+# dir is git repo?
+- name: check if ci-config dir is git repo # noqa 301 303
+  command: "git rev-parse --is-inside-work-tree"
+  args:
+    chdir: "{{ ci_config_remote_src_dir }}"
+  register: git_repo
+
+# clone ci-config repo if not present or not a git repo
+- name: When dir is not present, clone from git
+  git:  # noqa 401
+    repo: 'https://review.rdoproject.org/r/p/rdo-infra/ci-config.git'
+    dest: "{{ ci_config_remote_src_dir }}"
+  when: not ci_config_remote_src_dir_stat.stat.exists or git_repo.rc != 0
