@@ -1,0 +1,40 @@
+#
+# Monitoring setup
+#
+- block:
+    - name: Configure telegraf to report to rrcockpit
+      blockinfile:
+        path: /etc/telegraf/telegraf.conf
+        marker: "# -- {mark} ANSIBLE MANAGED BLOCK --"
+        block: |
+          [[outputs.influxdb]]
+          urls = ['http://{{ rrcockpit_internal_network_ip }}:8086']
+      become: true
+
+    - name: Configure dlrn-promoter at telegraf
+      copy:
+        src: dlrn-promoter.telegraf.conf
+        dest: /etc/telegraf/telegraf.d/dlrn-promoter.conf
+        mode: '0644'
+        owner: 'root'
+        group: 'root'
+      register: dlrn_promoter_telegram
+
+    - name: Configure disk at telegraf
+      copy:
+        src: disk.telegraf.conf
+        dest: /etc/telegraf/telegraf.d/disk.conf
+        mode: '0644'
+        owner: 'root'
+        group: 'root'
+      register: disk_telegram
+
+    - name: Start and enable telegraf
+      service:
+        name: telegraf
+        state: restarted
+        enabled: yes
+      when:
+        - not setup_staging
+        - dlrn_promoter_telegram.changed or disk_telegram.changed
+  become: true

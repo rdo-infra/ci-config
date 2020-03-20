@@ -12,7 +12,6 @@ source ~/promoter_venv/bin/activate
 
 while true; do
 
-    {% if not setup_staging %}
     # fetch the latest ci-config
     cd ~/ci-config; git reset --hard origin/master && git pull >/dev/null
 
@@ -21,10 +20,8 @@ while true; do
 
     # call dlrn-promoter.sh for multiple releases/distros
     /bin/bash -x ~/ci-config/ci-scripts/dlrnapi_promoter/dlrn-promoter.sh
-    {% else %}
-    echo /bin/bash ~/ci-config/ci-scripts/dlrnapi_promoter/dlrn-promoter.sh
-    {% endif %}
 
     # Sleep 10 minutes
     sleep 600
+
 done
