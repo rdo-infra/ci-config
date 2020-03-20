@@ -1,0 +1,68 @@
+- name: Repos
+  become: true
+  block:
+    - name: Configure docker-ce repo
+      command: yum-config-manager --add-repo \
+        https://download.docker.com/linux/centos/docker-ce.repo
+
+    # Install EPEL so we can get ansible 2.8
+    # Sometimes the epel.repo file is removed even if the package is installed.
+    # So to get back the epel.repo file again we need to remove and install again.
+    - name: Check that epel.repo exists
+      stat:
+        path: /etc/yum.repos.d/epel.repo
+      register: epel_file
+
+    - name:  Ensure epel is removed before reinstalling it if the repo file doesn't exist
+      package:
+        name: epel-release
+        state: absent
+      when: not epel_file.stat.exists
+
+    - name:  install epel
+      package:
+        name: epel-release
+        state: present
+      when: not epel_file.stat.exists
+
+    - name: Install influxdb repo to get telegraf
+      yum_repository:
+        name: influxdb
+        description: InfluxDB Repository - CentOS \$releasever
+        baseurl: https://repos.influxdata.com/centos/$releasever/$basearch/stable
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://repos.influxdata.com/influxdb.key
+
+# This needs a different treatement as we can't install the latest version and we don't want to deal with
+# dependencies manually
+- name: Install docker packages
+  shell:
+    cmd: |
+      dnf install --nobest -y docker-ce docker-ce-cli
+    warn: false
+  changed_when: "'Complete!' in result.stdout"
+
+- name: Install distro Packages
+  become: true
+  block:
+    - name: Install required packages
+      package:
+        name:
+          - logrotate
+          - httpd
+          - python3-virtualenv
+          - telegraf
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+          - openssh
+          - git
+          - parted
+          - containerd.io
+          - parted
+          - xfsprogs
+          - policycoreutils
+          - setools-console
+          - ansible
+        state: present
