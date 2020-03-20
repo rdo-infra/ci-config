@@ -1,0 +1,10 @@
+- hosts: all
+  tasks:
+    - name: "set zuul_dump var to gather "
+      set_fact:
+        zuul_dump: "{{ {'zuul': zuul} }}"
+
+    - name: Dump zuul variables on the host so it can be reaused by molecule
+      copy:
+        content: "{{ zuul_dump|to_nice_yaml }}"
+        dest: "/tmp/extra_variables.yml"
