@@ -47,7 +47,7 @@
 - name: Attempt to use docker command as normal user
   become: true
   become_user: "{{ promoter_user }}"
-  command: "docker info > /dev/null"
+  shell: "docker info > /dev/null"
   register: docker_info_user
   changed_when: false
 
@@ -150,10 +150,36 @@
   command: systemd-analyze verify dlrn-promoter.service
   changed_when: false
 
+- name: Stat dlrn service exec script
+  stat:
+    path: "{{ dlrn_exec_path }}"
+  register: dlrn_exec_stat
+
+- name: Check that the dlrn exec exists
+  assert:
+    that: dlrn_exec_stat.stat.exists
+    success_msg: Dlrn promoter service exec script present
+    fail_msg: Dlrn promoter service exec missing
+
+- name: Check that the dlrn exec is executable
+  assert:
+    that: dlrn_exec_stat.stat.executable
+    success_msg: Dlrn promoter service exec is executable
+    fail_msg: Dlrn promoter service exec it not executable
+
+- name: check if dlrn exec was correctly rendered
+  shell: |
+    source ~/promoter_venv/bin/activate
+    bashate {{ dlrn_exec_path }}
+
+- name: syntax check dlrn exec script (dry-run)
+  command: "bash -nv {{ dlrn_exec_path }}"
+
 - name: Ensure dlrn-promoter service is running  # noqa 303
   become: true
   command: systemctl status dlrn-promoter
   changed_when: false
+  when: run_service
 
 - name: Ensure monitoring service unit file is correctly installed
   become: true

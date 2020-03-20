@@ -1,0 +1,103 @@
+#
+# Docker configuration
+#
+- name: Configure Docker
+  become: true
+  block:
+    - name: Ensure docker dir exists
+      file:
+        path: /etc/docker
+        state: directory
+
+    - name: Configure overlay2 for docker
+      copy:
+        content: |
+          {
+              "storage-driver": "overlay2",
+              "storage-opts": [
+                "overlay2.override_kernel_check=true"
+              ]
+          }
+        dest: /etc/docker/daemon.json
+      become: true
+      register: docker_config
+
+- name: Reload, enable and start docker
+  become: true
+  block:
+    - name: Reload docker if config was changed
+      service:
+        name: docker
+        state: reloaded
+      when: docker_config is changed
+
+    - name: Start and enable Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+- name: Stat docker on docker socket
+  stat:
+    path: "{{ docker_socket }}"
+  register: docker_socket_stat
+
+- name: Fail if no docker socket still
+  when: not docker_socket_stat.stat.exists
+  fail:
+    msg: No docker socket
+
+- name: Find out docker group name
+  shell: |
+    set -euo pipefail
+    getent group {{ docker_socket_stat.stat.gid }} | cut -d":" -f1 | head -1
+  register: docker_group
+  changed_when: false
+  failed_when: false
+
+- when: not docker_group.stdout
+  block:
+    - name: Create docker group
+      group:
+        name: "docker_{{ docker_socket_stat.stat.gid }}"
+        gid: "{{ docker_socket_stat.stat.gid }}"
+        state: present
+
+    - name: Storing new created docker group
+      set_fact:
+        docker_group:
+          stdout: "docker_{{ docker_socket_stat.stat.gid }}"
+
+- name: List groups for user
+  command: "groups {{ promoter_user }}"
+  register: user_groups
+  changed_when: false
+
+- name: Check if user is in docker group
+  when: "docker_group.stdout not in user_groups.stdout"
+  block:
+    - name: Add user to docker group
+      user:
+        name: '{{ promoter_user }}'
+        groups: '{{ docker_group.stdout }}'
+        append: true
+      register: groupadd
+
+    - name: Reset connection for group add to take effect in the next tasks
+      meta: reset_connection
+
+- name: Create user config dir
+  file:
+    path: /home/{{ promoter_user }}/.docker/
+    owner: "{{ promoter_user }}"
+    state: directory
+
+- name: Enable experimental commands in user config
+  become: true
+  become_user: "{{ promoter_user }}"
+  copy:
+    content: |
+      {
+          "experimental": "enabled"
+      }
+    dest: /home/{{ promoter_user }}/.docker/config.json
