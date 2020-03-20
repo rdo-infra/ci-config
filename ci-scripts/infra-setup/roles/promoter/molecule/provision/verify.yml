@@ -1,0 +1,19 @@
+- hosts: localhost
+  tasks:
+    - include_vars: ../../defaults/main.yml
+    # the test requirements are usually run only by tox
+    # so when we are testing, it's nice to have them in the same virtual env
+    - name: install test requirements (converge)
+      become: true
+      become_user: "{{ promoter_user }}"
+      pip:
+        requirements: "{{ ci_config_remote_src_dir }}/test-requirements.txt"
+        virtualenv: "/home/{{ promoter_user }}/promoter_venv"
+        extra_args: -chttps://releases.openstack.org/constraints/upper/master
+      tags:
+        - provisioning
+
+    - name: provisioner functional tests
+      include_tasks: tests_provisioner_functional.yml
+      vars:
+        run_service: false

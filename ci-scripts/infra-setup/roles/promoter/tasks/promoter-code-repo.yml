@@ -1,0 +1,48 @@
+#
+# Ci-config repo handling
+#
+
+# ci_config_local_src_dir is where zuul clones ci-config repo
+- name: set ci-config src dir
+  set_fact:
+    ci_config_local_src_dir: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
+  when: zuul is defined
+
+# repo cloned by zuul job
+- name: Check for presence of repo on local machine
+  become: false
+  stat:
+    path: "{{ ci_config_local_src_dir }}"
+  register: ci_config_local_src_dir_stat
+  delegate_to: localhost
+
+# repo may already exist in a production promoter server
+- name: Check for presence of repo on server
+  stat:
+    path: "{{ ci_config_remote_src_dir }}"
+  register: ci_config_remote_src_dir_stat
+
+#
+# Clone ci-config repo
+#
+- name: Understand from where to take the ci-config
+  become: true
+  become_user: "{{ promoter_user }}"
+  block:
+
+    - name: clone promoter dir from local dir if present
+      synchronize:
+        src: "{{ ci_config_local_src_dir }}/"
+        dest: "{{ ci_config_remote_src_dir }}"
+        rsync_opts:
+          - "--no-motd"
+          - "--exclude=.tox"
+      when: ci_config_local_src_dir_stat.stat.exists
+
+    - name: When dir is not present on the node, or locally, clone from git
+      git:  # noqa 401
+        repo: 'https://review.rdoproject.org/r/p/rdo-infra/ci-config.git'
+        dest: "{{ ci_config_remote_src_dir }}"
+      when:
+        - not ci_config_local_src_dir_stat.stat.exists
+        - not ci_config_remote_src_dir_stat.stat.exists
