@@ -1,6 +1,7 @@
 ---
 # This is very useful while developing the staging environment locally
 # as it will always clone your latest change to the server
+
 - name: clone promoter dir in staging
   synchronize:
     src: "{{ ci_config_local_src_dir }}/"
@@ -26,6 +27,7 @@
     requirements: "{{ ci_config_remote_src_dir }}/test-requirements.txt"
     virtualenv: "/home/{{ promoter_user }}/promoter_venv"
     extra_args: -chttps://releases.openstack.org/constraints/upper/train
+    virtualenv_site_packages: yes
   tags:
     - staging_prepare
 
