@@ -32,7 +32,15 @@
 # tthey may step on eachother's toe, and the first test could pollute the
 # environemnt for the second
 # So it's probably better to leave them as standalone jobs
-#
+
+- job:
+    name: molecule-provision-promoter-delegated-centos-8
+    parent: rdo-tox-molecule-delegated-centos-8
+    vars:
+      tox_environment:
+        PROMOTER_USER: zuul
+      tox_extra_args: -- ci-scripts/infra-setup/roles/promoter/molecule/provision/molecule.yml
+
 - job:
     name: molecule-container-push-delegated-centos-7
     parent: base
