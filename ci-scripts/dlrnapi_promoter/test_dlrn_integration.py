@@ -44,7 +44,7 @@ def staged_env(request):
     # correctly instead of passing  configuration directly
     config_file = "stage-config-secure.yaml"
     promoter_config_file = \
-        "staging/CentOS-7/master.ini"
+        "staging/CentOS-7/train.ini"
     setup_cmd_line = "setup --stage-config-file {}".format(config_file)
     teardown_cmd_line = "teardown --stage-config-file {}".format(config_file)
 

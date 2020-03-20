@@ -9,7 +9,7 @@
 - project:
     check:
       jobs:
-        - tripleo-ci-promotion-staging-single-pipeline-centos-7:
+        - tripleo-ci-promotion-staging-single-pipeline-centos-8:
             files: &integration
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
@@ -18,7 +18,7 @@
               - ^playbooks/staging.*
               - ^requirements.txt
               - ^test-requirements.txt
-        - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
+        - tripleo-ci-promotion-staging-integration-pipeline-centos-8:
             files: *integration
         - sova-tracking-jobs: &sovatrack
             # broken for more than a month, incorrect file pattern as job
@@ -37,14 +37,15 @@
               - ^test-requirements.txt
               - ^tox.ini$
               - ^zuul.d/layout.yaml
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 1
         - rdo-tox-molecule-delegated-centos-8:
             <<: *molecule
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 1
+        - molecule-provision-promoter-delegated-centos-8: &molecule-provision
+            files:
+              - ^ci-scripts/dlrnapi_promoter/.*
+              - ^ci-scripts/infra-setup/roles/promoter/molecule/provision/.*
+              - ^playbooks/molecule-pre.yml
+              - ^requirements.txt
+              - ^test-requirements.txt
         - molecule-container-push-delegated-centos-7: &molecule-container-push
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
@@ -91,9 +92,6 @@
               - ^tox.ini
               - ^zuul.d/layout.yaml$
             nodeset: rdo-centos-7
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 188
         - tox-py36: &py36
             pre-run: playbooks/pre-run-docker.yml
             post-run: playbooks/post-run.yml
@@ -111,21 +109,21 @@
               - ^test-requirements.txt
               - ^tox.ini
               - ^zuul.d/layout.yaml$
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 188
     gate:
       jobs:
+        - molecule-provision-promoter-delegated-centos-8:
+            <<: *molecule-provision
         - molecule-container-push-delegated-centos-7:
             <<: *molecule-container-push
         - molecule-tripleo-common-delegated-centos-7:
             <<: *molecule-tripleo-common
         - molecule-delegated-promote-images-delegated-centos-7:
             <<: *molecule-promote-images
-        - tripleo-ci-promotion-staging-single-pipeline-centos-7:
-            files: *integration
-        - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
-            files: *integration
+# FIXME(rfolco): broken due to code reorg/centos8 bump
+#        - tripleo-ci-promotion-staging-single-pipeline-centos-7:
+#            files: *integration
+#        - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
+#            files: *integration
         - rdo-tox-molecule:
             <<: *molecule
         - rdo-tox-molecule-delegated-centos-8:
