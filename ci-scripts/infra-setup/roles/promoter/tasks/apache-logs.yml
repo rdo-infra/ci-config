@@ -1,0 +1,35 @@
+#
+# Apache setup (expose log)
+#
+- name: Disable the default welcome page
+  copy:
+    content: ''
+    dest: '/etc/httpd/conf.d/welcome.conf'
+    backup: yes
+  become: true
+
+- name: Add config file for Apache to expose the logs
+  blockinfile:
+    path: '/etc/httpd/conf.d/promoter_logs.conf'
+    create: yes
+    block: |
+      <VirtualHost *:80>
+          ServerAdmin rdo-ci-admins@redhat.com
+          DocumentRoot /home/{{ promoter_user }}/promoter_logs
+
+          <Directory /home/{{ promoter_user }}/promoter_logs>
+              Options Indexes MultiViews
+              AllowOverride None
+              Require all granted
+          </Directory>
+      </VirtualHost>
+  register: apache_config
+  become: true
+
+- name: Start and enable Apache
+  service:
+    name: httpd
+    state: restarted
+    enabled: yes
+  become: true
+  when: apache_config is changed
