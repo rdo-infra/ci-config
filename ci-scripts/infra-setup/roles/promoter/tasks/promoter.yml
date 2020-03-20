@@ -1,0 +1,32 @@
+#
+# Promoter preparation
+#
+
+- name: Create a virtualenv for the promoter script
+  become: true
+  become_user: "{{ promoter_user }}"
+  pip:
+    requirements: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/requirements.txt"
+    virtualenv: /home/{{ promoter_user }}/promoter_venv
+
+- name: Install promoter service
+  template:
+    src: dlrn-promoter.service.j2
+    dest: /etc/systemd/system/dlrn-promoter.service
+    mode: '0644'
+    owner: 'root'
+    group: 'root'
+  become: true
+
+# In staging setup the service file is a dumbed down version
+# and we can start it to check that at least part of the syntax
+# is ok
+
+- name: Start and enable promoter
+  systemd:
+    name: dlrn-promoter
+    state: started
+    daemon_reload: yes
+    enabled: yes
+  become: true
+  when: run_service
