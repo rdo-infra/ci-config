@@ -397,14 +397,11 @@
                 "type":"table"
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "cacheTimeout":null,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
                 "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "fontSize":"100%",
                 "gridPos":{
                     "h":8,
                     "w":9,
@@ -412,39 +409,135 @@
                     "y":1
                 },
                 "hideTimeOverride":false,
-                "id":110,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
+                "id":450,
                 "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":5,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
                     {
                         "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
                         "groupBy":[
                             {
                                 "params":[
@@ -468,10 +561,10 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8' AND \"component\" = 'baremetal') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'baremetal') group by time(24h), *\n",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
@@ -507,47 +600,11 @@
                         ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":"2w",
-                "timeRegions":[],
                 "timeShift":null,
                 "title":"Baremetal promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -915,14 +972,11 @@
                 "type":"table"
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "cacheTimeout":null,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
                 "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "fontSize":"100%",
                 "gridPos":{
                     "h":8,
                     "w":9,
@@ -930,39 +984,135 @@
                     "y":9
                 },
                 "hideTimeOverride":false,
-                "id":432,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
+                "id":451,
                 "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":5,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
                     {
                         "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
                         "groupBy":[
                             {
                                 "params":[
@@ -986,10 +1136,10 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8' AND \"component\" = 'cinder') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'cinder') group by time(24h), *\n",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
@@ -1025,47 +1175,11 @@
                         ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":"2w",
-                "timeRegions":[],
                 "timeShift":null,
                 "title":"Cinder promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -1433,14 +1547,11 @@
                 "type":"table"
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "cacheTimeout":null,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
                 "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "fontSize":"100%",
                 "gridPos":{
                     "h":8,
                     "w":9,
@@ -1448,39 +1559,135 @@
                     "y":17
                 },
                 "hideTimeOverride":false,
-                "id":433,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
+                "id":452,
                 "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":5,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
                     {
                         "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
                         "groupBy":[
                             {
                                 "params":[
@@ -1504,10 +1711,10 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8' AND \"component\" = 'clients') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'clients') group by time(24h), *\n",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
@@ -1543,47 +1750,11 @@
                         ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":"2w",
-                "timeRegions":[],
                 "timeShift":null,
                 "title":"Clients promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -1951,14 +2122,11 @@
                 "type":"table"
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "cacheTimeout":null,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
                 "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "fontSize":"100%",
                 "gridPos":{
                     "h":8,
                     "w":9,
@@ -1966,39 +2134,135 @@
                     "y":25
                 },
                 "hideTimeOverride":false,
-                "id":434,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
+                "id":453,
                 "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":5,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
                     {
                         "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
                         "groupBy":[
                             {
                                 "params":[
@@ -2022,10 +2286,10 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8' AND \"component\" = 'common') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'common') group by time(24h), *\n",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
@@ -2061,47 +2325,11 @@
                         ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":"2w",
-                "timeRegions":[],
                 "timeShift":null,
                 "title":"Common promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -2469,14 +2697,11 @@
                 "type":"table"
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "cacheTimeout":null,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
                 "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "fontSize":"100%",
                 "gridPos":{
                     "h":8,
                     "w":9,
@@ -2484,39 +2709,135 @@
                     "y":33
                 },
                 "hideTimeOverride":false,
-                "id":435,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
+                "id":454,
                 "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":5,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
                     {
                         "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
                         "groupBy":[
                             {
                                 "params":[
@@ -2540,10 +2861,10 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8' AND \"component\" = 'cloudops') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'cloudops') group by time(24h), *\n",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
@@ -2579,47 +2900,11 @@
                         ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":"2w",
-                "timeRegions":[],
                 "timeShift":null,
-                "title":"Cloudops promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "title":"CloudOps promotions",
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -2987,14 +3272,11 @@
                 "type":"table"
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "cacheTimeout":null,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
                 "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "fontSize":"100%",
                 "gridPos":{
                     "h":8,
                     "w":9,
@@ -3002,39 +3284,135 @@
                     "y":41
                 },
                 "hideTimeOverride":false,
-                "id":436,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
+                "id":455,
                 "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":5,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
                     {
                         "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
                         "groupBy":[
                             {
                                 "params":[
@@ -3058,10 +3436,10 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8' AND \"component\" = 'compute') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'compute') group by time(24h), *\n",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
@@ -3097,47 +3475,11 @@
                         ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":"2w",
-                "timeRegions":[],
                 "timeShift":null,
                 "title":"Compute promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -3505,14 +3847,11 @@
                 "type":"table"
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "cacheTimeout":null,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
                 "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "fontSize":"100%",
                 "gridPos":{
                     "h":8,
                     "w":9,
@@ -3520,39 +3859,135 @@
                     "y":49
                 },
                 "hideTimeOverride":false,
-                "id":437,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
+                "id":456,
                 "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":5,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
                     {
                         "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
                         "groupBy":[
                             {
                                 "params":[
@@ -3576,10 +4011,10 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8' AND \"component\" = 'glance') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'glance') group by time(24h), *\n",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
@@ -3615,47 +4050,11 @@
                         ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":"2w",
-                "timeRegions":[],
                 "timeShift":null,
                 "title":"Glance promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -4023,14 +4422,11 @@
                 "type":"table"
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "cacheTimeout":null,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
                 "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "fontSize":"100%",
                 "gridPos":{
                     "h":8,
                     "w":9,
@@ -4038,39 +4434,135 @@
                     "y":57
                 },
                 "hideTimeOverride":false,
-                "id":438,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
+                "id":457,
                 "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":5,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
                     {
                         "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
                         "groupBy":[
                             {
                                 "params":[
@@ -4094,10 +4586,10 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8' AND \"component\" = 'manila') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'manila') group by time(24h), *\n",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
@@ -4133,47 +4625,11 @@
                         ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":"2w",
-                "timeRegions":[],
                 "timeShift":null,
                 "title":"Manila promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -4541,14 +4997,11 @@
                 "type":"table"
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "cacheTimeout":null,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
                 "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "fontSize":"100%",
                 "gridPos":{
                     "h":8,
                     "w":9,
@@ -4556,39 +5009,135 @@
                     "y":65
                 },
                 "hideTimeOverride":false,
-                "id":439,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
+                "id":458,
                 "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":5,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
                     {
                         "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
                         "groupBy":[
                             {
                                 "params":[
@@ -4612,10 +5161,10 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8' AND \"component\" = 'network') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'network') group by time(24h), *\n",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
@@ -4651,47 +5200,11 @@
                         ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":"2w",
-                "timeRegions":[],
                 "timeShift":null,
                 "title":"Network promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -5059,14 +5572,11 @@
                 "type":"table"
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "cacheTimeout":null,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
                 "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "fontSize":"100%",
                 "gridPos":{
                     "h":8,
                     "w":9,
@@ -5074,39 +5584,135 @@
                     "y":73
                 },
                 "hideTimeOverride":false,
-                "id":440,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
+                "id":449,
                 "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":5,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
                     {
                         "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
                         "groupBy":[
                             {
                                 "params":[
@@ -5130,10 +5736,10 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8' AND \"component\" = 'octavia') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'octavia') group by time(24h), *\n",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
@@ -5169,47 +5775,11 @@
                         ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":"2w",
-                "timeRegions":[],
                 "timeShift":null,
                 "title":"Octavia promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -5217,7 +5787,7 @@
                 "description":"",
                 "fontSize":"100%",
                 "gridPos":{
-                    "h":7,
+                    "h":8,
                     "w":15,
                     "x":0,
                     "y":81
@@ -5577,54 +6147,147 @@
                 "type":"table"
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "cacheTimeout":null,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
                 "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "fontSize":"100%",
                 "gridPos":{
-                    "h":7,
+                    "h":8,
                     "w":9,
                     "x":15,
                     "y":81
                 },
                 "hideTimeOverride":false,
-                "id":441,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
+                "id":459,
                 "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":5,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
                     {
                         "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
                         "groupBy":[
                             {
                                 "params":[
@@ -5648,10 +6311,10 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8' AND \"component\" = 'security') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'security') group by time(24h), *\n",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
@@ -5687,47 +6350,11 @@
                         ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":"2w",
-                "timeRegions":[],
                 "timeShift":null,
                 "title":"Security promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -5735,10 +6362,10 @@
                 "description":"",
                 "fontSize":"100%",
                 "gridPos":{
-                    "h":7,
+                    "h":8,
                     "w":15,
                     "x":0,
-                    "y":88
+                    "y":89
                 },
                 "id":447,
                 "links":[
@@ -6095,54 +6722,147 @@
                 "type":"table"
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "cacheTimeout":null,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
                 "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "fontSize":"100%",
                 "gridPos":{
-                    "h":7,
+                    "h":8,
                     "w":9,
                     "x":15,
-                    "y":88
+                    "y":89
                 },
                 "hideTimeOverride":false,
-                "id":448,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
+                "id":460,
                 "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":5,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
                     {
                         "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
                         "groupBy":[
                             {
                                 "params":[
@@ -6166,10 +6886,10 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8' AND \"component\" = 'swift') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'swift') group by time(24h), *\n",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
@@ -6205,47 +6925,11 @@
                         ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":"2w",
-                "timeRegions":[],
                 "timeShift":null,
                 "title":"Swift promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -6253,10 +6937,10 @@
                 "description":"",
                 "fontSize":"100%",
                 "gridPos":{
-                    "h":7,
+                    "h":8,
                     "w":15,
                     "x":0,
-                    "y":95
+                    "y":97
                 },
                 "id":431,
                 "links":[
@@ -6613,54 +7297,147 @@
                 "type":"table"
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "cacheTimeout":null,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
                 "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "fontSize":"100%",
                 "gridPos":{
-                    "h":7,
+                    "h":8,
                     "w":9,
                     "x":15,
-                    "y":95
+                    "y":97
                 },
                 "hideTimeOverride":false,
-                "id":442,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
+                "id":461,
                 "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":5,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
                     {
                         "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
                         "groupBy":[
                             {
                                 "params":[
@@ -6684,10 +7461,10 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8' AND \"component\" = 'tempest') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'tempest') group by time(24h), *\n",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
@@ -6723,47 +7500,11 @@
                         ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":"2w",
-                "timeRegions":[],
                 "timeShift":null,
                 "title":"Tempest promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -6771,10 +7512,10 @@
                 "description":"",
                 "fontSize":"100%",
                 "gridPos":{
-                    "h":7,
+                    "h":8,
                     "w":15,
                     "x":0,
-                    "y":102
+                    "y":105
                 },
                 "id":443,
                 "links":[
@@ -7131,54 +7872,147 @@
                 "type":"table"
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "cacheTimeout":null,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
                 "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "fontSize":"100%",
                 "gridPos":{
-                    "h":7,
+                    "h":8,
                     "w":9,
                     "x":15,
-                    "y":102
+                    "y":105
                 },
                 "hideTimeOverride":false,
-                "id":444,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
+                "id":462,
                 "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":5,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
                     {
                         "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
                         "groupBy":[
                             {
                                 "params":[
@@ -7202,10 +8036,10 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8' AND \"component\" = 'tripleo') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'tripleo') group by time(24h), *\n",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
@@ -7241,47 +8075,11 @@
                         ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":"2w",
-                "timeRegions":[],
                 "timeShift":null,
                 "title":"TripleO promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "transform":"table",
+                "type":"table"
             },
             {
                 "columns":[],
@@ -7289,10 +8087,10 @@
                 "description":"",
                 "fontSize":"100%",
                 "gridPos":{
-                    "h":7,
+                    "h":8,
                     "w":15,
                     "x":0,
-                    "y":109
+                    "y":113
                 },
                 "id":445,
                 "links":[
@@ -7649,54 +8447,147 @@
                 "type":"table"
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
+                "cacheTimeout":null,
+                "columns":[],
                 "datasource":"telegraf",
-                "decimals":0,
                 "description":"Bars represent successful promotions to current-tripleo for master. Default time is the last 2 weeks.",
-                "fill":1,
+                "fontSize":"100%",
                 "gridPos":{
-                    "h":7,
+                    "h":8,
                     "w":9,
                     "x":15,
-                    "y":109
+                    "y":113
                 },
                 "hideTimeOverride":false,
-                "id":446,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "hideEmpty":false,
-                    "hideZero":false,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
+                "id":463,
                 "links":[],
-                "nullPointMode":"null",
-                "percentage":false,
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":5,
+                    "desc":true
+                },
+                "styles":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":true,
-                "targets":[
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
                     {
                         "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
                         "groupBy":[
                             {
                                 "params":[
@@ -7720,10 +8611,10 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'promoted-components' AND \"distro\" = 'CentOS-8' AND \"component\" = 'ui') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'ui') group by time(24h), *\n",
                         "rawQuery":true,
                         "refId":"A",
-                        "resultFormat":"time_series",
+                        "resultFormat":"table",
                         "select":[
                             [
                                 {
@@ -7759,47 +8650,11 @@
                         ]
                     }
                 ],
-                "thresholds":[],
                 "timeFrom":"2w",
-                "timeRegions":[],
                 "timeShift":null,
                 "title":"UI promotions",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
+                "transform":"table",
+                "type":"table"
             }
         ],
         "refresh":false,
