@@ -1,9 +1,8 @@
 ---
 - job:
-    name: tripleo-ci-promotion-staging-single-pipeline-centos-7
+    name: tripleo-ci-promotion-staging-single-pipeline-centos-8
     parent: base
-    ansible-version: 2.8
-    nodeset: rdo-centos-7
+    nodeset: rdo-centos-8
     run: playbooks/staging.yml
     post-run: playbooks/staging-post.yml
     host-vars:
@@ -11,13 +10,12 @@
         ansible_user: root
     vars:
       pipeline_type: single
-      test_release: CentOS-7/master
+      test_release: CentOS-7/train
 
 - job:
-    name: tripleo-ci-promotion-staging-integration-pipeline-centos-7
+    name: tripleo-ci-promotion-staging-integration-pipeline-centos-8
     parent: base
-    ansible-version: 2.8
-    nodeset: rdo-centos-7
+    nodeset: rdo-centos-8
     run: playbooks/staging.yml
     post-run: playbooks/staging-post.yml
     host-vars:
