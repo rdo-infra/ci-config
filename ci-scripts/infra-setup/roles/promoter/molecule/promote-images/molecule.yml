@@ -17,7 +17,12 @@ driver:
       ansible_connection: local
 
 platforms:
-  - name: instance
+  - name: localhost
+    easy_install:
+      - pip
+    environment: &env
+      http_proxy: "{{ lookup('env', 'http_proxy') }}"
+      https_proxy: "{{ lookup('env', 'https_proxy') }}"
 
 provisioner:
   name: ansible
@@ -26,15 +31,14 @@ provisioner:
       fact_caching: jsonfile
       fact_caching_connection: /tmp/molecule/facts
   inventory:
-    hosts:
-      all:
-        hosts:
-          instance:
-            ansible_connection: local
-            ansible_python_interpreter: ${MOLECULE_INTERPRETER:-/home/zuul/test-python/bin/python}
+    all:
+      localhost:
+        ansible_user: root
+        ansible_connection: local
 
 scenario:
   test_sequence:
     - prepare
     - converge
     - verify
+    - cleanup
