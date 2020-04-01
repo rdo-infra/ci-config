@@ -1,0 +1,22 @@
+---
+# Install EPEL so we can get ansible 2.8
+# Sometimes the epel.repo file is removed even if the package is installed.
+# So to get back the epel.repo file again we need to remove and install again.
+- name: Check that epel.repo exists
+  stat:
+    path: /etc/yum.repos.d/epel.repo
+  register: epel_file
+
+- name:  Ensure epel is removed before reinstalling it if the repo file doesn't exist
+  become: true
+  package:
+    name: epel-release
+    state: absent
+  when: not epel_file.stat.exists
+
+- name:  install epel
+  become: true
+  package:
+    name: epel-release
+    state: present
+  when: not epel_file.stat.exists

@@ -1,0 +1,55 @@
+---
+# this file has been moved from playbooks/molecule-delegated-promote-images-pre.yml
+# contains common tasks for to set up all molecule delegated tests
+
+- hosts: localhost
+  vars:
+    venv_test_requirements:
+      - ansi2html
+      - cryptography>2.6.1
+      - pytest
+      - pytest-cov
+      - pytest-html<=2.0.1
+      - pytest-xdist
+      - mock
+      - molecule>=2.22rc1
+      - dlrn
+      - dlrnapi_client
+      - docker
+      - shyaml
+    required_packages:
+      - python3-virtualenv
+      - yum-utils
+      - ansible
+  tasks:
+    - name:  install epel
+      include_tasks: ../common/install-epel.yml
+
+    - name: Install required packages
+      include_tasks: ../common/install-requirements.yml
+
+    - name: Include install-test-python
+      include_tasks: ../common/setup-virtualenv.yml
+
+    - name: 'Check if {{ ansible_user_id }} already has a public key in {{ ansible_user_dir }}/.ssh'
+      stat:
+        path: "{{ ansible_user_dir }}/.ssh/id_rsa.pub"
+      register: pub_key
+
+    - name: Create id_rsa.pub if it doesn't exist
+      shell: |
+        ssh-keygen -m PEM -t rsa -N "" -f id_rsa
+        mv id_rsa id_rsa.pub {{ ansible_user_dir }}/.ssh/
+      when: "pub_key.stat.exists != 'True'"
+
+    - name: Check if id_rsa.pub is in authorized_keys
+      shell: |
+        grep "$(cat {{ ansible_user_dir }}/.ssh/id_rsa.pub)" {{ ansible_user_dir }}/ssh/authorized_keys
+      register: authorized_keys
+      failed_when: false
+      changed_when: false
+
+    - name: Add id_rsa.pub to authorized_keys if needed
+      shell: |
+        cat {{ ansible_user_dir }}/.ssh/id_rsa.pub >> {{ ansible_user_dir }}/.ssh/authorized_keys
+      when: "authorized_keys.rc != 0"

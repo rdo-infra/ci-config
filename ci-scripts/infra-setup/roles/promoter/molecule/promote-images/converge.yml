@@ -1,16 +1,18 @@
 ---
+- hosts: localhost
+  tasks:
+    - name: call tasks to manage variables
+      include_tasks: ../provision/manage_variables.yml
+
 # Setup the promoter-staging environment (--scenes 'overcloud-images') then
 # run ci-config/ci-scripts/promote-images.sh, then verify staging environment
 # promoted OK
-- name: Setup staging promotion and promote-images.sh and verify
-  hosts: all
-  tasks:
     - name: Test promoter container manifest-push.yml
       block:
         - name: launch staging setup scripts
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
-            {{ ansible_python_interpreter }} ../../../../../dlrnapi_promoter/stage.py setup --scenes dlrn,overcloud_images
+            /usr/bin/python3 {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/stage.py setup --scenes dlrn,overcloud_images
 
         - name: include stage setup variables
           include_vars:
