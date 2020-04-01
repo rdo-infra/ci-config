@@ -1,0 +1,45 @@
+---
+- hosts: localhost
+  tasks:
+    - name: call tasks to manage variables
+      include_tasks: ../provision/manage_variables.yml
+
+    # Verify staging environment promoted OK
+    - name: Test promoter container manifest-push.yml
+      block:
+
+        - name: include stage setup variables
+          include_vars:
+            file: "/tmp/stage-info.yaml"
+            name: stage_info
+
+        - name: Set full hash
+          set_fact:
+            full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+            images_path: "{{ stage_info.overcloud_images.root }}"
+
+        - name: Get tripleo-ci-staging-promoted info for checking
+          stat:
+            path: "{{ images_path }}/centos7/master/rdo_trunk/tripleo-ci-staging-promoted"
+          register: tripleo_ci_staging_promoted
+
+        - name: 'Check that tripleo-ci-staging-promoted is a symlink and it points to the hash we promoted {{ full_hash }}'
+          assert:
+            that:
+              - tripleo_ci_staging_promoted.stat.islnk is defined
+              - tripleo_ci_staging_promoted.stat.lnk_target == "{{ images_path }}/centos7/master/rdo_trunk/{{ full_hash }}"
+
+        - name: Get previous-tripleo-ci-staging-promoted info for checking
+          stat:
+            path: "{{ images_path }}/centos7/master/rdo_trunk/previous-tripleo-ci-staging-promoted"
+          register: previous_tripleo_ci_staging_pro
+
+        - name: >
+            Check that previous-tripleo-ci-staging-pro is a symlink and it points to the
+             promoted hash when we started {{ stage_info.dlrn.promotions.currently_promoted.full_hash }}
+          assert:
+            that:
+              - previous_tripleo_ci_staging_pro.stat.islnk is defined
+              - >-
+                previous_tripleo_ci_staging_pro.stat.lnk_target ==
+                 "{{ images_path }}/centos7/master/rdo_trunk/{{ stage_info.dlrn.promotions.currently_promoted.full_hash }}"
