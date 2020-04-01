@@ -1,7 +1,16 @@
 #
 # Ci-config repo handling
 #
+# ci-config repo may come from 3 sources:
 
+# 1) rdo-infra (cloned by this playbook)
+# 2) zuul local src (cloned by zuul-cloner)
+# 3) promoter_user home dir src (sync'ed from 1 or 2, or manually cloned)
+
+# local_src refers to zuul src dir on zuul jobs
+# we do not touch zuul src dir so we use remote_src as our workdir
+
+# source is where zuul clones ci-config
 - name: Check for presence of source repo on local machine
   become: false
   stat:
@@ -9,7 +18,8 @@
   register: ci_config_local_src_dir_stat
   delegate_to: localhost
 
-- name: Check for presence of repo on server   ci_config_remote_src_dir is where zuul clones ci-config repo
+# remote is the target repo where code is executed from
+- name: Check if remote src exists
   stat:
     path: "{{ ci_config_remote_src_dir }}"
   register: ci_config_remote_src_dir_stat
@@ -28,9 +38,11 @@
         rsync_opts:
           - "--no-motd"
           - "--exclude=.tox"
-      when: ci_config_local_src_dir_stat.stat.exists
+      when:
+        - ci_config_local_src_dir_stat.stat.exists
+        - not ci_config_remote_src_dir_stat.stat.exists
 
-    - name: When dir is not present on the node, or locally, clone from git
+    - name: When dir is not present, clone from git
       git:  # noqa 401
         repo: 'https://review.rdoproject.org/r/p/rdo-infra/ci-config.git'
         dest: "{{ ci_config_remote_src_dir }}"
