@@ -52,6 +52,14 @@
               - ^playbooks/molecule-pre.yml
               - ^requirements.txt
               - ^test-requirements.txt
+        - molecule-promote-images-delegated-centos-8: &molecule-promote-images
+            files:
+              - ^ci-scripts/dlrnapi_promoter/.*
+              - ^ci-scripts/promote-images.sh
+              - ^ci-scripts/infra-setup/roles/promoter/molecule/promote-images/.*
+              - ^playbooks/molecule-pre.yml
+              - ^requirements.txt
+              - ^test-requirements.txt
         - molecule-container-push-delegated-centos-7: &molecule-container-push
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
@@ -67,15 +75,6 @@
               - ^ci-scripts/container-push/.*
               - ^ci-scripts/infra-setup/roles/promoter/molecule/tripleo-common-integration.*
               - ^playbooks/molecule-delegated-pre.yml
-              - ^playbooks/molecule-delegated.yml
-              - ^requirements.txt
-              - ^test-requirements.txt
-        - molecule-delegated-promote-images-delegated-centos-7: &molecule-promote-images
-            files:
-              - ^ci-scripts/dlrnapi_promoter/.*
-              - ^ci-scripts/promote-images.sh
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/promote-images/.*
-              - ^playbooks/molecule-delegated-promote-images-pre.yml
               - ^playbooks/molecule-delegated.yml
               - ^requirements.txt
               - ^test-requirements.txt
@@ -119,12 +118,12 @@
       jobs:
         - molecule-provision-promoter-delegated-centos-8:
             <<: *molecule-provision
+        - molecule-promote-images-delegated-centos-8:
+            <<: *molecule-promote-images
         - molecule-container-push-delegated-centos-7:
             <<: *molecule-container-push
         - molecule-tripleo-common-delegated-centos-7:
             <<: *molecule-tripleo-common
-        - molecule-delegated-promote-images-delegated-centos-7:
-            <<: *molecule-promote-images
 # FIXME(rfolco): broken due to code reorg/centos8 bump
 #        - tripleo-ci-promotion-staging-single-pipeline-centos-7:
 #            files: *integration
