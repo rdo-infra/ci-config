@@ -104,7 +104,7 @@ class RegistriesClient(object):
             "env "
             "ANSIBLE_LOG_PATH={} "
             "ANSIBLE_DEBUG=False "
-            "ansible-playbook -v -e @{} {}".format(
+            "ansible-playbook -c ssh -v -e @{} {}".format(
                 self.logfile,
                 extra_vars_path,
                 self.promote_playbook,
