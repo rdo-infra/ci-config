@@ -1,0 +1,53 @@
+---
+- hosts: all
+  tasks:
+    - name: call tasks to manage variables
+      include_tasks: ../provision/manage_variables.yml
+
+    - include_role:
+        name: promoter
+        tasks_from: repos-packages
+
+    - name: 'Check if {{ ansible_user_id }} already has a public key in {{ ansible_user_dir }}/.ssh'
+      stat:
+        path: "{{ ansible_user_dir }}/.ssh/id_rsa.pub"
+      register: pub_key
+
+    - name: Create id_rsa.pub if it doesn't exist
+      shell: |
+        ssh-keygen -m PEM -t rsa -N "" -f id_rsa
+        mv id_rsa id_rsa.pub {{ ansible_user_dir }}/.ssh/
+      when: "pub_key.stat.exists != 'True'"
+
+    - name: Check if id_rsa.pub is in authorized_keys
+      shell: |
+        grep "$(cat {{ ansible_user_dir }}/.ssh/id_rsa.pub)" {{ ansible_user_dir }}/ssh/authorized_keys
+      register: authorized_keys
+      failed_when: false
+      changed_when: false
+
+    - name: Add id_rsa.pub to authorized_keys if needed
+      shell: |
+        cat {{ ansible_user_dir }}/.ssh/id_rsa.pub >> {{ ansible_user_dir }}/.ssh/authorized_keys
+      when: "authorized_keys.rc != 0"
+
+    - include_role:
+        name: promoter
+        tasks_from: promoter-code-repo
+
+    - name: Setup test virtualenv
+      pip:
+        requirements: "{{ ci_config_remote_src_dir }}/test-requirements.txt"
+        virtualenv: "/home/{{ promoter_user }}/promoter_venv"
+
+    # Setup the promoter-staging environment (--scenes 'overcloud-images')
+    - name: Test promoter container manifest-push.yml
+      block:
+        - name: launch staging setup scripts
+          shell: |
+            source /home/{{ promoter_user }}/promoter_venv/bin/activate
+            # Export the path to the mounted docker socket so all docker
+            # client commands will use it
+            /home/{{ promoter_user }}/promoter_venv/bin/python3 \
+                {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/stage.py \
+                    setup --scenes dlrn,overcloud_images
