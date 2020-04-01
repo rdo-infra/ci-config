@@ -1,0 +1,9 @@
+---
+- name: Setup promoter virtualenv
+  become: true
+  become_user: "{{ promoter_user }}"
+  pip:
+    name: "{{ venv_test_requirements }}"
+    virtualenv: "/home/{{ promoter_user }}/promoter_venv"
+    virtualenv_site_packages: true
+    extra_args: -chttps://releases.openstack.org/constraints/upper/master
