@@ -70,11 +70,9 @@
         molecule converge -s container-push -- --tags=registry_cleanup
 
 - job:
-    name: molecule-delegated-promote-images-delegated-centos-7
-    parent: base
-    nodeset: rdo-centos-7
-    pre-run: playbooks/molecule-delegated-promote-images-pre.yml
-    run: playbooks/molecule-delegated.yml
+    name: molecule-delegated-promote-images-delegated-centos-8
+    parent: rdo-tox-molecule-delegated-centos-8
+    pre-run: playbooks/molecule-pre.yaml
     vars:
-      molecule_test_commands: |
-        molecule test -s promote-images
+      promoter_user: zuul
+      tox_extra_args: -- ci-scripts/infra-setup/roles/promoter/molecule/provision/molecule.yml
