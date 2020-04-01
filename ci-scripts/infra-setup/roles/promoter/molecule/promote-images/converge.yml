@@ -1,59 +1,21 @@
 ---
-# Setup the promoter-staging environment (--scenes 'overcloud-images') then
-# run ci-config/ci-scripts/promote-images.sh, then verify staging environment
-# promoted OK
-- name: Setup staging promotion and promote-images.sh and verify
-  hosts: all
+- hosts: all
   tasks:
-    - name: Test promoter container manifest-push.yml
-      block:
-        - name: launch staging setup scripts
-          shell: |
-            # Export the path to the mounted docker socket so all docker client commands will use it
-            {{ ansible_python_interpreter }} ../../../../../dlrnapi_promoter/stage.py setup --scenes dlrn,overcloud_images
+    - name: call tasks to manage variables
+      include_tasks: ../provision/manage_variables.yml
 
-        - name: include stage setup variables
-          include_vars:
-            file: "/tmp/stage-info.yaml"
-            name: stage_info
+    - name: include stage setup variables # noqa 505
+      include_vars:
+        file: "/tmp/stage-info.yaml"
+        name: stage_info
 
-        - name: Set full hash
-          set_fact:
-            full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
-            images_path: "{{ stage_info.overcloud_images.root }}"
+    - name: Set full hash
+      set_fact:
+        full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+        images_path: "{{ stage_info.overcloud_images.root }}"
 
-        - name: Run the image promotion script promote-images.sh
-          shell: |
-             ../../../../../promote-images.sh master {{ full_hash }} tripleo-ci-staging-promoted
-          register: promote_images_result # need to check this as sftp can fail
-
-        - name: Get tripleo-ci-staging-promoted info for checking
-          stat:
-            path: "{{ images_path }}/centos7/master/rdo_trunk/tripleo-ci-staging-promoted"
-          register: tripleo_ci_staging_promoted
-
-        - name: 'Check that tripleo-ci-staging-promoted is a symlink and it points to the hash we promoted {{ full_hash }}'
-          assert:
-            that:
-              - tripleo_ci_staging_promoted.stat.islnk is defined
-              - tripleo_ci_staging_promoted.stat.lnk_target == "{{ images_path }}/centos7/master/rdo_trunk/{{ full_hash }}"
-
-        - name: Get previous-tripleo-ci-staging-promoted info for checking
-          stat:
-            path: "{{ images_path }}/centos7/master/rdo_trunk/previous-tripleo-ci-staging-promoted"
-          register: previous_tripleo_ci_staging_pro
-
-        - name: >
-            Check that previous-tripleo-ci-staging-pro is a symlink and it points to the
-             promoted hash when we started {{ stage_info.dlrn.promotions.currently_promoted.full_hash }}
-          assert:
-            that:
-              - previous_tripleo_ci_staging_pro.stat.islnk is defined
-              - >-
-                previous_tripleo_ci_staging_pro.stat.lnk_target ==
-                 "{{ images_path }}/centos7/master/rdo_trunk/{{ stage_info.dlrn.promotions.currently_promoted.full_hash }}"
-
-      always:
-        - name: Teardown
-          shell: |
-            {{ ansible_python_interpreter }} ../../../../../dlrnapi_promoter/stage.py teardown --scenes dlrn,overcloud_images
+    - name: Run the image promotion script promote-images.sh # noqa 301
+      shell: |
+         source /home/{{ promoter_user }}/promoter_venv/bin/activate
+         {{ ci_config_remote_src_dir }}/ci-scripts/promote-images.sh master {{ full_hash }} tripleo-ci-staging-promoted
+      register: promote_images_result # need to check this as sftp can fail
