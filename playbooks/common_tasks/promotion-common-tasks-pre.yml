@@ -1,6 +1,6 @@
 - name: Include defaults from the role
   include_vars:
-    file: "{{ override_ci_config_local_src_dir }}/ci-scripts/infra-setup/roles/promoter/defaults/main.yml"
+    file: "../../defaults/main.yml"
 
 - name: set test specify values
   set_fact:
@@ -56,8 +56,6 @@
   delegate_to: localhost
 
 - name: install test requirements
-  become: true
-  become_user: "{{ promoter_user }}"
   pip:
     requirements: "{{ ci_config_remote_src_dir }}/test-requirements.txt"
     virtualenv: "/home/{{ promoter_user }}/promoter_venv"
