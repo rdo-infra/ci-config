@@ -24,6 +24,8 @@ OOO_PROJECTS = [
     'openstack/tripleo-quickstart', 'openstack/tripleo-heat-templates',
     'openstack/tripleo-ansible', 'openstack/tripleo-validations',
     'rdo-infra/ansible-role-tripleo-ci-reproducer',
+    'openstack/puppet-neutron', 'openstack/puppet-octavia',
+    'openstack/puppet-nova',
     'containers/libpod', 'ceph/ceph-ansible'
 ]
 
