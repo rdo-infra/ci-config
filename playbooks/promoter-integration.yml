@@ -1,0 +1,30 @@
+- hosts: all
+  vars:
+    override_ci_config_local_src_dir: >-
+      {{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}
+    override_promoter_user: zuul
+    override_local_path_dlrnapi_secret: "{{ zuul.executor.work_root }}/dlrnapi_secret"
+    override_local_path_registry_secret: "{{ zuul.executor.work_root }}/registry_secret"
+    override_local_path_uploader_key: "{{ zuul.executor.work_root }}/uploader_key"
+
+  tasks:
+    - include_tasks: "{{ override_ci_config_local_src_dir }}/playbooks/common_tasks/promotion-common-tasks-pre.yml"
+    - include_role:
+        name: promoter
+        tasks_from: setup_loop
+    - include_role:
+        vars:
+          update_credentials: true
+        name: promoter
+    - include_role:
+        name: promoter
+        tasks_from: setup_staging
+    - include_role:
+        name: promoter
+        tasks_from: promotion_run
+    #- include_tasks: integration_checks
+    # merge passworid checs to integration checks
+    #- include_tasks: passwords_check
+    - include_role:
+        name: promoter
+        tasks_from: tripleo_common_test
