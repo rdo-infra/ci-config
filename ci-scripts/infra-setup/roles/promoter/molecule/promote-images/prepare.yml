@@ -1,0 +1,12 @@
+-
+- hosts: all
+  vars:
+    override_ci_config_local_src_dir: "{{ playbook_dir }}/../../../../../../"
+  tasks:
+    # move install devel to provision/repos-packages
+    - include_tasks: ../../playbooks/common-tasks/promotion-common-tasks-pre.yml
+    - include_role: promoter
+         tasks_from: repo_packages
+    # installing a different python should not be needed anymore
+    - include_role: promoter
+        tasks_from: update_credentials
