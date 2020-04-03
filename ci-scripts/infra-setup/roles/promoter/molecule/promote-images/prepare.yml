@@ -1,0 +1,10 @@
+---
+- hosts: all
+  tasks:
+    - include_tasks: "{{ ci_config_remote_src_dir }}/playbooks/common_tasks/promotion-common-tasks-pre.yml"
+    - include_role:
+        name: promoter
+        tasks_from: repos-packages
+    - include_role:
+        name: promoter
+        tasks_from: update_credentials
