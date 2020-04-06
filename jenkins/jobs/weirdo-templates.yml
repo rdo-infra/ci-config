@@ -18,6 +18,7 @@
         # Use variables provided by a job earlier in the pipeline, if available
         delorean_hash=${{delorean_current_hash:-current}}
         delorean_url="http://trunk.rdoproject.org/centos7-{openstack_release}/${{delorean_hash}}/delorean.repo"
+        delorean_deps_url="http://trunk.rdoproject.org/centos7-{openstack_release}/delorean-deps.repo"
 
         # Use WeIRDO provided by jenkins scm
         cd weirdo
@@ -25,6 +26,7 @@
         tox -e ansible-playbook -- -i ${{WORKSPACE}}/hosts playbooks/{playbook}.yml \
           -e ci_environment=ci-centos \
           -e delorean_url=$delorean_url \
+          -e delorean_deps_url=$delorean_deps_url \
           -e openstack_release={openstack_release} \
           -e version=$version
         </pre>
