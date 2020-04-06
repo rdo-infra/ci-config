@@ -103,16 +103,16 @@
               script: |
                 # Use variables provided by a job earlier in the pipeline, if available
                 delorean_hash=${delorean_current_hash:-current}
-                delorean_commit_url="https://trunk.rdoproject.org/centos7-${RDO_VERSION_DIR}/${delorean_hash}/commit.yaml"
-                if [[ "${RDO_VERSION_DIR}" == "master" ]]; then
-                    api_worker="api-centos-master-uc"
-                else
-                    api_worker="api-centos-${RDO_VERSION_DIR}"
-                fi
+                api_worker="api-${RDO_VERSION}"
                 mkdir ${WORKSPACE}/${BUILD_ID}
                 echo export DLRNAPI_URL="https://trunk.rdoproject.org/$api_worker" > ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
-                echo export COMMIT_HASH=$(echo $delorean_hash | awk -F/ '{print $3}' |awk -F_ '{print $1}') >> ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
-                echo export DISTRO_HASH=`curl $delorean_commit_url | grep distro_hash |  awk -F: '{print $2}' |xargs echo` >> ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
+                if [[ "${delorean_hash}" == *"_"* ]]; then
+                    echo export AGG_HASH=$(echo $delorean_hash | awk -F/ '{print $3}') >> ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
+                else
+                    delorean_commit_url="https://trunk.rdoproject.org/centos7-${RDO_VERSION_DIR}/${delorean_hash}/commit.yaml"
+                    echo export COMMIT_HASH=$(echo $delorean_hash | awk -F/ '{print $3}' |awk -F_ '{print $1}') >> ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
+                    echo export DISTRO_HASH=`curl $delorean_commit_url | grep distro_hash |  awk -F: '{print $2}' |xargs echo` >> ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
+                fi
                 echo export INFO_URL="https://ci.centos.org/job/${JOB_NAME}/${BUILD_NUMBER}/artifact/logs.html" >> ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
         - post-tasks:
             - matches:

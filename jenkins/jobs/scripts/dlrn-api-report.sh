@@ -3,17 +3,21 @@ source $WORKSPACE/venv_dlrnapi/bin/activate
 
 pip install dlrnapi_client shyaml
 
-curl -sLo $BUILD_TAG.yaml $(echo $DELOREAN_URL | sed 's/delorean\.repo/commit.yaml/')
-
-commit_hash=$(cat $BUILD_TAG.yaml| shyaml get-value commits.0.commit_hash)
-distro_hash=$(cat $BUILD_TAG.yaml| shyaml get-value commits.0.distro_hash)
+if [[ "$delorean_current_hash" == *"_"* ]]; then
+    curl -sLo $BUILD_TAG.yaml $(echo $DELOREAN_URL | sed 's/delorean\.repo/commit.yaml/')
+    COMMIT_HASH=$(cat $BUILD_TAG.yaml| shyaml get-value commits.0.commit_hash)
+    DISTRO_HASH=$(cat $BUILD_TAG.yaml| shyaml get-value commits.0.distro_hash)
+    HASH_ARGS="--commit-hash $COMMIT_HASH --distro-hash $DISTRO_HASH"
+else
+    AGG_HASH=`curl -L ${DELOREAN_URL}.md5`
+    HASH_ARGS="--agg-hash $AGG_HASH"
+fi
 
 dlrnapi --url https://$DELOREAN_PUBLIC_HOST/api-$RDO_VERSION \
     --username ciuser \
     report-result \
     --job-id $JOB_NAME \
-    --commit-hash $commit_hash \
-    --distro-hash $distro_hash \
+    ${HASH_ARGS} \
     --timestamp $(date +%s) \
     --info-url https://ci.centos.org/job/$JOB_NAME/$BUILD_ID/artifact/console.txt.gz \
     --success $JOB_SUCCESS
