@@ -8,12 +8,20 @@ CPU_ARCH=${CPU_ARCH:-x86_64}
 CICO_FLAVOR=${CICO_FLAVOR:-small}
 CICO_OS_RELEASE=${CICO_OS_RELEASE:-7}
 
+VENV="${WORKSPACE}/venv"
+
 # Write the header of the hosts file
 cat << EOF > ${ANSIBLE_HOSTS}
 localhost ansible_connection=local
 
 [openstack_nodes]
 EOF
+
+[[ ! -d "${VENV}" ]] && virtualenv "${VENV}"
+    source "${VENV}/bin/activate"
+
+# Install cico from pip to allow for centos8 checkouts
+pip install python-cicoclient
 
 # Get nodes
 nodes=$(cico -q node get --arch $CPU_ARCH --flavor $CICO_FLAVOR --release $CICO_OS_RELEASE --retry-count 6 --retry-interval 60  --count ${NODE_COUNT} --column hostname --column ip_address --column comment -f value)
