@@ -42,32 +42,20 @@
       tox_extra_args: -- ci-scripts/infra-setup/roles/promoter/molecule/provision/molecule.yml
 
 - job:
-    name: molecule-container-push-delegated-centos-7
-    parent: base
-    nodeset: rdo-centos-7
-    success-url: "tox/reports.html"
-    failure-url: "tox/reports.html"
-    pre-run: playbooks/molecule-delegated-pre.yml
-    run: playbooks/molecule-delegated.yml
-    post-run: playbooks/molecule-post.yml
+    name: molecule-container-push-delegated-centos-8
+    parent: rdo-tox-molecule-delegated-centos-8
+    pre-run: playbooks/molecule-pre.yaml
     vars:
-      molecule_test_commands: |
-        tox -emolecule_delegated -- roles/promoter/molecule/container-push/molecule.yml
+      promoter_user: zuul
+      tox_extra_args: ci-scripts/infra-setup/roles/promoter/molecule/container-push*/molecule.yml
 
 - job:
-    name: molecule-tripleo-common-delegated-centos-7
-    parent: base
-    nodeset: rdo-centos-7
-    pre-run: playbooks/molecule-delegated-pre.yml
-    run: playbooks/molecule-delegated.yml
+    name: molecule-tripleo-common-delegated-centos-8
+    parent: rdo-tox-molecule-delegated-centos-8
+    pre-run: playbooks/molecule-pre.yaml
     vars:
-      molecule_test_commands: |
-        # container-push generates staging containers, skip teardown
-        molecule converge -s container-push -- --skip-tags=registry_cleanup
-        # tripleo-common test w/ staging containers
-        molecule test -s tripleo-common-integration
-        # container-push teardown, cleanup registries
-        molecule converge -s container-push -- --tags=registry_cleanup
+      promoter_user: zuul
+      tox_extra_args: -- ci-scripts/infra-setup/roles/promoter/molecule/tripleo-common-integration/molecule.yml
 
 - job:
     name: molecule-delegated-promote-images-delegated-centos-8
