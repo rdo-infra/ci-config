@@ -50,17 +50,16 @@
       tox_extra_args: -- ci-scripts/infra-setup/roles/promoter/molecule/promote-images/molecule.yml
 
 - job:
-    name: molecule-container-push-delegated-centos-7
-    parent: base
-    nodeset: rdo-centos-7
-    success-url: "tox/reports.html"
-    failure-url: "tox/reports.html"
-    pre-run: playbooks/molecule-delegated-pre.yml
-    run: playbooks/molecule-delegated.yml
-    post-run: playbooks/molecule-post.yml
+    name: molecule-container-push-delegated-centos-8
+    parent: rdo-tox-molecule-delegated-centos-8
+    pre-run: playbooks/molecule-pre.yaml
     vars:
-      molecule_test_commands: |
-        tox -emolecule_delegated -- roles/promoter/molecule/container-push/molecule.yml
+      promoter_user: zuul
+      tox_extra_args: >-
+        -- ci-scripts/infra-setup/roles/promoter/molecule/container-push/molecule.yml
+           ci-scripts/infra-setup/roles/promoter/molecule/container-push-secure/molecule.yml
+           ci-scripts/infra-setup/roles/promoter/molecule/container-push-multiarch/molecule.yml
+           ci-scripts/infra-setup/roles/promoter/molecule/container-push-manifest/molecule.yml
 
 - job:
     name: molecule-tripleo-common-delegated-centos-7
