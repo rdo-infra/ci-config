@@ -1,0 +1,57 @@
+main:
+  release: master
+  distro_name: centos
+  distro_version: 8
+  dlrnauth_username: ciuser
+  promotion_steps_map: {}
+  promotion_criteria_map: {}
+  api_url: https://trunk.rdoproject.org/api-centos8-master-uc
+  dry_run: false
+  manifest_push: false
+  target_registries_push: true
+  latest_hashes_count: 10
+  allowed_clients: registries_client,qcow_client,dlrn_client
+  log_level: INFO
+  log_file: ~/promoter_logs/centos8_master.log
+  dlrn_api_host: trunk.rdoproject.org
+  containers_list_base_url: https://opendev.org/openstack/tripleo-common/raw/commit/
+  containers_list_path: container-images/overcloud_containers.yaml.j2
+overcloud_images:
+  qcow_servers:
+    rdo:
+      host: "images.rdoproject.org"
+      user: "uploader"
+      root: "/var/www/html/images/"
+    private:
+      host: "38.145.34.141"
+      root: "/var/www/rcm-guest/images/"
+      user: "centos"
+      website:
+      image_server_user_host:
+registries:
+  source:
+    name: rdo
+    host: trunk.registry.rdoproject.org
+    # namespace is dynamic
+    namespace: "tripleo{{ release }}"
+    username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
+    password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
+    auth_url: "https://trunk.registry.rdoproject.org/v2/"
+    port: 443
+    schema: s2_v1
+    secure: True
+  targets:
+    - name: dockerhub
+      port: 443
+      host: docker.io
+      secure: true
+      schema: s2_v2
+      auth_url: "https://index.docker.io/v1/"
+# Quay is temporarily disabled.
+#      - host: quay.io
+#        namespace: "tripleo{{ lookup('env','RELEASE') }}"
+#        username: "{{ lookup('env','QUAYDOTIO_USERNAME') }}"
+#        password: "{{ lookup('env','QUAYDOTIO_PASSWORD') }}"
+#        token: "{{ lookup('env','QUAYDOTIO_TOKEN') }}"
+#        auth_url: "https://quay.io/api/v1/'"
+#        schema: "v2_s1"

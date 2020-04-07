@@ -31,6 +31,14 @@ class ConfigError(Exception):
     pass
 
 
+def load_defaults(config_root_path):
+    defaults_path = os.path.join(config_root_path, "defaults.yaml")
+    with open(defaults_path) as defaults_file:
+        defaults = yaml.safe_load(defaults_file)
+
+    return defaults
+
+
 class PromoterConfigBase(object):
     """
     This class builds a singleton object to be passed to all the other
@@ -39,27 +47,9 @@ class PromoterConfigBase(object):
     basic loading.
     """
 
-    defaults = {
-        'release': 'master',
-        'distro_name': 'centos',
-        'distro_version': '7',
-        'dlrnauth_username': 'ciuser',
-        'promotion_steps_map': {},
-        'promotion_criteria_map': {},
-        'dry_run': "false",
-        'manifest_push': "false",
-        'target_registries_push': "true",
-        'latest_hashes_count': '10',
-        'allowed_clients': 'registries_client,qcow_client,dlrn_client',
-        'log_level': "INFO",
-        "dlrn_api_host": "trunk.rdoproject.org",
-        "containers_list_base_url": ("https://opendev.org/openstack/"
-                                     "tripleo-common/raw/commit/"),
-        "containers_list_path": "container-images/overcloud_containers.yaml.j2"
-    }
     log = logging.getLogger("promoter")
 
-    def __init__(self, config_file):
+    def __init__(self, config_rel_path, config_root=None):
         """
         Initialize the config object loading from ini file
         :param config_path: the path to the configuration file to load
@@ -68,24 +58,28 @@ class PromoterConfigBase(object):
         setup_logging("promoter", logging.DEBUG)
 
         self.git_root, self.script_root = get_root_paths(self.log)
-        self.log.debug("Config file passed: %s", config_file)
+        self.config_root = config_root
+        if not self.config_root:
+            self.config_root = os.path.join(self.script_root, "config")
+        self.log.debug("Config file passed: %s", config_rel_path)
         self.log.debug("Git root %s", self.git_root)
+        self.defaults = load_defaults(self.config_root)
 
-        if config_file is None:
+        if config_rel_path is None:
             raise ConfigError("Empty config file")
         # The path is either absolute ot it's relative to the code root
-        if not os.path.isabs(config_file):
-            config_file = os.path.join(self.script_root, "config",
-                                       config_file)
+        if not os.path.isabs(config_rel_path):
+            self.log.error("Config file should always be relative config root")
+        config_path = os.path.join(self.config_root, config_rel_path)
         try:
-            os.stat(config_file)
+            os.stat(config_path)
         except OSError:
             self.log.error("Configuration file not found")
             raise
 
-        self.log.debug("Using config file %s", config_file)
-        self._file_config = self.load_from_ini(config_file)
-        self._config = self.load_config(config_file, self._file_config)
+        self.log.debug("Using config file %s", config_path)
+        self._file_config = self.load_from_ini(config_path)
+        self._config = self.load_config(config_path, self._file_config)
 
         # Load keys as config attributes
         for key, value in self._config.items():
@@ -151,7 +145,7 @@ class PromoterConfig(PromoterConfigBase):
     class should be used by the promoter
     """
 
-    def __init__(self, config_file, overrides=None, filters="all",
+    def __init__(self, config_rel_path, overrides=None, filters="all",
                  checks="all"):
         """
         Expands the parent init by adding config expansion, overrides
@@ -159,7 +153,7 @@ class PromoterConfig(PromoterConfigBase):
         :param config_path: the path to the configuration file to load
         :param overrides: An object with override for the configuration
         """
-        super(PromoterConfig, self).__init__(config_file)
+        super(PromoterConfig, self).__init__(config_rel_path)
 
         config = {}
         if filters == "all":
@@ -170,7 +164,7 @@ class PromoterConfig(PromoterConfigBase):
             config = self.expand_config(config)
         if not self.sanity_check(config, self._file_config, checks=checks):
             self.log.error("Error in configuration file {}"
-                           "".format(config_file))
+                           "".format(config_rel_path))
             raise ConfigError
 
         # Add experimental configuration if activated
@@ -312,6 +306,10 @@ class PromoterConfig(PromoterConfigBase):
         for target_name, job_list in config['promotion_criteria_map'].items():
             criteria = set(list(job_list))
             config['promotion_criteria_map'][target_name] = criteria
+
+        config['overcloud_images_server'] = \
+            config['overcloud_images']['qcow_servers'][
+                config['overcloud_images_server_name']]
 
         return config
 
