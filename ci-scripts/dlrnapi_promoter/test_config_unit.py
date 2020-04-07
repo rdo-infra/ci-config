@@ -22,7 +22,7 @@ class ConfigBase(unittest.TestCase):
     def setUp(self):
         self.filepaths = {}
         for case, content in test_ini_configurations.items():
-            fp, filepath = tempfile.mkstemp(prefix="ini_conf_test")
+            fp, filepath = tempfile.mkstemp(prefix="conf_test_", suffix=".yaml")
             with os.fdopen(fp, "w") as test_file:
                 test_file.write(content)
             self.filepaths[case] = filepath
@@ -49,26 +49,49 @@ class TestConfigBase(ConfigBase):
             mock.call("Configuration file not found")
         ])
 
-    def test_load_notini_config(self):
+    @patch('logging.Logger.error')
+    def test_load_empty_yaml_config(self, mock_log_error):
         with self.assertRaises(ConfigError):
-            PromoterConfigBase(self.filepaths['not_ini'])
+            PromoterConfigBase(self.filepaths['empty_yaml'])
+        mock_log_error.assert_has_calls([
+            mock.call("Config file %s does not contain valid data",
+                      self.filepaths['empty_yaml'])
+        ])
 
     @patch('logging.Logger.error')
-    def test_load_ini_file_no_criteria(self, mock_log_error):
+    def test_load_invalid_yaml_config(self, mock_log_error):
         with self.assertRaises(ConfigError):
-            PromoterConfigBase(self.filepaths['missing_criteria_section'])
+            PromoterConfigBase(self.filepaths['invalid_yaml'])
         mock_log_error.assert_has_calls([
-            mock.call("Missing criteria section for target %s",
+            mock.call("Unable to load config file %s",
+                      self.filepaths['invalid_yaml'])
+        ])
+
+    @patch('logging.Logger.error')
+    def test_load_not_yaml_config(self, mock_log_error):
+        with self.assertRaises(ConfigError):
+            PromoterConfigBase(self.filepaths['not_yaml'])
+        mock_log_error.assert_has_calls([
+            mock.call("Config file %s does not contain valid data",
+                      self.filepaths['not_yaml'])
+        ])
+
+    @patch('logging.Logger.error')
+    def test_load_yaml_file_no_criteria(self, mock_log_error):
+        with self.assertRaises(ConfigError):
+            PromoterConfigBase(self.filepaths['missing_criteria'])
+        mock_log_error.assert_has_calls([
+            mock.call("Missing criteria for target %s",
                       'current-tripleo')
         ])
 
     @patch('logging.Logger.error')
-    def test_load_config_missing_main(self, mock_log_error):
+    def test_load_yaml_file_empty_criteria(self, mock_log_error):
         with self.assertRaises(ConfigError):
-            PromoterConfigBase(self.filepaths['missing_main'])
+            PromoterConfigBase(self.filepaths['empty_criteria'])
         mock_log_error.assert_has_calls([
-            mock.call("Config file: %s Missing main section",
-                      self.filepaths['missing_main'])
+            mock.call("Empty criteria for target %s",
+                      'current-tripleo')
         ])
 
     @patch('logging.Logger.error')
@@ -76,27 +99,92 @@ class TestConfigBase(ConfigBase):
         with self.assertRaises(ConfigError):
             PromoterConfigBase(self.filepaths['missing_promotions_section'])
         mock_log_error.assert_has_calls([
-            mock.call("Missing promotion_from section")
+            mock.call("Promotions section is empty"),
+            mock.call("No dlrnapi password found in env"),
+            mock.call("Error in configuration file %s", self.filepaths[
+                'missing_promotions_section'])
         ])
 
-    def test_load_correct_ini_file_verify_params(self):
+    def test_load_correct_yaml_file_verify_params(self):
         self.maxDiff = None
         # Test for load correctness
         os.environ["DLRNAPI_PASSWORD"] = "test"
-        config = PromoterConfigBase(self.filepaths['correct'])
+        config = PromoterConfigBase(self.filepaths['correct'],
+                                    sanity_checks=['logs', 'promotions'])
         # Test if config keys are there and have a value
         assert hasattr(config, "release"), "Missing mandatory argument"
         assert hasattr(config, "distro_name"), "Missing mandatory argument"
         self.assertIsInstance(config.distro_name, string_types)
         self.assertEqual(config.release, "master")
+        self.assertEqual(config.latest_hashes_count, 10)
         # TODO(gcerami) we should also check that ~ in log_file are expanded
         #  to user home, but it's not easy as setting log_file to something
         #  different from /dev/null will need a valid file to write logs to,
         #  and it cannot be in the user home
-        # This is tricky, here we verified that the code correctly loaded the
-        # value, and value from ini is text. In PromoterConfig we verify if
-        # this value has been correctly handled and converted to int
-        self.assertEqual(config.latest_hashes_count, '10')
+
+
+class TestBaseSanityChecks(ConfigBase):
+
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.warning')
+    def test_sanity_check_all_checks_success_all_warnings(self,
+                                                          mock_log_warning,
+                                                          mock_log_error):
+        pconfig = PromoterConfigBase(self.filepaths['correct'])
+        config = {
+            'distro_name': "default_distro",
+            'distro_version': "default_version",
+            'dlrnauth_username': 'ciuser',
+            'dlrnauth_password': 'pass',
+            'promotion_criteria_map': {
+                'current-tripleo': ['job1', 'job2']
+            },
+            'log_level': "INFO",
+            "log_file": "/dev/null"
+        }
+        file_config = {'main': {}}
+        conf_ok = pconfig.sanity_checks(config, file_config)
+        self.assertTrue(conf_ok)
+        mock_log_warning.assert_has_calls([
+            mock.call('Missing parameter in configuration file: %s. '
+                      'Using default value: %s', "distro_version",
+                      "default_version"),
+            mock.call('Missing parameter in configuration file: %s. '
+                      'Using default value: %s', "log_file",
+                      "/dev/null"),
+            mock.call('Missing parameter in configuration file: %s. '
+                      'Using default value: %s', "distro_name",
+                      "default_distro"),
+            mock.call('Missing parameter in configuration file: username. '
+                      'Using default value: %s', "ciuser")
+        ], any_order=True)
+        mock_log_error.assert_not_called()
+
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.warning')
+    def test_sanity_check_all_checks_fail_all_errors(self,
+                                                     mock_log_warning,
+                                                     mock_log_error):
+        pconfig = PromoterConfig(self.filepaths['correct'])
+        config = {
+            'distro_name': "default_distro",
+            'distro_version': "default_version",
+            'dlrnauth_password': None,
+            'dlrnauth_username': 'ciuser',
+            'promotion_criteria_map': {
+                'current-tripleo': []
+            },
+            'log_level': "INFO",
+            "log_file": "/tmp/not/existing/file.log"
+        }
+        file_config = {'main': {}}
+        conf_ok = pconfig.sanity_checks(config, file_config)
+        self.assertFalse(conf_ok)
+        mock_log_error.assert_has_calls([
+            mock.call('Invalid Log file: %s', '/tmp/not/existing/file.log'),
+            mock.call('No dlrnapi password found in env'),
+            mock.call('No jobs in criteria for target %s', 'current-tripleo')
+        ])
 
 
 class TestConfig(ConfigBase):
@@ -176,7 +264,7 @@ class TestGetDlrnApi(ConfigBase):
                                     mock_log_error):
         check_port_mock.return_value = True
         config = PromoterConfig(self.filepaths['correct'], filters=[],
-                                checks=[])
+                                sanity_checks=[])
         in_config = {}
         expected_url = "http://localhost:58080"
         api_url = config.get_dlrn_api_url(in_config)
@@ -197,7 +285,7 @@ class TestGetDlrnApi(ConfigBase):
                                    mock_log_error):
         check_port_mock.side_effect = [False, False]
         config = PromoterConfig(self.filepaths['correct'], filters=[],
-                                checks=[])
+                                sanity_checks=[])
         # PromoterConfig calls log.debug at this point, so we reset the mock
         # to make it count from zero
         mock_log_debug.reset_mock()
@@ -226,7 +314,7 @@ class TestGetDlrnApi(ConfigBase):
                                                     mock_log_error):
         check_port_mock.side_effect = [False, True]
         config = PromoterConfig(self.filepaths['correct'], filters=[],
-                                checks=[])
+                                sanity_checks=[])
         in_config = {
             'distro_name': "centos",
             'distro_version': "8",
@@ -252,7 +340,7 @@ class TestGetDlrnApi(ConfigBase):
                                                     mock_log_error):
         check_port_mock.side_effect = [False, True]
         config = PromoterConfig(self.filepaths['correct'], filters=[],
-                                checks=[])
+                                sanity_checks=[])
         in_config = {
             'distro_name': "centos",
             'distro_version': "7",
@@ -278,7 +366,7 @@ class TestGetDlrnApi(ConfigBase):
                                                    mock_log_error):
         check_port_mock.side_effect = [False, True]
         config = PromoterConfig(self.filepaths['correct'], filters=[],
-                                checks=[])
+                                sanity_checks=[])
         in_config = {
             'distro_name': "centos",
             'distro_version': "7",
@@ -295,72 +383,6 @@ class TestGetDlrnApi(ConfigBase):
             mock.call("Assigning api_url %s", expected_url)
         ])
         mock_log_error.assert_not_called()
-
-
-class TestSanityChecks(ConfigBase):
-
-    @patch('logging.Logger.error')
-    @patch('logging.Logger.warning')
-    def test_sanity_check_all_checks_success_all_warnings(self,
-                                                          mock_log_warning,
-                                                          mock_log_error):
-        pconfig = PromoterConfig(self.filepaths['correct'], filters=[],
-                                 checks=[])
-        config = {
-            'distro_name': "default_distro",
-            'distro_version': "default_version",
-            'dlrnauth_username': 'ciuser',
-            'dlrnauth_password': 'pass',
-            'promotion_criteria_map': {
-                'current-tripleo': ['job1', 'job2']
-            },
-            'log_level': "INFO",
-            "log_file": "/dev/null"
-        }
-        file_config = {'main': {}}
-        conf_ok = pconfig.sanity_check(config, file_config)
-        self.assertTrue(conf_ok)
-        mock_log_warning.assert_has_calls([
-            mock.call('Missing parameter in configuration file: %s. '
-                      'Using default value: %s', "distro_version",
-                      "default_version"),
-            mock.call('Missing parameter in configuration file: %s. '
-                      'Using default value: %s', "log_file",
-                      "/dev/null"),
-            mock.call('Missing parameter in configuration file: %s. '
-                      'Using default value: %s', "distro_name",
-                      "default_distro"),
-            mock.call('Missing parameter in configuration file: username. '
-                      'Using default value: %s', "ciuser")
-        ], any_order=True)
-        mock_log_error.assert_not_called()
-
-    @patch('logging.Logger.error')
-    @patch('logging.Logger.warning')
-    def test_sanity_check_all_checks_fail_all_errors(self,
-                                                     mock_log_warning,
-                                                     mock_log_error):
-        pconfig = PromoterConfig(self.filepaths['correct'], filters=[],
-                                 checks=[])
-        config = {
-            'distro_name': "default_distro",
-            'distro_version': "default_version",
-            'dlrnauth_password': None,
-            'dlrnauth_username': 'ciuser',
-            'promotion_criteria_map': {
-                'current-tripleo': []
-            },
-            'log_level': "INFO",
-            "log_file": "/tmp/not/existing/file.log"
-        }
-        file_config = {'main': {}}
-        conf_ok = pconfig.sanity_check(config, file_config)
-        self.assertFalse(conf_ok)
-        mock_log_error.assert_has_calls([
-            mock.call('Invalid Log file: %s', '/tmp/not/existing/file.log'),
-            mock.call('No dlrnapi password found in env'),
-            mock.call('No jobs in criteria for target %s', 'current-tripleo')
-        ])
 
 
 class TestExpandConfig(ConfigBase):
@@ -400,7 +422,7 @@ class TestExpandConfig(ConfigBase):
         }
         get_api_url_mock.return_value = api_url
         config = PromoterConfig(self.filepaths['correct'], filters=[],
-                                checks=[])
+                                sanity_checks=[])
         out_config = config.expand_config(in_config)
         self.assertEqual(out_config, expected_config)
 
@@ -420,7 +442,7 @@ class TestHandleOverrides(ConfigBase):
             'log_level': "INFO"
         }
         config = PromoterConfig(self.filepaths['correct'], filters=[],
-                                checks=[])
+                                sanity_checks=[])
         out_config = config.handle_overrides(in_config,
                                              overrides=overrides)
         self.assertEqual(out_config, in_config)
@@ -436,7 +458,7 @@ class TestHandleOverrides(ConfigBase):
             'api_url': "https://localhost:389"
         }
         config = PromoterConfig(self.filepaths['correct'], filters=[],
-                                checks=[])
+                                sanity_checks=[])
         out_config = config.handle_overrides(in_config,
                                              overrides=overrides)
         self.assertEqual(out_config['log_file'], "/path/to/logs")
