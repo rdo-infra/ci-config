@@ -1,0 +1,28 @@
+- hosts: all
+  tasks:
+    - name: call tasks to manage variables
+      include_tasks: ../provision/manage_variables.yml
+
+    - name: Test promoter container
+      block:
+        - name: include stage setup variables
+          include_vars:
+            file: "/tmp/stage-info.yaml"
+            name: stage_info
+
+        - name: sets critical variables
+          set_fact:
+            full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+            source_registry: "{{ stage_info.registries.source }}"
+            target_registries: "{{ stage_info.registries.targets }}"
+
+        - name: Check that the containers are pushed correctly to all target registries
+          loop: "{{ target_registries | map(attribute='host') | product(stage_info.containers.images) | map('join', '/') | list }}"
+          shell: |
+            docker manifest inspect --insecure {{ image }}
+          # skip multi-arch containers
+          # alternative to this is to add an option to the staging environment
+          # to not produce multi-arch containers
+          when: '"ppc" not in image and "x86" not in image'
+          loop_control:
+            loop_var: image
