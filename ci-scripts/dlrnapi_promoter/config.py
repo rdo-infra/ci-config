@@ -18,6 +18,7 @@ class ConfigError(Exception):
     pass
 
 
+<<<<<<< HEAD
 class PromoterConfig(object):
 
     def __init__(self):
@@ -77,6 +78,19 @@ class PromoterConfig(object):
 
 
 class PromoterConfigGenerator(object):
+||||||| parent of f19bd79... [WIP] Promoter: add support multiple configuration environments
+class PromoterConfigBase(object):
+=======
+def load_defaults(config_root_path):
+    defaults_path = os.path.join(config_root_path, "defaults.yaml")
+    with open(defaults_path) as defaults_file:
+        defaults = yaml.safe_load(defaults_file)
+
+    return defaults
+
+
+class PromoterConfigBase(object):
+>>>>>>> f19bd79... [WIP] Promoter: add support multiple configuration environments
     """
     This class builds a singleton object to be passed to all the other
     functions in the workflow.
@@ -84,6 +98,7 @@ class PromoterConfigGenerator(object):
     basic loading.
     """
 
+<<<<<<< HEAD
     defaults = {
         'release': 'master',
         'distro_name': 'centos',
@@ -105,10 +120,47 @@ class PromoterConfigGenerator(object):
         'log_file': "~/promoter_logs/{{ distro }}_{{ distro }}.log",
         "distro": "{{ distro_name }}{{ distro_release }}"
     }
+<<<<<<< HEAD
 
+||||||| parent of f19bd79... [WIP] Promoter: add support multiple configuration environments
+=======
+||||||| parent of 6188269... [WIP] Promoter: add support multiple configuration environments
+    defaults = {
+        'release': 'master',
+        'distro_name': 'centos',
+        'distro_version': '7',
+        'dlrnauth_username': 'ciuser',
+        'promotion_steps_map': {},
+        'promotion_criteria_map': {},
+        'dry_run': "false",
+        'manifest_push': "false",
+        'target_registries_push': "true",
+        'latest_hashes_count': '10',
+        'allowed_clients': 'registries_client,qcow_client,dlrn_client',
+        'log_level': "INFO",
+        "dlrn_api_host": "trunk.rdoproject.org",
+        "containers_list_base_url": ("https://opendev.org/openstack/"
+                                     "tripleo-common/raw/commit/"),
+        "containers_list_path": "container-images/overcloud_containers.yaml.j2"
+    }
+=======
+>>>>>>> 6188269... [WIP] Promoter: add support multiple configuration environments
+>>>>>>> f19bd79... [WIP] Promoter: add support multiple configuration environments
     log = logging.getLogger("promoter")
 
+<<<<<<< HEAD
     def __init__(self, filters="all", validate="all"):
+||||||| parent of f19bd79... [WIP] Promoter: add support multiple configuration environments
+    def __init__(self, config_path, sanity_checks="all"):
+=======
+<<<<<<< HEAD
+    def __init__(self, config_path, sanity_checks="all"):
+||||||| parent of 6188269... [WIP] Promoter: add support multiple configuration environments
+    def __init__(self, config_file):
+=======
+    def __init__(self, config_rel_path, config_root=None):
+>>>>>>> 6188269... [WIP] Promoter: add support multiple configuration environments
+>>>>>>> f19bd79... [WIP] Promoter: add support multiple configuration environments
         """
         Initialize the config object loading from ini file
         :param config_path: the path to the configuration file to load
@@ -119,28 +171,80 @@ class PromoterConfigGenerator(object):
         setup_logging("promoter", logging.DEBUG)
 
         self.git_root, self.script_root = get_root_paths(self.log)
+<<<<<<< HEAD
+||||||| parent of f19bd79... [WIP] Promoter: add support multiple configuration environments
+        self.log.debug("Config file passed: %s", config_path)
+=======
+<<<<<<< HEAD
+        self.log.debug("Config file passed: %s", config_path)
+||||||| parent of 6188269... [WIP] Promoter: add support multiple configuration environments
+        self.log.debug("Config file passed: %s", config_file)
+=======
+        self.config_root = config_root
+        if not self.config_root:
+            self.config_root = os.path.join(self.script_root, "config")
+        self.log.debug("Config file passed: %s", config_rel_path)
+>>>>>>> 6188269... [WIP] Promoter: add support multiple configuration environments
+>>>>>>> f19bd79... [WIP] Promoter: add support multiple configuration environments
         self.log.debug("Git root %s", self.git_root)
+        self.defaults = load_defaults(self.config_root)
 
+<<<<<<< HEAD
     def __call__(self, config_path, filters="all", validate="all"):
         self.log.debug("Config file passed: %s", config_path)
+||||||| parent of f19bd79... [WIP] Promoter: add support multiple configuration environments
+=======
+<<<<<<< HEAD
+>>>>>>> f19bd79... [WIP] Promoter: add support multiple configuration environments
         if config_path is None:
+||||||| parent of 6188269... [WIP] Promoter: add support multiple configuration environments
+        if config_file is None:
+=======
+        if config_rel_path is None:
+>>>>>>> 6188269... [WIP] Promoter: add support multiple configuration environments
             raise ConfigError("Empty config file")
         # The path is either absolute ot it's relative to the code root
+<<<<<<< HEAD
         if not os.path.isabs(config_path):
             config_path = os.path.join(self.script_root, "config",
                                        config_path)
+||||||| parent of 6188269... [WIP] Promoter: add support multiple configuration environments
+        if not os.path.isabs(config_file):
+            config_file = os.path.join(self.script_root, "config",
+                                       config_file)
+=======
+        if not os.path.isabs(config_rel_path):
+            self.log.error("Config file should always be relative config root")
+        config_path = os.path.join(self.config_root, config_rel_path)
+>>>>>>> 6188269... [WIP] Promoter: add support multiple configuration environments
         try:
             os.stat(config_path)
         except OSError:
             self.log.error("Configuration file not found")
             raise
 
+<<<<<<< HEAD
         config = self.load_config(config_path)
+||||||| parent of f19bd79... [WIP] Promoter: add support multiple configuration environments
+        self._config = self.load_config(config_path)
+=======
+<<<<<<< HEAD
+        self._config = self.load_config(config_path)
+>>>>>>> f19bd79... [WIP] Promoter: add support multiple configuration environments
 
         config = self.launch_filters(config, filters)
         if not self.validate(config, checks=validate):
             self.log.error("Error in configuration file %s", config_path)
             raise ConfigError
+||||||| parent of 6188269... [WIP] Promoter: add support multiple configuration environments
+        self.log.debug("Using config file %s", config_file)
+        self._file_config = self.load_from_ini(config_file)
+        self._config = self.load_config(config_file, self._file_config)
+=======
+        self.log.debug("Using config file %s", config_path)
+        self._file_config = self.load_from_ini(config_path)
+        self._config = self.load_config(config_path, self._file_config)
+>>>>>>> 6188269... [WIP] Promoter: add support multiple configuration environments
 
         configobj = type("ConfigObj", (), config)
 
@@ -244,12 +348,68 @@ class PromoterConfigGenerator(object):
         if not filters:
             return config
 
+<<<<<<< HEAD
+||||||| parent of f19bd79... [WIP] Promoter: add support multiple configuration environments
+    def __init__(self, config_path, overrides=None, filters="all",
+                 sanity_checks="all"):
+        """
+        Expands the parent init by adding config expansion, overrides
+        handling and sanity checks
+        :param config_path: the path to the configuration file to load
+        :param overrides: An object with override for the configuration
+        """
+        super(PromoterConfig, self).__init__(config_path,
+                                             sanity_checks=sanity_checks)
+
+        config = {}
+=======
+<<<<<<< HEAD
+    def __init__(self, config_path, overrides=None, filters="all",
+                 sanity_checks="all"):
+||||||| parent of 6188269... [WIP] Promoter: add support multiple configuration environments
+    def __init__(self, config_file, overrides=None, filters="all",
+                 checks="all"):
+=======
+    def __init__(self, config_rel_path, overrides=None, filters="all",
+                 checks="all"):
+>>>>>>> 6188269... [WIP] Promoter: add support multiple configuration environments
+        """
+        Expands the parent init by adding config expansion, overrides
+        handling and sanity checks
+        :param config_path: the path to the configuration file to load
+        :param overrides: An object with override for the configuration
+        """
+<<<<<<< HEAD
+        super(PromoterConfig, self).__init__(config_path,
+                                             sanity_checks=sanity_checks)
+||||||| parent of 6188269... [WIP] Promoter: add support multiple configuration environments
+        super(PromoterConfig, self).__init__(config_file)
+=======
+        super(PromoterConfig, self).__init__(config_rel_path)
+>>>>>>> 6188269... [WIP] Promoter: add support multiple configuration environments
+
+        config = {}
+>>>>>>> f19bd79... [WIP] Promoter: add support multiple configuration environments
         if filters == "all":
             filters = ['overrides', 'expand']
         if 'overrides' in filters:
             config = self.handle_overrides(self._config, overrides)
         if 'expand' in filters:
             config = self.expand_config(config)
+<<<<<<< HEAD
+||||||| parent of 6188269... [WIP] Promoter: add support multiple configuration environments
+        if not self.sanity_check(config, self._file_config, checks=checks):
+            self.log.error("Error in configuration file {}"
+                           "".format(config_file))
+            raise ConfigError
+
+=======
+        if not self.sanity_check(config, self._file_config, checks=checks):
+            self.log.error("Error in configuration file {}"
+                           "".format(config_rel_path))
+            raise ConfigError
+
+>>>>>>> 6188269... [WIP] Promoter: add support multiple configuration environments
         # Add experimental configuration if activated
         if 'experimental' in filters \
            and config.get('experimental', False):
@@ -324,6 +484,10 @@ class PromoterConfigGenerator(object):
             config['api_url'] = self.get_dlrn_api_url(config)
 
 
+
+        config['overcloud_images_server'] = \
+            config['overcloud_images']['qcow_servers'][
+                config['overcloud_images_server_name']]
 
         return config
 
