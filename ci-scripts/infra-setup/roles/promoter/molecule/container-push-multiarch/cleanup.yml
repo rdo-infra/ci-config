@@ -1,0 +1,10 @@
+- name: Download and repush container and multi-arch images on insecure registries
+  hosts: all
+  tasks:
+    - name: call tasks to manage variables
+      include_tasks: ../provision/manage_variables.yml
+
+    - name: common cleanup tasks
+      include_tasks: ../container-push/cleanup-common.yml
+      # the teardown here must not contain the registry_cleanup tag, or it
+      # will not clean up properly in the tripleo-common integration test
