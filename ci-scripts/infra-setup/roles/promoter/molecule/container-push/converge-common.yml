@@ -1,0 +1,19 @@
+- name: call tasks to manage variables
+  include_tasks: ../provision/manage_variables.yml
+
+- name: include stage setup variables
+  include_vars:
+    file: "/tmp/stage-info.yaml"
+    name: stage_info
+
+- name: sets critical variables
+  set_fact:
+    full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+    source_registry: "{{ stage_info.registries.source }}"
+    target_registries: "{{ stage_info.registries.targets }}"
+
+- name: Include containers-promote role to test
+  include_role:
+    name: ../../../../../container-push/roles/containers-promote
+  vars:
+    ansible_python_interpreter: "/home/{{ promoter_user }}/promoter_venv/bin/python3"
