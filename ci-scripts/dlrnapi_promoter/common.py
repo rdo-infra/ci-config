@@ -38,16 +38,6 @@ class LoggingError(Exception):
     pass
 
 
-def str2bool(value):
-    """
-    Converts a string with a boolean value into a proper boolean
-    mostly useful for variables coming from ini parser
-    """
-    if value in ['yes', 'true', 'True', 'on', '1']:
-        return True
-    return False
-
-
 def check_port(host, port, timeout=None, port_mode="open"):
     """
     Check for connection to a host:port within a timeout
@@ -151,10 +141,7 @@ def setup_logging(name, log_level, log_file=None):
                                       '%(levelname)-8s %(name)s '
                                       '%(message)s')
     if log_file is not None:
-        try:
-            log_file = os.path.expanduser(log_file)
-        except (FileNotFoundError, PermissionError):
-            pass
+        log_file = os.path.expanduser(log_file)
         try:
             log_handler = logging.handlers.WatchedFileHandler(log_file)
         except (FileNotFoundError, PermissionError):

@@ -24,7 +24,7 @@ except ImportError:
 import yaml
 
 from dlrn_hash import DlrnHash
-from config import PromoterConfigBase
+from config import PromoterConfigFactory
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger("promoter-integration-checks")
@@ -227,7 +227,7 @@ def parse_promotion_logs(stage_info=None, **kwargs):
         # and if the file does not exist, we can use the location proposed by
         # the stage
         promoter_config = \
-            PromoterConfigBase(stage_info['main']['promoter_config_file'])
+            PromoterConfigFactory(stage_info['main']['promoter_config_file'])
 
         logfile = promoter_config.log_file
         log.info("Verifying presence of log file in %s", logfile)
