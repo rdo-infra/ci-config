@@ -8,7 +8,7 @@ import pprint
 import yaml
 
 from common import get_root_paths
-from config import PromoterConfigBase
+from config import PromoterConfigGenerator
 from stage_dlrn import expand_dlrn_config
 
 
@@ -166,7 +166,7 @@ class StageConfig(object):
             os.path.join(self.code_root, "config",
                          _config['main']['promoter_config_file'])
         promoter_config = \
-            PromoterConfigBase(_config['main']['promoter_config_file'])
+            PromoterConfigGenerator(_config['main']['promoter_config_file'])
         _config['main']['distro_name'] = promoter_config.distro_name
         _config['main']['distro_version'] = promoter_config.distro_version
         _config['main']['release'] = promoter_config.release
@@ -242,7 +242,7 @@ class StageConfig(object):
         tripleo_commit_sha = "163d4b3b4b211358512fa9ee7f49d9fb930ecd8f"
         _config['containers']['tripleo_commit_sha'] = tripleo_commit_sha
         _config['containers']['containers_list_path'] = \
-            PromoterConfigBase.defaults['containers_list_path']
+            PromoterConfigGenerator.defaults['containers_list_path']
 
         containers_list_base = \
             os.path.join(containers_root,

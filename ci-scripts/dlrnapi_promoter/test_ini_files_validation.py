@@ -2,7 +2,7 @@ import os
 import logging
 
 from common import get_root_paths, setup_logging
-from config import PromoterConfig
+from config import PromoterConfigGenerator
 
 
 def test_ini_files():
@@ -20,7 +20,7 @@ def test_ini_files():
             if '.ini' in file:
                 full_path = os.path.join(root, file)
                 try:
-                    PromoterConfig(full_path, checks=['criteria'])
+                    PromoterConfigGenerator(full_path, checks=['criteria'])
                 except Exception as config_except:
                     log.exception(config_except)
                     errors = True
