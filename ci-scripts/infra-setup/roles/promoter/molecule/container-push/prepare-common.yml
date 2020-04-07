@@ -1,0 +1,22 @@
+- name: call tasks to manage variables
+  include_tasks: ../provision/manage_variables.yml
+
+- include_role:
+    name: promoter
+    tasks_from: repos-packages
+
+- include_role:
+    name: promoter
+    tasks_from: docker
+
+- name: Setup test virtualenv
+  pip:
+    requirements: "{{ ci_config_remote_src_dir }}/test-requirements.txt"
+    virtualenv: "/home/{{ promoter_user }}/promoter_venv"
+
+- name: launch staging setup scripts # noqa 301
+  shell: |
+    source /home/{{ promoter_user }}/promoter_venv/bin/activate
+    /home/{{ promoter_user }}/promoter_venv/bin/python3 \
+        {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/stage.py setup \
+            --scenes dlrn,registries,containers {{ stage_config_args | default('') }}

@@ -1,4 +1,4 @@
-- name: Disable target push, only promote containers in source registry
+- name: Download and repush container images to secure registries without multi-arch manifests
   hosts: all
   vars:
     # The way the container-push works, there's currently no way to test the vars lookup directly
@@ -13,10 +13,13 @@
     distro_name: centos
     distro_version: 8
     containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
-    target_registries_push: false
+    # Source and target registries are provided by staging environment
+    manifest_push: true
+    ppc_manifests: true
+    # Decrease the chance the ppc_manifests is disabled by our check
+    ppc_pull_attempts: 3
     containers_list:
       - nova-compute
       - neutron-server
-
   tasks:
-    - include_tasks: converge-common.yml
+    - include_tasks: ../container-push/converge-common.yml
