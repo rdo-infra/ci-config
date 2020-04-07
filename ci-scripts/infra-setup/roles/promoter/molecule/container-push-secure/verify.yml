@@ -1,0 +1,58 @@
+---
+# container-push-secure (2/4):
+#     - Manifests are disabled
+#     - A password protected registry is used (tests login to registries)
+#     - we only check if the containers were pushed
+
+# This test must run early, as the tripleo-common integration uses output from
+# the test below that must be available when tripleo-common tests are started
+- hosts: all
+  vars:
+    # The way the container-push works, there's currently no way to test the vars lookup directly
+    # so we are passing the vars directly here, but this reduces coverage: if we
+    # change the lookup, they don't get any test
+    # Unfortunately adding coverage for those requires a refactoring of the way vars are passed
+    # to the container-push in general, which is way too difficult to do right now.
+    release: master
+    named_label: triple-ci-staging-promoted
+    # full_hash is provided by the staging environment
+    script_root: UNUSED
+    distro_name: centos
+    distro_version: 8
+    containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+    target_registries_push: false
+    containers_list:
+      - nova-compute
+      - neutron-server
+
+  tasks:
+    - name: call tasks to manage variables
+      include_tasks: ../provision/manage_variables.yml
+
+   - name: Test promoter container
+      block:
+        - name: include stage setup variables
+          include_vars:
+            file: "/tmp/stage-info.yaml"
+            name: stage_info
+
+        - name: sets critical variables
+          set_fact:
+            full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+            source_registry: "{{ stage_info.registries.source }}"
+            target_registries: "{{ stage_info.registries.targets }}"
+
+        - name: Include containers-promote role to test
+          include_role:
+            name: ../../../../../container-push/roles/containers-promote
+
+        - name: Check that the containers are pushed correctly to all target registries
+          loop: "{{ target_registries | map(attribute='host') | product(stage_info.containers.images) | map('join', '/') | list }}"
+          shell: |
+            docker manifest inspect --insecure {{ image }}
+          # skip multi-arch containers
+          # alternative to this is to add an option to the staging environment
+          # to not produce multi-arch containers
+          when: '"ppc" not in image and "x86" not in image'
+          loop_control:
+          loop_var: image
