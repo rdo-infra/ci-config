@@ -8,24 +8,6 @@
 # It will also mirror the images to docker.io.
 - name: Download and repush container images
   hosts: localhost
-  vars:
-    target_registries:
-      # There's no easy way to transparently override these hosts.
-      # We would need to force their ip in /etc/hosts, but also reroute ports to
-      # Their equivalent target registry
-      - host: docker.io
-        namespace: "tripleo{{ release }}"
-        username: "{{ lookup('env','DOCKERHUB_USERNAME') }}"
-        password: "{{ lookup('env','DOCKERHUB_PASSWORD') }}"
-        auth_url: "https://index.docker.io/v1/"
-        schema: "v2_s2"
-#      - host: quay.io
-#        namespace: "tripleo{{ lookup('env','RELEASE') }}"
-#        username: "{{ lookup('env','QUAYDOTIO_USERNAME') }}"
-#        password: "{{ lookup('env','QUAYDOTIO_PASSWORD') }}"
-#        token: "{{ lookup('env','QUAYDOTIO_TOKEN') }}"
-#        auth_url: "https://quay.io/api/v1/'"
-#        schema: "v2_s1"
   tasks:
     # This same playbook will run in both production and testing.
     # If we are running in production we'll use the vars above.
@@ -56,8 +38,8 @@
             full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
 
     # TODO(gcerami) assert that the hash associated to promote_name in dlrn is
-    # different from full_hash. If that happens it means that promoted_name was
-    # promoted before pushing the containers, and it's an error
-    # Print out the two hashes anyway
+    #  different from full_hash. If that happens it means that promoted_name was
+    #  promoted before pushing the containers, and it's an error
+    #  Print out the two hashes anyway
     - include_role:
         name: containers-promote
