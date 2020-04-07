@@ -24,6 +24,8 @@ class QcowClient(object):
 
         self.distro_name = self.config.distro_name
         self.distro_version = self.config.distro_version
+        self.overcloud_images_server = self.config['overcloud_images_server']
+
         # Try to load experimental config
         if hasattr(config, 'qcow_server'):
             # Currently paramiko is not in requirements, and I don't want to
@@ -64,6 +66,11 @@ class QcowClient(object):
                    self.promote_script,
                    '--distro', self.distro_name,
                    '--distro-version', self.distro_version,
+                   '--webroot', self.overcloud_images_server['webroot'],
+                   '--website', self.overcloud_images_server['website'],
+                   'image-server-user-host', "{}@{}".format(
+                    self.overcloud_images_server['user'],
+                    self.overcloud_images_server['host']),
                    self.config.release,
                    candidate_hash.full_hash,
                    target_label

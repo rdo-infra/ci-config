@@ -11,7 +11,10 @@ set -euo pipefail
 function usage {
     cat <<-EOF
     Script to promote qcow images on ${OPT_WEBSITE}
-    Usage: promote-images.sh [--distro centos] [--distro-version 7] <release> <promoted_hash> <link_name>
+    Usage: promote-images.sh [--distro centos] [--distro-version 7] [--webroot /var/ww//html/images]
+                             [--website http://images.rdoproject.org]
+                             [--images-server-user-host uploader@images.rdoproject.org]
+                             <release> <promoted_hash> <link_name>
     Example: promote-images.sh master f442a3aa35981c3d6d7e312599dde2a1b1d202c9_0468cca4 current-tripleo
 EOF
 }
@@ -27,7 +30,7 @@ function finish {
 }
 trap finish EXIT
 
-while [ "x${1:-}" != "x" ]; do
+while [[ "x${1:-}" != "x" ]]; do
     case "$1" in
         --distro)
             # we lowercase distro string, to avoid accidents
@@ -36,6 +39,18 @@ while [ "x${1:-}" != "x" ]; do
             ;;
         --distro-version)
             OPT_DISTRO_VERSION=$2
+            shift
+            ;;
+        --webroot)
+            OPT_WEBROOT=$2
+            shift
+            ;;
+        --website)
+            OPT_WEBSITE=$2
+            shift
+            ;;
+        --image-server-user-host)
+            IMAGE_SERVER_USER_HOST=$2
             shift
             ;;
         -*) echo "ERROR: unknown option: $1" >&2
@@ -49,7 +64,7 @@ while [ "x${1:-}" != "x" ]; do
     shift
 done
 
-if [ "$#" -ne 3 ]; then
+if [[ "$#" -ne 3 ]]; then
     usage >&2
     echo "ERROR: invalid number of parameters" >&2
     exit 2
@@ -59,14 +74,6 @@ RELEASE=$1
 PROMOTED_HASH=$2
 LINK_NAME=$3
 
-DISTRO_AND_VERSION="${OPT_DISTRO}${OPT_DISTRO_VERSION}"
-if [[ "${OPT_DISTRO}" == "rhel" ]]; then
-    OPT_DISTRO="redhat"
-    OPT_WEBSITE="http://38.145.34.141/rcm-guest/images"
-    IMAGE_SERVER_USER_HOST=centos@38.145.34.141
-    OPT_WEBROOT="/var/www/rcm-guest/images"
-fi
-
 function sftp_command {
     # "-b -" assures that sftp command exit code is returned
     sftp -b - \
@@ -75,16 +82,6 @@ function sftp_command {
 $1
 EOF
 }
-
-# Check if this is promotion staging environment and override vars
-# See if the file /tmp/stage-info.yaml exists and source vars from there
-if [[ -f /tmp/stage-info.yaml ]]; then
-    images_path=$(shyaml get-value overcloud_images.root < /tmp/stage-info.yaml)
-    USER=$(shyaml get-value main.promoter_user < /tmp/stage-info.yaml)
-    OPT_WEBSITE="file://$images_path"
-    IMAGE_SERVER_USER_HOST="$USER@127.0.0.1"
-    OPT_WEBROOT="$images_path"
-fi
 
 # check if target url exists and fail-fast if it doesn't
 SOURCE_URL=${OPT_WEBSITE}/$DISTRO_AND_VERSION/$RELEASE/rdo_trunk/$PROMOTED_HASH
