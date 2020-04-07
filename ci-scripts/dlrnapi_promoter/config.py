@@ -2,215 +2,227 @@
 This file contains classes and function to build a configuration object that
 can be passed to all the functions in the workfloww
 """
-
-try:
-    # Python 3 import
-    import configparser as ini_parser
-except ImportError:
-    # Python 2 import
-    import ConfigParser as ini_parser
+import copy
 
 import common
-import copy
 import logging
 import os
 import pprint
 import yaml
 
-from common import str2bool, setup_logging, check_port, LoggingError, \
-    get_root_paths
-
-# Try to import stageconfig for defaults
-try:
-    from stage_config import StageConfig
-except ImportError:
-    pass
+from common import setup_logging, get_root_paths
+from jinja2 import Template
+from jinja2.nativetypes import native_concat
+from collections import OrderedDict
 
 
 class ConfigError(Exception):
     pass
 
 
-class PromoterConfigBase(object):
-    """
-    This class builds a singleton object to be passed to all the other
-    functions in the workflow.
-    The base class should be only used for testing as it just performs the
-    basic loading.
-    """
+class Config(object):
 
-    defaults = {
-        'release': 'master',
-        'distro_name': 'centos',
-        'distro_version': '7',
-        'dlrnauth_username': 'ciuser',
-        'promotion_steps_map': {},
-        'promotion_criteria_map': {},
-        'dry_run': "false",
-        'manifest_push': "false",
-        'target_registries_push': "true",
-        'latest_hashes_count': '10',
-        'allowed_clients': 'registries_client,qcow_client,dlrn_client',
-        'log_level': "INFO",
-        "dlrn_api_host": "trunk.rdoproject.org",
-        "containers_list_base_url": ("https://opendev.org/openstack/"
-                                     "tripleo-common/raw/commit/"),
-        "containers_list_path": "container-images/overcloud_containers.yaml.j2"
-    }
-    log = logging.getLogger("promoter")
+    _log = logging.getLogger("promoter")
 
-    def __init__(self, config_file):
+    def __init__(self, layers_list):
         """
-        Initialize the config object loading from ini file
-        :param config_path: the path to the configuration file to load
+        Initializes the layers in a ordered dict
+        :param layers_list: the list of layers in the configuration,
+        high priority first. The list cannot be changed.
         """
-        # Initial log setup
-        setup_logging("promoter", logging.DEBUG)
+        self._layers = OrderedDict()
+        for layer_name in layers_list:
+            self._layers[layer_name] = {}
 
-        self.git_root, self.script_root = get_root_paths(self.log)
-        self.log.debug("Config file passed: %s", config_file)
-        self.log.debug("Git root %s", self.git_root)
+    def _fill_layer_settings(self, layer_name, settings):
+        """
+        Allow access to the _layers data structure
+        :param layer_name: The layer name to fill
+        :param settings: A dict with the settings for the layer
+        :return: None
+        """
+        self._layers[layer_name] = settings
 
-        if config_file is None:
-            raise ConfigError("Empty config file")
-        # The path is either absolute ot it's relative to the code root
-        if not os.path.isabs(config_file):
-            config_file = os.path.join(self.script_root, "config",
-                                       config_file)
+    def _construct_value(self, attribute_name):
+        """
+        Generates the constructor name from the attribute name, and tries to
+        call it.
+        :param attribute_name: The name of the attribute whose value needs
+        construction
+        :return: The generated value if the constructor exists. raises
+        AttributeError in case of any error
+        """
+        constructor_name = "_constructor_{}".format(attribute_name)
         try:
-            os.stat(config_file)
-        except OSError:
-            self.log.error("Configuration file not found")
-            raise
+            constructor = self.__getattribute__(constructor_name)
+        except AttributeError:
+            self._log.error("No constructor for attribute %s", attribute_name)
+            raise AttributeError
 
-        self.log.debug("Using config file %s", config_file)
-        self._file_config = self.load_from_ini(config_file)
-        self._config = self.load_config(config_file, self._file_config)
-
-        # Load keys as config attributes
-        for key, value in self._config.items():
-            setattr(self, key, value)
-
-    def load_config(self, config_file, file_config):
-        """
-        Basic checks on the config, the loads i into a dictionary
-        :param config_file: the path to the configuration file to load
-        :param file_config: A dict with the file configuration
-        :return:  A dict with the configuration
-        """
-
-        config = copy.deepcopy(self.defaults)
+        self._log.debug("Running constructor for attribute %s",
+                       attribute_name)
         try:
-            config.update(file_config['main'])
-        except KeyError:
-            self.log.error("Config file: %s Missing main section", config_file)
-            raise ConfigError
-        # Check important sections existence
-        try:
-            config['promotion_steps_map'] = file_config['promote_from']
-        except KeyError:
-            self.log.error("Missing promotion_from section")
-            raise ConfigError
-        for target_name in config['promotion_steps_map']:
+            return constructor()
+        except Exception as exc:
+            self._log.error("The constructor for attribute %s generated an "
+                           "error, no value can be constructed")
+            self._log.exception(exc)
+            raise AttributeError
+
+    def _search_layers(self, attribute_name):
+        """
+        Performs the simple search for the attribute name, on all layers,
+        highest priority to lowest priority
+        :param attribute_name: The name of the attribute to search
+        :return: The value of the attribute or AttributeError if not found
+        """
+        for source_name, source in self.__getattribute__('_layers').items():
             try:
-                config['promotion_criteria_map'][target_name] = \
-                    file_config[target_name]
+                value = source[attribute_name]
+                self._log.debug("Getting attribute %s from layer '%s' ",
+                                attribute_name, source_name)
+                break
             except KeyError:
-                self.log.error("Missing criteria section for target %s",
-                               target_name)
-                raise ConfigError
+                pass
 
-        # This is done also in the child class, in expand config, but it's
-        # really necessary to expand this even in the base class
-        config['log_file'] = os.path.expanduser(config['log_file'])
-
-        return config
-
-    def load_from_ini(self, config_path):
-        """
-        Loads configuration from a INI file.
-        :param config_path: the path to the config file
-        :return: a dict with the configuration
-        """
-
-        cparser = ini_parser.ConfigParser(allow_no_value=True)
-        self.log.debug("Using config file %s", config_path)
         try:
-            cparser.read(config_path)
-        except ini_parser.MissingSectionHeaderError:
-            self.log.error("Unable to load config file %s", config_path)
-            raise ConfigError
+            return value
+        except UnboundLocalError:
+            raise AttributeError
 
-        config = dict(cparser.items())
-        return config
-
-
-class PromoterConfig(PromoterConfigBase):
-    """
-    This class expands and check the sanity of the config file. Only this
-    class should be used by the promoter
-    """
-
-    def __init__(self, config_file, overrides=None, filters="all",
-                 checks="all"):
+    def _filter(self, attribute_name, value):
         """
-        Expands the parent init by adding config expansion, overrides
-        handling and sanity checks
-        :param config_path: the path to the configuration file to load
-        :param overrides: An object with override for the configuration
+        Generates the filter name from the attribute name and tried to call
+        it with the value as parameter
+        :param attribute_name: THe name of the attribute whose value need
+        filtering
+        :param value: The value of the attribute
+        :return: The filtered value of the attribute or AttributeError if the
+        filter fails
         """
-        super(PromoterConfig, self).__init__(config_file)
+        filter_name = "_filter_{}".format(attribute_name)
+        try:
+            filter_method = self.__getattribute__(filter_name)
+        except AttributeError:
+            return value
 
-        config = {}
-        if filters == "all":
-            filters = ['overrides', 'expand', 'experimental']
-        if 'overrides' in filters:
-            config = self.handle_overrides(self._config, overrides)
-        if 'expand' in filters:
-            config = self.expand_config(config)
-        if not self.sanity_check(config, self._file_config, checks=checks):
-            self.log.error("Error in configuration file {}"
-                           "".format(config_file))
-            raise ConfigError
+        self._log.debug("Running filter for attribute %s",
+                       attribute_name)
+        try:
+            return filter_method(value)
+        except Exception as exc:
+            self._log.error("The filter for attribute %s generated an "
+                            "error, no value can be constructed")
+            self._log.exception(exc)
+            raise AttributeError
 
-        # Add experimental configuration if activated
-        if 'experimental' in filters \
-           and str2bool(config.get('experimental', 'false')):
-            config = self.experimental_config(config)
-
-        # reLoad keys as config attributes
-        for key, value in config.items():
-            setattr(self, key, value)
-
-    def handle_overrides(self, config, overrides):
+    def _get_value(self, attribute_name):
         """
-        replaces selected config variables with values coming from command
-        line arguments.
-        :param config: The starting _config dict
-        :param overrides: A namespace object with config overrides.
-        :return: the overridden _config dict
+        High level method to drive the extraction/creation of a value from
+        the attribute name.
+        :param attribute_name: The name of the attribute whose value we want
+        to know
+        :return: The value or AttributeError if no value can be found or
+        constructed
         """
-
-        main_overrides = ['log_file',
-                          'promotion_steps_map',
-                          'promotion_criteria_map',
-                          'api_url',
-                          'username',
-                          'repo_url',
-                          'experimental',
-                          'log_level',
-                          'containers_list_base_url',
-                          'allowed_clients']
-        for override in main_overrides:
+        try:
+            return self._search_layers(attribute_name)
+        except AttributeError:
+            self._log.debug("Attribute %s not found in layers", attribute_name)
             try:
-                attr = getattr(overrides, override)
-                config[override] = attr
+                return self._construct_value(attribute_name)
             except AttributeError:
-                self.log.debug("Main config key %s not overridden", override)
+                self._log.error("No attribute %s in config", attribute_name)
+                raise AttributeError("No setting '{}' found"
+                                     "".format(attribute_name))
 
-        return config
+    def _render(self, value):
+        """
+        Renders a string value that may contain a jinja template.
+        :param value: The string with the possible template
+        :return: The rendered string if it's a template, value otherwise
+        """
+        template = Template(value)
+        # We can't call template.render directly in our case, as the render
+        # will try to build a static dict from this object, and the dict will
+        # be empty as we have no static values.
+        # So we use low level API, passing shared=True and locals=False to
+        # the context for the same reason as above.
+        value = native_concat(template.root_render_func(
+            template.new_context(vars=self, shared=True, locals=None)))
+        return value
 
-    def get_dlrn_api_url(self, config):
+    def __getattr__(self, attribute_name):
+        """
+        Drives any attribute access to the configuration. All
+        config.attribute start generation here.
+        The method tries to get a value then filters it and renders it when
+        found
+        :param attribute_name:
+        :return: The value of the attribute or AttributeError if no value is
+        available with any mean possible
+        """
+        value = self._get_value(attribute_name)
+        value = self._filter(attribute_name, value)
+
+        if isinstance(value, str):
+            return self._render(value)
+        else:
+            return value
+
+    def __getitem__(self, attribute_name):
+        """
+        config[item] is the same as config.item.
+        This method is needed for templating, as jinja2 expects
+        the data structure the act like a dict
+        :param attribute_name:
+        :return: The value of the attribute
+        """
+        return self.__getattr__(attribute_name)
+
+    def __contains__(self, attribute_name):
+        """
+        This method is needed for templating, as jinja2 expects
+        the data structure the act like a dict
+        :param attribute_name: The name of the attribute to check
+        :return: A bool, true if name is in config, false otherwise
+        """
+        try:
+            self._get_value(attribute_name)
+            return True
+        except AttributeError:
+            return False
+
+
+class PromoterConfig(Config):
+
+    def __init__(self, default_settings=None, file_settings=None,
+                 cli_settings=None, experimental_settings=None):
+        super(PromoterConfig, self).__init__(['cli', 'file', 'default',
+                                              'experimental'])
+        if cli_settings is None:
+            cli_settings = {}
+        if file_settings is None:
+            file_settings = {}
+        if default_settings is None:
+            default_settings = {}
+        if experimental_settings is None:
+            experimental_settings = {}
+        self._layers["cli"] = cli_settings
+        self._layers['file'] = file_settings
+        self._layers['default'] = default_settings
+        self._layers['experimental'] = experimental_settings
+
+    # Constructors
+
+    def _constructor_dlrnauth_password(self):
+        return os.environ.get('DLRNAPI_PASSWORD', None)
+
+    def _constructor_qcow_server(self):
+        return self['overcloud_images']['qcow_servers'][
+            self.default_qcow_server]
+
+    def _constructor_api_url(self):
         """
         API url is the wild west of exceptions, when it's not specified in
         config files, we need an entire function to try to understand what we
@@ -220,7 +232,7 @@ class PromoterConfig(PromoterConfigBase):
         """
         # Try local staged api first
         api_host = "localhost"
-        api_port = "58080"
+        api_port = 58080
         api_url = None
         if common.check_port(api_host, api_port):
             api_url = "http://{}:{}".format(api_host, api_port)
@@ -244,147 +256,185 @@ class PromoterConfig(PromoterConfigBase):
             self.log.debug("Assigning api_url %s", api_url)
         return api_url
 
-    def expand_config(self, config):
-        # Mangling, diverging and derivatives
-        config['dlrnauth_username'] = \
-            config.pop('username', self.defaults['dlrnauth_username'])
-        config['dlrnauth_password'] = os.environ.get('DLRNAPI_PASSWORD', None)
+    # filters
 
-        config['distro_name'] = \
-            config.get('distro_name', self.defaults['distro_name']).lower()
-        config['distro_version'] = \
-            config.get('distro_version',
-                       self.defaults['distro_version']).lower()
-        config['release'] = \
-            config.get('release', self.defaults['release']).lower()
+    def _filter_allowed_clients(self, allowed_clients):
+        return allowed_clients.split(',')
 
-        config['distro'] = "{}{}".format(config['distro_name'],
-                                         config['distro_version'])
-        config['latest_hashes_count'] = \
-            int(config.get('latest_hashes_count',
-                           self.defaults['latest_hashes_count']))
+    def _filter_distro_name(self, distro_name):
+        return distro_name.lower()
 
-        if 'repo_url' not in config:
-            config['repo_url'] = ("https://{}/{}-{}"
-                                  "".format(self.defaults['dlrn_api_host'],
-                                            config['distro'],
-                                            config['release']))
+    def _filter_promotions(self, promotions):
+        if isinstance(promotions, dict):
+            _promotions = copy.deepcopy(promotions)
+            for target_name, info in promotions.items():
+                if 'criteria' in info and not isinstance(info['criteria'], set):
+                    info['criteria'] = set(info['criteria'])
+            return _promotions
+        else:
+            return promotions
 
-        if 'api_url' not in config:
-            config['api_url'] = self.get_dlrn_api_url(config)
 
-        if 'log_file' not in config:
-            config['log_file'] = ("~/promoter_logs/{}_{}.log"
-                                  "".format(config['distro'],
-                                            config['release']))
+class PromoterConfigFactory(object):
+    """
+    This class builds a singleton object to be passed to all the other
+    functions in the workflow.
+    The base class should be only used for testing as it just performs the
+    basic loading.
+    """
 
-        config['containers_list_base_url'] = \
-            config.get('containers_list_base_url',
-                       self.defaults['containers_list_base_url'])
+    defaults = {
+        'release': 'master',
+        'distro_name': 'centos',
+        'distro_version': '7',
+        'dlrnauth_username': 'ciuser',
+        'promotions': None,
+        'dry_run': "false",
+        'manifest_push': "false",
+        'target_registries_push': "true",
+        'latest_hashes_count': '10',
+        'allowed_clients': 'registries_client,qcow_client,dlrn_client',
+        'log_level': "INFO",
+        'log_file': None,
+        "dlrn_api_host": "trunk.rdoproject.org",
+        "containers_list_base_url": ("https://opendev.org/openstack/"
+                                     "tripleo-common/raw/commit/"),
+        "containers_list_path": "container-images/overcloud_containers.yaml.j2",
+        "repo_url": "https://{{ dlrn_api_host }}/{{ distro }}-{{ release }}",
+        'log_file': "~/promoter_logs/{{ distro }}_{{ distro }}.log",
+        "distro": "{{ distro_name }}{{ distro_release }}"
+    }
 
-        config['containers_list_path'] = \
-            config.get('containers_list_path',
-                       self.defaults['containers_list_path'])
+    log = logging.getLogger("promoter")
 
-        config['log_file'] = os.path.expanduser(config['log_file'])
-        config['log_level'] = \
-            config.get('log_level', self.defaults['log_level'])
-        try:
-            config['log_level'] = getattr(logging, config['log_level'])
-        except AttributeError:
-            self.log.error("unrecognized log level: %s, using default %s",
-                           config['log_level'], self.defaults.log_level)
-            config['log_level'] = self.defaults.log_level
+    def __init__(self, filters="all", validate="all"):
+        """
+        Initialize the config object loading from ini file
+        :param config_path: the path to the configuration file to load
+        :param validate: A comma separated list of checks for the config
+        file
+        """
+        # Initial log setup
+        setup_logging("promoter", logging.DEBUG)
+        self.git_root = None
+        self.script_root = None
+        self.git_root, self.script_root = get_root_paths(self.log)
+        self.log.debug("Git root %s", self.git_root)
+        self.log.debug("Script root %s", self.git_root)
 
-        config['allowed_clients'] = \
-            config.get('allowed_clients',
-                       self.defaults['allowed_clients']).split(',')
-        config['dry_run'] = \
-            str2bool(config.get('dry_run', self.defaults['dry_run']))
-        config['manifest_push'] = \
-            str2bool(config.get('manifest_push',
-                                self.defaults['manifest_push']))
-        config['target_registries_push'] = \
-            str2bool(config.get('target_registries_push',
-                                self.defaults['target_registries_push']))
+    def __call__(self, config_path, cli_settings=None, validate="all"):
+        file_settings = self.load_file_settings(config_path)
+        experimental_path = os.path.join(self.script_root,
+                                         "promoter_defaults_experimental.yaml")
+        experimental_settings = self.load_file_settings(experimental_path)
 
-        # Promotion criteria do not have defaults
-        for target_name, job_list in config['promotion_criteria_map'].items():
-            criteria = set(list(job_list))
-            config['promotion_criteria_map'][target_name] = criteria
+        config = PromoterConfig(default_settings=self.defaults,
+                                file_settings=file_settings,
+                                cli_settings=cli_settings,
+                                experimental_settings=experimental_settings)
+
+        if not self.validate(config, checks=validate):
+            self.log.error("Error in configuration file %s", config_path)
+            raise ConfigError
 
         return config
 
-    def sanity_check(self, config, file_config, checks="all"):
+    def load_file_settings(self, config_path):
         """
-        There are several exceptions
-        that can block the load
-        - Missing main section
-        - Missing criteria section for one of the specified candidates
-        - Missing jobs in criteria section
-        - Missing mandatory parameters
-        - Missing password
+        Loads configuration from a yaml file.
+        :param config_path: the path to the config file
+        :return: a dict with the configuration
         """
+
+        self.log.debug("Config file passed: %s", config_path)
+        if config_path is None:
+            self.log.error("Config file passed can't be None")
+            raise ConfigError
+        # The path is either absolute ot it's relative to the code root
+        if not os.path.isabs(config_path):
+            config_path = os.path.join(self.script_root, "config",
+                                       config_path)
+        try:
+            os.stat(config_path)
+        except OSError:
+            self.log.error("Configuration file not found")
+            raise
+
+        self.log.debug("Using config file %s", config_path)
+        with open(config_path) as config_file:
+            try:
+                config = yaml.safe_load(config_file)
+            except yaml.YAMLError as exc:
+                self.log.error("Unable to load config file %s", config_path)
+                self.log.exception(exc)
+                raise ConfigError
+        if not isinstance(config, dict):
+            self.log.error("Config file %s does not contain valid data",
+                           config_path)
+            raise ConfigError
+
+        return config
+
+    def validate(self, config, checks="all"):
+        """
+        :param config: A PromoterConfig instance to check
+        :param checks: a comma separated list of checks to perform
+        :return: A boolean, True if the validation was successful,
+        false otherwise
+        """
+        if not checks:
+            return True
+
         conf_ok = True
-        mandatory_parameters = [
-            "distro_name",
-            "distro_version",
-            "release",
-            "api_url",
-            "log_file",
-        ]
         if checks == "all":
-            checks = ["logs", "parameters", "password", "criteria"]
+            checks = ["logs", "password", "promotions"]
+
         if 'logs' in checks:
             try:
-                setup_logging('promoter', config['log_level'],
-                              config['log_file'])
-            except LoggingError:
+                with open(config.log_file, "w"):
+                    pass
+            except (FileNotFoundError, PermissionError):
+                self.log.error("Invalid log file %s", config.log_file)
                 conf_ok = False
-        for key, value in config.items():
-            if key in mandatory_parameters and key not in file_config['main']:
-                self.log.warning("Missing parameter in configuration file: %s."
-                                 " Using default value: %s"
-                                 "", key, value)
-        if 'username' not in file_config['main']:
-            self.log.warning("Missing parameter in configuration file: "
-                             "username. Using default value: %s"
-                             "", config['dlrnauth_username'])
+            try:
+                getattr(logging, config.log_level)
+            except AttributeError:
+                self.log.error("Unrecognized log level: %s",
+                               config['log_level'])
+                conf_ok = False
+
+        if "promotions" in checks:
+            try:
+                promotions = config.promotions
+            except AttributeError:
+                self.log.error("Missing promotions section")
+                conf_ok = False
+
+            if promotions is None:
+                self.log.error("Missing promotions section")
+                conf_ok = False
+            elif not promotions:
+                self.log.error("Promotions section is empty")
+                conf_ok = False
+            else:
+                for target_name, info in promotions.items():
+                    if 'criteria' not in info:
+                        self.log.error("Missing criteria for target %s",
+                                       target_name)
+                        conf_ok = False
+                    if 'criteria' in info and not info['criteria']:
+                        self.log.error("Empty criteria for target %s",
+                                       target_name)
+                        conf_ok = False
+                    if 'candidate_label' not in info:
+                        self.log.error("Missing candidate label for target %s",
+                                       target_name)
+                        conf_ok = False
+
         if "password" in checks:
-            if config['dlrnauth_password'] is None:
+            if config.dlrnauth_password is None:
                 self.log.error("No dlrnapi password found in env")
                 conf_ok = False
-        if "criteria" in checks:
-            for target_name, job_list in \
-                    config['promotion_criteria_map'].items():
-                if not job_list:
-                    self.log.error("No jobs in criteria for target %s",
-                                   target_name)
-                    conf_ok = False
 
         return conf_ok
 
-    def experimental_config(self, config):
-        """
-        Loads additional configuration for experimental features
-        :param config:
-        :return:
-        """
-        # Experimental configuration for qcow promotion via promoter code
-        # FIXME: This is policy and it shouldn't be here. Promotion
-        #  configuration file should pass their server preference as variable
-        default_qcow_server = 'staging'
-        experimental_path = os.path.join(self.git_root, "ci-scripts",
-                                         "dlrnapi_promoter",
-                                         "promoter_defaults_experimental.yaml")
-        with open(experimental_path, 'r') as \
-                defaults:
-            experimental_config = yaml.safe_load(defaults)
-
-        if 'rhel' in self.distro_name or 'redhat' in self.distro_name:
-            default_qcow_server = 'private'
-
-        self.qcow_server = experimental_config['overcloud_images'][
-            'qcow_servers'][default_qcow_server]
-
-        return config
