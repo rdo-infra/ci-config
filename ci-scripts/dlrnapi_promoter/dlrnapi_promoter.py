@@ -6,9 +6,9 @@ import argparse
 
 import common
 from common import LockError
-from config import PromoterConfigBase
+from config import PromoterConfigFactory
 from logic import Promoter
-from dlrn_hash import DlrnHash, DlrnHashError, DlrnAggregateHash
+from dlrn_hash import DlrnHash, DlrnHashError
 
 
 def promote_all(args):
@@ -42,7 +42,7 @@ def arg_parser(cmd_line=None):
     main_parser.add_argument("--config-file", required=True,
                              help="The config file")
     main_parser.add_argument("--log-level",
-                             default=PromoterConfigBase.defaults['log_level'],
+                             default=PromoterConfigFactory.defaults['log_level'],
                              help="Set the log level")
     command_parser = main_parser.add_subparsers(dest='subcommand')
     command_parser.required = True
@@ -66,7 +66,7 @@ def arg_parser(cmd_line=None):
     force_promote_parser.add_argument("--aggregate-hash",
                                       help="The aggregate hash part for the "
                                            "candidate hash")
-    allowed_clients_default = PromoterConfigBase.defaults['allowed_clients']
+    allowed_clients_default = PromoterConfigFactory.defaults['allowed_clients']
     force_promote_parser.add_argument("--allowed-clients",
                                       default=allowed_clients_default,
                                       help="The comma separated list of "

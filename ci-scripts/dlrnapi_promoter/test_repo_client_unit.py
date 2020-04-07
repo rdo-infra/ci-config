@@ -16,7 +16,7 @@ except ImportError:
 
 from repo_client import RepoClient
 from dlrn_hash import DlrnCommitDistroHash, DlrnAggregateHash
-from config import PromoterConfigBase
+from config import PromoterConfigFactory
 
 
 class RepoSetup(unittest.TestCase):
@@ -38,7 +38,7 @@ class RepoSetup(unittest.TestCase):
                        self.dlrn_hash_aggregate]
         self.temp_dir = tempfile.mkdtemp()
         self.versions_csv_dir = self.temp_dir
-        config_defaults = PromoterConfigBase.defaults
+        config_defaults = PromoterConfigFactory.defaults
 
         repo_url = "file://{}/".format(self.temp_dir)
         containers_list_base_url = "file://{}".format(self.temp_dir)
