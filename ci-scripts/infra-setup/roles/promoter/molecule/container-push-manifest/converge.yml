@@ -1,0 +1,19 @@
+- name: Download and repush container images to secure registries without multi-arch manifests
+  hosts: all
+  vars:
+    release: master
+    named_label: triple-ci-staging-promoted
+    # full_hash is provided by the staging environment
+    script_root: UNUSED
+    distro_name: centos
+    distro_version: 8
+    containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+    # Source and target registries are provided by staging environment
+    manifest_push: true
+    ppc_manifests: false
+    containers_list:
+      - nova-compute
+      - neutron-server
+
+  tasks:
+    - include_tasks: ../container-push/converge-common.yml

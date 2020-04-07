@@ -1,0 +1,36 @@
+- name: Disable target push, only promote containers in source registry
+  hosts: all
+  tasks:
+    - name: call tasks to manage variables
+      include_tasks: ../provision/manage_variables.yml
+
+    - name: Test promoter container
+      block:
+
+        - name: include stage setup variables
+          include_vars:
+            file: "/tmp/stage-info.yaml"
+            name: stage_info
+
+        - name: sets critical variables
+          set_fact:
+            full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+            source_registry: "{{ stage_info.registries.source }}"
+            target_registries: "{{ stage_info.registries.targets }}"
+
+        - name: Gather information on containers from registry
+          loop: "{{ target_registries | map(attribute='host') | product(stage_info.containers.images) | map('join', '/') | list }}"
+          shell: |
+            docker manifest inspect --insecure {{ image }} 2> /dev/null || true
+          register: pushed_images
+          loop_control:
+            loop_var: image
+
+        - name: Check that no containers were pushed to target registry
+          assert:
+            that: image_manifest.stdout == "" # noqa 602
+            success_msg: "Container {{ image_manifest.image  }} was not pushed to target registry with flag disabled"
+            fail_msg: "Container {{ image_manifest.image  }} found in target registry with push flag disabled"
+          loop: "{{ pushed_images.results }}"
+          loop_control:
+            loop_var: image_manifest
