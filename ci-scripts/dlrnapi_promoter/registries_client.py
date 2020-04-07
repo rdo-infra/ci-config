@@ -69,7 +69,8 @@ class RegistriesClient(object):
             'commit_hash': candidate_hash.commit_hash,
             'distro_hash': candidate_hash.distro_hash,
             'full_hash': candidate_hash.full_hash,
-            'containers_list': containers_list
+            'containers_list': containers_list,
+            'registries': self.config['registries']
         }
         self.extra_vars.update(extra_vars)
         __, extra_vars_path = tempfile.mkstemp(suffix=".yaml")
