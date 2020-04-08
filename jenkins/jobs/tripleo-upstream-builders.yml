@@ -80,12 +80,12 @@
               become_user: root
               tasks:
                 - shell: |
+                    dnf install -y git libffi libffi-devel openssl openssl-devel podman python3-pip python3-venv iptables
+                    dnf group install "Developer Tools"
+                    pip install ansible==2.8.0
+
                     iptables -N openstack-INPUT
                     iptables -I INPUT 1 -j openstack-INPUT
-
-                    yum install -y docker gcc git python-devel python-virtualenv python-setuptools python-docker libffi libffi-devel openssl openssl-devel
-                    easy_install pip
-                    pip install ansible==2.8.0
 
                     # Deliberately clobber decorator system site package with working version
                     pip install -I decorator
