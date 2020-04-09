@@ -1,10 +1,8 @@
 """
 This file contains classes and functionto interact with containers registries
 """
-import datetime
 import logging
 import os
-import re
 import subprocess
 import tempfile
 
@@ -24,10 +22,7 @@ class RegistriesClient(object):
     def __init__(self, config):
         self.config = config
         self.git_root = self.config.git_root
-        self.logfile = os.path.abspath(os.path.join(
-            self.git_root,
-            "../promoter_logs/container-push/%s.log" %
-            datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
+        self.logfile = self.config.log_file
         self.promote_playbook = os.path.join(self.git_root,
                                              'ci-scripts',
                                              'container-push',
@@ -113,35 +108,14 @@ class RegistriesClient(object):
 
         log_header = "Containers promote '{}' to {}:".format(candidate_hash,
                                                              target_label)
-        # Remove color codes from ansible output
-        ansi_escape = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
         try:
             self.log.info('Running: %s', cmd)
-            container_logs = subprocess.check_output(cmd.split(" "),
-                                                     stderr=subprocess.STDOUT)
-            # containers_log needs decoding in python3
+            subprocess.check_output(cmd.split(" "), stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as ex:
             os.unlink(extra_vars_path)
-            self.log.error("%s Failed promotion", log_header)
-            self.log.error("%s Failed promotion"
-                           "start logs -----------------------------",
-                           log_header)
-            for line in ex.output.decode("UTF-8").split("\n"):
-                self.log.error(ansi_escape.sub('', line))
             self.log.exception(ex)
-            self.log.error("%s Failed promotion end"
-                           " logs -----------------------------", log_header)
+            self.log.error("%s Failed promotion", log_header)
             raise PromotionError("Failed to promote overcloud images")
 
         os.unlink(extra_vars_path)
-        if type(container_logs) is not str:
-            container_logs = container_logs.decode()
         self.log.info("%s Successful promotion", log_header)
-        self.log.debug("%s Successful "
-                       "promotion start logs -----------------------------",
-                       log_header)
-        for line in container_logs.split("\n"):
-            self.log.debug(ansi_escape.sub('', line))
-        self.log.debug("%s Successful "
-                       "promotion end logs -----------------------------",
-                       log_header)
