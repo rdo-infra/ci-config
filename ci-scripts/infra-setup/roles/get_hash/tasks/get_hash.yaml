@@ -4,40 +4,21 @@
     path: '{{ workspace }}'
     state: directory
 
-- name: discover dlrnapi url (for legacy jobs only)
+- name: discover dlrnapi url
   set_fact:
-    dlrnapi_url:
-       "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/api-{{ ansible_distribution | lower }}-{{ release }}"
-  when:
-    - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
-    - ansible_distribution_major_version|int < 8
-    - component|default(None) == None
-
-- name: discover dlrnapi url (for centos8/rhel8 jobs)
-  set_fact:
-    dlrnapi_url:
-      "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/api-{{ ansible_distribution | lower }}{{ ansible_distribution_major_version }}-{{ release }}"
-  when:
-    - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
-    - ansible_distribution_major_version|int >= 8
-
-- name: use the upper constraint url (for master)
-  set_fact:
-    dlrnapi_url: "{{ dlrnapi_url }}-uc"
-  when: release == 'master'
+    dlrnapi_url: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ dlrnapi_endpoint[release] }}"
 
 - name: discover dlrn hash base url
   set_fact:
-    dlrn_hash_baseurl: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ ansible_distribution | lower }}{{ ansible_distribution_major_version }}-{{ release }}"
+    dlrn_hash_baseurl: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ dlrn_baseurl[release] }}"
 
 # commit/distro hashes for the combined repo (legacy shared hash for a single repo)
-# rhel/centos7
-- name: discover the hashes url (legacy)
+- name: discover the hashes url ( non-component )
   set_fact:
     commit_url: "{{ dlrn_hash_baseurl }}/{{ promote_source }}/commit.yaml"
   when:
-    - ansible_distribution == 'RedHat' or ansible_distribution_major_version|int < 8
     - component|default(None) == None
+    - release is search("queens|rocky|stein|train")
 
 # commit/distro hashes for component pipeline (an unique commit hash for each component)
 # component (centos8/rhel8)
@@ -45,19 +26,24 @@
   set_fact:
     commit_url: "{{ dlrn_hash_baseurl }}/component/{{ component }}/{{ promote_source }}/commit.yaml"
   when:
-    - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
-    - ansible_distribution_major_version|int >= 8
     - component|default(None) != None
+    - not release is search("queens|rocky|stein|train")
 
-# md5 hash for integration jobs (md5 build id for all components promoted into individual repos)
-# integration (centos8/rhel8)
+# md5 hash for integration jobs ( ussuri+ )
 - name: discover the hashes url (integration)
   set_fact:
     md5_url: "{{ dlrn_hash_baseurl }}/{{ promote_source }}/delorean.repo.md5"
   when:
-    - ansible_distribution == "CentOS" or ansible_distribution == "RedHat"
-    - ansible_distribution_major_version|int >= 8
     - component|default(None) == None
+    - not release is search("queens|rocky|stein|train")
+
+- name: print out dlrn_api url
+  debug:
+    msg: "dlrnapi_url: {{ dlrnapi_url }}"
+
+- name: print out commit_url
+  debug:
+    msg: "commit_url: {{ commit_url }}"
 
 - name: get hashes from commit.yaml (component and legacy jobs)
   import_tasks: get_hashes_from_commit_yaml.yaml
