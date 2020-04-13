@@ -1,0 +1,65 @@
+- name: tripleo-common integration scenario
+  hosts: all
+  vars:
+    release: master
+    # full_hash is provided by the staging environment
+    script_root: UNUSED
+    distro_name: centos
+    distro_version: 8
+    containers_file: "/tmp/parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+    undercloud_registry:
+      name: local-undercloud-registry
+      host: 127.0.0.1:8787
+      username: unused
+      password: unused
+      namespace: "tripleo{{ release }}"
+
+  tasks:
+
+    - name: call tasks to manage variables
+      include_tasks: ../provision/manage_variables.yml
+
+    - name: include stage setup variables # noqa 505
+      include_vars:
+          file: /tmp/stage-info.yaml
+          name: stage_info
+
+    - name: set full_hash
+      set_fact:
+        full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+
+    - debug:
+        var: full_hash
+
+    - name: remove staging files
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /tmp/staging_overcloud_containers.yaml.j2
+        - /tmp/staging-containers-prepare-parameter.yaml
+      tags:
+        - registry_cleanup
+
+    - name: remove local containers
+      docker_image:
+        name: "{{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}"
+        state: absent
+      vars:
+        ansible_python_interpreter: "/home/{{ promoter_user }}/promoter_venv/bin/python3"
+      with_items: "{{ lookup('file', containers_file ).splitlines() }}"
+      tags:
+        - registry_cleanup
+
+    - name: Stop and remove registries
+      docker_container:
+        name: "{{ undercloud_registry['name'] }}"
+        state: absent
+      vars:
+        ansible_python_interpreter: "/home/{{ promoter_user }}/promoter_venv/bin/python3"
+      tags:
+        - registry_cleanup
+
+    - include_tasks: ../container-push/cleanup-common.yml
+      tags:
+        - registry_cleanup
