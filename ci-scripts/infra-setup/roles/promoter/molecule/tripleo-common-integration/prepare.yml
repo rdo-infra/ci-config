@@ -1,0 +1,121 @@
+- name: tripleo-common integration scenario
+  hosts: all
+  vars:
+    release: master
+    named_label: triple-ci-staging-promoted
+    # full_hash is provided by the staging environment
+    script_root: UNUSED
+    distro_name: centos
+    distro_version: 8
+    containers_file: "/tmp/parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+    undercloud_registry:
+      name: local-undercloud-registry
+      host: 127.0.0.1:8787
+      username: unused
+      password: unused
+      namespace: "tripleo{{ release }}"
+    promote_registries:
+      - host: 127.0.0.1:6500
+        name: local-promote-registry-1
+        username: unused
+        password: unused
+        namespace: "tripleo{{ release }}"
+        token: unused
+    manifest_push: true
+    containers_list:
+      - nova-compute
+      - neutron-server
+
+  tasks:
+
+    - include_tasks: ../container-push/prepare-common.yml
+    - include_tasks: ../container-push/converge-common.yml
+
+    - name: Mock undercloud registry -- pull registry image
+      docker_image:
+        name: registry:2
+        source: pull
+      vars:
+        ansible_python_interpreter: "/home/{{ promoter_user }}/promoter_venv/bin/python3"
+
+    - name: Mock undercloud registry -- run registry
+      docker_container:
+        image: registry:2
+        name: "{{ undercloud_registry['name'] }}"
+        restart: true
+        restart_policy: always
+        ports:
+          - "{{ undercloud_registry['host'] }}:5000"
+      vars:
+        ansible_python_interpreter: "/home/{{ promoter_user }}/promoter_venv/bin/python3"
+
+    - name: include stage setup variables # noqa 505
+      include_vars:
+          file: /tmp/stage-info.yaml
+          name: stage_info
+
+    - name: set full_hash
+      set_fact:
+        full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+
+    - debug:
+        var: full_hash
+
+    - debug:
+        var: stage_info.containers.images
+
+    - name: Generate containers template file
+      copy:
+        content: |
+            container_images_template:
+        dest: /tmp/staging_overcloud_containers.yaml.j2
+
+    - name: Populate template file w/ staging containers
+      blockinfile:
+        path: /tmp/staging_overcloud_containers.yaml.j2
+        block: |
+            - imagename: {% raw %}{{ namespace }}/{{ name_prefix }}{% endraw %}{{ item }}{% raw %}{{ name_suffix }}:{{ tag }}
+              image_source: kolla
+              params:
+              - ContainerTripleoclientImage
+              services:
+              - OS::TripleO::Services::TripleoClient
+              {%endraw%}
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
+      with_items: "{{ lookup('file', containers_file ).splitlines() }}"
+
+    - name: generate staging-containers-prepare-parameter.yaml
+      copy:
+        content: |
+            parameter_defaults:
+              ContainerImagePrepare:
+              - push_destination: "{{ undercloud_registry['host'] }}"
+                set:
+                  ceph_alertmanager_image: alertmanager
+                  ceph_alertmanager_namespace: docker.io/prom
+                  ceph_alertmanager_tag: latest
+                  ceph_grafana_image: grafana
+                  ceph_grafana_namespace: docker.io/grafana
+                  ceph_grafana_tag: latest
+                  ceph_image: daemon
+                  ceph_namespace: docker.io/ceph
+                  ceph_node_exporter_image: node-exporter
+                  ceph_node_exporter_namespace: docker.io/prom
+                  ceph_node_exporter_tag: latest
+                  ceph_prometheus_image: prometheus
+                  ceph_prometheus_namespace: docker.io/prom
+                  ceph_prometheus_tag: latest
+                  ceph_tag: v4.0.1-stable-4.0-nautilus-centos-7-x86_64
+                  name_prefix: "{{ distro_name }}-binary-"
+                  name_suffix: ''
+                  namespace: "{{ promote_registries[0]['host'] }}/{{ promote_registries[0]['namespace'] }}"
+                  neutron_driver: ovn
+                  rhel_containers: false
+                  tag: "{{ full_hash }}"
+                tag_from_label: rdo_version
+        dest: "/tmp/staging-containers-prepare-parameter.yaml"
+
+    - name: copy staging_overcloud_containers.yaml.j2
+      copy:
+        src: "/tmp/staging_overcloud_containers.yaml.j2"
+        dest: "/home/{{ promoter_user }}/promoter_venv/share/tripleo-common/container-images/overcloud_containers.yaml.j2"
