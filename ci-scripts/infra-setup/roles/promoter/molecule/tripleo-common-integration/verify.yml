@@ -1,0 +1,35 @@
+- name: tripleo-common integration scenario
+  hosts: all
+  vars:
+    release: master
+    # full_hash is provided by the staging environment
+    distro_name: centos
+    distro_version: 8
+    containers_file: "../container-push/parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+    undercloud_registry:
+      name: local-undercloud-registry
+      host: 127.0.0.1:8787
+      username: unused
+      password: unused
+      namespace: "tripleo{{ release }}"
+
+  tasks:
+    # check if containers were pushed to undercloud_registry
+    - name: emulate deploy -- check containers in undercloud_registry  # noqa 303
+      shell: |
+        curl --verbose -X GET {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}/tags/list
+      with_items: "{{ lookup('file', containers_file ).splitlines() }}"
+
+    # check manifests in undercloud_registry
+    - name: emulate deploy -- inspect manifests in undercloud_registry
+      shell: |
+        docker manifest inspect --insecure \
+        {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}
+      with_items: "{{ lookup('file', containers_file ).splitlines() }}"
+
+    # pull staging containers from undercloud_registry
+    - name: emulate deploy -- pull staging containers from undercloud_registry
+      docker_image:
+        name: "{{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}"
+        source: pull
+      with_items: "{{ lookup('file', containers_file ).splitlines() }}"
