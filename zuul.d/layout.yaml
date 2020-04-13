@@ -63,13 +63,12 @@
               - ^playbooks/molecule-pre.yml
               - ^requirements.txt
               - ^test-requirements.txt
-        - molecule-tripleo-common-delegated-centos-7: &molecule-tripleo-common
+        - molecule-tripleo-common-integration-delegated-centos-8: &molecule-tripleo-common-integration
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/tripleo-common-integration.*
-              - ^playbooks/molecule-delegated-pre.yml
-              - ^playbooks/molecule-delegated.yml
+              - ^ci-scripts/infra-setup/roles/promoter/molecule/tripleo-common-integration/.*
+              - ^playbooks/molecule-pre.yml
               - ^requirements.txt
               - ^test-requirements.txt
         - tox-jjb
@@ -116,8 +115,8 @@
             <<: *molecule-promote-images
         - molecule-container-push-delegated-centos-8:
             <<: *molecule-container-push
-        - molecule-tripleo-common-delegated-centos-7:
-            <<: *molecule-tripleo-common
+        - molecule-tripleo-common-integration-delegated-centos-8:
+            <<: *molecule-tripleo-common-integration
         - tripleo-ci-promotion-staging-single-pipeline-centos-7:
             files: *integration
         - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
