@@ -1,0 +1,52 @@
+- name: tripleo-common integration scenario
+  hosts: all
+  vars:
+    release: master
+    # full_hash is provided by the staging environment
+    distro_name: centos
+    distro_version: 8
+    containers_file: "/tmp/parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+    undercloud_registry:
+      name: local-undercloud-registry
+      host: 127.0.0.1:8787
+      username: unused
+      password: unused
+      namespace: "tripleo{{ release }}"
+
+  tasks:
+    - name: call tasks to manage variables
+      include_tasks: ../provision/manage_variables.yml
+
+    - name: include stage setup variables # noqa 505
+      include_vars:
+          file: /tmp/stage-info.yaml
+          name: stage_info
+
+    - name: set full_hash
+      set_fact:
+        full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+
+    - debug:
+        var: full_hash
+
+    # check if containers were pushed to undercloud_registry
+    - name: emulate deploy -- check containers in undercloud_registry  # noqa 303 301
+      shell: |
+        curl --verbose -X GET {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}/tags/list
+      with_items: "{{ lookup('file', containers_file ).splitlines() }}"
+
+    # check manifests in undercloud_registry
+    - name: emulate deploy -- inspect manifests in undercloud_registry # noqa 301
+      shell: |
+        docker manifest inspect --insecure \
+        {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}
+      with_items: "{{ lookup('file', containers_file ).splitlines() }}"
+
+    # pull staging containers from undercloud_registry
+    - name: emulate deploy -- pull staging containers from undercloud_registry
+      docker_image:
+        name: "{{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}"
+        source: pull
+      vars:
+        ansible_python_interpreter: "/home/{{ promoter_user }}/promoter_venv/bin/python3"
+      with_items: "{{ lookup('file', containers_file ).splitlines() }}"
