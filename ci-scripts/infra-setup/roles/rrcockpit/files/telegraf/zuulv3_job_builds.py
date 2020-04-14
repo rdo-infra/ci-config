@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 import argparse
 from datetime import datetime, timedelta
@@ -24,7 +24,7 @@ OOO_PROJECTS = [
     'openstack/tripleo-quickstart', 'openstack/tripleo-heat-templates',
     'openstack/tripleo-ansible', 'openstack/tripleo-validations',
     'rdo-infra/ansible-role-tripleo-ci-reproducer',
-    'containers/libpod', 'ceph/ceph-ansible', 'openstack/heat'
+    'containers/libpod', 'ceph/ceph-ansible'
 ]
 
 INTERNAL_OOO_PROJECTS = [
