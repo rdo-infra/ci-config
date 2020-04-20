@@ -162,7 +162,7 @@ class Promoter(object):
         to promote
         :param target_label: the label to which a winning hash should be
         promoted
-        :return: None
+        :return: A tuple containing the hash promoted to a label
         """
         promoted_pair = ()
         selected_candidates = self.select_candidates(candidate_label,
@@ -245,5 +245,9 @@ class Promoter(object):
 
         self.log.info("Summary: Promoted {} hashes this round"
                       "".format(len(promoted_pairs)))
+        for candidate_hash, target_label in promoted_pairs:
+            hash_info = self.dlrn_client.get_civotes_info(candidate_hash)
+            self.log.info("Summary: Promoted %s to %s. See %s", candidate_hash,
+                          target_label, hash_info)
         self.log.info("------- -------- Promoter terminated normally")
         return promoted_pairs

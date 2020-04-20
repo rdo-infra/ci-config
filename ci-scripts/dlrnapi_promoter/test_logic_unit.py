@@ -378,7 +378,8 @@ class TestPromoteAll(ConfigSetup):
     def test_promote_all_success(self, mock_promote_label_to_label,
                                  mock_fetch_named_hashes,
                                  mock_log_info):
-        mock_promote_label_to_label.return_value = ('label', 'hash')
+        candidate_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b')
+        mock_promote_label_to_label.return_value = ('label', candidate_hash)
         promoted_pairs = self.promoter.promote_all()
         mock_fetch_named_hashes.assert_has_calls([
             mock.call(store=True)
@@ -388,6 +389,8 @@ class TestPromoteAll(ConfigSetup):
             mock.call("Candidate label '%s': Attempting promotion to '%s'",
                       'tripleo-ci-testing', 'current-tripleo'),
             mock.call("Summary: Promoted 1 hashes this round"),
+            mock.call("Summary: Promoted %s to %s. See %s", 'label',
+                      candidate_hash, mock.ANY),
             mock.call('------- -------- Promoter terminated normally')
         ])
         mock_promote_label_to_label.assert_has_calls([
