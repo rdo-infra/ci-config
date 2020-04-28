@@ -2,19 +2,36 @@
 dlrnapi_protocol: "https"
 dlrnapi_host: "trunk.rdoproject.org"
 dlrnapi_endpoint:
-  master: api-centos8-master-uc
-  ussuri: api-centos8-ussuri
-  train: api-centos-train
-  stein: api-centos-stein
-  rocky: api-centos-rocky
-  queens: api-centos-queens
-  rhos-17: api-rhel8-osp17
+  centos8:
+    master: api-centos8-master-uc
+    train: api-centos8-train
+  centos7:
+    train: api-centos8-train
+    stein: api-centos-stein
+    rocky: api-centos-rocky
+    queens: api-centos-queens
+  rhel8:
+    rhos-17: api-rhel8-osp17
 
 dlrn_baseurl:
-  master: centos8-master
-  ussuri: centos8-ussuri
-  train: centos7-train
-  stein: centos7-stein
-  rocky: centos7-rocky
-  queens: centos7-queens
-  rhos-17: rhel8-osp17
+  centos8:
+    master: centos8-master
+    train: centos8-train
+  centos7:
+    train: centos7-train
+    stein: centos7-stein
+    rocky: centos7-rocky
+    queens: centos7-queens
+  rhel8:
+    rhos-17: rhel8-osp17
+
+dlrnapi_url: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ dlrnapi_endpoint[distro][release] }}"
+dlrn_hash_baseurl: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ dlrn_baseurl[distro][release] }}"
+distro: >
+  {% if release in ['train', 'stein', 'rocky', 'queens']-%}
+  "centos7"
+  {%- elif release in ['rhos-17'] -%}
+  "rhel8"
+  {%- else -%}
+  "centos8"
+  {%- endif -%}
