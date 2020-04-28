@@ -6,8 +6,10 @@
 
 - name: discover dlrnapi url ( upstream )
   set_fact:
-    dlrnapi_url: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ dlrnapi_endpoint[release] }}"
-  when: osp_release is not defined
+    dlrnapi_url: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ dlrnapi_endpoint[distro][release] }}"
+  when:
+    - osp_release is not defined
+    - distro is defined
 
 - name: discover dlrnapi url ( osp )
   set_fact:
