@@ -4,26 +4,6 @@
     path: '{{ workspace }}'
     state: directory
 
-- name: discover dlrnapi url ( upstream )
-  set_fact:
-    dlrnapi_url: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ dlrnapi_endpoint[release] }}"
-  when: osp_release is not defined
-
-- name: discover dlrnapi url ( osp )
-  set_fact:
-    dlrnapi_url: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ dlrnapi_endpoint[osp_release] }}"
-  when: osp_release is defined
-
-- name: discover dlrn hash base url ( upstream )
-  set_fact:
-    dlrn_hash_baseurl: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ dlrn_baseurl[release] }}"
-  when: osp_release is not defined
-
-- name: discover dlrn hash base url ( osp )
-  set_fact:
-    dlrn_hash_baseurl: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ dlrn_baseurl[osp_release] }}"
-  when: osp_release is defined
-
 # commit/distro hashes for the combined repo (legacy shared hash for a single repo)
 - name: discover the hashes url ( non-component )
   set_fact:
@@ -40,6 +20,14 @@
     - component|default(None) != None
     - not release is search("queens|rocky|stein|train")
 
+- name: print out dlrn_api url
+  debug:
+    msg: "dlrnapi_url: {{ dlrnapi_url }}"
+
+- name: print out dlrn_hash_baseurl
+  debug:
+    msg: "dlrn_hash_baseurl: {{ dlrn_hash_baseurl }}"
+
 # md5 hash for integration jobs ( ussuri+ )
 - name: discover the hashes url (integration)
   set_fact:
@@ -47,10 +35,6 @@
   when:
     - component|default(None) == None
     - not release is search("queens|rocky|stein|train")
-
-- name: print out dlrn_api url
-  debug:
-    msg: "dlrnapi_url: {{ dlrnapi_url }}"
 
 - name: print out commit_url
   debug:
