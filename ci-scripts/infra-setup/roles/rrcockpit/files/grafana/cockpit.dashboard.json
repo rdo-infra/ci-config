@@ -1108,6 +1108,209 @@
             },
             {
                 "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":9,
+                    "w":4,
+                    "x":10,
+                    "y":11
+                },
+                "id":447,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"7d",
+                "title":"Upstream Periodic CI stats",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
@@ -1116,8 +1319,8 @@
                 "fill":1,
                 "gridPos":{
                     "h":9,
-                    "w":14,
-                    "x":10,
+                    "w":10,
+                    "x":14,
                     "y":11
                 },
                 "id":231,
@@ -1283,6 +1486,358 @@
                 "type":"text"
             },
             {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"Running list of *upstream* periodic jobs",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":9,
+                    "w":24,
+                    "x":0,
+                    "y":22
+                },
+                "id":391,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Reason",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"sova_reason",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "sova_reason"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"periodic"
+                            }
+                        ]
+                    }
+                ],
+                "title":"Upstream periodic jobs",
+                "transform":"table",
+                "type":"table"
+            },
+            {
                 "aliasColors":{},
                 "breakPoint":"50%",
                 "cacheTimeout":null,
@@ -1299,7 +1854,1022 @@
                     "h":6,
                     "w":6,
                     "x":0,
-                    "y":22
+                    "y":31
+                },
+                "id":448,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND  \"branch\"='master' AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic'  AND  \"branch\"='master' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND  \"branch\"='master'  AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"7d",
+                "title":"Upstream Periodic CI stats",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":5,
+                    "x":6,
+                    "y":31
+                },
+                "id":449,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-train.*/ AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-train.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-train.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"7d",
+                "title":"Upstream Train Periodic CI stats",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":5,
+                    "x":11,
+                    "y":31
+                },
+                "id":450,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-stein.*/ AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-stein.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-stein.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"7d",
+                "title":"Upstream Stein Periodic CI stats",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":4,
+                    "x":16,
+                    "y":31
+                },
+                "id":451,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-rocky.*/ AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-rocky.*/ AND  \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-rocky.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"7d",
+                "title":"Upstream Rocky Periodic CI stats",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":4,
+                    "x":20,
+                    "y":31
+                },
+                "id":452,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-queens.*/ AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic'  AND \"job_name\" =~ /tripleo-ci.*-queens.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic'  AND \"job_name\" =~ /tripleo-ci.*-queens.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"7d",
+                "title":"Upstream Queens Periodic CI stats",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":6,
+                    "x":0,
+                    "y":37
                 },
                 "id":427,
                 "interval":null,
@@ -1502,7 +3072,7 @@
                     "h":6,
                     "w":5,
                     "x":6,
-                    "y":22
+                    "y":37
                 },
                 "id":428,
                 "interval":null,
@@ -1706,7 +3276,7 @@
                     "h":6,
                     "w":5,
                     "x":11,
-                    "y":22
+                    "y":37
                 },
                 "id":429,
                 "interval":null,
@@ -1909,7 +3479,7 @@
                     "h":6,
                     "w":4,
                     "x":16,
-                    "y":22
+                    "y":37
                 },
                 "id":430,
                 "interval":null,
@@ -2112,7 +3682,7 @@
                     "h":6,
                     "w":4,
                     "x":20,
-                    "y":22
+                    "y":37
                 },
                 "id":431,
                 "interval":null,
@@ -2315,7 +3885,7 @@
                     "h":6,
                     "w":6,
                     "x":0,
-                    "y":28
+                    "y":43
                 },
                 "id":432,
                 "interval":null,
@@ -2518,7 +4088,7 @@
                     "h":6,
                     "w":5,
                     "x":6,
-                    "y":28
+                    "y":43
                 },
                 "id":433,
                 "interval":null,
@@ -2721,7 +4291,7 @@
                     "h":6,
                     "w":5,
                     "x":11,
-                    "y":28
+                    "y":43
                 },
                 "id":434,
                 "interval":null,
@@ -2924,7 +4494,7 @@
                     "h":6,
                     "w":4,
                     "x":16,
-                    "y":28
+                    "y":43
                 },
                 "id":435,
                 "interval":null,
@@ -3127,7 +4697,7 @@
                     "h":6,
                     "w":4,
                     "x":20,
-                    "y":28
+                    "y":43
                 },
                 "id":436,
                 "interval":null,
@@ -3330,7 +4900,7 @@
                     "h":7,
                     "w":6,
                     "x":0,
-                    "y":34
+                    "y":49
                 },
                 "id":441,
                 "interval":null,
@@ -3527,7 +5097,7 @@
                     "h":7,
                     "w":5,
                     "x":6,
-                    "y":34
+                    "y":49
                 },
                 "id":442,
                 "interval":null,
@@ -3724,7 +5294,7 @@
                     "h":7,
                     "w":5,
                     "x":11,
-                    "y":34
+                    "y":49
                 },
                 "id":444,
                 "interval":null,
@@ -3921,7 +5491,7 @@
                     "h":7,
                     "w":4,
                     "x":16,
-                    "y":34
+                    "y":49
                 },
                 "id":445,
                 "interval":null,
@@ -4118,7 +5688,7 @@
                     "h":7,
                     "w":4,
                     "x":20,
-                    "y":34
+                    "y":49
                 },
                 "id":446,
                 "interval":null,
@@ -4306,7 +5876,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":41
+                    "y":56
                 },
                 "id":2,
                 "links":[],
@@ -4375,7 +5945,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":48
+                    "y":63
                 },
                 "id":422,
                 "links":[],
@@ -4734,7 +6304,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":58
+                    "y":73
                 },
                 "id":63,
                 "links":[],
@@ -5093,7 +6663,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":68
+                    "y":83
                 },
                 "id":421,
                 "links":[],
@@ -5452,7 +7022,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":78
+                    "y":93
                 },
                 "id":423,
                 "links":[],
@@ -5811,7 +7381,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":88
+                    "y":103
                 },
                 "id":424,
                 "links":[],
@@ -6170,7 +7740,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":98
+                    "y":113
                 },
                 "id":425,
                 "links":[],
@@ -6529,7 +8099,7 @@
                     "h":11,
                     "w":24,
                     "x":0,
-                    "y":108
+                    "y":123
                 },
                 "id":426,
                 "links":[],
@@ -6899,7 +8469,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":119
+                    "y":134
                 },
                 "id":232,
                 "legend":{
@@ -7194,7 +8764,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":127
+                    "y":142
                 },
                 "id":370,
                 "panels":[],
@@ -7210,7 +8780,7 @@
                     "h":9,
                     "w":24,
                     "x":0,
-                    "y":128
+                    "y":143
                 },
                 "id":386,
                 "links":[
@@ -7589,7 +9159,7 @@
                     "h":9,
                     "w":24,
                     "x":0,
-                    "y":137
+                    "y":152
                 },
                 "id":392,
                 "links":[],
@@ -7935,364 +9505,12 @@
             {
                 "columns":[],
                 "datasource":"telegraf",
-                "description":"Running list of *upstream* periodic jobs",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":5,
                     "w":24,
                     "x":0,
-                    "y":146
-                },
-                "id":391,
-                "links":[],
-                "pageSize":null,
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":0,
-                    "desc":true
-                },
-                "styles":[
-                    {
-                        "alias":"Time",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"Branch",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"branch",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Job",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_3}",
-                        "mappingType":1,
-                        "pattern":"job_name",
-                        "sanitize":true,
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Pipeline",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"pipeline",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Duration",
-                        "colorMode":"cell",
-                        "colors":[
-                            "#2f575e",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":1,
-                        "mappingType":1,
-                        "pattern":"duration",
-                        "thresholds":[
-                            "10000",
-                            "10600"
-                        ],
-                        "type":"number",
-                        "unit":"dtdurations"
-                    },
-                    {
-                        "alias":"Passed",
-                        "colorMode":"row",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "#e24d42",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"result_num",
-                        "rangeMaps":[
-                            {
-                                "from":"",
-                                "text":"",
-                                "to":""
-                            }
-                        ],
-                        "thresholds":[
-                            "-1",
-                            "1"
-                        ],
-                        "type":"string",
-                        "unit":"short",
-                        "valueMaps":[
-                            {
-                                "text":"YES",
-                                "value":"1"
-                            },
-                            {
-                                "text":"NO",
-                                "value":"0"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"Log URL",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"log_url",
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Patch",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(50, 172, 45, 0.97)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Gerrit",
-                        "linkUrl":"https://review.opendev.org/${__cell}",
-                        "mappingType":1,
-                        "pattern":"change",
-                        "thresholds":[
-                            ""
-                        ],
-                        "type":"string",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
-                        "alias":"Job",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "mappingType":1,
-                        "pattern":"log_link",
-                        "sanitize":true,
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"passed",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Result",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"result",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Reason",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"sova_reason",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "decimals":2,
-                        "pattern":"/.*/",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    }
-                ],
-                "targets":[
-                    {
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "refId":"A",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "branch"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "log_link"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "duration"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "result"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "sova_reason"
-                                    ],
-                                    "type":"field"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"pipeline",
-                                "operator":"=",
-                                "value":"periodic"
-                            }
-                        ]
-                    }
-                ],
-                "title":"Upstream periodic jobs",
-                "transform":"table",
-                "type":"table"
-            },
-            {
-                "columns":[],
-                "datasource":"telegraf",
-                "fontSize":"100%",
-                "gridPos":{
-                    "h":5,
-                    "w":24,
-                    "x":0,
-                    "y":151
+                    "y":161
                 },
                 "id":381,
                 "links":[],
@@ -8641,7 +9859,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":156
+                    "y":166
                 },
                 "id":140,
                 "panels":[],
@@ -8657,7 +9875,7 @@
                     "h":10,
                     "w":12,
                     "x":0,
-                    "y":157
+                    "y":167
                 },
                 "id":242,
                 "links":[
@@ -8793,7 +10011,7 @@
                     "h":10,
                     "w":12,
                     "x":12,
-                    "y":157
+                    "y":167
                 },
                 "id":155,
                 "links":[
@@ -8930,7 +10148,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":167
+                    "y":177
                 },
                 "id":345,
                 "links":[
@@ -9066,7 +10284,7 @@
                     "h":8,
                     "w":12,
                     "x":12,
-                    "y":167
+                    "y":177
                 },
                 "id":322,
                 "links":[
@@ -9201,7 +10419,7 @@
                     "h":7,
                     "w":4,
                     "x":0,
-                    "y":175
+                    "y":185
                 },
                 "id":351,
                 "links":[
@@ -9286,7 +10504,7 @@
                     "h":7,
                     "w":4,
                     "x":4,
-                    "y":175
+                    "y":185
                 },
                 "id":356,
                 "links":[
@@ -9371,7 +10589,7 @@
                     "h":7,
                     "w":4,
                     "x":8,
-                    "y":175
+                    "y":185
                 },
                 "id":357,
                 "links":[
@@ -9457,7 +10675,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":175
+                    "y":185
                 },
                 "id":358,
                 "links":[
@@ -9590,7 +10808,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":182
+                    "y":192
                 },
                 "id":340,
                 "panels":[],
@@ -9605,7 +10823,7 @@
                     "h":11,
                     "w":5,
                     "x":0,
-                    "y":183
+                    "y":193
                 },
                 "id":160,
                 "limit":"100",
@@ -9632,7 +10850,7 @@
                     "h":11,
                     "w":5,
                     "x":5,
-                    "y":183
+                    "y":193
                 },
                 "id":159,
                 "limit":"100",
@@ -9666,7 +10884,7 @@
                     "h":11,
                     "w":5,
                     "x":10,
-                    "y":183
+                    "y":193
                 },
                 "id":165,
                 "limit":"100",
@@ -9699,7 +10917,7 @@
                     "h":11,
                     "w":4,
                     "x":15,
-                    "y":183
+                    "y":193
                 },
                 "id":161,
                 "limit":"100",
@@ -9726,7 +10944,7 @@
                     "h":3,
                     "w":5,
                     "x":19,
-                    "y":183
+                    "y":193
                 },
                 "id":162,
                 "limit":"100",
@@ -9753,7 +10971,7 @@
                     "h":3,
                     "w":5,
                     "x":19,
-                    "y":186
+                    "y":196
                 },
                 "id":192,
                 "limit":10,
@@ -9780,7 +10998,7 @@
                     "h":5,
                     "w":5,
                     "x":19,
-                    "y":189
+                    "y":199
                 },
                 "id":198,
                 "limit":10,
@@ -9806,7 +11024,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":194
+                    "y":204
                 },
                 "id":408,
                 "links":[],
@@ -10027,7 +11245,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":202
+                    "y":212
                 },
                 "id":412,
                 "links":[],
@@ -10247,7 +11465,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":210
+                    "y":220
                 },
                 "id":411,
                 "links":[],
@@ -10467,7 +11685,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":218
+                    "y":228
                 },
                 "id":410,
                 "links":[],
@@ -10687,7 +11905,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":226
+                    "y":236
                 },
                 "id":409,
                 "links":[],
@@ -10904,7 +12122,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":234
+                    "y":244
                 },
                 "id":51,
                 "panels":[],
@@ -10922,7 +12140,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":235
+                    "y":245
                 },
                 "hideTimeOverride":true,
                 "id":157,
@@ -11153,7 +12371,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":242
+                    "y":252
                 },
                 "hideTimeOverride":true,
                 "id":307,
@@ -11385,7 +12603,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":249
+                    "y":259
                 },
                 "id":317,
                 "legend":{
@@ -11636,7 +12854,7 @@
                     "h":6,
                     "w":4,
                     "x":0,
-                    "y":255
+                    "y":265
                 },
                 "id":71,
                 "legend":{
@@ -11808,7 +13026,7 @@
                     "h":6,
                     "w":4,
                     "x":4,
-                    "y":255
+                    "y":265
                 },
                 "id":72,
                 "legend":{
@@ -11975,7 +13193,7 @@
                     "h":6,
                     "w":16,
                     "x":8,
-                    "y":255
+                    "y":265
                 },
                 "id":55,
                 "legend":{
@@ -12193,7 +13411,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":261
+                    "y":271
                 },
                 "id":79,
                 "legend":{
@@ -12391,7 +13609,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":261
+                    "y":271
                 },
                 "id":80,
                 "legend":{
@@ -12578,7 +13796,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":267
+                    "y":277
                 },
                 "id":398,
                 "legend":{
@@ -12750,7 +13968,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":267
+                    "y":277
                 },
                 "id":399,
                 "legend":{
@@ -12873,7 +14091,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":273
+                    "y":283
                 },
                 "id":82,
                 "panels":[],
@@ -12930,7 +14148,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":274
+                    "y":284
                 },
                 "hideTimeOverride":false,
                 "id":110,
@@ -13119,7 +14337,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":274
+                    "y":284
                 },
                 "hideTimeOverride":false,
                 "id":116,
@@ -13307,7 +14525,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":274
+                    "y":284
                 },
                 "id":130,
                 "legend":{
@@ -13444,7 +14662,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":278
+                    "y":288
                 },
                 "id":123,
                 "legend":{
@@ -13599,7 +14817,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":278
+                    "y":288
                 },
                 "id":125,
                 "legend":{
@@ -13789,7 +15007,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":278
+                    "y":288
                 },
                 "id":133,
                 "legend":{
@@ -13958,7 +15176,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":282
+                    "y":292
                 },
                 "hideTimeOverride":false,
                 "id":263,
@@ -14140,7 +15358,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":282
+                    "y":292
                 },
                 "id":273,
                 "legend":{
@@ -14320,7 +15538,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":282
+                    "y":292
                 },
                 "id":274,
                 "legend":{
@@ -14488,7 +15706,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":286
+                    "y":296
                 },
                 "hideTimeOverride":false,
                 "id":213,
@@ -14671,7 +15889,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":286
+                    "y":296
                 },
                 "id":214,
                 "legend":{
@@ -14852,7 +16070,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":286
+                    "y":296
                 },
                 "id":216,
                 "legend":{
@@ -15024,7 +16242,7 @@
                     "h":4,
                     "w":8,
                     "x":0,
-                    "y":290
+                    "y":300
                 },
                 "hideTimeOverride":false,
                 "id":117,
@@ -15207,7 +16425,7 @@
                     "h":4,
                     "w":8,
                     "x":8,
-                    "y":290
+                    "y":300
                 },
                 "id":118,
                 "legend":{
@@ -15392,7 +16610,7 @@
                     "h":4,
                     "w":8,
                     "x":16,
-                    "y":290
+                    "y":300
                 },
                 "id":131,
                 "legend":{
@@ -15520,7 +16738,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":294
+                    "y":304
                 },
                 "id":298,
                 "panels":[],
@@ -15571,7 +16789,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":295
+                    "y":305
                 },
                 "hideTimeOverride":false,
                 "id":284,
@@ -15752,7 +16970,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":295
+                    "y":305
                 },
                 "id":286,
                 "legend":{
@@ -15886,7 +17104,7 @@
                     "h":4,
                     "w":12,
                     "x":0,
-                    "y":299
+                    "y":309
                 },
                 "hideTimeOverride":false,
                 "id":404,
@@ -16067,7 +17285,7 @@
                     "h":4,
                     "w":12,
                     "x":12,
-                    "y":299
+                    "y":309
                 },
                 "id":406,
                 "legend":{
@@ -16195,7 +17413,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":303
+                    "y":313
                 },
                 "id":414,
                 "panels":[],
@@ -16210,7 +17428,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":304
+                    "y":314
                 },
                 "id":416,
                 "links":[],
@@ -16348,7 +17566,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":304
+                    "y":314
                 },
                 "id":418,
                 "links":[],
@@ -16486,7 +17704,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":310
+                    "y":320
                 },
                 "id":417,
                 "links":[],
@@ -16624,7 +17842,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":310
+                    "y":320
                 },
                 "id":420,
                 "links":[],
@@ -16762,7 +17980,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":316
+                    "y":326
                 },
                 "id":419,
                 "links":[],
@@ -16898,7 +18116,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":322
+                    "y":332
                 },
                 "id":4,
                 "panels":[],
@@ -16916,7 +18134,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":323
+                    "y":333
                 },
                 "id":209,
                 "legend":{
@@ -17034,7 +18252,7 @@
                     "h":9,
                     "w":12,
                     "x":0,
-                    "y":331
+                    "y":341
                 },
                 "hideTimeOverride":true,
                 "id":196,
@@ -17170,7 +18388,7 @@
                     "h":9,
                     "w":12,
                     "x":12,
-                    "y":331
+                    "y":341
                 },
                 "hideTimeOverride":true,
                 "id":194,
@@ -17272,7 +18490,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":340
+                    "y":350
                 },
                 "id":173,
                 "panels":[],
@@ -17290,7 +18508,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":341
+                    "y":351
                 },
                 "id":175,
                 "legend":{
@@ -17465,7 +18683,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":341
+                    "y":351
                 },
                 "id":177,
                 "legend":{
@@ -17728,7 +18946,7 @@
                     "h":7,
                     "w":12,
                     "x":0,
-                    "y":347
+                    "y":357
                 },
                 "id":179,
                 "legend":{
@@ -18089,7 +19307,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":347
+                    "y":357
                 },
                 "id":181,
                 "legend":{
@@ -18250,7 +19468,7 @@
                     "h":6,
                     "w":7,
                     "x":0,
-                    "y":354
+                    "y":364
                 },
                 "id":183,
                 "legend":{
@@ -18365,7 +19583,7 @@
                     "h":6,
                     "w":9,
                     "x":7,
-                    "y":354
+                    "y":364
                 },
                 "id":185,
                 "legend":{
@@ -18480,7 +19698,7 @@
                     "h":6,
                     "w":8,
                     "x":16,
-                    "y":354
+                    "y":364
                 },
                 "id":187,
                 "legend":{
@@ -18635,7 +19853,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":360
+                    "y":370
                 },
                 "id":364,
                 "legend":{
@@ -18867,7 +20085,7 @@
             ]
         },
         "time":{
-            "from":"now-2d",
+            "from":"now-7d",
             "to":"now"
         },
         "timepicker":{
