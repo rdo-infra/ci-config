@@ -17,18 +17,18 @@
       package:
         name: epel-release
         state: absent
-      when: not epel_file.stat.exists
+      when: epel_file.stat.exists
 
     - name:  install epel
       package:
         name: epel-release
         state: present
-      when: not epel_file.stat.exists
 
     - name: ensure epel is enabled
       dnf:
         enablerepo: epel
         state: present
+      when: ansible_distribution_version|int >= 8
 
     - name: Install influxdb repo to get telegraf
       yum_repository:
@@ -41,11 +41,15 @@
 
 # This needs a different treatement as we can't install the latest version and we don't want to deal with
 # dependencies manually
-- name: Install docker packages
+- name: Install docker packages (dnf)
   become: true
   command: dnf install --nobest -y docker-ce docker-ce-cli
-  register: result
-  changed_when: "'Complete!' in result.stdout"
+  when: ansible_distribution_version|int >= 8
+
+- name: Install docker packages (yum)
+  become: true
+  command: yum install --nobest -y docker-ce docker-ce-cli
+  when: ansible_distribution_version|int <= 7
 
 - name: Install distro Packages
   become: true
