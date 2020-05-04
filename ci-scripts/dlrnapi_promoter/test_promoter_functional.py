@@ -45,7 +45,7 @@ def staged_env(request):
     # correctly instead of passing  configuration directly
     config_file = "stage-config-secure.yaml"
     promoter_config_file = \
-        "staging/CentOS-7/master.ini"
+        "staging/CentOS-7/train.ini"
 
     test_case = "all_integration"
 
@@ -84,9 +84,10 @@ def staged_env(request):
         promoter_config_file = \
             "staging/CentOS-8/master.ini"
         setup_cmd_line += " --db-data integration-pipeline.yaml"
-        setup_cmd_line += (" --promoter-config-file {}"
-                           "".format(promoter_config_file))
         teardown_cmd_line += " --db-data integration-pipeline.yaml"
+
+    setup_cmd_line += (" --promoter-config-file {}"
+                       "".format(promoter_config_file))
 
     log.info("Running cmd line: {}".format(setup_cmd_line))
 
