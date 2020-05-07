@@ -15,12 +15,12 @@ if [[ -n "${properties}" ]]; then
 fi
 
 # Ansible config
-CLOUD=${CLOUD:-rdo-cloud}
-NETWORK=${NETWORK:-private}
+CLOUD=${CLOUD:-vexxhost}
+NETWORK=${NETWORK:-private-network}
 NAME="${JOB_NAME_SIMPLIFIED}-${BUILD_NUMBER}"
 IMAGE=${IMAGE:-template-rdo-centos-7}
 TIMEOUT=${TIMEOUT:-120}
-FLAVOR=${FLAVOR:-rdo.m1.nodepool}
+FLAVOR=${FLAVOR:-nodepool-infra}
 VM_INFO="${WORKSPACE}/vminfo.json"
 ANSIBLE_PYTHON_INTERPRETER=${ANSIBLE_PYTHON_INTERPRETER:-/usr/bin/python}
 
