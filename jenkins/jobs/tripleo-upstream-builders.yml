@@ -91,6 +91,9 @@
                     # Deliberately clobber decorator system site package with working version
                     pip3 install -I decorator
 
+                    # Remove all container registries except for docker.io, which serves power containers
+                    sed -i "s/.*registry.centos.org.*/registries = ['docker.io']/g" /etc/containers/registries.conf
+
             - name: 'Clone OpenStack git dependencies'
               hosts: openstack_nodes
               tasks:
