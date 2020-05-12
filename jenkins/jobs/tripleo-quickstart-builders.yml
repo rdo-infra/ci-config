@@ -8,7 +8,13 @@
                 fi
               done
 
-              bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh
+              if [[ "$RDO_VERSION" == *"centos8"* ]]; then
+                  export CENTOS_RELEASE=8
+              else
+                  export CENTOS_RELEASE=7
+              fi
+
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh -r $CENTOS_RELEASE
               export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
               echo $VIRTHOST
               export OPT_ENVIRONMENT=$WORKSPACE/tripleo-quickstart/config/environments/ci_centos_libvirt.yml
