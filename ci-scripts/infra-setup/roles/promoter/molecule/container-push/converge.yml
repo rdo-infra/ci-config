@@ -1,6 +1,8 @@
 ---
 - name: Set up docker experimental commands (common to all tests)
   hosts: all
+  vars:
+    ansible_user: "{{ ansible_user |  default(lookup('pipe', 'whoami')) }}"
   tasks:
     - name: Create user config dir
       file:

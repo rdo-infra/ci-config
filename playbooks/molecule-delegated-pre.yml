@@ -28,6 +28,15 @@
       - python3-devel
       - libselinux-python3
   tasks:
+
+    - name: Add tester hostname alias for localhost
+      become: yes
+      lineinfile:
+        dest: /etc/hosts
+        regexp: "^127.0.0.1 tester$"
+        line: "127.0.0.1 tester"
+        state: present
+
     - name: Packages
       become: true
       block:
