@@ -12,12 +12,13 @@ driver:
       -o VerifyHostKeyDNS=no
       -o ForwardX11=no
       -o ForwardAgent=no
-      {instance}
+      {tester}
     ansible_connection_options:
-      ansible_connection: local
+      ansible_connection: ssh
 
 platforms:
-  - name: instance
+  - name: tester
+    hostname: tester
 
 provisioner:
   name: ansible
@@ -29,8 +30,7 @@ provisioner:
     hosts:
       all:
         hosts:
-          instance:
-            ansible_connection: local
+          tester:
             ansible_python_interpreter: ${MOLECULE_INTERPRETER:-/home/zuul/test-python/bin/python}
 
 scenario:
