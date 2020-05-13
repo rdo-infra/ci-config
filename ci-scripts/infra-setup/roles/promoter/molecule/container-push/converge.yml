@@ -1,11 +1,13 @@
 ---
 - name: Set up docker experimental commands (common to all tests)
   hosts: all
+  vars:
+    target_user: "{{ ansible_user |  default(lookup('pipe', 'whoami')) }}"
   tasks:
     - name: Create user config dir
       file:
-        path: /home/{{ ansible_user }}/.docker/
-        owner: "{{ ansible_user }}"
+        path: /home/{{ target_user }}/.docker/
+        owner: "{{ target_user }}"
         state: directory
 
     - name: Enable experimental commands in user config
@@ -14,7 +16,7 @@
           {
               "experimental": "enabled"
           }
-        dest: /home/{{ ansible_user }}/.docker/config.json
+        dest: /home/{{ target_user }}/.docker/config.json
 
 
 - name: Disable target push, only promote containers in source registry
