@@ -18,3 +18,9 @@
         rsync_opts:
           - --include=reports.html
           - --exclude=*
+
+    - name: Fail a success job if it did not produce a reports.html file
+      when: zuul_success | bool
+      fail:
+        msg: Job failed to produce a reports.html which is mandatory for success.
+
