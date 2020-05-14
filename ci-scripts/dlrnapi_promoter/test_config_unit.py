@@ -14,15 +14,15 @@ import pytest
 from six import string_types
 
 from config import ConfigError, PromoterConfigBase, PromoterConfig
-from test_unit_fixtures import test_ini_configurations
+from test_unit_fixtures import test_configurations
 
 
 class ConfigBase(unittest.TestCase):
 
     def setUp(self):
         self.filepaths = {}
-        for case, content in test_ini_configurations.items():
-            fp, filepath = tempfile.mkstemp(prefix="ini_conf_test")
+        for case, content in test_configurations.items():
+            fp, filepath = tempfile.mkstemp(prefix="_conf_test")
             with os.fdopen(fp, "w") as test_file:
                 test_file.write(content)
             self.filepaths[case] = filepath
@@ -49,12 +49,12 @@ class TestConfigBase(ConfigBase):
             mock.call("Configuration file not found")
         ])
 
-    def test_load_notini_config(self):
+    def test_load_not_a_config(self):
         with self.assertRaises(ConfigError):
-            PromoterConfigBase(self.filepaths['not_ini'])
+            PromoterConfigBase(self.filepaths['not_a_conf'])
 
     @patch('logging.Logger.error')
-    def test_load_ini_file_no_criteria(self, mock_log_error):
+    def test_load_config_file_no_criteria(self, mock_log_error):
         with self.assertRaises(ConfigError):
             PromoterConfigBase(self.filepaths['missing_criteria_section'])
         mock_log_error.assert_has_calls([
@@ -79,7 +79,7 @@ class TestConfigBase(ConfigBase):
             mock.call("Missing promotion_from section")
         ])
 
-    def test_load_correct_ini_file_verify_params(self):
+    def test_load_correct_config_file_verify_params(self):
         self.maxDiff = None
         # Test for load correctness
         os.environ["DLRNAPI_PASSWORD"] = "test"
@@ -93,10 +93,7 @@ class TestConfigBase(ConfigBase):
         #  to user home, but it's not easy as setting log_file to something
         #  different from /dev/null will need a valid file to write logs to,
         #  and it cannot be in the user home
-        # This is tricky, here we verified that the code correctly loaded the
-        # value, and value from ini is text. In PromoterConfig we verify if
-        # this value has been correctly handled and converted to int
-        self.assertEqual(config.latest_hashes_count, '10')
+        self.assertEqual(config.latest_hashes_count, 10)
 
 
 class TestConfig(ConfigBase):
@@ -116,9 +113,6 @@ class TestConfig(ConfigBase):
         self.assertDictEqual(promotion_criteria_map,
                              config.promotion_criteria_map)
 
-        # This is tricky, here we verified that the code correctly
-        # converted this value to int In PromoterConfigBase we verify if
-        # this value has just been correctly loaded as str from ini config
         self.assertEqual(config.latest_hashes_count, 10)
 
     # FIXME: python2 has no unittest.assertLogs

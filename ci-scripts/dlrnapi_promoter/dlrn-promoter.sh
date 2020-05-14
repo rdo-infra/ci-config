@@ -51,5 +51,5 @@ DIR=$(dirname $0)
 
 for r in "${RELEASES[@]}"; do
     /usr/bin/timeout --preserve-status -k $KILLTIME $TIMEOUT \
-        python $DIR/dlrnapi_promoter.py --log-level ${LOG_LEVEL} --config-file ${STAGING_DIR}${r}.ini promote-all
+        python $DIR/dlrnapi_promoter.py --log-level ${LOG_LEVEL} --config-file ${STAGING_DIR}${r}.yaml promote-all
 done

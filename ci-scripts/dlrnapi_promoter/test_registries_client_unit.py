@@ -160,7 +160,7 @@ class TestPrepareExtraVars(ConfigSetup):
             'release': "master",
             'script_root': mock.ANY,
             'distro_name': "centos",
-            'distro_version': '7',
+            'distro_version': 7,
             'manifest_push': True,
             'target_registries_push': True,
             'candidate_label': "tripleo-ci-testing",

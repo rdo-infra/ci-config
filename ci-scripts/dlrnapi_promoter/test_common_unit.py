@@ -67,6 +67,7 @@ class TestCheckPort(unittest.TestCase):
 class TestStr2Bool(unittest.TestCase):
 
     def test_str2bool_true(self):
+        self.assertTrue(str2bool(True))
         self.assertTrue(str2bool("yes"))
         self.assertTrue(str2bool("true"))
         self.assertTrue(str2bool("True"))
@@ -74,6 +75,7 @@ class TestStr2Bool(unittest.TestCase):
         self.assertTrue(str2bool("1"))
 
     def test_str2bool_false(self):
+        self.assertFalse(str2bool(False))
         self.assertFalse(str2bool("False"))
         self.assertFalse(str2bool(type("Whatever", (), {})))
 
