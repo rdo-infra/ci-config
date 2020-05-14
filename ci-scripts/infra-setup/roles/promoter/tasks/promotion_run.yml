@@ -10,10 +10,10 @@
       ci-scripts/dlrnapi_promoter/dlrn-promoter.sh -s
   changed_when: true
 
-- name: extract log_file from staging.ini
+- name: extract log_file from staging config
   shell:
     cmd: |
-       grep log_file config/staging/{{ test_release }}.ini | awk '{ print $2 }'
+       grep log_file config/staging/{{ test_release }}.yaml | awk '{ print $2 }'
   register: log_file_grep
   args:
     chdir: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter"
