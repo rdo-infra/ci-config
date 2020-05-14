@@ -17,7 +17,7 @@ import os
 import pprint
 import yaml
 
-from common import str2bool, setup_logging, check_port, LoggingError, \
+from common import str2bool, setup_logging, LoggingError, \
     get_root_paths
 
 # Try to import stageconfig for defaults
@@ -84,7 +84,7 @@ class PromoterConfigBase(object):
             raise
 
         self.log.debug("Using config file %s", config_file)
-        self._file_config = self.load_from_ini(config_file)
+        self._file_config = self.load_from_yaml(config_file)
         self._config = self.load_config(config_file, self._file_config)
 
         # Load keys as config attributes
@@ -102,7 +102,7 @@ class PromoterConfigBase(object):
         config = copy.deepcopy(self.defaults)
         try:
             config.update(file_config['main'])
-        except KeyError:
+        except (KeyError, TypeError):
             self.log.error("Config file: %s Missing main section", config_file)
             raise ConfigError
         # Check important sections existence
@@ -123,6 +123,24 @@ class PromoterConfigBase(object):
         # This is done also in the child class, in expand config, but it's
         # really necessary to expand this even in the base class
         config['log_file'] = os.path.expanduser(config['log_file'])
+
+        return config
+
+    def load_from_yaml(self, config_path):
+        """
+        Loads configuration from a YAML file.
+        :param config_path: the path to the config file
+        :return: a dict with the configuration
+        """
+
+        self.log.debug("Using config file %s", config_path)
+        try:
+            with open(config_path) as config_file:
+                config = yaml.safe_load(config_file)
+        except Exception as e:
+            self.log.exception(e)
+            self.log.error("Unable to load config file %s", config_path)
+            raise ConfigError
 
         return config
 
@@ -254,7 +272,7 @@ class PromoterConfig(PromoterConfigBase):
             config.get('distro_name', self.defaults['distro_name']).lower()
         config['distro_version'] = \
             config.get('distro_version',
-                       self.defaults['distro_version']).lower()
+                       self.defaults['distro_version'])
         config['release'] = \
             config.get('release', self.defaults['release']).lower()
 
@@ -310,8 +328,9 @@ class PromoterConfig(PromoterConfigBase):
 
         # Promotion criteria do not have defaults
         for target_name, job_list in config['promotion_criteria_map'].items():
-            criteria = set(list(job_list))
-            config['promotion_criteria_map'][target_name] = criteria
+            if isinstance(job_list, dict):
+                criteria = set(list(job_list))
+                config['promotion_criteria_map'][target_name] = criteria
 
         return config
 
@@ -357,7 +376,7 @@ class PromoterConfig(PromoterConfigBase):
         if "criteria" in checks:
             for target_name, job_list in \
                     config['promotion_criteria_map'].items():
-                if not job_list:
+                if not (job_list or isinstance(job_list, dict)):
                     self.log.error("No jobs in criteria for target %s",
                                    target_name)
                     conf_ok = False

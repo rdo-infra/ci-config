@@ -45,7 +45,7 @@ def staged_env(request):
     # correctly instead of passing  configuration directly
     config_file = "stage-config-secure.yaml"
     promoter_config_file = \
-        "staging/CentOS-7/master.ini"
+        "staging/CentOS-7/master.yaml"
 
     test_case = "all_integration"
 
@@ -82,7 +82,7 @@ def staged_env(request):
     # file for component db data, and emulate CentOS8/master at least
     if "_integration" in test_case:
         promoter_config_file = \
-            "staging/CentOS-8/master.ini"
+            "staging/CentOS-8/master.yaml"
         setup_cmd_line += " --db-data integration-pipeline.yaml"
         setup_cmd_line += (" --promoter-config-file {}"
                            "".format(promoter_config_file))

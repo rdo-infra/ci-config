@@ -6,7 +6,7 @@ import yaml
 from StringIO import StringIO
 
 PROMOTER_CONFIG_URL = ("https://raw.githubusercontent.com/rdo-infra/ci-config/"
-                       "master/ci-scripts/dlrnapi_promoter/config/{}/{}.ini")
+                       "master/ci-scripts/dlrnapi_promoter/config/{}/{}.yaml")
 
 COMPONENT_CONFIG_URL = ("https://raw.githubusercontent.com/rdo-infra/ci-config/"
                         "master/ci-scripts/dlrnapi_promoter/"

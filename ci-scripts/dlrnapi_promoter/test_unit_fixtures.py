@@ -15,93 +15,93 @@ except ImportError:
     import mock
 
 # Cases of ini configuration
-test_ini_configurations = dict(
-    not_ini='''
-    I am not a ini file
+test_configurations = dict(
+    not_a_conf='''
+    I am not a conf file
     ''',
     missing_parameters='''
-    [main]
-    api_url: https://trunk.rdoproject.org/api-centos-master-uc
-    username: ciuser
-    dry_run: no
-    log_file: /dev/nul
-    latest_hashes_count: 10
-    manifest_push: true
+    main:
+      api_url: https://trunk.rdoproject.org/api-centos-master-uc
+      username: ciuser
+      dry_run: no
+      log_file: /dev/nul
+      latest_hashes_count: 10
+      manifest_push: true
 
-    [promote_from]
-    current-tripleo: tripleo-ci-testing
+    promote_from:
+      current-tripleo: tripleo-ci-testing
 
-    [current-tripleo]
-    periodic-tripleo-centos-7-master-containers-build-push
+    current-tripleo:
+      periodic-tripleo-centos-7-master-containers-build-push: null
     ''',
     missing_main='''
-    [promote_from]
-    current-tripleo: tripleo-ci-testing
+    promote_from:
+      current-tripleo: tripleo-ci-testing
     ''',
     missing_promotions_section='''
-    [main]
-    # missing mandatory parameters and sections
-    distro_name: centos
-    distro_version: 7
-    release: master
-    api_url: https://trunk.rdoproject.org/api-centos-master-uc
-    username: ciuser
-    dry_run: no
-    log_file: /dev/null
-    latest_hashes_count: 10
-    manifest_push: true
+    main:
+      # missing mandatory parameters and sections
+      distro_name: centos
+      distro_version: 7
+      release: master
+      api_url: https://trunk.rdoproject.org/api-centos-master-uc
+      username: ciuser
+      dry_run: no
+      log_file: /dev/null
+      latest_hashes_count: 10
+      manifest_push: true
     ''',
     missing_criteria_section='''
-    [main]
-    # missing mandatory parameters and sections
-    distro_name: centos
-    distro_version: 7
-    release: master
-    api_url: https://trunk.rdoproject.org/api-centos-master-uc
-    username: ciuser
-    dry_run: no
-    log_file: /dev/null
-    latest_hashes_count: 10
-    manifest_push: true
+    main:
+      # missing mandatory parameters and sections
+      distro_name: centos
+      distro_version: 7
+      release: master
+      api_url: https://trunk.rdoproject.org/api-centos-master-uc
+      username: ciuser
+      dry_run: no
+      log_file: /dev/null
+      latest_hashes_count: 10
+      manifest_push: true
 
-    [promote_from]
-    current-tripleo: tripleo-ci-testing
+    promote_from:
+      current-tripleo: tripleo-ci-testing
     ''',
     criteria_empty='''
-    [main]
-    distro_name: centos
-    distro_version: 7
-    release: master
-    api_url: https://trunk.rdoproject.org/api-centos-master-uc
-    username: ciuser
-    dry_run: no
-    log_file: /dev/null
-    latest_hashes_count: 10
-    manifest_push: true
+    main:
+      distro_name: centos
+      distro_version: 7
+      release: master
+      api_url: https://trunk.rdoproject.org/api-centos-master-uc
+      username: ciuser
+      dry_run: no
+      log_file: /dev/null
+      latest_hashes_count: 10
+      manifest_push: true
 
-    [promote_from]
-    current-tripleo: tripleo-ci-testing
+    promote_from:
+      current-tripleo: tripleo-ci-testing
 
-    [current-tripleo]
+    current-tripleo:
     ''',
     correct='''
-    [main]
-    distro_name: centos
-    distro_version: 7
-    release: master
-    api_url: https://trunk.rdoproject.org/api-centos-master-uc
-    username: ciuser
-    dry_run: no
-    log_file: /dev/null
-    latest_hashes_count: 10
-    manifest_push: true
+    main:
+      distro_name: centos
+      distro_version: 7
+      release: master
+      api_url: https://trunk.rdoproject.org/api-centos-master-uc
+      username: ciuser
+      dry_run: no
+      log_file: /dev/null
+      latest_hashes_count: 10
+      manifest_push: true
 
-    [promote_from]
-    current-tripleo: tripleo-ci-testing
+    promote_from:
+      current-tripleo: tripleo-ci-testing
 
-    [current-tripleo]
-    periodic-tripleo-centos-7-master-containers-build-push
-    periodic-tripleo-centos-7-master-standalone
+    current-tripleo:
+      periodic-tripleo-centos-7-master-containers-build-push: null
+      periodic-tripleo-centos-7-master-standalone: null
     ''',
 )
 
@@ -176,7 +176,7 @@ hashes_test_cases = {
 class ConfigSetup(unittest.TestCase):
 
     def setUp(self):
-        content = test_ini_configurations['correct']
+        content = test_configurations['correct']
         fp, self.filepath = tempfile.mkstemp(prefix="instance_test")
         with os.fdopen(fp, "w") as test_file:
             test_file.write(content)
