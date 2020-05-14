@@ -1,0 +1,72 @@
+---
+- job:
+    name: tripleo-ci-promotion-staging-single-pipeline-centos-7
+    parent: base
+    ansible-version: 2.8
+    nodeset: rdo-centos-7
+    run: playbooks/staging.yml
+    post-run: playbooks/staging-post.yml
+    host-vars:
+      primary:
+        ansible_user: root
+    vars:
+      pipeline_type: single
+      test_release: CentOS-7/master
+
+- job:
+    name: tripleo-ci-promotion-staging-integration-pipeline-centos-7
+    parent: base
+    ansible-version: 2.8
+    nodeset: rdo-centos-7
+    run: playbooks/staging.yml
+    post-run: playbooks/staging-post.yml
+    host-vars:
+      primary:
+        ansible_user: root
+    vars:
+      pipeline_type: integration
+      test_release: CentOS-8/master
+
+# These jobs could be handled by rdo-tox-molecule job, when the pytest-molecule
+# supports delegated driver, but as delegated tests don't run in isolation,
+# tthey may step on eachother's toe, and the first test could pollute the
+# environemnt for the second
+# So it's probably better to leave them as standalone jobs
+#
+- job:
+    name: molecule-container-push-delegated-centos-7
+    parent: base
+    nodeset: rdo-centos-7
+    success-url: "tox/reports.html"
+    failure-url: "tox/reports.html"
+    pre-run: playbooks/molecule-delegated-pre.yml
+    run: playbooks/molecule-delegated.yml
+    post-run: playbooks/molecule-post.yml
+    vars:
+      molecule_test_commands: |
+        tox -emolecule_delegated -- roles/promoter/molecule/container-push/molecule.yml
+
+- job:
+    name: molecule-tripleo-common-delegated-centos-7
+    parent: base
+    nodeset: rdo-centos-7
+    pre-run: playbooks/molecule-delegated-pre.yml
+    run: playbooks/molecule-delegated.yml
+    vars:
+      molecule_test_commands: |
+        # container-push generates staging containers, skip teardown
+        molecule converge -s container-push -- --skip-tags=registry_cleanup
+        # tripleo-common test w/ staging containers
+        molecule test -s tripleo-common-integration
+        # container-push teardown, cleanup registries
+        molecule converge -s container-push -- --tags=registry_cleanup
+
+- job:
+    name: molecule-delegated-promote-images-delegated-centos-7
+    parent: base
+    nodeset: rdo-centos-7
+    pre-run: playbooks/molecule-delegated-promote-images-pre.yml
+    run: playbooks/molecule-delegated.yml
+    vars:
+      molecule_test_commands: |
+        molecule test -s promote-images
