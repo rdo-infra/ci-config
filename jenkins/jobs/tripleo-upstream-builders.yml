@@ -129,11 +129,11 @@
                 - when: push_containers|default(true)|bool
                   block:
                     - become: "{{ item }}"
-                      docker_login:
-                          registry_url: "https://trunk.registry.rdoproject.org"
-                          username: "tripleo.service"
-                          password: "${RDO_REGISTRY_TOKEN}"
-                          reauthorize: true
+                      shell: |-
+                        podman login --username=tripleo.service \
+                                     --password="${REGISTRY_PASSWORD}" \
+                                     --tls-verify={{ tripleo_podman_tls_verify }} \
+                                     "https://trunk.registry.rdoproject.org"
                       with_items:
                        - true
                        - false
