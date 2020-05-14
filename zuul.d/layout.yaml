@@ -14,7 +14,7 @@
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
               - ^ci-scripts/promote-images.sh
-              - ^ci-scripts/infra-setup/roles/promoter/.*
+              - ^ci-scripts/infra-setup/roles/(ensure_)promoter/.*
               - ^playbooks/staging.*
               - ^requirements.txt
               - ^test-requirements.txt
@@ -31,7 +31,7 @@
             files:
               - .*molecule.*
               - ^ci-scripts/infra-setup/roles/get_hash/.*$
-              - ^ci-scripts/infra-setup/roles/promoter/.*$
+              - ^ci-scripts/infra-setup/roles/(ensure_)promoter.*/.*$
               - ^requirements.txt
               - ^requirements.txt
               - ^test-requirements.txt
@@ -49,7 +49,7 @@
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/container-push/.*
+              - ^ci-scripts/infra-setup/roles/(ensure_)promoter/molecule/container-push/.*
               - ^playbooks/molecule-delegated-pre.yml
               - ^playbooks/molecule-delegated.yml
               - ^requirements.txt
@@ -58,7 +58,7 @@
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/tripleo-common-integration.*
+              - ^ci-scripts/infra-setup/roles/(ensure_)promoter/molecule/tripleo-common-integration.*
               - ^playbooks/molecule-delegated-pre.yml
               - ^playbooks/molecule-delegated.yml
               - ^requirements.txt
@@ -67,11 +67,34 @@
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/promote-images.sh
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/promote-images/.*
+              - ^ci-scripts/infra-setup/roles/(ensure_)promoter/molecule/promote-images/.*
               - ^playbooks/molecule-delegated-promote-images-pre.yml
               - ^playbooks/molecule-delegated.yml
               - ^requirements.txt
               - ^test-requirements.txt
+        # non-voting centos-8 aimed to replace those above
+        - molecule-container-push-delegated-centos-8:
+            <<: *molecule-container-push
+            voting: false
+        - molecule-tripleo-common-delegated-centos-8:
+            <<: *molecule-tripleo-common
+            voting: false
+        - molecule-delegated-promote-images-delegated-centos-8:
+            <<: *molecule-promote-images
+            voting: false
+        - tripleo-ci-promotion-staging-single-pipeline-centos-8:
+            files: *integration
+            voting: false
+        - tripleo-ci-promotion-staging-integration-pipeline-centos-8:
+            files: *integration
+            voting: false
+        - rdo-tox-molecule:
+            <<: *molecule
+            voting: false
+        - rdo-tox-molecule-delegated-centos-8:
+            <<: *molecule
+            voting: false
+        # /centos8
         - tox-jjb
         - tox-py27: &py27
             pre-run: playbooks/pre-run-docker.yml
