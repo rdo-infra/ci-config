@@ -17,7 +17,7 @@ import os
 import pprint
 import yaml
 
-from common import str2bool, setup_logging, check_port, LoggingError, \
+from common import str2bool, setup_logging, LoggingError, \
     get_root_paths
 
 # Try to import stageconfig for defaults
@@ -84,7 +84,7 @@ class PromoterConfigBase(object):
             raise
 
         self.log.debug("Using config file %s", config_file)
-        self._file_config = self.load_from_ini(config_file)
+        self._file_config = self.load_from_yaml(config_file)
         self._config = self.load_config(config_file, self._file_config)
 
         # Load keys as config attributes
@@ -123,6 +123,24 @@ class PromoterConfigBase(object):
         # This is done also in the child class, in expand config, but it's
         # really necessary to expand this even in the base class
         config['log_file'] = os.path.expanduser(config['log_file'])
+
+        return config
+
+    def load_from_yaml(self, config_path):
+        """
+        Loads configuration from a YAML file.
+        :param config_path: the path to the config file
+        :return: a dict with the configuration
+        """
+
+        self.log.debug("Using config file %s", config_path)
+        try:
+            with open(config_path) as config_file:
+                config = yaml.safe_load(config_file)
+        except Exception as e:
+            self.log.exception(e)
+            self.log.error("Unable to load config file %s", config_path)
+            raise ConfigError
 
         return config
 
