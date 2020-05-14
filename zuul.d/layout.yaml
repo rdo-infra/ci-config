@@ -14,11 +14,15 @@
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
               - ^ci-scripts/promote-images.sh
-              - ^ci-scripts/infra-setup/roles/promoter/.*
+              - ^ci-scripts/infra-setup/roles/promoter.*/.*
               - ^playbooks/staging.*
               - ^requirements.txt
               - ^test-requirements.txt
+        - tripleo-ci-promotion-staging-single-pipeline-centos-8:
+            files: *integration
         - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
+            files: *integration
+        - tripleo-ci-promotion-staging-integration-pipeline-centos-8:
             files: *integration
         - sova-tracking-jobs: &sovatrack
             # broken for more than a month, incorrect file pattern as job
@@ -31,7 +35,7 @@
             files:
               - .*molecule.*
               - ^ci-scripts/infra-setup/roles/get_hash/.*$
-              - ^ci-scripts/infra-setup/roles/promoter/.*$
+              - ^ci-scripts/infra-setup/roles/promoter.*/.*$
               - ^requirements.txt
               - ^requirements.txt
               - ^test-requirements.txt
@@ -49,29 +53,35 @@
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/container-push/.*
+              - ^ci-scripts/infra-setup/roles/promoter.*/molecule/container-push/.*
               - ^playbooks/molecule-delegated-pre.yml
               - ^playbooks/molecule-delegated.yml
               - ^requirements.txt
               - ^test-requirements.txt
+        - molecule-container-push-delegated-centos-8:
+            <<: *molecule-container-push
         - molecule-tripleo-common-delegated-centos-7: &molecule-tripleo-common
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/tripleo-common-integration.*
+              - ^ci-scripts/infra-setup/roles/promoter.*/molecule/tripleo-common-integration.*
               - ^playbooks/molecule-delegated-pre.yml
               - ^playbooks/molecule-delegated.yml
               - ^requirements.txt
               - ^test-requirements.txt
+        - molecule-tripleo-common-delegated-centos-8:
+            <<: *molecule-tripleo-common
         - molecule-delegated-promote-images-delegated-centos-7: &molecule-promote-images
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/promote-images.sh
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/promote-images/.*
+              - ^ci-scripts/infra-setup/roles/promoter.*/molecule/promote-images/.*
               - ^playbooks/molecule-delegated-promote-images-pre.yml
               - ^playbooks/molecule-delegated.yml
               - ^requirements.txt
               - ^test-requirements.txt
+        - molecule-delegated-promote-images-delegated-centos-8:
+            <<: *molecule-promote-images
         - tox-jjb
         - tox-py27: &py27
             pre-run: playbooks/pre-run-docker.yml
