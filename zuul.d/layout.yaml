@@ -10,6 +10,7 @@
     check:
       jobs:
         - tripleo-ci-promotion-staging-single-pipeline-centos-7:
+            voting: false
             files: &integration
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
@@ -19,6 +20,7 @@
               - ^requirements.txt
               - ^test-requirements.txt
         - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
+            voting: false
             files: *integration
         - sova-tracking-jobs: &sovatrack
             # broken for more than a month, incorrect file pattern as job
@@ -74,6 +76,7 @@
               - ^test-requirements.txt
         - tox-jjb
         - tox-py27: &py27
+            voting: false
             pre-run: playbooks/pre-run-docker.yml
             post-run: playbooks/post-run.yml
             success-url: "tox/reports.html"
@@ -95,6 +98,7 @@
               tox_environment:
                 PYTEST_REQPASS: 188
         - tox-py36: &py36
+            voting: false
             pre-run: playbooks/pre-run-docker.yml
             post-run: playbooks/post-run.yml
             success-url: "tox/reports.html"
