@@ -125,17 +125,7 @@
             - name: 'Login to RDO registry'
               hosts: openstack_nodes
               tasks:
-                - when: push_containers|default(true)|bool
-                  block:
-                    - become: "{{ item }}"
-                      docker_login:
-                          registry_url: "https://trunk.registry.rdoproject.org"
-                          username: "tripleo.service"
-                          password: "${RDO_REGISTRY_TOKEN}"
-                          reauthorize: true
-                      with_items:
-                       - true
-                       - false
+                - include_tasks: "${CICO_USER_DIR}/${RDO_CONFIG_DIR_PROTECTED}/playbooks/tripleo-rdo-base/container-login.yaml"
 
             - name: Populate hash.info required for dlrn reporting
               hosts: openstack_nodes
