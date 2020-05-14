@@ -33,7 +33,7 @@ class StageConfig(object):
         'db_data_file': "single-pipeline.yaml",
         'stage_config_file': "stage-config.yaml",
         'stage_info_file': "/tmp/stage-info.yaml",
-        'promoter_config_file': "CentOS-7/master.ini",
+        'promoter_config_file': "CentOS-7/master.yaml",
     })
 
     def __init__(self, source=None, overrides=None):
