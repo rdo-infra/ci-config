@@ -17,9 +17,9 @@ LOG_LEVEL="INFO"
 STAGING_DIR=""
 
 DEFAULT_RELEASES=( "CentOS-8/master" "CentOS-8/ussuri" \
-                   "CentOS-7/train" "CentOS-7/stein" \
+                   "CentOS-8/train" "CentOS-7/stein" \
                    "CentOS-7/rocky" "CentOS-7/queens" \
-                   "RedHat-8/master" "CentOS-8/train" )
+                   "CentOS-7/train" )
 declare -p DEFAULT_RELEASES
 
 
