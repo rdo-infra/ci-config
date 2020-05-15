@@ -162,11 +162,10 @@ class StageConfig(object):
             _config['main']['promoter_config_file'] = \
                 self.defaults.promoter_config_file
 
-        _config['main']['promoter_config_file'] = \
-            os.path.join(self.code_root, "config",
-                         _config['main']['promoter_config_file'])
+        config_root = os.path.join(self.code_root, "config")
         promoter_config = \
-            PromoterConfigBase(_config['main']['promoter_config_file'])
+            PromoterConfigBase(config_root,
+                               _config['main']['promoter_config_file'])
         _config['main']['distro_name'] = promoter_config.distro_name
         _config['main']['distro_version'] = promoter_config.distro_version
         _config['main']['release'] = promoter_config.release
