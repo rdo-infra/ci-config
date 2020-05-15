@@ -19,14 +19,15 @@ class Promoter(object):
 
     log = logging.getLogger('promoter')
 
-    def __init__(self, config_file, overrides=None):
+    def __init__(self, config_root, config_file, overrides=None):
         """
         Instantiates a configuration object and all the clients for the
         promotion
+        :param config_root: The path to the configuration file
         :param config_file: The path to the configuration file
         :param overrides: The command line overrides to the configuration
         """
-        self.config = PromoterConfig(config_file,
+        self.config = PromoterConfig(config_root, config_file,
                                      overrides=overrides)
         self.dlrn_client = DlrnClient(self.config)
         self.registries_client = RegistriesClient(self.config)

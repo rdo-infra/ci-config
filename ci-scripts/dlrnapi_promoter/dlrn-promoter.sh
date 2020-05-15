@@ -15,21 +15,20 @@ TIMEOUT=115m
 KILLTIME=120m
 LOG_LEVEL="INFO"
 STAGING_DIR=""
+: ${CONFIG_ROOT:./config}
 
-DEFAULT_RELEASES=( "CentOS-8/master" "CentOS-8/ussuri" \
-                   "CentOS-7/train" "CentOS-7/stein" \
-                   "CentOS-7/rocky" "CentOS-7/queens" \
-                   "RedHat-8/master" "CentOS-8/train" )
-declare -p DEFAULT_RELEASES
+. $CONFIG_ROOT/active_releases.sh
 
-
-while getopts "t:k:sh" arg; do
+while getopts "t:k:shr:" arg; do
     case $arg in
     t)
         TIMEOUT="${OPTARG}"
         ;;
     k)
         KILLTIME="${OPTARG}"
+        ;;
+    r)
+        CONFIG_ROOT="${OPTARG}"
         ;;
     s)
         echo "Staging promoter mode enabled"
@@ -51,5 +50,5 @@ DIR=$(dirname $0)
 
 for r in "${RELEASES[@]}"; do
     /usr/bin/timeout --preserve-status -k $KILLTIME $TIMEOUT \
-        python $DIR/dlrnapi_promoter.py --log-level ${LOG_LEVEL} --config-file ${STAGING_DIR}${r}.yaml promote-all
+        python $DIR/dlrnapi_promoter.py --log-level ${LOG_LEVEL} --config-root $CONFIG_ROOT --config-file ${STAGING_DIR}${r}.yaml promote-all
 done
