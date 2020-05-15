@@ -3,21 +3,22 @@
 Main file for the promoter
 """
 import argparse
+import os
 
 import common
-from common import LockError
+from common import LockError, get_root_paths
 from config import PromoterConfigBase
 from logic import Promoter
-from dlrn_hash import DlrnHash, DlrnHashError, DlrnAggregateHash
+from dlrn_hash import DlrnHash, DlrnHashError
 
 
 def promote_all(args):
-    promoter = Promoter(args.config_file, overrides=args)
+    promoter = Promoter(args.config_root, args.config_file, overrides=args)
     promoter.promote_all()
 
 
 def force_promote(args):
-    promoter = Promoter(args.config_file, overrides=args)
+    promoter = Promoter(args.config_root, args.config_file, overrides=args)
 
     try:
         candidate_hash = DlrnHash(source=args)
@@ -37,10 +38,17 @@ def arg_parser(cmd_line=None):
     :return: An args object with overrides for the configuration
     """
     default_formatter = argparse.ArgumentDefaultsHelpFormatter
+    __, promoter_root = get_root_paths(log="promoter")
+    ci_config_root_default = os.path.join(promoter_root, "config")
     main_parser = argparse.ArgumentParser(description="Promoter workflow",
                                           formatter_class=default_formatter)
+    main_parser.add_argument("--config-root", required=False,
+                             help=("The config root. Relative paths "
+                                   "will have script_root as root"),
+                             default=ci_config_root_default)
     main_parser.add_argument("--config-file", required=True,
-                             help="The config file")
+                             help=("The config file. Relative paths "
+                                   "will have config_root as root"))
     main_parser.add_argument("--log-level",
                              default=PromoterConfigBase.defaults['log_level'],
                              help="Set the log level")

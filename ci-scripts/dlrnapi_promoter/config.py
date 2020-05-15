@@ -59,7 +59,7 @@ class PromoterConfigBase(object):
     }
     log = logging.getLogger("promoter")
 
-    def __init__(self, config_file):
+    def __init__(self, config_root, config_file):
         """
         Initialize the config object loading from ini file
         :param config_path: the path to the configuration file to load
@@ -73,10 +73,12 @@ class PromoterConfigBase(object):
 
         if config_file is None:
             raise ConfigError("Empty config file")
-        # The path is either absolute ot it's relative to the code root
+        # The path is either absolute ot it's relative to the script_root
+        if not os.path.isabs(config_root):
+            config_root = os.path.join(self.script_root, config_root)
+        # The path is either absolute ot it's relative to the config_root
         if not os.path.isabs(config_file):
-            config_file = os.path.join(self.script_root, "config",
-                                       config_file)
+            config_file = os.path.join(config_root, config_file)
         try:
             os.stat(config_file)
         except OSError:
