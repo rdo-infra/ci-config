@@ -108,7 +108,7 @@ def staged_env(request):
 
     overrides_obj = type("FakeArgs", (), overrides)
     os.environ["DLRNAPI_PASSWORD"] = stage_info['dlrn']['server']['password']
-    promoter = Promoter(promoter_config_file, overrides=overrides_obj)
+    promoter = Promoter("config", promoter_config_file, overrides=overrides_obj)
 
     yield stage_info, promoter
 

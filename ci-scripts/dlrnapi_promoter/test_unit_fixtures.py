@@ -183,7 +183,7 @@ class ConfigSetup(unittest.TestCase):
         cli = "--config-file {} promote-all".format(self.filepath)
         args = arg_parser(cmd_line=cli)
         os.environ["DLRNAPI_PASSWORD"] = "test"
-        self.promoter = Promoter(config_file=args.config_file)
+        self.promoter = Promoter("config", config_file=args.config_file)
 
     def tearDown(self):
         os.unlink(self.filepath)

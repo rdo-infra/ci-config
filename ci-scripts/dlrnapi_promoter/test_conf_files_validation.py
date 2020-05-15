@@ -22,7 +22,7 @@ def test_conf_files():
                 if 'component' in full_path:
                     continue
                 try:
-                    PromoterConfig(full_path, checks=['criteria'])
+                    PromoterConfig("config", full_path, checks=['criteria'])
                 except Exception as config_except:
                     log.exception(config_except)
                     errors = True

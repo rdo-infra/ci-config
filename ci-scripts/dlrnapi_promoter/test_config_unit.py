@@ -39,24 +39,25 @@ class TestConfigBase(ConfigBase):
 
     def test_config_none(self):
         with self.assertRaises(ConfigError):
-            PromoterConfigBase(None)
+            PromoterConfigBase("config", None)
 
     @patch('logging.Logger.error')
     def test_config_not_found(self, mock_log_error):
         with self.assertRaises(OSError):
-            PromoterConfigBase("/does/not/exist")
+            PromoterConfigBase("config", "/does/not/exist")
         mock_log_error.assert_has_calls([
             mock.call("Configuration file not found")
         ])
 
     def test_load_not_a_config(self):
         with self.assertRaises(ConfigError):
-            PromoterConfigBase(self.filepaths['not_a_conf'])
+            PromoterConfigBase("config", self.filepaths['not_a_conf'])
 
     @patch('logging.Logger.error')
     def test_load_config_file_no_criteria(self, mock_log_error):
         with self.assertRaises(ConfigError):
-            PromoterConfigBase(self.filepaths['missing_criteria_section'])
+            PromoterConfigBase("config",
+                               self.filepaths['missing_criteria_section'])
         mock_log_error.assert_has_calls([
             mock.call("Missing criteria section for target %s",
                       'current-tripleo')
@@ -65,7 +66,7 @@ class TestConfigBase(ConfigBase):
     @patch('logging.Logger.error')
     def test_load_config_missing_main(self, mock_log_error):
         with self.assertRaises(ConfigError):
-            PromoterConfigBase(self.filepaths['missing_main'])
+            PromoterConfigBase("config", self.filepaths['missing_main'])
         mock_log_error.assert_has_calls([
             mock.call("Config file: %s Missing main section",
                       self.filepaths['missing_main'])
@@ -74,7 +75,8 @@ class TestConfigBase(ConfigBase):
     @patch('logging.Logger.error')
     def test_load_config_missing_promotions(self, mock_log_error):
         with self.assertRaises(ConfigError):
-            PromoterConfigBase(self.filepaths['missing_promotions_section'])
+            PromoterConfigBase("config",
+                               self.filepaths['missing_promotions_section'])
         mock_log_error.assert_has_calls([
             mock.call("Missing promotion_from section")
         ])
@@ -83,7 +85,7 @@ class TestConfigBase(ConfigBase):
         self.maxDiff = None
         # Test for load correctness
         os.environ["DLRNAPI_PASSWORD"] = "test"
-        config = PromoterConfigBase(self.filepaths['correct'])
+        config = PromoterConfigBase("config", self.filepaths['correct'])
         # Test if config keys are there and have a value
         assert hasattr(config, "release"), "Missing mandatory argument"
         assert hasattr(config, "distro_name"), "Missing mandatory argument"
@@ -102,7 +104,7 @@ class TestConfig(ConfigBase):
         self.maxDiff = None
         # Test for load correctness
         os.environ["DLRNAPI_PASSWORD"] = "test"
-        config = PromoterConfig(self.filepaths['correct'])
+        config = PromoterConfig("config", self.filepaths['correct'])
         self.assertEqual(config.target_registries_push, True)
         promotion_criteria_map = {
             "current-tripleo": {
@@ -120,9 +122,9 @@ class TestConfig(ConfigBase):
     @patch('logging.Logger.error')
     def test_load_defective_ini_file(self, mock_error, mock_warning):
         os.environ["DLRNAPI_PASSWORD"] = "test"
-        ini_config = self.filepaths['missing_parameters']
+        yaml_config = self.filepaths['missing_parameters']
         with self.assertRaises(ConfigError):
-            PromoterConfig(ini_config)
+            PromoterConfig("config", yaml_config)
         calls = [
             mock.call('Missing parameter in configuration file: %s. Using '
                       'default value: %s', 'distro_name', 'centos')
@@ -130,7 +132,7 @@ class TestConfig(ConfigBase):
         mock_warning.assert_has_calls(calls)
         calls = [
             mock.call('Invalid Log file: %s', '/dev/nul'),
-            mock.call('Error in configuration file %s' % str(ini_config))
+            mock.call('Error in configuration file %s' % str(yaml_config))
         ]
         mock_error.assert_has_calls(calls, any_order=True)
 
@@ -141,7 +143,7 @@ class TestConfig(ConfigBase):
         except KeyError:
             pass
         with self.assertRaises(ConfigError):
-            PromoterConfig(self.filepaths['correct'])
+            PromoterConfig("config", self.filepaths['correct'])
         calls = [
             mock.call('No dlrnapi password found in env'),
         ]
@@ -151,7 +153,7 @@ class TestConfig(ConfigBase):
     def test_load_empty_criteria(self, mock_error):
         os.environ["DLRNAPI_PASSWORD"] = "test"
         with self.assertRaises(ConfigError):
-            PromoterConfig(self.filepaths['criteria_empty'])
+            PromoterConfig("config", self.filepaths['criteria_empty'])
         calls = [
             mock.call('No jobs in criteria for target %s', 'current-tripleo'),
             mock.call('Error in configuration file {}'
@@ -169,7 +171,7 @@ class TestGetDlrnApi(ConfigBase):
                                     mock_log_debug,
                                     mock_log_error):
         check_port_mock.return_value = True
-        config = PromoterConfig(self.filepaths['correct'], filters=[],
+        config = PromoterConfig("config", self.filepaths['correct'], filters=[],
                                 checks=[])
         in_config = {}
         expected_url = "http://localhost:58080"
@@ -190,7 +192,7 @@ class TestGetDlrnApi(ConfigBase):
                                    mock_log_debug,
                                    mock_log_error):
         check_port_mock.side_effect = [False, False]
-        config = PromoterConfig(self.filepaths['correct'], filters=[],
+        config = PromoterConfig("config", self.filepaths['correct'], filters=[],
                                 checks=[])
         # PromoterConfig calls log.debug at this point, so we reset the mock
         # to make it count from zero
@@ -219,7 +221,7 @@ class TestGetDlrnApi(ConfigBase):
                                                     mock_log_debug,
                                                     mock_log_error):
         check_port_mock.side_effect = [False, True]
-        config = PromoterConfig(self.filepaths['correct'], filters=[],
+        config = PromoterConfig("config", self.filepaths['correct'], filters=[],
                                 checks=[])
         in_config = {
             'distro_name': "centos",
@@ -245,7 +247,7 @@ class TestGetDlrnApi(ConfigBase):
                                                     mock_log_debug,
                                                     mock_log_error):
         check_port_mock.side_effect = [False, True]
-        config = PromoterConfig(self.filepaths['correct'], filters=[],
+        config = PromoterConfig("config", self.filepaths['correct'], filters=[],
                                 checks=[])
         in_config = {
             'distro_name': "centos",
@@ -271,7 +273,7 @@ class TestGetDlrnApi(ConfigBase):
                                                    mock_log_debug,
                                                    mock_log_error):
         check_port_mock.side_effect = [False, True]
-        config = PromoterConfig(self.filepaths['correct'], filters=[],
+        config = PromoterConfig("config", self.filepaths['correct'], filters=[],
                                 checks=[])
         in_config = {
             'distro_name': "centos",
@@ -298,7 +300,8 @@ class TestSanityChecks(ConfigBase):
     def test_sanity_check_all_checks_success_all_warnings(self,
                                                           mock_log_warning,
                                                           mock_log_error):
-        pconfig = PromoterConfig(self.filepaths['correct'], filters=[],
+        pconfig = PromoterConfig("config",
+                                 self.filepaths['correct'], filters=[],
                                  checks=[])
         config = {
             'distro_name': "default_distro",
@@ -334,7 +337,8 @@ class TestSanityChecks(ConfigBase):
     def test_sanity_check_all_checks_fail_all_errors(self,
                                                      mock_log_warning,
                                                      mock_log_error):
-        pconfig = PromoterConfig(self.filepaths['correct'], filters=[],
+        pconfig = PromoterConfig("config",
+                                 self.filepaths['correct'], filters=[],
                                  checks=[])
         config = {
             'distro_name': "default_distro",
@@ -393,7 +397,7 @@ class TestExpandConfig(ConfigBase):
             'promotion_criteria_map': {}
         }
         get_api_url_mock.return_value = api_url
-        config = PromoterConfig(self.filepaths['correct'], filters=[],
+        config = PromoterConfig("config", self.filepaths['correct'], filters=[],
                                 checks=[])
         out_config = config.expand_config(in_config)
         self.assertEqual(out_config, expected_config)
@@ -413,7 +417,7 @@ class TestHandleOverrides(ConfigBase):
             'username': "foo",
             'log_level': "INFO"
         }
-        config = PromoterConfig(self.filepaths['correct'], filters=[],
+        config = PromoterConfig("config", self.filepaths['correct'], filters=[],
                                 checks=[])
         out_config = config.handle_overrides(in_config,
                                              overrides=overrides)
@@ -429,7 +433,7 @@ class TestHandleOverrides(ConfigBase):
             'log_file': "/another/path/to/logs",
             'api_url': "https://localhost:389"
         }
-        config = PromoterConfig(self.filepaths['correct'], filters=[],
+        config = PromoterConfig("config", self.filepaths['correct'], filters=[],
                                 checks=[])
         out_config = config.handle_overrides(in_config,
                                              overrides=overrides)
