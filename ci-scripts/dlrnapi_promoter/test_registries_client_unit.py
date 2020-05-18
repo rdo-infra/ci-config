@@ -165,6 +165,7 @@ class TestPrepareExtraVars(ConfigSetup):
             'target_registries_push': True,
             'candidate_label': "tripleo-ci-testing",
             "named_label": "current-tripleo",
+            "namespace": "tripleomaster",
             "commit_hash": self.dlrn_hash_commitdistro.commit_hash,
             "distro_hash": self.dlrn_hash_commitdistro.distro_hash,
             "full_hash": self.dlrn_hash_commitdistro.full_hash,
