@@ -18,3 +18,18 @@
         rsync_opts:
           - --include=reports.html
           - --exclude=*
+
+    - name: Verify that successful job produced expected artifacts
+      when: zuul_success | bool
+      block:
+
+        - name: Stat reports.html
+          delegate_to: localhost
+          stat:
+            path: "{{ zuul.executor.log_root }}/tox/reports.html"
+          register: result
+
+        - name: Fail a success job if it did not produce a reports.html file
+          when: result.stat.exists
+          fail:
+            msg: Job failed to produce a reports.html which is mandatory for success.
