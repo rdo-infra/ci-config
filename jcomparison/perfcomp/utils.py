@@ -108,7 +108,7 @@ def save_to_file(data):
             print(data[k])
             if data[k]:
                 for z in data[k]:
-                    f.write(" | ".join([str(l) for l in z]) + "\n")
+                    f.write(" | ".join([str(v) for v in z]) + "\n")
 
 
 def red(x):

@@ -58,7 +58,7 @@ def compose_as_csv(release, type, builds):
     csv = ""
     for build in builds:
         if "non-voting" not in build['comment']:
-            csv += ('{},{},{},{},{},{},{}\n').format(
+            csv += ('{},{},{},{},{},{},{},{}\n').format(
                 release,
                 type,
                 build['job'],

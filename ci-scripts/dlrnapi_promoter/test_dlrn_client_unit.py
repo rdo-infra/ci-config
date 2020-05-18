@@ -23,7 +23,7 @@ try:
     import urllib.request as url
 except ImportError:
     # Python2 imports
-    import ConfigParser as ini_parser
+    import ConfigParser as ini_parser  # noqa N813
     from mock import Mock, patch
     import mock
     from urlparse import urlparse

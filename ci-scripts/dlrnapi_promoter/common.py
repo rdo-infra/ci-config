@@ -11,7 +11,7 @@ import time
 
 try:
     # In python 2 ConnectionRefusedError is not a builtin
-    from socket import error as ConnectionRefusedError
+    from socket import error as ConnectionRefusedError  # noqa N812
 except ImportError:
     pass
 

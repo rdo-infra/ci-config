@@ -8,7 +8,7 @@ try:
     import configparser as ini_parser
 except ImportError:
     # Python 2 import
-    import ConfigParser as ini_parser
+    import ConfigParser as ini_parser  # noqa N813
 
 import common
 import copy
