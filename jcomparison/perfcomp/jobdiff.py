@@ -25,14 +25,14 @@ class JobDiff:
         inline_with_links = rpm_diff.add_github_links(inline, colored_inline)
         return {
             'inline': inline_with_links, "uniq1": uniq1, "uniq2": uniq2,
-            'rpms_diff_max_length': max([len(l) for l in (uniq1, uniq2)])
+            'rpms_diff_max_length': max([len(v) for v in (uniq1, uniq2)])
         }
 
     def pip_files_diff(self):
         inline, uniq1, uniq2 = pip_diff.pip_modules(self.good, self.bad)
         return {
             'pip_inline': inline, "pip_uniq1": uniq1, "pip_uniq2": uniq2,
-            'pip_diff_max_length': max([len(l) for l in (uniq1, uniq2)])
+            'pip_diff_max_length': max([len(v) for v in (uniq1, uniq2)])
         }
 
     def generate(self):
