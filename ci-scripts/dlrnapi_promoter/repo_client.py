@@ -6,11 +6,11 @@ import os
 try:
     # Python3 imports
     import urllib.request as url
-    from io import StringIO as csv_io
+    from io import StringIO as csv_io  # noqa N813
 except ImportError:
     # Python 2 imports
     import urllib2 as url
-    from StringIO import StringIO as csv_io
+    from StringIO import StringIO as csv_io  # noqa N813
 
 
 class RepoError(Exception):

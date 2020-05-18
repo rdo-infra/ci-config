@@ -1,6 +1,7 @@
 import pytest
 import noop_build
 
+
 # We get all the combinations and attack gerrit
 @pytest.mark.parametrize("release", ['master', 'rocky', 'queens', 'pike'])
 @pytest.mark.parametrize("type", ["upstream", "rdo"])

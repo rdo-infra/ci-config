@@ -13,11 +13,11 @@ import time
 import yaml
 
 try:
-    import ConfigParser as ini_parser
-    from io import BytesIO as csv_io
-except ImportError:
     import configparser as ini_parser
-    from io import StringIO as csv_io
+    from io import StringIO as csv_io  # noqa N813
+except ImportError:  # py2
+    import ConfigParser as ini_parser  # noqa N813
+    from io import BytesIO as csv_io  # noqa N813
 
 from common import check_port
 from dlrn import db as dlrn_db

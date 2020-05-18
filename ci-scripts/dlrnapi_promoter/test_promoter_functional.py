@@ -177,6 +177,7 @@ def test_single_promote(staged_env):
     promoter.promote(candidate_hash, "tripleo-ci-staging",
                      "tripleo-ci-staging-promoted")
 
+
 @pytest.mark.parametrize("staged_env", ("all_single", "all_integration"),
                          indirect=True)
 def test_promote_all(staged_env):

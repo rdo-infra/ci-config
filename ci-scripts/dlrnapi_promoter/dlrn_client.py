@@ -21,7 +21,7 @@ try:
     import urllib.request as url
 except ImportError:
     # Python 2 imports
-    import ConfigParser as ini_parser
+    import ConfigParser as ini_parser  # noqa N813
     JSONDecodeError = ValueError
     import urllib2 as url
 

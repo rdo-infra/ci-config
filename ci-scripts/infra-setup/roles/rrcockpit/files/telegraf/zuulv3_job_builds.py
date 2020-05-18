@@ -188,18 +188,20 @@ def add_container_prep_time(build):
         elif any(x in build['job_name'] for x in job_terms):
             file_relative_path = ("logs/undercloud/home/zuul/"
                                   "install-undercloud.log.txt.gz")
-            respData = get_file_from_build(build, file_relative_path,
-                                           json_view=False)
+            resp_data = get_file_from_build(
+                build, file_relative_path,
+                json_view=False)
         elif 'standalone' in build['job_name']:
             file_relative_path = ("logs/undercloud/home/zuul/"
                                   "standalone_deploy.log.txt.gz")
 
-            respData = get_file_from_build(build, file_relative_path,
-                                           json_view=False)
+            resp_data = get_file_from_build(
+                build, file_relative_path,
+                json_view=False)
         else:
             return
 
-        if respData is None:
+        if resp_data is None:
             return
 
         # This is the old regular expression, commented here because it's hard
@@ -232,7 +234,7 @@ def add_container_prep_time(build):
         container_prep_line = (r'Run.*tripleo-container-image-prepare.log'
                                r'\s*\-?\s*([1-9]*\.?[1-9]*)s')
 
-        match = re.findall(container_prep_line, respData, re.MULTILINE)
+        match = re.findall(container_prep_line, resp_data, re.MULTILINE)
 
         if len(match) > 0:
             build['container_prep_time_u'] = float(match[0])
