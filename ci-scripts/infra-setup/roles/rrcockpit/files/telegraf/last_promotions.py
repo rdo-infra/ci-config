@@ -4,9 +4,17 @@ import argparse
 import dlrnapi_client
 
 from influxdb_utils import format_ts_from_float
-from promoter_utils import get_dlrn_instance
-from promoter_utils import get_promoter_config
-from promoter_utils import get_promoter_component_config
+
+# only run upstream or downstream promotion checks
+# do not run both.
+try:
+    from internal_promoter_utils import get_dlrn_instance
+    from internal_promoter_utils import get_promoter_config
+    from internal_promoter_utils import get_promoter_component_config
+except ImportError:
+    from promoter_utils import get_dlrn_instance
+    from promoter_utils import get_promoter_config
+    from promoter_utils import get_promoter_component_config
 
 PROMOTION_INFLUXDB_LINE = ("dlrn-promotion,"
                            "release={release},distro={distro},"
