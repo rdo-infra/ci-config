@@ -48,7 +48,7 @@ class TestMain(unittest.TestCase):
         with self.assertRaises(LockError):
             promoter_main(cmd_line="--config-file config.ini promote-all")
 
-        init_mock.assert_not_called()
+        self.assertFalse(init_mock.called)
 
 
 class TestPromoteAll(unittest.TestCase):
@@ -81,8 +81,8 @@ class TestForcePromote(unittest.TestCase):
         with self.assertRaises(SystemExit):
             promoter_main(cmd_line=cmd_line)
 
-        init_mock.assert_not_called()
-        start_process_mock.assert_not_called()
+        self.assertFalse(init_mock.called)
+        self.assertFalse(start_process_mock.called)
 
     @mock.patch.object(Promoter, '__init__', autospec=True, return_value=None)
     @mock.patch.object(Promoter, 'promote_all', autospec=True)
@@ -100,9 +100,9 @@ class TestForcePromote(unittest.TestCase):
         with self.assertRaises(SystemExit):
             promoter_main(cmd_line=cmd_line)
 
-        init_mock.assert_not_called()
-        start_process_mock.assert_not_called()
-        single_promote_mock.assert_not_called()
+        self.assertFalse(init_mock.called)
+        self.assertFalse(start_process_mock.called)
+        self.assertFalse(single_promote_mock.called)
 
     @mock.patch.object(Promoter, '__init__', autospec=True, return_value=None)
     @mock.patch.object(Promoter, 'promote_all', autospec=True)
@@ -121,7 +121,7 @@ class TestForcePromote(unittest.TestCase):
         promoter_main(cmd_line=cmd_line)
 
         self.assertTrue(init_mock.called)
-        start_process_mock.assert_not_called()
+        self.assertFalse(start_process_mock.called)
         single_promote_mock.assert_has_calls([
             mock.call(mock.ANY, candidate_hash, 'tripleo-ci-testing',
                       'current-tripleo')
