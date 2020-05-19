@@ -28,6 +28,7 @@
               - ^ci-scripts/infra-setup/scheduler/.*$
               - ^zuul.d/layout.yaml$
         - rdo-tox-molecule: &molecule
+            voting: false
             files:
               - .*molecule.*
               - ^ci-scripts/infra-setup/roles/get_hash/.*$
@@ -42,6 +43,7 @@
                 PYTEST_REQPASS: 1
         - rdo-tox-molecule-delegated-centos-8:
             <<: *molecule
+            voting: false
             vars:
               tox_environment:
                 PYTEST_REQPASS: 1
@@ -99,6 +101,7 @@
             post-run: playbooks/post-run.yml
             success-url: "tox/reports.html"
             failure-url: "tox/reports.html"
+            voting: false
             files:
               - .*\.py
               - ^ci-scripts/infra-.*/.*
