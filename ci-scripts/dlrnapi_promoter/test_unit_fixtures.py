@@ -183,7 +183,13 @@ class ConfigSetup(unittest.TestCase):
         cli = "--config-file {} promote-all".format(self.filepath)
         args = arg_parser(cmd_line=cli)
         os.environ["DLRNAPI_PASSWORD"] = "test"
-        self.promoter = Promoter(config_file=args.config_file)
+        overrides = {
+            "default_qcow_server": "staging",
+            "log_level": "DEBUG",
+        }
+        overrides_obj = type("FakeArgs", (), overrides)
+        self.promoter = Promoter(config_file=args.config_file,
+                                 overrides=overrides_obj)
 
     def tearDown(self):
         os.unlink(self.filepath)

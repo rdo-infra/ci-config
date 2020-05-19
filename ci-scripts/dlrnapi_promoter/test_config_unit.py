@@ -392,13 +392,22 @@ class TestExpandConfig(ConfigBase):
             'promotion_criteria_map': {},
             'release': 'master',
             'repo_url': 'https://trunk.rdoproject.org/centos7-master',
-            'target_registries_push': True,
             'source_namespace': "tripleomaster",
             'target_namespace': "tripleomaster",
+            'target_registries_push': True,
+            'overcloud_images': {'qcow_servers': {'local': {}}},
+            'default_qcow_server': 'local',
+            'qcow_server': {},
         }
 
         in_config = {
-            'promotion_criteria_map': {}
+            'promotion_criteria_map': {},
+            'overcloud_images': {
+                'qcow_servers': {
+                    "local": {}
+                }
+            },
+            'default_qcow_server': "local"
         }
         get_api_url_mock.return_value = api_url
         config = PromoterConfig(self.filepaths['correct'], filters=[],
@@ -411,7 +420,13 @@ class TestExpandConfig(ConfigBase):
         api_url = "http://localhost:58080"
         in_config = {
             'promotion_criteria_map': {},
-            'release': "ussuri"
+            'release': "ussuri",
+            'overcloud_images': {
+                'qcow_servers': {
+                    'default_server': {}
+                }
+            },
+            'default_qcow_server': 'default_server'
         }
         get_api_url_mock.return_value = api_url
         config = PromoterConfig(self.filepaths['correct'], filters=[],
@@ -427,6 +442,12 @@ class TestExpandConfig(ConfigBase):
             'promotion_criteria_map': {},
             'source_namespace': "mysourcenamespace",
             'target_namespace': "mytargetnamespace",
+            'overcloud_images': {
+                'qcow_servers': {
+                    'default_server': {}
+                }
+            },
+            'default_qcow_server': 'default_server'
         }
         get_api_url_mock.return_value = api_url
         config = PromoterConfig(self.filepaths['correct'], filters=[],
