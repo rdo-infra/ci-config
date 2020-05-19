@@ -51,7 +51,38 @@ class PromoterConfigBase(object):
         "containers_list_exclude_config": (
             "https://opendev.org/openstack/"
             "tripleo-ci/raw/branch/master/roles/build-containers/vars/main.yaml"
-        )
+        ),
+        "overcloud_images": {
+            "qcow_servers": {
+                "rdo": {
+                    "host": "images.rdoproject.org",
+                    "user": "uploader",
+                    "root": "/var/www/html/images/",
+                    "client": "sftp"
+                },
+                "staging": {
+                    "host": "localhost",
+                    "root": "/tmp/promoter-staging/overcloud_images",
+                    "user": os.environ.get("USER"),
+                    "client": "sftp",
+                },
+                "local": {
+                    "host": None,
+                    "root": "/tmp/promoter-staging/overcloud_images",
+                    "user": None,
+                    "client": "fs",
+                }
+            },
+            "qcow_images": [
+                "ironic-python-agent.tar",
+                "ironic-python-agent.tar.md5",
+                "overcloud-full.tar",
+                "overcloud-full.tar.md5",
+                "undercloud.qcow2",
+                "undercloud.qcow2.md5",
+            ],
+        },
+        "default_qcow_server": "rdo",
     }
     log = logging.getLogger("promoter")
 
@@ -197,7 +228,8 @@ class PromoterConfig(PromoterConfigBase):
                           'log_level',
                           'containers_list_base_url',
                           'containers_list_exclude_config',
-                          'allowed_clients']
+                          'allowed_clients',
+                          'default_qcow_server']
         for override in main_overrides:
             try:
                 attr = getattr(overrides, override)
@@ -328,6 +360,9 @@ class PromoterConfig(PromoterConfigBase):
             criteria = set(list(job_list))
             config['promotion_criteria_map'][target_name] = criteria
 
+        config['qcow_server'] = config['overcloud_images'][
+            'qcow_servers'][config['default_qcow_server']]
+
         return config
 
     def sanity_check(self, config, file_config, checks="all"):
@@ -382,24 +417,11 @@ class PromoterConfig(PromoterConfigBase):
     def experimental_config(self, config):
         """
         Loads additional configuration for experimental features
-        :param config:
-        :return:
+        And modify config accordingly
+        :param config: The curent configuration
+        :return: The config dict with experimental handling
         """
-        # Experimental configuration for qcow promotion via promoter code
-        # FIXME: This is policy and it shouldn't be here. Promotion
-        #  configuration file should pass their server preference as variable
-        default_qcow_server = 'staging'
-        experimental_path = os.path.join(self.git_root, "ci-scripts",
-                                         "dlrnapi_promoter",
-                                         "promoter_defaults_experimental.yaml")
-        with open(experimental_path, 'r') as \
-                defaults:
-            experimental_config = yaml.safe_load(defaults)
-
-        if 'rhel' in self.distro_name or 'redhat' in self.distro_name:
-            default_qcow_server = 'private'
-
-        self.qcow_server = experimental_config['overcloud_images'][
-            'qcow_servers'][default_qcow_server]
+        # Experimental configuration
+        # No experimental handling of config currently exist
 
         return config
