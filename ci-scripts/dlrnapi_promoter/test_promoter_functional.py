@@ -101,6 +101,7 @@ def staged_env(request):
         'repo_url': stage_info['dlrn']['server']['repo_url'],
         'log_level': 'DEBUG',
         'experimental': experimental,
+        'default_qcow_server': 'staging'
     }
     if "containers_" in test_case:
         overrides['containers_list_base_url'] = \
@@ -138,7 +139,8 @@ def test_promote_containers(staged_env):
         stage_info=stage_info)
 
 
-@pytest.mark.parametrize("staged_env", ("qcow_single", "qcow_integration"),
+@pytest.mark.parametrize("staged_env", ("qcow_single",
+                                        "qcow_integration"),
                          indirect=True)
 def test_promote_qcows(staged_env):
     """
@@ -157,12 +159,10 @@ def test_promote_qcows(staged_env):
         error_msg = "Integration pipeline should promote an aggregate hash"
         assert type(candidate_hash) == DlrnAggregateHash, error_msg
 
-    candidate_label = candidate_dict['name']
     target_label = stage_info['dlrn']['promotion_target']
 
     promoter.dlrn_client.fetch_current_named_hashes(store=True)
-    promoter.promote(candidate_hash, candidate_label, target_label,
-                     allowed_clients=["qcow_client"])
+    promoter.qcow_client.promote(candidate_hash, target_label)
 
     promoter_integration_checks.compare_tagged_image_hash(stage_info=stage_info)
 
@@ -230,31 +230,3 @@ def test_promote_all_two_promotions_in_a_row(staged_env):
     :return:
     """
     assert False
-
-
-@pytest.mark.parametrize("staged_env", ("qcow_single_experimental",
-                                        "qcow_integration_experimental"),
-                         indirect=True)
-def test_promote_qcows_experimental(staged_env):
-    """
-    Tests promotion of overcloud images
-    :param staged_env: The stage env fixture
-    :return: None
-    """
-    stage_info, promoter = staged_env
-    candidate_dict = stage_info['dlrn']['promotions']['promotion_candidate']
-    candidate_hash = DlrnHash(source=candidate_dict)
-
-    if stage_info['main']['pipeline_type'] == "single":
-        error_msg = "Single pipeline should promote a commit/distro hash"
-        assert type(candidate_hash) == DlrnCommitDistroHash, error_msg
-    else:
-        error_msg = "Integration pipeline should promote an aggregate hash"
-        assert type(candidate_hash) == DlrnAggregateHash, error_msg
-
-    target_label = stage_info['dlrn']['promotion_target']
-
-    promoter.dlrn_client.fetch_current_named_hashes(store=True)
-    promoter.qcow_client.promote_experimental(candidate_hash, target_label)
-
-    promoter_integration_checks.compare_tagged_image_hash(stage_info=stage_info)
