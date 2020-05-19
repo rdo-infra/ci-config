@@ -184,6 +184,13 @@ def compare_tagged_image_hash(stage_info=None, **kwargs):
         #    release, 'rdo_trunk')
         rl_module = sftp
 
+    check_links(rl_module, promotion_link, target_label, promotion_dir,
+                previous_link=previous_link, previous_dir=previous_dir)
+
+
+def check_links(rl_module, promotion_link, target_label, promotion_dir,
+                previous_link=None, previous_dir=None):
+
     try:
         file_mode = rl_module.lstat(promotion_link).st_mode
         assert True
@@ -197,15 +204,17 @@ def compare_tagged_image_hash(stage_info=None, **kwargs):
                                                                  promotion_dir)
 
     assert linked_dir == promotion_dir, error_msg
-    try:
-        file_mode = rl_module.lstat(previous_link).st_mode
-        assert True
-    except OSError:
-        assert False, "No link was created"
 
-    assert stat.S_ISLNK(file_mode), "Promoted dir is not a symlink"
-    assert rl_module.readlink(
-        previous_link) == previous_dir, "No previous dir create"
+    if previous_dir is not None and previous_link is not None:
+        try:
+            file_mode = rl_module.lstat(previous_link).st_mode
+            assert True
+        except OSError:
+            assert False, "No link was created"
+
+        assert stat.S_ISLNK(file_mode), "Promoted dir is not a symlink"
+        assert rl_module.readlink(
+            previous_link) == previous_dir, "No previous dir create"
 
 
 def parse_promotion_logs(stage_info=None, **kwargs):

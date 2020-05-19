@@ -4,9 +4,52 @@ This file contains classes and functionto interact with qcow images servers
 import copy
 import logging
 import os
-import subprocess
+import paramiko
 
 from common import PromotionError
+
+try:
+    FileNotFoundError
+except NameError:
+    FileNotFoundError = IOError
+
+
+class QcowConnectionClient(object):
+    """
+    Proxy class for client connection
+    """
+
+    _log = logging.getLogger("promoter")
+
+    def __init__(self, server_conf):
+        self._host = server_conf['host']
+        self._user = server_conf['user']
+        self._client_type = server_conf['client']
+        self._client = os
+        if server_conf['client'] == "sftp":
+            client = paramiko.SSHClient()
+            client.load_system_host_keys()
+            client.set_missing_host_key_policy(paramiko.WarningPolicy)
+
+            keypath = os.path.expanduser('~/.ssh/id_rsa')
+            key = paramiko.rsakey.RSAKey(filename=keypath)
+            kwargs = {}
+            if self._user is not None:
+                kwargs['username'] = self._user
+            else:
+                kwargs['username'] = os.environ.get("USER")
+
+            self._log.debug("Connecting to %s as user %s", self._host,
+                            self._user)
+            client.connect(self._host, pkey=key, **kwargs)
+            self._client = client.open_sftp()
+
+    def __getattr__(self, item):
+        return getattr(self._client, item)
+
+    def close(self):
+        if self._client_type == "sftp":
+            self._client.close()
 
 
 class QcowClient(object):
@@ -25,85 +68,17 @@ class QcowClient(object):
         self.distro_name = self.config.distro_name
         self.distro_version = self.config.distro_version
         # Try to load experimental config
-        if hasattr(config, 'qcow_server'):
-            # Currently paramiko is not in requirements, and I don't want to
-            # add it for the experimental code.
-            import paramiko
-            server_conf = self.config.qcow_server
-            self.user = server_conf['user']
-            self.root = server_conf['root']
-            self.host = server_conf['host']
+        # Currently paramiko is not in requirements, and I don't want to
+        # add it for the experimental code.
+        server_conf = self.config.qcow_server
+        self.user = server_conf['user']
+        self.root = server_conf['root']
+        self.host = server_conf['host']
 
-            self.images_dir = os.path.join(self.root, config.distro,
-                                           config.release, "rdo_trunk")
+        self.client = QcowConnectionClient(server_conf)
 
-            client = paramiko.SSHClient()
-            client.load_system_host_keys()
-            client.set_missing_host_key_policy(paramiko.WarningPolicy)
-
-            keypath = os.path.expanduser('~/.ssh/id_rsa')
-            key = paramiko.rsakey.RSAKey(filename=keypath)
-            kwargs = {}
-            if self.user is not None:
-                kwargs['username'] = self.user
-            client.connect(self.host, pkey=key, **kwargs)
-            self.client = client.open_sftp()
-            try:
-                self.client.chdir(self.images_dir)
-            except IOError as ex:
-                self.log.error("Qcow-client: Image root dir %s does not exist "
-                               "in the server")
-                self.log.exception(ex)
-                self.client.close()
-                raise
-
-    def promote(self, candidate_hash, target_label, **kwargs):
-        """
-        This method promotes images contained inside a dir in the server
-        whose name is equal to the dlrn_id specified by creating a
-        symlink to it named as the target_label.
-        It currently uses an external Bash script for the effective promotion
-        :param candidate_hash:  The hash object to select images dir
-        :param target_label: The name of the symlink
-        :return: None
-        """
-        log_header = "Qcow promote '{}' to {}:".format(candidate_hash,
-                                                       target_label)
-        try:
-            self.log.info("%s Attempting promotion", log_header)
-            # The script doesn't really use commit/distro or full hash,
-            # it just needs the hash to identify the dir, so it works with
-            # either dlrnhash or aggregated hash.
-            cmd = ['bash',
-                   self.promote_script,
-                   '--distro', self.distro_name,
-                   '--distro-version', self.distro_version,
-                   self.config.release,
-                   candidate_hash.full_hash,
-                   target_label
-                   ]
-            qcow_logs = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-            qcow_logs_lines = qcow_logs.decode("UTF-8").split("\n")
-            self.log.info("%s Successful promotion", log_header)
-            self.log.info("%s Successful promotion "
-                          "start logs -----------------------------",
-                          log_header)
-            for line in qcow_logs_lines:
-                self.log.info(line)
-            self.log.info("%s Successful promotion "
-                          "end logs -----------------------------", log_header)
-        except subprocess.CalledProcessError as ex:
-            self.log.error("%s Failed promotion", log_header)
-            self.log.error("%s Failed promotion start "
-                           "logs -----------------------------", log_header)
-            for line in ex.output.decode("UTF-8").split("\n"):
-                self.log.error(line)
-            self.log.exception(ex)
-            self.log.error("%s Failed promotion end "
-                           "logs -----------------------------", log_header)
-            raise PromotionError("Failed to promote overcloud images")
-
-# ###-------- The code that follows is experimental and untested
+        self.images_dir = os.path.join(self.root, config.distro,
+                                       config.release, "rdo_trunk")
 
     def validate_qcows(self, dlrn_hash, name=None, assume_valid=False):
         """
@@ -117,25 +92,25 @@ class QcowClient(object):
         :param dlrn_hash: The hash to check
         :param name: The promotion name
         :param assume_valid: report everything worked unconditionally
-        :return:
+        :return: A dict with result of the validation
         """
+
+        try:
+            self.client.chdir(self.images_dir)
+        except IOError as ex:
+            self.log.error("Qcow-client: Image root dir %s does not exist "
+                           "in the server")
+            self.log.exception(ex)
+            raise
 
         results = {
             "hash_valid": False,
             "promotion_valid": False,
             "qcow_valid": False,
-            "missing_qcows": copy.copy(self.config.qcow_images),
+            "missing_qcows": copy.copy(
+                self.config.overcloud_images['qcow_images']),
             "present_qcows": [],
         }
-        if assume_valid:
-            results = {
-                "hash_valid": True,
-                "promotion_valid": True,
-                "qcow_valid": True,
-                "present_qcows": copy.copy(self.config.qcow_images),
-                "missing_qcows": [],
-            }
-            return results
 
         try:
             images_path = os.path.join(self.images_dir, dlrn_hash.full_hash)
@@ -146,10 +121,12 @@ class QcowClient(object):
             images = sorted(self.client.listdir(images_path))
             results['present_qcows'] = images
             results['missing_qcows'] = \
-                list(set(self.config.qcow_images).difference(images))
-            if images == self.config.qcow_images:
+                list(set(self.config.overcloud_images[
+                             'qcow_images']).difference(
+                    images))
+            if images == self.config.overcloud_images['qcow_images']:
                 results['qcow_valid'] = True
-        except IOError:
+        except (FileNotFoundError, IOError):
             pass
 
         if name is not None:
@@ -162,20 +139,23 @@ class QcowClient(object):
 
         return results
 
-    def promote_experimental(self, candidate_hash, target_label,
-                             candidate_label=None,
-                             create_previous=True):
+    def promote(self, candidate_hash, target_label, candidate_label=None,
+                create_previous=True,):
+
+        self.validate_qcows(candidate_hash)
+
         log_header = "Qcow promote '{}' to {}:".format(candidate_hash,
                                                        target_label)
         self.log.info("%s Attempting promotion", log_header)
         try:
             self.client.stat(candidate_hash.full_hash)
-        except IOError as ex:
+        except Exception as ex:
             self.log.error("%s No images dir for hash %s", log_header,
                            candidate_hash)
             self.log.exception(ex)
             self.client.close()
-            raise
+            raise PromotionError("{} No images dir for hash {}"
+                                 "".format(log_header, candidate_hash))
 
         current_hash = None
         try:
