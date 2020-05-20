@@ -3,21 +3,41 @@
 Main file for the promoter
 """
 import argparse
+from collections import defaultdict
+import yaml
+import os
 
 import common
-from common import LockError
-from config import PromoterConfigBase
+from common import LockError, get_root_paths
+from config_legacy import PromoterLegacyConfigBase, PromoterLegacyConfig
 from logic import Promoter
 from dlrn_hash import DlrnHash, DlrnHashError, DlrnAggregateHash
 
 
-def promote_all(args):
-    promoter = Promoter(args.config_file, overrides=args)
+class DefaultConfig(defaultdict):
+    """
+    Creates a configuration object used early in the promoter, when config_root
+    has not yet been specified.
+    """
+    def __init__(self, *args, **kwargs):
+        super(DefaultConfig, self,).__init__(lambda : None, **kwargs)
+        try:
+            with open("config_defaults.yaml") as defaults_file:
+                self.update(yaml.safe_load(defaults_file))
+                self['repo_root'], self['promoter_root'] = get_root_paths()
+                self['config_root'] = os.path.join(self['promoter_root'],
+                                                   self['config_root'])
+        except (IOError, yaml.YAMLError):
+            pass
+
+
+def promote_all(config, args):
+    promoter = Promoter(config)
     promoter.promote_all()
 
 
-def force_promote(args):
-    promoter = Promoter(args.config_file, overrides=args)
+def force_promote(config, args):
+    promoter = Promoter(config)
 
     try:
         candidate_hash = DlrnHash(source=args)
@@ -29,11 +49,12 @@ def force_promote(args):
     promoter.promote(candidate_hash, args.candidate_label, args.target_label)
 
 
-def arg_parser(cmd_line=None):
+def arg_parser(cmd_line=None, defaults=defaultdict()):
     """
     Parse the command line or the parameter to pass to the rest of the workflow
     :param cmd_line: A string containing a command line (mainly used for
     testing)
+    :param defaults: A default Dictionary with argument defaults
     :return: An args object with overrides for the configuration
     """
     default_formatter = argparse.ArgumentDefaultsHelpFormatter
@@ -42,7 +63,7 @@ def arg_parser(cmd_line=None):
     main_parser.add_argument("--config-file", required=True,
                              help="The config file")
     main_parser.add_argument("--log-level",
-                             default=PromoterConfigBase.defaults['log_level'],
+                             default=defaults['log_level'],
                              help="Set the log level")
     command_parser = main_parser.add_subparsers(dest='subcommand')
     command_parser.required = True
@@ -66,9 +87,9 @@ def arg_parser(cmd_line=None):
     force_promote_parser.add_argument("--aggregate-hash",
                                       help="The aggregate hash part for the "
                                            "candidate hash")
-    allowed_clients_default = PromoterConfigBase.defaults['allowed_clients']
     force_promote_parser.add_argument("--allowed-clients",
-                                      default=allowed_clients_default,
+                                      default=defaults[
+                                          'allowed_clients_default'],
                                       help="The comma separated list of "
                                            "clients allowed to perfom the "
                                            "promotion")
@@ -95,7 +116,9 @@ def main(cmd_line=None):
     line string with arguments. Useful for testing the main function
     :return: None
     """
-    args = arg_parser(cmd_line=cmd_line)
+    defaults = DefaultConfig()
+
+    args = arg_parser(cmd_line=cmd_line, defaults=defaults)
     try:
         common.get_lock("promoter")
     except LockError:
@@ -104,7 +127,15 @@ def main(cmd_line=None):
             "kill it and then retry")
         raise
 
-    args.handler(args)
+    if args.config_file is None:
+        # If a config file is specified use legacy config builder
+        config = PromoterLegacyConfig(args)
+    else:
+        # If not then use the config root and the new config builder
+        # Which is not implemented yet
+        config = PromoterLegacyConfig(args)
+
+    args.handler(config, args)
 
 
 if __name__ == '__main__':

@@ -2,7 +2,8 @@ import os
 import tempfile
 import unittest
 
-from dlrnapi_promoter import arg_parser
+from config_legacy import PromoterLegacyConfig
+from dlrnapi_promoter import arg_parser, DefaultConfig
 from logic import Promoter
 
 try:
@@ -181,9 +182,11 @@ class ConfigSetup(unittest.TestCase):
         with os.fdopen(fp, "w") as test_file:
             test_file.write(content)
         cli = "--config-file {} promote-all".format(self.filepath)
-        args = arg_parser(cmd_line=cli)
+        defaults = DefaultConfig()
+        args = arg_parser(cmd_line=cli, defaults=defaults)
+        config = PromoterLegacyConfig(args)
         os.environ["DLRNAPI_PASSWORD"] = "test"
-        self.promoter = Promoter(config_file=args.config_file)
+        self.promoter = Promoter(config)
 
     def tearDown(self):
         os.unlink(self.filepath)
