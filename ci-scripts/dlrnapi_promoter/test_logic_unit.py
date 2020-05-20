@@ -395,6 +395,7 @@ class TestPromoteAll(ConfigSetup):
         ])
         self.assertEqual(promoted_pairs, [('label', 'hash')])
 
+    @patch('dlrnapi_client.DefaultApi.api_promotions_get')
     @patch('logging.Logger.info')
     @patch('logging.Logger.warning')
     @patch('logging.Logger.error')
@@ -402,7 +403,8 @@ class TestPromoteAll(ConfigSetup):
     def test_promote_all_failure(self, mock_promote_label_to_label,
                                  mock_log_error,
                                  mock_log_warning,
-                                 mock_log_info):
+                                 mock_log_info,
+                                 mock_dlrn_api_promotions):
         mock_promote_label_to_label.side_effect = PromotionError
         promoted_pairs = self.promoter.promote_all()
         mock_log_error.assert_has_calls([
@@ -414,6 +416,7 @@ class TestPromoteAll(ConfigSetup):
                       "hash promoted to %s", 'tripleo-ci-testing',
                       'current-tripleo')
         ])
+        self.assertTrue(mock_dlrn_api_promotions.called)
         # Ensure we terminate normally even in case of promotion failure
         mock_log_info.assert_has_calls([
             mock.call('------- -------- Promoter terminated normally')
