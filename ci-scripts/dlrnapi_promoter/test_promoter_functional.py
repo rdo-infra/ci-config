@@ -12,6 +12,7 @@ import promoter_integration_checks
 import pytest
 import yaml
 from common import close_logging
+from config_legacy import PromoterLegacyConfig
 from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
 from logic import Promoter
 from stage import main as stage_main
@@ -44,7 +45,7 @@ def staged_env(request):
     promoter_config_file = \
         "staging/CentOS-7/master.ini"
 
-    test_case = "all_integration"
+    test_case = "all_legacyconf_integration"
 
     try:
         test_case = request.param
@@ -98,7 +99,8 @@ def staged_env(request):
         'repo_url': stage_info['dlrn']['server']['repo_url'],
         'log_level': 'DEBUG',
         'experimental': experimental,
-        'default_qcow_server': 'staging'
+        'default_qcow_server': 'staging',
+        'config_file': promoter_config_file,
     }
     if "containers_" in test_case:
         overrides['containers_list_base_url'] = \
@@ -106,7 +108,13 @@ def staged_env(request):
 
     overrides_obj = type("FakeArgs", (), overrides)
     os.environ["DLRNAPI_PASSWORD"] = stage_info['dlrn']['server']['password']
-    promoter = Promoter(promoter_config_file, overrides=overrides_obj)
+    if 'legacyconf' in test_case:
+        config = PromoterLegacyConfig(overrides_obj.config_file,
+                                      overrides=overrides_obj)
+    else:
+        raise Exception("New config engine is not implemented yet")
+
+    promoter = Promoter(config)
 
     yield stage_info, promoter
 
@@ -114,8 +122,8 @@ def staged_env(request):
     stage_main(teardown_cmd_line)
 
 
-@pytest.mark.parametrize("staged_env", ("containers_single",
-                                        "containers_integration"),
+@pytest.mark.parametrize("staged_env", ("containers_legacyconf_single",
+                                        "containers_legacyconf_integration"),
                          indirect=True)
 def test_promote_containers(staged_env):
     """
@@ -136,8 +144,8 @@ def test_promote_containers(staged_env):
         stage_info=stage_info)
 
 
-@pytest.mark.parametrize("staged_env", ("qcow_single",
-                                        "qcow_integration"),
+@pytest.mark.parametrize("staged_env", ("qcow_legacyconf_single",
+                                        "qcow_legacyconf_integration"),
                          indirect=True)
 def test_promote_qcows(staged_env):
     """
@@ -175,7 +183,8 @@ def test_single_promote(staged_env):
                      "tripleo-ci-staging-promoted")
 
 
-@pytest.mark.parametrize("staged_env", ("all_single", "all_integration"),
+@pytest.mark.parametrize("staged_env", ("all_legacyconf_single",
+                                        "all_legacyconf_integration"),
                          indirect=True)
 def test_promote_all(staged_env):
     """
@@ -199,7 +208,8 @@ def test_promote_all(staged_env):
     assert len(promoted_pairs) != 0, error_msg
 
 
-@pytest.mark.parametrize("staged_env", ("all_single", "all_integration"),
+@pytest.mark.parametrize("staged_env", ("all_legacyconf_single",
+                                        "all_legacyconf_integration"),
                          indirect=True)
 @pytest.mark.xfail(reason="Not Implemented", run=False)
 def test_promote_all_no_promotions(staged_env):
@@ -214,7 +224,8 @@ def test_promote_all_no_promotions(staged_env):
     assert False
 
 
-@pytest.mark.parametrize("staged_env", ("all_single", "all_integration"),
+@pytest.mark.parametrize("staged_env", ("all_legacyconf_single",
+                                        "all_legacyconf_integration"),
                          indirect=True)
 @pytest.mark.xfail(reason="Not Implemented", run=False)
 def test_promote_all_two_promotions_in_a_row(staged_env):

@@ -4,11 +4,11 @@ import unittest
 
 import pytest
 from common import PromotionError
-from config import PromoterConfigBase
+from config_legacy import PromoterLegacyConfigBase
 from dlrn_hash import DlrnHash
 from promoter_integration_checks import check_links
 from qcow_client import QcowConnectionClient
-from test_unit_fixtures import ConfigSetup, hashes_test_cases
+from test_unit_fixtures import LegacyConfigSetup, hashes_test_cases
 
 try:
     # Python3 imports
@@ -73,7 +73,7 @@ class TestQcowConnectionClient(unittest.TestCase):
         self.assertFalse(paramiko_close_mock.called)
 
 
-class TestQcowClient(ConfigSetup):
+class TestQcowClient(LegacyConfigSetup):
 
     def setUp(self):
         super(TestQcowClient, self).setUp()
@@ -169,7 +169,7 @@ class TestQcowClientRollback(unittest.TestCase):
 class TestQcowClientValidation(TestQcowClient):
 
     def test_validation_full_pass(self):
-        expected_qcows = PromoterConfigBase.defaults['overcloud_images'][
+        expected_qcows = PromoterLegacyConfigBase.defaults['overcloud_images'][
             'qcow_images']
         for image_file in expected_qcows:
             with open(os.path.join(self.candidate_hash_dir, image_file), "w"):
@@ -188,7 +188,7 @@ class TestQcowClientValidation(TestQcowClient):
         self.assertTrue(validation_results['promotion_valid'])
 
     def test_validate_invalid_promotion(self):
-        expected_qcows = PromoterConfigBase.defaults['overcloud_images'][
+        expected_qcows = PromoterLegacyConfigBase.defaults['overcloud_images'][
             'qcow_images']
         for image_file in expected_qcows:
             with open(os.path.join(self.candidate_hash_dir, image_file), "w"):
@@ -204,7 +204,7 @@ class TestQcowClientValidation(TestQcowClient):
         self.assertFalse(validation_results['promotion_valid'])
 
     def test_validate_incomplete_images(self):
-        expected_qcows = PromoterConfigBase.defaults['overcloud_images'][
+        expected_qcows = PromoterLegacyConfigBase.defaults['overcloud_images'][
             'qcow_images']
         expected_qcows.remove('undercloud.qcow2')
         for image_file in expected_qcows:
@@ -222,7 +222,7 @@ class TestQcowClientValidation(TestQcowClient):
         self.assertFalse(validation_results['promotion_valid'])
 
     def test_validate_invalid_hash(self):
-        missing_qcows = PromoterConfigBase.defaults['overcloud_images'][
+        missing_qcows = PromoterLegacyConfigBase.defaults['overcloud_images'][
             'qcow_images']
 
         validation_results = self.client.validate_qcows(
