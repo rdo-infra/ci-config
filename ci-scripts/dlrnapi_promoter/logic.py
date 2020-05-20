@@ -5,7 +5,6 @@ workflow
 import logging
 
 from common import PromotionError
-from config import PromoterConfig
 from dlrn_client import DlrnClient
 from qcow_client import QcowClient
 from registries_client import RegistriesClient
@@ -19,15 +18,14 @@ class Promoter(object):
 
     log = logging.getLogger('promoter')
 
-    def __init__(self, config_file, overrides=None):
+    def __init__(self, config):
         """
         Instantiates a configuration object and all the clients for the
         promotion
         :param config_file: The path to the configuration file
         :param overrides: The command line overrides to the configuration
         """
-        self.config = PromoterConfig(config_file,
-                                     overrides=overrides)
+        self.config = config
         self.dlrn_client = DlrnClient(self.config)
         self.registries_client = RegistriesClient(self.config)
         self.qcow_client = QcowClient(self.config)

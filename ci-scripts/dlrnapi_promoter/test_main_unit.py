@@ -1,6 +1,7 @@
 import unittest
 
 from common import LockError
+from config_legacy import PromoterLegacyConfig
 from dlrn_hash import DlrnCommitDistroHash
 
 try:
@@ -53,9 +54,12 @@ class TestMain(unittest.TestCase):
 
 class TestPromoteAll(unittest.TestCase):
 
+    @mock.patch.object(PromoterLegacyConfig, '__init__', autospec=True,
+                       return_value=None)
     @mock.patch.object(Promoter, '__init__', autospec=True, return_value=None)
     @mock.patch.object(Promoter, 'promote_all', autospec=True)
-    def test_promote_all(self, start_process_mock, init_mock):
+    def test_promote_all(self, start_process_mock, init_mock,
+                         legacy_config_mock):
 
         promoter_main(cmd_line="--config-file config.ini promote-all")
 
@@ -104,13 +108,16 @@ class TestForcePromote(unittest.TestCase):
         self.assertFalse(start_process_mock.called)
         self.assertFalse(single_promote_mock.called)
 
+    @mock.patch.object(PromoterLegacyConfig, '__init__', autospec=True,
+                       return_value=None)
     @mock.patch.object(Promoter, '__init__', autospec=True, return_value=None)
     @mock.patch.object(Promoter, 'promote_all', autospec=True)
     @mock.patch.object(Promoter, 'promote', autospec=True)
     def test_force_promote_success(self,
                                    single_promote_mock,
                                    start_process_mock,
-                                   init_mock):
+                                   init_mock,
+                                   legacy_config_mock):
 
         candidate_hash = DlrnCommitDistroHash(commit_hash="a", distro_hash="b")
         cmd_line = ("--config-file config.ini force-promote "
