@@ -39,6 +39,7 @@ INTERNAL_OOO_PROJECTS = [
     'openstack-tripleo-ui',
     'openstack-tripleo-validations',
     'openstack-tripleo',
+    'openstack/tripleo-ci',
     'rhos-ops/openstack-tripleo-heat-templates'
 ]
 
@@ -104,6 +105,8 @@ def get(url, json_view, query=None, timeout=20):
 def get_builds_info(url, query, pages, offset):
     builds = []
     for p in range(pages):
+        import pdb
+        #pdb.set_trace()
         if p > 0:
             query['skip'] = offset + (p * 50)
             # let's not abuse ZUUL API and sleep betwen requests
