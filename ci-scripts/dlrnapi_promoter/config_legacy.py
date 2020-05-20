@@ -22,7 +22,7 @@ class ConfigError(Exception):
     pass
 
 
-class PromoterConfigBase(object):
+class PromoterLegacyConfigBase(object):
     """
     This class builds a singleton object to be passed to all the other
     functions in the workflow.
@@ -171,7 +171,7 @@ class PromoterConfigBase(object):
         return config
 
 
-class PromoterConfig(PromoterConfigBase):
+class PromoterLegacyConfig(PromoterLegacyConfigBase):
     """
     This class expands and check the sanity of the config file. Only this
     class should be used by the promoter
@@ -185,13 +185,13 @@ class PromoterConfig(PromoterConfigBase):
         :param config_path: the path to the configuration file to load
         :param overrides: An object with override for the configuration
         """
-        super(PromoterConfig, self).__init__(config_file)
+        super(PromoterLegacyConfig, self).__init__(config_file)
 
         config = {}
         if filters == "all":
             filters = ['overrides', 'expand', 'experimental']
         if 'overrides' in filters:
-            config = self.handle_overrides(self._config, overrides)
+            config = self.handle_overrides(self._config, overrides=overrides)
         if 'expand' in filters:
             config = self.expand_config(config)
         if not self.sanity_check(config, self._file_config, checks=checks):

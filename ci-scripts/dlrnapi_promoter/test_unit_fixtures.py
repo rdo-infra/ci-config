@@ -2,6 +2,7 @@ import os
 import tempfile
 import unittest
 
+from config_legacy import PromoterLegacyConfig
 from dlrnapi_promoter import arg_parser
 from logic import Promoter
 
@@ -171,7 +172,8 @@ hashes_test_cases = {
 }
 
 
-class ConfigSetup(unittest.TestCase):
+# TODO: remove together with legacy config
+class LegacyConfigSetup(unittest.TestCase):
 
     def setUp(self):
         content = test_ini_configurations['correct']
@@ -179,15 +181,15 @@ class ConfigSetup(unittest.TestCase):
         with os.fdopen(fp, "w") as test_file:
             test_file.write(content)
         cli = "--config-file {} promote-all".format(self.filepath)
-        args = arg_parser(cmd_line=cli)
         os.environ["DLRNAPI_PASSWORD"] = "test"
         overrides = {
             "default_qcow_server": "staging",
             "log_level": "DEBUG",
         }
         overrides_obj = type("FakeArgs", (), overrides)
-        self.promoter = Promoter(config_file=args.config_file,
-                                 overrides=overrides_obj)
+        args = arg_parser(cmd_line=cli)
+        config = PromoterLegacyConfig(args.config_file, overrides=overrides_obj)
+        self.promoter = Promoter(config)
 
     def tearDown(self):
         os.unlink(self.filepath)

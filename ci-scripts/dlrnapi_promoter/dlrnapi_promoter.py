@@ -6,18 +6,16 @@ import argparse
 
 import common
 from common import LockError
-from config import PromoterConfigBase
-from dlrn_hash import DlrnHash, DlrnHashError
+from config_legacy import PromoterLegacyConfigBase, PromoterLegacyConfig
 from logic import Promoter
+from dlrn_hash import DlrnHash, DlrnHashError
 
 
-def promote_all(args):
-    promoter = Promoter(args.config_file, overrides=args)
+def promote_all(promoter, args):
     promoter.promote_all()
 
 
-def force_promote(args):
-    promoter = Promoter(args.config_file, overrides=args)
+def force_promote(promoter, args):
 
     try:
         candidate_hash = DlrnHash(source=args)
@@ -42,7 +40,8 @@ def arg_parser(cmd_line=None):
     main_parser.add_argument("--config-file", required=True,
                              help="The config file")
     main_parser.add_argument("--log-level",
-                             default=PromoterConfigBase.defaults['log_level'],
+                             default=PromoterLegacyConfigBase.defaults[
+                                 'log_level'],
                              help="Set the log level")
     command_parser = main_parser.add_subparsers(dest='subcommand')
     command_parser.required = True
@@ -66,9 +65,9 @@ def arg_parser(cmd_line=None):
     force_promote_parser.add_argument("--aggregate-hash",
                                       help="The aggregate hash part for the "
                                            "candidate hash")
-    allowed_clients_default = PromoterConfigBase.defaults['allowed_clients']
     force_promote_parser.add_argument("--allowed-clients",
-                                      default=allowed_clients_default,
+                                      default=PromoterLegacyConfigBase.defaults[
+                                          'allowed_clients'],
                                       help="The comma separated list of "
                                            "clients allowed to perfom the "
                                            "promotion")
@@ -95,6 +94,7 @@ def main(cmd_line=None):
     line string with arguments. Useful for testing the main function
     :return: None
     """
+
     args = arg_parser(cmd_line=cmd_line)
     try:
         common.get_lock("promoter")
@@ -104,7 +104,17 @@ def main(cmd_line=None):
             "kill it and then retry")
         raise
 
-    args.handler(args)
+    if args.config_file is not None:
+        # If a config file is specified use legacy config builder
+        config = PromoterLegacyConfig(args.config_file, overrides=args)
+    else:
+        # If not then use the config root and the new config builder
+        # Which is not implemented yet
+        raise Exception("New config method is not implemented yed")
+
+    promoter = Promoter(config)
+
+    args.handler(promoter, args)
 
 
 if __name__ == '__main__':

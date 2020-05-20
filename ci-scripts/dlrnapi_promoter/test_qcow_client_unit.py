@@ -4,11 +4,11 @@ import unittest
 
 import pytest
 from common import PromotionError
-from config import PromoterConfigBase
 from dlrn_hash import DlrnHash
 from promoter_integration_checks import check_links
 from qcow_client import QcowConnectionClient
-from test_unit_fixtures import ConfigSetup, hashes_test_cases
+from test_unit_fixtures import LegacyConfigSetup, hashes_test_cases
+
 
 try:
     # Python3 imports
@@ -72,8 +72,7 @@ class TestQcowConnectionClient(unittest.TestCase):
         client.close()
         self.assertFalse(paramiko_close_mock.called)
 
-
-class TestQcowClient(ConfigSetup):
+class TestQcowClient(LegacyConfigSetup):
 
     def setUp(self):
         super(TestQcowClient, self).setUp()
