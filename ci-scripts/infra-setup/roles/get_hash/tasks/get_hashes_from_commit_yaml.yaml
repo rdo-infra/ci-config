@@ -4,6 +4,10 @@
     url: "{{ commit_url }}"
     dest: "{{ workspace }}/commit.yaml"
     force: yes
+  register: result
+  until: result is success
+  retries: 3
+  delay: 30
 
 - name: fetch commit.yaml file to ansible controller
   fetch:
