@@ -2,6 +2,7 @@ import pytest
 import unittest
 
 from common import LockError
+from config_legacy import PromoterLegacyConfig
 from dlrn_hash import DlrnCommitDistroHash
 
 try:
@@ -48,14 +49,17 @@ class TestMain(unittest.TestCase):
         with self.assertRaises(LockError):
             promoter_main(cmd_line="--config-file config.ini promote-all")
 
-        init_mock.assert_not_called()
+        self.assertFalse(init_mock.called)
 
 
 class TestPromoteAll(unittest.TestCase):
 
+    @mock.patch.object(PromoterLegacyConfig, '__init__', autospec=True,
+                       return_value=None)
     @mock.patch.object(Promoter, '__init__', autospec=True, return_value=None)
     @mock.patch.object(Promoter, 'promote_all', autospec=True)
-    def test_promote_all(self, start_process_mock, init_mock):
+    def test_promote_all(self, start_process_mock, init_mock,
+                         legacy_config_mock):
 
         promoter_main(cmd_line="--config-file config.ini promote-all")
 
@@ -81,8 +85,8 @@ class TestForcePromote(unittest.TestCase):
         with self.assertRaises(SystemExit):
             promoter_main(cmd_line=cmd_line)
 
-        init_mock.assert_not_called()
-        start_process_mock.assert_not_called()
+        self.assertFalse(init_mock.called)
+        self.assertFalse(start_process_mock.called)
 
     @mock.patch.object(Promoter, '__init__', autospec=True, return_value=None)
     @mock.patch.object(Promoter, 'promote_all', autospec=True)
@@ -100,17 +104,20 @@ class TestForcePromote(unittest.TestCase):
         with self.assertRaises(SystemExit):
             promoter_main(cmd_line=cmd_line)
 
-        init_mock.assert_not_called()
-        start_process_mock.assert_not_called()
-        single_promote_mock.assert_not_called()
+        self.assertFalse(init_mock.called)
+        self.assertFalse(start_process_mock.called)
+        self.assertFalse(single_promote_mock.called)
 
+    @mock.patch.object(PromoterLegacyConfig, '__init__', autospec=True,
+                       return_value=None)
     @mock.patch.object(Promoter, '__init__', autospec=True, return_value=None)
     @mock.patch.object(Promoter, 'promote_all', autospec=True)
     @mock.patch.object(Promoter, 'promote', autospec=True)
     def test_force_promote_success(self,
                                    single_promote_mock,
                                    start_process_mock,
-                                   init_mock):
+                                   init_mock,
+                                   legacy_config_mock):
 
         candidate_hash = DlrnCommitDistroHash(commit_hash="a", distro_hash="b")
         cmd_line = ("--config-file config.ini force-promote "
@@ -121,7 +128,7 @@ class TestForcePromote(unittest.TestCase):
         promoter_main(cmd_line=cmd_line)
 
         self.assertTrue(init_mock.called)
-        start_process_mock.assert_not_called()
+        self.assertFalse(start_process_mock.called)
         single_promote_mock.assert_has_calls([
             mock.call(mock.ANY, candidate_hash, 'tripleo-ci-testing',
                       'current-tripleo')

@@ -11,10 +11,10 @@ except ImportError:
 
 from common import PromotionError
 from dlrn_hash import DlrnHash
-from test_unit_fixtures import ConfigSetup, hashes_test_cases
+from test_unit_fixtures import LegacyConfigSetup, hashes_test_cases
 
 
-class TestQcowClient(ConfigSetup):
+class TestQcowClient(LegacyConfigSetup):
 
     def setUp(self):
         super(TestQcowClient, self).setUp()
