@@ -39,6 +39,7 @@ INTERNAL_OOO_PROJECTS = [
     'openstack-tripleo-ui',
     'openstack-tripleo-validations',
     'openstack-tripleo',
+    'openstack/tripleo-ci',
     'rhos-ops/openstack-tripleo-heat-templates'
 ]
 
