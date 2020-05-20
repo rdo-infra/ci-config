@@ -31,7 +31,7 @@ class ConfigError(Exception):
     pass
 
 
-class PromoterConfigBase(object):
+class PromoterLegacyConfigBase(object):
     """
     This class builds a singleton object to be passed to all the other
     functions in the workflow.
@@ -59,7 +59,7 @@ class PromoterConfigBase(object):
     }
     log = logging.getLogger("promoter")
 
-    def __init__(self, config_file):
+    def __init__(self, args):
         """
         Initialize the config object loading from ini file
         :param config_path: the path to the configuration file to load
@@ -68,24 +68,24 @@ class PromoterConfigBase(object):
         setup_logging("promoter", logging.DEBUG)
 
         self.git_root, self.script_root = get_root_paths(self.log)
-        self.log.debug("Config file passed: %s", config_file)
+        self.log.debug("Config file passed: %s", args.config_file)
         self.log.debug("Git root %s", self.git_root)
 
-        if config_file is None:
+        if args.config_file is None:
             raise ConfigError("Empty config file")
         # The path is either absolute ot it's relative to the code root
-        if not os.path.isabs(config_file):
-            config_file = os.path.join(self.script_root, "config",
-                                       config_file)
+        if not os.path.isabs(args.config_file):
+            args.config_file = os.path.join(self.script_root, "config",
+                                       args.config_file)
         try:
-            os.stat(config_file)
+            os.stat(args.config_file)
         except OSError:
             self.log.error("Configuration file not found")
             raise
 
-        self.log.debug("Using config file %s", config_file)
-        self._file_config = self.load_from_ini(config_file)
-        self._config = self.load_config(config_file, self._file_config)
+        self.log.debug("Using config file %s", args.config_file)
+        self._file_config = self.load_from_ini(args.config_file)
+        self._config = self.load_config(args.config_file, self._file_config)
 
         # Load keys as config attributes
         for key, value in self._config.items():
@@ -145,13 +145,13 @@ class PromoterConfigBase(object):
         return config
 
 
-class PromoterConfig(PromoterConfigBase):
+class PromoterLegacyConfig(PromoterLegacyConfigBase):
     """
     This class expands and check the sanity of the config file. Only this
     class should be used by the promoter
     """
 
-    def __init__(self, config_file, overrides=None, filters="all",
+    def __init__(self, args, filters="all",
                  checks="all"):
         """
         Expands the parent init by adding config expansion, overrides
@@ -159,18 +159,18 @@ class PromoterConfig(PromoterConfigBase):
         :param config_path: the path to the configuration file to load
         :param overrides: An object with override for the configuration
         """
-        super(PromoterConfig, self).__init__(config_file)
+        super(PromoterLegacyConfig, self).__init__(args)
 
         config = {}
         if filters == "all":
             filters = ['overrides', 'expand', 'experimental']
         if 'overrides' in filters:
-            config = self.handle_overrides(self._config, overrides)
+            config = self.handle_overrides(self._config, args)
         if 'expand' in filters:
             config = self.expand_config(config)
         if not self.sanity_check(config, self._file_config, checks=checks):
             self.log.error("Error in configuration file {}"
-                           "".format(config_file))
+                           "".format(args.config_file))
             raise ConfigError
 
         # Add experimental configuration if activated
@@ -290,6 +290,8 @@ class PromoterConfig(PromoterConfigBase):
         config['log_level'] = \
             config.get('log_level', self.defaults['log_level'])
         try:
+            print(config['log_level'])
+            print(type(config['log_level']))
             config['log_level'] = getattr(logging, config['log_level'])
         except AttributeError:
             self.log.error("unrecognized log level: %s, using default %s",
