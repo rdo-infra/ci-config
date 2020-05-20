@@ -14,6 +14,7 @@ import promoter_integration_checks
 import yaml
 
 from common import close_logging
+from config_legacy import PromoterLegacyConfig
 
 try:
     import urllib2 as url
@@ -26,7 +27,8 @@ from logic import Promoter
 from stage import main as stage_main
 
 
-@pytest.fixture(scope='function', params=['dlrn_single', 'dlrn_integration'])
+@pytest.fixture(scope='function', params=['dlrn_legacyconf_single',
+                                          'dlrn_legacyconf_integration'])
 def staged_env(request):
     """
     Fixture that runs the staging environment provisioner with parameters,
@@ -81,11 +83,19 @@ def staged_env(request):
         'log_file': stage_info['main']['log_file'],
         'repo_url': stage_info['dlrn']['server']['repo_url'],
         'allowed_clients': 'dlrn_client',
+        'config_file': promoter_config_file,
     }
 
     overrides_obj = type("FakeArgs", (), overrides)
     os.environ["DLRNAPI_PASSWORD"] = stage_info['dlrn']['server']['password']
-    promoter = Promoter(promoter_config_file, overrides=overrides_obj)
+
+    if 'legacyconf' in test_case:
+        config = PromoterLegacyConfig(overrides_obj.config_file,
+                                      overrides=overrides_obj)
+    else:
+        raise Exception("New config engine is not implemented yet")
+
+    promoter = Promoter(config)
 
     yield stage_info, promoter
 
