@@ -19,12 +19,301 @@
         "links":[],
         "panels":[
             {
+                "cacheTimeout":null,
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"promotions to promoted-components and current-tripleo listed here.",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":8,
+                    "w":12,
+                    "x":0,
+                    "y":0
+                },
+                "hideTimeOverride":false,
+                "id":450,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"host",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"host",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"count",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_7:raw} ",
+                        "mappingType":1,
+                        "pattern":"repo",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"",
+                        "linkUrl":"${__cell_6:raw}",
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "preserveFormat":true,
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"release",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"repo",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "24h"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "name"
+                                ],
+                                "type":"tag"
+                            },
+                            {
+                                "params":[
+                                    "0"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "measurement":"dlrn-promotion",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'master'  and \"distro\" = 'CentOS-8') group by time(24h), *\n",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "repo_hash"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"release",
+                                "operator":"=",
+                                "value":"master"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"name",
+                                "operator":"=",
+                                "value":"current-tripleo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"distro",
+                                "operator":"=",
+                                "value":"CentOS-7"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"2w",
+                "timeShift":null,
+                "title":"Upstream Master Promotions",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":8,
+                    "w":12,
+                    "x":12,
+                    "y":0
+                },
+                "id":466,
+                "interval":"",
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":false
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "colorMode":null,
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":null,
+                        "pattern":"Time",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select \"component\", \"repo_hash\" from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"Days since last promotion",
+                "transform":"timeseries_to_columns",
+                "type":"table"
+            },
+            {
                 "collapsed":false,
                 "gridPos":{
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":0
+                    "y":8
                 },
                 "id":370,
                 "panels":[],
@@ -40,7 +329,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":1
+                    "y":9
                 },
                 "id":422,
                 "links":[
@@ -406,10 +695,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":1
+                    "y":9
                 },
                 "hideTimeOverride":false,
-                "id":450,
+                "id":464,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -419,12 +708,6 @@
                     "desc":true
                 },
                 "styles":[
-                    {
-                        "alias":"Time",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
                     {
                         "alias":"host",
                         "colorMode":null,
@@ -439,22 +722,6 @@
                         "pattern":"host",
                         "thresholds":[],
                         "type":"hidden",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"count",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"count",
-                        "thresholds":[],
-                        "type":"number",
                         "unit":"short"
                     },
                     {
@@ -533,6 +800,41 @@
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
+                    },
+                    {
+                        "alias":"Date",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"Time",
+                        "thresholds":[],
+                        "type":"date",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"Time",
+                        "thresholds":[
+                            "1",
+                            "2"
+                        ],
+                        "type":"number",
+                        "unit":"d"
                     }
                 ],
                 "targets":[
@@ -615,7 +917,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":9
+                    "y":17
                 },
                 "id":424,
                 "links":[
@@ -981,7 +1283,7 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":9
+                    "y":17
                 },
                 "hideTimeOverride":false,
                 "id":451,
@@ -1190,7 +1492,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":17
+                    "y":25
                 },
                 "id":386,
                 "links":[
@@ -1556,7 +1858,7 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":17
+                    "y":25
                 },
                 "hideTimeOverride":false,
                 "id":452,
@@ -1765,7 +2067,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":25
+                    "y":33
                 },
                 "id":425,
                 "links":[
@@ -2131,7 +2433,7 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":25
+                    "y":33
                 },
                 "hideTimeOverride":false,
                 "id":453,
@@ -2340,7 +2642,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":33
+                    "y":41
                 },
                 "id":426,
                 "links":[
@@ -2706,7 +3008,7 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":33
+                    "y":41
                 },
                 "hideTimeOverride":false,
                 "id":454,
@@ -2915,7 +3217,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":41
+                    "y":49
                 },
                 "id":423,
                 "links":[
@@ -3281,7 +3583,7 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":41
+                    "y":49
                 },
                 "hideTimeOverride":false,
                 "id":455,
@@ -3490,7 +3792,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":49
+                    "y":57
                 },
                 "id":427,
                 "links":[
@@ -3856,7 +4158,7 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":49
+                    "y":57
                 },
                 "hideTimeOverride":false,
                 "id":456,
@@ -4065,7 +4367,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":57
+                    "y":65
                 },
                 "id":428,
                 "links":[
@@ -4431,7 +4733,7 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":57
+                    "y":65
                 },
                 "hideTimeOverride":false,
                 "id":457,
@@ -4640,7 +4942,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":65
+                    "y":73
                 },
                 "id":429,
                 "links":[
@@ -5006,7 +5308,7 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":65
+                    "y":73
                 },
                 "hideTimeOverride":false,
                 "id":458,
@@ -5215,7 +5517,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":73
+                    "y":81
                 },
                 "id":430,
                 "links":[
@@ -5581,7 +5883,7 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":73
+                    "y":81
                 },
                 "hideTimeOverride":false,
                 "id":449,
@@ -5790,7 +6092,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":81
+                    "y":89
                 },
                 "id":421,
                 "links":[
@@ -6156,7 +6458,7 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":81
+                    "y":89
                 },
                 "hideTimeOverride":false,
                 "id":459,
@@ -6365,7 +6667,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":89
+                    "y":97
                 },
                 "id":447,
                 "links":[
@@ -6731,7 +7033,7 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":89
+                    "y":97
                 },
                 "hideTimeOverride":false,
                 "id":460,
@@ -6940,7 +7242,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":97
+                    "y":105
                 },
                 "id":431,
                 "links":[
@@ -7306,7 +7608,7 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":97
+                    "y":105
                 },
                 "hideTimeOverride":false,
                 "id":461,
@@ -7515,7 +7817,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":105
+                    "y":113
                 },
                 "id":443,
                 "links":[
@@ -7881,7 +8183,7 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":105
+                    "y":113
                 },
                 "hideTimeOverride":false,
                 "id":462,
@@ -8090,7 +8392,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":113
+                    "y":121
                 },
                 "id":445,
                 "links":[
@@ -8456,7 +8758,7 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":113
+                    "y":121
                 },
                 "hideTimeOverride":false,
                 "id":463,
