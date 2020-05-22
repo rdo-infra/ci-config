@@ -78,22 +78,44 @@
             ---
             - name: 'Setup CICO node for container builds'
               hosts: openstack_nodes
-              become: yes
-              become_user: root
               tasks:
-                - shell: |
-                    dnf install -y git libffi libffi-devel openssl openssl-devel podman python3-pip python3-virtualenv iptables
-                    dnf group install -y "Development Tools"
-                    pip3 install ansible==2.8.0
+                - name: 'Install dependencies with dnf'
+                  package:
+                    name:
+                      - 'git'
+                      - 'iptables'
+                      - 'libffi'
+                      - 'libffi-devel'
+                      - 'openssl'
+                      - 'openssl-devel'
+                      - 'podman'
+                      - 'python3-pip'
+                      - 'python3-virtualenv'
+                      - 'rsync'
+                      - '@Development Tools'
+                    state: present
+                  become: yes
 
+                - name: 'Install pip requirement'
+                  pip:
+                    name: 'ansible==2.8.0'
+
+                - name: 'Install decorator - Deliberately clobber decorator system site package with working version'
+                  pip:
+                    name: 'decorator'
+                    extra_args: '-I'
+
+                - name: 'Create openstack iptables chain and jump rule'
+                  shell: |
+                    # PR for creating new chains in ansible hasn't merged, so need to handle in shell
                     iptables -N openstack-INPUT
                     iptables -I INPUT 1 -j openstack-INPUT
+                  become: yes
 
-                    # Deliberately clobber decorator system site package with working version
-                    pip3 install -I decorator
-
-                    # Remove all container registries except for docker.io, which serves power containers
+                - name: 'Remove all container registries except for docker.io, which serves power containers'
+                  shell: |
                     sed -i "s/.*registry.centos.org.*/registries = ['docker.io']/g" /etc/containers/registries.conf
+                  become: yes
 
             - name: 'Clone OpenStack git dependencies'
               hosts: openstack_nodes
