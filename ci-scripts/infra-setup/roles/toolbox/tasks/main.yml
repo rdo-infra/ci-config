@@ -62,13 +62,13 @@
       dest: /etc/logrotate.d/cron_clean_logs
       content: |
         /var/log/clean_* {
-            missingok
-            notifempty
-            compress
-            size 5M
             daily
-            rotate 10
+            missingok
             dateext
+            dateyesterday
+            notifempty
+            delaycompress
+            rotate 20
             nomail
             create 0600 root root
         }
