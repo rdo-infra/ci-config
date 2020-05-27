@@ -150,14 +150,19 @@
               tasks:
                 - when: push_containers|default(true)|bool
                   block:
-                    - become: "{{ item }}"
+                    - become: "true"
                       shell: |-
                         podman login --username=tripleo.service \
                                      --password="${RDO_REGISTRY_TOKEN}" \
                                      "https://trunk.registry.rdoproject.org"
-                      with_items:
-                       - true
-                       - false
+                  no_log: true
+
+                - when: push_containers|default(true)|bool
+                  block:
+                    - shell: |-
+                        podman login --username=tripleo.service \
+                                     --password="${RDO_REGISTRY_TOKEN}" \
+                                     "https://trunk.registry.rdoproject.org"
                   no_log: true
 
             - name: Populate hash.info required for dlrn reporting
