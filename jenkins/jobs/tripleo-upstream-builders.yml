@@ -83,6 +83,7 @@
                 - name: 'Install dependencies with dnf'
                   package:
                     name:
+                      - 'buildah'
                       - 'git'
                       - 'iptables'
                       - 'libffi'
@@ -150,13 +151,12 @@
               tasks:
                 - when: push_containers|default(true)|bool
                   block:
-                    - become: "true"
-                      shell: |-
-                        podman login --username=tripleo.service \
+                    - shell: |-
+                        buildah login --username=tripleo.service \
                                      --password="${RDO_REGISTRY_TOKEN}" \
                                      "https://trunk.registry.rdoproject.org"
                     - shell: |-
-                        podman login --username=tripleo.service \
+                        sudo buildah login --username=tripleo.service \
                                      --password="${RDO_REGISTRY_TOKEN}" \
                                      "https://trunk.registry.rdoproject.org"
                   no_log: true
