@@ -309,6 +309,416 @@
                 "valueName":"current"
             },
             {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"A running list of failing upstream *gate* jobs. By default this will show the last 3 days.\n\nClick on individual jobs to go to the logs or to the gerrit change.",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":10,
+                    "w":14,
+                    "x":10,
+                    "y":1
+                },
+                "hideTimeOverride":false,
+                "id":61,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "thresholds":[
+                            "A"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":"cell",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[
+                            "AA"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"autogen",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"cloud\", \"region\", \"result\", \"sova_reason\" as \"Failure Cause\"  FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND \"pipeline\" = 'gate' AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "cloud"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "region"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"gate"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"3d",
+                "timeShift":null,
+                "title":"Upstream failing gate jobs",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "cacheTimeout":null,
+                "colorBackground":false,
+                "colorValue":true,
+                "colors":[
+                    "#299c46",
+                    "rgba(237, 129, 40, 0.89)",
+                    "#d44a3a"
+                ],
+                "datasource":"telegraf",
+                "decimals":1,
+                "description":"Gives the time a patch waits before it can run in the *RDO gate*. \n\nClick on the links below to go to the softwarefactory-project.io rdoproject.org zuul builds status.",
+                "format":"m",
+                "gauge":{
+                    "maxValue":2000,
+                    "minValue":0,
+                    "show":true,
+                    "thresholdLabels":true,
+                    "thresholdMarkers":true
+                },
+                "gridPos":{
+                    "h":9,
+                    "w":3,
+                    "x":0,
+                    "y":11
+                },
+                "id":145,
+                "interval":null,
+                "links":[
+                    {
+                        "includeVars":false,
+                        "targetBlank":true,
+                        "title":"web",
+                        "type":"absolute",
+                        "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
+                    },
+                    {
+                        "includeVars":false,
+                        "keepTime":false,
+                        "params":"",
+                        "targetBlank":true,
+                        "title":"api",
+                        "type":"absolute",
+                        "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
+                    }
+                ],
+                "mappingType":1,
+                "mappingTypes":[
+                    {
+                        "name":"value to text",
+                        "value":1
+                    },
+                    {
+                        "name":"range to text",
+                        "value":2
+                    }
+                ],
+                "maxDataPoints":100,
+                "nullPointMode":"connected",
+                "nullText":null,
+                "postfix":"",
+                "postfixFontSize":"50%",
+                "prefix":"",
+                "prefixFontSize":"50%",
+                "rangeMaps":[
+                    {
+                        "from":"null",
+                        "text":"N/A",
+                        "to":"null"
+                    }
+                ],
+                "sparkline":{
+                    "fillColor":"rgba(31, 118, 189, 0.18)",
+                    "full":false,
+                    "lineColor":"rgb(31, 120, 193)",
+                    "show":true
+                },
+                "tableColumn":"",
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "none"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "measurement":"zuul-queue-status",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "enqueued_time"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"max"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-check"
+                            }
+                        ]
+                    }
+                ],
+                "thresholds":"500,1000",
+                "timeFrom":null,
+                "title":"RDO Zuul queue",
+                "type":"singlestat",
+                "valueFontSize":"50%",
+                "valueMaps":[
+                    {
+                        "op":"=",
+                        "text":"N/A",
+                        "value":"null"
+                    }
+                ],
+                "valueName":"current"
+            },
+            {
                 "aliasColors":{},
                 "breakPoint":"50%",
                 "cacheTimeout":null,
@@ -322,10 +732,10 @@
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
-                    "h":10,
+                    "h":9,
                     "w":4,
-                    "x":10,
-                    "y":1
+                    "x":3,
+                    "y":11
                 },
                 "id":164,
                 "interval":null,
@@ -506,607 +916,6 @@
                 "valueName":"current"
             },
             {
-                "columns":[],
-                "datasource":"telegraf",
-                "description":"A running list of failing upstream *gate* jobs. By default this will show the last 3 days.\n\nClick on individual jobs to go to the logs or to the gerrit change.",
-                "fontSize":"100%",
-                "gridPos":{
-                    "h":10,
-                    "w":10,
-                    "x":14,
-                    "y":1
-                },
-                "hideTimeOverride":false,
-                "id":61,
-                "links":[],
-                "pageSize":null,
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":0,
-                    "desc":true
-                },
-                "styles":[
-                    {
-                        "alias":"Time",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"Branch",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"branch",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Job",
-                        "colorMode":"value",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"job_name",
-                        "thresholds":[
-                            "A"
-                        ],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Pipeline",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"pipeline",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Duration",
-                        "colorMode":"cell",
-                        "colors":[
-                            "#2f575e",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":1,
-                        "mappingType":1,
-                        "pattern":"duration",
-                        "thresholds":[
-                            "10000",
-                            "10600"
-                        ],
-                        "type":"number",
-                        "unit":"dtdurations"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":"cell",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"result",
-                        "thresholds":[
-                            "AA"
-                        ],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Job",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"log_link",
-                        "sanitize":true,
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Patch",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Gerrit",
-                        "linkUrl":"https://review.opendev.org/${__cell}",
-                        "mappingType":1,
-                        "pattern":"change",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "decimals":2,
-                        "pattern":"/.*/",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    }
-                ],
-                "targets":[
-                    {
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"autogen",
-                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"cloud\", \"region\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND \"pipeline\" = 'gate' AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "branch"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "change"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "log_link"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "duration"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "cloud"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "region"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "result"
-                                    ],
-                                    "type":"field"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"False"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"pipeline",
-                                "operator":"=",
-                                "value":"gate"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            }
-                        ]
-                    }
-                ],
-                "timeFrom":"3d",
-                "timeShift":null,
-                "title":"Upstream failing gate jobs",
-                "transform":"table",
-                "type":"table"
-            },
-            {
-                "cacheTimeout":null,
-                "colorBackground":false,
-                "colorValue":true,
-                "colors":[
-                    "#299c46",
-                    "rgba(237, 129, 40, 0.89)",
-                    "#d44a3a"
-                ],
-                "datasource":"telegraf",
-                "decimals":1,
-                "description":"Gives the time a patch waits before it can run in the *RDO gate*. \n\nClick on the links below to go to the softwarefactory-project.io rdoproject.org zuul builds status.",
-                "format":"m",
-                "gauge":{
-                    "maxValue":2000,
-                    "minValue":0,
-                    "show":true,
-                    "thresholdLabels":true,
-                    "thresholdMarkers":true
-                },
-                "gridPos":{
-                    "h":9,
-                    "w":5,
-                    "x":0,
-                    "y":11
-                },
-                "id":145,
-                "interval":null,
-                "links":[
-                    {
-                        "includeVars":false,
-                        "targetBlank":true,
-                        "title":"web",
-                        "type":"absolute",
-                        "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
-                    },
-                    {
-                        "includeVars":false,
-                        "keepTime":false,
-                        "params":"",
-                        "targetBlank":true,
-                        "title":"api",
-                        "type":"absolute",
-                        "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
-                    }
-                ],
-                "mappingType":1,
-                "mappingTypes":[
-                    {
-                        "name":"value to text",
-                        "value":1
-                    },
-                    {
-                        "name":"range to text",
-                        "value":2
-                    }
-                ],
-                "maxDataPoints":100,
-                "nullPointMode":"connected",
-                "nullText":null,
-                "postfix":"",
-                "postfixFontSize":"50%",
-                "prefix":"",
-                "prefixFontSize":"50%",
-                "rangeMaps":[
-                    {
-                        "from":"null",
-                        "text":"N/A",
-                        "to":"null"
-                    }
-                ],
-                "sparkline":{
-                    "fillColor":"rgba(31, 118, 189, 0.18)",
-                    "full":false,
-                    "lineColor":"rgb(31, 120, 193)",
-                    "show":true
-                },
-                "tableColumn":"",
-                "targets":[
-                    {
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "$__interval"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "none"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "measurement":"zuul-queue-status",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "enqueued_time"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"max"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"pipeline",
-                                "operator":"=",
-                                "value":"openstack-check"
-                            }
-                        ]
-                    }
-                ],
-                "thresholds":"500,1000",
-                "timeFrom":null,
-                "title":"RDO Zuul queue",
-                "type":"singlestat",
-                "valueFontSize":"50%",
-                "valueMaps":[
-                    {
-                        "op":"=",
-                        "text":"N/A",
-                        "value":"null"
-                    }
-                ],
-                "valueName":"current"
-            },
-            {
-                "aliasColors":{},
-                "breakPoint":"50%",
-                "cacheTimeout":null,
-                "combine":{
-                    "label":"Others",
-                    "threshold":0
-                },
-                "datasource":"telegraf",
-                "decimals":null,
-                "description":"Percentage of RDO  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
-                "fontSize":"110%",
-                "format":"none",
-                "gridPos":{
-                    "h":9,
-                    "w":5,
-                    "x":5,
-                    "y":11
-                },
-                "id":203,
-                "interval":null,
-                "legend":{
-                    "header":"",
-                    "percentage":true,
-                    "percentageDecimals":1,
-                    "show":true,
-                    "values":false
-                },
-                "legendType":"On graph",
-                "links":[],
-                "maxDataPoints":3,
-                "nullPointMode":"connected",
-                "pieType":"pie",
-                "strokeWidth":"2",
-                "targets":[
-                    {
-                        "alias":"PASS",
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"True"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"rdo"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"FAIL",
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "refId":"B",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"False"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"rdo"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"TIMED_OUT"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"TIMED_OUT",
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "refId":"C",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"False"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"rdo"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"=",
-                                "value":"TIMED_OUT"
-                            }
-                        ]
-                    }
-                ],
-                "timeFrom":"24h",
-                "title":"RDO CI stats",
-                "type":"grafana-piechart-panel",
-                "valueName":"current"
-            },
-            {
                 "aliasColors":{},
                 "breakPoint":"50%",
                 "cacheTimeout":null,
@@ -1122,7 +931,7 @@
                 "gridPos":{
                     "h":9,
                     "w":4,
-                    "x":10,
+                    "x":7,
                     "y":11
                 },
                 "id":447,
@@ -1311,6 +1120,197 @@
             },
             {
                 "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of RDO  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"110%",
+                "format":"none",
+                "gridPos":{
+                    "h":9,
+                    "w":4,
+                    "x":11,
+                    "y":11
+                },
+                "id":203,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"On graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"24h",
+                "title":"RDO CI stats",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
@@ -1319,8 +1319,8 @@
                 "fill":1,
                 "gridPos":{
                     "h":9,
-                    "w":10,
-                    "x":14,
+                    "w":9,
+                    "x":15,
                     "y":11
                 },
                 "id":231,
@@ -10137,743 +10137,12 @@
             {
                 "columns":[],
                 "datasource":"telegraf",
-                "description":"A running list of RDO jobs that are in the  openstack-periodic-24hr openstack-periodic-latest-released zuul pipelines.\n\nNOTE: this does *not* necessarily mean the jobs here listed here are also  in the promotion criteria. \n\nUse the links below to see the RDO zuul builds or the promotion criteria.",
-                "fontSize":"100%",
-                "gridPos":{
-                    "h":9,
-                    "w":24,
-                    "x":0,
-                    "y":160
-                },
-                "id":386,
-                "links":[
-                    {
-                        "dashboard":"",
-                        "targetBlank":true,
-                        "title":"RDO Zuul builds status",
-                        "type":"absolute",
-                        "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
-                    },
-                    {
-                        "dashboard":"",
-                        "targetBlank":true,
-                        "title":"Promotion Criteria",
-                        "type":"absolute",
-                        "url":"https://github.com/rdo-infra/ci-config/tree/master/ci-scripts/dlrnapi_promoter/config"
-                    }
-                ],
-                "pageSize":null,
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":0,
-                    "desc":true
-                },
-                "styles":[
-                    {
-                        "alias":"Time",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"Branch",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"branch",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Job",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_3}",
-                        "mappingType":1,
-                        "pattern":"job_name",
-                        "sanitize":true,
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Pipeline",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"pipeline",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Duration",
-                        "colorMode":"cell",
-                        "colors":[
-                            "#2f575e",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":1,
-                        "mappingType":1,
-                        "pattern":"duration",
-                        "thresholds":[
-                            "10000",
-                            "10600"
-                        ],
-                        "type":"number",
-                        "unit":"dtdurations"
-                    },
-                    {
-                        "alias":"Passed",
-                        "colorMode":"row",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "#e24d42",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"result_num",
-                        "rangeMaps":[
-                            {
-                                "from":"",
-                                "text":"",
-                                "to":""
-                            }
-                        ],
-                        "thresholds":[
-                            "-1",
-                            "1"
-                        ],
-                        "type":"string",
-                        "unit":"short",
-                        "valueMaps":[
-                            {
-                                "text":"YES",
-                                "value":"1"
-                            },
-                            {
-                                "text":"NO",
-                                "value":"0"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"Log URL",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"log_url",
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Patch",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(50, 172, 45, 0.97)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Gerrit",
-                        "linkUrl":"https://review.opendev.org/${__cell}",
-                        "mappingType":1,
-                        "pattern":"change",
-                        "thresholds":[
-                            ""
-                        ],
-                        "type":"string",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
-                        "alias":"Job",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "mappingType":1,
-                        "pattern":"log_link",
-                        "sanitize":true,
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"passed",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Result",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"result",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Reason",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"sova_reason",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "decimals":2,
-                        "pattern":"/.*/",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    }
-                ],
-                "targets":[
-                    {
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "refId":"A",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "branch"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "log_link"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "duration"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "result"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "sova_reason"
-                                    ],
-                                    "type":"field"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"rdo"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"pipeline",
-                                "operator":"=",
-                                "value":"openstack-periodic-24hr"
-                            },
-                            {
-                                "condition":"OR",
-                                "key":"pipeline",
-                                "operator":"=",
-                                "value":"openstack-periodic-latest-released"
-                            },
-                            {
-                                "condition":"OR",
-                                "key":"pipeline",
-                                "operator":"=",
-                                "value":"openstack-periodic-master"
-                            }
-                        ]
-                    }
-                ],
-                "title":"RDO promotion jobs",
-                "transform":"table",
-                "type":"table"
-            },
-            {
-                "columns":[],
-                "datasource":"telegraf",
-                "description":"Running list of RDO *periodic* jobs running in the *openstack-regular* pipeline.",
-                "fontSize":"100%",
-                "gridPos":{
-                    "h":9,
-                    "w":24,
-                    "x":0,
-                    "y":169
-                },
-                "id":392,
-                "links":[],
-                "pageSize":null,
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":0,
-                    "desc":true
-                },
-                "styles":[
-                    {
-                        "alias":"Time",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"Branch",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"branch",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Job",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_3}",
-                        "mappingType":1,
-                        "pattern":"job_name",
-                        "sanitize":true,
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Pipeline",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"pipeline",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Duration",
-                        "colorMode":"cell",
-                        "colors":[
-                            "#2f575e",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":1,
-                        "mappingType":1,
-                        "pattern":"duration",
-                        "thresholds":[
-                            "10000",
-                            "10600"
-                        ],
-                        "type":"number",
-                        "unit":"dtdurations"
-                    },
-                    {
-                        "alias":"Passed",
-                        "colorMode":"row",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "#e24d42",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"result_num",
-                        "rangeMaps":[
-                            {
-                                "from":"",
-                                "text":"",
-                                "to":""
-                            }
-                        ],
-                        "thresholds":[
-                            "-1",
-                            "1"
-                        ],
-                        "type":"string",
-                        "unit":"short",
-                        "valueMaps":[
-                            {
-                                "text":"YES",
-                                "value":"1"
-                            },
-                            {
-                                "text":"NO",
-                                "value":"0"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"Log URL",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"log_url",
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Patch",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(50, 172, 45, 0.97)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Gerrit",
-                        "linkUrl":"https://review.opendev.org/${__cell}",
-                        "mappingType":1,
-                        "pattern":"change",
-                        "thresholds":[
-                            ""
-                        ],
-                        "type":"string",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
-                        "alias":"Job",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "mappingType":1,
-                        "pattern":"log_link",
-                        "sanitize":true,
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"passed",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Result",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"result",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Reason",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"sova_reason",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "decimals":2,
-                        "pattern":"/.*/",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    }
-                ],
-                "targets":[
-                    {
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "refId":"A",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "branch"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "log_link"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "duration"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "result"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "sova_reason"
-                                    ],
-                                    "type":"field"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"rdo"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"pipeline",
-                                "operator":"=",
-                                "value":"openstack-regular"
-                            }
-                        ]
-                    }
-                ],
-                "title":"RDO periodic jobs",
-                "transform":"table",
-                "type":"table"
-            },
-            {
-                "columns":[],
-                "datasource":"telegraf",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":5,
                     "w":24,
                     "x":0,
-                    "y":178
+                    "y":160
                 },
                 "id":381,
                 "links":[],
@@ -11222,7 +10491,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":183
+                    "y":165
                 },
                 "id":140,
                 "panels":[],
@@ -11238,7 +10507,7 @@
                     "h":10,
                     "w":12,
                     "x":0,
-                    "y":184
+                    "y":166
                 },
                 "id":242,
                 "links":[
@@ -11374,7 +10643,7 @@
                     "h":10,
                     "w":12,
                     "x":12,
-                    "y":184
+                    "y":166
                 },
                 "id":155,
                 "links":[
@@ -11511,7 +10780,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":194
+                    "y":176
                 },
                 "id":345,
                 "links":[
@@ -11647,7 +10916,7 @@
                     "h":8,
                     "w":12,
                     "x":12,
-                    "y":194
+                    "y":176
                 },
                 "id":322,
                 "links":[
@@ -11782,7 +11051,7 @@
                     "h":7,
                     "w":4,
                     "x":0,
-                    "y":202
+                    "y":184
                 },
                 "id":351,
                 "links":[
@@ -11867,7 +11136,7 @@
                     "h":7,
                     "w":4,
                     "x":4,
-                    "y":202
+                    "y":184
                 },
                 "id":356,
                 "links":[
@@ -11952,7 +11221,7 @@
                     "h":7,
                     "w":4,
                     "x":8,
-                    "y":202
+                    "y":184
                 },
                 "id":357,
                 "links":[
@@ -12038,7 +11307,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":202
+                    "y":184
                 },
                 "id":358,
                 "links":[
@@ -12171,7 +11440,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":209
+                    "y":191
                 },
                 "id":340,
                 "panels":[
@@ -12183,7 +11452,7 @@
                             "h":11,
                             "w":5,
                             "x":0,
-                            "y":210
+                            "y":192
                         },
                         "id":160,
                         "limit":"100",
@@ -12210,7 +11479,7 @@
                             "h":11,
                             "w":5,
                             "x":5,
-                            "y":210
+                            "y":192
                         },
                         "id":159,
                         "limit":"100",
@@ -12244,7 +11513,7 @@
                             "h":11,
                             "w":5,
                             "x":10,
-                            "y":210
+                            "y":192
                         },
                         "id":165,
                         "limit":"100",
@@ -12277,7 +11546,7 @@
                             "h":11,
                             "w":4,
                             "x":15,
-                            "y":210
+                            "y":192
                         },
                         "id":161,
                         "limit":"100",
@@ -12304,7 +11573,7 @@
                             "h":3,
                             "w":5,
                             "x":19,
-                            "y":210
+                            "y":192
                         },
                         "id":162,
                         "limit":"100",
@@ -12331,7 +11600,7 @@
                             "h":3,
                             "w":5,
                             "x":19,
-                            "y":213
+                            "y":195
                         },
                         "id":192,
                         "limit":10,
@@ -12358,7 +11627,7 @@
                             "h":5,
                             "w":5,
                             "x":19,
-                            "y":216
+                            "y":198
                         },
                         "id":198,
                         "limit":10,
@@ -12385,7 +11654,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":210
+                    "y":192
                 },
                 "id":51,
                 "panels":[],
@@ -12403,10 +11672,10 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":211
+                    "y":193
                 },
                 "hideTimeOverride":true,
-                "id":157,
+                "id":459,
                 "legend":{
                     "alignAsTable":false,
                     "avg":false,
@@ -12634,7 +11903,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":218
+                    "y":200
                 },
                 "hideTimeOverride":true,
                 "id":307,
@@ -12866,7 +12135,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":225
+                    "y":207
                 },
                 "id":317,
                 "legend":{
@@ -13117,7 +12386,7 @@
                     "h":6,
                     "w":4,
                     "x":0,
-                    "y":231
+                    "y":213
                 },
                 "id":71,
                 "legend":{
@@ -13289,7 +12558,7 @@
                     "h":6,
                     "w":4,
                     "x":4,
-                    "y":231
+                    "y":213
                 },
                 "id":72,
                 "legend":{
@@ -13456,7 +12725,7 @@
                     "h":6,
                     "w":16,
                     "x":8,
-                    "y":231
+                    "y":213
                 },
                 "id":55,
                 "legend":{
@@ -13674,7 +12943,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":237
+                    "y":219
                 },
                 "id":79,
                 "legend":{
@@ -13872,7 +13141,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":237
+                    "y":219
                 },
                 "id":80,
                 "legend":{
@@ -14059,7 +13328,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":243
+                    "y":225
                 },
                 "id":398,
                 "legend":{
@@ -14231,7 +13500,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":243
+                    "y":225
                 },
                 "id":399,
                 "legend":{
@@ -14354,7 +13623,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":249
+                    "y":231
                 },
                 "id":414,
                 "panels":[
@@ -15058,7 +14327,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":250
+                    "y":232
                 },
                 "id":4,
                 "panels":[],
@@ -15076,7 +14345,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":251
+                    "y":233
                 },
                 "id":209,
                 "legend":{
@@ -15194,7 +14463,7 @@
                     "h":9,
                     "w":12,
                     "x":0,
-                    "y":259
+                    "y":241
                 },
                 "hideTimeOverride":true,
                 "id":196,
@@ -15330,7 +14599,7 @@
                     "h":9,
                     "w":12,
                     "x":12,
-                    "y":259
+                    "y":241
                 },
                 "hideTimeOverride":true,
                 "id":194,
@@ -15432,7 +14701,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":268
+                    "y":250
                 },
                 "id":173,
                 "panels":[],
@@ -15450,7 +14719,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":269
+                    "y":251
                 },
                 "id":175,
                 "legend":{
@@ -15625,7 +14894,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":269
+                    "y":251
                 },
                 "id":177,
                 "legend":{
@@ -15888,7 +15157,7 @@
                     "h":7,
                     "w":12,
                     "x":0,
-                    "y":275
+                    "y":257
                 },
                 "id":179,
                 "legend":{
@@ -16249,7 +15518,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":275
+                    "y":257
                 },
                 "id":181,
                 "legend":{
@@ -16410,7 +15679,7 @@
                     "h":6,
                     "w":7,
                     "x":0,
-                    "y":282
+                    "y":264
                 },
                 "id":183,
                 "legend":{
@@ -16525,7 +15794,7 @@
                     "h":6,
                     "w":9,
                     "x":7,
-                    "y":282
+                    "y":264
                 },
                 "id":185,
                 "legend":{
@@ -16640,7 +15909,7 @@
                     "h":6,
                     "w":8,
                     "x":16,
-                    "y":282
+                    "y":264
                 },
                 "id":187,
                 "legend":{
@@ -16795,7 +16064,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":288
+                    "y":270
                 },
                 "id":364,
                 "legend":{
