@@ -1,0 +1,38 @@
+---
+- name: Ensure legacy workspace directory
+  file:
+    path: '{{ workspace }}'
+    state: directory
+
+# commit/distro hashes for the combined repo (legacy shared hash for a single repo)
+- name: discover the hashes url ( non-component )
+  set_fact:
+    commit_url: "{{ dlrn_hash_baseurl }}/{{ promote_source }}/commit.yaml"
+  when:
+    - component|default(None) == None
+    - release is search("queens|rocky|stein|train")
+
+# commit/distro hashes for component pipeline (an unique commit hash for each component)
+- name: discover the hashes url (component)
+  set_fact:
+    commit_url: "{{ dlrn_hash_baseurl }}/component/{{ component }}/{{ promote_source }}/commit.yaml"
+  when:
+    - component|default(None) != None
+    - not release is search("queens|rocky|stein|train")
+
+- name: print out dlrn_api url
+  debug:
+    msg: "dlrnapi_url: {{ dlrnapi_url }}"
+
+- name: print out dlrn_hash_baseurl
+  debug:
+    msg: "dlrn_hash_baseurl: {{ dlrn_hash_baseurl }}"
+
+# md5 hash for integration jobs ( ussuri+ )
+- name: discover the hashes url (integration)
+  set_fact:
+    md5_url: "{{ dlrn_hash_baseurl }}/{{ promote_source }}/delorean.repo.md5"
+  when:
+    - component|default(None) == None
+    - not release is search("queens|rocky|stein|train")
+
