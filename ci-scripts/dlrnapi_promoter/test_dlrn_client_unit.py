@@ -35,7 +35,7 @@ class DlrnSetup(unittest.TestCase):
                                        dlrnauth_password='bar',
                                        api_url="http://api.url",
                                        repo_url="file:///tmp")
-        self.config.promotion_steps_map = {
+        self.config.promotions = {
             'current-tripleo': 'tripleo-ci-testing'
         }
         self.client = DlrnClient(self.config)
