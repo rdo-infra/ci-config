@@ -24,7 +24,7 @@ except ImportError:
     import urllib.request as url_lib
 
 import yaml
-from config_legacy import PromoterLegacyConfigBase
+from config import PromoterConfigFactory
 from dlrn_hash import DlrnHash
 
 logging.basicConfig(level=logging.DEBUG)
@@ -243,11 +243,7 @@ def parse_promotion_logs(stage_info=None, **kwargs):
         # and if the file does not exist, we can use the location proposed by
         # the stage
         try:
-            promoter_config = \
-                PromoterLegacyConfigBase(stage_info['main'][
-                                             'promoter_config_file'])
-
-            logfile = promoter_config.log_file
+            logfile = stage_info['main']['log_file']
         except KeyError:
             logfile = ""
         log.info("Verifying presence of log file in %s", logfile)

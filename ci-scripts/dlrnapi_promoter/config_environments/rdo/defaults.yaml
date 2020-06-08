@@ -1,14 +1,31 @@
-environment_defaults:
-  release: master
-  distro_name: centos
-  distro_version: 8
-  dlrnauth_username: ciuser
-  manifest_push: false
-  target_registries_push: true
-  latest_hashes_count: 10
-  log_levels: INFO
-  dlrn_api_host: trunk.rdoproject.org
+release: master
+distro_name: centos
+distro_version: 8
+dlrnauth_username: ciuser
+manifest_push: false
+target_registries_push: true
+latest_hashes_count: 10
+log_levels: INFO
+dlrn_api_host: trunk.rdoproject.org
+dlrn_api_port: 80
+dlrn_api_scheme: "http"
+repo_url: "https://{{ dlrn_api_host }}/{{ distro }}-{{ release }}"
+log_root: "~/web/"
+log_file: "~/web/promoter_logs/{{ distro }}_{{ release }}.log"
+overcloud_images:
+  qcow_servers:
+    local:
+      user: "promoter"
+      host: localhost
+      root: overcloud_images/
+      key: "sample_key"
+      client: "sftp"
+      keypath: "~/.ssh/id_rsa"
+default_qcow_server: local
+
+containers:
   containers_list_base_url: "https://opendev.org/openstack/tripleo-common/raw/commit/"
-  containers_list_path: "container-images/overcloud_containers.yaml.j2"
-  repo_url: "https://{{ dlrn_api_host }}/{{ distro }}-{{ release }}"
-  log_file: "{{ ansible_user_dir }}/web/promoter_logs/{{ distro }}_{{ release }}.log"
+  containers_list_path: "container-images/tripleo_containers.yaml"
+  containers_list_exclude_config: "file:///tmp/promoter-staging/containers/build-containers-main.yaml"
+  container_preffix: "openstack-"
+  build_method: "tripleo"
