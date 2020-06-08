@@ -18,17 +18,17 @@ class QcowConnectionClient(object):
 
     def __init__(self, server_conf):
         self._host = server_conf['host']
-        self._user = server_conf['user']
+        self._user = os.environ.get("USER")
         self._client_type = server_conf['client']
         self._keypath = server_conf['keypath']
         self._client = os
         if self._client_type == "sftp":
             client = paramiko.SSHClient()
             client.load_system_host_keys()
-            client.set_missing_host_key_policy(paramiko.WarningPolicy)
+            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
             keypath = os.path.expanduser(self._keypath)
-            self.key = paramiko.rsakey.RSAKey(filename=keypath)
+            self.key = paramiko.RSAKey.from_private_key_file(filename=keypath)
             self.kwargs = {}
             if self._user is not None:
                 self.kwargs['username'] = self._user
@@ -75,8 +75,9 @@ class QcowClient(object):
         self.host = server_conf['local']['host']
 
         self.client = QcowConnectionClient(server_conf['local'])
-        self.images_dir = os.path.join(self.root, config.distro,
-                                       config.release, "rdo_trunk")
+        self.images_dir = os.path.join(
+            os.path.join(config.stage_root, self.root),
+            config.distro, config.release, "rdo_trunk")
 
     def validate_qcows(self, dlrn_hash, name=None, assume_valid=False):
         """
@@ -255,7 +256,10 @@ class QcowClient(object):
 
         # Finally the effective promotion
         try:
-            self.client.symlink(candidate_hash.full_hash, target_label)
+            c_hash = os.path.join(self.images_dir, candidate_hash.full_hash)
+            self.client.symlink(c_hash, target_label)
+            self.log.debug("Created link {} -> {}".format(
+                candidate_hash.full_hash, target_label))
         except EnvironmentError as ex:
             self.log.error("%s failed to link %s to %s", log_header,
                            target_label, candidate_hash.full_hash)
