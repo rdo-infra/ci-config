@@ -3,7 +3,6 @@ import logging
 import os
 
 import yaml
-from config_legacy import PromoterLegacyConfig
 
 try:
     # Python3 imports
@@ -26,20 +25,14 @@ class RepoClient(object):
     def __init__(self, config):
         self.config = config
         self.root_url = self.config.repo_url
-        self.containers_list_base_url = config.containers_list_base_url
-        self.containers_list_path = config.containers_list_path
+        self.containers_list_base_url = \
+            config.containers['containers_list_base_url']
+        self.containers_list_path = config.containers['containers_list_path']
         self.release = config.release
-        # TODO (akahat) remove if-else after LegacyConfig is removed
-        if not isinstance(config, PromoterLegacyConfig):
-            self.containers_list_exclude_config = config.containers[
-                'containers_list_exclude_config']
-            self.build_method = config.containers['build_method']
-            self.container_preffix = config.containers['container_preffix']
-        else:
-            self.containers_list_exclude_config = \
-                config.containers_list_exclude_config
-            self.build_method = config.build_method
-            self.container_preffix = config.container_preffix
+        self.containers_list_exclude_config = \
+            config.containers["containers_list_exclude_config"]
+        self.build_method = config.containers["build_method"]
+        self.container_preffix = config.containers["container_preffix"]
 
     def get_versions_csv(self, dlrn_hash, candidate_label):
         """
@@ -150,7 +143,9 @@ class RepoClient(object):
                 # - image_source: tripleo
                 #   imagename: quay.io/tripleo/openstack-base:current-tripleo
 
-                if self.release == "queens":
+                if self.release in ["queens", "rocky", "stein", "train"]:
+                    if self.container_preffix != "centos-binary-":
+                        self.container_preffix = "centos-binary-"
                     full_list = [
                         i['imagename'].rpartition('/')[-1].split(':')[0]
                         for i in container_list['container_images']
