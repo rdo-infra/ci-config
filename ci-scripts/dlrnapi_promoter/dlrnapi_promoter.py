@@ -7,9 +7,11 @@ import argparse
 import common
 from common import LockError
 from config import PromoterConfigFactory
-from config_legacy import PromoterLegacyConfig, PromoterLegacyConfigBase
 from dlrn_hash import DlrnHash, DlrnHashError
 from logic import Promoter
+
+DEFAULT_CONFIG_RELEASE = "CentOS-8/master.yaml"
+DEFAULT_CONFIG_ROOT = "rdo"  # "staging" for stage environment
 
 
 def promote_all(promoter, args):
@@ -28,7 +30,7 @@ def force_promote(promoter, args):
     promoter.promote(candidate_hash, args.candidate_label, args.target_label)
 
 
-def arg_parser(cmd_line=None):
+def arg_parser(cmd_line=None, config=None):
     """
     Parse the command line or the parameter to pass to the rest of the workflow
     :param cmd_line: A string containing a command line (mainly used for
@@ -38,11 +40,11 @@ def arg_parser(cmd_line=None):
     default_formatter = argparse.ArgumentDefaultsHelpFormatter
     main_parser = argparse.ArgumentParser(description="Promoter workflow",
                                           formatter_class=default_formatter)
-    main_parser.add_argument("--config-file", required=True,
-                             help="The config file")
+    main_parser.add_argument("--release-config", required=False,
+                             default=DEFAULT_CONFIG_RELEASE,
+                             help="Release config file")
     main_parser.add_argument("--log-level",
-                             default=PromoterLegacyConfigBase.defaults[
-                                 'log_level'],
+                             default='INFO',
                              help="Set the log level")
     command_parser = main_parser.add_subparsers(dest='subcommand')
     command_parser.required = True
@@ -67,8 +69,8 @@ def arg_parser(cmd_line=None):
                                       help="The aggregate hash part for the "
                                            "candidate hash")
     force_promote_parser.add_argument("--allowed-clients",
-                                      default=PromoterLegacyConfigBase.defaults[
-                                          'allowed_clients'],
+                                      default="registries_client,qcow_client,"
+                                      "dlrn_client",
                                       help="The comma separated list of "
                                            "clients allowed to perfom the "
                                            "promotion")
@@ -84,7 +86,6 @@ def arg_parser(cmd_line=None):
         args = main_parser.parse_args(cmd_line.split())
     else:
         args = main_parser.parse_args()
-
     return args
 
 
@@ -105,14 +106,10 @@ def main(cmd_line=None):
             "kill it and then retry")
         raise
 
-    if args.config_file is not None:
-        # If a config file is specified use legacy config builder
-        config = PromoterLegacyConfig(args.config_file, overrides=args)
-    else:
-        # If not then use the config root and the new config builder
-        config_builder = PromoterConfigFactory()
-        config = config_builder()
-
+    config_builder = PromoterConfigFactory()
+    config = config_builder(DEFAULT_CONFIG_ROOT,
+                            DEFAULT_CONFIG_RELEASE,
+                            cli_args=args)
     promoter = Promoter(config)
 
     args.handler(promoter, args)

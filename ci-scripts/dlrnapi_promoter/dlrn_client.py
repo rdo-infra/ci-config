@@ -104,7 +104,7 @@ class DlrnClient(object):
         :return: A dictionary with name to hash {'current-tripleo': 'xyz',
         """
         named_hashes = {}
-        for promote_name in self.config.promotion_steps_map.keys():
+        for promote_name in self.config.promotions.keys():
             latest_named = self.fetch_promotions(promote_name, count=1)
             if latest_named:
                 update = {promote_name: latest_named}
