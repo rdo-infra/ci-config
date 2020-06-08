@@ -9,6 +9,9 @@ import subprocess
 import sys
 import time
 
+import jinja2
+import yaml
+
 try:
     # In python 2 ConnectionRefusedError is not a builtin
     from socket import error as ConnectionRefusedError  # noqa N812
@@ -36,17 +39,6 @@ class LockError(Exception):
 
 class LoggingError(Exception):
     pass
-
-
-# TODO(gcerami): Remove together with legacy config.
-def str2bool(value):
-    """
-    Converts a string with a boolean value into a proper boolean
-    mostly useful for variables coming from ini parser
-    """
-    if value in ['yes', 'true', 'True', 'on', '1']:
-        return True
-    return False
 
 
 def check_port(host, port, timeout=None, port_mode="open"):
@@ -203,3 +195,34 @@ def get_lock(process_name):
         raise LockError
 
     print('Acquired promoter lock')
+
+
+def get_log_file(env, release_config, log=None):
+    if log is None:
+        log = logging.getLogger("get-log-file")
+
+    # TODO (akahat) optimize this code.
+    paths = get_root_paths()
+    config_base = 'config_environments'
+    log_file_path = os.path.join(paths[1],
+                                 config_base,
+                                 env, release_config)
+    config_file = yaml.safe_load(open(log_file_path))
+    config_file['distro'] = config_file['distro_name'] + str(
+        config_file['distro_version'])
+    if hasattr(config_file, 'log_file'):
+        log.INFO("Log file is not present in release "
+                 "config: {}, using default.".format(release_config))
+
+        conf_template = jinja2.Template(config_file['log_file'])
+
+        return conf_template.render(config_file)
+    else:
+        default_path = os.path.join(paths[1],
+                                    config_base, env, 'defaults.yaml')
+        log.info("Getting log file from: {}".format(default_path))
+        config_file = yaml.safe_load(open(default_path))
+        config_file['distro'] = config_file['distro_name'] + str(
+            config_file['distro_version'])
+        conf_template = jinja2.Template(config_file['log_file'])
+        return conf_template.render(config_file)
