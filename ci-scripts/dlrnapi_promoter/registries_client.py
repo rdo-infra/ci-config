@@ -23,10 +23,11 @@ class RegistriesClient(object):
     def __init__(self, config):
         self.config = config
         self.git_root = self.config.git_root
-        self.logfile = os.path.abspath(os.path.join(
-            self.git_root,
-            "../promoter_logs/container-push/%s.log" %
-            datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
+        self.log_root = os.path.expanduser(self.config.log_root)
+        self.logfile = os.path.join(
+            self.log_root,
+            "%s.log" % datetime.datetime.now().strftime(
+                "%Y%m%d-%H%M%S"))
         self.promote_playbook = os.path.join(self.git_root,
                                              'ci-scripts',
                                              'container-push',
@@ -100,13 +101,16 @@ class RegistriesClient(object):
         extra_vars_path = self.prepare_extra_vars(candidate_hash,
                                                   target_label, candidate_label)
 
+        log_dir = self.log_root + "/".join(self.logfile.split("/")[:-1])
+
+        logfile = os.path.join(log_dir, self.logfile)
         # Use single string to make it easy to copy/paste from logs
         cmd = (
             "env "
             "ANSIBLE_LOG_PATH={} "
             "ANSIBLE_DEBUG=False "
             "ansible-playbook -v -e @{} {}".format(
-                self.logfile,
+                logfile,
                 extra_vars_path,
                 self.promote_playbook,
             )

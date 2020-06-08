@@ -17,7 +17,7 @@ except ImportError:
 from argparse import Namespace
 from collections import OrderedDict
 
-from common import close_logging, setup_logging
+from common import close_logging, get_log_file, setup_logging
 from config import (ConfigCore, ConfigError, PromoterConfig,
                     PromoterConfigFactory)
 
@@ -334,7 +334,6 @@ class TestPromoterConfig(ConfigTestCases):
         promotions = self.config_stablebranch.promotions
         for __, info in promotions.items():
             self.assertIsInstance(info['criteria'], set)
-        assert hasattr(self.config_stablebranch, 'promotion_steps_map')
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
@@ -437,8 +436,14 @@ class TestPromoterConfigFactory(ConfigTestCases):
             yaml_release = yaml.safe_dump(self.release_settings[env_name])
             with open(release_settings_path, "w") as release_file:
                 release_file.write(yaml_release)
+        release_config = "CentOS-8/master.yaml"
+        log_file = os.path.expanduser(get_log_file('staging',
+                                                   release_config))
+        log_dir = "/".join(log_file.split("/")[:-1])
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
 
-        self.config_builder = PromoterConfigFactory()
+        self.config_builder = PromoterConfigFactory(**{'log_file': log_file})
 
     def tearDown(self):
         close_logging("promoter")

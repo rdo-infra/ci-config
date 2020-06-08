@@ -8,7 +8,8 @@ import unittest
 import dlrnapi_client
 import pytest
 from common import (LoggingError, check_port, close_logging, get_lock,
-                    get_root_paths, setup_logging, str2bool, str_api_object)
+                    get_log_file, get_root_paths, setup_logging,
+                    str_api_object)
 
 try:
     # Python3 imports
@@ -61,20 +62,6 @@ class TestCheckPort(unittest.TestCase):
     def test_check_port_closed_true(self, socket_connect_mock):
         socket_connect_mock.side_effect = ConnectionRefusedError
         self.assertTrue(check_port("localhost", 100, port_mode="closed"))
-
-
-class TestStr2Bool(unittest.TestCase):
-
-    def test_str2bool_true(self):
-        self.assertTrue(str2bool("yes"))
-        self.assertTrue(str2bool("true"))
-        self.assertTrue(str2bool("True"))
-        self.assertTrue(str2bool("on"))
-        self.assertTrue(str2bool("1"))
-
-    def test_str2bool_false(self):
-        self.assertFalse(str2bool("False"))
-        self.assertFalse(str2bool(type("Whatever", (), {})))
 
 
 class TestLogging(unittest.TestCase):
@@ -164,3 +151,13 @@ class TestGeLock(unittest.TestCase):
                                     stderr=subprocess.STDOUT)
         self.assertIn("Another promoter process is running.",
                       ex.exception.output.decode())
+
+
+class TestGetLogFile(unittest.TestCase):
+    def test_get_log_file(self):
+        log_file = get_log_file("staging", "CentOS-8/master.yaml")
+        assert mock.ANY == log_file
+
+    def test_get_log_file_invalid_file(self):
+        with self.assertRaises(FileNotFoundError):
+            get_log_file("staging", "Ubuntu/master.yaml")
