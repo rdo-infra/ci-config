@@ -247,7 +247,7 @@ def test_containers(staged_env):
     for full_name in stage_info['containers']['images']:
         # Check if we only upload the containers for the promotion candidate
         # hash
-        candidate_hash_dict =\
+        candidate_hash_dict = \
             stage_info['dlrn']['promotions']['promotion_candidate']
         candidate_hash = DlrnHash(source=candidate_hash_dict)
         if stage_info['main']['pipeline_type'] == "integration":
