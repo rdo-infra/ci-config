@@ -59,4 +59,4 @@ done
 # After the promoter has cycled through all the releases
 # run an exhaustive cleanup of the local containers.
 # This will prevent the systems from running out of space
-docker system prune -a
+docker system prune -a -f
