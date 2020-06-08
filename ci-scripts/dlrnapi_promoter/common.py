@@ -38,6 +38,7 @@ class LoggingError(Exception):
     pass
 
 
+# TODO(gcerami): Remove together with legacy config.
 def str2bool(value):
     """
     Converts a string with a boolean value into a proper boolean

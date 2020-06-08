@@ -16,6 +16,7 @@ except ImportError:
     import mock
 
 # Cases of ini configuration
+# TODO: remove together with legacy config
 test_ini_configurations = dict(
     not_ini='''
     I am not a ini file
@@ -105,6 +106,100 @@ test_ini_configurations = dict(
     periodic-tripleo-centos-7-master-standalone
     ''',
 )
+
+
+test_yaml_configurations = dict(
+    empty_yaml="",
+    not_yaml='''
+    I am not a yaml file
+    ''',
+    invalid_yaml='''
+    [main]
+    invalid: 1
+    ''',
+    missing_promotions_section='''
+    distro_name: centos
+    distro_version: 7
+    release: master
+    api_url: https://trunk.rdoproject.org/api-centos-master-uc
+    username: ciuser
+    dry_run: no
+    log_file: /dev/null
+    latest_hashes_count: 10
+    manifest_push: true
+    ''',
+    empty_promotions_section='''
+    distro_name: centos
+    distro_version: 7
+    release: master
+    api_url: https://trunk.rdoproject.org/api-centos-master-uc
+    username: ciuser
+    dry_run: no
+    log_file: /dev/null
+    latest_hashes_count: 10
+    manifest_push: true
+    promotions: {}
+    ''',
+    missing_criteria='''
+    # missing mandatory parameters and sections
+    distro_name: centos
+    distro_version: 7
+    release: master
+    api_url: https://trunk.rdoproject.org/api-centos-master-uc
+    username: ciuser
+    dry_run: no
+    log_file: /dev/null
+    latest_hashes_count: 10
+    manifest_push: true
+
+    promotions:
+      current-tripleo: {}
+    ''',
+    empty_criteria='''
+    distro_name: centos
+    distro_version: 7
+    release: master
+    api_url: https://trunk.rdoproject.org/api-centos-master-uc
+    username: ciuser
+    dry_run: no
+    log_file: /dev/null
+    latest_hashes_count: 10
+    manifest_push: true
+
+    promotions:
+      current-tripleo:
+        criteria: {}
+    ''',
+    invalid_log='''
+    distro_name: centos
+    distro_version: 7
+    release: master
+    api_url: https://trunk.rdoproject.org/api-centos-master-uc
+    username: ciuser
+    dry_run: no
+    log_file: /this/does_not_exist
+    log_level: CATACLYSM
+    ''',
+    correct='''
+    distro_name: centos
+    distro_version: 7
+    release: master
+    api_url: https://trunk.rdoproject.org/api-centos-master-uc
+    username: ciuser
+    dry_run: no
+    log_file: /dev/null
+    latest_hashes_count: 10
+    manifest_push: true
+
+    promotions:
+      current-tripleo:
+        candidate_label: tripleo-ci-testing
+        criteria:
+          - periodic-tripleo-centos-7-master-containers-build-push
+          - periodic-tripleo-centos-7-master-standalone
+    ''',
+)
+
 
 
 # These are preparation for all the types of dlrn_hashes we are going to test
