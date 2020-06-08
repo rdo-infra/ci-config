@@ -12,7 +12,7 @@ import os
 
 import docker
 import pytest
-from common import setup_logging
+from common import get_log_file, setup_logging
 from config import PromoterConfigFactory
 
 try:
