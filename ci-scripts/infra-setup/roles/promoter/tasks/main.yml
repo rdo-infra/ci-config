@@ -172,6 +172,13 @@
         # avoid spamming our logs
         - "--quiet"
 
+- name: "set ~ directory permissions"
+  file:
+    path: "/home/{{ promoter_user }}"
+    owner: "{{ promoter_user }}"
+    group: "{{ promoter_user }}"
+    mode: "g-w,o-wx"
+
 #
 # Promoter preparation
 #
