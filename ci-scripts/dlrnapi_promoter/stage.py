@@ -114,11 +114,10 @@ def main(cmd_line=None):
 
     args = parse_args(config_builder.global_defaults, cmd_line=cmd_line)
 
-    release_config = None
-    try:
+    if hasattr(args, "release_config"):
         release_config = args.release_config
-    except AttributeError:
-        pass
+    else:
+        release_config = "CentOS-8/master.yaml"
 
     config = config_builder("staging", release_config,
                             validate=None)
