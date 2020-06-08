@@ -38,17 +38,6 @@ class LoggingError(Exception):
     pass
 
 
-# TODO(gcerami): Remove together with legacy config.
-def str2bool(value):
-    """
-    Converts a string with a boolean value into a proper boolean
-    mostly useful for variables coming from ini parser
-    """
-    if value in ['yes', 'true', 'True', 'on', '1']:
-        return True
-    return False
-
-
 def check_port(host, port, timeout=None, port_mode="open"):
     """
     Check for connection to a host:port within a timeout
