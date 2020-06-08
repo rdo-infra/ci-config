@@ -334,7 +334,6 @@ class TestPromoterConfig(ConfigTestCases):
         promotions = self.config_stablebranch.promotions
         for __, info in promotions.items():
             self.assertIsInstance(info['criteria'], set)
-        assert hasattr(self.config_stablebranch, 'promotion_steps_map')
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
