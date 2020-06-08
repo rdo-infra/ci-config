@@ -75,8 +75,8 @@ class QcowClient(object):
         self.host = server_conf['local']['host']
 
         self.client = QcowConnectionClient(server_conf['local'])
-        self.images_dir = os.path.join(self.root, config.distro,
-                                       config.release, "rdo_trunk")
+        self.images_dir = os.path.join(os.path.join(config.stage_root, self.root),
+                                       config.distro, config.release, "rdo_trunk")
 
     def validate_qcows(self, dlrn_hash, name=None, assume_valid=False):
         """
