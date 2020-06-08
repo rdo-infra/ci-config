@@ -14,6 +14,7 @@ except ImportError:
     from mock import Mock
 
 # Cases of ini configuration
+# TODO: remove together with legacy config
 test_ini_configurations = dict(
     not_ini='''
     I am not a ini file
