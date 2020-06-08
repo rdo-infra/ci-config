@@ -323,7 +323,7 @@ class PromoterConfig(ConfigCore):
         port = self['dlrn_api_port']
         scheme = self['dlrn_api_scheme']
         distro = self['distro_name']
-        version = self['distro_version']
+        version = str(self['distro_version'])
         release = self['release']
         url_port = None
         endpoint = ''
@@ -343,7 +343,7 @@ class PromoterConfig(ConfigCore):
                 endpoint = "api-{}-{}".format(distro_endpoint,
                                               release_endpoint)
 
-        if port is None or (scheme == "http" and port == 443) \
+        if port in [None, ""] or (scheme == "http" and port == 443) \
                 or (scheme == "https" and port == 443):
             url_port = ""
         else:
@@ -432,14 +432,6 @@ class PromoterConfig(ConfigCore):
                     else:
                         self._log.debug("Transforming criteria into a set")
                         info['criteria'] = set(info['criteria'])
-                    # Create backwards compatible version of promotions
-                    # TODO: remove this alias together with legacy config
-                    if not hasattr(self, 'promotion_steps_map'):
-                        # pylint: disable=attribute-defined-outside-init
-                        self.promotion_steps_map = {}
-
-                    self.promotion_steps_map[target_name] = info[
-                        'candidate_label']
 
                 except KeyError:
                     self._log.debug("No criteria info")

@@ -57,29 +57,32 @@ class StageConfig(PromoterConfig):
 
         return promotions
 
-    def _filter_containers(self, containers):
+    def _filter_containers(self, new_container):
         # Hardcode base images into containers suffixes
         base_images = ['base']
-        containers['images-suffix'] = base_images + containers['images-suffix']
+        new_container['images-suffix'] = base_images + new_container[
+            'images-suffix']
 
         # Expand containers namespace
-        containers['namespace'] = \
-            "{}{}".format(containers['namespace_prefix'], self.release)
+        new_container['namespace'] = \
+            "{}{}".format(new_container['namespace_prefix'], self.release)
 
-        containers['root'] = os.path.join(self.stage_root, containers['root'])
+        new_container['root'] = os.path.join(self.stage_root,
+                                             new_container['root'])
 
         # TODO(gcerami) this must be taken from the versions.csv static info
         #  in an automatic way
         tripleo_commit_sha = "163d4b3b4b211358512fa9ee7f49d9fb930ecd8f"
-        containers['tripleo_commit_sha'] = tripleo_commit_sha
-        containers['containers_list_path'] = self.containers_list_path
+        new_container['tripleo_commit_sha'] = tripleo_commit_sha
+        temp = self._layers['environment_defaults']['containers']
+        new_container['containers_list_path'] = temp['containers_list_path']
 
         containers_list_base = \
-            os.path.join(containers['root'],
-                         containers['containers_list_base'])
-        containers['containers_list_base'] = containers_list_base
+            os.path.join(new_container['root'],
+                         new_container['containers_list_base'])
+        new_container['containers_list_base'] = containers_list_base
 
-        return containers
+        return new_container
 
     def _filter_dlrn(self, dlrn):
         dlrn_root = os.path.join(self.stage_root, dlrn['server']['root'])
