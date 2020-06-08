@@ -24,7 +24,6 @@ except ImportError:
     import urllib.request as url_lib
 
 import yaml
-from config_legacy import PromoterLegacyConfigBase
 from dlrn_hash import DlrnHash
 
 logging.basicConfig(level=logging.DEBUG)
@@ -158,8 +157,7 @@ def compare_tagged_image_hash(stage_info=None, **kwargs):
         promotion_link = os.path.join(images_root, target_label)
         candidate_dict = stage_info['dlrn']['promotions']['promotion_candidate']
         candidate_hash = DlrnHash(source=candidate_dict)
-        promotion_dir = os.path.basename(os.path.join(images_root,
-                                                      candidate_hash.full_hash))
+        promotion_dir = os.path.join(images_root, candidate_hash.full_hash)
         current_dict = stage_info['dlrn']['promotions']['currently_promoted']
         current_hash = DlrnHash(source=current_dict)
         previous_dict = stage_info['dlrn']['promotions']['previously_promoted']
@@ -194,13 +192,12 @@ def compare_tagged_image_hash(stage_info=None, **kwargs):
 
 def check_links(rl_module, promotion_link, target_label, promotion_dir,
                 previous_link=None, previous_dir=None):
-
     try:
         file_mode = rl_module.lstat(promotion_link).st_mode
         assert True
     except OSError:
         assert False, "No link was created"
-    linked_dir = os.path.basename(rl_module.readlink(promotion_link))
+    linked_dir = rl_module.readlink(promotion_link)
     assert stat.S_ISLNK(file_mode), "promoter dir is not a symlink"
 
     error_msg = "{} points to wrong dir {} instead of {}".format(target_label,
@@ -243,11 +240,7 @@ def parse_promotion_logs(stage_info=None, **kwargs):
         # and if the file does not exist, we can use the location proposed by
         # the stage
         try:
-            promoter_config = \
-                PromoterLegacyConfigBase(stage_info['main'][
-                                             'promoter_config_file'])
-
-            logfile = promoter_config.log_file
+            logfile = stage_info['main']['log_file']
         except KeyError:
             logfile = ""
         log.info("Verifying presence of log file in %s", logfile)
@@ -338,7 +331,6 @@ def parse_promotion_logs(stage_info=None, **kwargs):
 
 
 def main():
-
     parser = argparse.ArgumentParser(
         description='Pass a config file.')
     parser.add_argument('--stage-info-file', default="/tmp/stage-info.yaml")

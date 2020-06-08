@@ -180,7 +180,7 @@ class Promoter(object):
             ci_votes = self.dlrn_client.get_civotes_info(candidate_hash)
             self.log.info("Candidate hash '%s' vote details page: %s"
                           "", candidate_hash, ci_votes)
-            required_jobs = self.config.promotion_criteria_map[target_label]
+            required_jobs = self.config.promotions[target_label]['criteria']
             self.log.debug("Candidate hash '%s': required jobs %s"
                            "", candidate_hash, required_jobs)
             successful_jobs = \
@@ -192,7 +192,7 @@ class Promoter(object):
                 self.log.warning("Candidate hash '%s': NO successful jobs"
                                  "", candidate_hash)
 
-            missing_jobs = list(required_jobs - successful_jobs)
+            missing_jobs = set(required_jobs - successful_jobs)
             if missing_jobs:
                 self.log.warning("Candidate hash '%s': missing jobs %s"
                                  "", candidate_hash, missing_jobs)
@@ -223,8 +223,10 @@ class Promoter(object):
 
         promoted_pairs = []
         self.log.info("Starting promotion attempts for all labels")
-        for target_label, candidate_label in \
-                self.config.promotion_steps_map.items():
+
+        for target_label, target_criteria in \
+                self.config.promotions.items():
+            candidate_label = target_criteria['candidate_label']
             self.log.info("Candidate label '%s': Attempting promotion to '%s'"
                           "", candidate_label, target_label)
             promoted_pair = None
