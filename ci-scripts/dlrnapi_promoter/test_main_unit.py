@@ -1,7 +1,7 @@
 import unittest
 
 from common import LockError
-from config_legacy import PromoterLegacyConfig
+from config import PromoterConfigFactory
 from dlrn_hash import DlrnCommitDistroHash
 
 try:
@@ -54,7 +54,7 @@ class TestMain(unittest.TestCase):
 
 class TestPromoteAll(unittest.TestCase):
 
-    @mock.patch.object(PromoterLegacyConfig, '__init__', autospec=True,
+    @mock.patch.object(PromoterConfigFactory, '__init__', autospec=True,
                        return_value=None)
     @mock.patch.object(Promoter, '__init__', autospec=True, return_value=None)
     @mock.patch.object(Promoter, 'promote_all', autospec=True)
@@ -108,7 +108,7 @@ class TestForcePromote(unittest.TestCase):
         self.assertFalse(start_process_mock.called)
         self.assertFalse(single_promote_mock.called)
 
-    @mock.patch.object(PromoterLegacyConfig, '__init__', autospec=True,
+    @mock.patch.object(PromoterConfigFactory, '__init__', autospec=True,
                        return_value=None)
     @mock.patch.object(Promoter, '__init__', autospec=True, return_value=None)
     @mock.patch.object(Promoter, 'promote_all', autospec=True)
