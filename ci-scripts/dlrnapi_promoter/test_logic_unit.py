@@ -11,10 +11,10 @@ except ImportError:
     import mock
 
 from dlrn_hash import DlrnCommitDistroHash, DlrnHash
-from test_unit_fixtures import LegacyConfigSetup
+from test_unit_fixtures import ConfigSetup
 
 
-class TestPromote(LegacyConfigSetup):
+class TestPromote(ConfigSetup):
 
     @patch('logging.Logger.exception')
     @patch('logging.Logger.error')
@@ -37,12 +37,12 @@ class TestPromote(LegacyConfigSetup):
         candidate_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b')
         with self.assertRaises(PromotionError):
             self.promoter.promote(candidate_hash, 'tripleo-ci-testing',
-                                  'current-tripleo')
+                                  'tripleo-ci-staging-promoted')
 
         mock_log_error.assert_has_calls([
             mock.call("Candidate hash '%s': client %s FAILED promotion attempt "
                       "to %s"
-                      "", candidate_hash, 'qcow_client', 'current-tripleo')
+                      "", candidate_hash, 'qcow_client', 'tripleo-ci-staging-promoted')
         ])
         self.assertTrue(mock_log_exception.called)
         self.assertTrue(mock_registries_client.called)
@@ -63,7 +63,7 @@ class TestPromote(LegacyConfigSetup):
         candidate_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b')
         mock_check_named_hashes.return_value = None
         self.promoter.promote(candidate_hash, 'tripleo-ci-testing',
-                              'current-tripleo',
+                              'tripleo-ci-staging-promoted',
                               allowed_clients=['dlrn_client'])
         mock_log_debug.assert_has_calls([
             mock.call("Candidate hash '%s': clients allowed to promote: %s",
@@ -105,7 +105,7 @@ class TestPromote(LegacyConfigSetup):
         mock_registries_client.return_value = None
         promoted_pair = \
             self.promoter.promote(candidate_hash, 'tripleo-ci-testing',
-                                  'current-tripleo')
+                                  'tripleo-ci-staging-promoted')
         mock_log_debug.assert_has_calls([
             mock.call("Candidate hash '%s': clients allowed to promote: %s",
                       candidate_hash, ', '.join(allowed_clients)),
@@ -120,7 +120,7 @@ class TestPromote(LegacyConfigSetup):
             mock.call("Candidate hash '%s': attempting promotion",
                       candidate_hash),
             mock.call("Candidate hash '%s': SUCCESSFUL promotion to %s",
-                      candidate_hash, 'current-tripleo'),
+                      candidate_hash, 'tripleo-ci-staging-promoted'),
         ])
         self.assertFalse(mock_log_warning.called)
         self.assertFalse(mock_log_error.called)
@@ -128,7 +128,7 @@ class TestPromote(LegacyConfigSetup):
         self.assertTrue(mock_registries_client.called)
         self.assertTrue(mock_qcow_client.called)
         self.assertTrue(mock_dlrn_client.called)
-        self.assertEqual(promoted_pair, (candidate_hash, 'current-tripleo'))
+        self.assertEqual(promoted_pair, (candidate_hash, 'tripleo-ci-staging-promoted'))
 
     @patch('logging.Logger.debug')
     @patch('dlrn_client.DlrnClient.check_named_hashes_unchanged')
@@ -145,13 +145,13 @@ class TestPromote(LegacyConfigSetup):
         mock_check_named_hashes.side_effect = HashChangedError
         with self.assertRaises(HashChangedError):
             self.promoter.promote(candidate_hash, 'tripleo-ci-testing',
-                                  'current-tripleo')
+                                  'tripleo-ci-staging-promoted')
         self.assertFalse(mock_registries_client.called)
         self.assertFalse(mock_qcow_client.called)
         self.assertFalse(mock_dlrn_client.called)
 
 
-class TestPromoteLabelToLabel(LegacyConfigSetup):
+class TestPromoteLabelToLabel(ConfigSetup):
 
     @patch('logging.Logger.debug')
     @patch('logging.Logger.error')
@@ -173,22 +173,23 @@ class TestPromoteLabelToLabel(LegacyConfigSetup):
         ci_votes = "http://host.to/detailspage.html"
         mock_civotes.return_value = ci_votes
         required_set = {
-            'periodic-tripleo-centos-7-master-containers-build-push',
-            'periodic-tripleo-centos-7-master-standalone'
+            'staging-job-1',
+            'staging-job-2'
         }
         successful_jobs = [
             'periodic-tripleo-centos-7-master-containers-build-push',
         ]
-        missing_jobs = [
-            'periodic-tripleo-centos-7-master-standalone'
-        ]
+        missing_jobs = {
+            'staging-job-1',
+            'staging-job-2'
+        }
         mock_fetch_jobs.return_value = successful_jobs
         candidate_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b')
         mock_select_candidates.return_value = [
             candidate_hash
         ]
         promoted_pair = self.promoter.promote_label_to_label(
-            'tripleo-ci-testing', 'current-tripleo')
+            'tripleo-ci-testing', 'tripleo-ci-staging-promoted')
         mock_log_debug.assert_has_calls([
             mock.call("Candidate hash '%s': required jobs %s", candidate_hash,
                       required_set)
@@ -197,14 +198,14 @@ class TestPromoteLabelToLabel(LegacyConfigSetup):
             mock.call("Candidate hash '%s': missing jobs %s", candidate_hash,
                       missing_jobs),
             mock.call("Candidate hash '%s': criteria NOT met for promotion to "
-                      "%s", candidate_hash, 'current-tripleo'),
+                      "%s", candidate_hash, 'tripleo-ci-staging-promoted'),
         ])
         mock_log_info.assert_has_calls([
             mock.call("Candidate label '%s': %d candidates",
                       'tripleo-ci-testing', 1),
             mock.call("Candidate label '%s': Checking candidates that meet "
                       "promotion criteria for target label '%s'",
-                      'tripleo-ci-testing', 'current-tripleo'),
+                      'tripleo-ci-testing', 'tripleo-ci-staging-promoted'),
             mock.call("Candidate hash '%s' vote details page: %s",
                       candidate_hash, ci_votes),
             mock.call("Candidate hash '%s': successful jobs %s",
@@ -237,7 +238,7 @@ class TestPromoteLabelToLabel(LegacyConfigSetup):
             candidate_hash
         ]
         promoted_pair = self.promoter.promote_label_to_label(
-            'tripleo-ci-testing', 'current-tripleo')
+            'tripleo-ci-testing', 'tripleo-ci-staging-promoted')
         mock_log_warning.assert_has_calls([
             mock.call("Candidate hash '%s': NO successful jobs",
                       candidate_hash),
@@ -261,7 +262,7 @@ class TestPromoteLabelToLabel(LegacyConfigSetup):
                                                   mock_log_error):
         mock_select_candidates.return_value = []
         promoted_pair = self.promoter.promote_label_to_label(
-            'tripleo-ci-testing', 'current-tripleo')
+            'tripleo-ci-testing', 'tripleo-ci-staging-promoted')
         mock_log_warning.assert_has_calls([
             mock.call("Candidate label '%s': No candidate hashes",
                       'tripleo-ci-testing')
@@ -295,16 +296,16 @@ class TestPromoteLabelToLabel(LegacyConfigSetup):
             DlrnCommitDistroHash(commit_hash='c', distro_hash='c')
         ]
         required_set = {
-            'periodic-tripleo-centos-7-master-containers-build-push',
-            'periodic-tripleo-centos-7-master-standalone'
+            'staging-job-1',
+            'staging-job-2'
         }
-        pair = (candidate_hashes[0], 'current-tripleo')
+        pair = (candidate_hashes[0], 'tripleo-ci-staging-promoted')
         mock_promote.return_value = pair
         mock_civotes.return_value = ci_votes
         mock_select_candidates.return_value = candidate_hashes
         mock_fetch_jobs.return_value = list(required_set)
         promoted_pair = self.promoter.promote_label_to_label(
-            'tripleo-ci-testing', 'current-tripleo')
+            'tripleo-ci-testing', 'tripleo-ci-staging-promoted')
 
         mock_log_debug.assert_has_calls([
             mock.call("Candidate hash '%s': required jobs %s",
@@ -316,13 +317,13 @@ class TestPromoteLabelToLabel(LegacyConfigSetup):
                       'tripleo-ci-testing', 2),
             mock.call("Candidate label '%s': Checking candidates that meet "
                       "promotion criteria for target label '%s'",
-                      'tripleo-ci-testing', 'current-tripleo'),
+                      'tripleo-ci-testing', 'tripleo-ci-staging-promoted'),
             mock.call("Candidate hash '%s' vote details page: %s",
                       candidate_hashes[0], ci_votes),
             mock.call("Candidate hash '%s': successful jobs %s",
                       candidate_hashes[0], required_set),
             mock.call("Candidate hash '%s': criteria met, attempting promotion "
-                      "to %s", candidate_hashes[0], 'current-tripleo'),
+                      "to %s", candidate_hashes[0], 'tripleo-ci-staging-promoted'),
         ])
         self.assertFalse(mock_log_warning.called)
         self.assertFalse(mock_log_error.called)
@@ -350,15 +351,15 @@ class TestPromoteLabelToLabel(LegacyConfigSetup):
             DlrnCommitDistroHash(commit_hash='c', distro_hash='c')
         ]
         required_set = {
-            'periodic-tripleo-centos-7-master-containers-build-push',
-            'periodic-tripleo-centos-7-master-standalone'
+            'staging-job-1',
+            'staging-job-2'
         }
         mock_promote.side_effect = [(), ()]
         mock_civotes.return_value = ci_votes
         mock_select_candidates.return_value = candidate_hashes
         mock_fetch_jobs.return_value = list(required_set)
         promoted_pair = self.promoter.promote_label_to_label(
-            'tripleo-ci-testing', 'current-tripleo')
+            'tripleo-ci-testing', 'tripleo-ci-staging-promoted')
 
         self.assertFalse(mock_log_warning.called)
         self.assertFalse(mock_log_error.called)
@@ -367,7 +368,7 @@ class TestPromoteLabelToLabel(LegacyConfigSetup):
         self.assertEqual(promoted_pair, ())
 
 
-class TestPromoteAll(LegacyConfigSetup):
+class TestPromoteAll(ConfigSetup):
 
     @patch('logging.Logger.info')
     @patch('dlrn_client.DlrnClient.fetch_current_named_hashes')
@@ -383,12 +384,12 @@ class TestPromoteAll(LegacyConfigSetup):
         mock_log_info.assert_has_calls([
             mock.call('Starting promotion attempts for all labels'),
             mock.call("Candidate label '%s': Attempting promotion to '%s'",
-                      'tripleo-ci-testing', 'current-tripleo'),
+                      'tripleo-ci-staging', 'tripleo-ci-staging-promoted'),
             mock.call("Summary: Promoted 1 hashes this round"),
             mock.call('------- -------- Promoter terminated normally')
         ])
         mock_promote_label_to_label.assert_has_calls([
-            mock.call('tripleo-ci-testing', 'current-tripleo')
+            mock.call('tripleo-ci-staging', 'tripleo-ci-staging-promoted')
         ])
         self.assertEqual(promoted_pairs, [('label', 'hash')])
 
@@ -406,12 +407,12 @@ class TestPromoteAll(LegacyConfigSetup):
         promoted_pairs = self.promoter.promote_all()
         mock_log_error.assert_has_calls([
             mock.call("Error while trying to promote %s to %s",
-                      'tripleo-ci-testing', 'current-tripleo')
+                      'tripleo-ci-staging', 'tripleo-ci-staging-promoted')
         ])
         mock_log_warning.assert_has_calls([
             mock.call("Candidate label '%s': NO candidate "
-                      "hash promoted to %s", 'tripleo-ci-testing',
-                      'current-tripleo')
+                      "hash promoted to %s", 'tripleo-ci-staging',
+                      'tripleo-ci-staging-promoted')
         ])
         self.assertTrue(mock_dlrn_api_promotions.called)
         # Ensure we terminate normally even in case of promotion failure
@@ -421,7 +422,7 @@ class TestPromoteAll(LegacyConfigSetup):
         self.assertEqual(promoted_pairs, [])
 
 
-class TestSelectCandidates(LegacyConfigSetup):
+class TestSelectCandidates(ConfigSetup):
 
     @mock.patch('dlrn_client.DlrnClient.fetch_promotions')
     def test_no_hashes_fetched_returns_empty_list(self, fetch_hashes_mock):
@@ -434,7 +435,7 @@ class TestSelectCandidates(LegacyConfigSetup):
             'candidate_label', 'target_label')
 
         fetch_hashes_mock.assert_has_calls([
-            mock.call('candidate_label', count=10),
+            mock.call('candidate_label', count='10'),
         ])
 
         assert(len(obtained_hashes) == 0)
@@ -457,7 +458,7 @@ class TestSelectCandidates(LegacyConfigSetup):
             'candidate_label', 'target_label')
         assert(len(obtained_hashes) == 0)
         fetch_hashes_mock.assert_has_calls([
-            mock.call('candidate_label', count=10),
+            mock.call('candidate_label', count='10'),
         ])
 
     @mock.patch('dlrn_client.DlrnClient.fetch_promotions')
@@ -484,7 +485,7 @@ class TestSelectCandidates(LegacyConfigSetup):
         obtained_hashes = self.promoter.select_candidates(
             'candidate_label', 'target_label')
         fetch_hashes_mock.assert_has_calls([
-            mock.call('candidate_label', count=10),
+            mock.call('candidate_label', count='10'),
             mock.call('target_label')
         ])
 
@@ -565,7 +566,7 @@ class TestSelectCandidates(LegacyConfigSetup):
         obtained_hashes = self.promoter.select_candidates(
             'candidate_label', 'target_label')
         fetch_hashes_mock.assert_has_calls([
-            mock.call('candidate_label', count=10),
+            mock.call('candidate_label', count='10'),
             mock.call('target_label')
         ])
 

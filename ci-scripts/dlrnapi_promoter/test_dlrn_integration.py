@@ -13,7 +13,6 @@ import promoter_integration_checks
 import pytest
 import yaml
 from common import close_logging
-from config_legacy import PromoterLegacyConfig
 
 try:
     import urllib2 as url
@@ -26,8 +25,8 @@ from logic import Promoter
 from stage import main as stage_main
 
 
-@pytest.fixture(scope='function', params=['dlrn_legacyconf_single',
-                                          'dlrn_legacyconf_integration'])
+@pytest.fixture(scope='function', params=['dlrn_single',
+                                          'dlrn_integration'])
 def staged_env(request):
     """
     Fixture that runs the staging environment provisioner with parameters,
@@ -45,9 +44,7 @@ def staged_env(request):
     # We are going to call the main in the staging passing a composed command
     # line, so we are testing also that the argument parsing is working
     # correctly instead of passing  configuration directly
-    release_config = \
-        "CentOS-7/master.yaml"
-    promoter_config_file = "staging/CentOS-7/master.ini"
+    release_config = "CentOS-7/master.yaml"
     setup_cmd_line += " --scenes dlrn"
 
     try:
@@ -61,10 +58,9 @@ def staged_env(request):
     # for the tests of the integration pipeline we need to pass a different
     # file with db data
     if "_integration" in test_case:
-        release_config = \
-            "CentOS-8/master.yaml"
-        promoter_config_file = \
-            "staging/CentOS-8/master.ini"
+        release_config = "CentOS-8/master.yaml"
+        # promoter_config_file = \
+        #    "staging/CentOS-8/master.ini"
         setup_cmd_line += " --db-data-file integration-pipeline.yaml"
         teardown_cmd_line += " --db-data-file integration-pipeline.yaml"
 
@@ -80,21 +76,15 @@ def staged_env(request):
     with open(stage_info_path, "r") as stage_info_file:
         stage_info = yaml.safe_load(stage_info_file)
 
-    overrides = {
-        'log_file': stage_info['main']['log_file'],
-        'repo_url': stage_info['dlrn']['server']['repo_url'],
-        'allowed_clients': 'dlrn_client',
-        'config_file': promoter_config_file,
-    }
+    # overrides = {
+    #    'log_file': stage_info['main']['log_file'],
+    #    'repo_url': stage_info['dlrn']['server']['repo_url'],
+    #    'allowed_clients': 'dlrn_client',
+    #    'config_file': promoter_config_file,
+    # }
 
-    overrides_obj = type("FakeArgs", (), overrides)
+    # overrides_obj = type("FakeArgs", (), overrides)
     os.environ["DLRNAPI_PASSWORD"] = stage_info['dlrn']['server']['password']
-
-    if 'legacyconf' in test_case:
-        config = PromoterLegacyConfig(overrides_obj.config_file,
-                                      overrides=overrides_obj)
-    else:
-        raise Exception("New config engine is not implemented yet")
 
     promoter = Promoter(config)
 
@@ -150,10 +140,12 @@ def test_select_candidates(staged_env):
     :return: None
     """
     stage_info, promoter = staged_env
+    commit = stage_info['dlrn']['promotions']['promotion_candidate']
+    candidate_label = commit['name']
 
     candidate_hashes_list = []
-    for target_label, candidate_label in \
-            promoter.config.promotion_steps_map.items():
+    for target_label, target_meta in \
+            promoter.config.promotions.items():
         candidate_hashes_list = promoter.select_candidates(candidate_label,
                                                            target_label)
     assert candidate_hashes_list != []
