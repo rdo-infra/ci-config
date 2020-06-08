@@ -13,10 +13,12 @@ except ImportError:
 
 from common import PromotionError
 from dlrn_hash import DlrnCommitDistroHash, DlrnHash
-from test_unit_fixtures import LegacyConfigSetup, hashes_test_cases
+from test_unit_fixtures import ConfigSetup, hashes_test_cases
 
 
-class TestPrepareExtraVars(LegacyConfigSetup):
+class TestPrepareExtraVars(ConfigSetup):
+
+    maxDiff = None
 
     def setUp(self):
         super(TestPrepareExtraVars, self).setUp()
@@ -159,9 +161,9 @@ class TestPrepareExtraVars(LegacyConfigSetup):
             'release': "master",
             'script_root': mock.ANY,
             'distro_name': "centos",
-            'distro_version': '7',
-            'manifest_push': True,
-            'target_registries_push': True,
+            'distro_version': 8,
+            'manifest_push': 'true',
+            'target_registries_push': 'true',
             'candidate_label': "tripleo-ci-testing",
             "named_label": "current-tripleo",
             "source_namespace": "tripleomaster",
@@ -189,7 +191,7 @@ class TestPrepareExtraVars(LegacyConfigSetup):
         self.assertFalse(mock_log_error.called)
 
 
-class TestPromote(LegacyConfigSetup):
+class TestPromote(ConfigSetup):
 
     def setUp(self):
         super(TestPromote, self).setUp()
