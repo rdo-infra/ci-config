@@ -8,17 +8,18 @@
     TEST_RELEASE: "{{ test_release }}"
   changed_when: true
 
-- name: extract log_file from staging.ini
+- name: Extract log file
   shell:
     cmd: |
-       grep log_file config/staging/{{ test_release }}.ini | awk '{ print $2 }'
-  register: log_file_grep
-  args:
-    chdir: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter"
-  changed_when: false
+       "grep -ir log_file {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/config_environments/staging/defaults.yaml"
+  register: log_file
+
+- name: log file name
+  debug:
+    var: log_file
 
 - name: check if dlrn api actually finished a promotion process
   become: true
   become_user: "{{ promoter_user }}"
-  command: "grep -E '(FINISHED promotion process|Promoter terminated normally)' {{ log_file_grep.stdout }}"
+  command: "grep -E '(FINISHED promotion process|Promoter terminated normally)' {{ log_file }}"
   changed_when: false

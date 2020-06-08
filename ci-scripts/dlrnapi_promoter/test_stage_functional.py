@@ -12,7 +12,7 @@ import os
 
 import docker
 import pytest
-from common import setup_logging
+from common import get_log_file, setup_logging
 from config import PromoterConfigFactory
 
 try:
@@ -120,7 +120,15 @@ def test_stage_config():
     Test to see if the stage config is created correctly
     :return: None
     """
-    config_builder = PromoterConfigFactory()
+    release_config = "CentOS-8/master.yaml"
+    log_file = os.path.expanduser(get_log_file('staging',
+                                               release_config))
+    log_dir = "/".join(log_file.split("/")[:-1])
+    if not os.path.exists(log_dir):
+        log.info("Creating log directory : {}".format(log_dir))
+        os.makedirs(log_dir)
+
+    config_builder = PromoterConfigFactory(**{'log_file': log_file})
     config = config_builder("staging", None, validate=None)
     config_sections = ['registries', 'containers',
                        'overcloud_images', 'dlrn']
@@ -247,7 +255,7 @@ def test_containers(staged_env):
     for full_name in stage_info['containers']['images']:
         # Check if we only upload the containers for the promotion candidate
         # hash
-        candidate_hash_dict =\
+        candidate_hash_dict = \
             stage_info['dlrn']['promotions']['promotion_candidate']
         candidate_hash = DlrnHash(source=candidate_hash_dict)
         if stage_info['main']['pipeline_type'] == "integration":
