@@ -15,7 +15,7 @@ except ImportError:
     from mock import patch
     import mock
 
-from config_legacy import PromoterLegacyConfigBase
+from config import PromoterConfigFactory
 from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash
 from repo_client import RepoClient
 
@@ -39,8 +39,8 @@ class RepoSetup(unittest.TestCase):
                        self.dlrn_hash_aggregate]
         self.temp_dir = tempfile.mkdtemp()
         self.versions_csv_dir = self.temp_dir
-        config_defaults = PromoterLegacyConfigBase.defaults
-
+        config_builder = PromoterConfigFactory()
+        config_defaults = config_builder("staging", "CentOS-8/master.yaml")
         repo_url = "file://{}/".format(self.temp_dir)
         containers_list_base_url = "file://{}".format(self.temp_dir)
         containers_list_exclude_config_path = os.path.join(self.temp_dir,
@@ -49,10 +49,12 @@ class RepoSetup(unittest.TestCase):
             'repo_url': repo_url,
             'release': 'master',
             'containers_list_base_url': containers_list_base_url,
-            'containers_list_path': config_defaults['containers_list_path'],
+            'containers_list_path': config_defaults.containers[
+                'containers_list_path'],
             'containers': {
                 'build_method': 'tripleo',
-                'container_preffix': config_defaults['container_preffix'],
+                'container_preffix': config_defaults.containers[
+                    'container_preffix'],
                 'containers_list_exclude_config':
                     "file://{}".format(containers_list_exclude_config_path),
             }
@@ -104,7 +106,7 @@ class RepoSetup(unittest.TestCase):
         ]
 
         # Create containers files
-        containers_file_dirname = os.path.dirname(config_defaults[
+        containers_file_dirname = os.path.dirname(config_defaults.containers[
                                                       'containers_list_path'])
         containers_dir = os.path.join(self.temp_dir,
                                       self.versions_csv_rows[1]['Source Sha'],
@@ -123,7 +125,7 @@ container_images:
         os.makedirs(containers_dir)
         containers_file_path = \
             os.path.join(containers_dir,
-                         os.path.basename(config_defaults[
+                         os.path.basename(config_defaults.containers[
                                               'containers_list_path']))
         with open(containers_file_path, "w") as containers_file:
             containers_file.write(tripleo_containers_list)
@@ -190,7 +192,7 @@ container_images:
         os.makedirs(empty_containers_dir)
         empty_containers_file_path = \
             os.path.join(empty_containers_dir,
-                         os.path.basename(config_defaults[
+                         os.path.basename(config_defaults.containers[
                                               'containers_list_path']))
         with open(empty_containers_file_path, "w") as containers_file:
             pass
@@ -341,7 +343,8 @@ class TestGetContainersList(RepoSetup):
         self.client.release = "foobar"
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
-        self.assertEqual(containers_list, ['base', 'os', 'aodh-base'])
+        self.assertEqual(containers_list, ['nova-api', 'neutron-server',
+            'excluded', 'ovn-controller'])
         mock_log_debug.assert_has_calls([
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
