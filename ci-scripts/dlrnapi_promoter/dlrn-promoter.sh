@@ -53,10 +53,10 @@ source ~/${PROMOTER_VENV:-promoter_venv}/bin/activate
 
 for r in "${RELEASES[@]}"; do
     /usr/bin/timeout --preserve-status -k $KILLTIME $TIMEOUT \
-        python3 $DIR/dlrnapi_promoter.py --log-level ${LOG_LEVEL} --config-file ${STAGING_DIR}${r}.ini promote-all
+        python3 $DIR/dlrnapi_promoter.py --log-level ${LOG_LEVEL} --release-config ${r}.yaml promote-all
 done
 
 # After the promoter has cycled through all the releases
 # run an exhaustive cleanup of the local containers.
 # This will prevent the systems from running out of space
-docker system prune -a
+docker system prune -a -f
