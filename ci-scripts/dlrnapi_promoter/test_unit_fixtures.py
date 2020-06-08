@@ -1,9 +1,8 @@
 import os
-import tempfile
+import shutil
 import unittest
 
-from config_legacy import PromoterLegacyConfig
-from dlrnapi_promoter import arg_parser
+from config import PromoterConfigFactory
 from logic import Promoter
 
 try:
@@ -55,99 +54,6 @@ ANVlQh7pYqCrYudNESL0qyGQ+dxcESo3XxCZHHFax4e8+9FeXWN4knRQBsjlGDyb
 +sjxQ3Hfl5UZk+GiZpY3Gm79L837QtvJELNn3kz+cK0R0kFOEvlq1W8=
 -----END RSA PRIVATE KEY-----"""
 
-# Cases of ini configuration
-# TODO: remove together with legacy config
-test_ini_configurations = dict(
-    not_ini='''
-    I am not a ini file
-    ''',
-    missing_parameters='''
-    [main]
-    api_url: https://trunk.rdoproject.org/api-centos-master-uc
-    username: ciuser
-    dry_run: no
-    log_file: /dev/nul
-    latest_hashes_count: 10
-    manifest_push: true
-
-    [promote_from]
-    current-tripleo: tripleo-ci-testing
-
-    [current-tripleo]
-    periodic-tripleo-centos-7-master-containers-build-push
-    ''',
-    missing_main='''
-    [promote_from]
-    current-tripleo: tripleo-ci-testing
-    ''',
-    missing_promotions_section='''
-    [main]
-    # missing mandatory parameters and sections
-    distro_name: centos
-    distro_version: 7
-    release: master
-    api_url: https://trunk.rdoproject.org/api-centos-master-uc
-    username: ciuser
-    dry_run: no
-    log_file: /dev/null
-    latest_hashes_count: 10
-    manifest_push: true
-    ''',
-    missing_criteria_section='''
-    [main]
-    # missing mandatory parameters and sections
-    distro_name: centos
-    distro_version: 7
-    release: master
-    api_url: https://trunk.rdoproject.org/api-centos-master-uc
-    username: ciuser
-    dry_run: no
-    log_file: /dev/null
-    latest_hashes_count: 10
-    manifest_push: true
-
-    [promote_from]
-    current-tripleo: tripleo-ci-testing
-    ''',
-    criteria_empty='''
-    [main]
-    distro_name: centos
-    distro_version: 7
-    release: master
-    api_url: https://trunk.rdoproject.org/api-centos-master-uc
-    username: ciuser
-    dry_run: no
-    log_file: /dev/null
-    latest_hashes_count: 10
-    manifest_push: true
-
-    [promote_from]
-    current-tripleo: tripleo-ci-testing
-
-    [current-tripleo]
-    ''',
-    correct='''
-    [main]
-    distro_name: centos
-    distro_version: 7
-    release: master
-    api_url: https://trunk.rdoproject.org/api-centos-master-uc
-    username: ciuser
-    dry_run: no
-    log_file: /dev/null
-    latest_hashes_count: 10
-    manifest_push: true
-
-    [promote_from]
-    current-tripleo: tripleo-ci-testing
-
-    [current-tripleo]
-    periodic-tripleo-centos-7-master-containers-build-push
-    periodic-tripleo-centos-7-master-standalone
-    ''',
-)
-
-
 # These are preparation for all the types of dlrn_hashes we are going to test
 # on the following test cases.
 valid_commitdistro_kwargs = dict(commit_hash='abcd', distro_hash='defg',
@@ -168,6 +74,8 @@ different_aggregate_kwargs = dict(aggregate_hash='c', commit_hash='a',
 different_aggregate_notimestamp_kwargs = dict(aggregate_hash='a',
                                               commit_hash='b',
                                               distro_hash='c')
+
+log_dir = "~/web/promoter_logs/"
 
 # Structured way to organize test cases by hash type and source type
 # by commitdistro and aggregate hash types and by dict or object source tyep
@@ -215,26 +123,22 @@ hashes_test_cases = {
 }
 
 
-# TODO: remove together with legacy config
-class LegacyConfigSetup(unittest.TestCase):
-
+class ConfigSetup(unittest.TestCase):
     def setUp(self):
-        content = test_ini_configurations['correct']
-        fp, self.filepath = tempfile.mkstemp(prefix="instance_test")
-
-        with os.fdopen(fp, "w") as test_file:
-            test_file.write(content)
-
-        cli = "--config-file {} promote-all".format(self.filepath)
-        os.environ["DLRNAPI_PASSWORD"] = "test"
-        overrides = {
-            "default_qcow_server": "staging",
-            "log_level": "DEBUG",
-        }
-        overrides_obj = type("FakeArgs", (), overrides)
-        args = arg_parser(cmd_line=cli)
-        config = PromoterLegacyConfig(args.config_file, overrides=overrides_obj)
+        log_d = os.path.expanduser(log_dir)
+        if not os.path.exists(os.path.dirname(log_d)):
+            os.makedirs(os.path.dirname(log_d))
+        config_builder = PromoterConfigFactory()
+        config = config_builder(
+            os.path.join(config_builder.global_defaults['script_root'],
+                         config_builder.global_defaults[
+                             'environment_config_root']),
+            'CentOS-8/master.yaml')
         self.promoter = Promoter(config)
 
     def tearDown(self):
-        os.unlink(self.filepath)
+        try:
+            log_d = os.path.expanduser(log_dir)
+            shutil.rmtree(os.path.dirname(log_d))
+        except Exception:
+            pass
