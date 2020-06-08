@@ -10,18 +10,23 @@ dlrn_api_host: "localhost"
 dlrn_api_port: 58080
 dlrn_api_scheme: http
 dlrn_api_endpoint: ""
-containers_list_base_url: "https://opendev.org/openstack/tripleo-common/raw/commit/"
-containers_list_path: "container-images/overcloud_containers.yaml.j2"
-repo_url: "https://{{ dlrn_api_host }}/{{ distro }}-{{ release  }}"
+repo_url: "file:///tmp/promoter-staging/dlrn/data/repos/"
 overcloud_images:
   qcow_servers:
     local:
-      user: user
+      user: 'promoter'
       host: localhost
       root: overcloud_images/
       key: "sample_key"
       client: "sftp"
       keypath: "~/.ssh/id_rsa"
+  qcow_images:
+    - ironic-python-agent.tar
+    - ironic-python-agent.tar.md5
+    - overcloud-full.tar
+    - overcloud-full.tar.md5
+    - undercloud.qcow2
+    - undercloud.qcow2.md5
 default_qcow_server: local
 
 # Stage configuration file for the promoter staging
@@ -35,6 +40,7 @@ scenes:
   - containers
   - overcloud_images
 stage_root: /tmp/promoter-staging/
+log_root: "~/web/promoter_logs/"
 log_file: "~/web/promoter_logs/{{ distro }}_{{ release }}.log"
 registries:
   # you can add multiple targets, but only the first source will win
@@ -68,7 +74,9 @@ containers:
   list_exclude_config: |
     "https://opendev.org/openstack/tripleo-ci/raw/branch/master/roles/build-containers/vars/main.yaml"
   build_method: "tripleo"
-  container_preffix: centos-binary-
+  container_preffix: "openstack-"
+  containers_list_base_url: "file:///tmp/promoter-staging/containers/tripleo-common/"
+  containers_list_path: "container-images/tripleo_containers.yaml"
 dlrn:
   components:
     - tripleo
