@@ -16,6 +16,7 @@ except ImportError:
     import mock
 
 # Cases of ini configuration
+# TODO: remove together with legacy config
 test_ini_configurations = dict(
     not_ini='''
     I am not a ini file
@@ -105,6 +106,7 @@ test_ini_configurations = dict(
     periodic-tripleo-centos-7-master-standalone
     ''',
 )
+
 
 
 # These are preparation for all the types of dlrn_hashes we are going to test
