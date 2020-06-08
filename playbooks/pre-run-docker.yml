@@ -38,3 +38,11 @@
               "experimental": "enabled"
           }
         dest: "{{ ansible_user_dir }}/.docker/config.json"
+
+    - name: "set ~ directory permissions"
+      become: true
+      file:
+        path: "{{ ansible_user_dir }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "g-w,o-wx"
