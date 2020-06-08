@@ -8,7 +8,7 @@ import unittest
 import dlrnapi_client
 import pytest
 from common import (LoggingError, check_port, close_logging, get_lock,
-                    get_root_paths, setup_logging, str2bool, str_api_object)
+                    get_root_paths, setup_logging, str_api_object)
 
 try:
     # Python3 imports
@@ -63,26 +63,12 @@ class TestCheckPort(unittest.TestCase):
         self.assertTrue(check_port("localhost", 100, port_mode="closed"))
 
 
-class TestStr2Bool(unittest.TestCase):
-
-    def test_str2bool_true(self):
-        self.assertTrue(str2bool("yes"))
-        self.assertTrue(str2bool("true"))
-        self.assertTrue(str2bool("True"))
-        self.assertTrue(str2bool("on"))
-        self.assertTrue(str2bool("1"))
-
-    def test_str2bool_false(self):
-        self.assertFalse(str2bool("False"))
-        self.assertFalse(str2bool(type("Whatever", (), {})))
-
-
 class TestLogging(unittest.TestCase):
 
     @patch('logging.Logger.info')
     def test_setup_logging_no_handlers(self, mock_log_info):
         setup_logging("tests", logging.DEBUG)
-        self.assertFalse(mock_log_info.called)
+        self.assertTrue(mock_log_info.called)
 
     def test_setup_logging_wrong_log_file(self):
         with pytest.raises(LoggingError):
@@ -94,8 +80,8 @@ class TestLogging(unittest.TestCase):
         setup_logging("tests", logging.DEBUG, log_file=filepath)
         os.unlink(filepath)
         mock_log_info.assert_has_calls([
-            mock.call('Set up logging level %%s on:  file %s' % filepath,
-                      'DEBUG')
+            mock.call('Set up logging level %%s on:  file %s ,console'
+                      % filepath, 'DEBUG')
         ])
 
     def test_close_logging(self):
