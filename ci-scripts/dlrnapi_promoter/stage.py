@@ -27,6 +27,7 @@ import argparse
 import logging
 import os
 
+from common import get_log_file
 from config import PromoterConfigFactory
 from stage_config import StageConfig
 from stage_orchestrator import StageOrchestrator
@@ -105,7 +106,18 @@ def main(cmd_line=None):
     :return: the configuration produced if a cmd_line has been passed. None
     otherwise. Useful for testing of the main function
     """
+    release_config = 'CentOS-8/master.yaml'
+    logging.basicConfig(level=logging.DEBUG)
+    log = logging.getLogger('dlrnapi_promoter')
+    log.setLevel(logging.DEBUG)
 
+    log.info("Checking for log directory")
+    log_file = os.path.expanduser(get_log_file('staging',
+                                               release_config))
+    log_dir = "/".join(log_file.split("/")[:-1])
+    if not os.path.exists(log_dir):
+        log.info("Creating log directory : {}".format(log_dir))
+        os.makedirs(log_dir)
     config_builder = PromoterConfigFactory(config_class=StageConfig)
 
     logging.basicConfig(level=logging.DEBUG)
@@ -114,11 +126,10 @@ def main(cmd_line=None):
 
     args = parse_args(config_builder.global_defaults, cmd_line=cmd_line)
 
-    release_config = None
-    try:
+    if hasattr(args, "release_config"):
         release_config = args.release_config
-    except AttributeError:
-        pass
+    config_builder = PromoterConfigFactory(config_class=StageConfig,
+                                           **{'log_file': log_file})
 
     config = config_builder("staging", release_config,
                             validate=None)
