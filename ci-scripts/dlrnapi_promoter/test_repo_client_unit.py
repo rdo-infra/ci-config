@@ -15,7 +15,7 @@ except ImportError:
     from mock import patch
     import mock
 
-from config_legacy import PromoterLegacyConfigBase
+from config import PromoterConfigFactory
 from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash
 from repo_client import RepoClient
 
@@ -39,7 +39,7 @@ class RepoSetup(unittest.TestCase):
                        self.dlrn_hash_aggregate]
         self.temp_dir = tempfile.mkdtemp()
         self.versions_csv_dir = self.temp_dir
-        config_defaults = PromoterLegacyConfigBase.defaults
+        config_defaults = PromoterConfigFactory().global_defaults
 
         repo_url = "file://{}/".format(self.temp_dir)
         containers_list_base_url = "file://{}".format(self.temp_dir)

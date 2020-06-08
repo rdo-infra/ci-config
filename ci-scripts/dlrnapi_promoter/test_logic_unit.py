@@ -11,10 +11,10 @@ except ImportError:
     import mock
 
 from dlrn_hash import DlrnCommitDistroHash, DlrnHash
-from test_unit_fixtures import LegacyConfigSetup
+from test_unit_fixtures import ConfigSetup
 
 
-class TestPromote(LegacyConfigSetup):
+class TestPromote(ConfigSetup):
 
     @patch('logging.Logger.exception')
     @patch('logging.Logger.error')
@@ -151,7 +151,7 @@ class TestPromote(LegacyConfigSetup):
         self.assertFalse(mock_dlrn_client.called)
 
 
-class TestPromoteLabelToLabel(LegacyConfigSetup):
+class TestPromoteLabelToLabel(ConfigSetup):
 
     @patch('logging.Logger.debug')
     @patch('logging.Logger.error')
@@ -367,7 +367,7 @@ class TestPromoteLabelToLabel(LegacyConfigSetup):
         self.assertEqual(promoted_pair, ())
 
 
-class TestPromoteAll(LegacyConfigSetup):
+class TestPromoteAll(ConfigSetup):
 
     @patch('logging.Logger.info')
     @patch('dlrn_client.DlrnClient.fetch_current_named_hashes')
@@ -421,7 +421,7 @@ class TestPromoteAll(LegacyConfigSetup):
         self.assertEqual(promoted_pairs, [])
 
 
-class TestSelectCandidates(LegacyConfigSetup):
+class TestSelectCandidates(ConfigSetup):
 
     @mock.patch('dlrn_client.DlrnClient.fetch_promotions')
     def test_no_hashes_fetched_returns_empty_list(self, fetch_hashes_mock):

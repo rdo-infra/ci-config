@@ -13,7 +13,6 @@ import promoter_integration_checks
 import pytest
 import yaml
 from common import close_logging
-from config_legacy import PromoterLegacyConfig
 
 try:
     import urllib2 as url
@@ -26,8 +25,8 @@ from logic import Promoter
 from stage import main as stage_main
 
 
-@pytest.fixture(scope='function', params=['dlrn_legacyconf_single',
-                                          'dlrn_legacyconf_integration'])
+@pytest.fixture(scope='function', params=['dlrn_single',
+                                          'dlrn_integration'])
 def staged_env(request):
     """
     Fixture that runs the staging environment provisioner with parameters,
@@ -90,12 +89,6 @@ def staged_env(request):
     overrides_obj = type("FakeArgs", (), overrides)
     os.environ["DLRNAPI_PASSWORD"] = stage_info['dlrn']['server']['password']
 
-    if 'legacyconf' in test_case:
-        config = PromoterLegacyConfig(overrides_obj.config_file,
-                                      overrides=overrides_obj)
-    else:
-        raise Exception("New config engine is not implemented yet")
-
     promoter = Promoter(config)
 
     yield stage_info, promoter
@@ -150,10 +143,13 @@ def test_select_candidates(staged_env):
     :return: None
     """
     stage_info, promoter = staged_env
+    commit = stage_info['dlrn']['promotions']['promotion_candidate']
+    candidate_label = commit['name']
 
     candidate_hashes_list = []
-    for target_label, candidate_label in \
-            promoter.config.promotion_steps_map.items():
+    for target_label, target_meta in \
+            promoter.config.promotions.items():
+        target_label = target_meta['target_label']
         candidate_hashes_list = promoter.select_candidates(candidate_label,
                                                            target_label)
     assert candidate_hashes_list != []
