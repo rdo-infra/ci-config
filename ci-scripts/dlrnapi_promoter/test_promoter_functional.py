@@ -13,7 +13,6 @@ import pytest
 import yaml
 from common import close_logging
 from config import PromoterConfigFactory
-from config_legacy import PromoterLegacyConfig
 from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
 from logic import Promoter
 from stage import main as stage_main
@@ -114,13 +113,10 @@ def staged_env(request):
 
     overrides_obj = type("FakeArgs", (), overrides)
     os.environ["DLRNAPI_PASSWORD"] = stage_info['dlrn']['server']['password']
-    if 'legacyconf' in test_case:
-        config = PromoterLegacyConfig(overrides_obj.config_file,
-                                      overrides=overrides_obj)
-    else:
-        config_builder = PromoterConfigFactory()
-        config = config_builder("staging", release_config,
-                                cli_args=overrides_obj)
+
+    config_builder = PromoterConfigFactory()
+    config = config_builder("staging", release_config,
+                            cli_args=overrides_obj)
 
     promoter = Promoter(config)
 

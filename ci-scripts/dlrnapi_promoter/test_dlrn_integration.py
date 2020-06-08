@@ -150,10 +150,13 @@ def test_select_candidates(staged_env):
     :return: None
     """
     stage_info, promoter = staged_env
+    commit = stage_info['dlrn']['promotions']['promotion_candidate']
+    candidate_label = commit['name']
 
     candidate_hashes_list = []
-    for target_label, candidate_label in \
-            promoter.config.promotion_steps_map.items():
+    for target_label, target_meta in \
+            promoter.config.promotions.items():
+        target_label = target_meta['target_label']
         candidate_hashes_list = promoter.select_candidates(candidate_label,
                                                            target_label)
     assert candidate_hashes_list != []

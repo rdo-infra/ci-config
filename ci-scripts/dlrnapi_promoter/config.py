@@ -432,14 +432,6 @@ class PromoterConfig(ConfigCore):
                     else:
                         self._log.debug("Transforming criteria into a set")
                         info['criteria'] = set(info['criteria'])
-                    # Create backwards compatible version of promotions
-                    # TODO: remove this alias together with legacy config
-                    if not hasattr(self, 'promotion_steps_map'):
-                        # pylint: disable=attribute-defined-outside-init
-                        self.promotion_steps_map = {}
-
-                    self.promotion_steps_map[target_name] = info[
-                        'candidate_label']
 
                 except KeyError:
                     self._log.debug("No criteria info")

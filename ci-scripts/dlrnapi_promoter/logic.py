@@ -223,8 +223,10 @@ class Promoter(object):
 
         promoted_pairs = []
         self.log.info("Starting promotion attempts for all labels")
-        for target_label, candidate_label in \
-                self.config.promotion_steps_map.items():
+
+        for target_label, target_criteria in \
+                self.config.promotions.items():
+            candidate_label = target_criteria['candidate_label']
             self.log.info("Candidate label '%s': Attempting promotion to '%s'"
                           "", candidate_label, target_label)
             promoted_pair = None
