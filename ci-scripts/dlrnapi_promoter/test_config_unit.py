@@ -3,7 +3,6 @@ import shutil
 import tempfile
 import unittest
 
-import pytest
 import yaml
 
 try:
@@ -15,6 +14,7 @@ except ImportError:
     from mock import patch
     import mock
 
+from argparse import Namespace
 from collections import OrderedDict
 
 from common import close_logging, setup_logging
@@ -41,11 +41,14 @@ class TestConfigCore(unittest.TestCase):
             'jinja_single_samelayer': "{{ simple_bothlayers }}-rendered",
             'jinja_single_crosslayers': "{{ simple_lowestlayer }}-rendered",
             'jinja_recursive_samelayer': ("{{ jinja_single_samelayer }}"
-                                          "-recursivelyrendered")
+                                          "-recursivelyrendered"),
+            'empty_string': '',
         }
-        self.config = ConfigCore(['high_priority', 'low_priority'])
+        self.config = ConfigCore(['high_priority', 'low_priority', None,
+                                  'null_layer'])
         self.config._layers['high_priority'] = high_priority_settings
         self.config._layers['low_priority'] = low_priority_settings
+        self.config._layers['null_layer'] = None
 
         class SubConfig(ConfigCore):
 
@@ -58,9 +61,12 @@ class TestConfigCore(unittest.TestCase):
         self.subconfig = SubConfig(['layer'])
         self.subconfig._layers['layer'] = {'filtered': 'VALUE'}
 
-    def test_get_unknown_attribute(self):
+    @patch('logging.Logger.warning')
+    def test_get_unknown_attribute_skip_null(self, mock_log_warning):
         with self.assertRaises(AttributeError):
             _ = self.config.nonexsting_setting
+        # Check also we are skipping search on null layer
+        self.assertTrue(mock_log_warning.called)
 
     def test_get_simple_attribute_lowest_layer(self):
         value = self.config.simple_lowestlayer
@@ -97,10 +103,13 @@ class TestConfigCore(unittest.TestCase):
         value = self.subconfig.filtered
         self.assertEqual(value, 'value')
 
-    @pytest.mark.xfail(reason="Not implemented, pass a layer as None",
-                       run=False)
-    def test_layer_is_none(self):
-        assert False
+    def test_render_empty_string(self):
+        # it should render empty strings a empty strings, not None
+        self.assertEqual(self.config.empty_string, '')
+
+    def test_item_assignement(self):
+        self.config['item_key'] = 'item_value'
+        self.assertEqual(self.config['item_key'], 'item_value')
 
 
 class ConfigTestCases(unittest.TestCase):
@@ -318,6 +327,7 @@ class TestPromoterConfig(ConfigTestCases):
         promotions = self.config_stablebranch.promotions
         for __, info in promotions.items():
             self.assertIsInstance(info['criteria'], set)
+        assert hasattr(self.config_stablebranch, 'promotion_steps_map')
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
@@ -330,7 +340,6 @@ class TestPromoterConfig(ConfigTestCases):
         mock_log_debug.assert_has_calls([
             mock.call("Assigning api_url %s", expected_url)
         ])
-        self.assertFalse(mock_log_error.called)
 
     @patch('logging.Logger.error')
     def test_get_dlrn_api_url_empty(self, mock_log_error):
@@ -352,7 +361,6 @@ class TestPromoterConfig(ConfigTestCases):
         mock_log_debug.assert_has_calls([
             mock.call("Assigning api_url %s", expected_url)
         ])
-        self.assertFalse(mock_log_error.called)
 
     def test_constructor_namespace_ussuri(self):
         self.config_stablebranch.release = "ussuri"
@@ -429,6 +437,16 @@ class TestPromoterConfigFactory(ConfigTestCases):
         close_logging("promoter")
         for path in self.env_paths.values():
             shutil.rmtree(path)
+
+    def test_cli_settings_namespace(self):
+        """
+        Ensure Namespace from cli gets transformed into dict
+        """
+        cli_args = Namespace()
+        config = self.config_builder(self.env_paths['upstream'], None,
+                                     cli_args=cli_args,
+                                     validate=None)
+        self.assertIsInstance(config._layers['cli'], dict)
 
     @patch('logging.Logger.error')
     def test_config_no_env_root(self, mock_log_error):

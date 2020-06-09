@@ -62,18 +62,21 @@ class PromoterLegacyConfigBase(object):
                     "host": "images.rdoproject.org",
                     "user": "uploader",
                     "root": "/var/www/html/images/",
+                    "keypath": "~/.ssh/id_rsa",
                     "client": "sftp"
                 },
                 "staging": {
                     "host": "localhost",
-                    "root": "/tmp/promoter-staging/overcloud_images",
                     "user": os.environ.get("USER"),
+                    "root": "/tmp/promoter-staging/overcloud_images",
+                    "keypath": "~/.ssh/id_rsa",
                     "client": "sftp",
                 },
                 "local": {
                     "host": None,
-                    "root": "/tmp/promoter-staging/overcloud_images",
                     "user": None,
+                    "root": "/tmp/promoter-staging/overcloud_images",
+                    "keypath": "~/.ssh/id_rsa",
                     "client": "fs",
                 }
             },
