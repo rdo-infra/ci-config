@@ -15,7 +15,6 @@ import promoter_integration_checks
 from common import close_logging
 from config_legacy import PromoterLegacyConfig
 from dlrn_hash import DlrnCommitDistroHash, DlrnAggregateHash, DlrnHash
-from dlrnapi_promoter import main as promoter_main
 from logic import Promoter
 
 from stage import main as stage_main
@@ -114,7 +113,8 @@ def staged_env(request):
         config = PromoterLegacyConfig(overrides_obj.config_file,
                                       overrides=overrides_obj)
     else:
-        raise Exception("New config engine is not implemented yet")
+        config = PromoterConfigFactory(overrides_obj.config_file,
+                                      overrides=overrides_obj)
 
     promoter = Promoter(config)
 
@@ -242,35 +242,3 @@ def test_promote_all_two_promotions_in_a_row(staged_env):
     :return:
     """
     assert False
-
-
-@pytest.mark.xfail(reason="Experimental Feature")
-@pytest.mark.parametrize("staged_env",
-                         ("qcow_legacyconf_single_experimental",
-                          "qcow_legacyconf_integration_experimental"),
-                         indirect=True)
-def test_promote_qcows_experimental(staged_env):
-    """
-    Tests promotion of overcloud images
-    :param staged_env: The stage env fixture
-    :return: None
-    """
-    stage_info, promoter = staged_env
-    candidate_dict = stage_info['dlrn']['promotions']['promotion_candidate']
-    candidate_hash = DlrnHash(source=candidate_dict)
-
-    if stage_info['main']['pipeline_type'] == "single":
-        error_msg = "Single pipeline should promote a commit/distro hash"
-        assert type(candidate_hash) == DlrnCommitDistroHash, error_msg
-    else:
-        error_msg = "Integration pipeline should promote an aggregate hash"
-        assert type(candidate_hash) == DlrnAggregateHash, error_msg
-
-    candidate_label = candidate_dict['name']
-    target_label = stage_info['dlrn']['promotion_target']
-
-    promoter.dlrn_client.fetch_current_named_hashes(store=True)
-    promoter.qcow_client.promote_experimental(candidate_hash, candidate_label,
-                                              target_label)
-
-    promoter_integration_checks.compare_tagged_image_hash(stage_info=stage_info)

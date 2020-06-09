@@ -12,6 +12,10 @@ import logging
 import os
 import pytest
 import pprint
+
+from common import setup_logging
+from config import PromoterConfigFactory
+
 try:
     import urllib2 as url
 except ImportError:
@@ -25,10 +29,10 @@ except ImportError:
     from mock import Mock, patch
     import mock
 
-from stage import StageConfig, main as stage_main
+from stage import main as stage_main
 from dlrn_hash import DlrnCommitDistroHash, DlrnAggregateHash, DlrnHash
 
-log = logging.getLogger("Test Staging")
+log = logging.getLogger("promoter-staging")
 
 
 @pytest.fixture(scope='function')
@@ -46,10 +50,11 @@ def staged_env(request):
     # We are going to call the main in the staging passing a composed command
     # line, so we are testing also that the argument parsing is working
     # correctly instead of passing  configuration directly
+    setup_logging("promoter-staging", 10)
     test_case = "all_single"
     config_file = "stage-config-secure.yaml"
-    setup_cmd_line = "setup --stage-config-file {}".format(config_file)
-    teardown_cmd_line = "teardown --stage-config-file {}".format(config_file)
+    release_file = "CentOS-8/master.yaml"
+    cmd_line = ""
 
     try:
         test_case = request.param
@@ -59,6 +64,8 @@ def staged_env(request):
         log.error("Invalid test case '{}'".format(request.param))
         raise
 
+    if 'secure' in test_case:
+        cmd_line += " --extra-config {}".format(config_file)
     # Select scenes to run in the staging env depending on the parameter passed
     # to the fixture
     scenes = None
@@ -69,19 +76,23 @@ def staged_env(request):
     if "containers_" in test_case:
         scenes = 'registries,containers'
     if scenes is not None:
-        setup_cmd_line += " --scenes {}".format(scenes)
+        cmd_line += " --scenes {}".format(scenes)
 
     # for the tests of the integration pipeline we need to pass a different
     # file with db data
     if "_integration" in test_case:
-        setup_cmd_line += " --db-data-file integration-pipeline.yaml"
-        teardown_cmd_line += " --db-data-file integration-pipeline.yaml"
+        db_data = " --db-data-file integration-pipeline.yaml"
+
+    setup_cmd_line = "setup {} --release-config {} {}".format(cmd_line,
+                                                           release_file,
+                                                              db_data)
+    teardown_cmd_line = "teardown {}".format(cmd_line)
 
     log.info("Running cmd line: {}".format(setup_cmd_line))
 
     config = stage_main(setup_cmd_line)
 
-    stage_info_path = config.main['stage_info_path']
+    stage_info_path = config['stage_info_path']
     with open(stage_info_path, "r") as stage_info_file:
         stage_info = yaml.safe_load(stage_info_file)
 
@@ -115,7 +126,8 @@ def test_stage_config():
     Test to see if the stage config is created correctly
     :return: None
     """
-    config = StageConfig(source="stage-config-secure.yaml")
+    config_builder = PromoterConfigFactory()
+    config = config_builder("staging", None, validate=None)
     config_sections = ['dlrn', 'registries', 'containers', 'main',
                        'overcloud_images']
     for section in config_sections:

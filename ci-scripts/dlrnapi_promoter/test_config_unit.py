@@ -100,6 +100,13 @@ class TestConfigCore(unittest.TestCase):
     def test_layer_is_none(self):
         assert False
 
+    def test_render_empty_string(self):
+        # it should rendere empty strings a empty strings, not None
+        assert False
+
+    def test_item_assignement(self):
+        assert False
+
 
 class ConfigTestCases(unittest.TestCase):
 
@@ -352,6 +359,9 @@ class TestPromoterConfig(ConfigTestCases):
         ])
         self.assertFalse(mock_log_error.called)
 
+    def test_backward_promotions(self):
+        assert False
+
 
 class TestPromoterConfigFactory(ConfigTestCases):
     """
@@ -418,6 +428,13 @@ class TestPromoterConfigFactory(ConfigTestCases):
         close_logging("promoter")
         for path in self.env_paths.values():
             shutil.rmtree(path)
+
+    def test_cli_settings_namespace(self):
+        """
+        Ensure Namespace from cli gets transformed into dict
+        :return:
+        """
+        assert False
 
     @patch('logging.Logger.error')
     def test_config_no_env_root(self, mock_log_error):
