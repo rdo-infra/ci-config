@@ -1,5 +1,6 @@
 import os
 import shutil
+import tempfile
 import unittest
 
 import pytest
@@ -8,7 +9,8 @@ from config_legacy import PromoterLegacyConfigBase
 from dlrn_hash import DlrnHash
 from promoter_integration_checks import check_links
 from qcow_client import QcowConnectionClient
-from test_unit_fixtures import LegacyConfigSetup, hashes_test_cases
+from test_unit_fixtures import (SSH_CONTENT, LegacyConfigSetup,
+                                hashes_test_cases)
 
 try:
     # Python3 imports
@@ -28,15 +30,22 @@ except NameError:
 class TestQcowConnectionClient(unittest.TestCase):
 
     def setUp(self):
+        fd, self.path = tempfile.mkstemp()
+        ssh_file = os.fdopen(fd, "w")
+        ssh_file.write(SSH_CONTENT)
+        ssh_file.close()
+
         self.server_conf_os = {
             'client': 'os',
             'host': 'localhost',
             'user': os.environ['USER'],
+            'keypath': self.path,
         }
         self.server_conf_sftp = {
             'host': 'localhost',
             'user': os.environ['USER'],
             'client': 'sftp',
+            'keypath': self.path,
         }
 
     @patch('paramiko.SSHClient.close')
@@ -71,6 +80,10 @@ class TestQcowConnectionClient(unittest.TestCase):
 
         client.close()
         self.assertFalse(paramiko_close_mock.called)
+
+    def tearDown(self):
+        super(TestQcowConnectionClient, self).tearDown()
+        os.remove(self.path)
 
 
 class TestQcowClient(LegacyConfigSetup):
