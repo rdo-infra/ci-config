@@ -144,7 +144,7 @@ class ConfigCore(object):
 
         if self._verbose:
             self._log.debug("Running filter for attribute %s",
-                        attribute_name)
+                            attribute_name)
         try:
             return filter_method(value)
         except Exception as exc:
@@ -426,6 +426,7 @@ class PromoterConfig(ConfigCore):
         :param promotions: The dict with the promotions steps
         :return: The same dict with criterias as set
         """
+        # pylint: ignore=W0201
         if isinstance(promotions, dict):
             self._log.debug("Promotions is a dict")
             for target_name, info in promotions.items():
