@@ -3,7 +3,7 @@ set -euo pipefail
 
 # defaults used for backwards compatibility
 : ${OPT_DISTRO:=centos}
-: ${OPT_DISTRO_VERSION:=7}
+: ${OPT_DISTRO_VERSION:=8}
 : ${OPT_WEBROOT:=/var/www/html/images}
 : ${OPT_WEBSITE:=https://images.rdoproject.org}
 : ${IMAGE_SERVER_USER_HOST:=uploader@images.rdoproject.org}
