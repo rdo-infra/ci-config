@@ -17,7 +17,7 @@ def test_ini_files():
     errors = False
     for root, __, files in os.walk(os.path.join(promoter_root, "config")):
         for file in files:
-            if '.ini' in file:
+            if file.endswith('.ini'):
                 full_path = os.path.join(root, file)
                 try:
                     PromoterLegacyConfig(full_path, checks=['criteria'])
