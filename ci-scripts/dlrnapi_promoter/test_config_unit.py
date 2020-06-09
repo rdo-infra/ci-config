@@ -11,7 +11,7 @@ except ImportError:
     import mock
 
 
-from config import ConfigCore
+from config import ConfigCore, PromoterConfig
 
 
 class TestConfigCore(unittest.TestCase):
@@ -85,3 +85,152 @@ class TestConfigCore(unittest.TestCase):
     def test_filtered(self):
         value = self.subconfig.filtered
         self.assertEqual(value, 'value')
+
+
+class TestPromoterConfigInstance(unittest.TestCase):
+
+    def test_base_instance(self):
+        config = PromoterConfig()
+        assert hasattr(config, "settings")
+        self.assertIsInstance(config.settings, OrderedDict)
+        self.assertIn("cli", config.settings)
+        self.assertIn("file", config.settings)
+        self.assertIn("default", config.settings)
+        self.assertIn("experimental", config.settings)
+        self.assertIsInstance(config.settings['cli'], dict)
+        self.assertIsInstance(config.settings['file'], dict)
+        self.assertIsInstance(config.settings['default'], dict)
+        self.assertIsInstance(config.settings['experimental'], dict)
+
+
+# FIXME: python2 has no unittest.assertLogs
+class TestGetDlrnApi(ConfigCases):
+
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.debug')
+    @patch('common.check_port')
+    def test_get_dlrn_api_url_local(self, check_port_mock,
+                                    mock_log_debug,
+                                    mock_log_error):
+        check_port_mock.return_value = True
+        config = PromoterConfigFactory(self.filepaths['correct'], filters=[],
+                                       validate=[])
+        in_config = {}
+        expected_url = "http://localhost:58080"
+        api_url = config.get_dlrn_api_url(in_config)
+        self.assertEqual(api_url, expected_url)
+        check_port_mock.assert_has_calls([
+            mock.call("localhost", "58080")
+        ])
+        mock_log_debug.assert_has_calls([
+            mock.call("Assigning api_url %s", expected_url)
+        ])
+        mock_log_error.assert_not_called()
+
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.debug')
+    @patch('common.check_port')
+    def test_get_dlrn_api_url_none(self, check_port_mock,
+                                   mock_log_debug,
+                                   mock_log_error):
+        check_port_mock.side_effect = [False, False]
+        config = PromoterConfigFactory(self.filepaths['correct'],
+                                       validate=[])
+        # PromoterConfig calls log.debug at this point, so we reset the mock
+        # to make it count from zero
+        mock_log_debug.reset_mock()
+        in_config = {
+            'distro_name': "centos",
+            'distro_version': "8",
+            'release': "master"
+        }
+        expected_url = None
+        api_url = config.get_dlrn_api_url(in_config)
+        self.assertEqual(api_url, expected_url)
+        check_port_mock.assert_has_calls([
+            mock.call("localhost", "58080"),
+            mock.call("trunk.rdoproject.org", 443, 5)
+        ])
+        mock_log_error.assert_has_calls([
+            mock.call("No valid API url found")
+        ])
+        mock_log_debug.assert_not_called()
+
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.debug')
+    @patch('common.check_port')
+    def test_get_dlrn_api_url_remote_centos8_master(self, check_port_mock,
+                                                    mock_log_debug,
+                                                    mock_log_error):
+        check_port_mock.side_effect = [False, True]
+        config = PromoterConfigFactory(self.filepaths['correct'],
+                                       validate=[])
+        in_config = {
+            'distro_name': "centos",
+            'distro_version': "8",
+            'release': "master"
+        }
+        expected_url = "https://trunk.rdoproject.org/api-centos8-master-uc"
+        api_url = config.get_dlrn_api_url(in_config)
+        self.assertEqual(api_url, expected_url)
+        check_port_mock.assert_has_calls([
+            mock.call("localhost", "58080"),
+            mock.call("trunk.rdoproject.org", 443, 5)
+        ])
+        mock_log_debug.assert_has_calls([
+            mock.call("Assigning api_url %s", expected_url)
+        ])
+        mock_log_error.assert_not_called()
+
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.debug')
+    @patch('common.check_port')
+    def test_get_dlrn_api_url_remote_centos7_master(self, check_port_mock,
+                                                    mock_log_debug,
+                                                    mock_log_error):
+        check_port_mock.side_effect = [False, True]
+        config_builder = PromoterConfigFactory(self.filepaths['correct'],
+                                       validate=[])
+        config = config_builder()
+        in_config = {
+            'distro_name': "centos",
+            'distro_version': "7",
+            'release': "master"
+        }
+        expected_url = "https://trunk.rdoproject.org/api-centos-master-uc"
+        api_url = config.get_dlrn_api_url(in_config)
+        self.assertEqual(api_url, expected_url)
+        check_port_mock.assert_has_calls([
+            mock.call("localhost", "58080"),
+            mock.call("trunk.rdoproject.org", 443, 5)
+        ])
+        mock_log_debug.assert_has_calls([
+            mock.call("Assigning api_url %s", expected_url)
+        ])
+        mock_log_error.assert_not_called()
+
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.debug')
+    @patch('common.check_port')
+    def test_get_dlrn_api_url_remote_centos7_train(self, check_port_mock,
+                                                   mock_log_debug,
+                                                   mock_log_error):
+        check_port_mock.side_effect = [False, True]
+        config = PromoterConfigFactory(self.filepaths['correct'],
+                                       validate=[])
+        in_config = {
+            'distro_name': "centos",
+            'distro_version': "7",
+            'release': "train"
+        }
+        expected_url = "https://trunk.rdoproject.org/api-centos-train"
+        api_url = config.get_dlrn_api_url(in_config)
+        self.assertEqual(api_url, expected_url)
+        check_port_mock.assert_has_calls([
+            mock.call("localhost", "58080"),
+            mock.call("trunk.rdoproject.org", 443, 5)
+        ])
+        mock_log_debug.assert_has_calls([
+            mock.call("Assigning api_url %s", expected_url)
+        ])
+        mock_log_error.assert_not_called()

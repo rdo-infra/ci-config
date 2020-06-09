@@ -183,3 +183,84 @@ class ConfigCore(object):
             return True
         except AttributeError:
             return False
+
+
+class PromoterConfig(ConfigCore):
+
+    def __init__(self, default_settings=None, file_settings=None,
+                 cli_settings=None, experimental_settings=None):
+        super(PromoterConfig, self).__init__(['cli', 'file', 'default',
+                                              'experimental'])
+        if cli_settings is None:
+            cli_settings = {}
+        if file_settings is None:
+            file_settings = {}
+        if default_settings is None:
+            default_settings = {}
+        if experimental_settings is None:
+            experimental_settings = {}
+        self._layers["cli"] = cli_settings
+        self._layers['file'] = file_settings
+        self._layers['default'] = default_settings
+        self._layers['experimental'] = experimental_settings
+
+    # Constructors
+
+    def _constructor_dlrnauth_password(self):
+        return os.environ.get('DLRNAPI_PASSWORD', None)
+
+    def _constructor_qcow_server(self):
+        return self['overcloud_images']['qcow_servers'][
+            self.default_qcow_server]
+
+    def _constructor_api_url(self):
+        """
+        API url is the wild west of exceptions, when it's not specified in
+        config files, we need an entire function to try to understand what we
+        can use
+        :param config: The existing configuration
+        :return: the first API url that responds.
+        """
+        # Try local staged api first
+        api_host = "localhost"
+        api_port = 58080
+        api_url = None
+        if common.check_port(api_host, api_port):
+            api_url = "http://{}:{}".format(api_host, api_port)
+        else:
+            distro_api_endpoint = config['distro_name']
+            if config['distro_version'] == '8':
+                distro_api_endpoint += config['distro_version']
+            release_api_endpoint = config['release']
+            if config['release'] == "master":
+                release_api_endpoint = "master-uc"
+            api_endpoint = "api-{}-{}".format(distro_api_endpoint,
+                                              release_api_endpoint)
+            api_host = self.defaults['dlrn_api_host']
+            api_port = 443
+            if common.check_port(api_host, api_port, 5):
+                api_url = "https://{}/{}".format(api_host, api_endpoint)
+
+        if api_url is None:
+            self.log.error("No valid API url found")
+        else:
+            self.log.debug("Assigning api_url %s", api_url)
+        return api_url
+
+    # filters
+
+    def _filter_allowed_clients(self, allowed_clients):
+        return allowed_clients.split(',')
+
+    def _filter_distro_name(self, distro_name):
+        return distro_name.lower()
+
+    def _filter_promotions(self, promotions):
+        if isinstance(promotions, dict):
+            _promotions = copy.deepcopy(promotions)
+            for target_name, info in promotions.items():
+                if 'criteria' in info and not isinstance(info['criteria'], set):
+                    info['criteria'] = set(info['criteria'])
+            return _promotions
+        else:
+            return promotions
