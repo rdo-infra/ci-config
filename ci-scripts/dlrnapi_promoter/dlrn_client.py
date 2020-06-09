@@ -547,7 +547,9 @@ class DlrnClient(object):
             self.log.error("%s (subhash %s) API returned different"
                            " promoted hash: '%s'", log_header,
                            dlrn_hash, promoted_hash)
-            raise PromotionError("API returned different promoted hash")
+            # Until we have a better way to compute the effective expectation
+            # on the promoted hash, don't make this fatal.
+            # raise PromotionError("API returned different promoted hash")
 
         # For every hash promoted, we need to update the named hashes.
         self.update_current_named_hashes(dlrn_hash, target_label)
