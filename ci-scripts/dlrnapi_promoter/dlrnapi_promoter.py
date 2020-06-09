@@ -6,6 +6,7 @@ import argparse
 
 import common
 from common import LockError
+from config import PromoterConfigFactory
 from config_legacy import PromoterLegacyConfig, PromoterLegacyConfigBase
 from dlrn_hash import DlrnHash, DlrnHashError
 from logic import Promoter
@@ -109,8 +110,8 @@ def main(cmd_line=None):
         config = PromoterLegacyConfig(args.config_file, overrides=args)
     else:
         # If not then use the config root and the new config builder
-        # Which is not implemented yet
-        raise Exception("New config method is not implemented yet")
+        config_builder = PromoterConfigFactory()
+        config = config_builder()
 
     promoter = Promoter(config)
 
