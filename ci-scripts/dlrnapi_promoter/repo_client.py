@@ -38,7 +38,6 @@ class RepoClient(object):
 
         versions_url = ("{}/{}/versions.csv"
                         "".format(self.root_url, dlrn_hash.commit_dir))
-        print(versions_url)
         self.log.debug("Accessing versions at %s", versions_url)
         try:
             versions_content = url.urlopen(versions_url).read()
