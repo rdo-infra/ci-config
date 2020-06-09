@@ -77,6 +77,7 @@ class QcowClient(object):
         self.images_dir = os.path.join(self.root, config.distro,
                                        config.release, "rdo_trunk")
 
+
     def validate_qcows(self, dlrn_hash, name=None, assume_valid=False):
         """
         Check we have the images dir in the server
