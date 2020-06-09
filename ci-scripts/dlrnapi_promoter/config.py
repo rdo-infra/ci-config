@@ -2,13 +2,19 @@
 This file contains classes and function to build a configuration object that
 can be passed to all the functions in the workfloww
 """
+import copy
 import logging
+import os
 import pprint
 
-from common import setup_logging, get_root_paths
 from jinja2 import Template
 from jinja2.nativetypes import native_concat
 from collections import OrderedDict
+
+try:
+    from urllib import urlparse
+except ImportError:
+    import urlparse
 
 
 class ConfigCore(object):
@@ -24,6 +30,11 @@ class ConfigCore(object):
         self._layers = OrderedDict()
         for layer_name in layers_list:
             self._layers[layer_name] = {}
+        self._log.debug("Config object configured with layers: %s",
+                        ", ".join(layers_list))
+
+    def _dump(self):
+        pprint.pprint(self._layers)
 
     def _fill_layer_settings(self, layer_name, settings):
         """
@@ -74,7 +85,8 @@ class ConfigCore(object):
                                 attribute_name, source_name)
                 break
             except KeyError:
-                pass
+                self._log.debug("Attribute %s not found in layers",
+                                attribute_name)
 
         try:
             return value
@@ -119,7 +131,6 @@ class ConfigCore(object):
         try:
             return self._search_layers(attribute_name)
         except AttributeError:
-            self._log.debug("Attribute %s not found in layers", attribute_name)
             try:
                 return self._construct_value(attribute_name)
             except AttributeError:
@@ -141,7 +152,10 @@ class ConfigCore(object):
         # the context for the same reason as above.
         value = native_concat(template.root_render_func(
             template.new_context(vars=self, shared=True, locals=None)))
-        return value
+
+        # native concat returns int for string that contains only numbers
+        # so we force to return a string
+        return str(value)
 
     def __getattr__(self, attribute_name):
         """
@@ -183,3 +197,123 @@ class ConfigCore(object):
             return True
         except AttributeError:
             return False
+
+
+class PromoterConfig(ConfigCore):
+    """
+
+    """
+
+    def __init__(self, default_settings=None, file_settings=None,
+                 cli_settings=None, experimental_settings=None):
+        """
+
+        :param default_settings:
+        :param file_settings:
+        :param cli_settings:
+        :param experimental_settings:
+        """
+        super(PromoterConfig, self).__init__(['cli', 'file', 'default',
+                                              'experimental'])
+        if cli_settings is None:
+            cli_settings = {}
+        if file_settings is None:
+            file_settings = {}
+        if default_settings is None:
+            default_settings = {}
+        if experimental_settings is None:
+            experimental_settings = {}
+        self._layers["cli"] = cli_settings
+        self._layers['file'] = file_settings
+        self._layers['default'] = default_settings
+        self._layers['experimental'] = experimental_settings
+        self._log.debug("Initialized")
+
+    # Constructors
+
+    def _constructor_dlrnauth_password(self):
+        """
+
+        :return:
+        """
+        return os.environ.get('DLRNAPI_PASSWORD', None)
+
+    def _constructor_qcow_server(self):
+        """
+
+        :return:
+        """
+        return self['overcloud_images']['qcow_servers'][
+            self.default_qcow_server]
+
+    def _constructor_api_url(self):
+        """
+        API url is the wild west of exceptions.
+        :return: The api_url
+        """
+        host = self['dlrn_api_host']
+        port = self['dlrn_api_port']
+        scheme = self['dlrn_api_scheme']
+        distro = self['distro_name']
+        version = self['distro_version']
+        release = self['release']
+        url_port = None
+        endpoint = None
+
+        distro_endpoint = distro
+
+        if version == '8':
+            distro_endpoint += version
+        release_endpoint = release
+        if release == "master":
+            release_endpoint = "master-uc"
+        if distro_endpoint is not None and release_endpoint is not None:
+            endpoint = "api-{}-{}".format(distro_endpoint,
+                                          release_endpoint)
+        if port is None or (scheme == "http" and port == 443) \
+                or (scheme == "https" and
+                    port == 443):
+            url_port = ""
+        else:
+            url_port = ":{}".format(port)
+
+        if not host and not port:
+            url_hostport = ""
+        else:
+            url_hostport = "{}{}".format(host, url_port)
+
+        url_elements = [None] * 6
+        url_elements[0] = scheme
+        url_elements[1] = url_hostport
+        url_elements[2] = endpoint
+        url = urlparse.urlunparse(url_elements)
+
+        if url is None:
+            self._log.error("No valid API url found")
+        else:
+            self._log.debug("Assigning api_url %s", url)
+        return url
+
+    # filters
+
+    def _filter_allowed_clients(self, allowed_clients):
+        if isinstance(allowed_clients, str):
+            return allowed_clients.split(',')
+        else:
+            return allowed_clients
+
+    def _filter_distro_name(self, distro_name):
+        if isinstance(distro_name, str):
+            return distro_name.lower()
+        else:
+            return None
+
+    def _filter_promotions(self, promotions):
+        if isinstance(promotions, dict):
+            _promotions = copy.deepcopy(promotions)
+            for target_name, info in promotions.items():
+                if 'criteria' in info and not isinstance(info['criteria'], set):
+                    info['criteria'] = set(info['criteria'])
+            return _promotions
+        else:
+            return promotions
