@@ -25,23 +25,30 @@ This provisioner should produce
 """
 import argparse
 import logging
+import os
 
+from config import PromoterConfigFactory
 from stage_config import StageConfig
 from stage_orchestrator import StageOrchestrator
 
 
-def parse_args(cmd_line=None):
+def command_setup(staged_env):
+    staged_env.setup()
+
+
+def command_teardown(staged_env):
+    staged_env.teardown()
+
+
+def parse_args(defaults, cmd_line=None):
     """
     parses command line arguments
     :param cmd_line: an optional str paramter to simlate a command line.
     Useful for testing this function
     :return: The argparse args namespace object with cli arguments
     """
-
-    defaults = StageConfig.defaults
     parser = argparse.ArgumentParser(description='Staging promoter')
-    parser.add_argument('action', choices=['setup', 'teardown'])
-    default_scenes = ','.join(defaults.scenes)
+    default_scenes = ','.join(defaults['scenes'])
     parser.add_argument('--scenes',
                         default=default_scenes,
                         help=("Select scenes to create in the environment "
@@ -51,33 +58,38 @@ def parse_args(cmd_line=None):
     parser.add_argument('--dry-run', action='store_true', default=False,
                         help="Don't do anything, still create stage-info")
     parser.add_argument('--promoter-user',
-                        default=defaults.promoter_user,
+                        default=os.environ.get("USER", None),
                         help="The promoter user")
-    parser.add_argument('--stage-config-file',
-                        default=defaults.stage_config_file,
-                        help=("Config file for stage generation"
-                              " (relative to config dir)"))
     parser.add_argument('--stage-info-file',
-                        default=defaults.stage_info_file,
-                        help=("Config file for stage results"))
+                        default=defaults['stage_info_file'],
+                        help="Config file for stage results")
+    parser.add_argument('--extra-settings',
+                        help="Config file with additional settings")
     parser.add_argument('--db-data-file',
-                        default=defaults.db_data_file,
+                        default=defaults['db_data_file'],
                         help=("Data file to inject to dlrn server"
                               " (relative to config dir)"))
-    parser.add_argument('--promoter-config-file',
-                        default=defaults.promoter_config_file,
-                        help=("Config file for promoter"
-                              " on which to base the stage"
-                              " (relative to config dir)"))
+
+    command_parser = parser.add_subparsers(dest='subcommand')
+    command_parser.required = True
+    setup_parser = command_parser.add_parser('setup',
+                                             help="Set up the stage")
+    setup_parser.set_defaults(handler=command_setup)
+    setup_parser.add_argument('--release-config',
+                              required=True,
+                              help=("Config file for promoter"
+                                    " on which to base the stage"
+                                    " (relative to config dir)"))
+
+    teardown_parser = command_parser.add_parser('teardown',
+                                                help="Tear down the stage")
+    teardown_parser.set_defaults(handler=command_teardown)
 
     # Parse from the function parameter if present
     if cmd_line is not None:
         args = parser.parse_args(cmd_line.split())
     else:
         args = parser.parse_args()
-
-    if hasattr(args, 'scenes'):
-        args.scenes = args.scenes.split(',')
 
     return args
 
@@ -94,21 +106,25 @@ def main(cmd_line=None):
     otherwise. Useful for testing of the main function
     """
 
+    config_builder = PromoterConfigFactory(config_class=StageConfig)
+
     logging.basicConfig(level=logging.DEBUG)
     log = logging.getLogger("promoter-staging")
     log.setLevel(logging.DEBUG)
 
-    args = parse_args(cmd_line=cmd_line)
+    args = parse_args(config_builder.global_defaults, cmd_line=cmd_line)
 
-    config = StageConfig(source=args.stage_config_file, overrides=args)
+    release_config = None
+    try:
+        release_config = args.release_config
+    except AttributeError:
+        pass
+
+    config = config_builder("staging", release_config,
+                            validate=None)
 
     staged_env = StageOrchestrator(config)
-    if args.action == 'setup':
-        staged_env.setup()
-    elif args.action == 'teardown':
-        staged_env.teardown()
-    else:
-        log.error("No action specified")
+    args.handler(staged_env)
 
     if cmd_line is not None:
         return config
