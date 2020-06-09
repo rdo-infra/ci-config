@@ -24,24 +24,6 @@ class QcowClient(object):
 
         self.distro_name = self.config.distro_name
         self.distro_version = self.config.distro_version
-        # Try to load experimental config
-        if hasattr(config, 'qcow_server'):
-            # Currently paramiko is not in requirements, and I don't want to
-            # add it for the experimental code.
-            import paramiko
-            server_conf = self.config.qcow_server
-            self.user = server_conf['user']
-            self.root = server_conf['root']
-            self.host = server_conf['host']
-
-            self.images_dir = os.path.join(self.root, config.distro,
-                                           config.release, "rdo_trunk")
-
-            client = paramiko.SSHClient()
-            client.load_system_host_keys()
-
-            client.connect(self.host, username=self.user)
-            self.client = client.open_sftp()
 
     def promote(self, candidate_hash, target_label, **kwargs):
         """
