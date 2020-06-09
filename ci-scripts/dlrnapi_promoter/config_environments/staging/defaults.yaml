@@ -1,0 +1,82 @@
+release: 'master'
+distro_name: 'centos'
+distro_version: '8'
+dlrnauth_username: 'ciuser'
+manifest_push: "false"
+target_registries_push: "true"
+latest_hashes_count: '10'
+log_level: "DEBUG"
+dlrn_api_host: "localhost"
+dlrn_api_port: 58080
+dlrn_api_scheme: http
+dlrn_api_endpoint: ""
+containers_list_base_url: "https://opendev.org/openstack/tripleo-common/raw/commit/"
+containers_list_path: "container-images/overcloud_containers.yaml.j2"
+repo_url: "https://{{ dlrn_api_host }}/{{ distro }}-{{ release  }}"
+overcloud_images:
+  qcow_servers:
+    local:
+      user: user
+      host: localhost
+      root: overcloud_images/
+      key: "sample_key"
+default_qcow_server: local
+
+# Stage configuration file for the promoter staging
+# This versions creates only insecure registries
+stage_info_path: /tmp/stage-info.yaml
+dry_run: false
+promoter_user: promoter
+scenes:
+  - registries
+  - dlrn
+  - containers
+  - overcloud_images
+stage_root: /tmp/promoter-staging/
+log_file: "/tmp/promoter-staging/{{ distro }}_{{ release }}.log"
+registries:
+  # you can add multiple targets, but only the first source will win
+  - type: source
+    name: local-source-registry
+    port: 6000
+    secure: False
+    schema: v2_s2
+  - type: target
+    name: local-target-registry-1
+    port: 6500
+    secure: False
+    schema: v2_s2
+containers:
+  # When modfying the suffixes, please follow these hints
+  # - specify at least three values
+  # - base and openstack-base are hardcoded and will always be on top of this
+  # list
+  images-suffix:
+    - nova-compute
+    - neutron-server
+  namespace_prefix: tripleo
+  # Use default
+  # source_namespace:
+  # target_namespace:
+  root: containers/
+  list_base_url: tripleo-common
+  containers_list_base: tripleo-common
+  list_path: null
+  containers_list_exclude_config: "/tmp/promoter-staging/containers/build-containers-main.yaml"
+  list_exclude_config: |
+    "https://opendev.org/openstack/tripleo-ci/raw/branch/master/roles/build-containers/vars/main.yaml"
+dlrn:
+  components:
+    - tripleo
+    - nova
+    - neutron
+  promotion_target: tripleo-ci-staging-promoted
+  server:
+    username: ciuser
+    password: dlrnapi_password00
+    host: localhost
+    port: 58080
+    root: dlrn/
+    repo_root: data/repos/
+    db_file: commits.sqlite
+    db_data_file: single-pipeline.yaml
