@@ -5,14 +5,14 @@
 
     - name: Get tripleo-ci-staging-promoted info for checking
       stat:
-        path: "{{ images_path }}/centos7/master/rdo_trunk/tripleo-ci-staging-promoted"
+        path: "{{ images_path }}/centos8/master/rdo_trunk/tripleo-ci-staging-promoted"
       register: tripleo_ci_staging_promoted
 
     - name: 'Check that tripleo-ci-staging-promoted is a symlink and it points to the hash we promoted {{ full_hash }}'
       assert:
         that:
           - tripleo_ci_staging_promoted.stat.islnk is defined
-          - tripleo_ci_staging_promoted.stat.lnk_target == "{{ images_path }}/centos7/master/rdo_trunk/{{ full_hash }}"
+          - tripleo_ci_staging_promoted.stat.lnk_target == "{{ images_path }}/centos8/master/rdo_trunk/{{ full_hash }}"
 
     - name: Get previous-tripleo-ci-staging-promoted info for checking
       stat:
