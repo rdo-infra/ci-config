@@ -17,6 +17,10 @@ except ImportError:
     import urlparse
 
 
+class ConfigError(Exception):
+    pass
+
+
 class ConfigCore(object):
 
     _log = logging.getLogger("promoter")
@@ -317,3 +321,167 @@ class PromoterConfig(ConfigCore):
             return _promotions
         else:
             return promotions
+
+
+class PromoterConfigFactory(object):
+    """
+    This class builds a singleton object to be passed to all the other
+    functions in the workflow.
+    The base class should be only used for testing as it just performs the
+    basic loading.
+    """
+
+    defaults = {
+        'release': 'master',
+        'distro_name': 'centos',
+        'distro_version': '7',
+        'dlrnauth_username': 'ciuser',
+        'promotions': None,
+        'dry_run': "false",
+        'manifest_push': "false",
+        'target_registries_push': "true",
+        'latest_hashes_count': '10',
+        'allowed_clients': 'registries_client,qcow_client,dlrn_client',
+        'log_level': "INFO",
+        'log_file': None,
+        "dlrn_api_host": "trunk.rdoproject.org",
+        "containers_list_base_url": ("https://opendev.org/openstack/"
+                                     "tripleo-common/raw/commit/"),
+        "containers_list_path": "container-images/overcloud_containers.yaml.j2",
+        "repo_url": "https://{{ dlrn_api_host }}/{{ distro }}-{{ release }}",
+        'log_file': "~/promoter_logs/{{ distro }}_{{ distro }}.log",
+        "distro": "{{ distro_name }}{{ distro_release }}"
+    }
+
+    log = logging.getLogger("promoter")
+
+    def __init__(self, filters="all", validate="all"):
+        """
+        Initialize the config object loading from ini file
+        :param config_path: the path to the configuration file to load
+        :param validate: A comma separated list of checks for the config
+        file
+        """
+        # Initial log setup
+        setup_logging("promoter", logging.DEBUG)
+        self.git_root = None
+        self.script_root = None
+        self.git_root, self.script_root = get_root_paths(self.log)
+        self.log.debug("Git root %s", self.git_root)
+        self.log.debug("Script root %s", self.git_root)
+
+    def __call__(self, config_path, cli_settings=None, validate="all"):
+        file_settings = self.load_file_settings(config_path)
+        experimental_path = os.path.join(self.script_root,
+                                         "promoter_defaults_experimental.yaml")
+        experimental_settings = self.load_file_settings(experimental_path)
+
+        config = PromoterConfig(default_settings=self.defaults,
+                                file_settings=file_settings,
+                                cli_settings=cli_settings,
+                                experimental_settings=experimental_settings)
+
+        if not self.validate(config, checks=validate):
+            self.log.error("Error in configuration file %s", config_path)
+            raise ConfigError
+
+        return config
+
+    def load_file_settings(self, config_path):
+        """
+        Loads configuration from a yaml file.
+        :param config_path: the path to the config file
+        :return: a dict with the configuration
+        """
+
+        self.log.debug("Config file passed: %s", config_path)
+        if config_path is None:
+            self.log.error("Config file passed can't be None")
+            raise ConfigError
+        # The path is either absolute ot it's relative to the code root
+        if not os.path.isabs(config_path):
+            config_path = os.path.join(self.script_root, "config",
+                                       config_path)
+        try:
+            os.stat(config_path)
+        except OSError:
+            self.log.error("Configuration file not found")
+            raise
+
+        self.log.debug("Using config file %s", config_path)
+        with open(config_path) as config_file:
+            try:
+                config = yaml.safe_load(config_file)
+            except yaml.YAMLError as exc:
+                self.log.error("Unable to load config file %s", config_path)
+                self.log.exception(exc)
+                raise ConfigError
+        if not isinstance(config, dict):
+            self.log.error("Config file %s does not contain valid data",
+                           config_path)
+            raise ConfigError
+
+        return config
+
+    def validate(self, config, checks="all"):
+        """
+        :param config: A PromoterConfig instance to check
+        :param checks: a comma separated list of checks to perform
+        :return: A boolean, True if the validation was successful,
+        false otherwise
+        """
+        if not checks:
+            return True
+
+        conf_ok = True
+        if checks == "all":
+            checks = ["logs", "password", "promotions"]
+
+        if 'logs' in checks:
+            try:
+                with open(config.log_file, "w"):
+                    pass
+            except (FileNotFoundError, PermissionError):
+                self.log.error("Invalid log file %s", config.log_file)
+                conf_ok = False
+            try:
+                getattr(logging, config.log_level)
+            except AttributeError:
+                self.log.error("Unrecognized log level: %s",
+                               config['log_level'])
+                conf_ok = False
+
+        if "promotions" in checks:
+            try:
+                promotions = config.promotions
+            except AttributeError:
+                self.log.error("Missing promotions section")
+                conf_ok = False
+
+            if promotions is None:
+                self.log.error("Missing promotions section")
+                conf_ok = False
+            elif not promotions:
+                self.log.error("Promotions section is empty")
+                conf_ok = False
+            else:
+                for target_name, info in promotions.items():
+                    if 'criteria' not in info:
+                        self.log.error("Missing criteria for target %s",
+                                       target_name)
+                        conf_ok = False
+                    if 'criteria' in info and not info['criteria']:
+                        self.log.error("Empty criteria for target %s",
+                                       target_name)
+                        conf_ok = False
+                    if 'candidate_label' not in info:
+                        self.log.error("Missing candidate label for target %s",
+                                       target_name)
+                        conf_ok = False
+
+        if "password" in checks:
+            if config.dlrnauth_password is None:
+                self.log.error("No dlrnapi password found in env")
+                conf_ok = False
+
+        return conf_ok

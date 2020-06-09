@@ -207,3 +207,156 @@ class TestPromoterConfig(unittest.TestCase):
         ])
         self.assertFalse(mock_log_error.called)
 
+
+class ConfigCases(unittest.TestCase):
+
+    def setUp(self):
+        self.filepaths = {}
+        for case, content in test_ini_configurations.items():
+            fp, filepath = tempfile.mkstemp(prefix="conf_test_",
+                                            suffix=".yaml")
+            with os.fdopen(fp, "w") as test_file:
+                test_file.write(content)
+            self.filepaths[case] = filepath
+            self.config_builder = PromoterConfigFactory()
+
+    def tearDown(self):
+        for filepath in self.filepaths.values():
+            os.unlink(filepath)
+
+
+class TestConfigFactoryBuild(ConfigCases):
+
+    @patch('logging.Logger.error')
+    def test_config_none(self, mock_log_error):
+        with self.assertRaises(ConfigError):
+            self.config_builder(None)
+        mock_log_error.assert_has_calls([
+            mock.call("Config file passed can't be None")
+        ])
+
+    @patch('logging.Logger.error')
+    def test_config_not_found(self, mock_log_error):
+        with self.assertRaises(OSError):
+            self.config_builder("/does/not/exist")
+        mock_log_error.assert_has_calls([
+            mock.call("Configuration file not found")
+        ])
+
+    @patch('logging.Logger.error')
+    def test_load_empty_yaml_config(self, mock_log_error):
+        with self.assertRaises(ConfigError):
+            self.config_builder(self.filepaths['empty_yaml'])
+        mock_log_error.assert_has_calls([
+            mock.call("Config file %s does not contain valid data",
+                      self.filepaths['empty_yaml'])
+        ])
+
+    @patch('logging.Logger.error')
+    def test_load_invalid_yaml_config(self, mock_log_error):
+        with self.assertRaises(ConfigError):
+            self.config_builder(self.filepaths['invalid_yaml'])
+        mock_log_error.assert_has_calls([
+            mock.call("Unable to load config file %s",
+                      self.filepaths['invalid_yaml'])
+        ])
+
+    @patch('logging.Logger.error')
+    def test_load_not_yaml_config(self, mock_log_error):
+        with self.assertRaises(ConfigError):
+            self.config_builder(self.filepaths['not_yaml'])
+        mock_log_error.assert_has_calls([
+            mock.call("Config file %s does not contain valid data",
+                      self.filepaths['not_yaml'])
+        ])
+
+    @patch('logging.Logger.error')
+    def test_load_yaml_file_no_criteria(self, mock_log_error):
+        with self.assertRaises(ConfigError):
+            self.config_builder(self.filepaths['missing_criteria'])
+        mock_log_error.assert_has_calls([
+            mock.call("Missing criteria for target %s",
+                      'current-tripleo'),
+            mock.call('Missing candidate label for target %s',
+                      'current-tripleo'),
+            mock.call("Error in configuration file %s", self.filepaths[
+                'missing_criteria'])
+        ])
+
+    @patch('logging.Logger.error')
+    def test_load_yaml_file_invalid_log_options(self, mock_log_error):
+        with self.assertRaises(ConfigError):
+            self.config_builder(self.filepaths['invalid_log'], validate="logs")
+        mock_log_error.assert_has_calls([
+            mock.call('Invalid log file %s', '/this/does_not_exist'),
+            mock.call('Unrecognized log level: %s', 'CATACLYSM'),
+            mock.call('Error in configuration file %s',
+                      self.filepaths['invalid_log'])
+        ])
+
+    @patch('logging.Logger.error')
+    def test_load_yaml_file_empty_criteria(self, mock_log_error):
+        with self.assertRaises(ConfigError):
+            self.config_builder(self.filepaths['empty_criteria'],
+                                validate="promotions")
+        mock_log_error.assert_has_calls([
+            mock.call("Empty criteria for target %s",
+                      'current-tripleo'),
+            mock.call('Missing candidate label for target %s',
+                       'current-tripleo'),
+            mock.call("Error in configuration file %s", self.filepaths[
+                'empty_criteria'])
+        ])
+
+    @patch('logging.Logger.error')
+    def test_load_config_missing_promotions(self, mock_log_error):
+        with self.assertRaises(ConfigError):
+            self.config_builder(self.filepaths['missing_promotions_section'],
+                                validate="promotions")
+        mock_log_error.assert_has_calls([
+            mock.call("Missing promotions section"),
+            mock.call("Error in configuration file %s", self.filepaths[
+                'missing_promotions_section'])
+        ])
+
+    @patch('logging.Logger.error')
+    def test_load_config_empty_promotions(self, mock_log_error):
+        with self.assertRaises(ConfigError):
+            self.config_builder(self.filepaths['empty_promotions_section'])
+        mock_log_error.assert_has_calls([
+            mock.call("Promotions section is empty"),
+            mock.call("No dlrnapi password found in env"),
+            mock.call("Error in configuration file %s", self.filepaths[
+                'empty_promotions_section'])
+        ])
+
+    @patch('logging.Logger.error')
+    def test_load_config_missing_pass(self, mock_log_error):
+        try:
+            del(os.environ["DLRNAPI_PASSWORD"])
+        except KeyError:
+            pass
+        with self.assertRaises(ConfigError):
+            self.config_builder(self.filepaths['correct'], validate="password")
+        mock_log_error.assert_has_calls([
+            mock.call("No dlrnapi password found in env"),
+            mock.call("Error in configuration file %s", self.filepaths[
+                'correct'])
+        ])
+
+    def test_load_correct_yaml_file_verify_params(self):
+        self.maxDiff = None
+        # Test for load correctness
+        os.environ["DLRNAPI_PASSWORD"] = "test"
+        config = self.config_builder(self.filepaths['correct'],
+                                       validate=['logs', 'promotions'])
+        # Test if config keys are there and have a value
+        assert hasattr(config, "release"), "Missing mandatory argument"
+        assert hasattr(config, "distro_name"), "Missing mandatory argument"
+        self.assertIsInstance(config.distro_name, string_types)
+        self.assertEqual(config.release, "master")
+        self.assertEqual(config.latest_hashes_count, 10)
+        # TODO(gcerami) we should also check that ~ in log_file are expanded
+        #  to user home, but it's not easy as setting log_file to something
+        #  different from /dev/null will need a valid file to write logs to,
+        #  and it cannot be in the user home
