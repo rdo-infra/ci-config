@@ -3,7 +3,7 @@ set -euo pipefail
 
 # defaults used for backwards compatibility
 : ${OPT_DISTRO:=centos}
-: ${OPT_DISTRO_VERSION:=7}
+: ${OPT_DISTRO_VERSION:=8}
 : ${OPT_WEBROOT:=/var/www/html/images}
 : ${OPT_WEBSITE:=https://images.rdoproject.org}
 : ${IMAGE_SERVER_USER_HOST:=uploader@images.rdoproject.org}
@@ -96,6 +96,7 @@ curl -L --silent --head --fail $SOURCE_URL >/dev/null || {
 # very important for new releases, where some folders may not even exist
 # "mkdir: Invalid flag -p" may be returned in some cases, do not use it.
 # "-" prefix tells it to ignore errors (if folder already exists)
+
 sftp_command "-mkdir ${OPT_WEBROOT}/$DISTRO_AND_VERSION/"
 sftp_command "-mkdir ${OPT_WEBROOT}/$DISTRO_AND_VERSION/$RELEASE/"
 sftp_command "-mkdir ${OPT_WEBROOT}/$DISTRO_AND_VERSION/$RELEASE/rdo_trunk/"
