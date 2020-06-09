@@ -42,7 +42,7 @@
         - name: launch staging setup scripts
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
-            {{ ansible_python_interpreter }} \
+            python3 \
             ../../../../../dlrnapi_promoter/stage.py setup --scenes dlrn,registries,containers
 
         - name: include stage setup variables
@@ -80,7 +80,7 @@
       always:
         - name: Teardown
           shell: >
-            {{ ansible_python_interpreter }}
+            python3
             ../../../../../dlrnapi_promoter/stage.py
             teardown --scenes dlrn,registries,containers
 
@@ -113,7 +113,7 @@
         - name: launch staging setup scripts
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
-            {{ ansible_python_interpreter }} \
+            python3 \
             ../../../../../dlrnapi_promoter/stage.py setup \
             --scenes dlrn,registries,containers --stage-config-file stage-config-secure.yaml
 
@@ -146,7 +146,7 @@
       always:
         - name: Teardown
           shell: >
-            {{ ansible_python_interpreter }}
+            python3
             ../../../../../dlrnapi_promoter/stage.py
             teardown --scenes dlrn,registries,containers
         # the teardown here must not contain the registry_cleanup tag, or it will not clean up properly
@@ -186,7 +186,7 @@
         - name: launch staging setup scripts
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
-            {{ ansible_python_interpreter }} \
+            python3 \
             ../../../../../dlrnapi_promoter/stage.py setup --scenes dlrn,registries,containers
 
         - name: include stage setup variables
@@ -261,7 +261,7 @@
       always:
         - name: Teardown
           shell: >
-            {{ ansible_python_interpreter }}
+            python3
             ../../../../../dlrnapi_promoter/stage.py
             teardown --scenes dlrn,registries,containers
         # the teardown here must not contain the registry_cleanup tag, or it will not clean up
@@ -298,7 +298,7 @@
         - name: launch staging setup scripts
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
-            {{ ansible_python_interpreter }} \
+            python3 \
             ../../../../../dlrnapi_promoter/stage.py setup --scenes dlrn,registries,containers
 
         - name: include stage setup variables
@@ -363,7 +363,7 @@
       always:
         - name: Teardown
           shell: >
-            {{ ansible_python_interpreter }}
+            python3
             ../../../../../dlrnapi_promoter/stage.py
             teardown --scenes dlrn,registries,containers
           tags:
