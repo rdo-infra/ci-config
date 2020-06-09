@@ -43,7 +43,8 @@
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
             python3 \
-            ../../../../../dlrnapi_promoter/stage.py setup --scenes dlrn,registries,containers
+            ../../../../../dlrnapi_promoter/stage.py --scenes dlrn,registries,containers \
+              setup --release-config CentOS-{{ distro_version }}/{{ release }}.yaml
 
         - name: include stage setup variables
           include_vars:
@@ -81,8 +82,7 @@
         - name: Teardown
           shell: >
             python3
-            ../../../../../dlrnapi_promoter/stage.py
-            teardown --scenes dlrn,registries,containers
+            ../../../../../dlrnapi_promoter/stage.py --scenes dlrn,registries,containers teardown
 
 
 # This test is copied and pasted from below with some change:
@@ -114,8 +114,9 @@
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
             python3 \
-            ../../../../../dlrnapi_promoter/stage.py setup \
-            --scenes dlrn,registries,containers --stage-config-file stage-config-secure.yaml
+            ../../../../../dlrnapi_promoter/stage.py \
+              --scenes dlrn,registries,containers --extra-config stage-config-secure.yaml \
+              setup --release-config CentOS-{{ distro_version }}/{{ release }}.yaml
 
         - name: include stage setup variables
           include_vars:
@@ -147,8 +148,7 @@
         - name: Teardown
           shell: >
             python3
-            ../../../../../dlrnapi_promoter/stage.py
-            teardown --scenes dlrn,registries,containers
+            ../../../../../dlrnapi_promoter/stage.py --scenes dlrn,registries,containers tearown
         # the teardown here must not contain the registry_cleanup tag, or it will not clean up properly
         # in the tripleo-common integration test
 
@@ -187,7 +187,8 @@
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
             python3 \
-            ../../../../../dlrnapi_promoter/stage.py setup --scenes dlrn,registries,containers
+            ../../../../../dlrnapi_promoter/stage.py --scenes dlrn,registries,containers \
+              setup --release-config CentOS-{{ distro_version }}/{{ release }}.yaml
 
         - name: include stage setup variables
           include_vars:
@@ -262,8 +263,7 @@
         - name: Teardown
           shell: >
             python3
-            ../../../../../dlrnapi_promoter/stage.py
-            teardown --scenes dlrn,registries,containers
+            ../../../../../dlrnapi_promoter/stage.py --scenes dlrn,registries,containers teardown
         # the teardown here must not contain the registry_cleanup tag, or it will not clean up
         # properly in the tripleo-common integration test
 
@@ -299,7 +299,8 @@
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
             python3 \
-            ../../../../../dlrnapi_promoter/stage.py setup --scenes dlrn,registries,containers
+            ../../../../../dlrnapi_promoter/stage.py --scenes dlrn,registries,containers \
+              setup --release-config CentOS-{{ distro_version }}/{{ release }}.yaml
 
         - name: include stage setup variables
           include_vars:
@@ -364,8 +365,7 @@
         - name: Teardown
           shell: >
             python3
-            ../../../../../dlrnapi_promoter/stage.py
-            teardown --scenes dlrn,registries,containers
+            ../../../../../dlrnapi_promoter/stage.py --scenes dlrn,registries,containers teardown
           tags:
             - registry_cleanup
           # Only the last play should have the registry_cleanup set to work with

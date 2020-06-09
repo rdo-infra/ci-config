@@ -52,7 +52,8 @@ def staged_env(request):
     # We are going to call the main in the staging passing a composed command
     # line, so we are testing also that the argument parsing is working
     # correctly instead of passing  configuration directly
-    config_file = "stage-config-secure.yaml"
+    # extra_file = "stage-config-secure.yaml"
+    release_config = "CentOS-7/master.yaml"
     try:
         test_case = request.param
     except AttributeError:
@@ -64,32 +65,33 @@ def staged_env(request):
     # Select scenes to run in the staging env depending on the parameter passed
     # to the fixture
     scenes = None
-    if "all_" in test_case:
-        config_file = "stage-config.yaml"
     if "overcloud_" in test_case:
         scenes = 'overcloud_images'
     if "registries_" in test_case:
         scenes = 'registries'
     if "containers_" in test_case:
         scenes = 'dlrn,registries,containers'
-        config_file = "stage-config.yaml"
 
-    # for the tests of the integration pipeline we need to pass a different
-    # file with db data
-    setup_cmd_line = "setup --stage-config-file {}".format(config_file)
-    teardown_cmd_line = "teardown --stage-config-file {}".format(config_file)
+    setup_cmd_line = ""
+    teardown_cmd_line = ""
     if scenes is not None:
         setup_cmd_line += " --scenes {}".format(scenes)
 
     if "_integration" in test_case:
-        setup_cmd_line += " --db-data integration-pipeline.yaml"
-        teardown_cmd_line += " --db-data integration-pipeline.yaml"
+        release_config = "CentOS-8/master.yaml"
+        # for the tests of the integration pipeline we need to pass a different
+        # file with db data
+        setup_cmd_line += " --db-data-file integration-pipeline.yaml"
+        teardown_cmd_line += " --db-data-file integration-pipeline.yaml"
+
+    setup_cmd_line += " setup --release-config {}".format(release_config)
+    teardown_cmd_line += " teardown "
 
     log.info("Running cmd line: {}".format(setup_cmd_line))
 
     config = stage_main(setup_cmd_line)
 
-    stage_info_path = config.main['stage_info_path']
+    stage_info_path = config['stage_info_path']
     with open(stage_info_path, "r") as stage_info_file:
         stage_info = yaml.safe_load(stage_info_file)
 
