@@ -28,15 +28,15 @@ class StageOrchestrator(object):
         :param config: The global stage config
         """
         self.config = config
-        self.dlrn_server = DlrnStagingServer(config)
-        self.log_file = self.config.main['log_file']
-        self.distro_name = self.config.main['distro_name']
-        self.distro_version = self.config.main['distro_version']
-        self.promoter_user = self.config.main['promoter_user']
-        self.release = self.config.main['release']
-        self.stage_root = self.config.main['stage_root']
-        self.dry_run = self.config.main['dry_run']
-        self.stage_info_path = self.config.main['stage_info_path']
+        self.log_file = self.config['log_file']
+        self.log_dir = "/".join(self.config["log_file"].split("/")[:-1])
+        self.distro_name = self.config['distro_name']
+        self.distro_version = self.config['distro_version']
+        self.promoter_user = self.config['promoter_user']
+        self.release = self.config['release']
+        self.stage_root = self.config['stage_root']
+        self.dry_run = self.config['dry_run']
+        self.stage_info_path = self.config['stage_info_path']
 
         self.scenes_controllers = {
             'dlrn': DlrnStagingServer(self.config),
@@ -45,7 +45,7 @@ class StageOrchestrator(object):
             "containers": StagingContainers,
         }
 
-        self.scenes = self.config.main['scenes']
+        self.scenes = self.config['scenes']
 
     @property
     def stage_info(self):
@@ -55,7 +55,7 @@ class StageOrchestrator(object):
         :return: A dict with useful info
         """
         pipeline_type = "single"
-        if self.config.main['components_mode']:
+        if self.config['components_mode']:
             pipeline_type = "integration"
 
         stage_info = {
@@ -65,7 +65,6 @@ class StageOrchestrator(object):
             'scenes': self.scenes,
             'promoter_user': self.promoter_user,
             'pipeline_type': pipeline_type,
-            'promoter_config_file': self.config.main['promoter_config_file']
         }
 
         return stage_info
@@ -84,8 +83,14 @@ class StageOrchestrator(object):
             except OSError:
                 self.log.info("Stage root dir exists, not creating")
 
+        self.log.info("Checking for log directory")
+        log_dir = os.path.expanduser(self.log_dir)
+        if not os.path.exists(log_dir):
+            self.log.info("Creating log directory : {}".format(log_dir))
+            os.makedirs(log_dir)
+
         # If the stage is in in component mode, it's mandatory dlrn is run
-        if 'dlrn' in self.scenes or self.config.main['components_mode']:
+        if 'dlrn' in self.scenes or self.config['components_mode']:
             self.scenes_controllers['dlrn'].setup()
 
         # We need dlrn stage info even if it's not fully run as they are
@@ -124,7 +129,7 @@ class StageOrchestrator(object):
 
         self.scenes = stage_info['main']['scenes']
 
-        if 'dlrn' in self.scenes or self.config.main['components_mode']:
+        if 'dlrn' in self.scenes or self.config['components_mode']:
             self.scenes_controllers['dlrn'].teardown(stage_info)
 
         # We need dlrn stage info even if it's not fully run as they are
@@ -146,6 +151,14 @@ class StageOrchestrator(object):
                 shutil.rmtree(self.stage_root)
             except OSError:
                 self.log.info("Stage root dir doesn't exists, not removing")
+
+        self.log.info("Removing log directory")
+        log_dir = os.path.expanduser(self.log_dir)
+        if os.path.exists(log_dir):
+            shutil.rmtree(log_dir)
+            self.log.info("Removed log directory : {}".format(log_dir))
+        else:
+            self.log.error("Log directory does not exists : {}".format(log_dir))
 
         # finally remove the stage_info file as the stage is no more
         os.unlink(self.stage_info_path)
