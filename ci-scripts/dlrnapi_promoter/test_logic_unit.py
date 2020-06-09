@@ -39,7 +39,6 @@ class TestPromote(LegacyConfigSetup):
             self.promoter.promote(candidate_hash, 'tripleo-ci-testing',
                                   'current-tripleo')
 
-        print(candidate_hash)
         mock_log_error.assert_has_calls([
             mock.call("Candidate hash '%s': client %s FAILED promotion attempt "
                       "to %s"
