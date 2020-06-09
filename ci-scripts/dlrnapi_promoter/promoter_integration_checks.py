@@ -238,19 +238,23 @@ def parse_promotion_logs(stage_info=None, **kwargs):
         # We need to check first if we are logging in the primary location,
         # and if the file does not exist, we can use the location proposed by
         # the stage
-        promoter_config = \
-            PromoterLegacyConfigBase(stage_info['main']['promoter_config_file'])
+        try:
+            promoter_config = \
+                PromoterLegacyConfigBase(stage_info['main'][
+                                             'promoter_config_file'])
 
-        logfile = promoter_config.log_file
+            logfile = promoter_config.log_file
+        except KeyError:
+            logfile = ""
         log.info("Verifying presence of log file in %s", logfile)
         try:
-            os.stat(logfile)
+            os.stat(os.path.expanduser(logfile))
         except OSError:
             log.warning("%s not found", logfile)
             logfile = stage_info['main']['log_file']
             log.info("Verifying presence of log file in %s", logfile)
             try:
-                os.stat(logfile)
+                os.stat(os.path.expanduser(logfile))
             except OSError:
                 log.error("No log file found")
                 raise
@@ -260,7 +264,7 @@ def parse_promotion_logs(stage_info=None, **kwargs):
         candidate_dict = stage_info['dlrn']['promotions']['promotion_candidate']
         candidate_hash = DlrnHash(source=candidate_dict)
 
-        with open(logfile, 'r') as lf:
+        with open(os.path.expanduser(logfile), 'r') as lf:
             logfile_contents = lf.read()
     else:
         # We are checking production
