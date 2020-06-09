@@ -94,7 +94,7 @@ class StagingContainers(object):
         :param config: The global stage config
         """
         self.config = config
-        self.dry_run = self.config.main['dry_run']
+        self.dry_run = self.config['dry_run']
         self.docker_client = docker.from_env()
         # Select only the stagedhash with the promotion candidate
         candidate_hash_dict = \
@@ -124,10 +124,10 @@ class StagingContainers(object):
             self.source_image = self.base_image.build()
 
         self.suffixes = self.config.containers['images-suffix']
-        self.distro = self.config.main['distro']
+        self.distro = self.config['distro']
         self.namespace = self.config.containers['namespace']
 
-        self.distro_name = self.config.main['distro_name']
+        self.distro_name = self.config['distro_name']
         self.pushed_images = []
         self.containers_root = self.config.containers['root']
         self.excluded_containers = ['nonexisting', 'excluded']
@@ -218,7 +218,6 @@ class StagingContainers(object):
         """
         if self.dry_run:
             return
-
         containers_list_path = \
             os.path.join(self.containers_list_base,
                          self.tripleo_commit_sha,
