@@ -20,13 +20,14 @@ class QcowConnectionClient(object):
         self._host = server_conf['host']
         self._user = server_conf['user']
         self._client_type = server_conf['client']
+        self._keypath = server_conf['keypath']
         self._client = os
         if server_conf['client'] == "sftp":
             client = paramiko.SSHClient()
             client.load_system_host_keys()
             client.set_missing_host_key_policy(paramiko.WarningPolicy)
 
-            keypath = os.path.expanduser('~/.ssh/id_rsa')
+            keypath = os.path.expanduser(self._keypath)
             self.key = paramiko.rsakey.RSAKey(filename=keypath)
             self.kwargs = {}
             if self._user is not None:
