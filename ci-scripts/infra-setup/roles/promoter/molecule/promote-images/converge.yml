@@ -10,7 +10,7 @@
         - name: launch staging setup scripts
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
-            python3 ../../../../../dlrnapi_promoter/stage.py setup --scenes dlrn,overcloud_images
+            python3 ../../../../../dlrnapi_promoter/stage.py --scenes dlrn,overcloud_images setup --release-config CentOS-7/master.yaml
 
         - name: include stage setup variables
           include_vars:
@@ -56,4 +56,4 @@
       always:
         - name: Teardown
           shell: |
-            python3 ../../../../../dlrnapi_promoter/stage.py teardown --scenes dlrn,overcloud_images
+            python3 ../../../../../dlrnapi_promoter/stage.py --scenes dlrn,overcloud_images teardown
