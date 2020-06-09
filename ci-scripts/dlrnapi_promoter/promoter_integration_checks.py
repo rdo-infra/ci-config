@@ -244,7 +244,8 @@ def parse_promotion_logs(stage_info=None, **kwargs):
         # the stage
         try:
             promoter_config = \
-                PromoterLegacyConfigBase(stage_info['main']['promoter_config_file'])
+                PromoterLegacyConfigBase(stage_info['main'][
+                                             'promoter_config_file'])
 
             logfile = promoter_config.log_file
         except KeyError:

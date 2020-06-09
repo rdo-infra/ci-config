@@ -52,7 +52,7 @@ def staged_env(request):
     # We are going to call the main in the staging passing a composed command
     # line, so we are testing also that the argument parsing is working
     # correctly instead of passing  configuration directly
-    extra_file = "stage-config-secure.yaml"
+    # extra_file = "stage-config-secure.yaml"
     release_config = "CentOS-7/master.yaml"
     try:
         test_case = request.param
