@@ -131,6 +131,8 @@ def close_logging(name):
     print("Deconfiguring Logger with name: %s" % name)
     list(map(logger.removeHandler, logger.handlers[:]))
     list(map(logger.removeFilter, logger.filters[:]))
+    for handler in logger.handlers:
+        handler.flush()
 
 
 def setup_logging(name, log_level, log_file=None):
