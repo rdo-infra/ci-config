@@ -20,13 +20,14 @@ class QcowConnectionClient(object):
         self._host = server_conf['host']
         self._user = server_conf['user']
         self._client_type = server_conf['client']
+        self._keypath = server_conf['keypath']
         self._client = os
         if server_conf['client'] == "sftp":
             client = paramiko.SSHClient()
             client.load_system_host_keys()
             client.set_missing_host_key_policy(paramiko.WarningPolicy)
 
-            keypath = os.path.expanduser('~/.ssh/id_rsa')
+            keypath = os.path.expanduser(self._keypath)
             self.key = paramiko.rsakey.RSAKey(filename=keypath)
             self.kwargs = {}
             if self._user is not None:
@@ -163,7 +164,7 @@ class QcowClient(object):
                 create_previous=True, validation=True):
         """
         Effective promotion of the images. This method will handle symbolic
-        links to the dir containing images from thje candidate hash,
+        links to the dir containing images from the candidate hash,
         optionally saving the current link as previous
         :param candidate_hash: The dlrn hash to promote
         :param target_label: The name of the link to create
@@ -174,10 +175,11 @@ class QcowClient(object):
         """
 
         self.client.connect()
-        self.client.chdir(self.images_dir)
 
         if validation:
             self.validate_qcows(candidate_hash)
+
+        self.client.chdir(self.images_dir)
 
         log_header = "Qcow promote '{}' to {}:".format(candidate_hash,
                                                        target_label)
