@@ -22,16 +22,16 @@ class QcowStagingServer(object):
         :param config: The global stage config
         """
         self.config = config
-        self.release = self.config.main['release']
-        self.distro = self.config.main['distro']
-        self.dry_run = self.config.main['dry_run']
-        self.images_top_root = self.config.overcloud_images['root']
+        self.release = self.config['release']
+        self.distro = self.config['distro']
+        self.dry_run = self.config['dry_run']
+        self.images_top_root = self.config.qcow_server['root']
         self.images_root = os.path.join(self.images_top_root, self.distro,
                                         self.release, "rdo_trunk")
         self.commits = self.config.dlrn['commits']
         self.images_dirs = {}
         self.promotions = self.config.dlrn['promotions']
-        self.promoter_user = self.config.main['promoter_user']
+        self.promoter_user = self.config['promoter_user']
 
     def setup(self):
         """
