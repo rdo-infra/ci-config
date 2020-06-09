@@ -109,8 +109,8 @@ def main(cmd_line=None):
         config = PromoterLegacyConfig(args.config_file, overrides=args)
     else:
         # If not then use the config root and the new config builder
-        # Which is not implemented yet
-        raise Exception("New config method is not implemented yed")
+        config = PromoterConfigFactory(args.config_file, overrides=args)
+
 
     promoter = Promoter(config)
 
