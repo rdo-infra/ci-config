@@ -40,14 +40,16 @@ def staged_env(request):
     close_logging("promoter")
     log = logging.getLogger('promoter-staging')
 
+    setup_cmd_line = ""
+    teardown_cmd_line = ""
     # We are going to call the main in the staging passing a composed command
     # line, so we are testing also that the argument parsing is working
     # correctly instead of passing  configuration directly
-    config_file = "stage-config-secure.yaml"
-    promoter_config_file = \
-        "staging/CentOS-7/master.ini"
-    setup_cmd_line = "setup --stage-config-file {}".format(config_file)
-    teardown_cmd_line = "teardown --stage-config-file {}".format(config_file)
+    release_config = \
+        "CentOS-7/master.yaml"
+    promoter_config_file = "staging/CentOS-7/master.ini"
+    setup_cmd_line += " setup --release-config {}".format(release_config)
+    setup_cmd_line += " --scenes dlrn"
 
     try:
         test_case = request.param
@@ -57,24 +59,25 @@ def staged_env(request):
         log.error("Invalid test case '{}'".format(request.param))
         raise
 
-    scenes = 'dlrn'
-    setup_cmd_line += " --scenes {}".format(scenes)
-
     # for the tests of the integration pipeline we need to pass a different
     # file with db data
     if "_integration" in test_case:
+        release_config = \
+            "CentOS-8/master.yaml"
         promoter_config_file = \
             "staging/CentOS-8/master.ini"
-        setup_cmd_line += " --db-data integration-pipeline.yaml"
-        setup_cmd_line += (" --promoter-config-file {}"
-                           "".format(promoter_config_file))
-        teardown_cmd_line += " --db-data integration-pipeline.yaml"
+        setup_cmd_line += " --db-data-file integration-pipeline.yaml"
+        teardown_cmd_line += " --db-data-file integration-pipeline.yaml"
+
+    # MARIOS WORKING HERE
+    #import pdb; pdb.set_trace()
+    teardown_cmd_line += " teardown"
 
     log.info("Running cmd line: {}".format(setup_cmd_line))
 
     config = stage_main(setup_cmd_line)
 
-    stage_info_path = config.main['stage_info_path']
+    stage_info_path = config['stage_info_path']
     with open(stage_info_path, "r") as stage_info_file:
         stage_info = yaml.safe_load(stage_info_file)
 
