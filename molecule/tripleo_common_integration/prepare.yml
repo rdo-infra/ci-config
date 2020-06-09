@@ -2,6 +2,7 @@
 - hosts: instance
   vars:
     staging_action: setup
+    release_config_args: "--release-config CentOS-8/master.yaml"
     staging_args: "--scenes dlrn,registries,containers"
   tasks:
 
@@ -11,17 +12,28 @@
       include_role:
         name: _ensure_staging
 
-    - name: install tripleo-common and python-tripleoclient
+    - name: install tripleo-common python-tripleoclient tripleo-ansible
       become: true
       become_user: "{{ promoter_user }}"
       vars:
         ansible_python_interpreter: "/usr/bin/python3"
       pip:
-        name: ['tripleo-common', 'python-tripleoclient']
+        name:
+          - 'git+https://opendev.org/openstack/tripleo-common/#egg=tripleo-common'
+          - 'git+https://opendev.org/openstack/python-tripleoclient/#egg=python-tripleoclient'
+          - 'git+https://opendev.org/openstack/tripleo-ansible/#egg=tripleo-ansible'
         virtualenv: "~/{{ promoter_virtualenv }}"
       when: zuul is not defined
 
-    - name: Install tripleo projects from zuul
+    - name: install tripleo deps from package https://bugs.launchpad.net/tripleo/+bug/1895194
+      become: true
+      package:
+        name:
+          - "openstack-kolla"
+          - "python*-tripleoclient"
+          - "tripleo-ansible"
+
+    - name: Install tripleo projects from zuul # TODO also clone here if it works above
       become: true
       become_user: "{{ promoter_user }}"
       vars:
