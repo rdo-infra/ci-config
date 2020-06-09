@@ -2,6 +2,7 @@
 This file contains classes and function to build a configuration object that
 can be passed to all the functions in the workfloww
 """
+import imp
 import logging
 import os
 import pprint
@@ -97,7 +98,7 @@ class ConfigCore(object):
         :return: The value of the attribute or AttributeError if not found
         """
         for source_name, source in self.__getattribute__('_layers').items():
-            if not source:
+            if not hasattr(source, '__getitem__'):
                 continue
             try:
                 value = source[attribute_name]
@@ -105,12 +106,12 @@ class ConfigCore(object):
                                 attribute_name, source_name)
                 break
             except KeyError:
-                self._log.debug("Attribute %s not found in layers",
-                                attribute_name)
+                pass
 
         try:
             return value
         except UnboundLocalError:
+            self._log.debug("Attribute %s not found in layers", attribute_name)
             raise AttributeError
 
     def _filter(self, attribute_name, value):
@@ -135,7 +136,8 @@ class ConfigCore(object):
             return filter_method(value)
         except Exception as exc:
             self._log.error("The filter for attribute %s generated an "
-                            "error, no value can be constructed")
+                            "error, no value can be constructed",
+                            attribute_name)
             self._log.exception(exc)
             raise AttributeError
 
@@ -173,6 +175,9 @@ class ConfigCore(object):
         value = native_concat(template.root_render_func(
             template.new_context(vars=self, shared=True, locals=None)))
 
+        # native concat renders empty strings as None ...
+        if not value:
+            value = ''
         # native concat returns int for string that contains only numbers
         # so we force to return a string
         return str(value)
@@ -194,6 +199,17 @@ class ConfigCore(object):
             return self._render(value)
         else:
             return value
+
+    def __setitem__(self, attribute_name, value):
+        """
+        config[item] is the same as config.item.
+        This method emulates dict assignment with attribute setting
+        It should be used carefully it as completely bypasses all methods
+        :param attribute_name: the attribute name
+        :param value: the value
+        :return: None
+        """
+        setattr(self, attribute_name, value)
 
     def __getitem__(self, attribute_name):
         """
@@ -278,6 +294,9 @@ class PromoterConfig(ConfigCore):
         return self['overcloud_images']['qcow_servers'][
             self.default_qcow_server]
 
+    def _constructor_promoter_user(self):
+        return os.environ.get('USER', None)
+
     def _constructor_api_url(self):
         """
         API url is the wild west of exceptions. This method builds the api
@@ -291,18 +310,24 @@ class PromoterConfig(ConfigCore):
         version = self['distro_version']
         release = self['release']
         url_port = None
-        endpoint = None
+        endpoint = ''
 
         distro_endpoint = distro
 
         if version == '8':
             distro_endpoint += version
         release_endpoint = release
-        if release == "master":
-            release_endpoint = "master-uc"
-        if distro_endpoint is not None and release_endpoint is not None:
-            endpoint = "api-{}-{}".format(distro_endpoint,
-                                          release_endpoint)
+
+        try:
+            endpoint = self['dlrn_api_endpoint']
+            print("endpoint ", endpoint)
+        except AttributeError:
+            if release == "master":
+                release_endpoint = "master-uc"
+            if distro_endpoint is not None and release_endpoint is not None:
+                endpoint = "api-{}-{}".format(distro_endpoint,
+                                              release_endpoint)
+
         if port is None or (scheme == "http" and port == 443) \
                 or (scheme == "https" and port == 443):
             url_port = ""
@@ -329,6 +354,12 @@ class PromoterConfig(ConfigCore):
         return url
 
     # filters
+
+    def _filter_scenes(self, scenes):
+        if isinstance(scenes, str):
+            return scenes.split(',')
+        else:
+            return scenes
 
     def _filter_allowed_clients(self, allowed_clients):
         """
@@ -370,6 +401,14 @@ class PromoterConfig(ConfigCore):
                         info['criteria'] = set(info['criteria'])
                 except KeyError:
                     self._log.debug("No criteria info")
+
+                # Create backwards compatible version of promotions
+                # TODO: remove this alias together with legacy config
+                if not hasattr(self, 'promotion_steps_map'):
+                    self.promotion_steps_map = {}
+
+                self.promotion_steps_map[target_name] = info['candidate_label']
+
         else:
             self._log.debug("Promotions is not a dict")
 
@@ -386,7 +425,7 @@ class PromoterConfigFactory(object):
 
     log = logging.getLogger("promoter")
 
-    def __init__(self):
+    def __init__(self, config_class=PromoterConfig):
         """
         Initialize the config object loading from ini file
         :param config_path: the path to the configuration file to load
@@ -403,40 +442,61 @@ class PromoterConfigFactory(object):
         self.rel_roots_map = {
             "global_defaults": os.path.join(self.script_root,
                                             "config_environments"),
-            "environment_pool": os.path.join(self.script_root,
-                                             "config_environments"),
+            "environments_pool": os.path.join(self.script_root,
+                                              "config_environments"),
         }
 
         self.global_defaults = self.load_yaml_config("global_defaults",
                                                      "global_defaults.yaml")
+        self.global_defaults['git_root'] = self.git_root
+        self.global_defaults['script_root'] = self.script_root
+        self.config_class = config_class
 
     def __call__(self, environment_root, release_settings_path, cli_args=None,
                  validate="all"):
 
         # set environment root as root for all other files
-        self.validate_path(environment_root, path_name="Environment root")
-
-        self.rel_roots_map['environment'] = \
+        environment_root_path = \
             self.convert_path_rel_to_abs("environments_pool", environment_root)
+        self.validate_path(environment_root_path, path_name="Environment root")
+
+        self.rel_roots_map['environment'] = environment_root_path
 
         layers = {
+            'global_defaults': self.global_defaults,
             'environment_defaults': self.load_yaml_config("environment",
-                                                          "defaults.yaml"),
-            'release_settings': self.load_yaml_config("environment",
-                                                      release_settings_path)
+                                                          "defaults.yaml")
         }
+
+        try:
+            release_settings = self.load_yaml_config("environment",
+                                                     release_settings_path)
+            layers['release_settings'] = release_settings
+        except ConfigError:
+            pass
+
         if cli_args:
-            layers['cli_settings'] = cli_args
+            layers['cli_settings'] = cli_args.__dict__
             try:
-                extra_settings = self.load_yaml_config(None,
+                extra_settings = self.load_yaml_config("environment",
                                                        cli_args.extra_settings)
                 layers['extra_settings'] = extra_settings
             except AttributeError:
                 pass
 
-        # importing custom config class is not implemented yet
+        # importing custom config class is not stable yet
+        # try:
+        #    custom = imp.load_source("custom", os.path.join(
+        #    environment_root_path,
+        #                                           "custom.py"))
+        #    try:
+        #        self.config_class = custom.Config()
+        #    except AttributeError:
+        #        pass
+        # except IOError:
+        #    pass
 
-        config = PromoterConfig(**layers)
+        config = self.config_class(**layers)
 
         if not self.validate(config, checks=validate):
             self.log.error("Error in configuration")
