@@ -41,7 +41,7 @@ def staged_env(request):
     # We are going to call the main in the staging passing a composed command
     # line, so we are testing also that the argument parsing is working
     # correctly instead of passing  configuration directly
-    config_file = "stage-config-secure.yaml"
+    release_config = "CentOS-7/master.yaml"
     promoter_config_file = \
         "staging/CentOS-7/master.ini"
 
@@ -57,40 +57,42 @@ def staged_env(request):
 
     # Select scenes to run in the staging env depending on the parameter passed
     # to the fixture
+    extra_file = ""
     scenes = None
     if "all_" in test_case:
-        config_file = "stage-config.yaml"
+        extra_file = "--extra-settings stage-config.yaml"
     if "qcow_" in test_case:
         scenes = 'dlrn,overcloud_images'
     if "registries_" in test_case:
         scenes = 'registries'
     if "containers_" in test_case:
         scenes = 'dlrn,registries,containers'
-        config_file = "stage-config.yaml"
+        extra_file = "--extra-settings stage-config.yaml"
 
-    setup_cmd_line = "setup --stage-config-file {}".format(config_file)
-    teardown_cmd_line = "teardown --stage-config-file {}".format(config_file)
+    setup_cmd_line = " {}".format(extra_file)
+    teardown_cmd_line = "{}".format(extra_file)
+
     if scenes is not None:
         setup_cmd_line += " --scenes {}".format(scenes)
 
+    if "_integration" in test_case:
+        promoter_config_file = \
+            "staging/CentOS-8/master.ini"
+        setup_cmd_line += " --db-data-file integration-pipeline.yaml"
+        teardown_cmd_line += " --db-data-file integration-pipeline.yaml"
+
+    setup_cmd_line += " setup --release-config {}".format(release_config)
+    teardown_cmd_line += " teardown "
     experimental = 'false'
     if "_experimental" in test_case:
         experimental = 'true'
     # for the tests of the integration pipeline we need to pass a different
     # file for component db data, and emulate CentOS8/master at least
-    if "_integration" in test_case:
-        promoter_config_file = \
-            "staging/CentOS-8/master.ini"
-        setup_cmd_line += " --db-data integration-pipeline.yaml"
-        setup_cmd_line += (" --promoter-config-file {}"
-                           "".format(promoter_config_file))
-        teardown_cmd_line += " --db-data integration-pipeline.yaml"
-
     log.info("Running cmd line: {}".format(setup_cmd_line))
 
     config = stage_main(setup_cmd_line)
 
-    stage_info_path = config.main['stage_info_path']
+    stage_info_path = config['stage_info_path']
     with open(stage_info_path, "r") as stage_info_file:
         stage_info = yaml.safe_load(stage_info_file)
 
