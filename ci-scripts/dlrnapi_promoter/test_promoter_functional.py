@@ -114,7 +114,8 @@ def staged_env(request):
         config = PromoterLegacyConfig(overrides_obj.config_file,
                                       overrides=overrides_obj)
     else:
-        raise Exception("New config engine is not implemented yet")
+        config = PromoterConfigFactory(overrides_obj.config_file,
+                                      overrides=overrides_obj)
 
     promoter = Promoter(config)
 
