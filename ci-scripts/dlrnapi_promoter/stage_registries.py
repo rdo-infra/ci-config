@@ -215,7 +215,7 @@ class StagingRegistries(object):
         :param config: The global stage config
         """
         self.config = config
-        self.dry_run = self.config.main['dry_run']
+        self.dry_run = self.config['dry_run']
         self.registries = {}
         for registry_conf in self.config.registries:
             registry_conf = copy.deepcopy(registry_conf)
