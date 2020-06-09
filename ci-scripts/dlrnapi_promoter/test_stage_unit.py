@@ -1,7 +1,7 @@
 import unittest
 
 import pytest
-from stage import StageConfig, parse_args
+from stage import parse_args
 
 
 class TestMain(unittest.TestCase):
