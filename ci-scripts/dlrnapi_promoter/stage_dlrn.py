@@ -38,7 +38,7 @@ def conditional_run(orig_function):
     :return: The wrapped function
     """
     def new_function(*args, **kwargs):
-        if not args[0].config.main['dry_run']:
+        if not args[0].config['dry_run']:
             orig_function(*args, **kwargs)
     return new_function
 
@@ -112,18 +112,18 @@ def generate_versions_csv():
     return versions_csv_file.getvalue()
 
 
-def expand_dlrn_config(_config):
+def expand_dlrn_config(dlrn_config):
     """
     Called by StageConfig.expand_config to expand the dlrn configuration part
-    :param _config: The config dict
+    :param dlrn_config: The config dict
     :return: the expanded config dict, with dlrn information
     """
-    _config['dlrn']['promotions'] = {}
-    db_commits = _config['dlrn']['server']['db_data']['commits']
+    dlrn_config['promotions'] = {}
+    db_commits = dlrn_config['server']['db_data']['commits']
     # Every third commit in the group of commits, will be the last to
     # promote that name, and so it will be the one tied to the aggregate
     # hash that we'll have to promote
-    promotions_map = _config['dlrn']['server']['db_data'][
+    promotions_map = dlrn_config['server']['db_data'][
         'promotions_map']
 
     # expands db commit information with associated promotions and full_hashes
@@ -137,18 +137,18 @@ def expand_dlrn_config(_config):
             commit['name'] = promotion_name
             commit['full_hash'] = DlrnCommitDistroHash(source=commit).full_hash
         if promotion_alias is not None:
-            _config['dlrn']['promotions'][promotion_alias] = \
+            dlrn_config['promotions'][promotion_alias] = \
                 commit
         commits.append(commit)
 
-    _config['dlrn']['commits'] = commits
+    dlrn_config['commits'] = commits
 
     # Create reverse promotion map from promotions map
-    _config['dlrn']['rev_promotions'] = {}
-    for promotion_alias, commit in _config['dlrn']['promotions'].items():
-        _config['dlrn']['rev_promotions'][commit['id']] = promotion_alias
+    dlrn_config['rev_promotions'] = {}
+    for promotion_alias, commit in dlrn_config['promotions'].items():
+        dlrn_config['rev_promotions'][commit['id']] = promotion_alias
 
-    return _config
+    return dlrn_config
 
 
 class StagingRepo(object):
@@ -166,15 +166,15 @@ class StagingRepo(object):
         """
         self.config = config
         self.commits = self.config.dlrn['commits']
-        self.release = self.config.main['release']
-        self.distro = self.config.main['distro']
-        self.dry_run = self.config.main['dry_run']
+        self.release = self.config.release
+        self.distro = self.config.distro
+        self.dry_run = self.config['dry_run']
         self.server_root = self.config.dlrn['server']['root']
         self.repo_root_server = self.config.dlrn['server']['repo_root']
         self.distro_combo = "{}-{}".format(self.distro, self.release)
         self.repo_root_files = os.path.join(self.server_root,
                                             self.distro_combo)
-        self.components_mode = self.config.main['components_mode']
+        self.components_mode = self.config['components_mode']
         self.promotions = self.config.dlrn['promotions']
         self.rev_promotions = self.config.dlrn['rev_promotions']
         self.rel_commit_dir = None
@@ -306,9 +306,9 @@ class DlrnStagingServer(object):
         self.config = config
 
         # General
-        self.release = self.config.main['release']
-        self.distro = self.config.main['distro']
-        self.dry_run = self.config.main['dry_run']
+        self.release = self.config['release']
+        self.distro = self.config['distro']
+        self.dry_run = self.config['dry_run']
 
         # Server
         self.host = self.config.dlrn['server']['host']
@@ -328,12 +328,12 @@ class DlrnStagingServer(object):
         self.repo_root = self.config.dlrn['server']['repo_root']
         self.staging_repo = StagingRepo(self.config)
         self.repo_root_files = self.staging_repo.repo_root_files
-        self.stage_root = self.config.main['stage_root']
+        self.stage_root = self.config['stage_root']
         self.server_root = self.config.dlrn['server']['root']
         self.db_file = self.config.dlrn['server']['db_file']
         self.db_data = self.config.dlrn['server']['db_data_file']
 
-        self.components_mode = self.config.main['components_mode']
+        self.components_mode = self.config.components_mode
         self.commits = self.config.dlrn['commits']
         self.promotions = self.config.dlrn['promotions']
         self.rev_promotions = self.config.dlrn['rev_promotions']
@@ -489,7 +489,7 @@ class DlrnStagingServer(object):
         """
 
         # Creates dlrn and repo dirs
-        if not self.config.main['dry_run']:
+        if not self.config['dry_run']:
             try:
                 os.makedirs(self.server_root)
             except OSError:
