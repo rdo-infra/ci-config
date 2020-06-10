@@ -19,7 +19,7 @@
       - python-tripleoclient
       - selinux
     required_packages:
-      - python-virtualenv
+      - /usr/bin/virtualenv  # portable between c7/c8
       - yum-utils
       # required by tripleo-common
       - gcc
@@ -33,7 +33,7 @@
       block:
 
         # keep this step separated from the docker-ce install below
-        - name: Install required packages
+        - name: Include install-requirements
           include_tasks: common_tasks/install-requirements.yml
 
         - name: Configure docker-ce repo
