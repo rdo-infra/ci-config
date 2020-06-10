@@ -10,6 +10,7 @@ import pprint
 import shutil
 import subprocess
 import time
+import sys
 import yaml
 
 try:
@@ -26,6 +27,10 @@ from dlrn_client import (DlrnClient, DlrnClientConfig)
 from dlrn_hash import DlrnCommitDistroHash
 from sqlalchemy import exc as sql_a_exc
 from string import Template
+
+
+if sys.version_info[0] < 3:
+    raise Exception("Must be using Python 3")
 
 
 def conditional_run(orig_function):
