@@ -31,6 +31,14 @@
       - nova-compute
       - neutron-server
   tasks:
+
+    - name: Install docker wheel
+      pip:
+        name: docker
+        state: present
+        # we cannot allow pip to uninstall distro packages
+        extra_args: --ignore-installed
+
     - name: Test tripleo-common
       block:
         - name: Mock undercloud registry -- pull registry image
@@ -112,6 +120,12 @@
                       tag: "{{ full_hash }}"
                     tag_from_label: rdo_version
             dest: "/tmp/staging-containers-prepare-parameter.yaml"
+
+        - name: create container images folder
+          file:
+            path: "{{ ansible_user_dir }}/test-python/share/tripleo-common/container-images/"
+            state: directory
+            recurse: true
 
         - name: copy staging_overcloud_containers.yaml.j2
           copy:
