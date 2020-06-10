@@ -9,6 +9,12 @@
     - source_registry.namespace
     - release
 
+- name: Ensure docker python (for docker_* modules)
+  pip:
+    name: docker
+    state: present
+    extra_args: --user
+
 - name: Initialize list of pushed containers. Will be used for cleanup
   set_fact:
     pushed_containers: []
