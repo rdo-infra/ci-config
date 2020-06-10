@@ -9,6 +9,17 @@
     - source_registry.namespace
     - release
 
+- name: Ensure python dependencies for ansible docker_* modules
+  connection: local
+  pip:
+    # executable: "{{ ansible_python.executable }} -m pip"
+    name:
+      - docker
+      - requests
+    state: present
+    # if inside virtualenv we cannot use --user, but outside we want it
+    extra_args: "{% if not 'VIRTUAL_ENV' in ansible_env %}--user{% endif %}"
+
 - name: Initialize list of pushed containers. Will be used for cleanup
   set_fact:
     pushed_containers: []
