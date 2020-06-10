@@ -1,6 +1,8 @@
 ---
 - name: Setup test-python
-  become: true
+  # keep become false at all costs, we do not want to create root owned
+  # files inside a non root user, causing later failures.
+  become: false
   pip:
     name: "{{ venv_test_requirements }}"
     virtualenv: "{{ ansible_user_dir }}/test-python"
