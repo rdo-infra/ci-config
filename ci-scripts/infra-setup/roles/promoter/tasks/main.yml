@@ -83,7 +83,6 @@
         name:
           - logrotate
           - httpd
-          - python-virtualenv
           - telegraf
           - yum-utils
           - device-mapper-persistent-data
@@ -99,8 +98,18 @@
           - policycoreutils
           - setools-console
           - ansible
-          - python-docker-py
+          - "{% if ansible_distribution_major_version == '7' %}python-docker-py{% endif %}"
         state: present
+
+    - name: Install docker wheel
+      pip:
+        name: docker
+        state: present
+
+    - name: Fail fast if ansible docker module is not functional
+      docker_image:
+        name: hello-world
+        source: pull
 
 - name: Set up external partition
   become: true
@@ -467,6 +476,7 @@
   pip:
     requirements: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/requirements.txt"
     virtualenv: ~/promoter_venv
+    virtualenv_python: python3
 
 - name: Render promoter service script
   template:
