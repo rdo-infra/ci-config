@@ -1,10 +1,21 @@
 ---
 - name: Setup test-python
-  become: true
+  # keep become false at all costs, we do not want to create root owned
+  # files inside a non root user, causing later failures.
+  become: false
   pip:
     name: "{{ venv_test_requirements }}"
     virtualenv: "{{ ansible_user_dir }}/test-python"
-    virtualenv_site_packages: true
+    # we cannot use site packages as pip would eventually fail to uninstall
+    # outdated distro packages, like `requests`.
+    virtualenv_site_packages: false
     # we want to be sure we use python3, even on centos7
     virtualenv_python: python3
     # extra_args: -chttps://releases.openstack.org/constraints/upper/train
+
+# needed because previous task will cannot enforce virtualenv_python
+- name: Fail if not using python3 for test-python
+  shell:
+    cmd: |
+      source {{ ansible_user_dir }}/test-python/bin/activate
+      python -c "import sys; sys.exit(sys.version_info[0] - 3)"
