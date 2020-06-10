@@ -65,7 +65,7 @@ Installation
 Create a virtualenv to run the script and install the requirements before the
 first run:
 
-    virtualenv /tmp/dlrnapi_promoter
+    python3 -m venv /tmp/dlrnapi_promoter
     source /tmp/dlrnapi_promoter/bin/activate
     pip install -r requirements.txt
 
