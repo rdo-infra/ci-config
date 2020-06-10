@@ -1,4 +1,12 @@
 ---
+- name: Check pre-requisites
+  hosts: all
+  tasks:
+    - name: Fail if ansible docker module is not functional
+      docker_image:
+        name: hello-world
+        source: pull
+
 - name: Set up docker experimental commands (common to all tests)
   hosts: all
   tasks:
