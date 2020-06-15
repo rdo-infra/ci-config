@@ -48,12 +48,14 @@ class RepoSetup(unittest.TestCase):
         config = type("Config", (), {
             'repo_url': repo_url,
             'release': 'master',
-            'build_method': 'tripleo',
-            'container_preffix': config_defaults['container_preffix'],
             'containers_list_base_url': containers_list_base_url,
             'containers_list_path': config_defaults['containers_list_path'],
-            'containers_list_exclude_config': "file://{}".format(
-                containers_list_exclude_config_path),
+            'containers': {
+                'build_method': 'tripleo',
+                'container_preffix': config_defaults['container_preffix'],
+                'containers_list_exclude_config':
+                    "file://{}".format(containers_list_exclude_config_path),
+            }
         })
         self.client = RepoClient(config)
         fieldnames = ("Project,Source Repo,Source Sha,Dist Repo,Dist Sha,"
@@ -219,7 +221,7 @@ class TestGetVersionsCsv(RepoSetup):
                                              mock_log_debug,
                                              mock_log_error):
         self.maxDiff = None
-        out_versions_csv_reader =  \
+        out_versions_csv_reader = \
             self.client.get_versions_csv(self.dlrn_hash_commitdistro,
                                          candidate_label="tripleo-ci-testing")
 
@@ -318,7 +320,7 @@ class TestGetContainersList(RepoSetup):
         self.client.release = "train"
         self.client.container_preffix = "centos-binary-"
         self.client.containers_list_path = (
-                'container-images/overcloud_containers.yaml'
+            'container-images/overcloud_containers.yaml'
         )
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
@@ -355,7 +357,7 @@ class TestGetContainersList(RepoSetup):
         self.client.build_method = "kolla"
         self.client.container_preffix = "centos-binary-"
         self.client.containers_list_path = (
-                'container-images/queens_containers.yaml'
+            'container-images/queens_containers.yaml'
         )
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
@@ -374,7 +376,7 @@ class TestGetContainersList(RepoSetup):
         self.client.release = "stein"
         self.client.container_preffix = "centos-binary-"
         self.client.containers_list_path = (
-                'container-images/overcloud_containers.yaml'
+            'container-images/overcloud_containers.yaml'
         )
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'], load_excludes=False)
@@ -503,7 +505,7 @@ class TestGetContainersList(RepoSetup):
         self.client.release = "ussuri"
         self.client.container_preffix = "centos-binary-"
         self.client.containers_list_path = (
-                'container-images/ussuri_containers.yaml'
+            'container-images/ussuri_containers.yaml'
         )
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
