@@ -157,8 +157,8 @@ class StagingContainers(object):
                 self.log.debug("Not excluding container %s", excluded)
 
         for image_name in suffixes:
-            if self.config.main['release'] in [
-                    'queens', 'rocky', 'stein', 'train', 'ussuri']:
+            if self.config['release'] in ['queens', 'rocky', 'stein',
+                                          'train', 'ussuri']:
                 target_image_name = "{}-binary-{}".format(
                     self.distro_name, image_name)
             else:
@@ -246,7 +246,10 @@ class StagingContainers(object):
                 'train': self.excluded_containers,
             },
         }
-        with open(self.containers_list_exclude_config, "w") as exclude_file:
+        f_name = self.containers_list_exclude_config
+        if self.containers_list_exclude_config.startswith("file://"):
+            f_name = self.containers_list_exclude_config.split("file://")[-1]
+        with open(f_name, "w") as exclude_file:
             exclude_file.write(yaml.safe_dump(exclude_config))
 
     def cleanup_containers(self, containers):
