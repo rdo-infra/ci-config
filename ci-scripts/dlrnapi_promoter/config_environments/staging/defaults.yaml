@@ -2,7 +2,7 @@ release: 'master'
 distro_name: 'centos'
 distro_version: '8'
 dlrnauth_username: 'ciuser'
-manifest_push: "false"
+manifest_push: "true"
 target_registries_push: "true"
 latest_hashes_count: '10'
 log_level: "DEBUG"
@@ -20,6 +20,8 @@ overcloud_images:
       host: localhost
       root: overcloud_images/
       key: "sample_key"
+      client: "sftp"
+      keypath: "~/.ssh/id_rsa"
 default_qcow_server: local
 
 # Stage configuration file for the promoter staging
@@ -65,6 +67,8 @@ containers:
   containers_list_exclude_config: "/tmp/promoter-staging/containers/build-containers-main.yaml"
   list_exclude_config: |
     "https://opendev.org/openstack/tripleo-ci/raw/branch/master/roles/build-containers/vars/main.yaml"
+  build_method: "tripleo"
+  container_preffix: openstack-
 dlrn:
   components:
     - tripleo

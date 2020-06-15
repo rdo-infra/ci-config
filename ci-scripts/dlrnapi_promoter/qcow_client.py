@@ -22,7 +22,7 @@ class QcowConnectionClient(object):
         self._client_type = server_conf['client']
         self._keypath = server_conf['keypath']
         self._client = os
-        if server_conf['client'] == "sftp":
+        if self._client_type == "sftp":
             client = paramiko.SSHClient()
             client.load_system_host_keys()
             client.set_missing_host_key_policy(paramiko.WarningPolicy)
@@ -69,12 +69,12 @@ class QcowClient(object):
         self.distro_name = self.config.distro_name
         self.distro_version = self.config.distro_version
         self.rollback_links = {}
-        server_conf = self.config.qcow_server
-        self.user = server_conf['user']
-        self.root = server_conf['root']
-        self.host = server_conf['host']
+        server_conf = self.config.overcloud_images.get('qcow_servers')
+        self.user = server_conf['local']['user']
+        self.root = server_conf['local']['root']
+        self.host = server_conf['local']['host']
 
-        self.client = QcowConnectionClient(server_conf)
+        self.client = QcowConnectionClient(server_conf['local'])
         self.images_dir = os.path.join(self.root, config.distro,
                                        config.release, "rdo_trunk")
 
