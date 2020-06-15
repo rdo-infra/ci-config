@@ -37,7 +37,7 @@ class ConfigCore(object):
 
     _log = logging.getLogger("promoter")
 
-    def __init__(self, layers_list):
+    def __init__(self, layers_list, verbose=False):
         """
         Initializes the layers in a ordered dict
         :param layers_list: the list of layers in the configuration,
@@ -51,6 +51,10 @@ class ConfigCore(object):
                 self._log.warning("Ignored layer %s", str(layer_name))
         self._log.debug("Config object configured with layers: %s",
                         ", ".join(self._layers.keys()))
+        # As config is used everywhere multiple times, some debug message may
+        # flood the logs. We enable them only when we really want to trace
+        # the config engine
+        self._verbose = verbose
 
     def _dump_layers(self):
         pprint.pprint(self._layers)
@@ -105,17 +109,21 @@ class ConfigCore(object):
                 continue
             try:
                 value = source[attribute_name]
-                self._log.debug("Getting attribute %s from layer '%s' ",
-                                attribute_name, source_name)
+                if self._verbose:
+                    self._log.debug("Getting attribute %s from layer '%s' ",
+                                    attribute_name, source_name)
                 break
             except KeyError:
-                self._log.debug("Attribute %s not found in layer %s",
-                                attribute_name, source_name)
+                if self._verbose:
+                    self._log.debug("Attribute %s not found in layer %s",
+                                    attribute_name, source_name)
 
         try:
             return value
         except UnboundLocalError:
-            self._log.debug("Attribute %s not found in layers", attribute_name)
+            if self._verbose:
+                self._log.debug("Attribute %s not found in layers",
+                                attribute_name)
             raise AttributeError
 
     def _filter(self, attribute_name, value):
@@ -134,7 +142,8 @@ class ConfigCore(object):
         except AttributeError:
             return value
 
-        self._log.debug("Running filter for attribute %s",
+        if self._verbose:
+            self._log.debug("Running filter for attribute %s",
                         attribute_name)
         try:
             return filter_method(value)
