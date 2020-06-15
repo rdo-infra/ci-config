@@ -101,7 +101,9 @@ def query_container_registry_promotion(stage_info=None, **kwargs):
             log.info("Checking for promoted container hash: %s", reg_url)
             try:
                 url_lib.urlopen(reg_url)
-            except url_lib.HTTPError:
+                log.debug("%s:%s found", name, tag)
+            except url_lib.HTTPError as ex:
+                log.exception(ex)
                 if no_ppc and '_ppc64le' in tag:
                     log.info("(expected - ppc manifests disabled)"
                              "Image not found - %s", line)
@@ -117,7 +119,9 @@ def query_container_registry_promotion(stage_info=None, **kwargs):
                 log.info("Checking for promoted container tag: %s", reg_url)
                 try:
                     url_lib.urlopen(reg_url)
-                except url_lib.HTTPError:
+                    log.debug("%s:%s found", name, promotion_target)
+                except url_lib.HTTPError as ex:
+                    log.exception(ex)
                     log.error("Image with named tag not found - %s", line)
                     promo_tgt_line = line.replace(candidate_hash.full_hash,
                                                   promotion_target)
@@ -128,7 +132,7 @@ def query_container_registry_promotion(stage_info=None, **kwargs):
         log.info("Compare images tagged with hash and promotion target:")
         log.error("Not implemented")
 
-    assert missing_images == [], "Images are missing"
+    assert missing_images == [], "Images are missing {}".format(missing_images)
 
 
 def compare_tagged_image_hash(stage_info=None, **kwargs):
