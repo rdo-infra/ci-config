@@ -3,7 +3,7 @@ This test is launched as part of the existing tox command
 
 It tests general workflow with multiple classes from the promoter involved
 
-Uses standard pytest fixture as a setup/teardown method
+ Uses standard pytest fixture as a setup/teardown method
 """
 import logging
 import os
@@ -13,6 +13,7 @@ import yaml
 import promoter_integration_checks
 
 from common import close_logging
+from config import PromoterConfigFactory
 from config_legacy import PromoterLegacyConfig
 from dlrn_hash import DlrnCommitDistroHash, DlrnAggregateHash, DlrnHash
 from logic import Promoter
@@ -115,7 +116,9 @@ def staged_env(request):
         config = PromoterLegacyConfig(overrides_obj.config_file,
                                       overrides=overrides_obj)
     else:
-        raise Exception("New config engine is not implemented yet")
+        config_builder = PromoterConfigFactory()
+        config = config_builder("staging", release_config,
+                                cli_args=overrides_obj)
 
     promoter = Promoter(config)
 
@@ -126,7 +129,9 @@ def staged_env(request):
 
 
 @pytest.mark.parametrize("staged_env", ("containers_legacyconf_single",
-                                        "containers_legacyconf_integration"),
+                                        "containers_legacyconf_integration",
+                                        "containers_single",
+                                        "containers_integration"),
                          indirect=True)
 def test_promote_containers(staged_env):
     """
