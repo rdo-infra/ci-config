@@ -3,7 +3,7 @@ This test is launched as part of the existing tox command
 
 It tests general workflow with multiple classes from the promoter involved
 
-Uses standard pytest fixture as a setup/teardown method
+ Uses standard pytest fixture as a setup/teardown method
 """
 import logging
 import os
