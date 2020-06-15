@@ -34,10 +34,9 @@ class ConfigError(Exception):
 
 
 class ConfigCore(object):
-
     _log = logging.getLogger("promoter")
 
-    def __init__(self, layers_list):
+    def __init__(self, layers_list, verbose=False):
         """
         Initializes the layers in a ordered dict
         :param layers_list: the list of layers in the configuration,
@@ -51,6 +50,10 @@ class ConfigCore(object):
                 self._log.warning("Ignored layer %s", str(layer_name))
         self._log.debug("Config object configured with layers: %s",
                         ", ".join(self._layers.keys()))
+        # As config is used everywhere multiple times, some debug message may
+        # flood the logs. We enable them only when we really want to trace
+        # the config engine
+        self._verbose = verbose
 
     def _dump_layers(self):
         pprint.pprint(self._layers)
@@ -105,17 +108,21 @@ class ConfigCore(object):
                 continue
             try:
                 value = source[attribute_name]
-                self._log.debug("Getting attribute %s from layer '%s' ",
-                                attribute_name, source_name)
+                if self._verbose:
+                    self._log.debug("Getting attribute %s from layer '%s' ",
+                                    attribute_name, source_name)
                 break
             except KeyError:
-                self._log.debug("Attribute %s not found in layer %s",
-                                attribute_name, source_name)
+                if self._verbose:
+                    self._log.debug("Attribute %s not found in layer %s",
+                                    attribute_name, source_name)
 
         try:
             return value
         except UnboundLocalError:
-            self._log.debug("Attribute %s not found in layers", attribute_name)
+            if self._verbose:
+                self._log.debug("Attribute %s not found in layers",
+                                attribute_name)
             raise AttributeError
 
     def _filter(self, attribute_name, value):
@@ -134,8 +141,9 @@ class ConfigCore(object):
         except AttributeError:
             return value
 
-        self._log.debug("Running filter for attribute %s",
-                        attribute_name)
+        if self._verbose:
+            self._log.debug("Running filter for attribute %s", attribute_name)
+
         try:
             return filter_method(value)
         except Exception as exc:
@@ -246,7 +254,7 @@ class ConfigCore(object):
 class PromoterConfig(ConfigCore):
     """
     This class implements the Promoter config, using Config Core as a parent
-    sets the layers used in promoter configuration and implements contructor
+    sets the layers used in promoter configuration and implements constructor
     and filters for the complex configuration variables.
     """
 
@@ -443,7 +451,7 @@ class PromoterConfig(ConfigCore):
 
         return promotions
 
-    # Comenting because it fail tests
+    # Commenting because it fail tests
     #  def _filter_containers(self, containers):
     #    pass
 
@@ -550,7 +558,8 @@ class PromoterConfigFactory(object):
             return config_path
 
         if os.path.isabs(config_path):
-            self.log.debug("%s is an absolute path, not converting")
+            self.log.debug("%s is an absolute path, not "
+                           "converting" % config_path)
             return config_path
 
         _config_path = config_path

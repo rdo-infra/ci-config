@@ -157,8 +157,8 @@ class StagingContainers(object):
                 self.log.debug("Not excluding container %s", excluded)
 
         for image_name in suffixes:
-            if self.config.main['release'] in [
-                    'queens', 'rocky', 'stein', 'train', 'ussuri']:
+            if self.config['release'] in ['queens', 'rocky', 'stein',
+                                          'train', 'ussuri']:
                 target_image_name = "{}-binary-{}".format(
                     self.distro_name, image_name)
             else:

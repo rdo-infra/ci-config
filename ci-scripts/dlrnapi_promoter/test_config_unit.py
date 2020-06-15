@@ -46,6 +46,7 @@ class TestConfigCore(unittest.TestCase):
         }
         self.config = ConfigCore(['high_priority', 'low_priority', None,
                                   'null_layer'])
+        self.config._verbose = True
         self.config._layers['high_priority'] = high_priority_settings
         self.config._layers['low_priority'] = low_priority_settings
         self.config._layers['null_layer'] = None
@@ -59,6 +60,7 @@ class TestConfigCore(unittest.TestCase):
                 return value.lower()
 
         self.subconfig = SubConfig(['layer'])
+        self.subconfig._verbose = True
         self.subconfig._layers['layer'] = {'filtered': 'VALUE'}
 
     @patch('logging.Logger.warning')
@@ -253,19 +255,24 @@ class TestPromoterConfig(ConfigTestCases):
     def setUp(self):
         super(TestPromoterConfig, self).setUp()
         self.config_empty = PromoterConfig(global_defaults=self.null_settings)
+        self.config_empty._verbose = True
         self.config_stablebranch = \
             PromoterConfig(environment_defaults=self.upstream_defaults,
                            release_settings=self.release_settings_stablebranch)
+        self.config_stablebranch._verbose = True
         self.config_master = \
             PromoterConfig(environment_defaults=self.downstream_defaults,
                            release_settings=self.release_settings_master,
                            cli_settings=self.cli_settings)
+        self.config_master._verbose = True
         self.config_incomplete = \
             PromoterConfig(environment_defaults=self.downstream_defaults,
                            release_settings=self.release_missing_promotion_info)
+        self.config_incomplete._verbose = True
 
     def test_base_instance(self):
         config = PromoterConfig()
+        config._verbose = True
         assert hasattr(config, "_layers")
         self.assertIsInstance(config._layers, OrderedDict)
         for layer_name in ['cli', 'release', 'extra', 'environment_defaults',
