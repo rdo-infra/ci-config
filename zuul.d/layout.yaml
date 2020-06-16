@@ -65,12 +65,16 @@
             post-run: playbooks/post-run.yml
             success-url: "tox/reports.html"
             failure-url: "tox/reports.html"
-            files:
+            files: &python_files
               - .*\.py
               - .*\.ini
-              - ^ci-scripts/infra-.*/.*
-              - ^molecule/.*
-              - ^playbooks/.*
+              - ^ci-scripts/dlrnapi_promoter/.*
+              - ^ci-scripts/infra-setup/roles/rrcockpit/files/grafana/.*\.py
+              - ^ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/.*\.py
+              - ^ci-scripts/infra-setup/roles/rrcockpit/files/telegraf/.*\.py
+              - ^jcomparison/perfcomp/.*\.py
+              - ^jenkins/jobs/scripts/.*\.py
+              - ^plugins/modules/.*\.py
               - ^requirements.txt
               - ^setup.cfg
               - ^setup.py
@@ -86,18 +90,7 @@
             post-run: playbooks/post-run.yml
             success-url: "tox/reports.html"
             failure-url: "tox/reports.html"
-            files:
-              - .*\.py
-              - ^ci-scripts/infra-.*/.*
-              - .*\.ini
-              - ^molecule/.*
-              - ^playbooks/.*
-              - ^requirements.txt
-              - ^setup.cfg
-              - ^setup.py
-              - ^test-requirements.txt
-              - ^tox.ini
-              - ^zuul.d/layout.yaml$
+            files: *python_files
             vars:
               tox_environment:
                 PYTEST_REQPASS: 188
