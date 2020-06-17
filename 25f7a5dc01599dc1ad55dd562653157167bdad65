@@ -150,6 +150,23 @@
     },
     {
       "key": {
+        "uuid": "ad4b4a37_aab4ab4c",
+        "filename": "ci-scripts/dlrnapi_promoter/qcow_client.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 63
+      },
+      "writtenOn": "2020-06-17T12:24:18Z",
+      "side": 1,
+      "message": "made sose manual test, initialize paramiko, connect client then play with commands:\n- block port 22 in the firewall, client.chdir waits indefinitely. There is not way to specify a timeout at this point. TImeouts are either for connection, or open file operations.\n- Directory doesn\u0027t exist: IOError\n- Permission denied: IOError.\nIn all cases the specific error can be seen in ex.strerror.\nAlso, I discovered chdir works even if the directory is not accessible. So at this point:\n- I will replace chdir with listdir, which fails in case of permission errors.\n- I will change the message to add \"or is not accessible\"\nI don\u0027t need to differentiate reaally, because I log the entire error with the reason, and then re raise the error to make the promoter die",
+      "revId": "25f7a5dc01599dc1ad55dd562653157167bdad65",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1fb11c30_5eba607c",
         "filename": "ci-scripts/dlrnapi_promoter/qcow_client.py",
         "patchSetId": 6
@@ -224,6 +241,23 @@
       "writtenOn": "2020-06-17T09:44:05Z",
       "side": 1,
       "message": "As above, but in this case the documentation doesn\u0027t even specify the error, I tested the result by hand.Beside losing connection, what else do you imagine it would happen here ?",
+      "revId": "25f7a5dc01599dc1ad55dd562653157167bdad65",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8dfff52_f6662b71",
+        "filename": "ci-scripts/dlrnapi_promoter/qcow_client.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 63
+      },
+      "writtenOn": "2020-06-17T12:24:18Z",
+      "side": 1,
+      "message": "Added to the message \"or is not accessible\". As above, the full error is logged, and the promoter dies.",
       "revId": "25f7a5dc01599dc1ad55dd562653157167bdad65",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": false
