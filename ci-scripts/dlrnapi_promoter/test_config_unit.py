@@ -392,7 +392,9 @@ class TestExpandConfig(ConfigBase):
             'promotion_criteria_map': {},
             'release': 'master',
             'repo_url': 'https://trunk.rdoproject.org/centos7-master',
-            'target_registries_push': True
+            'target_registries_push': True,
+            'source_namespace': "tripleomaster",
+            'target_namespace': "tripleomaster",
         }
 
         in_config = {
@@ -403,6 +405,35 @@ class TestExpandConfig(ConfigBase):
                                 checks=[])
         out_config = config.expand_config(in_config)
         self.assertEqual(out_config, expected_config)
+
+    @patch('config.PromoterConfig.get_dlrn_api_url')
+    def test_expand_config_ussuri(self, get_api_url_mock):
+        api_url = "http://localhost:58080"
+        in_config = {
+            'promotion_criteria_map': {},
+            'release': "ussuri"
+        }
+        get_api_url_mock.return_value = api_url
+        config = PromoterConfig(self.filepaths['correct'], filters=[],
+                                checks=[])
+        out_config = config.expand_config(in_config)
+        self.assertEqual(out_config['source_namespace'], "tripleou")
+        self.assertEqual(out_config['target_namespace'], "tripleou")
+
+    @patch('config.PromoterConfig.get_dlrn_api_url')
+    def test_expand_config_namespace(self, get_api_url_mock):
+        api_url = "http://localhost:58080"
+        in_config = {
+            'promotion_criteria_map': {},
+            'source_namespace': "mysourcenamespace",
+            'target_namespace': "mytargetnamespace",
+        }
+        get_api_url_mock.return_value = api_url
+        config = PromoterConfig(self.filepaths['correct'], filters=[],
+                                checks=[])
+        out_config = config.expand_config(in_config)
+        self.assertEqual(out_config['source_namespace'], "mysourcenamespace")
+        self.assertEqual(out_config['target_namespace'], "mytargetnamespace")
 
     @pytest.mark.xfail(reason="Not Implemented", run=False)
     def test_expand_config_complete(self):

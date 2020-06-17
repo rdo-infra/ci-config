@@ -63,11 +63,6 @@ class RegistriesClient(object):
             self.log.error("Containers list is empty")
             raise PromotionError
 
-        namespace = "tripleo{}".format(self.config.release)
-        # Ugly ugly ugly hack to make an exception for ussuri namespace
-        if self.config.release == "ussuri":
-            namespace = "tripleou"
-
         extra_vars = {
             'candidate_label': candidate_label,
             'named_label': target_label,
@@ -75,7 +70,8 @@ class RegistriesClient(object):
             'distro_hash': candidate_hash.distro_hash,
             'full_hash': candidate_hash.full_hash,
             'containers_list': containers_list,
-            'namespace': namespace
+            'source_namespace': self.config.source_namespace,
+            'target_namespace': self.config.target_namespace
         }
         self.extra_vars.update(extra_vars)
         __, extra_vars_path = tempfile.mkstemp(suffix=".yaml")
