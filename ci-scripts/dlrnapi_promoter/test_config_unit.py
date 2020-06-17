@@ -392,7 +392,8 @@ class TestExpandConfig(ConfigBase):
             'promotion_criteria_map': {},
             'release': 'master',
             'repo_url': 'https://trunk.rdoproject.org/centos7-master',
-            'target_registries_push': True
+            'target_registries_push': True,
+            'namespace': "tripleomaster"
         }
 
         in_config = {
@@ -403,6 +404,32 @@ class TestExpandConfig(ConfigBase):
                                 checks=[])
         out_config = config.expand_config(in_config)
         self.assertEqual(out_config, expected_config)
+
+    @patch('config.PromoterConfig.get_dlrn_api_url')
+    def test_expand_config_ussuri(self, get_api_url_mock):
+        api_url = "http://localhost:58080"
+        in_config = {
+            'promotion_criteria_map': {},
+            'release': "ussuri"
+        }
+        get_api_url_mock.return_value = api_url
+        config = PromoterConfig(self.filepaths['correct'], filters=[],
+                                checks=[])
+        out_config = config.expand_config(in_config)
+        self.assertEqual(out_config['namespace'], "tripleou")
+
+    @patch('config.PromoterConfig.get_dlrn_api_url')
+    def test_expand_config_namespace(self, get_api_url_mock):
+        api_url = "http://localhost:58080"
+        in_config = {
+            'promotion_criteria_map': {},
+            'namespace': "mynamespace"
+        }
+        get_api_url_mock.return_value = api_url
+        config = PromoterConfig(self.filepaths['correct'], filters=[],
+                                checks=[])
+        out_config = config.expand_config(in_config)
+        self.assertEqual(out_config['namespace'], "mynamespace")
 
     @pytest.mark.xfail(reason="Not Implemented", run=False)
     def test_expand_config_complete(self):
