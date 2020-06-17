@@ -278,6 +278,20 @@ class PromoterConfig(PromoterConfigBase):
                                   "".format(config['distro'],
                                             config['release']))
 
+        if 'source_namespace' not in config:
+            if config['release'] == "ussuri":
+                source_namespace = "tripleou"
+            else:
+                source_namespace = "tripleo{}".format(config['release'])
+            config['source_namespace'] = source_namespace
+
+        if 'target_namespace' not in config:
+            if config['release'] == "ussuri":
+                target_namespace = "tripleou"
+            else:
+                target_namespace = "tripleo{}".format(config['release'])
+            config['target_namespace'] = target_namespace
+
         config['containers_list_base_url'] = \
             config.get('containers_list_base_url',
                        self.defaults['containers_list_base_url'])
