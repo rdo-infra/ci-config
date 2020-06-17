@@ -12,9 +12,11 @@ namespace: "tripleo{{ release }}"
 containers_file: "/tmp/parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
 registry_hostname: trunk.registry.rdoproject.org
 registry_api: "https://{{ registry_hostname }}:8443/oapi/v1/namespaces/tripleo{{ release }}/imagestreamtags"
+source_namespace: "tripleo{{ release }}"
+target_namespace: "tripleo{{ release }}"
 source_registry:
   host: "{{ registry_hostname }}"
-  namespace: "tripleo{{ release }}"
+  namespace: "{{ source_namespace }}"
   username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
   password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
   auth_url: "https://{{ registry_hostname }}/v2/"
