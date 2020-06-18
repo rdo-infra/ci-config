@@ -157,15 +157,52 @@ class TestQcowClientPromotion(TestQcowClient):
             self.client.promote(self.missing_candidate_hash, self.target_label)
         self.assertTrue(mock_log_error.called)
 
+    @patch('logging.Logger.error')
+    @patch('paramiko.SFTPClient.remove')
+    def test_promote_failure_remove(self, remove_mock, mock_log_error):
+        os.symlink(os.path.join(self.images_dir, "target"),
+                   os.path.join(self.images_dir, self.target_label))
+        remove_mock.side_effect = EnvironmentError
 
-class TestQcowClientRollback(unittest.TestCase):
+        with self.assertRaises(EnvironmentError):
+            self.client.promote(self.valid_candidate_hash, self.target_label,
+                                create_previous=False, validation=False)
 
-    @pytest.mark.xfail(reason="Not yet enabled", run=False)
-    def test_rollback_pass(self):
+        mock_log_error.assert_has_calls([
+            mock.call("Unable to remove the target_label: %s",
+                      self.target_label)
+        ])
+
+    @patch('logging.Logger.error')
+    @patch('paramiko.SFTPClient.symlink')
+    def test_promote_failure_link_rollback(self, symlink_mock, mock_log_error):
+        # second call is from the rollback
+        symlink_mock.side_effect = [EnvironmentError, None]
+
+        fake_source = os.path.join(self.images_dir, "target")
+        os.symlink(fake_source,
+                   os.path.join(self.images_dir, self.target_label))
+
+        with self.assertRaises(PromotionError):
+            self.client.promote(self.valid_candidate_hash, self.target_label,
+                                create_previous=False, validation=False)
+
+        mock_log_error.assert_has_calls([
+            mock.call('%s failed to link %s to %s', mock.ANY,
+                      self.target_label, self.valid_candidate_hash.full_hash),
+        ])
+
+        symlink_mock.assert_has_calls([
+            mock.call(self.valid_candidate_hash.full_hash, self.target_label),
+            mock.call(fake_source, self.target_label)
+        ])
+
+    @pytest.mark.xfail(reason="Not implemented", run=False)
+    def test_promote_previous_failure_remove(self):
         assert False
 
-    @pytest.mark.xfail(reason="Not yet enabled", run=False)
-    def test_rollback_fail(self):
+    @pytest.mark.xfail(reason="Not implemented", run=False)
+    def test_promote_previous_failure_link(self):
         assert False
 
 

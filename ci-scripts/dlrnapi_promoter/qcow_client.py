@@ -155,7 +155,10 @@ class QcowClient(object):
         :return: None
         """
         for name, target in self.rollback_links.items():
-            self.client.remove(name)
+            try:
+                self.client.remove(name)
+            except EnvironmentError:
+                self.log.debug("No name %s was present")
             self.client.symlink(target, name)
             self.rollback_links = {}
 
@@ -194,21 +197,29 @@ class QcowClient(object):
             raise PromotionError("{} No images dir for hash {}"
                                  "".format(log_header, candidate_hash))
 
-        # Check if the target label exists and points to a hash dir
+        # Check if the target label exists, is a link, and this link points
+        # to a hash dir
         current_hash = None
         try:
             current_hash = self.client.readlink(target_label)
-        except EnvironmentError:
+        except EnvironmentError as ex:
             self.log.debug("%s No link named %s exists", log_header,
                            target_label)
+            # Bed message means the target_label is not a link.
+            # TODO: Handle the case where target_label is not a link (rollback
+            #  will not work
+            if ex.message == "Bad message":
+                self.log.error("%s current target_label %s is not a link",
+                               target_label)
+                raise PromotionError
 
         # If this exists Check if we can remove  the symlink
         if current_hash:
-            self.rollback_links['target_label'] = current_hash
+            self.rollback_links[target_label] = current_hash
             try:
                 self.client.remove(target_label)
             except EnvironmentError as ex:
-                self.log.debug("Unable to remove the target_label: %s",
+                self.log.error("Unable to remove the target_label: %s",
                                target_label)
                 self.log.exception(ex)
                 self.client.close()
@@ -235,9 +246,7 @@ class QcowClient(object):
                                target_label)
                 self.log.exception(ex)
                 self.client.close()
-                # Rollback is not tested, we enable it later, when tests are
-                # easier to add
-                # self.rollback()
+                self.rollback()
                 raise
             try:
                 self.client.symlink(current_hash, previous_label)
@@ -245,9 +254,7 @@ class QcowClient(object):
                 self.log.error("%s failed to link %s to %s", log_header,
                                previous_label, current_hash)
                 self.log.exception(ex)
-                # Rollback is not tested, we enable it later, when tests are
-                # easier to add
-                # self.rollback()
+                self.rollback()
                 self.client.close()
                 raise
 
@@ -258,10 +265,10 @@ class QcowClient(object):
             self.log.error("%s failed to link %s to %s", log_header,
                            target_label, candidate_hash.full_hash)
             self.log.exception(ex)
-            # Rollback is not tested, we enable it later, when tests are
-            # easier to add
-            # self.rollback()
-        finally:
+            self.rollback()
             self.client.close()
+            raise PromotionError
+
+        self.client.close()
 
         self.log.info("%s Successful promotion", log_header)
