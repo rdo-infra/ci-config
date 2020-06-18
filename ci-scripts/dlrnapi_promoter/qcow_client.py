@@ -222,9 +222,7 @@ class QcowClient(object):
                                target_label)
                 self.log.exception(ex)
                 self.client.close()
-                # Rollback is not tested, we enable it later, when tests are
-                # easier to add
-                # self.rollback()
+                self.rollback()
                 raise
             try:
                 self.client.symlink(current_hash, previous_label)
@@ -232,9 +230,7 @@ class QcowClient(object):
                 self.log.error("%s failed to link %s to %s", log_header,
                                previous_label, current_hash)
                 self.log.exception(ex)
-                # Rollback is not tested, we enable it later, when tests are
-                # easier to add
-                # self.rollback()
+                self.rollback()
                 self.client.close()
                 raise
 
@@ -245,9 +241,7 @@ class QcowClient(object):
             self.log.error("%s failed to link %s to %s", log_header,
                            target_label, candidate_hash.full_hash)
             self.log.exception(ex)
-            # Rollback is not tested, we enable it later, when tests are
-            # easier to add
-            # self.rollback()
+            self.rollback()
         finally:
             self.client.close()
 
