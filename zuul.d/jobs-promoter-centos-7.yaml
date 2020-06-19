@@ -115,3 +115,47 @@
       molecule_test_commands: |
         molecule test -s promote-images
       skip_report: true  # old jobs do not produce reports.html
+
+# Add tox-py-ci-config jobs for use as parent by the corresponding periodics
+# https://tree.taiga.io/project/tripleo-ci-board/task/1801
+- job:
+    name: tox-py27-ci-config
+    parent: tox-py27
+    pre-run: playbooks/pre-run-docker.yml
+    post-run: playbooks/post-run.yml
+    success-url: "tox/reports.html"
+    failure-url: "tox/reports.html"
+    nodeset: rdo-centos-7
+    vars:
+      tox_environment:
+        PYTEST_REQPASS: 188
+      zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
+
+- job:
+    name: tox-py36-ci-config
+    parent: tox-py36
+    pre-run: playbooks/pre-run-docker.yml
+    post-run: playbooks/post-run.yml
+    success-url: "tox/reports.html"
+    failure-url: "tox/reports.html"
+    vars:
+      tox_environment:
+        PYTEST_REQPASS: 188
+      zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
+
+- job:
+    name: rdo-tox-molecule-ci-config
+    parent: rdo-tox-molecule
+    vars:
+      tox_environment:
+        PYTEST_REQPASS: 1
+      zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
+
+
+- job:
+    name: rdo-tox-molecule-delegated-centos-8-ci-config
+    parent: rdo-tox-molecule-delegated-centos-8
+    vars:
+      tox_environment:
+        PYTEST_REQPASS: 1
+      zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"

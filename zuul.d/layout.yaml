@@ -8,7 +8,7 @@
       - jobs-promoter-centos-7-jobs
     check:
       jobs:
-        - rdo-tox-molecule: &molecule
+        - rdo-tox-molecule-ci-config: &molecule
             files:
               - .*molecule.*
               - ^ci-scripts/infra-setup/roles/get_hash/.*$
@@ -18,21 +18,11 @@
               - ^test-requirements.txt
               - ^tox.ini$
               - ^zuul.d/layout.yaml
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 1
-        - rdo-tox-molecule-delegated-centos-8:
+        - rdo-tox-molecule-delegated-centos-8-ci-config:
             <<: *molecule
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 1
         - tox-jjb
-        - tox-py27: &py27
-            pre-run: playbooks/pre-run-docker.yml
-            post-run: playbooks/post-run.yml
-            success-url: "tox/reports.html"
-            failure-url: "tox/reports.html"
-            files: &python_files
+        - tox-py27-ci-config: &py27
+            files: &pyfiles
               - .*\.py
               - .*\.ini
               - ^ci-scripts/dlrnapi_promoter/.*
@@ -48,27 +38,16 @@
               - ^test-requirements.txt
               - ^tox.ini
               - ^zuul.d/layout.yaml$
-            nodeset: rdo-centos-7
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 188
-        - tox-py36: &py36
-            pre-run: playbooks/pre-run-docker.yml
-            post-run: playbooks/post-run.yml
-            success-url: "tox/reports.html"
-            failure-url: "tox/reports.html"
-            files: *python_files
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 188
+        - tox-py36-ci-config: &py36
+            files: *pyfiles
     gate:
       jobs:
-        - rdo-tox-molecule:
+        - rdo-tox-molecule-ci-config:
             <<: *molecule
-        - rdo-tox-molecule-delegated-centos-8:
+        - rdo-tox-molecule-delegated-centos-8-ci-config:
             <<: *molecule
         - tox-jjb
-        - tox-py27:
+        - tox-py27-ci-config:
             <<: *py27
-        - tox-py36:
+        - tox-py36-ci-config:
             <<: *py36
