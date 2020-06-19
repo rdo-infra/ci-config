@@ -27,12 +27,8 @@
               tox_environment:
                 PYTEST_REQPASS: 1
         - tox-jjb
-        - tox-py27: &py27
-            pre-run: playbooks/pre-run-docker.yml
-            post-run: playbooks/post-run.yml
-            success-url: "tox/reports.html"
-            failure-url: "tox/reports.html"
-            files:
+        - tox-py27-ci-config: &py27
+            files: &pyfiles
               - .*\.py
               - .*\.ini
               - ^ci-scripts/infra-.*/.*
@@ -44,30 +40,8 @@
               - ^test-requirements.txt
               - ^tox.ini
               - ^zuul.d/layout.yaml$
-            nodeset: rdo-centos-7
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 188
-        - tox-py36: &py36
-            pre-run: playbooks/pre-run-docker.yml
-            post-run: playbooks/post-run.yml
-            success-url: "tox/reports.html"
-            failure-url: "tox/reports.html"
-            files:
-              - .*\.py
-              - ^ci-scripts/infra-.*/.*
-              - .*\.ini
-              - ^molecule/.*
-              - ^playbooks/.*
-              - ^requirements.txt
-              - ^setup.cfg
-              - ^setup.py
-              - ^test-requirements.txt
-              - ^tox.ini
-              - ^zuul.d/layout.yaml$
-            vars:
-              tox_environment:
-                PYTEST_REQPASS: 188
+        - tox-py36-ci-config: &py36
+            files: *pyfiles
     gate:
       jobs:
         - rdo-tox-molecule:
@@ -75,7 +49,7 @@
         - rdo-tox-molecule-delegated-centos-8:
             <<: *molecule
         - tox-jjb
-        - tox-py27:
+        - tox-py27-ci-config:
             <<: *py27
-        - tox-py36:
+        - tox-py36-ci-config:
             <<: *py36
