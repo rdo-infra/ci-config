@@ -19,6 +19,7 @@
       - python-tripleoclient
       - selinux
     required_packages:
+      - python-virtualenv
       - yum-utils
       # required by tripleo-common
       - gcc
@@ -27,30 +28,17 @@
       - python3-devel
       - libselinux-python3
   tasks:
-
     - name: Packages
       become: true
       block:
 
         # keep this step separated from the docker-ce install below
-        - name: Include install-requirements
+        - name: Install required packages
           include_tasks: common_tasks/install-requirements.yml
 
         - name: Configure docker-ce repo
           command: yum-config-manager --add-repo \
               "https://download.docker.com/linux/{{ ansible_distribution|lower }}/docker-ce.repo"
-
-        # Workaround for docker-ce installation failure due conflict with containerd.io
-        # https://bugzilla.redhat.com/show_bug.cgi?id=1756473#c1
-        - name: Patch docker-ce.repo for newer RedHat distros
-          when: ansible_os_family == 'RedHat' and ansible_distribution_major_version == '8'
-          ini_file:
-            path: /etc/yum.repos.d/docker-ce.repo
-            section: docker-ce-stable
-            option: module_hotfixes
-            value: "True"
-            no_extra_spaces: true
-            create: false
 
         - name:  install epel
           include_tasks: common_tasks/install-epel.yml
@@ -74,6 +62,7 @@
               - docker-ce
               - docker-ce-cli
               - ansible
+              - python-docker-py
             state: present
 
         - name: Start docker

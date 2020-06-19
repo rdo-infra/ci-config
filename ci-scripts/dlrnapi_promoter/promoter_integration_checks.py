@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 This script tests the steps of the promoter workflow.
  - Checks the dlrn API that the hash under test has been promoted

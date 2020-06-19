@@ -2,7 +2,7 @@ To prepare the environment for deployment:
 
     cd /tmp/
     git clone https://review.rdoproject.org/r/p/rdo-infra/ci-config.git
-    python3 -m venv deploy
+    virtualenv deploy
     source deploy/bin/activate
     pip install ansible shade
     cd ci-config/ci-scripts/infra-setup
