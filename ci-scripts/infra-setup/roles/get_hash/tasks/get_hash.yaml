@@ -18,7 +18,7 @@
     commit_url: "{{ dlrn_hash_baseurl }}/component/{{ component }}/{{ promote_source }}/commit.yaml"
   when:
     - component|default(None) != None
-    - not release is search("queens|rocky|stein|train")
+    - not release is search("queens|rocky|stein")
 
 - name: print out dlrn_api url
   debug:
@@ -28,13 +28,13 @@
   debug:
     msg: "dlrn_hash_baseurl: {{ dlrn_hash_baseurl }}"
 
-# md5 hash for integration jobs ( ussuri+ )
+# md5 hash for integration jobs ( ussuri+. train both centos7+8 - only 8 has .md5  )
 - name: discover the hashes url (integration)
   set_fact:
     md5_url: "{{ dlrn_hash_baseurl }}/{{ promote_source }}/delorean.repo.md5"
   when:
     - component|default(None) == None
-    - not release is search("queens|rocky|stein|train")
+    - ansible_distribution_major_version is version("8", ">=")
 
 - name: print out commit_url
   debug:
