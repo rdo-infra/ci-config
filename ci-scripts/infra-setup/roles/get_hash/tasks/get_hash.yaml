@@ -12,13 +12,16 @@
     - component|default(None) == None
     - release is search("queens|rocky|stein|train")
 
+- debug:
+    msg: "sanity check - component: {{ component|default('nope') }}  release: {{ release|default('nope') }}"
+
 # commit/distro hashes for component pipeline (an unique commit hash for each component)
 - name: discover the hashes url (component)
   set_fact:
     commit_url: "{{ dlrn_hash_baseurl }}/component/{{ component }}/{{ promote_source }}/commit.yaml"
   when:
     - component|default(None) != None
-    - not release is search("queens|rocky|stein|train")
+    - release not in ['queens', 'rocky', 'stein']
 
 - name: print out dlrn_api url
   debug:
