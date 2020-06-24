@@ -7,5 +7,7 @@ function activate_dlrnapi_venv {
 }
 
 function deactivate_dlrnapi_venv {
+    # deactivate can fail with unbound variable, so we need +u
+    set +u
     [[ $VIRTUAL_ENV = $WORKSPACE/dlrnapi_venv ]] && deactivate
 }
