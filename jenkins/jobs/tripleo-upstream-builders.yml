@@ -23,6 +23,9 @@
             git clone https://github.com/openstack/ansible-role-container-registry \
                 ${WORKSPACE}/roles/ansible-role-container-registry
 
+            # Copy over any zuul roles needed
+            cp -r ${WORKSPACE}/zuul-jobs/roles/ensure-pip ${WORKSPACE}/roles
+
             # Mock prerequisite zuul vars so the playbooks can run on jenkins
             cat <<EOF >> ${WORKSPACE}/roles/build-containers/vars/main.yaml
 
@@ -85,6 +88,10 @@
                     name:
                       - 'buildah'
                       - 'git'
+                      - 'iptables'
+                      - 'libffi'
+                      - 'libffi-devel'
+                      - 'openssl'
                       - 'iptables'
                       - 'libffi'
                       - 'libffi-devel'
