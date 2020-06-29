@@ -101,6 +101,8 @@ def staged_env(request):
         'repo_url': stage_info['dlrn']['server']['repo_url'],
         'log_level': 'DEBUG',
         'experimental': experimental,
+        'containers_list_exclude_config':
+            '/tmp/promoter-staging/containers/build-containers-main.yaml',
     }
     if "containers_" in test_case:
         overrides['containers_list_base_url'] = \

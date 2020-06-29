@@ -379,6 +379,10 @@ class TestExpandConfig(ConfigBase):
                 'https://opendev.org/openstack/tripleo-common/raw/commit/',
             'containers_list_path':
                 'container-images/overcloud_containers.yaml.j2',
+            "containers_list_exclude_config": (
+                "https://opendev.org/openstack/"
+                "tripleo-ci/raw/branch/master/roles/build-containers/vars"
+                "/main.yaml"),
             'distro': 'centos7',
             'distro_name': 'centos',
             'distro_version': '7',
