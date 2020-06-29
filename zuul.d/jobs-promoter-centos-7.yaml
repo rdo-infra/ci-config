@@ -34,10 +34,11 @@
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/promote-images.sh
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/promote-images/.*
+              - ^ci-scripts/infra-setup/roles/promoter/.*
               - ^playbooks/molecule.*.yml
               - ^requirements.txt
               - ^test-requirements.txt
+        - molecule-delegated-promoter-default-centos-7: *molecule-promote-images
     gate: *jobs
 
 - job:
@@ -114,6 +115,18 @@
     vars:
       molecule_test_commands: |
         molecule test -s promote-images
+      skip_report: true  # old jobs do not produce reports.html
+
+- job:
+    name: molecule-delegated-promoter-default-centos-7
+    parent: base
+    nodeset: rdo-centos-7
+    run: playbooks/molecule-delegated.yml
+    pre-run: playbooks/molecule-delegated-promote-images-pre.yml
+    post-run: playbooks/molecule-post.yml
+    vars:
+      molecule_test_commands: |
+        molecule test -s default
       skip_report: true  # old jobs do not produce reports.html
 
 # Add tox-py-ci-config jobs for use as parent by the corresponding periodics
