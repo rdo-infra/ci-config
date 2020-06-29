@@ -3,7 +3,7 @@
     name: jobs-promoter-centos-7-jobs
     check: &jobs
       jobs:
-        - tripleo-ci-promotion-staging-single-pipeline-centos-7:
+        - legacy-tripleo-ci-promotion-staging-single-pipeline-centos-7:
             files: &integration
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
@@ -12,9 +12,9 @@
               - ^playbooks/staging.*
               - ^requirements.txt
               - ^test-requirements.txt
-        - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
+        - legacy-tripleo-ci-promotion-staging-integration-pipeline-centos-7:
             files: *integration
-        - molecule-container-push-delegated-centos-7: &molecule-container-push
+        - legacy-molecule-container-push-delegated-centos-7: &molecule-container-push
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
@@ -22,7 +22,7 @@
               - ^playbooks/molecule.*.yml
               - ^requirements.txt
               - ^test-requirements.txt
-        - molecule-tripleo-common-delegated-centos-7: &molecule-tripleo-common
+        - legacy-molecule-tripleo-common-delegated-centos-7: &molecule-tripleo-common
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
@@ -30,7 +30,7 @@
               - ^playbooks/molecule.*.yml
               - ^requirements.txt
               - ^test-requirements.txt
-        - molecule-delegated-promote-images-delegated-centos-7: &molecule-promote-images
+        - legacy-molecule-delegated-promote-images-delegated-centos-7: &molecule-promote-images
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/promote-images.sh
@@ -41,12 +41,12 @@
     gate: *jobs
 
 - job:
-    name: tripleo-ci-promotion-staging-single-pipeline-centos-7
+    name: legacy-tripleo-ci-promotion-staging-single-pipeline-centos-7
     parent: base
     ansible-version: 2.8
     nodeset: rdo-centos-7
-    run: playbooks/staging.yml
-    post-run: playbooks/staging-post.yml
+    run: playbooks/legacy/staging.yml
+    post-run: playbooks/legacy/staging-post.yml
     host-vars:
       primary:
         ansible_user: root
@@ -54,19 +54,35 @@
       pipeline_type: single
       test_release: CentOS-7/master
 
+#TODO(rfolco): Rename this job to legacy-* in rdo-jobs and then delete it
+# https://github.com/rdo-infra/rdo-jobs/blob/master/zuul.d/molecule-jobs.yaml
 - job:
-    name: tripleo-ci-promotion-staging-integration-pipeline-centos-7
+    name: tripleo-ci-promotion-staging-single-pipeline-centos-7
+    description: |
+      This is a placeholder to keep original job names while we rename them
+    parent: legacy-tripleo-ci-promotion-staging-single-pipeline-centos-7
+
+- job:
+    name: legacy-tripleo-ci-promotion-staging-integration-pipeline-centos-7
     parent: base
     ansible-version: 2.8
     nodeset: rdo-centos-7
-    run: playbooks/staging.yml
-    post-run: playbooks/staging-post.yml
+    run: playbooks/legacy/staging.yml
+    post-run: playbooks/legacy/staging-post.yml
     host-vars:
       primary:
         ansible_user: root
     vars:
       pipeline_type: integration
       test_release: CentOS-8/master
+
+#TODO(rfolco): Rename this job to legacy-* in rdo-jobs and then delete it
+# https://github.com/rdo-infra/rdo-jobs/blob/master/zuul.d/molecule-jobs.yaml
+- job:
+    name: tripleo-ci-promotion-staging-integration-pipeline-centos-7
+    description: |
+      This is a placeholder to keep original job names while we rename them
+    parent: legacy-tripleo-ci-promotion-staging-integration-pipeline-centos-7
 
 # These jobs could be handled by rdo-tox-molecule job, when the pytest-molecule
 # supports delegated driver, but as delegated tests don't run in isolation,
@@ -75,46 +91,70 @@
 # So it's probably better to leave them as standalone jobs
 #
 - job:
-    name: molecule-container-push-delegated-centos-7
+    name: legacy-molecule-container-push-delegated-centos-7
     parent: base
     nodeset: rdo-centos-7
     success-url: "tox/reports.html"
     failure-url: "tox/reports.html"
-    pre-run: playbooks/molecule-delegated-pre.yml
-    run: playbooks/molecule-delegated.yml
-    post-run: playbooks/molecule-post.yml
+    pre-run: playbooks/legacy/molecule-delegated-pre.yml
+    run: playbooks/legacy/molecule-delegated.yml
+    post-run: playbooks/legacy/molecule-post.yml
     vars:
       molecule_test_commands: |
-        tox -emolecule_delegated -- roles/promoter/molecule/container-push/molecule.yml
+        tox -emolecule_delegated -- roles/promoter/molecule/legacy-container-push/molecule.yml
+
+#TODO(rfolco): Rename this job to legacy-* in rdo-jobs and then delete it
+# https://github.com/rdo-infra/rdo-jobs/blob/master/zuul.d/molecule-jobs.yaml
+- job:
+    name: molecule-container-push-delegated-centos-7
+    description: |
+      This is a placeholder to keep original job names while we rename them
+    parent: legacy-molecule-container-push-delegated-centos-7
 
 - job:
-    name: molecule-tripleo-common-delegated-centos-7
+    name: legacy-molecule-tripleo-common-delegated-centos-7
     parent: base
     nodeset: rdo-centos-7
-    pre-run: playbooks/molecule-delegated-pre.yml
-    run: playbooks/molecule-delegated.yml
-    post-run: playbooks/molecule-post.yml
+    pre-run: playbooks/legacy/molecule-delegated-pre.yml
+    run: playbooks/legacy/molecule-delegated.yml
+    post-run: playbooks/legacy/molecule-post.yml
     vars:
       molecule_test_commands: |
         # container-push generates staging containers, skip teardown
-        molecule converge -s container-push -- --skip-tags=registry_cleanup
+        molecule converge -s legacy-container-push -- --skip-tags=registry_cleanup
         # tripleo-common test w/ staging containers
-        molecule test -s tripleo-common-integration
+        molecule test -s legacy-tripleo-common-integration
         # container-push teardown, cleanup registries
-        molecule converge -s container-push -- --tags=registry_cleanup
+        molecule converge -s legacy-container-push -- --tags=registry_cleanup
       skip_report: true  # old jobs do not produce reports.html
 
+#TODO(rfolco): Rename this job to legacy-* in rdo-jobs and then delete it
+# https://github.com/rdo-infra/rdo-jobs/blob/master/zuul.d/molecule-jobs.yaml
 - job:
-    name: molecule-delegated-promote-images-delegated-centos-7
+    name: molecule-tripleo-common-delegated-centos-7
+    description: |
+      This is a placeholder to keep original job names while we rename them
+    parent: legacy-molecule-tripleo-common-delegated-centos-7
+
+- job:
+    name: legacy-molecule-delegated-promote-images-delegated-centos-7
     parent: base
     nodeset: rdo-centos-7
-    pre-run: playbooks/molecule-delegated-promote-images-pre.yml
-    run: playbooks/molecule-delegated.yml
-    post-run: playbooks/molecule-post.yml
+    pre-run: playbooks/legacy/molecule-delegated-promote-images-pre.yml
+    run: playbooks/legacy/molecule-delegated.yml
+    post-run: playbooks/legacy/molecule-post.yml
     vars:
       molecule_test_commands: |
-        molecule test -s promote-images
+        molecule test -s legacy-promote-images
       skip_report: true  # old jobs do not produce reports.html
+
+#TODO(rfolco): Rename this job to legacy-* in rdo-jobs and then delete it
+# https://github.com/rdo-infra/rdo-jobs/blob/master/zuul.d/molecule-jobs.yaml
+- job:
+    name: molecule-delegated-promote-images-delegated-centos-7
+    description: |
+      This is a placeholder to keep original job names while we rename them
+    parent: legacy-molecule-delegated-promote-images-delegated-centos-7
 
 # Add tox-py-ci-config jobs for use as parent by the corresponding periodics
 # https://tree.taiga.io/project/tripleo-ci-board/task/1801
