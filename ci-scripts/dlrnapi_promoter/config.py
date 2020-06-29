@@ -55,7 +55,11 @@ class PromoterConfigBase(object):
         "dlrn_api_host": "trunk.rdoproject.org",
         "containers_list_base_url": ("https://opendev.org/openstack/"
                                      "tripleo-common/raw/commit/"),
-        "containers_list_path": "container-images/overcloud_containers.yaml.j2"
+        "containers_list_path": "container-images/overcloud_containers.yaml.j2",
+        "containers_list_exclude_config": (
+            "https://opendev.org/openstack/"
+            "tripleo-ci/raw/branch/master/roles/build-containers/vars/main.yaml"
+        )
     }
     log = logging.getLogger("promoter")
 
@@ -200,6 +204,7 @@ class PromoterConfig(PromoterConfigBase):
                           'experimental',
                           'log_level',
                           'containers_list_base_url',
+                          'containers_list_exclude_config',
                           'allowed_clients']
         for override in main_overrides:
             try:
@@ -299,6 +304,10 @@ class PromoterConfig(PromoterConfigBase):
         config['containers_list_path'] = \
             config.get('containers_list_path',
                        self.defaults['containers_list_path'])
+
+        config['containers_list_exclude_config'] = \
+            config.get('containers_list_exclude_config',
+                       self.defaults['containers_list_exclude_config'])
 
         config['log_file'] = os.path.expanduser(config['log_file'])
         config['log_level'] = \
