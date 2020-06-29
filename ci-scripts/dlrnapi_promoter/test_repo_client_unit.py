@@ -4,6 +4,7 @@ import pytest
 import shutil
 import tempfile
 import unittest
+import yaml
 
 try:
     # Python3 imports
@@ -42,10 +43,17 @@ class RepoSetup(unittest.TestCase):
 
         repo_url = "file://{}/".format(self.temp_dir)
         containers_list_base_url = "file://{}".format(self.temp_dir)
+        containers_list_exclude_config_path = os.path.join(self.temp_dir,
+                                                           "exclude_file.yaml")
         config = type("Config", (), {
             'repo_url': repo_url,
+            'distro_name': 'centos',
+            'distro_version': '8',
+            'distro': 'centos8',
             'containers_list_base_url': containers_list_base_url,
-            'containers_list_path': config_defaults['containers_list_path']
+            'containers_list_path': config_defaults['containers_list_path'],
+            'containers_list_exclude_config': "file://{}".format(
+                containers_list_exclude_config_path),
         })
         self.client = RepoClient(config)
         fieldnames = ("Project,Source Repo,Source Sha,Dist Repo,Dist Sha,"
@@ -100,7 +108,8 @@ class RepoSetup(unittest.TestCase):
                                       self.versions_csv_rows[1]['Source Sha'],
                                       containers_file_dirname)
         containers_list = ("{{name_prefix}}nova-api{{name_suffix}}\n"
-                           "{{name_prefix}}neutron-server{{name_suffix}}\n")
+                           "{{name_prefix}}neutron-server{{name_suffix}}\n"
+                           "{{name_prefix}}excluded{{name_suffix}}\n")
         os.makedirs(containers_dir)
         containers_file_path = \
             os.path.join(containers_dir,
@@ -108,6 +117,20 @@ class RepoSetup(unittest.TestCase):
                                               'containers_list_path']))
         with open(containers_file_path, "w") as containers_file:
             containers_file.write(containers_list)
+
+        # create exclude config
+
+        excluded_containers = ['nonexisting', 'excluded']
+        exclude_config = {
+            'exclude_containers': {
+                'centos': {
+                    7: excluded_containers,
+                    8: excluded_containers,
+                },
+            }
+        }
+        with open(containers_list_exclude_config_path, "w") as exclude_file:
+            exclude_file.write(yaml.safe_dump(exclude_config))
 
         # Crate empty containers file
         empty_containers_dir = os.path.join(self.temp_dir, "abc",
@@ -253,6 +276,21 @@ class TestGetContainersList(RepoSetup):
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
+    def test_get_containers_list_ok_no_excludes(self,
+                                                mock_log_debug,
+                                                mock_log_error):
+        containers_list = self.client.get_containers_list(
+            self.versions_csv_rows[1]['Source Sha'], load_excludes=False)
+        self.assertEqual(containers_list, ['nova-api', 'neutron-server',
+                                           'excluded'])
+        mock_log_debug.assert_has_calls([
+            mock.call("Attempting Download of containers template at %s",
+                      mock.ANY)
+        ])
+        mock_log_error.assert_not_called()
+
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.debug')
     def test_get_containers_list_fail_no_match(self,
                                                mock_log_debug,
                                                mock_log_error):
@@ -283,3 +321,80 @@ class TestGetContainersList(RepoSetup):
             mock.call("Unable to download containers template at %s", mock.ANY)
         ])
         self.assertTrue(mock_log_exception.called)
+
+    @patch('logging.Logger.debug')
+    @patch('logging.Logger.exception')
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.info')
+    def test_load_excludes_correct(self,
+                                   mock_log_info,
+                                   mock_log_error,
+                                   mock_log_exception,
+                                   mock_log_debug):
+        input_full_list = ['nova-api', 'neutron-server', 'excluded']
+        expect_full_list = ['nova-api', 'neutron-server']
+        full_list = self.client.load_excludes(input_full_list)
+        self.assertEqual(full_list, expect_full_list)
+
+        mock_log_info.assert_has_calls([
+            mock.call("Excluding %s from the containers list",
+                      'excluded')
+        ])
+        mock_log_debug.assert_has_calls([
+            mock.call("%s not in containers list", 'nonexisting')
+        ])
+        self.assertFalse(mock_log_error.called)
+        self.assertFalse(mock_log_exception.called)
+
+    @patch('logging.Logger.warning')
+    @patch('logging.Logger.debug')
+    @patch('logging.Logger.exception')
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.info')
+    def test_load_excludes_file_not_found(self,
+                                          mock_log_info,
+                                          mock_log_error,
+                                          mock_log_exception,
+                                          mock_log_debug,
+                                          mock_log_warning):
+        self.client.containers_list_exclude_config = 'file:///not/existing'
+        input_full_list = ['nova-api', 'neutron-server', 'excluded']
+        full_list = self.client.load_excludes(input_full_list)
+        self.assertEqual(full_list, input_full_list)
+
+        mock_log_warning.assert_has_calls([
+            mock.call('Unable to download containers exclude config at %s, '
+                      'no exclusion',
+                      self.client.containers_list_exclude_config)
+        ])
+
+        self.assertTrue(mock_log_exception.called)
+        self.assertFalse(mock_log_error.called)
+        self.assertFalse(mock_log_info.called)
+        self.assertFalse(mock_log_debug.called)
+
+    @patch('logging.Logger.warning')
+    @patch('logging.Logger.debug')
+    @patch('logging.Logger.exception')
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.info')
+    def test_load_excludes_distro_not_found(self,
+                                            mock_log_info,
+                                            mock_log_error,
+                                            mock_log_exception,
+                                            mock_log_debug,
+                                            mock_log_warning):
+        self.client.distro_name = 'redhat'
+        self.client.distro = 'redhat8'
+        input_full_list = ['nova-api', 'neutron-server', 'excluded']
+        full_list = self.client.load_excludes(input_full_list)
+        self.assertEqual(full_list, input_full_list)
+
+        mock_log_warning.assert_has_calls([
+            mock.call('Unable to find container exclude list for %s', 'redhat8')
+        ])
+
+        self.assertFalse(mock_log_error.called)
+        self.assertFalse(mock_log_info.called)
+        self.assertFalse(mock_log_debug.called)
+        self.assertFalse(mock_log_exception.called)
