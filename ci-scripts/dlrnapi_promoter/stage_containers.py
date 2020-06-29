@@ -9,6 +9,8 @@ import os
 import pprint
 import tempfile
 import shutil
+import yaml
+
 from string import Template
 
 from dlrn_hash import DlrnHash
@@ -108,6 +110,9 @@ class StagingContainers(object):
         self.containers_list_base = \
             self.config.containers['containers_list_base']
 
+        self.containers_list_exclude_config = \
+            self.config.containers['containers_list_exclude_config']
+
         self.containers_list_path = self.config.containers[
             'containers_list_path']
         self.tripleo_commit_sha = self.config.containers['tripleo_commit_sha']
@@ -191,6 +196,8 @@ class StagingContainers(object):
         stage_info = {
             'containers_list_base_url': "file://{}".format(
                 self.containers_list_base),
+            'containers_list_exclude_config': "file://{}".format(
+                self.containers_list_exclude_config),
             'images': self.pushed_images
         }
         return stage_info
@@ -223,6 +230,17 @@ class StagingContainers(object):
                 'image2': self.suffixes[-1],
             })
             containers_file.write(containers_yaml_j2)
+
+        excluded_containers = ['nonexisting', 'excluded']
+        exclude_config = {
+            'exclude_containers': {
+                'master': excluded_containers,
+                'ussuri': excluded_containers,
+                'train': excluded_containers,
+            },
+        }
+        with open(self.containers_list_exclude_config, "w") as exclude_file:
+            exclude_file.write(yaml.safe_dump(exclude_config))
 
     def cleanup_containers(self, containers):
         """
