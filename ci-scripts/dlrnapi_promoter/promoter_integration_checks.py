@@ -94,6 +94,8 @@ def query_container_registry_promotion(stage_info=None, **kwargs):
         no_ppc = stage_info.get('ppc_manifests', True)
         for line in stage_info['containers']['images']:
             name, tag = line.split(":")
+            if 'excluded' in name:
+                continue
             reg_url = "http://{}/v2/{}/manifests/{}".format(
                 registry_target, name, tag
             )

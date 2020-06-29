@@ -249,4 +249,11 @@ class StageConfig(object):
                          _config['containers']['containers_list_base'])
         _config['containers']['containers_list_base'] = containers_list_base
 
+        containers_list_exclude_config = \
+            os.path.join(containers_root,
+                         _config['containers'][
+                             'containers_list_exclude_config'])
+        _config['containers']['containers_list_exclude_config'] = \
+            containers_list_exclude_config
+
         return _config
