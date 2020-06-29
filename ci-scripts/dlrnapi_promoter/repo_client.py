@@ -2,6 +2,7 @@ import csv
 import logging
 import re
 import os
+import yaml
 
 try:
     # Python3 imports
@@ -26,6 +27,9 @@ class RepoClient(object):
         self.root_url = self.config.repo_url
         self.containers_list_base_url = config.containers_list_base_url
         self.containers_list_path = config.containers_list_path
+        self.containers_list_exclude_config = \
+            config.containers_list_exclude_config
+        self.release = config.release
 
     def get_versions_csv(self, dlrn_hash, candidate_label):
         """
@@ -83,7 +87,7 @@ class RepoClient(object):
 
         return commit_sha
 
-    def get_containers_list(self, tripleo_common_commit):
+    def get_containers_list(self, tripleo_common_commit, load_excludes=True):
         """
         Gets a tripleo containers template file from a specific
         tripleo-common commit
@@ -112,5 +116,52 @@ class RepoClient(object):
                                containers_content)
         if not full_list:
             self.log.error("No containers name found in %s", containers_url)
+
+        if load_excludes:
+            full_list = self.load_excludes(full_list)
+
+        return full_list
+
+    def load_excludes(self, full_list):
+        """
+        Filter the list using and exclude list from an exxternal source
+        Tries to download the source from a url and find the correct list for
+        the release. The exclusion is completely optional, so if any error is
+        encountered, a message is logged then the original list is returned
+        :param full_list: the initial full list of containers
+        :return: a list of containers optionally excluding some.
+        """
+        exclude_content_yaml = None
+        exclude_content = None
+        exclude_list = []
+        try:
+            exclude_content_yaml = url.urlopen(
+                self.containers_list_exclude_config).read().decode()
+        except (url.URLError, ValueError) as ex:
+            self.log.warning("Unable to download containers exclude config at "
+                             "%s, no exclusion",
+                             self.containers_list_exclude_config)
+            self.log.exception(ex)
+
+        if exclude_content_yaml:
+            try:
+                exclude_content = yaml.safe_load(exclude_content_yaml)
+            except yaml.YAMLError:
+                self.log.error("Unable to read container exclude config_file")
+
+        if exclude_content:
+            try:
+                exclude_list = exclude_content['exclude_containers'][
+                    self.release]
+            except KeyError:
+                self.log.warning("Unable to find container exclude list for "
+                                 "%s", self.release)
+
+        for name in exclude_list:
+            try:
+                full_list.remove(name)
+                self.log.info("Excluding %s from the containers list", name)
+            except ValueError:
+                self.log.debug("%s not in containers list", name)
 
         return full_list
