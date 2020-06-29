@@ -3,12 +3,15 @@ This file contains classes to stage containers in registry at the moment
 immediately before a promotion.
 """
 
+import copy
 import docker
 import logging
 import os
 import pprint
 import tempfile
 import shutil
+import yaml
+
 from string import Template
 
 from dlrn_hash import DlrnHash
@@ -108,6 +111,9 @@ class StagingContainers(object):
         self.containers_list_base = \
             self.config.containers['containers_list_base']
 
+        self.containers_list_exclude_config = \
+            self.config.containers['containers_list_exclude_config']
+
         self.containers_list_path = self.config.containers[
             'containers_list_path']
         self.tripleo_commit_sha = self.config.containers['tripleo_commit_sha']
@@ -132,6 +138,7 @@ class StagingContainers(object):
         self.distro_name = self.config.main['distro_name']
         self.pushed_images = []
         self.containers_root = self.config.containers['root']
+        self.excluded_containers = ['nonexisting', 'excluded']
 
     def setup(self):
         """
@@ -149,7 +156,15 @@ class StagingContainers(object):
         for arch in ['ppc64le', 'x86_64']:
             tags.append("{}_{}".format(self.candidate_hash.full_hash, arch))
 
-        for image_name in self.suffixes:
+        # Don't push containers that are in the exclude list
+        suffixes = copy.copy(self.suffixes)
+        for excluded in self.excluded_containers:
+            try:
+                suffixes.remove(excluded)
+            except ValueError:
+                self.log.debug("Not excluding container %s", excluded)
+
+        for image_name in suffixes:
             target_image_name = "{}-binary-{}".format(
                 self.distro_name, image_name)
             for tag in tags:
@@ -191,6 +206,8 @@ class StagingContainers(object):
         stage_info = {
             'containers_list_base_url': "file://{}".format(
                 self.containers_list_base),
+            'containers_list_exclude_config': "file://{}".format(
+                self.containers_list_exclude_config),
             'images': self.pushed_images
         }
         return stage_info
@@ -223,6 +240,16 @@ class StagingContainers(object):
                 'image2': self.suffixes[-1],
             })
             containers_file.write(containers_yaml_j2)
+
+        exclude_config = {
+            'exclude_containers': {
+                'master': self.excluded_containers,
+                'ussuri': self.excluded_containers,
+                'train': self.excluded_containers,
+            },
+        }
+        with open(self.containers_list_exclude_config, "w") as exclude_file:
+            exclude_file.write(yaml.safe_dump(exclude_config))
 
     def cleanup_containers(self, containers):
         """
