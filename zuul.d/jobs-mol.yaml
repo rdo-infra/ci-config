@@ -1,0 +1,18 @@
+- job:
+    name: mol-promoter
+    description: Tests promoter deployment role.
+    parent: tox-molecule
+    nodeset: rdo-centos-7
+    vars:
+      # longer -k match avoids accidental inclusion of more than one scenario
+      tox_extra_args: -- -k promoter/molecule.yml
+      tox_environment:
+        # See https://click.palletsprojects.com/en/7.x/python3/
+        LC_ALL: en_US.utf8
+        LANG: en_US.utf8
+    # pre assures instance/tester hostnames resolve
+    pre-run: playbooks/mol/pre.yml
+    # Our run avoids calling revoke-sudo
+    run: playbooks/mol/run.yml
+    # custom post will make reports.html visible in zuul UI
+    post-run: playbooks/molecule-post.yml
