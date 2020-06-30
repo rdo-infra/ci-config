@@ -3,28 +3,24 @@ driver:
   name: delegated
 
 platforms:
-  - name: instance
-    easy_install:
-      - pip
-    environment: &env
-      http_proxy: "{{ lookup('env', 'http_proxy') }}"
-      https_proxy: "{{ lookup('env', 'https_proxy') }}"
+  - name: instance  # must be able to `ssh host`, edit your ~/.ssh/config
+    options:
+      managed: False
 
 provisioner:
   name: ansible
   inventory:
     host_vars:
-      centos7:
+      dict:
         # Our role are usually run as unprivileged user
         # But not this one, this is usually run as root
         #ansible_user: unprivileged
         ansible_user: root
-      rhel8:
 
 scenario:
   test_sequence:
-    - destroy
+    # - destroy
     - create
     - prepare
     - converge
-    - destroy
+    # - destroy
