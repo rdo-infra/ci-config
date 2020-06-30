@@ -1,0 +1,12 @@
+---
+- hosts: all
+  tasks:
+
+    # molecule delegated scenarios assume tester/instance host names are the
+    # the ones used for testing, use of "localhost" being seen as an
+    # anti-pattern which prevents development testing.
+    - name: Assure instance or tester point to 127.0.0.1
+      lineinfile:
+        path: /etc/hosts
+        line: "127.0.0.1 instance tester"
+        state: present
