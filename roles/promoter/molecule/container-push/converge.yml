@@ -43,7 +43,7 @@
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
             python3 \
-            ../../../../../dlrnapi_promoter/stage.py setup --scenes dlrn,registries,containers
+            ../../ci-scripts/dlrnapi_promoter/stage.py setup --scenes dlrn,registries,containers
 
         - name: include stage setup variables
           include_vars:
@@ -58,7 +58,7 @@
 
         - name: Include containers-promote role to test
           include_role:
-            name: ../../../../../container-push/roles/containers-promote
+            name: ../../ci-scripts/container-push/roles/containers-promote
 
         - name: Gather information on containers from registry
           loop: "{{ target_registries | map(attribute='host') | product(stage_info.containers.images) | map('join', '/') | list }}"
@@ -81,7 +81,7 @@
         - name: Teardown
           shell: >
             python3
-            ../../../../../dlrnapi_promoter/stage.py
+            ../../ci-scripts/dlrnapi_promoter/stage.py
             teardown --scenes dlrn,registries,containers
 
 
@@ -114,7 +114,7 @@
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
             python3 \
-            ../../../../../dlrnapi_promoter/stage.py setup \
+            ../../ci-scripts/dlrnapi_promoter/stage.py setup \
             --scenes dlrn,registries,containers --stage-config-file stage-config-secure.yaml
 
         - name: include stage setup variables
@@ -130,7 +130,7 @@
 
         - name: Include containers-promote role to test
           include_role:
-            name: ../../../../../container-push/roles/containers-promote
+            name: ../../ci-scripts/container-push/roles/containers-promote
 
         - name: Check that the containers are pushed correctly to all target registries
           loop: "{{ target_registries | map(attribute='host') | product(stage_info.containers.images) | map('join', '/') | list }}"
@@ -147,7 +147,7 @@
         - name: Teardown
           shell: >
             python3
-            ../../../../../dlrnapi_promoter/stage.py
+            ../../ci-scripts/dlrnapi_promoter/stage.py
             teardown --scenes dlrn,registries,containers
         # the teardown here must not contain the registry_cleanup tag, or it will not clean up properly
         # in the tripleo-common integration test
@@ -187,7 +187,7 @@
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
             python3 \
-            ../../../../../dlrnapi_promoter/stage.py setup --scenes dlrn,registries,containers
+            ../../ci-scripts/dlrnapi_promoter/stage.py setup --scenes dlrn,registries,containers
 
         - name: include stage setup variables
           include_vars:
@@ -202,7 +202,7 @@
 
         - name: Include containers-promote role to test
           include_role:
-            name: ../../../../../container-push/roles/containers-promote
+            name: ../../ci-scripts/container-push/roles/containers-promote
 
         - name: Check that the containers are pushed correctly to all target registries
           loop: "{{ target_registries | map(attribute='host') | product(stage_info.containers.images) | map('join', '/') | list }}"
@@ -262,7 +262,7 @@
         - name: Teardown
           shell: >
             python3
-            ../../../../../dlrnapi_promoter/stage.py
+            ../../ci-scripts/dlrnapi_promoter/stage.py
             teardown --scenes dlrn,registries,containers
         # the teardown here must not contain the registry_cleanup tag, or it will not clean up
         # properly in the tripleo-common integration test
@@ -299,7 +299,7 @@
           shell: |
             # Export the path to the mounted docker socket so all docker client commands will use it
             python3 \
-            ../../../../../dlrnapi_promoter/stage.py setup --scenes dlrn,registries,containers
+            ../../ci-scripts/dlrnapi_promoter/stage.py setup --scenes dlrn,registries,containers
 
         - name: include stage setup variables
           include_vars:
@@ -315,7 +315,7 @@
 
         - name: Include containers-promote role to test
           include_role:
-            name: ../../../../../container-push/roles/containers-promote
+            name: ../../ci-scripts/container-push/roles/containers-promote
 
         - name: Check that the containers are pushed correctly to all target registries
           loop: "{{ target_registries | map(attribute='host') | product(stage_info.containers.images) | map('join', '/') | list }}"
@@ -364,7 +364,7 @@
         - name: Teardown
           shell: >
             python3
-            ../../../../../dlrnapi_promoter/stage.py
+            ../../ci-scripts/dlrnapi_promoter/stage.py
             teardown --scenes dlrn,registries,containers
           tags:
             - registry_cleanup
