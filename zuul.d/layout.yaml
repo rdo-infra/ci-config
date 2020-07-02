@@ -3,11 +3,19 @@
     name: tox-jjb
     run: playbooks/tox-jjb-run.yml
 
+- job:
+    name: tox-json
+    run: playbooks/tox-jsonlint-run.yml
+    files:
+      - ci-scripts/infra-setup/roles/rrcockpit/files/grafana/*.json
+      - zuul.d/layout.yaml
+
 - project:
     templates:
       - jobs-promoter-centos-7-jobs
     check:
       jobs:
+        - tox-json
         - mol-promoter:
             voting: false
         - rdo-tox-molecule-ci-config: &molecule
