@@ -40,7 +40,7 @@ unix:///var/run/docker.sock: Post http://%2Fvar%2Frun%2Fdocker.sock
 
 There is a simiple script included in this repo that will help start up the
 required service container with docker-compose - see
-[development_script.sh](https://github.com/rdo-infra/ci-config/blob/master/ci-scripts/infra-setup/roles/rrcockpit/files/development_script.sh). Running with -s will start up the
+[development_script.sh](https://github.com/rdo-infra/ci-config/blob/master/roles/rrcockpit/files/development_script.sh). Running with -s will start up the
 cockpit:
 
 ```
@@ -109,11 +109,11 @@ have made and saved changes, but before exporting them, git will show there
 have been no changes made to the cockpit.dashboard.json.
 
 Luckily there are scripts included for export and import of the json data. The
-scripts are in the [files/grafana directory](https://github.com/rdo-infra/ci-config/tree/master/ci-scripts/infra-setup/roles/rrcockpit/files/grafana).
+scripts are in the [files/grafana directory](https://github.com/rdo-infra/ci-config/tree/master/roles/rrcockpit/files/grafana).
 
 #### create-api-key.py
 
-First create the required key using [create-api-key.py](https://github.com/rdo-infra/ci-config/blob/master/ci-scripts/infra-setup/roles/rrcockpit/files/grafana/create-api-key.py).
+First create the required key using [create-api-key.py](https://github.com/rdo-infra/ci-config/blob/master/roles/rrcockpit/files/grafana/create-api-key.py).
 
 ```
 ./create-api-key.py --key-name foo > grafana.key
