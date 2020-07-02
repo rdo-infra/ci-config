@@ -3,6 +3,14 @@
     name: tox-jjb
     run: playbooks/tox-jjb-run.yml
 
+- job:
+    name: tox-json
+    parent: openstack-tox
+    vars:
+      tox_envlist: jsonlint
+    files:
+      - ci-scripts/infra-setup/roles/rrcockpit/files/grafana/*.json
+
 - project:
     templates:
       - jobs-promoter-centos-7-jobs
