@@ -45,8 +45,8 @@
     parent: base
     ansible-version: 2.8
     nodeset: rdo-centos-7
-    run: playbooks/staging.yml
-    post-run: playbooks/staging-post.yml
+    run: playbooks/legacy/staging.yml
+    post-run: playbooks/legacy/staging-post.yml
     host-vars:
       primary:
         ansible_user: root
@@ -59,8 +59,8 @@
     parent: base
     ansible-version: 2.8
     nodeset: rdo-centos-7
-    run: playbooks/staging.yml
-    post-run: playbooks/staging-post.yml
+    run: playbooks/legacy/staging.yml
+    post-run: playbooks/legacy/staging-post.yml
     host-vars:
       primary:
         ansible_user: root
@@ -80,9 +80,9 @@
     nodeset: rdo-centos-7
     success-url: "tox/reports.html"
     failure-url: "tox/reports.html"
-    pre-run: playbooks/molecule-delegated-pre.yml
-    run: playbooks/molecule-delegated.yml
-    post-run: playbooks/molecule-post.yml
+    pre-run: playbooks/legacy/molecule-delegated-pre.yml
+    run: playbooks/legacy/molecule-delegated.yml
+    post-run: playbooks/legacy/molecule-post.yml
     vars:
       molecule_test_commands: |
         tox -emolecule_delegated -- roles/promoter/molecule/container-push/molecule.yml
@@ -91,9 +91,9 @@
     name: molecule-tripleo-common-delegated-centos-7
     parent: base
     nodeset: rdo-centos-7
-    pre-run: playbooks/molecule-delegated-pre.yml
-    run: playbooks/molecule-delegated.yml
-    post-run: playbooks/molecule-post.yml
+    pre-run: playbooks/legacy/molecule-delegated-pre.yml
+    run: playbooks/legacy/molecule-delegated.yml
+    post-run: playbooks/legacy/molecule-post.yml
     vars:
       molecule_test_commands: |
         # container-push generates staging containers, skip teardown
@@ -108,9 +108,9 @@
     name: molecule-delegated-promote-images-delegated-centos-7
     parent: base
     nodeset: rdo-centos-7
-    pre-run: playbooks/molecule-delegated-promote-images-pre.yml
-    run: playbooks/molecule-delegated.yml
-    post-run: playbooks/molecule-post.yml
+    pre-run: playbooks/legacy/molecule-delegated-promote-images-pre.yml
+    run: playbooks/legacy/molecule-delegated.yml
+    post-run: playbooks/legacy/molecule-post.yml
     vars:
       molecule_test_commands: |
         molecule test -s promote-images
