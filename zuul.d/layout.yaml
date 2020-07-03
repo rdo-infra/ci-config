@@ -12,7 +12,7 @@
         - mol-get_hash-centos-8
         - mol-promoter:
             voting: false
-        - tox-jjb:
+        - tox-jjb: &jjb
             files:
               - ^jenkins/.*
               - ^requirements.txt
@@ -39,7 +39,8 @@
             files: *pyfiles
     gate:
       jobs:
-        - tox-jjb
+        - tox-jjb:
+            <<: *jjb
         - mol-get_hash-centos-7
         - mol-get_hash-centos-8
         - tox-py27-ci-config:
