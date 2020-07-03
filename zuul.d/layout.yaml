@@ -22,7 +22,7 @@
               - ^zuul.d/layout.yaml
         - rdo-tox-molecule-delegated-centos-8-ci-config:
             <<: *molecule
-        - tox-jjb:
+        - tox-jjb: &jjb
             files:
               - ^jenkins/.*
               - ^requirements.txt
@@ -54,6 +54,7 @@
         - rdo-tox-molecule-delegated-centos-8-ci-config:
             <<: *molecule
         - tox-jjb
+            <<: *jjb
         - tox-py27-ci-config:
             <<: *py27
         - tox-py36-ci-config:
