@@ -540,7 +540,7 @@
                 "datasource":"telegraf",
                 "fontSize":"100%",
                 "gridPos":{
-                    "h":8,
+                    "h":15,
                     "w":24,
                     "x":0,
                     "y":10
@@ -552,7 +552,7 @@
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
-                    "col":7,
+                    "col":2,
                     "desc":true
                 },
                 "styles":[
@@ -792,6 +792,518 @@
                 "type":"table"
             },
             {
+                "columns":[],
+                "datasource":"telegraf",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":8,
+                    "w":24,
+                    "x":0,
+                    "y":25
+                },
+                "hideTimeOverride":false,
+                "id":22,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":2,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Statistics",
+                        "linkUrl":"http://zuul.openstack.org/builds?job_name=${__cell}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "thresholds":[
+                            "A"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job Time ( mean )",
+                        "colorMode":"value",
+                        "colors":[
+                            "#73BF69",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"mean",
+                        "thresholds":[
+                            "10000",
+                            "10800"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"count",
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Success rate",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"sum_count",
+                        "thresholds":[
+                            "80",
+                            "90"
+                        ],
+                        "type":"number",
+                        "unit":"percent"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job Time ( max )",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"max",
+                        "thresholds":[
+                            "10000",
+                            "10800"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Job Time (  aggregate )",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"sum",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Container Prep ( mean)",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"mean_1",
+                        "thresholds":[
+                            "1400",
+                            "1500"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Container Prep (max)",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"max_1",
+                        "thresholds":[
+                            "1400",
+                            "1500"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "job_name"
+                                ],
+                                "type":"tag"
+                            }
+                        ],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"autogen",
+                        "query":"SELECT count(\"result_num\"), mean(\"duration\"), max(\"duration\"), mean(\"container_prep_time_u\"), max(\"container_prep_time_u\"), sum(\"duration\"), sum(\"result_num\")*100/count(\"result_num\") FROM \"autogen\".\"build\" WHERE (\"type\" = 'upstream' AND \"result\" != 'SUCCESS' ) AND $timeFilter GROUP BY \"job_name\"",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"sum"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"FAILED: Jobs Frequency",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":8,
+                    "w":24,
+                    "x":0,
+                    "y":33
+                },
+                "hideTimeOverride":false,
+                "id":23,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":2,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Statistics",
+                        "linkUrl":"http://zuul.openstack.org/builds?job_name=${__cell}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "thresholds":[
+                            "A"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job Time ( mean )",
+                        "colorMode":"value",
+                        "colors":[
+                            "#73BF69",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"mean",
+                        "thresholds":[
+                            "10000",
+                            "10800"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Count",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"count",
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Success rate",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"sum_count",
+                        "thresholds":[
+                            "80",
+                            "90"
+                        ],
+                        "type":"number",
+                        "unit":"percent"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job Time ( max )",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"max",
+                        "thresholds":[
+                            "10000",
+                            "10800"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Job Time (  aggregate )",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"sum",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Container Prep ( mean)",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"mean_1",
+                        "thresholds":[
+                            "1400",
+                            "1500"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Container Prep (max)",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"max_1",
+                        "thresholds":[
+                            "1400",
+                            "1500"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "job_name"
+                                ],
+                                "type":"tag"
+                            }
+                        ],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"autogen",
+                        "query":"SELECT count(\"result_num\"), mean(\"duration\"), max(\"duration\"), mean(\"container_prep_time_u\"), max(\"container_prep_time_u\"), sum(\"duration\"), sum(\"result_num\")*100/count(\"result_num\") FROM \"autogen\".\"build\" WHERE (\"type\" = 'upstream' AND \"result\" != 'SUCCESS' ) AND $timeFilter GROUP BY \"project\"",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"sum"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"FAILED: Jobs Frequency by Project",
+                "transform":"table",
+                "type":"table"
+            },
+            {
                 "aliasColors":{},
                 "bars":true,
                 "dashLength":10,
@@ -802,7 +1314,7 @@
                     "h":9,
                     "w":24,
                     "x":0,
-                    "y":18
+                    "y":41
                 },
                 "id":11,
                 "legend":{
@@ -912,7 +1424,7 @@
                     "h":9,
                     "w":24,
                     "x":0,
-                    "y":27
+                    "y":50
                 },
                 "id":12,
                 "legend":{
@@ -1025,7 +1537,7 @@
                     "h":9,
                     "w":24,
                     "x":0,
-                    "y":36
+                    "y":59
                 },
                 "id":2,
                 "legend":{
@@ -1156,7 +1668,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":45
+                    "y":68
                 },
                 "id":3,
                 "legend":{
@@ -1286,7 +1798,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":53
+                    "y":76
                 },
                 "id":18,
                 "legend":{
@@ -1416,7 +1928,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":61
+                    "y":84
                 },
                 "id":19,
                 "legend":{
@@ -1546,7 +2058,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":69
+                    "y":92
                 },
                 "id":17,
                 "legend":{
@@ -1676,7 +2188,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":77
+                    "y":100
                 },
                 "id":20,
                 "interval":"",
@@ -1798,7 +2310,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":85
+                    "y":108
                 },
                 "id":21,
                 "interval":"",
@@ -1956,7 +2468,7 @@
                     "h":9,
                     "w":24,
                     "x":0,
-                    "y":93
+                    "y":116
                 },
                 "id":16,
                 "legend":{
