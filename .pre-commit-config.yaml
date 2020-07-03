@@ -3,6 +3,13 @@ default_language_version:
   python: python3
 minimum_pre_commit_version: "1.14.0"
 repos:
+  - repo: local
+    hooks:
+      - id: jsonlint
+        name: jsonlint
+        entry: jsonlint
+        language: node
+        files: '^.*\.json$'
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.0.1
     hooks:
@@ -14,6 +21,7 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-merge-conflict
       - id: debug-statements
+      - id: check-json
       - id: check-yaml
         files: .*\.(yaml|yml)$
         # https://github.com/pre-commit/pre-commit-hooks/issues/273
