@@ -10135,6 +10135,571 @@
                 "type":"row"
             },
             {
+                "aliasColors":{},
+                "breakPoint":"100%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "fontSize":"80%",
+                "format":"short",
+                "gridPos":{
+                    "h":7,
+                    "w":5,
+                    "x":0,
+                    "y":160
+                },
+                "id":463,
+                "interval":null,
+                "legend":{
+                    "percentage":true,
+                    "percentageDecimals":null,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"Under graph",
+                "links":[],
+                "maxDataPoints":1,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"pipeline\"='periodic' AND \"job_name\" =~ /periodic-tripleo-ci-reproducer.*/ AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"pipeline\"='periodic' AND \"job_name\" =~ /periodic-tripleo-ci-reproducer.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"periodic-tripleo-ci-reproducer",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"100%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "fontSize":"80%",
+                "format":"short",
+                "gridPos":{
+                    "h":7,
+                    "w":5,
+                    "x":5,
+                    "y":160
+                },
+                "id":464,
+                "interval":null,
+                "legend":{
+                    "percentage":true,
+                    "percentageDecimals":null,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"Under graph",
+                "links":[],
+                "maxDataPoints":1,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"pipeline\"='periodic' AND \"job_name\" =~ /periodic-rdo-tox.*/ AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"pipeline\"='periodic' AND \"job_name\" =~ /periodic-rdo-tox.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"periodic-rdo-tox",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"100%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "fontSize":"80%",
+                "format":"short",
+                "gridPos":{
+                    "h":7,
+                    "w":4,
+                    "x":10,
+                    "y":160
+                },
+                "id":465,
+                "interval":null,
+                "legend":{
+                    "percentage":true,
+                    "percentageDecimals":null,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"Under graph",
+                "links":[],
+                "maxDataPoints":1,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"pipeline\"='periodic' AND \"job_name\" =~ /periodic-tox.*/ AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"pipeline\"='periodic' AND \"job_name\" =~ /periodic-tox.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"periodic-tox",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"100%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "fontSize":"80%",
+                "format":"short",
+                "gridPos":{
+                    "h":7,
+                    "w":5,
+                    "x":14,
+                    "y":160
+                },
+                "id":466,
+                "interval":null,
+                "legend":{
+                    "percentage":true,
+                    "percentageDecimals":null,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"Under graph",
+                "links":[],
+                "maxDataPoints":1,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"pipeline\"='periodic' AND \"job_name\" =~ /periodic-tripleo-ci-promotion.*/ AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"pipeline\"='periodic' AND \"job_name\" =~  /periodic-tripleo-ci-promotion.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"Promoter:  periodic-tripleo-ci-promotion ",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"100%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "fontSize":"80%",
+                "format":"short",
+                "gridPos":{
+                    "h":7,
+                    "w":5,
+                    "x":19,
+                    "y":160
+                },
+                "id":467,
+                "interval":null,
+                "legend":{
+                    "percentage":true,
+                    "percentageDecimals":null,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"Under graph",
+                "links":[],
+                "maxDataPoints":1,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"pipeline\"='periodic' AND \"job_name\" =~ /periodic-molecule.*/ AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"pipeline\"='periodic' AND \"job_name\" =~  /periodic-molecule.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"Promoter:  periodic-molecule",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
                 "columns":[],
                 "datasource":"telegraf",
                 "fontSize":"100%",
@@ -10142,7 +10707,7 @@
                     "h":5,
                     "w":24,
                     "x":0,
-                    "y":160
+                    "y":167
                 },
                 "id":381,
                 "links":[],
@@ -10486,12 +11051,902 @@
                 "type":"table"
             },
             {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"tox jobs running in periodic:\n\nhttps://review.rdoproject.org/zuul/builds?pipeline=periodic-ci-config-molecule-python",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":5,
+                    "w":24,
+                    "x":0,
+                    "y":172
+                },
+                "id":461,
+                "links":[
+                    {
+                        "targetBlank":true,
+                        "type":"absolute",
+                        "url":"https://review.rdoproject.org/zuul/builds?pipeline=periodic-ci-config-molecule-python"
+                    }
+                ],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Reason",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"sova_reason",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"log_link\", \"duration\", \"result\", \"result_num\", \"sova_reason\" FROM \"build\" WHERE (\"result\" != 'SKIPPED' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /periodic-rdo-tox.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "sova_reason"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"project",
+                                "operator":"=",
+                                "value":"rdo-infra/ansible-role-tripleo-ci-reproducer"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-24hr"
+                            }
+                        ]
+                    },
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"log_link\", \"duration\", \"result\", \"result_num\", \"sova_reason\" FROM \"build\" WHERE (\"result\" != 'SKIPPED' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /periodic-tox.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "sova_reason"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"project",
+                                "operator":"=",
+                                "value":"rdo-infra/ansible-role-tripleo-ci-reproducer"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-24hr"
+                            }
+                        ]
+                    }
+                ],
+                "title":"CI-Config Periodic - Tox",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"Promoter check jobs running in periodic:\n\nhttps://review.rdoproject.org/zuul/builds?pipeline=periodic-ci-config-molecule-python",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":5,
+                    "w":24,
+                    "x":0,
+                    "y":177
+                },
+                "id":460,
+                "links":[
+                    {
+                        "targetBlank":true,
+                        "type":"absolute",
+                        "url":"https://review.rdoproject.org/zuul/builds?pipeline=periodic-ci-config-molecule-python"
+                    }
+                ],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Reason",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"sova_reason",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"log_link\", \"duration\", \"result\", \"result_num\", \"sova_reason\" FROM \"build\" WHERE (\"result\" != 'SKIPPED' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /periodic-tripleo-ci-promotion.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "sova_reason"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"project",
+                                "operator":"=",
+                                "value":"rdo-infra/ansible-role-tripleo-ci-reproducer"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-24hr"
+                            }
+                        ]
+                    },
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"log_link\", \"duration\", \"result\", \"result_num\", \"sova_reason\" FROM \"build\" WHERE (\"result\" != 'SKIPPED' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /periodic-molecule.*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "sova_reason"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"project",
+                                "operator":"=",
+                                "value":"rdo-infra/ansible-role-tripleo-ci-reproducer"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"openstack-periodic-24hr"
+                            }
+                        ]
+                    }
+                ],
+                "title":"CI-Config Periodic - Promoter",
+                "transform":"table",
+                "type":"table"
+            },
+            {
                 "collapsed":false,
                 "gridPos":{
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":165
+                    "y":182
                 },
                 "id":140,
                 "panels":[],
@@ -10507,7 +11962,7 @@
                     "h":10,
                     "w":12,
                     "x":0,
-                    "y":166
+                    "y":183
                 },
                 "id":242,
                 "links":[
@@ -10643,7 +12098,7 @@
                     "h":10,
                     "w":12,
                     "x":12,
-                    "y":166
+                    "y":183
                 },
                 "id":155,
                 "links":[
@@ -10780,7 +12235,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":176
+                    "y":193
                 },
                 "id":345,
                 "links":[
@@ -10916,7 +12371,7 @@
                     "h":8,
                     "w":12,
                     "x":12,
-                    "y":176
+                    "y":193
                 },
                 "id":322,
                 "links":[
@@ -11051,7 +12506,7 @@
                     "h":7,
                     "w":4,
                     "x":0,
-                    "y":184
+                    "y":201
                 },
                 "id":351,
                 "links":[
@@ -11136,7 +12591,7 @@
                     "h":7,
                     "w":4,
                     "x":4,
-                    "y":184
+                    "y":201
                 },
                 "id":356,
                 "links":[
@@ -11221,7 +12676,7 @@
                     "h":7,
                     "w":4,
                     "x":8,
-                    "y":184
+                    "y":201
                 },
                 "id":357,
                 "links":[
@@ -11307,7 +12762,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":184
+                    "y":201
                 },
                 "id":358,
                 "links":[
@@ -11440,7 +12895,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":191
+                    "y":208
                 },
                 "id":340,
                 "panels":[
@@ -11654,7 +13109,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":192
+                    "y":209
                 },
                 "id":51,
                 "panels":[],
@@ -11672,7 +13127,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":193
+                    "y":210
                 },
                 "hideTimeOverride":true,
                 "id":459,
@@ -11907,7 +13362,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":200
+                    "y":217
                 },
                 "hideTimeOverride":true,
                 "id":307,
@@ -12139,7 +13594,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":207
+                    "y":224
                 },
                 "id":317,
                 "legend":{
@@ -12391,7 +13846,7 @@
                     "h":6,
                     "w":4,
                     "x":0,
-                    "y":213
+                    "y":230
                 },
                 "id":71,
                 "legend":{
@@ -12563,7 +14018,7 @@
                     "h":6,
                     "w":4,
                     "x":4,
-                    "y":213
+                    "y":230
                 },
                 "id":72,
                 "legend":{
@@ -12730,7 +14185,7 @@
                     "h":6,
                     "w":16,
                     "x":8,
-                    "y":213
+                    "y":230
                 },
                 "id":55,
                 "legend":{
@@ -12948,7 +14403,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":219
+                    "y":236
                 },
                 "id":79,
                 "legend":{
@@ -13146,7 +14601,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":219
+                    "y":236
                 },
                 "id":80,
                 "legend":{
@@ -13333,7 +14788,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":225
+                    "y":242
                 },
                 "id":398,
                 "legend":{
@@ -13505,7 +14960,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":225
+                    "y":242
                 },
                 "id":399,
                 "legend":{
@@ -13628,7 +15083,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":231
+                    "y":248
                 },
                 "id":414,
                 "panels":[
@@ -14332,7 +15787,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":232
+                    "y":249
                 },
                 "id":4,
                 "panels":[],
@@ -14350,7 +15805,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":233
+                    "y":250
                 },
                 "id":209,
                 "legend":{
@@ -14468,7 +15923,7 @@
                     "h":9,
                     "w":12,
                     "x":0,
-                    "y":241
+                    "y":258
                 },
                 "hideTimeOverride":true,
                 "id":196,
@@ -14604,7 +16059,7 @@
                     "h":9,
                     "w":12,
                     "x":12,
-                    "y":241
+                    "y":258
                 },
                 "hideTimeOverride":true,
                 "id":194,
@@ -14706,7 +16161,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":250
+                    "y":267
                 },
                 "id":173,
                 "panels":[],
@@ -14724,7 +16179,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":251
+                    "y":268
                 },
                 "id":175,
                 "legend":{
@@ -14899,7 +16354,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":251
+                    "y":268
                 },
                 "id":177,
                 "legend":{
@@ -15162,7 +16617,7 @@
                     "h":7,
                     "w":12,
                     "x":0,
-                    "y":257
+                    "y":274
                 },
                 "id":179,
                 "legend":{
@@ -15523,7 +16978,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":257
+                    "y":274
                 },
                 "id":181,
                 "legend":{
@@ -15684,7 +17139,7 @@
                     "h":6,
                     "w":7,
                     "x":0,
-                    "y":264
+                    "y":281
                 },
                 "id":183,
                 "legend":{
@@ -15799,7 +17254,7 @@
                     "h":6,
                     "w":9,
                     "x":7,
-                    "y":264
+                    "y":281
                 },
                 "id":185,
                 "legend":{
@@ -15914,7 +17369,7 @@
                     "h":6,
                     "w":8,
                     "x":16,
-                    "y":264
+                    "y":281
                 },
                 "id":187,
                 "legend":{
@@ -16069,7 +17524,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":270
+                    "y":287
                 },
                 "id":364,
                 "legend":{
