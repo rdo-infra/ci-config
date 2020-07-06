@@ -1,0 +1,21 @@
+---
+- hosts: instance
+  tasks:
+
+    - name: Include promoter role defaults
+      include_vars: "{{ playbook_dir }}/../../ci-scripts/infra-setup/roles/promoter/defaults/main.yml"
+
+    - name: Setup test virtualenv
+      pip:
+        requirements: "{{ ci_config_remote_src_dir }}/test-requirements.txt"
+        virtualenv: "/home/{{ promoter_user }}/promoter_venv"
+        virtualenv_python: python3
+
+    - name: Provision staging promoter
+      block:
+        - name: launch staging setup scripts
+          shell: |
+            source /home/{{ promoter_user }}/promoter_venv/bin/activate
+            /home/{{ promoter_user }}/promoter_venv/bin/python3 \
+                {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/stage.py \
+                    setup --scenes dlrn,overcloud_images
