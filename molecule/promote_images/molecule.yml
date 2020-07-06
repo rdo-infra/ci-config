@@ -1,0 +1,29 @@
+---
+driver:
+  name: delegated
+
+platforms:
+  - name: instance
+    options:
+      managed: False
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      fact_caching: jsonfile
+      fact_caching_connection: /tmp/molecule/facts
+  inventory:
+    host_vars:
+      instance:
+        ansible_user: root
+        ansible_connection: ssh
+        promoter_user: centos
+        promoter_virtualenv: promoter_venv
+
+scenario:
+  test_sequence:
+    - prepare
+    - converge
+    - verify
+    - cleanup

@@ -1,0 +1,14 @@
+---
+- hosts: instance
+  tasks:
+
+    # find a way to include setup staging promoter
+    #- include_tasks: ../promoter/prepare.yml
+    #- include_tasks: ../promoter/converge.yml
+
+    - name: launch staging setup scripts
+      shell: |
+        source /home/{{ promoter_user }}/promoter_venv/bin/activate
+        /home/{{ promoter_user }}/promoter_venv/bin/python3 \
+            {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/stage.py \
+                setup --scenes dlrn,overcloud_images
