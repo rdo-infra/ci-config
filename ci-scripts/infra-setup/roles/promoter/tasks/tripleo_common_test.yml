@@ -105,13 +105,13 @@
     - name: copy staging_overcloud_containers.yaml.j2
       copy:
         src: "/home/{{ promoter_user }}/staging_overcloud_containers.yaml.j2"
-        dest: "/home/{{ promoter_user }}/promoter_venv/share/tripleo-common/container-images/overcloud_containers.yaml.j2"
+        dest: "/home/{{ promoter_user }}/{{ promoter_virtualenv }}/share/tripleo-common/container-images/overcloud_containers.yaml.j2"
         remote_src: yes
 
     # image prepare pulls from promote_registry and pushes to undercloud_registry
     - name: run container image prepare
       shell: |
-        source /home/{{ promoter_user }}/promoter_venv/bin/activate
+        source /home/{{ promoter_user }}/{{ promoter_virtualenv }}/bin/activate
         openstack tripleo container image prepare --verbose \
             -e /home/{{ promoter_user }}/staging-containers-prepare-parameter.yaml \
             --output-env-file /home/{{ promoter_user }}/containers-default-parameters.yaml \

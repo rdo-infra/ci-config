@@ -1,0 +1,30 @@
+---
+- hosts: instance
+  tasks:
+    - include_tasks: functional_tests.yml
+      tags:
+        - functional
+
+    #TODO(rfolco): moved from converge.yml
+    # staging setup AFTER provisioning ? and.. AFTER functional_tests?
+    # provisioning is calling (full) promoter role, isn't it enough to set
+    # promoter up ?
+    # why calling setup_staging below? why calling after functional_tests?
+    #
+    #- name: Stage setup
+    #  include_role:
+    #    name: promoter
+    #    tasks_from: setup_staging
+    #  tags:
+    #    - staging
+
+    #- name: Test Staging Setup
+    #  debug:
+    #    msg: |
+    #      Not Implemented. This part should test that all ansible elements
+    #      in staging setup are working correctly
+    #      1) check that dlrn API is up
+    #      2) check that registries are up
+    #      3) check that base image is created
+    #  tags:
+    #    - staging
