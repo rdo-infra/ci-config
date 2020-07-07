@@ -1,0 +1,59 @@
+---
+- hosts: all
+  tasks:
+    - name: install development tools
+      become: yes
+      yum:
+        name: '@Development tools'
+        state: present
+
+    - name: set local src dir for ci-config  # noqa 305
+      shell: "pwd"
+      args:
+        chdir: "{{ playbook_dir }}/../../../../../../"
+      register: ci_config_dir
+      delegate_to: localhost
+      changed_when: false
+
+    - name: set vars for molecule env
+      set_fact:
+        ci_config_local_src_dir: "{{ ci_config_dir.stdout }}"
+        molecule_testing: true
+        setup_staging: true
+
+    - name: Stat for local registry secrets file
+      stat:
+        path: "{{ local_path_registry_secret }}"
+      register: registry_secret_local
+      delegate_to: localhost
+      tags:
+        - provisioning
+    #
+    # Create credentials (MOLECULE)
+    #
+    - name: Inject registry_secret_local
+      copy:
+        content: export REGISTRY_PASSWORD='registry_password00'
+        dest: "{{ local_path_registry_secret }}"
+      delegate_to: localhost
+
+    - name: Inject dlrnapi_secret_local
+      copy:
+        content: export DLRNAPI_PASSWORD='test'
+        dest: "{{ local_path_dlrnapi_secret }}"
+      delegate_to: localhost
+      tags:
+        - provisioning
+
+    - name: save fake static uploader key locally
+      copy:
+        content: |
+            -----BEGIN RSA PRIVATE KEY-----
+            MIIEowIBAAKCAQEAvJ5+qg0sA9rHFouk+tQeBq+FDDqHwzLTd1oyMFl+47Fp89jg
+            6njfyBmJEyIeGA/AA1njMHDfHC1IWTN/9cgnxcN//gwtRVIsnDRMG8ylwqJNuKKa
+            av7Xnxcu6N8PEYRjzRP8nMsCXVev+zi6Y8RdNsH9AOl/S4x+ms2aEs7b7ePI9pgK
+            jvrxlKqyO0KVNXXk61s4SBMG+bcEjTNnzzCy5PiV9hlMuw5YERuVV5dMB6rskN5N
+            o1O4bc102og1YzIwPAsqp0Hul2o9sKWl9CHcjIhLdx0U9hI2xVqF46+jG/hLlAX6
+            kZ8rryxA4jSlxeIP9rDGR5lvwk7H9a7C0mdzLQIDAQABAoIBAQC34/YtqEXfRC6R
+            ZnfkK2VSs1CNiYrO3gCY/hCsXrR9HHzlxe4R6uKR3YNsafjZEJHtMndyxLhgai18
+            +d6pKwjLoDxq3EhOqzze1YXWHIEG7uHDPpQ5+FcTvbB4TPAN7fq29+NyoeGeS11B
