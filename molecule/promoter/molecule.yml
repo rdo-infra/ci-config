@@ -9,9 +9,29 @@ platforms:
 
 provisioner:
   name: ansible
+  config_options:
+    defaults:
+      fact_caching: jsonfile
+      fact_caching_connection: /tmp/molecule/facts
+  inventory:
+    host_vars:
+      instance:
+        # constants and default vars used across scenarios
+        # avoids including vars from defaults/main.yml everywhere
+        molecule_testing: true
+        setup_staging: true
+        promoter_user: centos
+        promoter_virtualenv: promoter_venv
+        local_path_dlrnapi_secret: /tmp/dlrnapi_secret
+        local_path_registry_secret: /tmp/registry_secret
+        local_path_uploader_key: /tmp/uploader_key
+        remote_path_dlrnapi_secret: /home/centos/dlrnapi_secret
+        remote_path_registry_secret: /home/centos/registry_secret
+        remote_path_uploader_key: /home/centos/.ssh/id_rsa
 
 scenario:
   test_sequence:
-    - create
     - prepare
     - converge
+    - verify
+    - cleanup
