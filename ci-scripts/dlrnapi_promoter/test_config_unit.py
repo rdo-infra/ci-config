@@ -187,7 +187,7 @@ class TestGetDlrnApi(ConfigBase):
         mock_log_debug.assert_has_calls([
             mock.call("Assigning api_url %s", expected_url)
         ])
-        mock_log_error.assert_not_called()
+        self.assertFalse(mock_log_error.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
@@ -216,7 +216,7 @@ class TestGetDlrnApi(ConfigBase):
         mock_log_error.assert_has_calls([
             mock.call("No valid API url found")
         ])
-        mock_log_debug.assert_not_called()
+        self.assertFalse(mock_log_debug.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
@@ -242,7 +242,7 @@ class TestGetDlrnApi(ConfigBase):
         mock_log_debug.assert_has_calls([
             mock.call("Assigning api_url %s", expected_url)
         ])
-        mock_log_error.assert_not_called()
+        self.assertFalse(mock_log_error.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
@@ -268,7 +268,7 @@ class TestGetDlrnApi(ConfigBase):
         mock_log_debug.assert_has_calls([
             mock.call("Assigning api_url %s", expected_url)
         ])
-        mock_log_error.assert_not_called()
+        self.assertFalse(mock_log_error.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
@@ -294,7 +294,7 @@ class TestGetDlrnApi(ConfigBase):
         mock_log_debug.assert_has_calls([
             mock.call("Assigning api_url %s", expected_url)
         ])
-        mock_log_error.assert_not_called()
+        self.assertFalse(mock_log_error.called)
 
 
 class TestSanityChecks(ConfigBase):
@@ -333,7 +333,7 @@ class TestSanityChecks(ConfigBase):
             mock.call('Missing parameter in configuration file: username. '
                       'Using default value: %s', "ciuser")
         ], any_order=True)
-        mock_log_error.assert_not_called()
+        self.assertFalse(mock_log_error.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.warning')

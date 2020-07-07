@@ -53,10 +53,10 @@ class TestPrepareExtraVars(ConfigSetup):
         get_versions_mock.assert_has_calls([
             mock.call(self.dlrn_hash_commitdistro, "tripleo-ci-testing")
         ])
-        get_commit_mock.assert_not_called()
-        get_containers_mock.assert_not_called()
-        mock_log_debug.assert_not_called()
-        mock_log_info.assert_not_called()
+        self.assertFalse(get_commit_mock.called)
+        self.assertFalse(get_containers_mock.called)
+        self.assertFalse(mock_log_debug.called)
+        self.assertFalse(mock_log_info.called)
         mock_log_error.assert_has_calls([
             mock.call("No versions.csv found")
         ])
@@ -87,9 +87,9 @@ class TestPrepareExtraVars(ConfigSetup):
         get_commit_mock.assert_has_calls([
             mock.call("reader", "openstack-tripleo-common")
         ])
-        get_containers_mock.assert_not_called()
-        mock_log_debug.assert_not_called()
-        mock_log_info.assert_not_called()
+        self.assertFalse(get_containers_mock.called)
+        self.assertFalse(mock_log_debug.called)
+        self.assertFalse(mock_log_info.called)
         mock_log_error.assert_has_calls([
             mock.call("Versions.csv does not contain tripleo-common commit")
         ])
@@ -124,8 +124,8 @@ class TestPrepareExtraVars(ConfigSetup):
         get_containers_mock.assert_has_calls([
             mock.call("abc")
         ])
-        mock_log_debug.assert_not_called()
-        mock_log_info.assert_not_called()
+        self.assertFalse(mock_log_debug.called)
+        self.assertFalse(mock_log_info.called)
         mock_log_error.assert_has_calls([
             mock.call("Containers list is empty")
         ])
@@ -187,7 +187,7 @@ class TestPrepareExtraVars(ConfigSetup):
         mock_log_info.assert_has_calls([
             mock.call("Passing extra vars to playbook: %s", mock.ANY)
         ])
-        mock_log_error.assert_not_called()
+        self.assertFalse(mock_log_error.called)
 
 
 class TestPromote(ConfigSetup):
