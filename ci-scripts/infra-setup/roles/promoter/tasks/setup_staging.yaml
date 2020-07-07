@@ -16,7 +16,6 @@
     name: "@Development tools"
     state: present
 
-
 # Same as above, the test requirements are usually run only by tox
 # so when we are testing, it's nice to have them in the same virtual env
 - name: install test requirements
@@ -24,18 +23,17 @@
   become_user: "{{ promoter_user }}"
   pip:
     requirements: "{{ ci_config_remote_src_dir }}/test-requirements.txt"
-    virtualenv: "/home/{{ promoter_user }}/promoter_venv"
-    extra_args: -chttps://releases.openstack.org/constraints/upper/train
+    virtualenv: "/home/{{ promoter_user }}/{{ promoter_virtualenv }}"
   tags:
     - staging_prepare
 
 # This block is the setup / run
-- become: true
+- name: launch staging setup scripts
+  become: true
   become_user: "{{ promoter_user }}"
-  name: launch staging setup scripts
   changed_when: false
   shell: |
-    source ~/promoter_venv/bin/activate
+    source /home/{{ promoter_user/{{ promoter_virtualenv }}/bin/activate
     # Export the path to the mounted docker socket so all docker client commands will use it
     if [ -S /tmp/docker.sock ]; then
         export DOCKER_HOST=unix:///tmp/docker.sock

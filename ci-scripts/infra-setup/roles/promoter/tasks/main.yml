@@ -4,9 +4,11 @@
 # - STANDALONE (production promoter server in real host or vm)
 #   should be run only after merging tested code, to actually provision the real server
 #   with continuous deployment afterwards. RUNS THE ROLE AS ROOT
-# - ZUUL ci job in staging promoter (nodepool node)
+#
+# - ZUUL (ci job in staging promoter spawned by nodepool)
 #   watch the test in your ci job
-# - MOLECULE testing (local docker driver)
+#
+# - MOLECULE (local testing)
 #   test and iterate over it before submitting changes
 #   This environment should be taken into consideration, but major
 #   task for it should be added in the molecule playbooks directly
@@ -14,23 +16,11 @@
 #
 #   ALL refers to all environments above
 
-
-# This part of the role is continuously called by the production server
-# as a mean for continuous delivery and code update in the server.
-# The call in production is currently done by a root crontab installed a
-# intance creation time by cloud-init.
-# This can be changed in the future, but currently this role *MUST* be run
-# as root especially in the tests, to mimic what's happening in production
-
-- name: Check user id
-  command: id -u
-  register: user_id
-  changed_when: false
-
-- name: fail if this role is not run as root
-  fail:
-    msg: This role must be run as root.
-  when: user_id.stdout != '0'
+# promoter is the user for all envs
+- name: Ensure promoter user exists
+  become: true
+  user:
+    name: "{{ promoter_user }}"
 
 #
 # Repos and packages
@@ -81,6 +71,8 @@
     - name: Install required packages
       yum:
         name:
+          - python3
+          - python3-devel
           - logrotate
           - httpd
           - python-virtualenv
@@ -157,7 +149,6 @@
       register: docker_config
 
 - name: Reload, enable and start docker
-  when: not molecule_testing
   become: true
   block:
     - name: Reload docker if config was changed
@@ -172,42 +163,14 @@
         state: started
         enabled: yes
 
-# Molecule docker driver it's the default and easiest provisioner to use
-# unfortunately it has some limitations: you can't run docker daemon in it.
-# so to test docker client actions we need to trick the client and the container itself.
-# we are mounting the docker socket from the host to the container, but in a different
-# location than default (it's a long story).
-# So with the docker daemon mounted, the docker client can create containers in the host.
-# Here we are getting the group from the socket file in the host, and adding the group to
-# the user that is going to use the socket
-
-- name: set default docker socket
-  set_fact:
-    docker_socket: /tmp/docker.sock
-
-- name: Stat docker on docker socket
-  stat:
-    path: "{{ docker_socket }}"
-  register: docker_socket_stat
-
-- name: Adjust docker on docker setup
-  when: not docker_socket_stat.stat.exists
-  block:
-    - name: set default docker socket
-      set_fact:
-        docker_socket: /var/run/docker.sock
-
 - name: Stat docker socket again
+  become: true
   stat:
-    path: "{{ docker_socket }}"
+    path: "/var/run/docker.sock"
   register: docker_socket_stat
-
-- name: Fail if no docker socket still
-  when: not docker_socket_stat.stat.exists
-  fail:
-    msg: No docker socket
 
 - name: Find out docker group name
+  become: true
   shell: |
     set -euo pipefail
     getent group {{ docker_socket_stat.stat.gid }} | cut -d":" -f1 | head -1
@@ -216,6 +179,7 @@
   failed_when: false
 
 - when: not docker_group.stdout
+  become: true
   block:
     - name: Create docker group
       group:
@@ -229,11 +193,13 @@
           stdout: "docker_{{ docker_socket_stat.stat.gid }}"
 
 - name: List groups for user
+  become: true
   command: "groups {{ promoter_user }}"
   register: user_groups
   changed_when: false
 
 - name: Check if user is in docker group
+  become: true
   when: "docker_group.stdout not in user_groups.stdout"
   block:
     - name: Add user to docker group
@@ -247,6 +213,8 @@
       meta: reset_connection
 
 - name: Create user config dir
+  become: true
+  become_user: "{{ promoter_user }}"
   file:
     path: /home/{{ promoter_user }}/.docker/
     owner: "{{ promoter_user }}"
@@ -268,11 +236,15 @@
 #
 
 - name: Fix home directory permissions
+  become: true
+  become_user: "{{ promoter_user }}"
   file:
     path: "/home/{{ promoter_user }}"
     mode: 0755
 
 - name: Create a directory for the promoter logs
+  become: true
+  become_user: "{{ promoter_user }}"
   file:
     path: "/home/{{ promoter_user }}/promoter_logs"
     state: directory
@@ -353,6 +325,8 @@
 # Credential prepare
 #
 - name: Make sure .ssh dir exists
+  become: true
+  become_user: "{{ promoter_user }}"
   file:
     path: "/home/{{ promoter_user }}/.ssh"
     state: directory
@@ -372,6 +346,7 @@
 
 
 - name: Check if secrets are in root
+  become: true
   stat:
     path: "{{ item }}"
   loop:
@@ -381,6 +356,8 @@
   register: root_result
 
 - name: Check if secrets are in user directory place
+  become: true
+  become_user: "{{ promoter_user }}"
   stat:
     path: "{{ item }}"
   loop:
@@ -395,6 +372,7 @@
   when: item.0.stat.exists|bool and not item.1.stat.exists|bool
 
 - name: Copy root credentials to user directory if need
+  become: true
   copy:
     src: "{{ item.0.item }}"
     dest: "{{ item.1.item }}"
@@ -404,6 +382,7 @@
 
 - block:
     - name: Fix owners of the files
+      become: true
       file:
         path: '{{ item }}'
         mode: '0600'
@@ -420,6 +399,22 @@
 #
 # Ci-config repo handling
 #
+
+- name: get local repo src dir
+  args:
+    chdir: "{{ role_path }}/../../../../."
+  command: pwd
+  delegate_to: localhost
+  register: local_repo
+
+- name: set ci-config local src dir
+  set_fact:
+    ci_config_local_src_dir: "{{ local_repo.stdout }}"
+
+- name: print local repo src dir
+  debug:
+    msg: "{{ ci_config_local_src_dir }}"
+
 - name: Check for presence of repo on local machine
   become: false
   stat:
@@ -436,26 +431,25 @@
 # Clone ci-config repo
 #
 - name: Understand from where to take the ci-config
-  become: true
-  become_user: "{{ promoter_user }}"
   block:
 
+    # clone from controller ci_config_local_src_dir to remote instance at /tmp
     - name: clone promoter dir from local dir if present
-      synchronize:
-        src: "{{ ci_config_local_src_dir }}/"
-        dest: "{{ ci_config_remote_src_dir }}"
-        rsync_opts:
-            - "--no-motd"
-            - "--exclude=.tox"
+      become: false
+      shell: |
+        rsync --archive --no-motd --exclude=.tox {{ ci_config_local_src_dir }}/ \
+          {{ ansible_user }}@instance:/tmp/ci-config/
+      delegate_to: localhost
       when: ci_config_local_src_dir_stat.stat.exists
 
-    - name: When dir is not present on the node, or locally, clone from git
-      git:  # noqa 401
-        repo: 'https://review.rdoproject.org/r/p/rdo-infra/ci-config.git'
-        dest: "{{ ci_config_remote_src_dir }}"
-      when:
-        - not ci_config_local_src_dir_stat.stat.exists
-        - not ci_config_remote_src_dir_stat.stat.exists
+    # sync from /tmp to ci_config_remote_src_dir
+    - name: clone promoter dir from tmp
+      become: true
+      shell: |
+        rsync --archive --no-motd --exclude=.tox \
+          --chown={{ promoter_user }}:{{ promoter_user }} /tmp/ci-config/ \
+          {{ ci_config_remote_src_dir }}/
+      when: ci_config_local_src_dir_stat.stat.exists
 
 #
 # Promoter preparation
@@ -466,7 +460,8 @@
   become_user: "{{ promoter_user }}"
   pip:
     requirements: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/requirements.txt"
-    virtualenv: ~/promoter_venv
+    virtualenv: "/home/{{ promoter_user }}/{{ promoter_virtualenv }}"
+    virtualenv_python: /usr/bin/python3
 
 - name: Render promoter service script
   template:
