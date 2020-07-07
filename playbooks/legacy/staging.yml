@@ -84,7 +84,6 @@
         tasks_from: setup_loop
 
     - name: Promotion main block
-      become: true
       block:
         - name: Run promotion server provisioning role
           include_role:
@@ -131,7 +130,7 @@
       shell:
         cmd: |
           export DOCKER_HOST=unix:///tmp/docker.sock
-          source /home/{{ promoter_user }}/promoter_venv/bin/activate
+          source /home/{{ promoter_user }}/{{ promoter_virtualenv }}/bin/activate
           cd /home/{{ promoter_user }}/ci-config
           python ci-scripts/dlrnapi_promoter/promoter_integration_checks.py --stage-info-file /tmp/stage-info.yaml
       changed_when: true
