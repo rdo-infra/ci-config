@@ -9,9 +9,23 @@ platforms:
 
 provisioner:
   name: ansible
+  config_options:
+    defaults:
+      fact_caching: jsonfile
+      fact_caching_connection: /tmp/molecule/facts
+  inventory:
+    host_vars:
+      instance:
+        ansible_user: root
+        ansible_connection: ssh
+        # constants used across scenarios
+        # avoids including vars from defaults/main.yml
+        promoter_user: centos
+        promoter_virtualenv: promoter_venv
 
 scenario:
   test_sequence:
-    - create
     - prepare
     - converge
+    - verify
+    - cleanup
