@@ -711,8 +711,8 @@ class TestPromoteHash(DlrnSetup):
         mock_log_info.assert_has_calls([
             mock.call("%s (subhash %s) Successfully promoted", '', mock.ANY)
         ])
-        mock_log_error.assert_not_called()
-        api_promote_mock.assert_not_called()
+        self.assertFalse(mock_log_error.called)
+        self.assertFalse(api_promote_mock.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.info')
@@ -740,8 +740,8 @@ class TestPromoteHash(DlrnSetup):
         mock_log_info.assert_has_calls([
             mock.call("%s (subhash %s) Successfully promoted", '', mock.ANY)
         ])
-        mock_log_error.assert_not_called()
-        api_promote_batch_mock.assert_not_called()
+        self.assertFalse(mock_log_error.called)
+        self.assertFalse(api_promote_batch_mock.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.info')
@@ -760,7 +760,7 @@ class TestPromoteHash(DlrnSetup):
                       self.api_exception.reason,
                       self.api_exception.message),
         ])
-        mock_log_info.assert_not_called()
+        self.assertFalse(mock_log_info.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.info')
@@ -773,8 +773,8 @@ class TestPromoteHash(DlrnSetup):
         mock_log_error.assert_has_calls([
             mock.call("Unrecognized dlrn hash type: %s", type("A hash"))
         ])
-        mock_log_info.assert_not_called()
-        api_promote_mock.assert_not_called()
+        self.assertFalse(mock_log_info.called)
+        self.assertFalse(api_promote_mock.called)
 
     @pytest.mark.xfail(reason="Need a patch to compute timestamp correctly",
                        run=False)

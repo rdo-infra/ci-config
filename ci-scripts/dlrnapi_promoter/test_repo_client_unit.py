@@ -175,7 +175,7 @@ class TestGetVersionsCsv(RepoSetup):
         mock_log_debug.assert_has_calls([
             mock.call("Accessing versions at %s", mock.ANY)
         ])
-        mock_log_error.assert_not_called()
+        self.assertFalse(mock_log_error.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
@@ -194,7 +194,7 @@ class TestGetVersionsCsv(RepoSetup):
         mock_log_debug.assert_has_calls([
             mock.call("Accessing versions at %s", mock.ANY)
         ])
-        mock_log_error.assert_not_called()
+        self.assertFalse(mock_log_error.called)
 
     @patch('logging.Logger.exception')
     @patch('logging.Logger.error')
@@ -234,7 +234,7 @@ class TestGetContainersList(RepoSetup):
             mock.call("Looking for sha commit of project %s in %s",
                       "openstack-tripleo-common", mock.ANY)
         ])
-        mock_log_error.assert_not_called()
+        self.assertFalse(mock_log_error.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
@@ -267,7 +267,7 @@ class TestGetContainersList(RepoSetup):
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
         ])
-        mock_log_error.assert_not_called()
+        self.assertFalse(mock_log_error.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
@@ -282,7 +282,7 @@ class TestGetContainersList(RepoSetup):
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
         ])
-        mock_log_error.assert_not_called()
+        self.assertFalse(mock_log_error.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
