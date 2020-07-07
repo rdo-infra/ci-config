@@ -4,6 +4,12 @@
     - bindep  # python3-libselinux and alike
   tasks:
 
+    # override promoter_user to run on zuul job
+    # default is centos for production and molecule local envs
+    - name: Set promoter_user as zuul
+      set_fact:
+        promoter_user: zuul
+
     # molecule delegated scenarios assume tester/instance host names are the
     # the ones used for testing, use of "localhost" being seen as an
     # anti-pattern which prevents development testing.
