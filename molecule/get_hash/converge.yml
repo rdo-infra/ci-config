@@ -10,7 +10,7 @@
   tasks:
 
     - name: Include required variables
-      include_vars: ../../defaults/main.yml
+      include_vars: ../../roles/get_hash/defaults/main.yml
 
     - block: &clean
         - name: check artifact file
@@ -38,7 +38,7 @@
     - name: get-hash for COMPONENT jobs (commit.yaml)
       block:
         - name: test get-hash.yaml for component job
-          include_tasks: ../../tasks/get_hash.yaml
+          include_tasks: ../../roles/get_hash/tasks/get_hash.yaml
           vars:
             component: compute
             promote_source: consistent
@@ -68,7 +68,7 @@
     - name: get-hash for INTEGRATION jobs (.md5)
       block:
         - name: test get-hash.yaml for integration job
-          include_tasks: ../../tasks/get_hash.yaml
+          include_tasks: ../../roles/get_hash/tasks/get_hash.yaml
           vars:
             promote_source: promoted-components
             promote_target: tripleo-ci-testing
@@ -115,7 +115,7 @@
     - name: get-hash for LEGACY jobs (commit.yaml)
       block:
         - name: test get-hash.yaml for legacy job
-          include_tasks: ../../tasks/get_hash.yaml
+          include_tasks: ../../roles/get_hash/tasks/get_hash.yaml
           vars:
             promote_source: consistent
             promote_target: tripleo-ci-testing
