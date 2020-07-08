@@ -4,11 +4,17 @@
     nodeset: rdo-centos-7
     vars:
       # longer -k match avoids accidental inclusion of more than one scenario
-      tox_extra_args: "-- -k {{ mol_scenario }}/molecule.yml"
+      # molecule/ at the end tells pytest to look only inside this folder, so
+      # it will avoid collecting (or failign to collect) other unrelated tests
+      tox_extra_args: "-- molecule/{{ mol_scenario }}/molecule.yml"
       tox_environment:
         # See https://click.palletsprojects.com/en/7.x/python3/
         LC_ALL: en_US.utf8
         LANG: en_US.utf8
+        # assure we fail if we do not pass exactly 1 test, not less or more
+        PYTEST_REQPASS: 1
+        # forces scenarios to use delegated driver
+        MOLECULE_DRIVER_NAME: delegated
       # avoids an error with "Run tox without tests" due to implicit use of 'venv' in zuul-job
       tox_envlist: molecule
     # pre assures instance/tester hostnames resolve
@@ -31,3 +37,18 @@
       - ^setup.py
       - ^test-requirements.txt
       - ^tox.ini
+
+- job:
+    name: mol-get_hash
+    parent: mol
+    vars:
+      mol_scenario: get_hash
+    files:
+      - .*molecule.*
+      - ^ci-scripts/infra-setup/roles/get_hash/.*$
+      - ^ci-scripts/infra-setup/roles/promoter/.*$
+      - ^requirements.txt
+      - ^requirements.txt
+      - ^test-requirements.txt
+      - ^tox.ini$
+      - ^zuul.d/layout.yaml
