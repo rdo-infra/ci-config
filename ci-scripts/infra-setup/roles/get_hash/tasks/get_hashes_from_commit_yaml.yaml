@@ -25,9 +25,21 @@
     distro_hash: "{{ hashes['commits'][0]['distro_hash'] }}"
     commit_hash: "{{ hashes['commits'][0]['commit_hash'] }}"
 
+- name: print out commit_hash
+  debug:
+    msg: "{{ commit_hash }}"
+
+- name: print out distro_hash
+  debug:
+    msg: "{{ distro_hash }}"
+
 - name: converge commit/distro hashes into full_hash
   set_fact:
      full_hash: "{{ commit_hash }}_{{ distro_hash[:8] }}"
+
+- name: print out full_hash
+  debug:
+    msg: "{{ full_hash }}"
 
 - name: get component (if it exists and is not known)
   set_fact:
