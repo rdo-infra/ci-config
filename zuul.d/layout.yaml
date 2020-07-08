@@ -10,18 +10,10 @@
       jobs:
         - mol-promoter:
             voting: false
-        - rdo-tox-molecule-ci-config: &molecule
-            files:
-              - .*molecule.*
-              - ^ci-scripts/infra-setup/roles/get_hash/.*$
-              - ^ci-scripts/infra-setup/roles/promoter/.*$
-              - ^requirements.txt
-              - ^requirements.txt
-              - ^test-requirements.txt
-              - ^tox.ini$
-              - ^zuul.d/layout.yaml
-        - rdo-tox-molecule-delegated-centos-8-ci-config:
-            <<: *molecule
+        - mol-get_hash-centos-8
+        - mol-get_hash-centos-7:
+            # nv because it never run on it due to config mistake
+            voting: false
         - tox-jjb:
             files:
               - ^jenkins/.*
@@ -49,10 +41,6 @@
             files: *pyfiles
     gate:
       jobs:
-        - rdo-tox-molecule-ci-config:
-            <<: *molecule
-        - rdo-tox-molecule-delegated-centos-8-ci-config:
-            <<: *molecule
         - tox-jjb
         - tox-py27-ci-config:
             <<: *py27
