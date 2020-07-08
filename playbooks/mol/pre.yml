@@ -13,3 +13,10 @@
         path: /etc/hosts
         line: "127.0.0.1 instance tester"
         state: present
+
+# apparently even if we tell molecule to use delegated driver and ignore
+# the one from config, pytest-molecule may decide to skip the test
+# https://github.com/ansible-community/pytest-molecule/issues/56
+# Once this is sorted we may avoid installing docker for all mol jobs.
+- name: install docker
+  import_playbook: ../pre-run-docker.yml
