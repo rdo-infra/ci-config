@@ -14,17 +14,10 @@ import common
 import copy
 import logging
 import os
-import pprint
 import yaml
 
-from common import str2bool, setup_logging, check_port, LoggingError, \
+from common import str2bool, setup_logging, LoggingError, \
     get_root_paths
-
-# Try to import stageconfig for defaults
-try:
-    from stage_config import StageConfig
-except ImportError:
-    pass
 
 
 class ConfigError(Exception):

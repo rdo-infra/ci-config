@@ -1,15 +1,11 @@
 import unittest
 
-import pytest
-
 try:
     # Python3 imports
-    from unittest.mock import Mock, patch
-    import unittest.mock as mock
+    from unittest.mock import Mock
 except ImportError:
     # Python2 imports
-    from mock import Mock, patch
-    import mock
+    from mock import Mock
 
 from dlrn_hash import DlrnCommitDistroHash, DlrnAggregateHash, DlrnHashError, \
     DlrnHash

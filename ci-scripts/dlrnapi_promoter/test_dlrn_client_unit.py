@@ -20,14 +20,12 @@ try:
     from unittest.mock import Mock, patch
     import unittest.mock as mock
     from urllib.parse import urlparse
-    import urllib.request as url
 except ImportError:
     # Python2 imports
     import ConfigParser as ini_parser  # noqa N813
     from mock import Mock, patch
     import mock
     from urlparse import urlparse
-    import urllib2 as url
 
 
 class DlrnSetup(unittest.TestCase):

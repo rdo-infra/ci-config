@@ -1,6 +1,5 @@
 import csv
 import os
-import pytest
 import shutil
 import tempfile
 import unittest
@@ -8,11 +7,11 @@ import yaml
 
 try:
     # Python3 imports
-    from unittest.mock import Mock, patch
+    from unittest.mock import patch
     import unittest.mock as mock
 except ImportError:
     # Python2 imports
-    from mock import Mock, patch
+    from mock import patch
     import mock
 
 from repo_client import RepoClient

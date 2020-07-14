@@ -13,7 +13,6 @@ This script tests the steps of the promoter workflow.
 import argparse
 import dlrnapi_client
 import logging
-import pprint
 import os
 import re
 import stat

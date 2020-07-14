@@ -9,7 +9,6 @@ Uses standard pytest fixture as a setup/teardown method
 import logging
 import os
 import pytest
-import pprint
 import promoter_integration_checks
 import yaml
 

@@ -4,7 +4,6 @@ environment
 """
 import logging
 import os
-import pprint
 import yaml
 
 from common import get_root_paths

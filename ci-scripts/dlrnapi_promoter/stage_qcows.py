@@ -3,7 +3,6 @@ This file contains classes that stage an overcloud images server
 """
 import logging
 import os
-import pprint
 import shutil
 
 from dlrn_hash import DlrnHash

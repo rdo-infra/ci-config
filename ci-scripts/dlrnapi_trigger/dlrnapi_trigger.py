@@ -3,7 +3,6 @@
 import argparse
 import logging
 
-from dlrnapi_client.rest import ApiException
 import dlrnapi_client
 import sys
 

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import argparse
-from datetime import datetime, timedelta
+from datetime import datetime
 import time
 import re
 import requests

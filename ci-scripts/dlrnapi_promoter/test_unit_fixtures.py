@@ -8,11 +8,9 @@ from logic import Promoter
 try:
     # Python3 imports
     from unittest.mock import Mock
-    import unittest.mock as mock
 except ImportError:
     # Python2 imports
     from mock import Mock
-    import mock
 
 # Cases of ini configuration
 test_ini_configurations = dict(

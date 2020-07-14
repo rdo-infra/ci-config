@@ -2,7 +2,6 @@ import copy
 import docker
 import logging
 import os
-import pprint
 import tempfile
 import shutil
 

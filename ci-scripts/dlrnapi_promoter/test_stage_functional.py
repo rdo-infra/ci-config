@@ -11,19 +11,11 @@ import docker
 import logging
 import os
 import pytest
-import pprint
 try:
     import urllib2 as url
 except ImportError:
     import urllib.request as url
 import yaml
-
-try:
-    from unittest.mock import Mock, patch
-    import unittest.mock as mock
-except ImportError:
-    from mock import Mock, patch
-    import mock
 
 from stage import StageConfig, main as stage_main
 from dlrn_hash import DlrnCommitDistroHash, DlrnAggregateHash, DlrnHash

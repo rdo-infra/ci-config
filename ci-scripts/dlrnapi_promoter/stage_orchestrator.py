@@ -9,13 +9,6 @@ from stage_dlrn import DlrnStagingServer
 from stage_qcows import QcowStagingServer
 from stage_registries import StagingRegistries
 
-try:
-    # Python 3 import
-    import configparser as ini_parser
-except ImportError:
-    # Python 2 import
-    import ConfigParser as ini_parser  # noqa N813
-
 
 class StageOrchestrator(object):
     """

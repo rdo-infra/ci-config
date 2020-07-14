@@ -24,11 +24,11 @@ from promoter_integration_checks import (check_dlrn_promoted_hash,
 from stage import main as stage_main
 try:
     # Python3 imports
-    from unittest.mock import Mock, patch, mock_open
+    from unittest.mock import patch
     builtin_str = "builtins.open"
 except ImportError:
     # Python2 imports
-    from mock import Mock, patch, mock_open
+    from mock import patch
     builtin_str = "__builtin__.open"
 
 

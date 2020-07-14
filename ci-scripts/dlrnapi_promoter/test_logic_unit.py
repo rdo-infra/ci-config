@@ -1,15 +1,13 @@
-import pytest
-
 from common import PromotionError
 from dlrn_client import HashChangedError
 
 try:
     # Python3 imports
-    from unittest.mock import Mock, patch
+    from unittest.mock import patch
     import unittest.mock as mock
 except ImportError:
     # Python2 imports
-    from mock import Mock, patch
+    from mock import patch
     import mock
 
 from dlrn_hash import DlrnHash, DlrnCommitDistroHash
