@@ -105,9 +105,20 @@ class RepoSetup(unittest.TestCase):
         containers_dir = os.path.join(self.temp_dir,
                                       self.versions_csv_rows[1]['Source Sha'],
                                       containers_file_dirname)
-        containers_list = ("{{name_prefix}}nova-api{{name_suffix}}\n"
-                           "{{name_prefix}}neutron-server{{name_suffix}}\n"
-                           "{{name_prefix}}excluded{{name_suffix}}\n")
+        # containers names coming from .j2 file
+        containers_list = """
+container_images_template:
+
+- imagename: "{{namespace}}/{{name_prefix}}nova-api{{name_suffix}}:{{tag}}"
+  image_source: kolla
+
+- imagename: "{{namespace}}/{{name}}neutron-server{{name_suffix}}:{{tag}}"
+  image_source: kolla
+
+- imagename: "{{namespace}}/{{name_prefix}}excluded{{name_suffix}}:{{tag}}"
+  image_source: kolla
+
+"""
         os.makedirs(containers_dir)
         containers_file_path = \
             os.path.join(containers_dir,
@@ -115,6 +126,22 @@ class RepoSetup(unittest.TestCase):
                                               'containers_list_path']))
         with open(containers_file_path, "w") as containers_file:
             containers_file.write(containers_list)
+
+        # containers names coming from yaml file
+        tripleo_containers_list = """
+container_images:
+- image_source: tripleo
+  imagename: quay.io/tripleomaster/openstack-base:current-tripleo
+- image_source: tripleo
+  imagename: quay.io/tripleomaster/openstack-os:current-tripleo
+- image_source: tripleo
+  imagename: quay.io/tripleomaster/openstack-aodh-base:current-tripleo
+"""
+
+        tripleo_containers_file_path = \
+            os.path.join(containers_dir, 'tripleo_containers.yaml')
+        with open(tripleo_containers_file_path, "w") as containers_file:
+            containers_file.write(tripleo_containers_list)
 
         # create exclude config
 
@@ -271,6 +298,23 @@ class TestGetContainersList(RepoSetup):
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
+    def test_get_containers_list_from_yaml_ok(self,
+                                              mock_log_debug,
+                                              mock_log_error):
+        self.client.containers_list_path = (
+                'container-images/tripleo_containers.yaml'
+        )
+        containers_list = self.client.get_containers_list(
+            self.versions_csv_rows[1]['Source Sha'])
+        self.assertEqual(containers_list, ['base', 'os', 'aodh-base'])
+        mock_log_debug.assert_has_calls([
+            mock.call("Attempting Download of containers template at %s",
+                      mock.ANY)
+        ])
+        mock_log_error.assert_not_called()
+
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.debug')
     def test_get_containers_list_ok_no_excludes(self,
                                                 mock_log_debug,
                                                 mock_log_error):
@@ -289,6 +333,7 @@ class TestGetContainersList(RepoSetup):
     def test_get_containers_list_fail_no_match(self,
                                                mock_log_debug,
                                                mock_log_error):
+        pytest.set_trace()
         containers_list = self.client.get_containers_list("abc")
         self.assertEqual(containers_list, [])
         mock_log_debug.assert_has_calls([
