@@ -4,6 +4,8 @@ import re
 import os
 import yaml
 
+from jinja2 import Environment, BaseLoader, Template
+
 try:
     # Python3 imports
     import urllib.request as url
@@ -111,8 +113,23 @@ class RepoClient(object):
         if not isinstance(containers_content, str):
             containers_content = containers_content.decode()
 
-        full_list = re.findall("(?<=name_prefix}}).*(?={{name_suffix)",
-                               containers_content)
+        container_template = Template(containers_content)
+        container_list = yaml.safe_load(container_template.render())
+
+        # parse 'container_images_template' key and fetch imagename
+        # extract "<class 'jinja2.utils.Namespace'>/aodh-api:" to aodh-api
+        # extract 'quay.io/tripleomaster/openstack-tempest:current-tripleo' to
+        # tempest
+        if 'container_images_template' in container_list:
+            full_list = [i['imagename'].rpartition(
+                '/')[-1].split(':')[0] for i in container_list['container_images_template']]
+            # It also contains some empty strings that needs to be cleaned
+            full_list = [i for i in full_list if i]
+        elif 'container_images' in container_list:
+            full_list = [i['imagename'].rpartition(
+                '/')[-1].split(':')[0] for i in container_list['container_images']]
+            full_list = [i.split('openstack-')[-1] for i in full_list]
+
         if not full_list:
             self.log.error("No containers name found in %s", containers_url)
 
