@@ -111,8 +111,13 @@ class RepoClient(object):
         if not isinstance(containers_content, str):
             containers_content = containers_content.decode()
 
-        full_list = re.findall("(?<=name_prefix}}).*(?={{name_suffix)",
-                               containers_content)
+        if self.containers_list_path.endswith('.j2'):
+            full_list = re.findall("(?<=name_prefix}}).*(?={{name_suffix)",
+                                   containers_content)
+        elif self.containers_list_path.endswith('tripleo_containers.yaml'):
+            full_list = re.findall("(?<=/openstack-).*(?=:current-tripleo)",
+                                   containers_content)
+
         if not full_list:
             self.log.error("No containers name found in %s", containers_url)
 
