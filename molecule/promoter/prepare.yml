@@ -7,11 +7,11 @@
         name: '@Development tools'
         state: present
 
-    - name: set vars for molecule env
-      set_fact:
-        ci_config_local_src_dir: "{{ playbook_dir }}/../.."
-        molecule_testing: true
-        setup_staging: true
+    - name: Assure promoter_user exists
+      user:
+        name: "{{ promoter_user }}"
+        system: true
+        create_home: true
 
     #
     # Create credentials (MOLECULE)
