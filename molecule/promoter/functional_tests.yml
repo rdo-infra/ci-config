@@ -47,7 +47,7 @@
 - name: Attempt to use docker command as normal user
   become: true
   become_user: "{{ promoter_user }}"
-  command: "docker info > /dev/null"
+  command: "docker info"
   register: docker_info_user
   changed_when: false
 
@@ -58,6 +58,8 @@
     success_msg: "Promoter user can correctly use docker"
 
 - name: Ensure we can access logs from apache
+  become: true
+  become_user: "{{ promoter_user }}"
   get_url:
     url: http://localhost/
     dest: "/home/{{ promoter_user }}/staging_promotion_index.html"
@@ -67,6 +69,7 @@
 # just "wait for it to fail"
 # Unless there's a way to run logorate with the exect selinux context, this is the only test we can launch right now
 - name: Dry run log rotation
+  become: true
   command: logrotate -d /etc/logrotate.d/promoter
   register: logrotate_run
   changed_when: true
@@ -99,6 +102,8 @@
     msg: Not Implemented
 
 - name: Stat public key
+  become: true
+  become_user: "{{ promoter_user }}"
   stat:
     path: "{{ remote_path_uploader_key }}.pub"
   register: uploader_public_key
@@ -134,7 +139,7 @@
   become: true
   become_user: "{{ promoter_user }}"
   shell: |
-    source ~/promoter_venv/bin/activate
+    source /home/{{ promoter_user }}/{{ promoter_virtualenv }}/bin/activate
     python --version
   changed_when: false
 
