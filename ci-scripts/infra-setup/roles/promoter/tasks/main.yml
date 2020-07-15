@@ -4,9 +4,11 @@
 # - STANDALONE (production promoter server in real host or vm)
 #   should be run only after merging tested code, to actually provision the real server
 #   with continuous deployment afterwards. RUNS THE ROLE AS ROOT
-# - ZUUL ci job in staging promoter (nodepool node)
+#
+# - ZUUL (ci job in staging promoter spawned by nodepool)
 #   watch the test in your ci job
-# - MOLECULE testing (local docker driver)
+#
+# - MOLECULE (local testing)
 #   test and iterate over it before submitting changes
 #   This environment should be taken into consideration, but major
 #   task for it should be added in the molecule playbooks directly
@@ -69,6 +71,8 @@
     - name: Install required packages
       yum:
         name:
+          - python3
+          - python3-devel
           - logrotate
           - httpd
           - python-virtualenv
@@ -145,7 +149,6 @@
       register: docker_config
 
 - name: Reload, enable and start docker
-  when: not molecule_testing
   become: true
   block:
     - name: Reload docker if config was changed
@@ -396,6 +399,23 @@
 #
 # Ci-config repo handling
 #
+
+- name: get local repo src dir
+  args:
+    chdir: "{{ role_path }}/../../../../."
+  command: pwd
+  delegate_to: localhost
+  changed_when: false
+  register: local_repo
+
+- name: set ci-config local src dir
+  set_fact:
+    ci_config_local_src_dir: "{{ local_repo.stdout }}"
+
+- name: print local repo src dir
+  debug:
+    msg: "{{ ci_config_local_src_dir }}"
+
 - name: Check for presence of repo on local machine
   become: false
   stat:
@@ -412,26 +432,25 @@
 # Clone ci-config repo
 #
 - name: Understand from where to take the ci-config
-  become: true
-  become_user: "{{ promoter_user }}"
   block:
 
-    - name: clone promoter dir from local dir if present
-      synchronize:
-        src: "{{ ci_config_local_src_dir }}/"
-        dest: "{{ ci_config_remote_src_dir }}"
-        rsync_opts:
-            - "--no-motd"
-            - "--exclude=.tox"
+    # clone from controller ci_config_local_src_dir to remote instance at /tmp
+    - name: clone promoter dir from local dir if present # noqa 303
+      become: false
+      shell: |
+        rsync --archive --no-motd --exclude=.tox {{ ci_config_local_src_dir }}/ \
+          {{ ansible_user }}@instance:/tmp/ci-config/
+      delegate_to: localhost
       when: ci_config_local_src_dir_stat.stat.exists
 
-    - name: When dir is not present on the node, or locally, clone from git
-      git:  # noqa 401
-        repo: 'https://review.rdoproject.org/r/p/rdo-infra/ci-config.git'
-        dest: "{{ ci_config_remote_src_dir }}"
-      when:
-        - not ci_config_local_src_dir_stat.stat.exists
-        - not ci_config_remote_src_dir_stat.stat.exists
+    # sync from /tmp to ci_config_remote_src_dir
+    - name: clone promoter dir from tmp # noqa 303
+      become: true
+      shell: |
+        rsync --archive --no-motd --exclude=.tox \
+          --chown={{ promoter_user }}:{{ promoter_user }} /tmp/ci-config/ \
+          {{ ci_config_remote_src_dir }}/
+      when: ci_config_local_src_dir_stat.stat.exists
 
 #
 # Promoter preparation
@@ -442,7 +461,8 @@
   become_user: "{{ promoter_user }}"
   pip:
     requirements: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/requirements.txt"
-    virtualenv: ~/promoter_venv
+    virtualenv: "/home/{{ promoter_user }}/{{ promoter_virtualenv }}"
+    virtualenv_python: /usr/bin/python3
 
 - name: Render promoter service script
   template:
