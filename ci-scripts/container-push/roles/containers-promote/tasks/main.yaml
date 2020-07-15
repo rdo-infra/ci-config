@@ -46,12 +46,11 @@
   when: containers_file_stat.stat.size == 0
 
 - name: append implicit images to containers list
+  when: implicit_container_images|len > 0
   lineinfile:
     path: "{{ containers_file }}"
     line: "{{ item }}"
-  loop:
-    - base
-    - openstack-base
+  loop: "{{ implicit_container_images }}"
 
 - name: run container tagging and always cleanup at the end
   block:
