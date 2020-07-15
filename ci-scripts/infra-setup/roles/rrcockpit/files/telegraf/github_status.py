@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import requests
-
 from influxdb_utils import format_ts_from_str
 
 INFLUXDB_LINE = 'github-status message="{}",status="{}",status_enum={} {}'

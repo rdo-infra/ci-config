@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, request, abort
+from flask import Flask, abort, render_template, request
 from perfcomp.jobdiff import JobDiff
-
 
 app = Flask(__name__)
 

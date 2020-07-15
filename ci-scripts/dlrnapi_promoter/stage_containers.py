@@ -4,15 +4,14 @@ immediately before a promotion.
 """
 
 import copy
-import docker
 import logging
 import os
-import tempfile
 import shutil
-import yaml
-
+import tempfile
 from string import Template
 
+import docker
+import yaml
 from dlrn_hash import DlrnHash
 
 # template that emulates the tripleo-common/overcloud_containers.yaml.j2

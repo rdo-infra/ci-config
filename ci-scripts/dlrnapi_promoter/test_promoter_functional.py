@@ -7,14 +7,13 @@ Uses standard pytest fixture as a setup/teardown method
 """
 import logging
 import os
+
+import promoter_integration_checks
 import pytest
 import yaml
-import promoter_integration_checks
-
 from common import close_logging
-from dlrn_hash import DlrnCommitDistroHash, DlrnAggregateHash, DlrnHash
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
 from logic import Promoter
-
 from stage import main as stage_main
 
 

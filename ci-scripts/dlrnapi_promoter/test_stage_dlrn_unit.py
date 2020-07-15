@@ -1,6 +1,6 @@
-import pytest
 import unittest
 
+import pytest
 from stage_dlrn import generate_versions_csv
 
 

@@ -1,8 +1,9 @@
 import subprocess
+
 try:
     # Python3 imports
+    from unittest import mock
     from unittest.mock import patch
-    import unittest.mock as mock
 except ImportError:
     # Python2 imports
     from mock import patch

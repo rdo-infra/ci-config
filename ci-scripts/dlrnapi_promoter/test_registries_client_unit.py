@@ -4,15 +4,15 @@ import yaml
 
 try:
     # Python3 imports
+    from unittest import mock
     from unittest.mock import patch
-    import unittest.mock as mock
 except ImportError:
     # Python2 imports
     from mock import patch
     import mock
 
 from common import PromotionError
-from dlrn_hash import DlrnHash, DlrnCommitDistroHash
+from dlrn_hash import DlrnCommitDistroHash, DlrnHash
 from test_unit_fixtures import ConfigSetup, hashes_test_cases
 
 

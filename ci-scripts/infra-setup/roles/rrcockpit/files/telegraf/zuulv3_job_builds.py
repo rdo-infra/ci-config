@@ -1,14 +1,15 @@
 #!/usr/bin/python
 
 import argparse
-from datetime import datetime
-import time
 import re
+import time
+from datetime import datetime
+
 import requests
+import urllib3
 import yaml
 from diskcache import Cache
 
-import urllib3
 urllib3.disable_warnings()
 
 try:

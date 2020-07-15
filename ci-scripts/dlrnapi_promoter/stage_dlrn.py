@@ -9,22 +9,25 @@ import os
 import shutil
 import subprocess
 import time
+
 import yaml
 
 try:
-    import ConfigParser as ini_parser  # noqa N813
     from io import BytesIO as csv_io  # noqa N813
+
+    import ConfigParser as ini_parser  # noqa N813
 except ImportError:  # py3
     import configparser as ini_parser
     from io import StringIO as csv_io  # noqa N813
 
+from string import Template
+
 from common import check_port
 from dlrn import db as dlrn_db
 from dlrn import utils
-from dlrn_client import (DlrnClient, DlrnClientConfig)
+from dlrn_client import DlrnClient, DlrnClientConfig
 from dlrn_hash import DlrnCommitDistroHash
 from sqlalchemy import exc as sql_a_exc
-from string import Template
 
 
 def conditional_run(orig_function):

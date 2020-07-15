@@ -3,20 +3,21 @@ import os
 import shutil
 import tempfile
 import unittest
+
 import yaml
 
 try:
     # Python3 imports
+    from unittest import mock
     from unittest.mock import patch
-    import unittest.mock as mock
 except ImportError:
     # Python2 imports
     from mock import patch
     import mock
 
-from repo_client import RepoClient
-from dlrn_hash import DlrnCommitDistroHash, DlrnAggregateHash
 from config import PromoterConfigBase
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash
+from repo_client import RepoClient
 
 
 class RepoSetup(unittest.TestCase):

@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 import argparse
-import requests
-import json
 import glob
+import json
+
+import requests
 
 
 def import_file(host, key, path, json_file_path):

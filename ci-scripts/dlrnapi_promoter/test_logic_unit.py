@@ -3,14 +3,14 @@ from dlrn_client import HashChangedError
 
 try:
     # Python3 imports
+    from unittest import mock
     from unittest.mock import patch
-    import unittest.mock as mock
 except ImportError:
     # Python2 imports
     from mock import patch
     import mock
 
-from dlrn_hash import DlrnHash, DlrnCommitDistroHash
+from dlrn_hash import DlrnCommitDistroHash, DlrnHash
 from test_unit_fixtures import ConfigSetup
 
 

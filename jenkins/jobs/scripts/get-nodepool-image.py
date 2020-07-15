@@ -17,8 +17,9 @@
 # Returns the latest nodepool image matching a pattern from a cloud
 
 import argparse
-import shade
 import sys
+
+import shade
 
 
 def get_args():

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-import os
 import argparse
+import os
 
-from launchpadlib.launchpad import Launchpad
 from influxdb_utils import format_ts_from_date
+from launchpadlib.launchpad import Launchpad
 
 cachedir = "{}/.launchpadlib/cache/".format(os.path.expanduser('~'))
 

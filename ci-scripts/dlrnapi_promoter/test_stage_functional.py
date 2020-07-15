@@ -7,18 +7,21 @@ the list of containers created.
 
 Uses standard pytest fixture as a setup/teardown method
 """
-import docker
 import logging
 import os
+
+import docker
 import pytest
+
 try:
     import urllib2 as url
 except ImportError:
     import urllib.request as url
-import yaml
 
-from stage import StageConfig, main as stage_main
-from dlrn_hash import DlrnCommitDistroHash, DlrnAggregateHash, DlrnHash
+import yaml
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
+from stage import StageConfig
+from stage import main as stage_main
 
 log = logging.getLogger("Test Staging")
 

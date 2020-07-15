@@ -8,10 +8,10 @@ Uses standard pytest fixture as a setup/teardown method
 
 import logging
 import os
-import pytest
-import promoter_integration_checks
-import yaml
 
+import promoter_integration_checks
+import pytest
+import yaml
 from common import close_logging
 
 try:
@@ -19,8 +19,8 @@ try:
 except ImportError:
     import urllib.request as url
 
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
 from dlrnapi_client.rest import ApiException
-from dlrn_hash import DlrnCommitDistroHash, DlrnAggregateHash, DlrnHash
 from logic import Promoter
 from stage import main as stage_main
 

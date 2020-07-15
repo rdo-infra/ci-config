@@ -10,14 +10,13 @@ except ImportError:
     # Python 2 import
     import ConfigParser as ini_parser  # noqa N813
 
-import common
 import copy
 import logging
 import os
-import yaml
 
-from common import str2bool, setup_logging, LoggingError, \
-    get_root_paths
+import common
+import yaml
+from common import LoggingError, get_root_paths, setup_logging, str2bool
 
 
 class ConfigError(Exception):

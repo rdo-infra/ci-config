@@ -1,30 +1,29 @@
 import copy
 import logging
 import os
-import pytest
 import shutil
 import tempfile
 import unittest
+
+import pytest
 import yaml
-
-from dlrnapi_client.rest import ApiException
-
 from common import PromotionError, setup_logging, str_api_object
-from dlrn_client import HashChangedError, DlrnClientConfig, DlrnClient
-from dlrn_hash import DlrnCommitDistroHash, DlrnAggregateHash, DlrnHash
+from dlrn_client import DlrnClient, DlrnClientConfig, HashChangedError
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
+from dlrnapi_client.rest import ApiException
 from test_unit_fixtures import hashes_test_cases
 
 try:
     # Python3 imports
     import configparser as ini_parser
+    from unittest import mock
     from unittest.mock import Mock, patch
-    import unittest.mock as mock
     from urllib.parse import urlparse
 except ImportError:
     # Python2 imports
     import ConfigParser as ini_parser  # noqa N813
-    from mock import Mock, patch
     import mock
+    from mock import Mock, patch
     from urlparse import urlparse
 
 

@@ -1,5 +1,6 @@
-import requests
 import logging
+
+import requests
 
 
 def get(url, query={}, timeout=20, json_view=True):

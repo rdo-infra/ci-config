@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 import argparse
-import requests
 import json
+
+import requests
 
 
 def main():

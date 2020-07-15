@@ -26,8 +26,8 @@ This provisioner should produce
 import argparse
 import logging
 
-from stage_orchestrator import StageOrchestrator
 from stage_config import StageConfig
+from stage_orchestrator import StageOrchestrator
 
 
 def parse_args(cmd_line=None):

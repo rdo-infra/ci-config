@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import argparse
+import datetime
+import json
 import os
+import re
 import subprocess
 import time
-import re
-import json
-import datetime
 
 # This file is running on toolbox periodically
 

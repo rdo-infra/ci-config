@@ -3,11 +3,10 @@ import logging
 import logging.handlers
 import os
 import subprocess
+
 import requests
+from perfcomp.config import FILE_STORAGE, LOG_FILE
 from six.moves.urllib.parse import urljoin
-
-from perfcomp.config import LOG_FILE, FILE_STORAGE
-
 
 log = logging.getLogger('comparator')
 log.setLevel(logging.DEBUG)

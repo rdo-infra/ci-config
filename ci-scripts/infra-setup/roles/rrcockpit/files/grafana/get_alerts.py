@@ -1,8 +1,9 @@
 #!/bin/env python
 
 import argparse
-import requests
 import json
+
+import requests
 
 
 def call_alerts_api(host, key, suffix):

@@ -1,7 +1,6 @@
 import mock
 import pytest
 
-
 # avoid pytest --collect-only errors with missing imports:
 dlrnapi_trigger = pytest.importorskip('dlrnapi_trigger')
 models = pytest.importorskip('dlrnapi_client.models')

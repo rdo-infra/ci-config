@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-import requests
+import json
 import re
 import sys
+
 import dlrnapi_client
 import influxdb_utils
-import json
-
-from promoter_utils import get_dlrn_instance_for_release
+import requests
 from diskcache import Cache
+from promoter_utils import get_dlrn_instance_for_release
 
 cache = Cache('/tmp/skipped_promotions_cache')
 cache.expire()

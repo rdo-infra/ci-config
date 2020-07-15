@@ -3,22 +3,21 @@ import logging
 import os
 import subprocess
 import tempfile
+import unittest
 
 import dlrnapi_client
 import pytest
-import unittest
-
-from common import str2bool, check_port, setup_logging, LoggingError, \
-    close_logging, str_api_object, get_root_paths, get_lock
+from common import (LoggingError, check_port, close_logging, get_lock,
+                    get_root_paths, setup_logging, str2bool, str_api_object)
 
 try:
     # Python3 imports
+    from unittest import mock
     from unittest.mock import patch
-    import unittest.mock as mock
 except ImportError:
     # Python2 imports
-    from mock import patch
     import mock
+    from mock import patch
 
 try:
     # In python 2 ConnectionRefusedError is not a builtin

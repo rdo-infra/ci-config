@@ -1,13 +1,14 @@
 import csv
 import logging
-import re
 import os
+import re
+
 import yaml
 
 try:
     # Python3 imports
-    import urllib.request as url
     from io import StringIO as csv_io  # noqa N813
+    from urllib import request as url
 except ImportError:
     # Python 2 imports
     import urllib2 as url

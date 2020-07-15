@@ -1,4 +1,4 @@
-from perfcomp import ansbile_playbook, rpm_diff, pip_diff
+from perfcomp import ansbile_playbook, pip_diff, rpm_diff
 from perfcomp.graphs import graph_ansible_playbook
 
 

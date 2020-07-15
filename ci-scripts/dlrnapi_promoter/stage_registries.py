@@ -1,9 +1,10 @@
 import copy
-import docker
 import logging
 import os
-import tempfile
 import shutil
+import tempfile
+
+import docker
 
 # Key for the secure registry
 domain_key = '''

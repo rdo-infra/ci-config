@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 
 from common import get_root_paths, setup_logging
 from config import PromoterConfig

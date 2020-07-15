@@ -17,9 +17,9 @@
 
 import argparse
 import os
-import requests
 import tempfile
 
+import requests
 from diskcache import Cache
 
 ZUUL_API_BUILD = 'https://review.rdoproject.org/zuul/api/builds?job_name='

@@ -4,8 +4,8 @@ environment
 """
 import logging
 import os
-import yaml
 
+import yaml
 from common import get_root_paths
 from config import PromoterConfigBase
 from stage_dlrn import expand_dlrn_config

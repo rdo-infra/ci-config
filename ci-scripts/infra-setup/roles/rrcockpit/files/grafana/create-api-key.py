@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+
 import requests
 
 if __name__ == '__main__':

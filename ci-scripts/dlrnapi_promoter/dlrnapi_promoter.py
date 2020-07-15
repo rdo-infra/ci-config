@@ -7,8 +7,8 @@ import argparse
 import common
 from common import LockError
 from config import PromoterConfigBase
-from logic import Promoter
 from dlrn_hash import DlrnHash, DlrnHashError
+from logic import Promoter
 
 
 def promote_all(args):

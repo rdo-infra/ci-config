@@ -7,21 +7,24 @@ and the functional tests on the promoter
 Uses standard pytest fixture as a setup/teardown method
 """
 
-import dlrnapi_client
 import logging
+
+import dlrnapi_client
 import pytest
+
 try:
     import urllib2 as url_lib
 except ImportError:
     import urllib.request as url_lib
-import yaml
 
-from dlrn_hash import DlrnHash, DlrnCommitDistroHash, DlrnAggregateHash
+import yaml
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
 from promoter_integration_checks import (check_dlrn_promoted_hash,
-                                         query_container_registry_promotion,
                                          compare_tagged_image_hash,
-                                         parse_promotion_logs)
+                                         parse_promotion_logs,
+                                         query_container_registry_promotion)
 from stage import main as stage_main
+
 try:
     # Python3 imports
     from unittest.mock import patch

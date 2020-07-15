@@ -7,8 +7,8 @@ except ImportError:
     # Python2 imports
     from mock import Mock
 
-from dlrn_hash import DlrnCommitDistroHash, DlrnAggregateHash, DlrnHashError, \
-    DlrnHash
+from dlrn_hash import (DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash,
+                       DlrnHashError)
 from test_unit_fixtures import hashes_test_cases
 
 

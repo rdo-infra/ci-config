@@ -9,7 +9,6 @@ import subprocess
 import tempfile
 
 import yaml
-
 from common import PromotionError
 from repo_client import RepoClient
 

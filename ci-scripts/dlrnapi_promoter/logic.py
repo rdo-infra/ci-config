@@ -4,11 +4,11 @@ workflow
 """
 import logging
 
-from dlrn_client import DlrnClient
-from registries_client import RegistriesClient
-from qcow_client import QcowClient
 from common import PromotionError
 from config import PromoterConfig
+from dlrn_client import DlrnClient
+from qcow_client import QcowClient
+from registries_client import RegistriesClient
 
 
 class Promoter(object):

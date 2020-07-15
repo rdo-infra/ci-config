@@ -5,15 +5,16 @@ from dlrn_hash import DlrnCommitDistroHash
 
 try:
     # Python3 imports
+    from unittest import mock
     from unittest.mock import patch
-    import unittest.mock as mock
 except ImportError:
     # Python2 imports
     from mock import patch
     import mock
 
-from dlrnapi_promoter import (main as promoter_main, arg_parser, promote_all,
-                              force_promote)
+from dlrnapi_promoter import arg_parser, force_promote
+from dlrnapi_promoter import main as promoter_main
+from dlrnapi_promoter import promote_all
 from logic import Promoter
 
 

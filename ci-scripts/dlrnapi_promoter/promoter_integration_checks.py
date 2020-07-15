@@ -11,19 +11,21 @@ This script tests the steps of the promoter workflow.
 """
 
 import argparse
-import dlrnapi_client
 import logging
 import os
 import re
 import stat
+
+import dlrnapi_client
+
 try:
     import urllib2 as url_lib
 except ImportError:
     import urllib.request as url_lib
-import yaml
 
-from dlrn_hash import DlrnHash
+import yaml
 from config import PromoterConfigBase
+from dlrn_hash import DlrnHash
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger("promoter-integration-checks")

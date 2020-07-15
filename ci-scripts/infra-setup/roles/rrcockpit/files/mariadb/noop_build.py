@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 import argparse
-import http_utils
 import json
 import re
+
+import http_utils
 
 GERRIT_URL = 'https://review.opendev.org'
 

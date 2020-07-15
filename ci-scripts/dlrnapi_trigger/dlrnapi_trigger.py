@@ -2,9 +2,9 @@
 
 import argparse
 import logging
+import sys
 
 import dlrnapi_client
-import sys
 
 logging.basicConfig(
     level=logging.DEBUG,

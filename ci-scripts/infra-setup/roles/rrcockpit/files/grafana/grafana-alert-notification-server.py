@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import argparse
-import thread
 import json
-import irc.bot
 
+import irc.bot
+import thread
 from flask import Flask, request
 from get_alerts import get_alerts
 

@@ -5,20 +5,20 @@ dlrn configuration options, dlrn repos
 import contextlib
 import copy
 import datetime
-import dlrnapi_client
+import json
 import logging
 import os
-import json
-import yaml
 import tempfile
 
-from dlrn_hash import DlrnCommitDistroHash, DlrnAggregateHash, DlrnHash
+import dlrnapi_client
+import yaml
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
 
 try:
     # Python3 imports
     import configparser as ini_parser
     from json.decoder import JSONDecodeError
-    import urllib.request as url
+    from urllib import request as url
 except ImportError:
     # Python 2 imports
     import ConfigParser as ini_parser  # noqa N813

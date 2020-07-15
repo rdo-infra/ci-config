@@ -3,7 +3,6 @@ import os
 import shutil
 
 import yaml
-
 from stage_containers import StagingContainers
 from stage_dlrn import DlrnStagingServer
 from stage_qcows import QcowStagingServer

@@ -3,8 +3,8 @@ import argparse
 import json
 import os
 import sys
-
 from datetime import datetime, timedelta
+
 from launchpadlib.launchpad import Launchpad
 
 cachedir = "{}/.launchpadlib/cache/".format(os.path.expanduser('~'))

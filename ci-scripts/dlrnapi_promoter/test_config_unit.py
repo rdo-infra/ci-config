@@ -1,19 +1,19 @@
 import os
 import tempfile
 import unittest
+
 try:
     # Python3 imports
+    from unittest import mock
     from unittest.mock import patch
-    import unittest.mock as mock
 except ImportError:
     # Python2 imports
     from mock import patch
     import mock
 
 import pytest
+from config import ConfigError, PromoterConfig, PromoterConfigBase
 from six import string_types
-
-from config import ConfigError, PromoterConfigBase, PromoterConfig
 from test_unit_fixtures import test_ini_configurations
 
 

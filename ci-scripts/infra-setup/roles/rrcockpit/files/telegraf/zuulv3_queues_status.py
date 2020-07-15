@@ -3,10 +3,10 @@
 import argparse
 import json
 import re
-import requests
-
 from os import path
 from time import time
+
+import requests
 
 CERT_LOCATION = '/etc/pki/tls/certs/ca-bundle.crt'
 

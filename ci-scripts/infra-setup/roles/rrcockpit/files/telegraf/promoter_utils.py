@@ -1,8 +1,7 @@
-import dlrnapi_client
 import ConfigParser
+import dlrnapi_client
 import requests
 import yaml
-
 from StringIO import StringIO
 
 PROMOTER_CONFIG_URL = ("https://raw.githubusercontent.com/rdo-infra/ci-config/"

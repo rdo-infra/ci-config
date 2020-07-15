@@ -1,5 +1,5 @@
-import pytest
 import noop_build
+import pytest
 
 
 # We get all the combinations and attack gerrit

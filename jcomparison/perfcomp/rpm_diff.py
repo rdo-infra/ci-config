@@ -1,10 +1,9 @@
 import os
 import re
 
-from perfcomp.utils import get_file, red, green
+from perfcomp.config import NAME_TO_PROJECT, RPM_LOC
 from perfcomp.filediff import make_diff
-from perfcomp.config import RPM_LOC, NAME_TO_PROJECT
-
+from perfcomp.utils import get_file, green, red
 
 PKG_NAME = re.compile(r'(^[a-z0-9-]+)-[0-9]+\.')
 COMMIT_HASH = re.compile(r'\.20\d+\.([a-z0-9]{7})\.')
