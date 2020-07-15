@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: instance
   tasks:
     - name: install development tools
       become: yes
@@ -7,11 +7,12 @@
         name: '@Development tools'
         state: present
 
-    - name: set vars for molecule env
-      set_fact:
-        ci_config_local_src_dir: "{{ playbook_dir }}/../.."
-        molecule_testing: true
-        setup_staging: true
+    - name: Ensure promoter user exists
+      become: true
+      user:
+        name: "{{ promoter_user }}"
+        system: true
+        create_home: true
 
     #
     # Create credentials (MOLECULE)
@@ -20,11 +21,13 @@
       copy:
         content: export REGISTRY_PASSWORD='registry_password00'
         dest: "{{ local_path_registry_secret }}"
+      delegate_to: localhost
 
     - name: Inject dlrnapi_secret_local
       copy:
         content: export DLRNAPI_PASSWORD='test'
         dest: "{{ local_path_dlrnapi_secret }}"
+      delegate_to: localhost
       tags:
         - provisioning
 
@@ -59,5 +62,6 @@
             WAsyy1Jag5MFgLJysZEKUDPtFWvsrs3gdn63GcrqkOH85a2Y/X2U
             -----END RSA PRIVATE KEY-----
         dest: "{{ local_path_uploader_key }}"
+      delegate_to: localhost
       tags:
         - provisioning
