@@ -45,13 +45,12 @@
     msg: "ERROR =========== container list is empty THIS IS A CRITICAL BUG in the container push playbook"
   when: containers_file_stat.stat.size == 0
 
-- name: append implicit images to containers list
+- name: append base images to containers list
+  when: base_container_images|length > 0
   lineinfile:
     path: "{{ containers_file }}"
     line: "{{ item }}"
-  loop:
-    - base
-    - openstack-base
+  loop: "{{ base_container_images }}"
 
 - name: run container tagging and always cleanup at the end
   block:
