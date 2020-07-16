@@ -113,7 +113,8 @@ class RepoClient(object):
             containers_content = containers_content.decode()
 
         container_template = Template(containers_content)
-        container_list = yaml.safe_load(container_template.render())
+        container_list = yaml.safe_load(
+            container_template.render(neutron_driver="ovn"))
 
         # parse 'container_images_template' key and fetch imagename
         # extract "<class 'jinja2.utils.Namespace'>/aodh-api:" to aodh-api
