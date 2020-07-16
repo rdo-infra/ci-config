@@ -29,3 +29,5 @@ dlrn_baseurl:
 dlrnapi_url: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ dlrnapi_endpoint[distro][osp_release|default(release)] }}"
 dlrn_hash_baseurl: "{{ dlrnapi_protocol }}://{{ dlrnapi_host }}/{{ dlrn_baseurl[distro][osp_release|default(release)] }}"
 distro: "{{ ansible_distribution|lower }}{{ ansible_distribution_major_version }}"
+# release is assumed to be 'master', or 'train' for old platforms
+release: "{% if ansible_distribution_major_version == '7' %}train{% else %}master{% endif %}"

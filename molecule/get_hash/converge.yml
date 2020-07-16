@@ -4,7 +4,6 @@
   vars:
     molecule_testing: true
     workspace: "/var/tmp"
-    release: master
     zuul:
       molecule: true
   tasks:
@@ -54,6 +53,8 @@
             [[ -n ${DISTRO_HASH+x} ]] || exit 1
             [[ -n ${FULL_HASH+x} ]] || exit 1
             [[ -n ${COMPONENT_NAME+x} ]] || exit 1
+      # TODO(rfolco): split component scenarios from legacy
+      when: ansible_distribution_major_version | int >= 8
 
     - name: cleanup
       block: *clean
@@ -101,6 +102,8 @@
             [[ -n ${DISTRO_HASH+x} ]] || exit 1
             [[ -n ${COMPONENT_NAME+x} ]] || exit 1
           loop: "{{ hash_info_files.files }}"
+      # TODO(rfolco): split component scenarios from legacy
+      when: ansible_distribution_major_version | int >= 8
 
     - name: cleanup
       block: *clean
@@ -128,3 +131,5 @@
             [[ -n ${COMMIT_HASH+x} ]] || exit 1
             [[ -n ${DISTRO_HASH+x} ]] || exit 1
             [[ -n ${FULL_HASH+x} ]] || exit 1
+      # TODO(rfolco): split component scenarios from legacy
+      when: ansible_distribution_major_version | int == 7
