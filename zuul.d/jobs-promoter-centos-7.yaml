@@ -22,14 +22,6 @@
               - ^playbooks/molecule.*.yml
               - ^requirements.txt
               - ^test-requirements.txt
-        - molecule-tripleo-common-delegated-centos-7: &molecule-tripleo-common
-            files:
-              - ^ci-scripts/dlrnapi_promoter/.*
-              - ^ci-scripts/container-push/.*
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/tripleo-common-integration.*
-              - ^playbooks/molecule.*.yml
-              - ^requirements.txt
-              - ^test-requirements.txt
         - molecule-delegated-promote-images-delegated-centos-7: &molecule-promote-images
             files:
               - ^ci-scripts/dlrnapi_promoter/.*
@@ -84,23 +76,6 @@
     vars:
       molecule_test_commands: |
         tox -emolecule_delegated -- roles/promoter/molecule/container-push/molecule.yml
-
-- job:
-    name: molecule-tripleo-common-delegated-centos-7
-    parent: base
-    nodeset: rdo-centos-7
-    pre-run: playbooks/legacy/molecule-delegated-pre.yml
-    run: playbooks/legacy/molecule-delegated.yml
-    post-run: playbooks/legacy/molecule-post.yml
-    vars:
-      molecule_test_commands: |
-        # container-push generates staging containers, skip teardown
-        molecule converge -s container-push -- --skip-tags=registry_cleanup
-        # tripleo-common test w/ staging containers
-        molecule test -s tripleo-common-integration
-        # container-push teardown, cleanup registries
-        molecule converge -s container-push -- --tags=registry_cleanup
-      skip_report: true  # old jobs do not produce reports.html
 
 - job:
     name: molecule-delegated-promote-images-delegated-centos-7
