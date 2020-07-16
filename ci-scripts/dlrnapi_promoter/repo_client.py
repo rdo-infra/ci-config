@@ -124,12 +124,16 @@ class RepoClient(object):
                 full_list = [
                     i['imagename'].rpartition('/')[-1].split(':')[0]
                     for i in container_list['container_images_template']
+                    if i['image_source'] == 'kolla'
                 ]
                 # It also contains some empty strings that needs to be cleaned
                 full_list = [i for i in full_list if i]
             elif 'container_images' in container_list:
-                full_list = [i['imagename'].rpartition('/')[-1].split(':')[0]
-                             for i in container_list['container_images']]
+                full_list = [
+                    i['imagename'].rpartition('/')[-1].split(':')[0]
+                    for i in container_list['container_images']
+                    if i['image_source'] == 'tripleo'
+                ]
                 full_list = [i.split('openstack-')[-1] for i in full_list]
         else:
             full_list = []
