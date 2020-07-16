@@ -118,6 +118,10 @@ container_images_template:
 - imagename: "{{namespace}}/{{name_prefix}}excluded{{name_suffix}}:{{tag}}"
   image_source: kolla
 
+{% if neutron_driver == "ovn" %}
+- imagename: "{{namespace}}/{{name}}ovn-controller{{suffix}}:{{tag}}"
+  image_source: kolla
+{% endif %}
 """
         os.makedirs(containers_dir)
         containers_file_path = \
@@ -289,7 +293,8 @@ class TestGetContainersList(RepoSetup):
                                     mock_log_error):
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
-        self.assertEqual(containers_list, ['nova-api', 'neutron-server'])
+        self.assertEqual(containers_list, ['nova-api', 'neutron-server',
+                                           'ovn-controller'])
         mock_log_debug.assert_has_calls([
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
