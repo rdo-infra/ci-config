@@ -40,6 +40,28 @@
       - ^test-requirements.txt
       - ^tox.ini
 
+- job:
+    name: mol-promoter-tripleo-common
+    parent: mol
+    nodeset: rdo-centos-7
+    vars:
+      mol_scenario: promoter-tripleo-common
+    # TODO:
+    #   molecule_test_commands: |
+    # # container-push generates staging containers, skip teardown
+    # molecule converge -s container-push -- --skip-tags=registry_cleanup
+    # # tripleo-common test w/ staging containers
+    # molecule test -s tripleo-common-integration
+    # # container-push teardown, cleanup registries
+    # molecule converge -s container-push -- --tags=registry_cleanup
+    files:
+      - .*promoter.*
+      - ^ci-scripts/dlrnapi_promoter/.*
+      - ^ci-scripts/container-push/.*
+      - ^molecule/promoter-tripleo-common/.*
+      - ^requirements.txt
+      - ^test-requirements.txt
+
 # TODO(ssbarnea): Investigate how can we combine c7/c8 in a single job that
 # used two nodes. Molecule needs to be able to get the list of nodes to use
 # from zuul. If we do this, it should be easier to maintain jobs that need
