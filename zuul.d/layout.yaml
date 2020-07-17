@@ -8,9 +8,7 @@
       - jobs-promoter-centos-7-jobs
     check:
       jobs:
-        - mol-get_hash-centos-7:
-            # nv because it never run on it due to config mistake
-            voting: false
+        - mol-get_hash-centos-7
         - mol-get_hash-centos-8
         - mol-promoter:
             voting: false
@@ -42,6 +40,8 @@
     gate:
       jobs:
         - tox-jjb
+        - mol-get_hash-centos-7
+        - mol-get_hash-centos-8
         - tox-py27-ci-config:
             <<: *py27
         - tox-py36-ci-config:
