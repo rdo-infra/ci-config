@@ -31,6 +31,16 @@ ppc_manifests: true
 ppc_pull_attempts: 5
 target_registries_push: true
 # A set of base containers that are not defined in tripleo-common
-base_container_images:
+base_containers_newworkflow:
+  - base
+
+base_containers_oldworkflow:
   - base
   - openstack-base
+
+base_container_images: >-
+  {% if release not in ['master'] -%}
+  {{ base_containers_oldworkflow }}
+  {%- else -%}
+  {{ base_containers_oldworkflow }}
+  {%- endif -%}
