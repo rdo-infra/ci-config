@@ -421,6 +421,7 @@
       synchronize:
         src: "{{ ci_config_local_src_dir }}/"
         dest: "{{ ci_config_remote_src_dir }}"
+        owner: false  # will use promoter_user due to become_user
         rsync_opts:
             - "--no-motd"
             - "--exclude=.tox"
@@ -445,7 +446,8 @@
   become_user: "{{ promoter_user }}"
   pip:
     requirements: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/requirements.txt"
-    virtualenv: ~/promoter_venv
+    virtualenv: "/home/{{ promoter_user }}//{{ promoter_virtualenv }}"
+    virtualenv_python: python3
 
 - name: Render promoter service script
   template:
