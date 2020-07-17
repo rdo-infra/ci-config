@@ -28,11 +28,12 @@
 
         # the test requirements are usually run only by tox
         # so when we are testing, it's nice to have them in the same virtual env
-        - name: install test requirements
+        - name: install test requirements on promoter virtualenv
           become: true
           become_user: "{{ promoter_user }}"
           pip:
             requirements: "{{ ci_config_remote_src_dir }}/test-requirements.txt"
             virtualenv: "/home/{{ promoter_user }}/{{ promoter_virtualenv }}"
+            virtualenv_python: python3
           tags:
             - provisioning

@@ -424,6 +424,7 @@
         rsync_opts:
             - "--no-motd"
             - "--exclude=.tox"
+            - "--chown={{ promoter_user }}:{{ promoter_user }}"
             # avoid spamming our logs
             - "--quiet"
       when: ci_config_local_src_dir_stat.stat.exists
@@ -445,7 +446,8 @@
   become_user: "{{ promoter_user }}"
   pip:
     requirements: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/requirements.txt"
-    virtualenv: ~/promoter_venv
+    virtualenv: "/home/{{ promoter_user }}//{{ promoter_virtualenv }}"
+    virtualenv_python: python3
 
 - name: Render promoter service script
   template:
