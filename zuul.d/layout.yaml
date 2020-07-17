@@ -4,50 +4,11 @@
     run: playbooks/tox-jjb-run.yml
 
 - project:
-    templates:
-      - jobs-promoter-centos-7-jobs
     check:
       jobs:
-        - mol-get_hash-centos-7:
-            # nv because it never run on it due to config mistake
-            voting: false
-        - mol-get_hash-centos-8
-        - mol-promoter:
-            voting: false
-        - tox-jjb:
-            files:
-              - ^jenkins/.*
-              - ^requirements.txt
-              - ^test-requirements.txt
-              - ^tox.ini
-        - tox-py27-ci-config: &py27
-            files: &pyfiles
-              - .*\.py
-              - .*\.ini
-              - ^ci-scripts/dlrnapi_promoter/.*
-              - ^ci-scripts/infra-setup/roles/rrcockpit/files/grafana/.*\.py
-              - ^ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/.*\.py
-              - ^ci-scripts/infra-setup/roles/rrcockpit/files/telegraf/.*\.py
-              - ^jcomparison/perfcomp/.*\.py
-              - ^jenkins/jobs/scripts/.*\.py
-              - ^plugins/modules/.*\.py
-              - ^requirements.txt
-              - ^setup.cfg
-              - ^setup.py
-              - ^test-requirements.txt
-              - ^tox.ini
-              - ^zuul.d/layout.yaml$
-        - tox-py36-ci-config: &py36
-            files: *pyfiles
-    gate:
-      jobs:
-        - tox-jjb
-        - tox-py27-ci-config:
-            <<: *py27
-        - tox-py36-ci-config:
-            <<: *py36
-    periodic:
-      jobs:
-        - mol-get_hash-centos-7
-        - mol-get_hash-centos-8
-        - mol-promoter
+        - periodic-tripleo-centos-8-master-component-tripleo-promote-to-promoted-components:
+            vars:
+              force_periodic: true
+        - periodic-tripleo-centos-8-master-component-clients-promote-to-promoted-components:
+            vars:
+              force_periodic: true
