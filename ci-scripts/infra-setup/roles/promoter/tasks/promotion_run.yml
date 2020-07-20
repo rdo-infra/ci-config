@@ -2,11 +2,11 @@
 - name: run promoter script on the staging environment
   become: true
   become_user: "{{ promoter_user }}"
-  shell:
-    cmd: |
-      source ~/{{ promoter_virtualenv }}/bin/activate
-      export TEST_RELEASE="{{ test_release }}"
-      bash {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/dlrn-promoter.sh -s
+  script:
+    cmd: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/dlrn-promoter.sh -s"
+  environment:
+    PROMOTER_VENV: "{{ promoter_virtualenv }}"
+    TEST_RELEASE: "{{ test_release }}"
   changed_when: true
 
 - name: extract log_file from staging.ini
