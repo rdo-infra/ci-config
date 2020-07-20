@@ -4,7 +4,7 @@
   become_user: "{{ promoter_user }}"
   shell:
     cmd: |
-      source ~/{{ promoter_virtualenv }}/bin/activate
+      export PROMOTER_VENV="{{ promoter_virtualenv }}"
       export TEST_RELEASE="{{ test_release }}"
       bash {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/dlrn-promoter.sh -s
   changed_when: true
