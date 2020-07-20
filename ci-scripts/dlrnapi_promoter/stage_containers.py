@@ -17,30 +17,13 @@ from dlrn_hash import DlrnHash
 # template that emulates the tripleo-common/overcloud_containers.yaml.j2
 # definitions
 containers_template = '''
-container_images_template:
+container_images:
 
 - imagename: "{{namespace}}/{{name_prefix}}${image2}{{name_suffix}}:{{tag}}"
   image_source: kolla
-  params:
-  - ContainerAodhApiImage
-  - ContainerAodhConfigImage
-  services:
-  - OS::TripleO::Services::AodhApi
-  - OS::TripleO::Services::AodhEvaluator
-  - OS::TripleO::Services::AodhListener
-  - OS::TripleO::Services::AodhNotifier
-  - OS::TripleO::Services::UndercloudAodhApi
-  - OS::TripleO::Services::UndercloudAodhEvaluator
-  - OS::TripleO::Services::UndercloudAodhListener
-  - OS::TripleO::Services::UndercloudAodhNotifier
 
 - imagename: "{{namespace}}/{{name_prefix}}${image1}{{name_suffix}}:{{tag}}"
   image_source: kolla
-  params:
-  - ContainerAodhEvaluatorImage
-  services:
-  - OS::TripleO::Services::AodhEvaluator
-  - OS::TripleO::Services::UndercloudAodhEvaluator
 '''
 
 
