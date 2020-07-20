@@ -1,0 +1,68 @@
+# TODO(rfolco): Replace this file w/ upstream ensure_docker
+# from zuul roles so we don't need to maintain this code
+
+- name: setup docker
+  block:
+    - name: Configure docker-ce repo
+      command: yum-config-manager --add-repo \
+          https://download.docker.com/linux/centos/docker-ce.repo
+
+    - name: Install required packages
+      yum:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+  become: true
+
+- name: Set up external partition
+  become: true
+  block:
+    - name: Mount external volume - create a partition
+      parted:
+        device: "{{ docker_device }}"
+        number: 1
+        state: present
+
+    - name: Be sure to reread partition table
+      command: kpartx -a "{{ docker_device }}"
+      when: setup_staging
+
+    - name: Mount external volume - create a filesystem
+      filesystem:
+        fstype: xfs
+        dev: "{{ docker_partition }}"
+
+    - name: create a mount folder
+      file:
+        path: /var/lib/docker
+        state: directory
+
+    - name: Mount external volume - mount the partition
+      mount:
+        path: /var/lib/docker
+        src: "{{ docker_partition }}"
+        fstype: xfs
+        state: mounted
+
+#
+# Docker configuration
+#
+- name: Configure Docker
+  become: true
+  block:
+    - name: Ensure docker dir exists
+      file:
+        path: /etc/docker
+        state: directory
+
+    - name: Configure overlay2 for docker
+      copy:
+        content: |
+          {
+              "storage-driver": "overlay2",
+              "storage-opts": [
+                "overlay2.override_kernel_check=true"
+              ]
+          }
