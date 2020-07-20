@@ -17,7 +17,7 @@
               - ^requirements.txt
               - ^test-requirements.txt
               - ^tox.ini
-        - tox-py27-ci-config: &py27
+        - tox-py36-ci-config: &py36
             files: &pyfiles
               - .*\.py
               - .*\.ini
@@ -34,8 +34,6 @@
               - ^test-requirements.txt
               - ^tox.ini
               - ^zuul.d/layout.yaml$
-        - tox-py36-ci-config: &py36
-            files: *pyfiles
     gate:
       jobs:
         - tox-jjb:
@@ -43,8 +41,6 @@
         - mol-get_hash-centos-7
         - mol-get_hash-centos-8
         - mol-promoter
-        - tox-py27-ci-config:
-            <<: *py27
         - tox-py36-ci-config:
             <<: *py36
     periodic:
