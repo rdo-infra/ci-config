@@ -1,19 +1,4 @@
-# This role is meant to run in 3 different environments:
-#  STANDALONE, ZUUL, and MOLECULE
-#
-# - STANDALONE (production promoter server in real host or vm)
-#   should be run only after merging tested code, to actually provision the real server
-#   with continuous deployment afterwards. RUNS THE ROLE AS ROOT
-# - ZUUL ci job in staging promoter (nodepool node)
-#   watch the test in your ci job
-# - MOLECULE testing (local docker driver)
-#   test and iterate over it before submitting changes
-#   This environment should be taken into consideration, but major
-#   task for it should be added in the molecule playbooks directly
-#   and not here
-#
-#   ALL refers to all environments above
-
+---
 - name: Ensure promoter user exists
   become: true
   user:
@@ -27,22 +12,12 @@
 - name: Packages
   become: true
   block:
-    - name: Configure docker-ce repo
-      command: yum-config-manager --add-repo \
-          https://download.docker.com/linux/centos/docker-ce.repo
-
-    # Install EPEL so we can get ansible 2.8
-    # Sometimes the epel.repo file is removed even if the package is installed.
-    # So to get back the epel.repo file again we need to remove and install again.
-    - name:  remove epel
-      package:
-        name: epel-release
-        state: absent
-
+    # Install EPEL so we can get ansible 2.8 on centos7
     - name:  install epel
       package:
         name: epel-release
         state: present
+      when: ansible_distribution_major_version|int == 7
 
     - name: Install influxdb repo to get telegraf
       yum_repository:
@@ -53,25 +28,12 @@
         gpgcheck: yes
         gpgkey: https://repos.influxdata.com/influxdb.key
 
-    - name: Removed old/distro version of docker
-      yum:
-        name:
-          - docker
-          - docker-client
-          - docker-client-latest
-          - docker-common
-          - docker-latest
-          - docker-latest-logrotate
-          - docker-logrotate
-          - docker-engine
-        state: absent
-
     - name: Install required packages
       yum:
         name:
           - logrotate
           - httpd
-          - python-virtualenv
+          - python3-virtualenv
           - telegraf
           - yum-utils
           - device-mapper-persistent-data
@@ -79,154 +41,15 @@
           - openssh
           - git
           - parted
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
           - parted
           - xfsprogs
           - policycoreutils
           - setools-console
           - ansible
-          - python-docker-py
         state: present
 
-- name: Set up external partition
-  become: true
-  block:
-    - name: Mount external volume - create a partition
-      parted:
-        device: "{{ docker_device }}"
-        number: 1
-        state: present
-
-    - name: Be sure to reread partition table
-      command: kpartx -a "{{ docker_device }}"
-      when: setup_staging
-
-    - name: Mount external volume - create a filesystem
-      filesystem:
-        fstype: xfs
-        dev: "{{ docker_partition }}"
-
-    - name: create a mount folder
-      file:
-        path: /var/lib/docker
-        state: directory
-
-    - name: Mount external volume - mount the partition
-      mount:
-        path: /var/lib/docker
-        src: "{{ docker_partition }}"
-        fstype: xfs
-        state: mounted
-
-#
-# Docker configuration
-#
-- name: Configure Docker
-  become: true
-  block:
-    - name: Ensure docker dir exists
-      file:
-        path: /etc/docker
-        state: directory
-
-    - name: Configure overlay2 for docker
-      copy:
-        content: |
-          {
-              "storage-driver": "overlay2",
-              "storage-opts": [
-                "overlay2.override_kernel_check=true"
-              ]
-          }
-        dest: /etc/docker/daemon.json
-      become: true
-      register: docker_config
-
-- name: Reload, enable and start docker
-  become: true
-  block:
-    - name: Reload docker if config was changed
-      service:
-        name: docker
-        state: reloaded
-      when: docker_config is changed
-
-    - name: Start and enable Docker
-      service:
-        name: docker
-        state: started
-        enabled: yes
-
-- name: Stat docker socket again
-  become: true
-  stat:
-    path: "/var/run/docker.sock"
-  register: docker_socket_stat
-
-- name: Find out docker group name
-  become: true
-  shell: |
-    set -euo pipefail
-    getent group {{ docker_socket_stat.stat.gid }} | cut -d":" -f1 | head -1
-  register: docker_group
-  changed_when: false
-  failed_when: false
-
-- when: not docker_group.stdout
-  become: true
-  block:
-    - name: Create docker group
-      group:
-        name: "docker_{{ docker_socket_stat.stat.gid }}"
-        gid: "{{ docker_socket_stat.stat.gid }}"
-        state: present
-
-    - name: Storing new created docker group
-      set_fact:
-        docker_group:
-          stdout: "docker_{{ docker_socket_stat.stat.gid }}"
-
-- name: List groups for user
-  become: true
-  command: "groups {{ promoter_user }}"
-  register: user_groups
-  changed_when: false
-
-- name: Check if user is in docker group
-  become: true
-  when: "docker_group.stdout not in user_groups.stdout"
-  block:
-    - name: Add user to docker group
-      user:
-        name: '{{ promoter_user }}'
-        groups: '{{ docker_group.stdout }}'
-        append: true
-      register: groupadd
-
-    - name: Reset connection for group add to take effect in the next tasks
-      meta: reset_connection
-
-- name: Create user config dir
-  become: true
-  become_user: "{{ promoter_user }}"
-  file:
-    path: "/home/{{ promoter_user }}/.docker/"
-    owner: "{{ promoter_user }}"
-    state: directory
-
-- name: Enable experimental commands in user config
-  become: true
-  become_user: "{{ promoter_user }}"
-  copy:
-    content: |
-      {
-          "experimental": "enabled"
-      }
-    dest: "/home/{{ promoter_user }}/.docker/config.json"
-
-
+    - name: setup docker
+      include_tasks: ensure_docker.yml
 #
 # Promoter logs and httpd service setup
 #
