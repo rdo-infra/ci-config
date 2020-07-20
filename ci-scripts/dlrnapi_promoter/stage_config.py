@@ -245,6 +245,8 @@ class StageConfig(object):
         _config['containers']['tripleo_commit_sha'] = tripleo_commit_sha
         _config['containers']['containers_list_path'] = \
             PromoterLegacyConfigBase.defaults['containers_list_path']
+        _config['containers']['build_method'] = \
+            PromoterLegacyConfigBase.defaults['build_method']
 
         containers_list_base = \
             os.path.join(containers_root,
