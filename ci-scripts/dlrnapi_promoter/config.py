@@ -46,7 +46,11 @@ class PromoterConfigBase(object):
         "dlrn_api_host": "trunk.rdoproject.org",
         "containers_list_base_url": ("https://opendev.org/openstack/"
                                      "tripleo-common/raw/commit/"),
-        "containers_list_path": "container-images/overcloud_containers.yaml.j2",
+        # For old container kolla based workflow, the source of truth of
+        # containers is overcloud_containers.yaml.
+        # For new container (non-kolla) based workflow, the source of truth
+        # is tripleo_containers.yaml.
+        "containers_list_path": "container-images/overcloud_containers.yaml",
         "containers_list_exclude_config": (
             "https://opendev.org/openstack/"
             "tripleo-ci/raw/branch/master/roles/build-containers/vars/main.yaml"
