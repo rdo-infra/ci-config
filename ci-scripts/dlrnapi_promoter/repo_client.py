@@ -113,6 +113,11 @@ class RepoClient(object):
             containers_content = containers_content.decode()
 
         container_template = Template(containers_content)
+        # FIX-ME:
+        # Setting neutron_driver="ovn" will skip the non-ovn
+        # neutron containers.
+        # All containers should be pushed/retagged
+        # The end-user will make the selection based on driver.
         container_list = yaml.safe_load(
             container_template.render(neutron_driver="ovn"))
 
@@ -121,6 +126,7 @@ class RepoClient(object):
         # extract 'quay.io/tripleomaster/openstack-tempest:current-tripleo' to
         # tempest
         if container_list:
+            # container_images_template is used in jinja template container list
             if 'container_images_template' in container_list:
                 full_list = [
                     i['imagename'].rpartition('/')[-1].split(':')[0]
@@ -129,13 +135,23 @@ class RepoClient(object):
                 ]
                 # It also contains some empty strings that needs to be cleaned
                 full_list = [i for i in full_list if i]
+            # container_images is the rendered container list, not the jinja
             elif 'container_images' in container_list:
                 full_list = [
                     i['imagename'].rpartition('/')[-1].split(':')[0]
                     for i in container_list['container_images']
-                    if i['image_source'] == 'tripleo'
+                    if i['image_source'] in ['tripleo', 'kolla']
                 ]
-                full_list = [i.split('openstack-')[-1] for i in full_list]
+                # In container-images/tripleo_containers.yaml, the containers
+                # are named openstack-*.
+                # In container-images/overcloud_containers.yaml, the containers
+                # are named distro-binary-*.
+                if "tripleo" in self.containers_list_path:
+                    full_list = [i.split('openstack-')[-1] for i in full_list]
+                elif "overcloud" in self.containers_list_path:
+                    full_list = [i.split('binary-')[-1] for i in full_list]
+                else:
+                    self.log.error("invalid containers list passed")
         else:
             full_list = []
 
