@@ -3,7 +3,6 @@ import logging
 import os
 
 import yaml
-from jinja2 import Template
 
 try:
     # Python3 imports
@@ -102,6 +101,9 @@ class RepoClient(object):
         self.log.debug("Attempting Download of containers template at %s",
                        containers_url)
         try:
+            # Download and read the container file(overcloud_containers.yaml
+            # or tripleo_containers.yaml) file
+            # in bytes format from tripleo-common
             containers_content = url.urlopen(containers_url).read()
         except url.URLError as ex:
             self.log.error("Unable to download containers template at %s",
@@ -109,37 +111,56 @@ class RepoClient(object):
             self.log.exception(ex)
             return []
 
+        # convert it readable content from byte to string
         if not isinstance(containers_content, str):
             containers_content = containers_content.decode()
 
-        container_template = Template(containers_content)
-        container_list = yaml.safe_load(
-            container_template.render(neutron_driver="ovn"))
+        # Load the yaml content for further parsing
+        container_list = yaml.safe_load(containers_content)
 
-        # parse 'container_images_template' key and fetch imagename
-        # extract "<class 'jinja2.utils.Namespace'>/aodh-api:" to aodh-api
-        # extract 'quay.io/tripleomaster/openstack-tempest:current-tripleo' to
-        # tempest
+        # The parsed yaml file contains the following data structure
+        # in overcloud_containers.yaml:
+        # container_images:
+        # - imagename: docker.io/tripleomaster/centos-binary-aodh-api:current
+        #   image_source: kolla
+        # in tripleo_containers.yaml:
+        # container_images:
+        # - image_source: tripleo
+        #   imagename: quay.io/tripleomaster/openstack-base:current-tripleo
+
         if container_list:
-            if 'container_images_template' in container_list:
-                full_list = [
-                    i['imagename'].rpartition('/')[-1].split(':')[0]
-                    for i in container_list['container_images_template']
-                    if i['image_source'] == 'kolla'
-                ]
-                # It also contains some empty strings that needs to be cleaned
-                full_list = [i for i in full_list if i]
-            elif 'container_images' in container_list:
+            if 'container_images' in container_list:
+
+                # filter imagename based on image_source
+                # for imagename and image_source: kolla:
+                # docker.io/tripleomaster/centos-binary-aodh-api:current-tripleo
+                # We need to get aodh-api as a container name by striping with
+                # '/' and spliting -binary from the imagename
+                #
+                # for imagename and image_source: tripleo
+                # quay.io/tripleomaster/openstack-base:current-tripleo
+                # we need to get tempest as a container name by striping with
+                # '/' and splitting -openstack from the imagename
+
                 full_list = [
                     i['imagename'].rpartition('/')[-1].split(':')[0]
                     for i in container_list['container_images']
-                    if i['image_source'] == 'tripleo'
+                    if i['image_source'] in ['tripleo', 'kolla']
                 ]
-                full_list = [i.split('openstack-')[-1] for i in full_list]
+
+                # construct container_name_preffix
+                # In container-images/tripleo_containers.yaml, the containers
+                # are named openstack-*.
+                # In container-images/overcloud_containers.yaml, the containers
+                # are named distro-binary-*.
+                if "tripleo" in self.containers_list_path:
+                    full_list = [i.split('openstack-')[-1] for i in full_list]
+                elif "overcloud" in self.containers_list_path:
+                    full_list = [i.split('binary-')[-1] for i in full_list]
+                else:
+                    self.log.error("invalid containers list passed")
         else:
             full_list = []
-
-        if not full_list:
             self.log.error("No containers name found in %s", containers_url)
 
         if load_excludes:
