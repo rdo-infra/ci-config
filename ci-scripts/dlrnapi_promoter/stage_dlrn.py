@@ -44,7 +44,7 @@ def conditional_run(orig_function):
 
 
 # script to run staging dlrn server
-dlrn_staging_server = '''#!/usr/bin/env python
+dlrn_staging_server = '''#!/usr/bin/env python3
 from dlrn.api import app
 app.run(debug=True, port=58080)
 '''
@@ -376,7 +376,7 @@ class DlrnStagingServer(object):
                                                  "projects.ini")
 
         self.promotion_target = self.config.dlrn['promotion_target']
-        self.launch_cmd = "python dlrn_staging_server.py"
+        self.launch_cmd = "python3 dlrn_staging_server.py"
         self.http_launch_cmd = "/usr/sbin/lighttpd -f ./lighttpd.conf"
         self.teardown_cmd = "pkill -f dlrn_staging_server"
         self.http_teardown_cmd = "pkill -f {}".format(self.launch_cmd)
