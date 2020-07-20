@@ -105,23 +105,17 @@ class RepoSetup(unittest.TestCase):
         containers_dir = os.path.join(self.temp_dir,
                                       self.versions_csv_rows[1]['Source Sha'],
                                       containers_file_dirname)
-        # containers names coming from .j2 file
+        # containers names coming from overcloud_containers.yaml file
         containers_list = """
-container_images_template:
-
-- imagename: "{{namespace}}/{{name_prefix}}nova-api{{name_suffix}}:{{tag}}"
-  image_source: kolla
-
-- imagename: "{{namespace}}/{{name}}neutron-server{{name_suffix}}:{{tag}}"
-  image_source: kolla
-
-- imagename: "{{namespace}}/{{name_prefix}}excluded{{name_suffix}}:{{tag}}"
-  image_source: kolla
-
-{% if neutron_driver == "ovn" %}
-- imagename: "{{namespace}}/{{name}}ovn-controller{{suffix}}:{{tag}}"
-  image_source: kolla
-{% endif %}
+container_images:
+- image_source: kolla
+  imagename: quay.io/tripleomaster/centos-binary-nova-api:current-tripleo
+- image_source: kolla
+  imagename: quay.io/tripleomaster/centos-binary-neutron-server:current-tripleo
+- image_source: kolla
+  imagename: quay.io/tripleomaster/centos-binary-excluded:current-tripleo
+- image_source: kolla
+  imagename: quay.io/tripleomaster/centos-binary-ovn-controller:current-tripleo
 """
         os.makedirs(containers_dir)
         containers_file_path = \
@@ -131,7 +125,7 @@ container_images_template:
         with open(containers_file_path, "w") as containers_file:
             containers_file.write(containers_list)
 
-        # containers names coming from yaml file
+        # containers names coming from tripleo yaml file
         tripleo_containers_list = """
 container_images:
 - image_source: tripleo
@@ -141,10 +135,24 @@ container_images:
 - image_source: tripleo
   imagename: quay.io/tripleomaster/openstack-aodh-base:current-tripleo
 """
-
         tripleo_containers_file_path = \
             os.path.join(containers_dir, 'tripleo_containers.yaml')
         with open(tripleo_containers_file_path, "w") as containers_file:
+            containers_file.write(tripleo_containers_list)
+
+        # Irregular containers names coming from yaml file
+        tripleo_containers_list = """
+container_images:
+- image_source: tripleo
+  imagename: quay.io/tripleomaster/centos-binary-base:current-tripleo
+- image_source: kolla
+  imagename: quay.io/tripleomaster/openstack-os:current-tripleo
+- image_source: kolla
+  imagename: quay.io/tripleomaster/centos-binary-aodh-base:current-tripleo
+"""
+        overcloud_containers_file_path = \
+            os.path.join(containers_dir, 'mixed_containers.yaml')
+        with open(overcloud_containers_file_path, "w") as containers_file:
             containers_file.write(tripleo_containers_list)
 
         # create exclude config
@@ -288,9 +296,9 @@ class TestGetContainersList(RepoSetup):
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
-    def test_get_containers_list_ok(self,
-                                    mock_log_debug,
-                                    mock_log_error):
+    def test_get_containers_list_overcloud(self,
+                                           mock_log_debug,
+                                           mock_log_error):
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
         self.assertEqual(containers_list, ['nova-api', 'neutron-server',
@@ -303,9 +311,9 @@ class TestGetContainersList(RepoSetup):
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
-    def test_get_containers_list_from_yaml_ok(self,
-                                              mock_log_debug,
-                                              mock_log_error):
+    def test_get_containers_list_tripleo(self,
+                                         mock_log_debug,
+                                         mock_log_error):
         self.client.containers_list_path = (
                 'container-images/tripleo_containers.yaml'
         )
