@@ -131,6 +131,7 @@ def test_promote_containers(staged_env):
     :param staged_env: The stage env fixture
     :return: None
     """
+    import pytest; pytest.set_trace()
     stage_info, promoter = staged_env
     candidate_dict = stage_info['dlrn']['promotions']['promotion_candidate']
     candidate_hash = DlrnHash(source=candidate_dict)
