@@ -25,12 +25,12 @@
       changed_when: false
 
     - name: Ensure docker manifest command is enabled by default
-      become:
+      become: true
       become_user: "{{ promoter_user }}"
       assert:
         that: '"docker manifest is only supported on a Docker cli with experimental cli features enabled" not in docker_manifest.stderr'
         success_msg: "Docker manifest enabled by default"
-        fail_msg: "Docker manifest command is present but not enable by default"
+        fail_msg: "Docker manifest command is present but not enabled by default"
 
     - name: Ensure influxdb repo is present and configured correctly
       command: yum repoinfo influxdb
