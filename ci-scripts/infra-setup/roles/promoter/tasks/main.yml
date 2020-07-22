@@ -169,8 +169,11 @@
   when: apache_config is changed
 
 #
-# Credential prepare
+# Credentials
 #
+
+# TODO(rfolco): Remove this task when we switch to
+# the new role _ensure_credentials
 - name: Make sure .ssh dir exists
   become: true
   become_user: "{{ promoter_user }}"
@@ -179,30 +182,7 @@
     state: directory
     mode: '0700'
 
-#
-# No credentials are handled in this part of the role
-# Credentials are setup at instance creation time by cloud-init
-# Continuous delivery doens't handle credentials at all, and credentials
-# modification usually doesn't involve launching a whol provisioning role.
-#
-
-# in CD mode, this part of the role will at least keep these files
-# restricted.
-
-# If it's a deploy of the server to the cloud, need to copy secrets from /root
-
-
-- name: Check if secrets are in root
-  become: true
-  stat:
-    path: "{{ item }}"
-  loop:
-    - "{{ provision_path_dlrnapi_secret_default }}"
-    - "{{ provision_path_registry_secret_default }}"
-    - "{{ provision_path_uploader_key_default }}"
-  register: root_result
-
-- name: Check if secrets are in user directory place
+- name: Check if secrets are in remote path
   become: true
   become_user: "{{ promoter_user }}"
   stat:
@@ -211,37 +191,17 @@
     - "{{ remote_path_dlrnapi_secret }}"
     - "{{ remote_path_registry_secret }}"
     - "{{ remote_path_uploader_key }}"
-  register: user_result
+  register: creds
 
-- name: Print what will be copied and where
-  debug: msg="Copying {{ item.0.item }} to {{ item.1.item }} "
-  loop: "{{ root_result.results | zip(user_result.results) | list }}"
-  when: item.0.stat.exists|bool and not item.1.stat.exists|bool
+- name: Print available credentials
+  debug: msg="Success! {{ item.item }} has been found :)"
+  loop: "{{ creds.results }}"
+  when: item.stat.exists|bool
 
-- name: Copy root credentials to user directory if need
-  become: true
-  copy:
-    src: "{{ item.0.item }}"
-    dest: "{{ item.1.item }}"
-    remote_src: true
-  loop: "{{ root_result.results | zip(user_result.results) | list }}"
-  when: item.0.stat.exists|bool and not item.1.stat.exists|bool
-
-- block:
-    - name: Fix owners of the files
-      become: true
-      file:
-        path: '{{ item }}'
-        mode: '0600'
-        owner: "{{ promoter_user }}"
-      with_items:
-          - "{{ remote_path_dlrnapi_secret  }}"
-          - "{{ remote_path_registry_secret  }}"
-          - "{{ remote_path_uploader_key  }}"
-  rescue:
-    - name: Possible Failure explanation
-      debug:
-        msg: Credentials ownership fix failed, probably a first run
+- name: Fail if unavailable credentials
+  fail: msg="Fail! {{ item.item }} has NOT been found. Cannot continue :("
+  loop: "{{ creds.results }}"
+  when: not item.stat.exists|bool
 
 #
 # Ci-config repo handling
