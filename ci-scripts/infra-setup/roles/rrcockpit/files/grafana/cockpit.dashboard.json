@@ -256,6 +256,8 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"pipeline\" = 'gate' AND \"passed\" = 'False' AND \"result\" != 'NODE_FAILURE' AND  \"result\" != 'RETRY') AND $timeFilter",
+                        "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
                         "select":[
@@ -493,7 +495,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"autogen",
-                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"cloud\", \"region\", \"result\", \"sova_reason\" as \"Failure Cause\"  FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND \"pipeline\" = 'gate' AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"cloud\", \"region\", \"result\", \"sova_reason\" as \"Failure Cause\"  FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND \"pipeline\" = 'gate' AND \"result\" != 'NODE_FAILURE' AND  \"result\" != 'RETRY') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -604,7 +606,7 @@
                 },
                 "gridPos":{
                     "h":9,
-                    "w":3,
+                    "w":5,
                     "x":0,
                     "y":11
                 },
@@ -733,8 +735,8 @@
                 "format":"none",
                 "gridPos":{
                     "h":9,
-                    "w":4,
-                    "x":3,
+                    "w":5,
+                    "x":5,
                     "y":11
                 },
                 "id":164,
@@ -759,6 +761,8 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
+                        "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
                         "select":[
@@ -807,6 +811,8 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
                         "select":[
@@ -861,6 +867,8 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
                         "select":[
@@ -910,7 +918,7 @@
                         ]
                     }
                 ],
-                "timeFrom":"24h",
+                "timeFrom":null,
                 "title":"Upstream CI stats",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
@@ -930,8 +938,8 @@
                 "format":"none",
                 "gridPos":{
                     "h":9,
-                    "w":4,
-                    "x":7,
+                    "w":5,
+                    "x":10,
                     "y":11
                 },
                 "id":447,
@@ -956,7 +964,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic'  AND \"result\" != 'NODE_FAILURE') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -1113,7 +1121,7 @@
                         ]
                     }
                 ],
-                "timeFrom":"7d",
+                "timeFrom":null,
                 "title":"Upstream Periodic CI stats",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
@@ -1134,7 +1142,7 @@
                 "gridPos":{
                     "h":9,
                     "w":4,
-                    "x":11,
+                    "x":15,
                     "y":11
                 },
                 "id":203,
@@ -1159,6 +1167,8 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo') AND $timeFilter",
+                        "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
                         "select":[
@@ -1201,6 +1211,8 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
                         "select":[
@@ -1255,6 +1267,8 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT') AND $timeFilter",
+                        "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
                         "select":[
@@ -1304,9 +1318,146 @@
                         ]
                     }
                 ],
-                "timeFrom":"24h",
+                "timeFrom":null,
                 "title":"RDO CI stats",
                 "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "cacheTimeout":null,
+                "colorBackground":false,
+                "colorValue":true,
+                "colors":[
+                    "#299c46",
+                    "rgba(237, 129, 40, 0.89)",
+                    "#d44a3a"
+                ],
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Number of failing upstream *gate* jobs in the last 24 hours.\n\nClick on links below to go to the source zuul builds status.",
+                "format":"none",
+                "gauge":{
+                    "maxValue":10,
+                    "minValue":0,
+                    "show":true,
+                    "thresholdLabels":true,
+                    "thresholdMarkers":true
+                },
+                "gridPos":{
+                    "h":9,
+                    "w":5,
+                    "x":19,
+                    "y":11
+                },
+                "id":469,
+                "interval":null,
+                "links":[
+                    {
+                        "params":"pipeline=gate",
+                        "targetBlank":true,
+                        "title":"web",
+                        "type":"absolute",
+                        "url":"http://zuul.openstack.org/builds.html"
+                    },
+                    {
+                        "dashboard":"http://zuul.openstack.org/api/builds",
+                        "params":"pipeline=gate",
+                        "targetBlank":true,
+                        "title":"api",
+                        "type":"absolute",
+                        "url":"http://zuul.openstack.org/api/builds"
+                    }
+                ],
+                "mappingType":1,
+                "mappingTypes":[
+                    {
+                        "name":"value to text",
+                        "value":1
+                    },
+                    {
+                        "name":"range to text",
+                        "value":2
+                    }
+                ],
+                "maxDataPoints":100,
+                "nullPointMode":"connected",
+                "nullText":null,
+                "postfix":" fails",
+                "postfixFontSize":"50%",
+                "prefix":"",
+                "prefixFontSize":"50%",
+                "rangeMaps":[
+                    {
+                        "from":"null",
+                        "text":"N/A",
+                        "to":"null"
+                    }
+                ],
+                "sparkline":{
+                    "fillColor":"rgba(31, 118, 189, 0.18)",
+                    "full":false,
+                    "lineColor":"rgb(31, 120, 193)",
+                    "show":false
+                },
+                "tableColumn":"count",
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"pipeline\" = 'gate' AND \"passed\" = 'False' AND \"result\" = 'RETRY') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"gate"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    }
+                ],
+                "thresholds":"1,2,3",
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"Upstream jobs failed in RETRY",
+                "type":"singlestat",
+                "valueFontSize":"70%",
+                "valueMaps":[
+                    {
+                        "op":"=",
+                        "text":"0",
+                        "value":"null"
+                    }
+                ],
                 "valueName":"current"
             },
             {
@@ -1319,9 +1470,9 @@
                 "fill":1,
                 "gridPos":{
                     "h":9,
-                    "w":9,
-                    "x":15,
-                    "y":11
+                    "w":10,
+                    "x":0,
+                    "y":20
                 },
                 "id":231,
                 "legend":{
@@ -1471,13 +1622,287 @@
                 }
             },
             {
-                "content":"[ruck rover etherpad](https://hackmd.io/7MBqFHurTA2e5H8kYRwgag) [rhos-release](http://rhos-release.virt.bos.redhat.com:3030/rhosp) [sova](http://cistatus.tripleo.org/)",
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"A running list of failing upstream that hit RETRY's",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":9,
+                    "w":14,
+                    "x":10,
+                    "y":20
+                },
+                "hideTimeOverride":false,
+                "id":468,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "thresholds":[
+                            "A"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":"cell",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[
+                            "AA"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"autogen",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"cloud\", \"region\", \"result\", \"sova_reason\" as \"Failure Cause\"  FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False'  AND \"result\" = 'RETRY') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "cloud"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "region"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"pipeline",
+                                "operator":"=",
+                                "value":"gate"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":"3d",
+                "timeShift":null,
+                "title":"Upstream failing jobs in RETRY",
+                "transform":"table",
+                "type":"table"
+            },
+            {
+                "content":"[ruck rover hackmd, see group ruck_rover](https://hackmd.io/team/rh-openstack-ci?nav=overview) [rhos-release](http://rhos-release.virt.bos.redhat.com:3030/rhosp) [How-TO Ruck](https://hackmd.io/07z0xroHTFi2IbX93P5ZfQ) ",
                 "description":"This is a place to keep some notes and links to current etherpads for ruck rovers.",
                 "gridPos":{
                     "h":2,
                     "w":24,
                     "x":0,
-                    "y":20
+                    "y":29
                 },
                 "id":253,
                 "links":[],
@@ -1494,7 +1919,7 @@
                     "h":9,
                     "w":24,
                     "x":0,
-                    "y":22
+                    "y":31
                 },
                 "id":391,
                 "links":[],
@@ -1754,6 +2179,8 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
+                        "query":"SELECT \"branch\", \"log_link\", \"duration\", \"result\", \"result_num\", \"sova_reason\" FROM \"build\" WHERE (\"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"pipeline\" = 'periodic') AND $timeFilter",
+                        "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
                         "select":[
@@ -1854,7 +2281,7 @@
                     "h":6,
                     "w":5,
                     "x":0,
-                    "y":31
+                    "y":40
                 },
                 "id":448,
                 "interval":null,
@@ -2057,7 +2484,7 @@
                     "h":6,
                     "w":4,
                     "x":5,
-                    "y":31
+                    "y":40
                 },
                 "id":449,
                 "interval":null,
@@ -2260,7 +2687,7 @@
                     "h":6,
                     "w":4,
                     "x":9,
-                    "y":31
+                    "y":40
                 },
                 "id":453,
                 "interval":null,
@@ -2463,7 +2890,7 @@
                     "h":6,
                     "w":4,
                     "x":13,
-                    "y":31
+                    "y":40
                 },
                 "id":450,
                 "interval":null,
@@ -2666,7 +3093,7 @@
                     "h":6,
                     "w":4,
                     "x":17,
-                    "y":31
+                    "y":40
                 },
                 "id":451,
                 "interval":null,
@@ -2869,7 +3296,7 @@
                     "h":6,
                     "w":3,
                     "x":21,
-                    "y":31
+                    "y":40
                 },
                 "id":452,
                 "interval":null,
@@ -3072,7 +3499,7 @@
                     "h":6,
                     "w":5,
                     "x":0,
-                    "y":37
+                    "y":46
                 },
                 "id":427,
                 "interval":null,
@@ -3275,7 +3702,7 @@
                     "h":6,
                     "w":4,
                     "x":5,
-                    "y":37
+                    "y":46
                 },
                 "id":428,
                 "interval":null,
@@ -3479,7 +3906,7 @@
                     "h":6,
                     "w":4,
                     "x":9,
-                    "y":37
+                    "y":46
                 },
                 "id":455,
                 "interval":null,
@@ -3683,7 +4110,7 @@
                     "h":6,
                     "w":4,
                     "x":13,
-                    "y":37
+                    "y":46
                 },
                 "id":429,
                 "interval":null,
@@ -3886,7 +4313,7 @@
                     "h":6,
                     "w":4,
                     "x":17,
-                    "y":37
+                    "y":46
                 },
                 "id":430,
                 "interval":null,
@@ -4089,7 +4516,7 @@
                     "h":6,
                     "w":3,
                     "x":21,
-                    "y":37
+                    "y":46
                 },
                 "id":431,
                 "interval":null,
@@ -4292,7 +4719,7 @@
                     "h":6,
                     "w":5,
                     "x":0,
-                    "y":43
+                    "y":52
                 },
                 "id":432,
                 "interval":null,
@@ -4495,7 +4922,7 @@
                     "h":6,
                     "w":4,
                     "x":5,
-                    "y":43
+                    "y":52
                 },
                 "id":433,
                 "interval":null,
@@ -4698,7 +5125,7 @@
                     "h":6,
                     "w":4,
                     "x":9,
-                    "y":43
+                    "y":52
                 },
                 "id":454,
                 "interval":null,
@@ -4901,7 +5328,7 @@
                     "h":6,
                     "w":4,
                     "x":13,
-                    "y":43
+                    "y":52
                 },
                 "id":434,
                 "interval":null,
@@ -5104,7 +5531,7 @@
                     "h":6,
                     "w":4,
                     "x":17,
-                    "y":43
+                    "y":52
                 },
                 "id":435,
                 "interval":null,
@@ -5307,7 +5734,7 @@
                     "h":6,
                     "w":3,
                     "x":21,
-                    "y":43
+                    "y":52
                 },
                 "id":436,
                 "interval":null,
@@ -5510,7 +5937,7 @@
                     "h":7,
                     "w":5,
                     "x":0,
-                    "y":49
+                    "y":58
                 },
                 "id":442,
                 "interval":null,
@@ -5707,7 +6134,7 @@
                     "h":7,
                     "w":4,
                     "x":5,
-                    "y":49
+                    "y":58
                 },
                 "id":444,
                 "interval":null,
@@ -5904,7 +6331,7 @@
                     "h":7,
                     "w":4,
                     "x":9,
-                    "y":49
+                    "y":58
                 },
                 "id":456,
                 "interval":null,
@@ -6101,7 +6528,7 @@
                     "h":7,
                     "w":4,
                     "x":13,
-                    "y":49
+                    "y":58
                 },
                 "id":445,
                 "interval":null,
@@ -6298,7 +6725,7 @@
                     "h":7,
                     "w":4,
                     "x":17,
-                    "y":49
+                    "y":58
                 },
                 "id":446,
                 "interval":null,
@@ -6495,7 +6922,7 @@
                     "h":7,
                     "w":3,
                     "x":21,
-                    "y":49
+                    "y":58
                 },
                 "id":457,
                 "interval":null,
@@ -6692,7 +7119,7 @@
                     "h":7,
                     "w":5,
                     "x":0,
-                    "y":56
+                    "y":65
                 },
                 "id":441,
                 "interval":null,
@@ -6880,7 +7307,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":63
+                    "y":72
                 },
                 "id":2,
                 "links":[],
@@ -6949,7 +7376,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":70
+                    "y":79
                 },
                 "id":422,
                 "links":[],
@@ -7308,7 +7735,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":80
+                    "y":89
                 },
                 "id":63,
                 "links":[],
@@ -7667,7 +8094,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":90
+                    "y":99
                 },
                 "id":421,
                 "links":[],
@@ -8026,7 +8453,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":100
+                    "y":109
                 },
                 "id":458,
                 "links":[],
@@ -8385,7 +8812,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":110
+                    "y":119
                 },
                 "id":423,
                 "links":[],
@@ -8744,7 +9171,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":120
+                    "y":129
                 },
                 "id":424,
                 "links":[],
@@ -9103,7 +9530,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":130
+                    "y":139
                 },
                 "id":425,
                 "links":[],
@@ -9462,7 +9889,7 @@
                     "h":11,
                     "w":24,
                     "x":0,
-                    "y":140
+                    "y":149
                 },
                 "id":426,
                 "links":[],
@@ -9832,7 +10259,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":151
+                    "y":160
                 },
                 "id":232,
                 "legend":{
@@ -10127,7 +10554,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":159
+                    "y":168
                 },
                 "id":370,
                 "panels":[],
@@ -10149,7 +10576,7 @@
                     "h":7,
                     "w":5,
                     "x":0,
-                    "y":160
+                    "y":169
                 },
                 "id":463,
                 "interval":null,
@@ -10262,7 +10689,7 @@
                     "h":7,
                     "w":5,
                     "x":5,
-                    "y":160
+                    "y":169
                 },
                 "id":464,
                 "interval":null,
@@ -10375,7 +10802,7 @@
                     "h":7,
                     "w":4,
                     "x":10,
-                    "y":160
+                    "y":169
                 },
                 "id":465,
                 "interval":null,
@@ -10488,7 +10915,7 @@
                     "h":7,
                     "w":5,
                     "x":14,
-                    "y":160
+                    "y":169
                 },
                 "id":466,
                 "interval":null,
@@ -10601,7 +11028,7 @@
                     "h":7,
                     "w":5,
                     "x":19,
-                    "y":160
+                    "y":169
                 },
                 "id":467,
                 "interval":null,
@@ -10707,7 +11134,7 @@
                     "h":5,
                     "w":24,
                     "x":0,
-                    "y":167
+                    "y":176
                 },
                 "id":381,
                 "links":[],
@@ -11059,7 +11486,7 @@
                     "h":5,
                     "w":24,
                     "x":0,
-                    "y":172
+                    "y":181
                 },
                 "id":461,
                 "links":[
@@ -11504,7 +11931,7 @@
                     "h":5,
                     "w":24,
                     "x":0,
-                    "y":177
+                    "y":186
                 },
                 "id":460,
                 "links":[
@@ -11946,7 +12373,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":182
+                    "y":191
                 },
                 "id":140,
                 "panels":[],
@@ -11962,7 +12389,7 @@
                     "h":10,
                     "w":12,
                     "x":0,
-                    "y":183
+                    "y":192
                 },
                 "id":242,
                 "links":[
@@ -12098,7 +12525,7 @@
                     "h":10,
                     "w":12,
                     "x":12,
-                    "y":183
+                    "y":192
                 },
                 "id":155,
                 "links":[
@@ -12235,7 +12662,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":193
+                    "y":202
                 },
                 "id":345,
                 "links":[
@@ -12371,7 +12798,7 @@
                     "h":8,
                     "w":12,
                     "x":12,
-                    "y":193
+                    "y":202
                 },
                 "id":322,
                 "links":[
@@ -12506,7 +12933,7 @@
                     "h":7,
                     "w":4,
                     "x":0,
-                    "y":201
+                    "y":210
                 },
                 "id":351,
                 "links":[
@@ -12591,7 +13018,7 @@
                     "h":7,
                     "w":4,
                     "x":4,
-                    "y":201
+                    "y":210
                 },
                 "id":356,
                 "links":[
@@ -12676,7 +13103,7 @@
                     "h":7,
                     "w":4,
                     "x":8,
-                    "y":201
+                    "y":210
                 },
                 "id":357,
                 "links":[
@@ -12762,7 +13189,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":201
+                    "y":210
                 },
                 "id":358,
                 "links":[
@@ -12895,7 +13322,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":208
+                    "y":217
                 },
                 "id":340,
                 "panels":[
@@ -13109,7 +13536,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":209
+                    "y":218
                 },
                 "id":51,
                 "panels":[],
@@ -13127,7 +13554,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":210
+                    "y":219
                 },
                 "hideTimeOverride":true,
                 "id":459,
@@ -13362,7 +13789,7 @@
                     "h":7,
                     "w":24,
                     "x":0,
-                    "y":217
+                    "y":226
                 },
                 "hideTimeOverride":true,
                 "id":307,
@@ -13594,7 +14021,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":224
+                    "y":233
                 },
                 "id":317,
                 "legend":{
@@ -13846,7 +14273,7 @@
                     "h":6,
                     "w":4,
                     "x":0,
-                    "y":230
+                    "y":239
                 },
                 "id":71,
                 "legend":{
@@ -14018,7 +14445,7 @@
                     "h":6,
                     "w":4,
                     "x":4,
-                    "y":230
+                    "y":239
                 },
                 "id":72,
                 "legend":{
@@ -14185,7 +14612,7 @@
                     "h":6,
                     "w":16,
                     "x":8,
-                    "y":230
+                    "y":239
                 },
                 "id":55,
                 "legend":{
@@ -14403,7 +14830,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":236
+                    "y":245
                 },
                 "id":79,
                 "legend":{
@@ -14601,7 +15028,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":236
+                    "y":245
                 },
                 "id":80,
                 "legend":{
@@ -14788,7 +15215,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":242
+                    "y":251
                 },
                 "id":398,
                 "legend":{
@@ -14960,7 +15387,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":242
+                    "y":251
                 },
                 "id":399,
                 "legend":{
@@ -15083,7 +15510,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":248
+                    "y":257
                 },
                 "id":414,
                 "panels":[
@@ -15787,7 +16214,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":249
+                    "y":258
                 },
                 "id":4,
                 "panels":[],
@@ -15805,7 +16232,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":250
+                    "y":259
                 },
                 "id":209,
                 "legend":{
@@ -15923,7 +16350,7 @@
                     "h":9,
                     "w":12,
                     "x":0,
-                    "y":258
+                    "y":267
                 },
                 "hideTimeOverride":true,
                 "id":196,
@@ -16059,7 +16486,7 @@
                     "h":9,
                     "w":12,
                     "x":12,
-                    "y":258
+                    "y":267
                 },
                 "hideTimeOverride":true,
                 "id":194,
@@ -16161,7 +16588,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":267
+                    "y":276
                 },
                 "id":173,
                 "panels":[],
@@ -16179,7 +16606,7 @@
                     "h":6,
                     "w":12,
                     "x":0,
-                    "y":268
+                    "y":277
                 },
                 "id":175,
                 "legend":{
@@ -16354,7 +16781,7 @@
                     "h":6,
                     "w":12,
                     "x":12,
-                    "y":268
+                    "y":277
                 },
                 "id":177,
                 "legend":{
@@ -16617,7 +17044,7 @@
                     "h":7,
                     "w":12,
                     "x":0,
-                    "y":274
+                    "y":283
                 },
                 "id":179,
                 "legend":{
@@ -16978,7 +17405,7 @@
                     "h":7,
                     "w":12,
                     "x":12,
-                    "y":274
+                    "y":283
                 },
                 "id":181,
                 "legend":{
@@ -17139,7 +17566,7 @@
                     "h":6,
                     "w":7,
                     "x":0,
-                    "y":281
+                    "y":290
                 },
                 "id":183,
                 "legend":{
@@ -17254,7 +17681,7 @@
                     "h":6,
                     "w":9,
                     "x":7,
-                    "y":281
+                    "y":290
                 },
                 "id":185,
                 "legend":{
@@ -17369,7 +17796,7 @@
                     "h":6,
                     "w":8,
                     "x":16,
-                    "y":281
+                    "y":290
                 },
                 "id":187,
                 "legend":{
@@ -17524,7 +17951,7 @@
                     "h":6,
                     "w":24,
                     "x":0,
-                    "y":287
+                    "y":296
                 },
                 "id":364,
                 "legend":{
