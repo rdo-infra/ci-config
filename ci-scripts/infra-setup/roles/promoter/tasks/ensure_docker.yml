@@ -14,10 +14,8 @@
           - docker-ce-cli
           - containerd.io
         state: present
-  become: true
 
 - name: Set up external partition
-  become: true
   block:
     - name: Mount external volume - create a partition
       parted:
@@ -25,6 +23,7 @@
         number: 1
         state: present
 
+    # TODO(rfolco): Move this test setup out of the role
     - name: Be sure to reread partition table
       command: kpartx -a "{{ docker_device }}"
       when: setup_staging
@@ -46,11 +45,7 @@
         fstype: xfs
         state: mounted
 
-#
-# Docker configuration
-#
-- name: Configure Docker
-  become: true
+- name: Configure docker
   block:
     - name: Ensure docker dir exists
       file:
@@ -67,11 +62,9 @@
               ]
           }
         dest: /etc/docker/daemon.json
-      become: true
       register: docker_config
 
 - name: Reload, enable and start docker
-  become: true
   block:
     - name: Reload docker if config was changed
       service:
@@ -86,13 +79,11 @@
         enabled: yes
 
 - name: Stat docker socket again
-  become: true
   stat:
     path: "/var/run/docker.sock"
   register: docker_socket_stat
 
 - name: Find out docker group name
-  become: true
   shell: |
     set -euo pipefail
     getent group {{ docker_socket_stat.stat.gid }} | cut -d":" -f1 | head -1
@@ -101,7 +92,6 @@
   failed_when: false
 
 - when: not docker_group.stdout
-  become: true
   block:
     - name: Create docker group
       group:
@@ -115,13 +105,11 @@
           stdout: "docker_{{ docker_socket_stat.stat.gid }}"
 
 - name: List groups for user
-  become: true
   command: "groups {{ promoter_user }}"
   register: user_groups
   changed_when: false
 
 - name: Check if user is in docker group
-  become: true
   when: "docker_group.stdout not in user_groups.stdout"
   block:
     - name: Add user to docker group
@@ -135,7 +123,6 @@
       meta: reset_connection
 
 - name: Create user config dir
-  become: true
   become_user: "{{ promoter_user }}"
   file:
     path: "/home/{{ promoter_user }}/.docker/"
@@ -143,7 +130,6 @@
     state: directory
 
 - name: Enable experimental commands in user config
-  become: true
   become_user: "{{ promoter_user }}"
   copy:
     content: |

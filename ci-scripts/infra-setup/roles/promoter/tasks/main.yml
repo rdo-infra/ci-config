@@ -1,84 +1,13 @@
 ---
+#
+# User setup
+#
 - name: Ensure promoter user exists
   become: true
   user:
     name: "{{ promoter_user }}"
     system: true
     create_home: true
-
-# Repos and packages
-#
-
-- name: EPEL Packages
-  become: true
-  block:
-    # Install EPEL so we can get ansible 2.8 on centos7
-    # and python3
-    - name:  install epel
-      package:
-        name: epel-release
-        state: present
-
-    - name: Enable epel
-      command: yum-config-manager --enable epel
-      args:
-        warn: false
-
-    - name: Install epel packages
-      package:
-        name: "{{ item }}"
-        state: present
-      loop:
-        - python36-virtualenv
-        - python36-docker
-  when: ansible_distribution_major_version|int == 7
-
-- name: Packages install
-  become: true
-  block:
-    - name: Install influxdb repo to get telegraf
-      yum_repository:
-        name: influxdb
-        description: InfluxDB Repository - RHEL \$releasever
-        baseurl: https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
-        enabled: yes
-        gpgcheck: yes
-        gpgkey: https://repos.influxdata.com/influxdb.key
-
-    - name: Install py3 packages
-      yum:
-        name:
-          - python3-virtualenv
-          - python3-docker
-        state: present
-      when: ansible_distribution_major_version|int >= 8
-
-    - name: Install required packages
-      yum:
-        name:
-          - logrotate
-          - httpd
-          - telegraf
-          - yum-utils
-          - device-mapper-persistent-data
-          - lvm2
-          - openssh
-          - git
-          - parted
-          - parted
-          - xfsprogs
-          - policycoreutils
-          - setools-console
-          - ansible
-          - libselinux-python3
-        state: present
-
-    - name: setup docker
-      include_tasks: ensure_docker.yml
-
-#
-# Promoter logs and httpd service setup
-#
 
 - name: Fix home directory permissions
   become: true
@@ -87,6 +16,18 @@
     path: "/home/{{ promoter_user }}"
     mode: 0755
 
+#
+# Install system packages
+#
+- name: Repos and packages
+  include_tasks: install_packages.yml
+  args:
+    apply:
+      become: yes
+
+#
+# Promoter logs and httpd service setup
+#
 - name: Create a directory for the promoter logs
   become: true
   become_user: "{{ promoter_user }}"
@@ -131,7 +72,6 @@
     mode: 0644
   become: true
 
-
 #
 # Apache setup (expose log)
 #
@@ -171,7 +111,6 @@
 #
 # Credentials check
 #
-
 - name: Check if secrets are in remote path
   become: true
   become_user: "{{ promoter_user }}"
@@ -265,9 +204,6 @@
     group: 'root'
   become: true
 
-# In staging setup the service file is a dumbed down version
-# and we can start it to check that at least part of the syntax
-# is ok
 - name: Start and enable promoter
   systemd:
     name: dlrn-promoter
