@@ -87,18 +87,6 @@
       skip_report: true  # old jobs do not produce reports.html
 
 - job:
-    name: molecule-delegated-promote-images-delegated-centos-7
-    parent: base
-    nodeset: rdo-centos-7
-    pre-run: playbooks/legacy/molecule-delegated-promote-images-pre.yml
-    run: playbooks/legacy/molecule-delegated.yml
-    post-run: playbooks/legacy/molecule-post.yml
-    vars:
-      molecule_test_commands: |
-        molecule test -s promote-images
-      skip_report: true  # old jobs do not produce reports.html
-
-- job:
     name: tox-py36-ci-config
     parent: tox-py36
     pre-run: playbooks/pre-run-docker.yml

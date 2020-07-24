@@ -40,6 +40,20 @@
       - ^test-requirements.txt
       - ^tox.ini
 
+- job:
+    name: mol-promote-images
+    description: Tests promote-images
+    parent: mol
+    vars:
+      mol_scenario: promoter
+    files:
+      - .*promote.*
+      - ^requirements.txt
+      - ^setup.cfg
+      - ^setup.py
+      - ^test-requirements.txt
+      - ^tox.ini
+
 # TODO(ssbarnea): Investigate how can we combine c7/c8 in a single job that
 # used two nodes. Molecule needs to be able to get the list of nodes to use
 # from zuul. If we do this, it should be easier to maintain jobs that need
@@ -64,3 +78,5 @@
     name: mol-get_hash-centos-8
     parent: mol-get_hash-centos-7
     nodeset: rdo-centos-8
+
+
