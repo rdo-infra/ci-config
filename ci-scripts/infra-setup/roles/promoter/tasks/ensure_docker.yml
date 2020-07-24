@@ -2,6 +2,7 @@
 # from zuul roles so we don't need to maintain this code
 
 - name: setup docker
+  become: true
   block:
     - name: Configure docker-ce repo
       command: yum-config-manager --add-repo \
@@ -14,7 +15,6 @@
           - docker-ce-cli
           - containerd.io
         state: present
-  become: true
 
 - name: Set up external partition
   become: true
@@ -25,6 +25,7 @@
         number: 1
         state: present
 
+    # TODO(rfolco): Move this test setup out of the role
     - name: Be sure to reread partition table
       command: kpartx -a "{{ docker_device }}"
       when: setup_staging
@@ -46,10 +47,7 @@
         fstype: xfs
         state: mounted
 
-#
-# Docker configuration
-#
-- name: Configure Docker
+- name: Configure docker
   become: true
   block:
     - name: Ensure docker dir exists
@@ -67,7 +65,6 @@
               ]
           }
         dest: /etc/docker/daemon.json
-      become: true
       register: docker_config
 
 - name: Reload, enable and start docker
@@ -86,7 +83,6 @@
         enabled: yes
 
 - name: Stat docker socket again
-  become: true
   stat:
     path: "/var/run/docker.sock"
   register: docker_socket_stat

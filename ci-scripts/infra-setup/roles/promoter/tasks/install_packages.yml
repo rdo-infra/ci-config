@@ -1,0 +1,64 @@
+- name: EPEL packages
+  become: true
+  block:
+    - name:  install epel
+      package:
+        name: epel-release
+        state: present
+
+    - name: Enable epel
+      command: yum-config-manager --enable epel
+      args:
+        warn: false
+
+    - name: Install epel packages
+      package:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - python36-virtualenv
+        - python36-docker
+  when: ansible_distribution_major_version|int == 7
+
+- name: Install system packages
+  become: true
+  block:
+    - name: Install influxdb repo to get telegraf
+      yum_repository:
+        name: influxdb
+        description: InfluxDB Repository - RHEL \$releasever
+        baseurl: https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://repos.influxdata.com/influxdb.key
+
+    - name: Install py3 packages
+      yum:
+        name:
+          - python3-virtualenv
+          - python3-docker
+        state: present
+      when: ansible_distribution_major_version|int >= 8
+
+    - name: Install required packages
+      yum:
+        name:
+          - logrotate
+          - httpd
+          - telegraf
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+          - openssh
+          - git
+          - parted
+          - parted
+          - xfsprogs
+          - policycoreutils
+          - setools-console
+          - ansible
+          - libselinux-python3
+        state: present
+
+- name: Setup docker
+  include_tasks: ensure_docker.yml
