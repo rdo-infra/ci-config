@@ -43,7 +43,7 @@ def get_username(host, uid):
 
 def get_gerrit_data(host, project):
     url = (
-        "%s/changes/?q=status:open+project:%s"
+        "%s/changes/?q=project:%s"
         "+-label:Workflow=-1+-label:Code-Review=-2"
         "+-message:\"WIP\"+-message:\"DNM\"") % (
         host, project)
@@ -60,8 +60,12 @@ def pretty_print(patch, host, project):
     patch_id = patch['_number']
     patch_created = time_convert(patch['created'], nano=False) + "000"
     patch_updated = time_convert(patch['updated'], nano=False) + "000"
-    patch_mergeable = patch['mergeable']
+    patch_mergeable = patch.get('mergeable', False)
     patch_title = patch['subject']
+    patch_status = patch['status']
+    patch_merged_at = ''
+    if 'submitted' in patch:
+        patch_merged_at = time_convert(patch['submitted'], nano=False) + "000"
     patch_user = get_username(host, patch['owner']['_account_id'])
     patch_link = "<a href='%s/%s' target=_blank>%s</a>" % (
         host, patch_id, patch_title)
@@ -70,6 +74,7 @@ def pretty_print(patch, host, project):
             'created=%s,'
             'updated=%s,'
             'mergeable=%s,'
+            'status=%s,'
             'owner=%s,'
             'project=%s'
             ' '
@@ -77,6 +82,8 @@ def pretty_print(patch, host, project):
             'created=%s,'
             'updated=%s,'
             'mergeable=%s,'
+            'status=%s,'
+            'merged=%s,'
             'owner="%s",'
             'subject="%s",'
             'project="%s",'
@@ -87,6 +94,7 @@ def pretty_print(patch, host, project):
                 patch_created,
                 patch_updated,
                 patch_mergeable,
+                patch_status,
                 influx_esc(patch_user),
                 project,
 
@@ -94,6 +102,8 @@ def pretty_print(patch, host, project):
                 patch_created,
                 patch_updated,
                 patch_mergeable,
+                patch_status,
+                patch_merged_at,
                 patch_user,
                 patch_title,
                 project,
