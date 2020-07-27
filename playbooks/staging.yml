@@ -54,7 +54,7 @@
         - name: Stage setup
           include_role:
             name: promoter
-            tasks_from: legacy_setup_staging
+            tasks_from: setup_staging
 
     - name: Try promotion_run
       include_role:
@@ -66,7 +66,7 @@
       become_user: "{{ promoter_user }}"
       copy:
         src: /tmp/stage-info.yaml
-        dest: "/home/{{ promoter_user }}"
+        dest: "~/"
         remote_src: yes
 
     - name: fetch stage info into zuul executor
@@ -80,10 +80,10 @@
       become_user: "{{ promoter_user }}"
       shell:
         cmd: |
-          export DOCKER_HOST=unix:///tmp/docker.sock
-          source /home/{{ promoter_user }}/promoter_venv/bin/activate
-          cd /home/{{ promoter_user }}/ci-config
-          python ci-scripts/dlrnapi_promoter/promoter_integration_checks.py --stage-info-file /tmp/stage-info.yaml
+          export DOCKER_HOST=unix:///var/docker.sock
+          source ~/{{ promoter_virtualenv }}/bin/activate
+          python3 ~/ci-config/ci-scripts/dlrnapi_promoter/promoter_integration_checks.py \
+                  --stage-info-file /tmp/stage-info.yaml
       changed_when: true
 
     - name: include vars from stage info
@@ -95,7 +95,7 @@
       become: true
       become_user: "{{ promoter_user }}"
       shell: |
-        cd /home/{{ promoter_user }}/promoter_logs
+        cd ~/promoter_logs
         grep -r -f {{ remote_path_dlrnapi_secret }} .
         grep -r -f {{ remote_path_registry_secret }} .
         grep -r -f {{ remote_path_uploader_key }} .
@@ -107,7 +107,7 @@
       become: true
       become_user: "{{ promoter_user }}"
       shell: |
-        cd /home/{{ promoter_user }}/promoter_logs
+        cd ~/promoter_logs
         grep -r -i "pass.*{{ password }}"
       register: found_pass
       failed_when: found_pass.stdout | length > 0
@@ -115,10 +115,3 @@
       loop: "{{ stage_info.registries.targets | map(attribute='password') | list }}"
       loop_control:
         loop_var: password
-
-# tripleo-common dependencies fail to install in Centos7 for python2.7
-# so we disable this until we migrate to centos-8
-#    - name: Run tripleo-common scenario tests
-#      include_role:
-#        name: promoter
-#        tasks_from: tripleo_common_test
