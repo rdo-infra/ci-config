@@ -20,8 +20,19 @@
     # May need install packages only
     #tasks_from: install_packages
 
+- name: Create a virtualenv for the promoter script
+  become: true
+  become_user: "{{ promoter_user }}"
+  pip:
+    requirements: "{{ ci_config_remote_src_dir }}/test-requirements.txt"
+    virtualenv: "~/{{ promoter_virtualenv }}"
+    virtualenv_command: "/usr/bin/python3 -m venv"
+
 - name: Setup staging environment
+  become: true
+  become_user: "{{ promoter_user }}"
   shell: |
+    source ~/{{ promoter_virtualenv }}/bin/activate
     python3 stage.py {{ staging_action }} {{ staging_args }}
   args:
     chdir: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter"
