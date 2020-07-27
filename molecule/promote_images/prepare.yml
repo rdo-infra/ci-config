@@ -1,0 +1,43 @@
+# Setup the promoter-staging environment (--scenes 'overcloud-images')
+- hosts: instance
+  vars:
+    staging_action: setup
+  tasks:
+
+    # TODO(rfolco): de-dup common bits for mol scenarios:
+    # packages install, venv setup, loop_setup, user, creds
+    - name: Setup local loop device as docker partition
+      include_role:
+        name: promoter
+        tasks_from: setup_loop
+
+    - name: Run promotion server provisioning role
+      include_role:
+        name: promoter
+        tasks_from: install_packages
+
+    - name: Create a virtualenv for the promoter script
+      become: true
+      become_user: "{{ promoter_user }}"
+      pip:
+        requirements: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/requirements.txt"
+        virtualenv: "/home/{{ promoter_user }}/{{ promoter_virtualenv }}"
+        virtualenv_command: "/usr/bin/python3 -m venv"
+
+    - name: Ensure promoter user exists
+      become: true
+      user:
+        name: "{{ promoter_user }}"
+        system: true
+        create_home: true
+
+    - name: Ensure credentials are created
+      include_role:
+        name: _ensure_credentials
+
+    - name: Setup staging environment
+      shell: |
+        python3 stage.py {{ staging_action }} {{ staging_args }}
+      args:
+        chdir: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter"
+      changed_when: false
