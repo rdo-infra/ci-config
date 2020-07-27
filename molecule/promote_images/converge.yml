@@ -1,0 +1,22 @@
+---
+# run ci-config/ci-scripts/promote-images.sh
+- hosts: instance
+  tasks:
+    - name: include stage setup variables
+      include_vars:
+        file: "/tmp/stage-info.yaml"
+        name: stage_info
+
+    - name: Set full hash
+      set_fact:
+        full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+        images_path: "{{ stage_info.overcloud_images.root }}"
+
+    - name: Run the image promotion script promote-images.sh
+      shell: |
+         bash promote-images.sh master {{ full_hash }} tripleo-ci-staging-promoted
+      args:
+        chdir: "{{ ci_config_remote_src_dir }}/ci-scripts"
+      register: promote_images_result # need to check this as sftp can fail
+
+

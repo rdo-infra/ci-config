@@ -1,0 +1,10 @@
+# Setup the promoter-staging environment (--scenes 'overcloud-images')
+- hosts: instance
+  vars:
+    staging_action: setup
+  tasks:
+    - name: Teardown
+      shell: |
+        python3 stage.py {{ staging_action }} {{ staging_args }}
+      args:
+        chdir: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter"
