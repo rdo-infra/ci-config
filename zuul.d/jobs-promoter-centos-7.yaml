@@ -4,7 +4,7 @@
     check: &jobs
       jobs:
         - tripleo-ci-promotion-staging-single-pipeline-centos-7:
-            files: &integration
+            files: &promoter_files
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
               - ^ci-scripts/promote-images.sh
@@ -15,13 +15,13 @@
               - ^ci-scripts/infra-setup/roles/promoter/molecule/.*
               - ^playbooks/molecule.*.yml
         - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
-            files: *integration
-        - molecule-container-push-delegated-centos-7: &molecule-container-push
-            files: *integration
-        - molecule-tripleo-common-delegated-centos-7: &molecule-tripleo-common
-            files: *integration
-        - molecule-delegated-promote-images-delegated-centos-7: &molecule-promote-images
-            files: *integration
+            files: *promoter_files
+        - molecule-container-push-delegated-centos-7:
+            files: *promoter_files
+        - molecule-tripleo-common-delegated-centos-7:
+            files: *promoter_files
+        - molecule-delegated-promote-images-delegated-centos-7:
+            files: *promoter_files
     gate: *jobs
 
 - job:
@@ -29,8 +29,8 @@
     parent: base
     ansible-version: 2.8
     nodeset: rdo-centos-7
-    run: playbooks/legacy/staging.yml
-    post-run: playbooks/legacy/staging-post.yml
+    run: playbooks/staging.yml
+    post-run: playbooks/staging-post.yml
     host-vars:
       primary:
         ansible_user: root
@@ -43,8 +43,8 @@
     parent: base
     ansible-version: 2.8
     nodeset: rdo-centos-7
-    run: playbooks/legacy/staging.yml
-    post-run: playbooks/legacy/staging-post.yml
+    run: playbooks/staging.yml
+    post-run: playbooks/staging-post.yml
     host-vars:
       primary:
         ansible_user: root
