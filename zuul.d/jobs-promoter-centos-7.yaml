@@ -3,7 +3,7 @@
     name: jobs-promoter-centos-7-jobs
     check: &jobs
       jobs:
-        - tripleo-ci-promotion-staging-single-pipeline-centos-7:
+        - tripleo-ci-promotion-staging-single-pipeline:
             files: &integration
               - ^ci-scripts/dlrnapi_promoter/.*
               - ^ci-scripts/container-push/.*
@@ -14,9 +14,14 @@
               - ^test-requirements.txt
               - ^ci-scripts/infra-setup/roles/promoter/molecule/.*
               - ^playbooks/molecule.*.yml
-        - tripleo-ci-promotion-staging-integration-pipeline-centos-7:
+        - tripleo-ci-promotion-staging-integration-pipeline:
             files: *integration
-        - molecule-container-push-delegated-centos-7: &molecule-container-push
+        # legacy jobs
+        - legacy-tripleo-ci-promotion-staging-single-pipeline-centos-7:
+            files: &integration
+        - legacy-tripleo-ci-promotion-staging-integration-pipeline-centos-7:
+            files: &integration
+       - molecule-container-push-delegated-centos-7: &molecule-container-push
             files: *integration
         - molecule-tripleo-common-delegated-centos-7: &molecule-tripleo-common
             files: *integration
@@ -25,7 +30,35 @@
     gate: *jobs
 
 - job:
-    name: tripleo-ci-promotion-staging-single-pipeline-centos-7
+    name: tripleo-ci-promotion-staging-single-pipeline
+    parent: base
+    ansible-version: 2.8
+    nodeset: rdo-centos-7
+    run: playbooks/staging.yml
+    post-run: playbooks/staging-post.yml
+    host-vars:
+      primary:
+        ansible_user: root
+    vars:
+      pipeline_type: single
+      test_release: CentOS-7/master
+
+- job:
+    name: tripleo-ci-promotion-staging-integration-pipeline
+    parent: base
+    ansible-version: 2.8
+    nodeset: rdo-centos-7
+    run: playbooks/staging.yml
+    post-run: playbooks/staging-post.yml
+    host-vars:
+      primary:
+        ansible_user: root
+    vars:
+      pipeline_type: integration
+      test_release: CentOS-8/master
+
+- job:
+    name: legacy-tripleo-ci-promotion-staging-single-pipeline-centos-7
     parent: base
     ansible-version: 2.8
     nodeset: rdo-centos-7
@@ -39,7 +72,7 @@
       test_release: CentOS-7/master
 
 - job:
-    name: tripleo-ci-promotion-staging-integration-pipeline-centos-7
+    name: legacy-tripleo-ci-promotion-staging-integration-pipeline-centos-7
     parent: base
     ansible-version: 2.8
     nodeset: rdo-centos-7
