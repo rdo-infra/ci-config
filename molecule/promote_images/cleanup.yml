@@ -1,0 +1,11 @@
+# Teardown staging environment
+- hosts: instance
+  vars:
+    staging_action: teardown
+  tasks:
+    - name: Teardown
+      shell: |
+        python3 stage.py {{ staging_action }} {{ staging_args }}
+      args:
+        chdir: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter"
+      changed_when: false
