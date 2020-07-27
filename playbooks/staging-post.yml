@@ -1,0 +1,26 @@
+---
+- hosts: all
+  tasks:
+    - name: Ensure logs directory exists
+      file:
+        path: '{{ zuul.executor.log_root }}/logs'
+        state: directory
+      delegate_to: localhost
+
+    - name: Copy files from /home/promoter_user on node
+      failed_when: false
+      synchronize:
+        src: '/home/zuul/'
+        dest: '{{ zuul.executor.log_root }}/logs'
+        mode: pull
+        copy_links: true
+        verify_host: true
+        rsync_opts:
+          - --include=promoter_logs**
+          - --include=.ssh**
+          - --include=commits.sqlite
+          - --include=dlrnapi*
+          - --include=registry_secret
+          - --include=*.yaml
+          - --include=*.log
+          - --exclude=*
