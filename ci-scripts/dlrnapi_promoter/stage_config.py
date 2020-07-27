@@ -138,10 +138,7 @@ class StageConfig(object):
         _config = expand_dlrn_config(_config)
 
         # Hardcode base images into containers suffixes
-        if _config['main']['release'] not in ['master']:
-            base_images = ['base', 'openstack-base']
-        else:
-            base_images = ['base']
+        base_images = ['base']
         _config['containers']['images-suffix'] = \
             base_images + _config['containers']['images-suffix']
 
