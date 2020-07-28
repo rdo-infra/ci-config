@@ -32,13 +32,24 @@
     parent: mol
     vars:
       mol_scenario: promoter
-    files:
+    files: &mol_promoter
       - .*promoter.*
       - ^requirements.txt
       - ^setup.cfg
       - ^setup.py
       - ^test-requirements.txt
       - ^tox.ini
+      - ^ci-scripts/dlrnapi_promoter/.*
+      - ^ci-scripts/promote-images.sh
+      - ^molecule/promote_images/.*
+
+- job:
+    name: mol-promote_images
+    description: Tests promote_images workflow.
+    parent: mol
+    vars:
+      mol_scenario: promote_images
+    files: *mol_promoter
 
 # TODO(ssbarnea): Investigate how can we combine c7/c8 in a single job that
 # used two nodes. Molecule needs to be able to get the list of nodes to use
