@@ -1,0 +1,10 @@
+# Setup the promoter-staging environment
+# (--scenes 'dlrn,registries,containers')
+- hosts: instance
+  vars:
+    staging_action: setup
+    staging_args: "--scenes dlrn,registries,containers --stage-config-file stage-config-secure.yaml"
+  tasks:
+    - name: Setup staging environment
+      include_role:
+        name: _ensure_staging
