@@ -29,6 +29,12 @@
   debug:
     msg: "dlrn_hash_baseurl: {{ dlrn_hash_baseurl }}"
 
+# create md5 hash for dependency repos
+- name: create the md5 sum for dependency repos
+  import_tasks: hash_create_md5sum.yaml
+  when:
+    - dependency|default(None) != None
+
 # md5 hash for integration jobs ( ussuri+. train both centos7+8 - only 8 has .md5  )
 - name: discover the hashes url (integration)
   set_fact:
