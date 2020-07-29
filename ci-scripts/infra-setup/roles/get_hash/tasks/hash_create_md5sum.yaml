@@ -1,0 +1,16 @@
+---
+- name: Get contents of dependency repo for the version hash
+  become: true
+  shell: >
+    set -o pipefail &&
+    md5sum /etc/yum.repos.d/{{ dependency }}-dependency.repo | awk '{print $1}'
+  register: md5sum_repo
+  changed_when: false
+
+- name: Set dependency_hash fact
+  set_fact:
+    dependency_hash: "{{ md5sum_repo.stdout }}"
+
+- name: print out dependency_hash
+  debug:
+    var: "{{ dependency_hash }}"
