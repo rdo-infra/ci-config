@@ -55,3 +55,8 @@ for r in "${RELEASES[@]}"; do
     /usr/bin/timeout --preserve-status -k $KILLTIME $TIMEOUT \
         python3 $DIR/dlrnapi_promoter.py --log-level ${LOG_LEVEL} --config-file ${STAGING_DIR}${r}.ini promote-all
 done
+
+# After the promoter has cycled through all the releases
+# run an exhaustive cleanup of the local containers.
+# This will prevent the systems from running out of space
+sudo docker system prune -a
