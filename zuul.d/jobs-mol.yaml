@@ -42,6 +42,8 @@
       - ^ci-scripts/dlrnapi_promoter/.*
       - ^ci-scripts/promote-images.sh
       - ^molecule/promote_images/.*
+      - ^molecule/container_push.*
+      - ^molecule/tripleo_common_integration.*
       - .*_ensure_staging.*
       - .*_ensure_credentials.*
       - .*container-push.*
@@ -88,6 +90,18 @@
     parent: mol
     vars:
       mol_scenario: container_push_manifests
+    files: *mol_promoter
+
+- job:
+    name: mol-tripleo_common_integration
+    description: |
+      Test tripleo-common integration by promoting containers and calling
+      image prepare command to pull from promote registry to undercloud
+      registry and emulate what is called in a deployment workflow.
+    parent: mol
+    voting: false
+    vars:
+      mol_scenario: tripleo_common_integration
     files: *mol_promoter
 
 # TODO(ssbarnea): Investigate how can we combine c7/c8 in a single job that
