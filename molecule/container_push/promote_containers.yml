@@ -1,0 +1,22 @@
+- name: fetch stage info
+  fetch:
+    src: /tmp/stage-info.yaml
+    dest: "~/"
+    flat: yes
+
+- name: include stage setup variables # noqa 505
+  include_vars:
+    file: "~/stage-info.yaml"
+    name: stage_info
+
+- name: sets critical variables
+  set_fact:
+    full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+    source_registry: "{{ stage_info.registries.source }}"
+    target_registries: "{{ stage_info.registries.targets }}"
+
+- name: Include containers-promote role to test
+  include_role:
+    name: "../../ci-scripts/container-push/roles/containers-promote"
+  vars:
+    ansible_python_interpreter: "~/{{ promoter_virtualenv }}/bin/python3"
