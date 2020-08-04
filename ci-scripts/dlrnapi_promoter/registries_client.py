@@ -25,7 +25,7 @@ class RegistriesClient(object):
         self.git_root = self.config.git_root
         self.logfile = os.path.abspath(os.path.join(
             self.git_root,
-            "../promoter_logs/container-push/%s.log" %
+            "../web/promoter_logs/container-push/%s.log" %
             datetime.datetime.now().strftime("%Y%m%d-%H%M%S")))
         self.promote_playbook = os.path.join(self.git_root,
                                              'ci-scripts',
