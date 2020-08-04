@@ -95,7 +95,7 @@
       become: true
       become_user: "{{ promoter_user }}"
       shell: |
-        cd ~/promoter_logs
+        cd ~/web/promoter_logs
         grep -r -f {{ remote_path_dlrnapi_secret }} .
         grep -r -f {{ remote_path_registry_secret }} .
         grep -r -f {{ remote_path_uploader_key }} .
@@ -107,7 +107,7 @@
       become: true
       become_user: "{{ promoter_user }}"
       shell: |
-        cd ~/promoter_logs
+        cd ~/web/promoter_logs
         grep -r -i "pass.*{{ password }}"
       register: found_pass
       failed_when: found_pass.stdout | length > 0
