@@ -1,0 +1,26 @@
+---
+- hosts: instance
+  become: true
+  become_user: "{{ promoter_user }}"
+  tasks:
+    # check if containers were pushed to undercloud_registry
+    - name: emulate deploy -- check containers in undercloud_registry  # noqa 303
+      shell: |
+        curl --verbose -X GET {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}/tags/list
+      with_items: "{{ lookup('file', containers_file ).splitlines() }}"
+      changed_when: false
+
+    # check manifests in undercloud_registry
+    - name: emulate deploy -- inspect manifests in undercloud_registry
+      shell: |
+        docker manifest inspect --insecure \
+        {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}
+      with_items: "{{ lookup('file', containers_file ).splitlines() }}"
+      changed_when: false
+
+    # pull staging containers from undercloud_registry
+    - name: emulate deploy -- pull staging containers from undercloud_registry
+      docker_image:
+        name: "{{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}"
+        source: pull
+      with_items: "{{ lookup('file', containers_file ).splitlines() }}"
