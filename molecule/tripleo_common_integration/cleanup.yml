@@ -1,0 +1,39 @@
+# Teardown staging environment
+- hosts: instance
+  become: true
+  become_user: "{{ promoter_user }}"
+  vars:
+    staging_action: teardown
+    staging_args: "--scenes dlrn,registries,containers"
+  tasks:
+
+    - name: remove staging files
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /tmp/staging_overcloud_containers.yaml.j2
+        - /tmp/staging-containers-prepare-parameter.yaml
+
+    - name: remove local containers
+      docker_image:
+        name: "{{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}"
+        state: absent
+      vars:
+        ansible_python_interpreter: "~/{{ promoter_virtualenv }}/bin/python3"
+      with_items: "{{ staging_containers_list }}"
+
+    - name: Stop and remove registries
+      docker_container:
+        name: "{{ undercloud_registry['name'] }}"
+        state: absent
+      vars:
+        ansible_python_interpreter: "~/{{ promoter_virtualenv }}/bin/python3"
+
+    - name: Teardown staging env
+      shell: |
+        source ~/{{ promoter_virtualenv }}/bin/activate
+        python3 stage.py {{ staging_action }} {{ staging_args }}
+      args:
+        chdir: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter"
+      changed_when: false
