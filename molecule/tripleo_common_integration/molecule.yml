@@ -1,0 +1,73 @@
+---
+# container_push_multiarch scenario
+# Download and repush container and multi-arch images on insecure registries:
+# - insecure local registries
+# - multi-arch manifests
+# - ppc_manifests
+
+driver:
+  name: delegated
+
+platforms:
+  - name: instance  # must be able to `ssh host`, edit your ~/.ssh/config
+    options:
+      managed: False
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      fact_caching: jsonfile
+      fact_caching_connection: /tmp/molecule/facts
+  inventory:
+    host_vars:
+      instance:
+        # constants and default vars used across scenarios
+        # avoids including vars from defaults/main.yml everywhere
+        promoter_user: promoter
+        remote_path_dlrnapi_secret: "~/dlrnapi_secret"
+        remote_path_registry_secret: "~/registry_secret"
+        remote_path_uploader_key: "~/.ssh/id_rsa"
+        setup_staging: true
+        promoter_virtualenv: promoter_venv
+        ci_config_local_src_dir: "{{ playbook_dir }}/../.."
+        ci_config_remote_src_dir: "/home/{{ promoter_user }}/ci-config"
+
+        # container_push_multiarch vars
+        release: master
+        named_label: triple-ci-staging-promoted
+        # full_hash is provided by the staging environment
+        script_root: UNUSED
+        distro_name: centos
+        distro_version: 7
+        containers_file: "/tmp/parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+        # Source and target registries are provided by staging environment
+        manifest_push: true
+        ppc_manifests: true
+        # Decrease the chance the ppc_manifests is disabled by our check
+        ppc_pull_attempts: 3
+        containers_list:
+          - nova-compute
+          - neutron-server
+
+        # tripleo_common_integration vars
+        undercloud_registry:
+          name: local-undercloud-registry
+          host: 127.0.0.1:8787
+          username: unused
+          password: unused
+          namespace: "tripleo{{ release }}"
+        promote_registries:
+          - host: 127.0.0.1:6500
+            name: local-promote-registry-1
+            username: unused
+            password: unused
+            namespace: "tripleo{{ release }}"
+            token: unused
+
+scenario:
+  test_sequence:
+    - prepare
+    - converge
+    - verify
+    - cleanup

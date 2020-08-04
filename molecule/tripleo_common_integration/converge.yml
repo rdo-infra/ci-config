@@ -1,0 +1,14 @@
+---
+- hosts: instance
+  become: true
+  become_user: "{{ promoter_user }}"
+  tasks:
+    # image prepare pulls from promote_registry and pushes to undercloud_registry
+    - name: run container image prepare
+      shell: |
+        source ~/{{ promoter_virtualenv }}/bin/python3
+        openstack tripleo container image prepare --verbose \
+            -e /tmp/staging-containers-prepare-parameter.yaml \
+            --output-env-file /tmp/containers-default-parameters.yaml \
+            2>&1 > /tmp/tripleo-container-image.prepare.log
+      changed_when: true
