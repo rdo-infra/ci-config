@@ -29,10 +29,13 @@
   become: true
   become_user: "{{ promoter_user }}"
   file:
-    path: "/home/{{ promoter_user }}/promoter_logs"
+    path: "{{ item }}"
     state: directory
     setype: httpd_sys_content_t
     owner: "{{ promoter_user }}"
+  with_items:
+    - "/home/{{ promoter_user }}/web/promoter_logs"
+    - "/home/{{ promoter_user }}/web/config"
 
 - name: copy logrotate selinux policy
   become: true
@@ -86,14 +89,31 @@
     block: |
       <VirtualHost *:80>
           ServerAdmin rdo-ci-admins@redhat.com
-          DocumentRoot /home/{{ promoter_user }}/promoter_logs
+          DocumentRoot /home/{{ promoter_user }}/web
 
-          <Directory /home/{{ promoter_user }}/promoter_logs>
+          <Directory /home/{{ promoter_user }}/web>
               Options Indexes MultiViews
               AllowOverride None
               Require all granted
           </Directory>
       </VirtualHost>
+
+      <VirtualHost *:80>
+          ServerAdmin rdo-ci-admins@redhat.com
+          DocumentRoot "/home/centos/web/config"
+          ServerPath "/config/"
+          RewriteEngine On
+          RewriteRule "^(/config/.*)" "/home/centos/web$"
+      </VirtualHost>
+
+      <VirtualHost *:80>
+          ServerAdmin rdo-ci-admins@redhat.com
+          DocumentRoot "/home/centos/web/promoter_logs"
+          ServerPath "/promoter_logs/"
+          RewriteEngine On
+          RewriteRule "^(/promoter_logs/.*)" "/home/centos/web$"
+      </VirtualHost>
+
   register: apache_config
   become: true
 
