@@ -8,40 +8,34 @@ import logging
 import os
 import shutil
 import tempfile
-from string import Template
 
 import docker
 import yaml
 from dlrn_hash import DlrnHash
 
-# template that emulates the tripleo-common/overcloud_containers.yaml.j2
+# template that emulates the tripleo-common/overcloud_containers.yaml
 # definitions
 containers_template = '''
-container_images_template:
+container_images:
 
-- imagename: "{{namespace}}/{{name_prefix}}${image2}{{name_suffix}}:{{tag}}"
+- imagename: "docker.io/tripleomaster/centos-binary-neutron-server:current-tripleo"
   image_source: kolla
-  params:
-  - ContainerAodhApiImage
-  - ContainerAodhConfigImage
-  services:
-  - OS::TripleO::Services::AodhApi
-  - OS::TripleO::Services::AodhEvaluator
-  - OS::TripleO::Services::AodhListener
-  - OS::TripleO::Services::AodhNotifier
-  - OS::TripleO::Services::UndercloudAodhApi
-  - OS::TripleO::Services::UndercloudAodhEvaluator
-  - OS::TripleO::Services::UndercloudAodhListener
-  - OS::TripleO::Services::UndercloudAodhNotifier
 
-- imagename: "{{namespace}}/{{name_prefix}}${image1}{{name_suffix}}:{{tag}}"
+- imagename: "docker.io/tripleomaster/centos-binary-nova-compute:current-tripleo"
   image_source: kolla
-  params:
-  - ContainerAodhEvaluatorImage
-  services:
-  - OS::TripleO::Services::AodhEvaluator
-  - OS::TripleO::Services::UndercloudAodhEvaluator
-'''
+''' # noqa
+
+# template that emulates the tripleo-common/tripleo_containers.yaml
+# definitions
+tripleo_containers_template = '''
+container_images:
+
+- imagename: "quay.io/tripleomaster/openstack-neutron-server:current-tripleo"
+  image_source: tripleo
+
+- imagename: "quay.io/tripleomaster/openstack-nova-compute:current-tripleo"
+  image_source: tripleo
+''' # noqa
 
 
 class BaseImage(object):
@@ -214,7 +208,7 @@ class StagingContainers(object):
         """
         The container-push playbook of the promoter gets a list of
         containers from a static position in a tripleo-common repo in a file
-        called overcloud_containers.yaml.j2.
+        called overcloud_containers.yaml or tripleo_containers.yaml.
         This method creates this file
         :return: None
         """
@@ -232,12 +226,15 @@ class StagingContainers(object):
         # Current template supports only two images, 0 and 1 in our list are
         # base and openstack-base, they are hardcoded and are not needed here
         with open(containers_list_path, "w") as containers_file:
-            template = Template(containers_template)
-            containers_yaml_j2 = template.substitute({
-                'image1': self.suffixes[-2],
-                'image2': self.suffixes[-1],
-            })
-            containers_file.write(containers_yaml_j2)
+            containers_file.write(containers_template)
+
+        # Generate tripleo_containers.yaml file
+        tripleo_containers_path = \
+            os.path.join(self.containers_list_base,
+                         self.tripleo_commit_sha,
+                         'container-images/tripleo_containers.yaml')
+        with open(tripleo_containers_path, "w") as tripleo_file:
+            tripleo_file.write(tripleo_containers_template)
 
         exclude_config = {
             'exclude_containers': {
