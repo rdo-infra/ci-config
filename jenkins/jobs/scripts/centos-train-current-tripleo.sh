@@ -1,5 +1,5 @@
 set -e
-export RDO_VERSION='centos-train'
+export RDO_VERSION='centos8-train'
 export DELOREAN_HOST='trunk-primary.rdoproject.org'
 export DELOREAN_PUBLIC_HOST='trunk.rdoproject.org'
 export DELOREAN_URL="https://$DELOREAN_PUBLIC_HOST/centos7-train/current-tripleo/delorean.repo"
