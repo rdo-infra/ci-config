@@ -97,7 +97,7 @@ read_noop(){
 
 load_mariadb(){
 
-    read_$1 > /tmp/$1.csv
+    #read_$1 > /tmp/$1.csv
     mysql -h mariadb -P 3306 -u root < /tmp/load_$1_mysql.sql
 
 }
@@ -110,12 +110,12 @@ ansible-playbook /tmp/wait-mariadb.yaml
 while true; do
     # noop jobs have been disabled
     # load_mariadb noop 2>&1 | tee /tmp/run.log
-    load_mariadb drop 2>&1 | tee /tmp/run.log
+    load_mariadb drop 2>&1 | tee -a /tmp/run.log
     sleep 5;
-    load_mariadb pass 2>&1 | tee /tmp/run.log
-    load_mariadb lp 2>&1 | tee /tmp/run.log
-    load_mariadb bz 2>&1 | tee /tmp/run.log
-    load_mariadb recent_lp 2>&1 | tee /tmp/run.log
+    load_mariadb pass 2>&1 | tee -a /tmp/run.log
+    load_mariadb lp 2>&1 | tee -a /tmp/run.log
+    load_mariadb bz 2>&1 | tee -a /tmp/run.log
+    load_mariadb recent_lp 2>&1 | tee -a /tmp/run.log
     sleep 1440;
 
 done
