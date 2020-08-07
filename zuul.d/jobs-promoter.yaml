@@ -16,12 +16,6 @@
               - ^playbooks/molecule.*.yml
         - tripleo-ci-promotion-staging-integration-pipeline-centos-8:
             files: *promoter_files
-        - molecule-container-push-delegated-centos-7:
-            files: *promoter_files
-        - molecule-tripleo-common-delegated-centos-7:
-            files: *promoter_files
-        - molecule-delegated-promote-images-delegated-centos-7:
-            files: *promoter_files
     gate: *jobs
 
 - job:
@@ -78,52 +72,6 @@
     vars:
       pipeline_type: integration
       test_release: CentOS-8/master
-
-# These jobs could be handled by rdo-tox-molecule job, when the pytest-molecule
-# supports delegated driver, but as delegated tests don't run in isolation,
-# tthey may step on eachother's toe, and the first test could pollute the
-# environemnt for the second
-# So it's probably better to leave them as standalone jobs
-#
-- job:
-    name: molecule-container-push-delegated-centos-7
-    parent: base
-    nodeset: rdo-centos-7
-    pre-run: playbooks/legacy/molecule-delegated-pre.yml
-    run: playbooks/legacy/molecule-delegated.yml
-    post-run: playbooks/legacy/molecule-post.yml
-    vars:
-      molecule_test_commands: |
-        tox -emolecule_delegated -- roles/promoter/molecule/container-push/molecule.yml
-
-- job:
-    name: molecule-tripleo-common-delegated-centos-7
-    parent: base
-    nodeset: rdo-centos-7
-    pre-run: playbooks/legacy/molecule-delegated-pre.yml
-    run: playbooks/legacy/molecule-delegated.yml
-    post-run: playbooks/legacy/molecule-post.yml
-    vars:
-      molecule_test_commands: |
-        # container-push generates staging containers, skip teardown
-        molecule converge -s container-push -- --skip-tags=registry_cleanup
-        # tripleo-common test w/ staging containers
-        molecule test -s tripleo-common-integration
-        # container-push teardown, cleanup registries
-        molecule converge -s container-push -- --tags=registry_cleanup
-      skip_report: true  # old jobs do not produce reports.html
-
-- job:
-    name: molecule-delegated-promote-images-delegated-centos-7
-    parent: base
-    nodeset: rdo-centos-7
-    pre-run: playbooks/legacy/molecule-delegated-promote-images-pre.yml
-    run: playbooks/legacy/molecule-delegated.yml
-    post-run: playbooks/legacy/molecule-post.yml
-    vars:
-      molecule_test_commands: |
-        molecule test -s promote-images
-      skip_report: true  # old jobs do not produce reports.html
 
 - job:
     name: tox-py36-ci-config
