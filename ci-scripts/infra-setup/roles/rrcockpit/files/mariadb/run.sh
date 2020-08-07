@@ -83,6 +83,10 @@ read_pass(){
 
 }
 
+read_drop(){
+  echo "ignore: drop does not execute python, just sql"
+}
+
 read_noop(){
 
     releases="master rocky queens pike"
@@ -97,7 +101,7 @@ read_noop(){
 
 load_mariadb(){
 
-    #read_$1 > /tmp/$1.csv
+    read_$1 > /tmp/$1.csv
     mysql -h mariadb -P 3306 -u root < /tmp/load_$1_mysql.sql
 
 }
