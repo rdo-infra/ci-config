@@ -119,27 +119,6 @@
         fail_msg: "Uploader public key not found"
         success_msg: "Uploader public key was correctly created"
 
-    - name: Ensure role did not clone git from master
-      block:
-
-        - name: Retrieve master commit  # noqa 303
-          shell: |
-            git ls-remote https://github.com/rdo-infra/ci-config.git \
-              | grep HEAD | awk '{ print $1 }'
-          register: ci_config_commit_master
-
-        - name: Retrieve actual commit from local ci-config  # noqa 303
-          command: git rev-parse HEAD
-          args:
-            chdir: "{{ ci_config_remote_src_dir }}"
-          register: ci_config_commit
-
-        - name: Ensure commit is not master (@dev, make sure any change in test is committed)
-          assert:
-            that: ci_config_commit.stdout != ci_config_commit_master.stdout
-            fail_msg: "No value in testing master commit in ci-config repo"
-            success_msg: "Commit {{ ci_config_commit }} is being tested"
-
     - name: Ensure promoter virtualenv is ready to be used
       become: true
       become_user: "{{ promoter_user }}"
