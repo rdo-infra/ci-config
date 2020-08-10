@@ -23,11 +23,15 @@
 - name: Install system packages
   become: true
   block:
+    - name: Set proper release for the OS
+      set_fact:
+        distro: "{{ (ansible_distribution == 'CentOS') | ternary('centos', 'rhel') }}"
+
     - name: Install influxdb repo to get telegraf
       yum_repository:
         name: influxdb
-        description: InfluxDB Repository - RHEL \$releasever
-        baseurl: https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+        description: InfluxDB Repository - RHEL $releasever
+        baseurl: "https://repos.influxdata.com/{{ distro }}/$releasever/$basearch/stable"
         enabled: yes
         gpgcheck: yes
         gpgkey: https://repos.influxdata.com/influxdb.key
