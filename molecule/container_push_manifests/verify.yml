@@ -3,19 +3,6 @@
   become: true
   become_user: "{{ promoter_user }}"
   tasks:
-    # TODO(rfolco): we shouldn't have to reload stage-info.yaml vars and reset
-    # facts, fact_caching should be automatically saving these for us
-    - name: include stage setup variables # noqa 505
-      include_vars:
-        file: "~/stage-info.yaml"
-        name: stage_info
-
-    - name: sets critical variables
-      set_fact:
-        full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
-        source_registry: "{{ stage_info.registries.source }}"
-        target_registries: "{{ stage_info.registries.targets }}"
-
     - name: Check that the containers are pushed correctly to all target registries
       loop: "{{ target_registries | map(attribute='host') | product(stage_info.containers.images) | map('join', '/') | list }}"
       shell: |
