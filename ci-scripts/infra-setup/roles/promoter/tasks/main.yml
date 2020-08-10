@@ -150,47 +150,22 @@
   when: not item.stat.exists|bool
 
 #
-# Ci-config repo handling
-#
-- name: Check for presence of repo on local machine
-  become: false
-  stat:
-    path: "{{ ci_config_local_src_dir }}"
-  register: ci_config_local_src_dir_stat
-  delegate_to: localhost
-
-- name: Check for presence of repo on server
-  stat:
-    path: "{{ ci_config_remote_src_dir }}"
-  register: ci_config_remote_src_dir_stat
-
-#
 # Clone ci-config repo
 #
-- name: Understand from where to take the ci-config
+
+- name: clone promoter dir from local dir if present
   become: true
   become_user: "{{ promoter_user }}"
-  block:
-
-    - name: clone promoter dir from local dir if present
-      synchronize:
-        src: "{{ ci_config_local_src_dir }}/"
-        dest: "{{ ci_config_remote_src_dir }}"
-        owner: false  # will use promoter_user due to become_user
-        rsync_opts:
-            - "--no-motd"
-            - "--exclude=.tox"
-            # avoid spamming our logs
-            - "--quiet"
-      when: ci_config_local_src_dir_stat.stat.exists
-
-    - name: When dir is not present on the node, or locally, clone from git
-      git:  # noqa 401
-        repo: 'https://review.rdoproject.org/r/p/rdo-infra/ci-config.git'
-        dest: "{{ ci_config_remote_src_dir }}"
-      when:
-        - not ci_config_local_src_dir_stat.stat.exists
-        - not ci_config_remote_src_dir_stat.stat.exists
+  synchronize:
+    src: "{{ ci_config_local_src_dir }}/"
+    dest: "{{ ci_config_remote_src_dir }}"
+    owner: false  # will use promoter_user due to become_user
+    rsync_opts:
+        - "--no-motd"
+        - "--exclude=.tox"
+        # avoid spamming our logs
+        - "--quiet"
+  when: ci_config_local_src_dir_stat.stat.exists
 
 #
 # Promoter preparation
