@@ -3,17 +3,6 @@
 - hosts: instance
   tasks:
 
-    # fact_caching should replace this
-    - name: include stage setup variables # noqa 505
-      include_vars:
-        file: "~/stage-info.yaml"
-        name: stage_info
-
-    - name: Set full hash
-      set_fact:
-        full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
-        images_path: "{{ stage_info.overcloud_images.root }}"
-
     - name: Get tripleo-ci-staging-promoted info for checking
       stat:
         path: "{{ images_path }}/centos7/master/rdo_trunk/tripleo-ci-staging-promoted"
