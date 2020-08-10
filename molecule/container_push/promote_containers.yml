@@ -7,13 +7,15 @@
 - name: include stage setup variables # noqa 505
   include_vars:
     file: "~/stage-info.yaml"
-    name: stage_info
+    name: stage_info_vars
 
 - name: sets critical variables
   set_fact:
-    full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
-    source_registry: "{{ stage_info.registries.source }}"
-    target_registries: "{{ stage_info.registries.targets }}"
+    full_hash: "{{ stage_info_vars.dlrn.promotions.promotion_candidate.full_hash }}"
+    source_registry: "{{ stage_info_vars.registries.source }}"
+    target_registries: "{{ stage_info_vars.registries.targets }}"
+    stage_info: "{{ stage_info_vars }}"
+    cacheable: yes
 
 - name: Include containers-promote role to test
   include_role:

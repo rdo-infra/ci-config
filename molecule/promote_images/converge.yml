@@ -13,12 +13,14 @@
     - name: include stage setup variables # noqa 505
       include_vars:
         file: "~/stage-info.yaml"
-        name: stage_info
+        name: stage_info_vars
 
     - name: Set full hash
       set_fact:
-        full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
-        images_path: "{{ stage_info.overcloud_images.root }}"
+        full_hash: "{{ stage_info_vars.dlrn.promotions.promotion_candidate.full_hash }}"
+        images_path: "{{ stage_info_vars.overcloud_images.root }}"
+        stage_info: "{{ stage_info_vars }}"
+        cacheable: yes
 
     - name: Run the image promotion script promote-images.sh
       shell: |
