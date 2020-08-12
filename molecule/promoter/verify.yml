@@ -33,9 +33,10 @@
         fail_msg: "Docker manifest command is present but not enabled by default"
 
     - name: Ensure influxdb repo is present and configured correctly
-      command: yum repoinfo influxdb
+      become: true
+      command: dnf repoinfo influxdb
       args:
-        # shut up ansible. Yum module doesn't offer repoinfo functionality as of 2.8
+        # shut up ansible. Dnf module doesn't offer repoinfo functionality as of 2.8
         warn: false
       changed_when: false
 
