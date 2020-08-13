@@ -1,9 +1,13 @@
 ---
+# Ensure ansible can use a python interpreter
+- name: Bootstrap instance
+  import_playbook: ../../playbooks/bootstrap_instance.yml
+
 - hosts: instance
   tasks:
     - name: install development tools
       become: yes
-      yum:
+      package:
         name: '@Development tools'
         state: present
 
