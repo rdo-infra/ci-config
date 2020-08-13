@@ -40,6 +40,12 @@ release: master
 distro_name: centos
 distro_version: 7
 
+# This is only to enable the right repo
+distro: "{{ (ansible_distribution == 'CentOS') | ternary('centos', 'rhel') }}"
+
+# Pachage virtualenv differs from $distro 7 and 8
+python_virtualenv: "{{ (ansible_facts['distribution_major_version'] is version('8', '>=')) | ternary('python3-virtualenv', 'python36-virtualenv') }}"
+
 named_label: triple-ci-staging-promoted
 containers_file: "/tmp/parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
 

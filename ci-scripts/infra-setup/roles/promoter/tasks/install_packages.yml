@@ -1,7 +1,8 @@
-- name: EPEL packages
+- name: Configure repositories
   become: true
   block:
-    - name:  install epel
+
+    - name:  Install epel
       package:
         name: epel-release
         state: present
@@ -10,22 +11,6 @@
       command: yum-config-manager --enable epel
       args:
         warn: false
-
-    - name: Install epel packages
-      package:
-        name: "{{ item }}"
-        state: present
-      loop:
-        - python36-virtualenv
-        - python36-docker
-  when: ansible_distribution_major_version|int == 7
-
-- name: Install system packages
-  become: true
-  block:
-    - name: Set proper release for the OS
-      set_fact:
-        distro: "{{ (ansible_distribution == 'CentOS') | ternary('centos', 'rhel') }}"
 
     - name: Install influxdb repo to get telegraf
       yum_repository:
@@ -36,33 +21,23 @@
         gpgcheck: yes
         gpgkey: https://repos.influxdata.com/influxdb.key
 
-    - name: Install py3 packages
-      yum:
-        name:
-          - python3-virtualenv
-          - python3-docker
-        state: present
-      when: ansible_distribution_major_version|int >= 8
-
-    - name: Install required packages
-      yum:
-        name:
-          - logrotate
-          - httpd
-          - telegraf
-          - yum-utils
-          - device-mapper-persistent-data
-          - lvm2
-          - openssh
-          - git
-          - parted
-          - parted
-          - xfsprogs
-          - policycoreutils
-          - setools-console
-          - ansible
-          - libselinux-python3
-        state: present
-
-- name: Setup docker
-  include_tasks: ensure_docker.yml
+- name: Install required packages
+  become: true
+  yum:
+    name:
+      - ansible # epel
+      - device-mapper-persistent-data
+      - git
+      - httpd
+      - libselinux-python3
+      - logrotate
+      - lvm2
+      - openssh
+      - parted
+      - policycoreutils
+      - "{{ python_virtualenv }}"
+      - setools-console
+      - telegraf
+      - xfsprogs
+      - yum-utils
+    state: present
