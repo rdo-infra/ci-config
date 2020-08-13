@@ -6,15 +6,20 @@
   block:
     - name: Configure docker-ce repo
       command: yum-config-manager --add-repo \
-          https://download.docker.com/linux/centos/docker-ce.repo
+          https://download.docker.com/linux/{{ distro }}/docker-ce.repo
 
-    - name: Install required packages
+    - name: Install required packages {{ ansible_distribution }} 7
       yum:
         name:
           - docker-ce
           - docker-ce-cli
           - containerd.io
         state: present
+      when: ansible_distribution_major_version|int == 7
+
+    - name: Install required packages {{ ansible_distribution }} 8
+      command: dnf install docker-ce --nobest -y
+      when: ansible_distribution_major_version|int >= 8
 
 - name: Set up external partition
   become: true
