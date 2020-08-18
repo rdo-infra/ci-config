@@ -44,6 +44,7 @@
       file:
         path: /var/lib/docker
         state: directory
+        mode: "0775"
 
     - name: Mount external volume - mount the partition
       mount:
@@ -59,6 +60,7 @@
       file:
         path: /etc/docker
         state: directory
+        mode: "0750"
 
     - name: Configure overlay2 for docker
       copy:
@@ -70,6 +72,7 @@
               ]
           }
         dest: /etc/docker/daemon.json
+        mode: "0640"
       register: docker_config
 
 - name: Reload, enable and start docker
@@ -142,6 +145,7 @@
     path: "/home/{{ promoter_user }}/.docker/"
     owner: "{{ promoter_user }}"
     state: directory
+    mode: "0700"
 
 - name: Enable experimental commands in user config
   become: true
@@ -152,3 +156,4 @@
           "experimental": "enabled"
       }
     dest: "/home/{{ promoter_user }}/.docker/config.json"
+    mode: "0640"

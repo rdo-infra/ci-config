@@ -67,6 +67,7 @@
             content: |
                 container_images_template:
             dest: /tmp/staging_overcloud_containers.yaml.j2
+            mode: "0644"
 
         - name: Populate template file w/ staging containers
           blockinfile:
@@ -112,11 +113,13 @@
                       tag: "{{ full_hash }}"
                     tag_from_label: rdo_version
             dest: "/tmp/staging-containers-prepare-parameter.yaml"
+            mode: "0644"
 
         - name: copy staging_overcloud_containers.yaml.j2
           copy:
             src: "/tmp/staging_overcloud_containers.yaml.j2"
             dest: "{{ ansible_user_dir }}/test-python/share/tripleo-common/container-images/overcloud_containers.yaml.j2"
+            mode: preserve
 
         # image prepare pulls from promote_registry and pushes to undercloud_registry
         - name: run container image prepare

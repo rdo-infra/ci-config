@@ -97,6 +97,7 @@
         content: |
             container_images_template:
         dest: /tmp/staging_overcloud_containers.yaml.j2
+        mode: "0644"
 
     - name: Read containers file
       become: true
@@ -158,6 +159,7 @@
                   tag: "{{ full_hash }}"
                 tag_from_label: rdo_version
         dest: "/tmp/staging-containers-prepare-parameter.yaml"
+        mode: "0644"
 
     - name: copy staging_overcloud_containers.yaml.j2
       become: true
@@ -166,3 +168,4 @@
         src: "/tmp/staging_overcloud_containers.yaml.j2"
         dest: "~/{{ promoter_virtualenv }}/share/tripleo-common/container-images/overcloud_containers.yaml.j2"
         remote_src: yes
+        mode: "0644"

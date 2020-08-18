@@ -39,6 +39,7 @@
     state: directory
     setype: httpd_sys_content_t
     owner: "{{ promoter_user }}"
+    mode: "0775"
   with_items:
     - "~/web/promoter_logs"
     - "~/web/config"
@@ -48,6 +49,7 @@
   copy:
     src: logrotate-promoter.te
     dest: /tmp/logrotate-promoter.te
+    mode: "0644"
   register: policy
 
 - name: compile and permanently install policy
@@ -86,6 +88,7 @@
     content: ''
     dest: '/etc/httpd/conf.d/welcome.conf'
     backup: yes
+    mode: preserve
   become: true
 
 - name: Add config file for Apache to expose the logs

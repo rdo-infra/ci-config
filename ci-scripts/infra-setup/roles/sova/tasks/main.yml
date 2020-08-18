@@ -44,6 +44,7 @@
       "group": "{{ docker_group.stdout }}",
       }
     dest: /etc/docker/daemon.json
+    mode: "0640"
   register: docker_config
 
 - name: Reload docker if config was changed
@@ -63,6 +64,7 @@
     state: directory
     path: '{{ logs_http_path }}/logs/{{ item.name }}'
     owner: "{{ username }}"
+    mode: "0755"
   with_items: "{{ sova_config }}"
 
 - name: Create logs dir in mount point of docker volume
@@ -88,6 +90,7 @@
     file:
       state: directory
       path: '{{ item.system_path }}'
+      mode: "0700"
     with_items: "{{ sova_config }}"
 
   - name: Check if Gerrit SSH key presents on remote host
@@ -104,6 +107,7 @@
       remote_src: yes
       src: '{{ gerrit_ssh_key }}'
       dest: '{{ item.system_path }}/robi_id_rsa'
+      mode: "0600"
     with_items: "{{ sova_config }}"
     when: key.stat.exists
 
@@ -111,11 +115,13 @@
     template:
       src: nginx.conf.j2
       dest: '{{ work_dir }}/nginx.conf'
+      mode: "0644"
 
   - name: Create docker-compose from template
     template:
       src: docker-compose.yml.j2
       dest: '{{ docker_compose_file }}'
+      mode: "0644"
 
   - name: Run docker-compose from repo
     docker_compose:
