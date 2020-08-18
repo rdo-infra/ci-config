@@ -7,6 +7,7 @@
         path: /home/{{ ansible_user }}/.docker/
         owner: "{{ ansible_user }}"
         state: directory
+        mode: "0700"
 
     - name: Enable experimental commands in user config
       copy:
@@ -15,6 +16,7 @@
               "experimental": "enabled"
           }
         dest: /home/{{ ansible_user }}/.docker/config.json
+        mode: "0600"
 
 
 - name: Disable target push, only promote containers in source registry

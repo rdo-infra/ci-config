@@ -31,11 +31,13 @@
       state: present
       line: '%tripleo ALL=(ALL) NOPASSWD: ALL'
       validate: 'visudo -cf %s'
+      mode: "0644"
 
   - name: Create persistent journal
     file:
       path: /var/log/journal/
       state: directory
+      mode: "0775"
 
   - name: Enable journald persistence
     ini_file:
@@ -44,6 +46,7 @@
       option: Storage
       value: "Persistent"
       no_extra_spaces: yes
+      mode: "0644"
     register: journal_config
 
   - name: Restart journald
@@ -70,12 +73,14 @@
       path: /etc/ssh/sshd_config
       regexp: '^[ #]*PasswordAuthentication .*'
       line: 'PasswordAuthentication no'
+      mode: "0600"
     notify: ssh-restart
 
   - name: Forbid SSH login for user centos
     lineinfile:
       path: /etc/ssh/sshd_config
       line: 'DenyUsers centos'
+      mode: "0600"
     notify: ssh-restart
 
   - name: Create continuous delivery script
@@ -94,5 +99,6 @@
   lineinfile:
     path: /home/centos/.bashrc
     line: "export HISTTIMEFORMAT='%F %T '"
+    mode: "0600"
   become: true
   become_user: centos

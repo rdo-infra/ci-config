@@ -19,6 +19,7 @@
   lineinfile:
     dest: ~/.bashrc
     line: export PATH=$PATH:~/.local/bin/
+    mode: "0600"
 
 - name: Find out docker group name
   shell: |
@@ -56,6 +57,7 @@
       "group": "{{ docker_group.stdout }}",
       }
     dest: /etc/docker/daemon.json
+    mode: "0640"
   register: docker_config
 
 - name: Reload docker if config was changed

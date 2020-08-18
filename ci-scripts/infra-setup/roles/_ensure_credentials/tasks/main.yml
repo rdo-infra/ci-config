@@ -9,11 +9,13 @@
   copy:
     content: export REGISTRY_PASSWORD='registry_password00'
     dest: "{{ registry_secret_path }}"
+    mode: "0600"
 
 - name: Inject dlrnapi secret
   copy:
     content: export DLRNAPI_PASSWORD='dlrnapi_password00'
     dest: "{{ dlrnapi_secret_path }}"
+    mode: "0600"
 
 - name: save fake static uploader key locally
   copy:
@@ -46,11 +48,7 @@
         WAsyy1Jag5MFgLJysZEKUDPtFWvsrs3gdn63GcrqkOH85a2Y/X2U
         -----END RSA PRIVATE KEY-----
     dest: "{{ uploader_key_path }}"
-
-- name: Change key file permission
-  file:
-    path: "{{ uploader_key_path }}"
-    mode: 0600
+    mode: "0600"
 
 - name: Generate public key from private key for uploader user
   shell: >

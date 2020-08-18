@@ -13,6 +13,7 @@
         regexp: '^127\.0\.0\.1[ \t]+localhost'
         line: "127.0.0.1 localhost {{ cockpit_hostname | default('rrcockpit') }}"
         state: present
+        mode: "0664"
 
     - name: Install packages
       package:
@@ -41,16 +42,19 @@
       file:
         path: /etc/ansible/
         state: directory
+        mode: "0775"
 
     - name: Create hosts file
       copy:
         dest: /etc/ansible/hosts
         content: "{{ cockpit_hostname | default('rrcockpit') }} ansible_connection=local"
+        mode: "0644"
 
     - name: Create files
       copy:
         content: "{{ item.content }}"
         dest: "{{ item.path }}"
+        mode: "0600"
       with_items:
         - content: "{{ grafana_admin_password }}"
           path: /root/grafana_admin_password
