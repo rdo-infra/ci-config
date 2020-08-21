@@ -1,20 +1,34 @@
 #!/usr/bin/env python
 
 import argparse
-
 import dlrnapi_client
-from influxdb_utils import format_ts_from_float
+import sys
+from influxdb_utils import format_ts_from_float, format_ts_from_last_modified
 
 # only run upstream or downstream promotion checks
 # do not run both.
 try:
     from internal_promoter_utils import (get_dlrn_instance,
                                          get_promoter_component_config,
-                                         get_promoter_config)
+                                         get_promoter_config,
+                                         get_consistent)
 except ImportError:
     from promoter_utils import (get_dlrn_instance,
                                 get_promoter_component_config,
-                                get_promoter_config)
+                                get_promoter_config,
+                                get_consistent)
+
+# noticed an exception is not always thrown here.
+# double check we have imported libraries, default to public
+if 'promoter_utils' or 'internal_promoter_utils' not in sys.modules:
+    from promoter_utils import (get_dlrn_instance,
+                                get_promoter_component_config,
+                                get_promoter_config,
+                                get_consistent)
+    if 'promoter_utils' not in sys.modules:
+        print 'promoter_utils is not imported'
+        sys.exit(1)
+
 
 PROMOTION_INFLUXDB_LINE = ("dlrn-promotion,"
                            "release={release},distro={distro},"
@@ -23,6 +37,7 @@ PROMOTION_INFLUXDB_LINE = ("dlrn-promotion,"
                            "distro_hash=\"{distro_hash}\","
                            "repo_hash=\"{repo_hash}\","
                            "repo_url=\"{repo_url}\","
+                           "consistent_date={consistent_date},"
                            "component=\"{component}\" "
                            "{timestamp}")
 
@@ -59,19 +74,33 @@ if __name__ == '__main__':
     parser.add_argument('--component', default=None)
     args = parser.parse_args()
 
+    if args is None:
+        SystemExit(1)
+
     if args.component is None:
         promoter_config = get_promoter_config(args.release, args.distro)
     else:
         promoter_config = get_promoter_component_config(
             args.release, args.distro)
+
     dlrn = get_dlrn_instance(promoter_config)
     if dlrn:
         for promotion_name in promoter_config['promote_from']:
             if args.component is None:
                 promo = get_last_promotion(dlrn, args.release, args.distro,
                                            promotion_name)
+                consistent = format_ts_from_last_modified(
+                    get_consistent(promoter_config))
             else:
                 promo = get_last_promotion(dlrn, args.release, args.distro,
                                            promotion_name, args.component)
+                consistent = format_ts_from_last_modified(
+                    get_consistent(promoter_config, args.component))
+            # get the promotion for consistent to establish how old the
+            # promotion is.  date(promomtion) - date(consistent)
+            if promo and consistent:
+                promo.update({'consistent_date': consistent})
             if promo:
                 print(influxdb(promo))
+    else:
+        print 'the dlrn configuration was not found'
