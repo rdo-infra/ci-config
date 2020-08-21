@@ -54,3 +54,25 @@ def get_dlrn_instance_for_release(release):
     promoter_config = get_promoter_config(release)
     if promoter_config:
         return get_dlrn_instance(promoter_config)
+
+# get the date of the consistent link in dlrn
+
+
+def get_consistent(config, component=None):
+    if component is None:
+        response = requests.get(
+            config['main']['base_url'] + 'consistent/delorean.repo')
+        if response.ok:
+            consistent_date = response.headers['Last-Modified']
+        else:
+            return None
+    else:
+        response = requests.get(
+            config['main']['base_url'] + 'component/'
+            + component + '/consistent/delorean.repo')
+        if response.ok:
+            consistent_date = response.headers['Last-Modified']
+        else:
+            return None
+
+    return consistent_date
