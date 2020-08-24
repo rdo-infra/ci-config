@@ -7,7 +7,7 @@
     - name: emulate deploy -- check containers in undercloud_registry  # noqa 303
       shell: |
         source ~/{{ promoter_virtualenv }}/bin/activate
-        curl --verbose -X GET {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}/tags/list
+        curl --verbose -X GET {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ container_name_prefix }}-{{ item }}/tags/list
       with_items: "{{ staging_containers_list }}"
       changed_when: false
 
@@ -16,14 +16,14 @@
       shell: |
         source ~/{{ promoter_virtualenv }}/bin/activate
         docker manifest inspect --insecure \
-        {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}
+        {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}
       with_items: "{{ staging_containers_list }}"
       changed_when: false
 
     # pull staging containers from undercloud_registry
     - name: emulate deploy -- pull staging containers from undercloud_registry
       docker_image:
-        name: "{{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}"
+        name: "{{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}"
         source: pull
       with_items: "{{ staging_containers_list }}"
       vars:
