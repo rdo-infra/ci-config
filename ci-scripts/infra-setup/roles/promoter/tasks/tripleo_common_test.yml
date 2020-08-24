@@ -71,6 +71,10 @@
         marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
       with_items: "{{ containers_list }}"
 
+    # TODO(rfolco): This should match what is in tripleo-common so perhaps
+    # loading defaults from tripleo-common and overriding parameters would be
+    # better than the current implementation below (hardcoded)
+    # tripleo-common | container-images/container_image_prepare_defaults.yaml
     - name: generate staging-containers-prepare-parameter.yaml
       copy:
         content: |
@@ -93,7 +97,7 @@
                   ceph_prometheus_namespace: docker.io/prom
                   ceph_prometheus_tag: latest
                   ceph_tag: v4.0.1-stable-4.0-nautilus-centos-7-x86_64
-                  name_prefix: "{{ distro_name }}-binary-"
+                  name_prefix: "{{ container_name_prefix }}"
                   name_suffix: ''
                   namespace: "{{ promote_registries[0]['host'] }}/{{ promote_registries[0]['namespace'] }}"
                   neutron_driver: ovn
@@ -121,7 +125,7 @@
     - name: emulate deploy -- check containers in undercloud_registry
       shell: |
         curl --verbose -X GET \
-            {{ undercloud_registry['host'] }}/v2/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}/tags/list
+            {{ undercloud_registry['host'] }}/v2/{{ undercloud_registry['namespace'] }}/{{ container_name_prefix }}-{{ item }}/tags/list
       args:
         # shut up ansible, get_url is not enough here
         warn: false
@@ -131,13 +135,13 @@
     - name: emulate deploy -- inspect manifests in undercloud_registry
       shell: |
         docker manifest inspect --insecure \
-            {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}
+            {{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}
       with_items: "{{ containers_list }}"
 
     # pull staging containers from undercloud_registry
     - name: emulate deploy -- pull staging containers from undercloud_registry
       docker_image:
-        name: "{{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}"
+        name: "{{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}"
         source: pull
       with_items: "{{ containers_list }}"
 
@@ -155,7 +159,7 @@
 
     - name: remove local containers
       docker_image:
-        name: "{{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ distro_name }}-binary-{{ item }}:{{ full_hash }}"
+        name: "{{ undercloud_registry['host'] }}/{{ undercloud_registry['namespace'] }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}"
         state: absent
       with_items: "{{ containers_list }}"
       tags:
