@@ -7,7 +7,6 @@ ci_config_local_src_dir: "{{ role_path }}/../../"
 ci_config_remote_src_dir: "/home/{{ promoter_user }}/ci-config"
 promoter_virtualenv: promoter_venv
 
-
 # TODO(rfolco): remove all local / provision paths for
 # credentials as the new _ensure_credentials will assume
 # these are present in the remote instance paths
@@ -39,6 +38,8 @@ remote_path_uploader_key: "~/.ssh/id_rsa"
 release: master
 distro_name: centos
 distro_version: 7
+
+container_prefix: "{{ (release in ['queens','rocky','stein','train','ussuri']) | ternary(distro'-binary', 'openstack-') }}"
 
 # This is only to enable the right repo
 distro: "{{ (ansible_distribution == 'CentOS') | ternary('centos', 'rhel') }}"
