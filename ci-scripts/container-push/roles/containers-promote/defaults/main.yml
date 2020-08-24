@@ -44,3 +44,9 @@ base_container_images: >-
   {%- else -%}
   {{ base_containers_newworkflow }}
   {%- endif -%}
+container_name_prefix: >-
+  {% if release in ['queens','rocky','stein','train','ussuri'] -%}
+  {{ ansible_distribution|lower }}-binary }}
+  {%- else -%}
+  openstack
+  {%- endif %}
