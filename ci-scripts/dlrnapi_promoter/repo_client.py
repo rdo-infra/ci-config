@@ -31,6 +31,7 @@ class RepoClient(object):
             config.containers_list_exclude_config
         self.release = config.release
         self.build_method = config.build_method
+        self.container_preffix = config.container_preffix
 
     def get_versions_csv(self, dlrn_hash, candidate_label):
         """
@@ -119,13 +120,11 @@ class RepoClient(object):
         # Load the yaml content for further parsing
         container_list = yaml.safe_load(containers_content)
 
-        # construct container_name_preffix
+        # container_preffix is loaded from config
         # In container-images/tripleo_containers.yaml, the containers
-        # are named openstack-*.
+        # are named openstack-* for master/victoria onwards.
         # In container-images/overcloud_containers.yaml, the containers
-        # are named distro-binary-*.
-        container_preffix = {'kolla': 'binary-',
-                             'tripleo': 'openstack-'}
+        # are named distro-binary-* for older branches.
 
         if container_list:
             if 'container_images' in container_list:
@@ -156,20 +155,20 @@ class RepoClient(object):
                     ]
 
                 # filter imagename based on image_source
-                # for imagename and image_source: kolla:
+                # for imagename and release up to ussuri
                 # docker.io/tripleomaster/centos-binary-aodh-api:current-tripleo
                 # We need to get aodh-api as a container name by striping with
                 # '/' and spliting -binary from the imagename
                 #
-                # for imagename and image_source: tripleo
+                # for imagename and release: master/victoria onwards
                 # quay.io/tripleomaster/openstack-base:current-tripleo
                 # we need to get tempest as a container name by striping with
                 # '/' and splitting -openstack from the imagename
 
                 full_list = [
-                    i.split(container_preffix[self.build_method])[-1]
+                    i.split(self.container_preffix)[-1]
                     for i in full_list
-                    if container_preffix[self.build_method] in i
+                    if self.container_preffix in i
                 ]
         else:
             full_list = []
