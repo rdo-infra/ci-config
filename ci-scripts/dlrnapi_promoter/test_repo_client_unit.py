@@ -48,7 +48,7 @@ class RepoSetup(unittest.TestCase):
         config = type("Config", (), {
             'repo_url': repo_url,
             'release': 'master',
-            'build_method': 'kolla',
+            'build_method': 'tripleo',
             'containers_list_base_url': containers_list_base_url,
             'containers_list_path': config_defaults['containers_list_path'],
             'containers_list_exclude_config': "file://{}".format(
@@ -106,25 +106,6 @@ class RepoSetup(unittest.TestCase):
         containers_dir = os.path.join(self.temp_dir,
                                       self.versions_csv_rows[1]['Source Sha'],
                                       containers_file_dirname)
-        # containers names coming from overcloud_containers.yaml file
-        containers_list = """
-container_images:
-- image_source: kolla
-  imagename: quay.io/tripleomaster/centos-binary-nova-api:current-tripleo
-- image_source: kolla
-  imagename: quay.io/tripleomaster/centos-binary-neutron-server:current-tripleo
-- image_source: kolla
-  imagename: quay.io/tripleomaster/centos-binary-excluded:current-tripleo
-- image_source: kolla
-  imagename: quay.io/tripleomaster/centos-binary-ovn-controller:current-tripleo
-"""
-        os.makedirs(containers_dir)
-        containers_file_path = \
-            os.path.join(containers_dir,
-                         os.path.basename(config_defaults[
-                                              'containers_list_path']))
-        with open(containers_file_path, "w") as containers_file:
-            containers_file.write(containers_list)
 
         # containers names coming from tripleo yaml file
         tripleo_containers_list = """
@@ -136,17 +117,37 @@ container_images:
 - image_source: tripleo
   imagename: quay.io/tripleomaster/openstack-aodh-base:current-tripleo
 """
-        tripleo_containers_file_path = \
-            os.path.join(containers_dir, 'tripleo_containers.yaml')
-        with open(tripleo_containers_file_path, "w") as containers_file:
+        os.makedirs(containers_dir)
+        containers_file_path = \
+            os.path.join(containers_dir,
+                         os.path.basename(config_defaults[
+                                              'containers_list_path']))
+        with open(containers_file_path, "w") as containers_file:
             containers_file.write(tripleo_containers_list)
+
+        # containers names coming from overcloud_containers.yaml file
+        overcloud_containers_list = """
+container_images:
+- image_source: kolla
+  imagename: quay.io/tripleou/centos-binary-nova-api:current-tripleo
+- image_source: kolla
+  imagename: quay.io/tripleou/centos-binary-neutron-server:current-tripleo
+- image_source: kolla
+  imagename: quay.io/tripleou/centos-binary-excluded:current-tripleo
+- image_source: kolla
+  imagename: quay.io/tripleou/centos-binary-ovn-controller:current-tripleo
+"""
+        overcloud_containers_file_path = \
+            os.path.join(containers_dir, 'overcloud_containers.yaml')
+        with open(overcloud_containers_file_path, "w") as containers_file:
+            containers_file.write(overcloud_containers_list)
 
         # containers names coming from yaml file for queens release
         tripleo_containers_list = """
 container_images:
-- imagename: quay.io/tripleomaster/centos-binary-base:current-tripleo
-- imagename: quay.io/tripleomaster/centos-binary-os:current-tripleo
-- imagename: quay.io/tripleomaster/centos-binary-aodh-base:current-tripleo
+- imagename: quay.io/tripleoqueens/centos-binary-base:current-tripleo
+- imagename: quay.io/tripleoqueens/centos-binary-os:current-tripleo
+- imagename: quay.io/tripleoqueens/centos-binary-aodh-base:current-tripleo
 """
         overcloud_containers_file_path = \
             os.path.join(containers_dir, 'queens_containers.yaml')
@@ -159,6 +160,7 @@ container_images:
         exclude_config = {
             'exclude_containers': {
                 'master': excluded_containers,
+                'train': excluded_containers,
             },
         }
         with open(containers_list_exclude_config_path, "w") as exclude_file:
@@ -297,7 +299,10 @@ class TestGetContainersList(RepoSetup):
     def test_get_containers_list_overcloud(self,
                                            mock_log_debug,
                                            mock_log_error):
-        self.client.build_method = "kolla"
+        self.client.release = "train"
+        self.client.containers_list_path = (
+                'container-images/overcloud_containers.yaml'
+        )
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
         self.assertEqual(containers_list, ['nova-api', 'neutron-server',
@@ -315,9 +320,6 @@ class TestGetContainersList(RepoSetup):
                                          mock_log_error):
         self.client.build_method = "tripleo"
         self.client.release = "foobar"
-        self.client.containers_list_path = (
-                'container-images/tripleo_containers.yaml'
-        )
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
         self.assertEqual(containers_list, ['base', 'os', 'aodh-base'])
@@ -333,6 +335,7 @@ class TestGetContainersList(RepoSetup):
                                         mock_log_debug,
                                         mock_log_error):
         self.client.release = "queens"
+        self.client.build_method = "kolla"
         self.client.containers_list_path = (
                 'container-images/queens_containers.yaml'
         )
@@ -350,6 +353,10 @@ class TestGetContainersList(RepoSetup):
     def test_get_containers_list_ok_no_excludes(self,
                                                 mock_log_debug,
                                                 mock_log_error):
+        self.client.release = "stein"
+        self.client.containers_list_path = (
+                'container-images/overcloud_containers.yaml'
+        )
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'], load_excludes=False)
         self.assertEqual(containers_list, ['nova-api', 'neutron-server',
@@ -468,3 +475,20 @@ class TestGetContainersList(RepoSetup):
         self.assertFalse(mock_log_info.called)
         self.assertFalse(mock_log_debug.called)
         self.assertFalse(mock_log_exception.called)
+
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.debug')
+    def test_get_containers_list_ussuri(self,
+                                        mock_log_debug,
+                                        mock_log_error):
+        self.client.release = "ussuri"
+        containers_list = self.client.get_containers_list(
+            self.versions_csv_rows[1]['Source Sha'])
+        mock_log_debug.assert_has_calls([
+            mock.call("Attempting Download of containers template at %s",
+                      mock.ANY)
+        ])
+        self.assertEqual(self.client.containers_list_path,
+            'container-images/tripleo_containers.yaml'
+        )
+        mock_log_error.assert_not_called()

@@ -124,8 +124,11 @@ class RepoClient(object):
         # are named openstack-*.
         # In container-images/overcloud_containers.yaml, the containers
         # are named distro-binary-*.
-        container_preffix = {'kolla': 'binary-',
-                             'tripleo': 'openstack-'}
+        if self.release in ['queens', 'rocky', 'stein', 'train', 'ussuri']:
+            container_preffix = 'binary-'
+        else:
+            #master/victoria onwards
+            container_preffix = 'openstack-'
 
         if container_list:
             if 'container_images' in container_list:
@@ -156,20 +159,20 @@ class RepoClient(object):
                     ]
 
                 # filter imagename based on image_source
-                # for imagename and image_source: kolla:
+                # for imagename and release up to ussuri
                 # docker.io/tripleomaster/centos-binary-aodh-api:current-tripleo
                 # We need to get aodh-api as a container name by striping with
                 # '/' and spliting -binary from the imagename
                 #
-                # for imagename and image_source: tripleo
+                # for imagename and release: master/victoria onwards
                 # quay.io/tripleomaster/openstack-base:current-tripleo
                 # we need to get tempest as a container name by striping with
                 # '/' and splitting -openstack from the imagename
 
                 full_list = [
-                    i.split(container_preffix[self.build_method])[-1]
+                    i.split(container_preffix)[-1]
                     for i in full_list
-                    if container_preffix[self.build_method] in i
+                    if container_preffix in i
                 ]
         else:
             full_list = []
