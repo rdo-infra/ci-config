@@ -44,14 +44,15 @@ class PromoterLegacyConfigBase(object):
         'allowed_clients': 'registries_client,qcow_client,dlrn_client',
         'log_level': "INFO",
         "dlrn_api_host": "trunk.rdoproject.org",
-        "build_method": "kolla",
+        "build_method": "tripleo",
+        "container_preffix": "openstack-",
         "containers_list_base_url": ("https://opendev.org/openstack/"
                                      "tripleo-common/raw/commit/"),
         # For old container kolla based workflow, the source of truth of
         # containers is overcloud_containers.yaml.
         # For new container (non-kolla) based workflow, the source of truth
         # is tripleo_containers.yaml.
-        "containers_list_path": "container-images/overcloud_containers.yaml",
+        "containers_list_path": "container-images/tripleo_containers.yaml",
         "containers_list_exclude_config": (
             "https://opendev.org/openstack/"
             "tripleo-ci/raw/branch/master/roles/build-containers/vars/main.yaml"
@@ -293,6 +294,10 @@ class PromoterLegacyConfig(PromoterLegacyConfigBase):
 
         config['build_method'] = \
             config.get('build_method', self.defaults['build_method']).lower()
+
+        config['container_preffix'] = \
+            config.get('container_preffix',
+                       self.defaults['container_preffix']).lower()
 
         config['distro'] = "{}{}".format(config['distro_name'],
                                          config['distro_version'])
