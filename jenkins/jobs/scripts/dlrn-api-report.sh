@@ -19,5 +19,5 @@ dlrnapi --url https://$DELOREAN_PUBLIC_HOST/api-$RDO_VERSION \
     --job-id $JOB_NAME \
     ${HASH_ARGS} \
     --timestamp $(date +%s) \
-    --info-url https://ci.centos.org/job/$JOB_NAME/$BUILD_ID/artifact/console.txt.gz \
+    --info-url https://ci.centos.org/job/$JOB_NAME/$BUILD_ID/console.txt.gz \
     --success $JOB_SUCCESS
