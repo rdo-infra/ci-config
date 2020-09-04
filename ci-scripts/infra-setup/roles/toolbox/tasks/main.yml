@@ -91,6 +91,15 @@
         bash /opt/stack/ci-config/ci-scripts/infra-cleanup/cleanup-failed-stacks.sh
         &>>/var/log/clean_failed_stacks.log
 
+  - name: Create cron job to cleanup keypairs
+    cron:
+      name: 'Cleaning keypairs'
+      minute: 50
+      job: >-
+        source /etc/vexxhostrc-ovb &&
+        bash /opt/stack/ci-config/ci-scripts/infra-cleanup/cleanup-keys.sh
+        &>>/var/log/clean_keypairs.log
+
   # - name: Create cron job to clean OVB old stacks
   #   cron:
   #     name: 'Cleaning old OVB stacks'
