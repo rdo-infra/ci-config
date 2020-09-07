@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "32433ffe_8eb16faa",
+        "filename": "ci-scripts/dlrnapi_promoter/test_dlrn_integration.py",
+        "patchSetId": 48
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 192
+      },
+      "writtenOn": "2020-09-07T15:16:30Z",
+      "side": 1,
+      "message": "--- a/ci-scripts/dlrnapi_promoter/test_dlrn_integration.py\n+++ b/ci-scripts/dlrnapi_promoter/test_dlrn_integration.py\n@@ -46,8 +46,9 @@ def staged_env(request):\n     # line, so we are testing also that the argument parsing is working\n     # correctly instead of passing  configuration directly\n     release_config \u003d \\\n-        \"CentOS-7/master.ini\"\n+        \"CentOS-7/master.yaml\"\n     promoter_config_file \u003d \"staging/CentOS-7/master.ini\"\n+    setup_cmd_line +\u003d \" setup --release-config {}\".format(release_config)\n     setup_cmd_line +\u003d \" --scenes dlrn\"\n \n     try:\n@@ -68,9 +69,8 @@ def staged_env(request):\n         setup_cmd_line +\u003d \" --db-data-file integration-pipeline.yaml\"\n         teardown_cmd_line +\u003d \" --db-data-file integration-pipeline.yaml\"\n \n-    setup_cmd_line +\u003d \" setup --release-config {}\".format(release_config)\n     # MARIOS WORKING HERE\n-    import pdb; pdb.set_trace()\n+    #import pdb; pdb.set_trace()\n     teardown_cmd_line +\u003d \" teardown\"\n \n     log.info(\"Running cmd line: {}\".format(setup_cmd_line))\n\n*** continue trying to fix \"invalid choice: \u0027dlrn\u0027 (choose from \u0027setup\u0027, \u0027teardown\u0027)\" https://logserver.rdoproject.org/81/28081/47/check/tox-py36-ci-config/b7f0ca0/job-output.txt \u0026 pdb stepping \u0026 args order matters -\u003e \u0027fixed\u0027 (* (Pdb) cmd_line\u003d\u0027setup --release-config CentOS-7/master.yaml --scenes dlrn\u0027)",
+      "revId": "b44d37cb8191b0a10c75e370374cac9ae62236c3",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
