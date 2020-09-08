@@ -1,0 +1,62 @@
+#!/usr/bin/python3
+
+import click
+import requests
+
+
+def request_data(jenkins_url):
+    jenkins_query = ("?tree=jobs[name,builds[fullDisplayName,id,url,"
+                     + "logs,number,timestamp,duration,result]]"
+                     + "&xpath=/hudson/job/build"
+                     + "[count(result)=0]&wrapper=builds")
+
+    r = requests.get(jenkins_url + "/api/json" + jenkins_query, verify=False)
+    return r
+
+
+def print_data(data, release, name_filter):
+
+    jobs = data.json()['jobs']
+
+    for j in jobs:
+        if 'builds' in j.keys():
+            job_name = j['name']
+            # hard code filter on master-promote jobs
+            if name_filter in job_name:
+                if release in job_name:
+                    for b in j['builds']:
+                        b['timestamp'] = int(b['timestamp'] * 1000000)
+                        print(('jenkins,'
+                               'job_name={},build_id="{}",'
+                               'duration="{}",result="{}",'
+                               'url="{}" result="{}",'
+                               'url="{}",build_id="{}",'
+                               'duration="{}" {}').
+                              format(job_name,
+                                     b['id'],
+                                     b['duration'],
+                                     b['result'],
+                                     b['url'],
+                                     b['result'],
+                                     b['url'],
+                                     b['id'],
+                                     b['duration'],
+                                     b['timestamp']))
+
+
+@click.command()
+@click.option('--release', default="master",
+              help="the rdo release, e.g. master,ussuri,train")
+@click.option('--name_filter', default="tripleo-quickstart",
+              help="filter out jobs with a keyword")
+@click.option('--jenkins_url', default="https://ci.centos.org/",
+              help="base url of jenkins server")
+def main(release="master",
+         name_filter="tripleo-quickstart",
+         jenkins_url="https://ci.centos.org/"):
+
+    print_data(request_data(jenkins_url), release, name_filter)
+
+
+if __name__ == '__main__':
+    main()

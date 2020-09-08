@@ -87,6 +87,18 @@ services:
     volumes:
       - telegraf-volume:/tmp/
 
+  telegraf_py3:
+    build: telegraf_py3
+    restart: always
+    container_name: telegraf_py3
+    hostname: telegraf_py3.rrcockpit
+    env_file:
+      - 'telegraf_py3/env'
+    depends_on:
+      - influxdb
+    volumes:
+      - telegraf-volume:/tmp/telegraf_py3
+
 volumes:
   mariadb-volume:
   influxdb-volume:
