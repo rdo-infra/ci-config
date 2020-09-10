@@ -21,27 +21,33 @@ def print_data(data, release, name_filter):
     for j in jobs:
         if 'builds' in j.keys():
             job_name = j['name']
-            # hard code filter on master-promote jobs
-            if name_filter in job_name:
-                if release in job_name:
-                    for b in j['builds']:
-                        b['timestamp'] = int(b['timestamp'] * 1000000)
-                        print(('jenkins,'
-                               'job_name={},build_id="{}",'
-                               'duration="{}",result="{}",'
-                               'url="{}" result="{}",'
-                               'url="{}",build_id="{}",'
-                               'duration="{}" {}').
-                              format(job_name,
-                                     b['id'],
-                                     b['duration'],
-                                     b['result'],
-                                     b['url'],
-                                     b['result'],
-                                     b['url'],
-                                     b['id'],
-                                     b['duration'],
-                                     b['timestamp']))
+        # hard code filter on master-promote jobs
+        if name_filter in job_name:
+            if release in job_name:
+                for b in j['builds']:
+                    b['timestamp'] = int(b['timestamp'] * 1000000)
+                    if b['result'] == "SUCCESS":
+                        b['result_int'] = int(0)
+                    else:
+                        b['result_int'] = int(1)
+                    print(('jenkins,'
+                           'job_name={},build_id="{}",'
+                           'duration={},result="{}",'
+                           'url="{}" result="{}",'
+                           'url="{}",build_id="{}",'
+                           'result_int={},'
+                           'duration={} {}').
+                          format(job_name,
+                                 b['id'],
+                                 b['duration'],
+                                 b['result'],
+                                 b['url'],
+                                 b['result'],
+                                 b['url'],
+                                 b['id'],
+                                 b['result_int'],
+                                 b['duration'],
+                                 b['timestamp']))
 
 
 @click.command()
