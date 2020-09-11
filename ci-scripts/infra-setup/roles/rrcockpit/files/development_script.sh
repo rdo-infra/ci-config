@@ -39,6 +39,12 @@ if [ -z "$1" ]; then
     usage
 fi
 
+# do not run on production servers
+if [[ $HOSTNAME == "incockpit" || $HOSTNAME == "rrcockpit.novalocal" ]]; then
+    echo "do not run this script here"
+    exit
+fi
+
 while [ "$1" != "" ]; do
     case $1 in
         -s | --start )          shift
