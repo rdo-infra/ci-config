@@ -802,7 +802,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"",
+                        "alias":"Time since last promotion",
                         "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
@@ -853,6 +853,22 @@
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
+                    },
+                    {
+                        "alias":"Time since last build",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"consistent_date",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -874,7 +890,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'baremetal' ) \n",
+                        "query":"select   \"component\",  \"repo_url\", \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'baremetal' ) \n",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -912,7 +928,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cinder' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cinder' ) \n",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"table",
@@ -950,7 +966,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'clients' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'clients' ) \n",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"table",
@@ -988,7 +1004,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cloudops' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cloudops' ) \n",
                         "rawQuery":true,
                         "refId":"D",
                         "resultFormat":"table",
@@ -1026,7 +1042,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'common' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'common' ) \n",
                         "rawQuery":true,
                         "refId":"E",
                         "resultFormat":"table",
@@ -1064,7 +1080,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'compute' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'compute' ) \n",
                         "rawQuery":true,
                         "refId":"F",
                         "resultFormat":"table",
@@ -1102,7 +1118,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'glance' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'glance' ) \n",
                         "rawQuery":true,
                         "refId":"G",
                         "resultFormat":"table",
@@ -1140,7 +1156,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'manila' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'manila' ) \n",
                         "rawQuery":true,
                         "refId":"H",
                         "resultFormat":"table",
@@ -1178,7 +1194,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'network' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'network' ) \n",
                         "rawQuery":true,
                         "refId":"I",
                         "resultFormat":"table",
@@ -1216,7 +1232,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'octavia' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'octavia' ) \n",
                         "rawQuery":true,
                         "refId":"J",
                         "resultFormat":"table",
@@ -1254,7 +1270,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'security' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'security' ) \n",
                         "rawQuery":true,
                         "refId":"K",
                         "resultFormat":"table",
@@ -1292,7 +1308,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'swift' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'swift' ) \n",
                         "rawQuery":true,
                         "refId":"L",
                         "resultFormat":"table",
@@ -1330,7 +1346,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tempest' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tempest' ) \n",
                         "rawQuery":true,
                         "refId":"M",
                         "resultFormat":"table",
@@ -1368,9 +1384,87 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tripleo' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tripleo' ) \n",
                         "rawQuery":true,
                         "refId":"N",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "hide":false,
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'ui' ) \n",
+                        "rawQuery":true,
+                        "refId":"O",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "hide":false,
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'validation' ) \n",
+                        "rawQuery":true,
+                        "refId":"P",
                         "resultFormat":"table",
                         "select":[
                             [
@@ -1858,7 +1952,7 @@
                     "x":12,
                     "y":35
                 },
-                "id":12,
+                "id":35,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -1869,7 +1963,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"",
+                        "alias":"Time since last promotion",
                         "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
@@ -1920,6 +2014,22 @@
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
+                    },
+                    {
+                        "alias":"Time since last build",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"consistent_date",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -1941,7 +2051,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'baremetal' ) \n",
+                        "query":"select   \"component\",  \"repo_url\", \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'baremetal' ) \n",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -1979,7 +2089,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cinder' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cinder' ) \n",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"table",
@@ -2017,7 +2127,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'clients' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'clients' ) \n",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"table",
@@ -2055,7 +2165,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cloudops' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cloudops' ) \n",
                         "rawQuery":true,
                         "refId":"D",
                         "resultFormat":"table",
@@ -2093,7 +2203,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'common' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'common' ) \n",
                         "rawQuery":true,
                         "refId":"E",
                         "resultFormat":"table",
@@ -2131,7 +2241,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'compute' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'compute' ) \n",
                         "rawQuery":true,
                         "refId":"F",
                         "resultFormat":"table",
@@ -2169,7 +2279,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'glance' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'glance' ) \n",
                         "rawQuery":true,
                         "refId":"G",
                         "resultFormat":"table",
@@ -2207,7 +2317,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'manila' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'manila' ) \n",
                         "rawQuery":true,
                         "refId":"H",
                         "resultFormat":"table",
@@ -2245,7 +2355,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'network' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'network' ) \n",
                         "rawQuery":true,
                         "refId":"I",
                         "resultFormat":"table",
@@ -2283,7 +2393,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'octavia' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'octavia' ) \n",
                         "rawQuery":true,
                         "refId":"J",
                         "resultFormat":"table",
@@ -2321,7 +2431,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'security' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'security' ) \n",
                         "rawQuery":true,
                         "refId":"K",
                         "resultFormat":"table",
@@ -2359,7 +2469,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'swift' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'swift' ) \n",
                         "rawQuery":true,
                         "refId":"L",
                         "resultFormat":"table",
@@ -2397,7 +2507,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tempest' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tempest' ) \n",
                         "rawQuery":true,
                         "refId":"M",
                         "resultFormat":"table",
@@ -2435,9 +2545,87 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tripleo' ) \n",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tripleo' ) \n",
                         "rawQuery":true,
                         "refId":"N",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "hide":false,
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'ui' ) \n",
+                        "rawQuery":true,
+                        "refId":"O",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "hide":false,
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'validation' ) \n",
+                        "rawQuery":true,
+                        "refId":"P",
                         "resultFormat":"table",
                         "select":[
                             [
@@ -2902,6 +3090,714 @@
                 }
             },
             {
+                "columns":[],
+                "datasource":"telegraf",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":16,
+                    "w":12,
+                    "x":12,
+                    "y":60
+                },
+                "id":36,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":false
+                },
+                "styles":[
+                    {
+                        "alias":"Time since last promotion",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"Time",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
+                    },
+                    {
+                        "alias":"repo",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkUrl":"${__cell_2:raw} ",
+                        "mappingType":1,
+                        "pattern":"last",
+                        "preserveFormat":false,
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"repo_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Time since last build",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"consistent_date",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\", \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'baremetal' ) \n",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cinder' ) \n",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'clients' ) \n",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cloudops' ) \n",
+                        "rawQuery":true,
+                        "refId":"D",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'common' ) \n",
+                        "rawQuery":true,
+                        "refId":"E",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'compute' ) \n",
+                        "rawQuery":true,
+                        "refId":"F",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'glance' ) \n",
+                        "rawQuery":true,
+                        "refId":"G",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'manila' ) \n",
+                        "rawQuery":true,
+                        "refId":"H",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'network' ) \n",
+                        "rawQuery":true,
+                        "refId":"I",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'octavia' ) \n",
+                        "rawQuery":true,
+                        "refId":"J",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'security' ) \n",
+                        "rawQuery":true,
+                        "refId":"K",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'swift' ) \n",
+                        "rawQuery":true,
+                        "refId":"L",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tempest' ) \n",
+                        "rawQuery":true,
+                        "refId":"M",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tripleo' ) \n",
+                        "rawQuery":true,
+                        "refId":"N",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "hide":false,
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'ui' ) \n",
+                        "rawQuery":true,
+                        "refId":"O",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "hide":false,
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'validation' ) \n",
+                        "rawQuery":true,
+                        "refId":"P",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"Train CentOS-8 Components: Days since last promotion",
+                "transform":"table",
+                "type":"table"
+            },
+            {
                 "aliasColors":{},
                 "bars":true,
                 "dashLength":10,
@@ -2912,8 +3808,8 @@
                 "gridPos":{
                     "h":8,
                     "w":12,
-                    "x":12,
-                    "y":60
+                    "x":0,
+                    "y":68
                 },
                 "id":21,
                 "legend":{
@@ -2934,7 +3830,7 @@
                         "targetBlank":true,
                         "title":"ussuri current-tripleo",
                         "type":"absolute",
-                        "url":"https://trunk.rdoproject.org/centos8-ussuri/current-tripleo/delorean.repo"
+                        "url":"https://trunk.rdoproject.org/centos8-ussuri/current-tripleo-rdo/delorean.repo"
                     }
                 ],
                 "nullPointMode":"null",
@@ -2968,7 +3864,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -2993,7 +3889,7 @@
                 "timeFrom":null,
                 "timeRegions":[],
                 "timeShift":null,
-                "title":"Promotions for CentOS-8 train tripleo ci ( current-tripleo )",
+                "title":"Promotions for CentOS-8 train RDO ( current-tripleo-rdo )",
                 "tooltip":{
                     "shared":true,
                     "sort":0,
@@ -3043,7 +3939,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":68
+                    "y":76
                 },
                 "id":20,
                 "legend":{
@@ -3173,7 +4069,7 @@
                     "h":8,
                     "w":12,
                     "x":12,
-                    "y":68
+                    "y":76
                 },
                 "id":22,
                 "legend":{
@@ -3300,7 +4196,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":76
+                    "y":84
                 },
                 "id":19,
                 "links":[],
@@ -3469,7 +4365,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":84
+                    "y":92
                 },
                 "id":26,
                 "legend":{
@@ -3599,7 +4495,7 @@
                     "h":8,
                     "w":12,
                     "x":12,
-                    "y":84
+                    "y":92
                 },
                 "id":24,
                 "legend":{
@@ -3726,7 +4622,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":92
+                    "y":100
                 },
                 "id":25,
                 "links":[],
@@ -3895,7 +4791,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":100
+                    "y":108
                 },
                 "id":23,
                 "legend":{
@@ -4025,7 +4921,7 @@
                     "h":8,
                     "w":12,
                     "x":12,
-                    "y":100
+                    "y":108
                 },
                 "id":27,
                 "legend":{
@@ -4152,7 +5048,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":108
+                    "y":116
                 },
                 "id":28,
                 "links":[],
@@ -4321,7 +5217,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":116
+                    "y":124
                 },
                 "id":29,
                 "legend":{
@@ -4451,7 +5347,7 @@
                     "h":8,
                     "w":12,
                     "x":12,
-                    "y":116
+                    "y":124
                 },
                 "id":30,
                 "legend":{
@@ -4578,7 +5474,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":124
+                    "y":132
                 },
                 "id":31,
                 "links":[],
