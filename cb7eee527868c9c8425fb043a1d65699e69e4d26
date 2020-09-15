@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eda72b44_13154ba6",
+        "filename": "ci-scripts/dlrnapi_promoter/config_environments/staging/defaults.yaml",
+        "patchSetId": 23
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 192
+      },
+      "writtenOn": "2020-09-15T11:06:24Z",
+      "side": 1,
+      "message": "latest py36 tests are failing on attribute error https://logserver.rdoproject.org/19/28019/23/check/tox-py36-ci-config/61587ae/tox/reports.html\n\nE               AttributeError: No setting \u0027containers_list_exclude_config\u0027 found\n\nI\u0027ve been digging here - that attribute *is* set in this file in fact @ line 65 below.\n\nI think there is something mixed up between parsing of .ini and .yaml again - e.g. expecting something at top level vs nested.\n\nI started adding the attributes here to get a green run... added quite a few (each of those was because a new attribute error was seen):\n\ndiff --git a/ci-scripts/dlrnapi_promoter/config_environments/staging/defaults.yaml b/ci-scripts/dlrnapi_promoter/config_environments/staging/defaults.yaml\nindex 8237e90..b111cc2 100644\n--- a/ci-scripts/dlrnapi_promoter/config_environments/staging/defaults.yaml\n+++ b/ci-scripts/dlrnapi_promoter/config_environments/staging/defaults.yaml\n@@ -12,6 +12,16 @@ dlrn_api_scheme: http\n dlrn_api_endpoint: \"\"\n containers_list_base_url: \"https://opendev.org/openstack/tripleo-common/raw/commit/\"\n containers_list_path: \"container-images/overcloud_containers.yaml.j2\"\n+containers_list_exclude_config: \"/tmp/promoter-staging/containers/build-containers-main.yaml\"\n+build_method: tripleo\n+container_preffix: \"openstack-\"\n+qcow_server:\n+  user: user\n+  host: localhost\n+  root: overcloud_images/\n+  key: \"sample_key\"\n+  client: \"fs\"\n+  keypath: \"/foo/bar\"\n repo_url: \"https://{{ dlrn_api_host }}/{{ distro }}-{{ release  }}\"\n overcloud_images:\n   qcow_servers:\n\n\nbut then it died for another reason.\n\nClearly this is not the solution so I won\u0027t be updating the patch with this stuff but adding the note for discussion in today\u0027s call.",
+      "revId": "cb7eee527868c9c8425fb043a1d65699e69e4d26",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": false
+    }
+  ]
+}
