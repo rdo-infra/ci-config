@@ -7,14 +7,15 @@ from influxdb_utils import format_ts_from_float, format_ts_from_last_modified
 
 # only run upstream or downstream promotion checks
 # do not run both.
-try:
-    from internal_promoter_utils import (get_consistent, get_dlrn_instance,
-                                         get_promoter_component_config,
-                                         get_promoter_config)
-except ImportError:
-    from promoter_utils import (get_consistent, get_dlrn_instance,
-                                get_promoter_component_config,
-                                get_promoter_config)
+# try:
+#    from internal_promoter_utils import (get_consistent, get_dlrn_instance,
+#                                         get_promoter_component_config,
+#                                         get_promoter_config)
+# except ImportError:
+from promoter_utils import (get_consistent, get_dlrn_instance,
+                            get_promoter_component_config,
+                            get_promoter_config,
+                            get_url_promotion_details)
 
 PROMOTION_INFLUXDB_LINE = ("dlrn-promotion,"
                            "release={release},distro={distro},"
@@ -24,6 +25,7 @@ PROMOTION_INFLUXDB_LINE = ("dlrn-promotion,"
                            "repo_hash=\"{repo_hash}\","
                            "repo_url=\"{repo_url}\","
                            "consistent_date={consistent_date},"
+                           "promotion_details=\"{promotion_details}\","
                            "component=\"{component}\" "
                            "{timestamp}")
 
@@ -77,15 +79,21 @@ if __name__ == '__main__':
                                            promotion_name)
                 consistent = format_ts_from_last_modified(
                     get_consistent(promoter_config))
+                if promo:
+                    promotion_details = get_url_promotion_details(
+                        promoter_config, promo)
             else:
                 promo = get_last_promotion(dlrn, args.release, args.distro,
                                            promotion_name, args.component)
                 consistent = format_ts_from_last_modified(
                     get_consistent(promoter_config, args.component))
+                promotion_details = "None"
             # get the promotion for consistent to establish how old the
             # promotion is.  date(promomtion) - date(consistent)
             if promo and consistent:
                 promo.update({'consistent_date': consistent})
+            if promo and promotion_details:
+                promo.update({'promotion_details': promotion_details})
             if promo:
                 print(influxdb(promo))
     else:
