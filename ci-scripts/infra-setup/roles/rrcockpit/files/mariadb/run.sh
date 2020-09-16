@@ -77,6 +77,18 @@ read_bz(){
 
 }
 
+read_skipped(){
+    skiplist -csv -release master \
+        -job periodic-tripleo-ci-centos-8-standalone-skipped-tempest-master \
+        -job periodic-tripleo-ci-centos-8-standalone-scenario001-skipped-tempest-master \
+        -job periodic-tripleo-ci-centos-8-standalone-scenario002-skipped-tempest-master \
+        -job periodic-tripleo-ci-centos-8-standalone-scenario003-skipped-tempest-master \
+        -job periodic-tripleo-ci-centos-8-standalone-scenario004-skipped-tempest-master \
+        -job periodic-tripleo-ci-centos-8-standalone-scenario007-skipped-tempest-master \
+        -job periodic-tripleo-ci-centos-8-standalone-scenario010-skipped-tempest-master \
+        -job periodic-tripleo-ci-centos-7-ovb-1ctlr_2comp-featureset021-master
+}
+
 read_pass(){
 
     skiplist.py
@@ -121,6 +133,7 @@ while true; do
     load_mariadb pass 2>&1 | tee -a /tmp/run.log
     load_mariadb lp 2>&1 | tee -a /tmp/run.log
     load_mariadb bz 2>&1 | tee -a /tmp/run.log
+    load_mariadb skipped 2>&1 | tee -a /tmp/run.log
     load_mariadb recent_lp 2>&1 | tee -a /tmp/run.log
     sleep 1440;
 
