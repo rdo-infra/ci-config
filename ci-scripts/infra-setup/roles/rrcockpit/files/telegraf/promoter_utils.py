@@ -76,3 +76,23 @@ def get_consistent(config, component=None):
             return None
 
     return consistent_date
+
+
+def get_url_promotion_details(config, promotion_data):
+    promotion = str(promotion_data['promote_name'])
+    response = requests.get(
+        config['main']['base_url'] + promotion + '/delorean.repo.md5')
+    if response.ok:
+        aggregate_hash = response.content
+        url = (config['main']['api_url']
+               + '/api/civotes_agg_detail.html?ref_hash='
+               + aggregate_hash)
+    else:
+        commit_hash = promotion_data['commit_hash']
+        distro_hash = promotion_data['distro_hash']
+        url = (config['main']['api_url']
+               + '/api/civotes_detail.html?commit_hash='
+               + commit_hash + '&'
+               + 'distro_hash=' + distro_hash)
+
+    return url
