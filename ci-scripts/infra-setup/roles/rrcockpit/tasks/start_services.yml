@@ -9,10 +9,16 @@
     src: /home/centos/grafana_smtp_password
   register: gf_smtp_password
 
+- name: Read gerrit service user password file
+  slurp:
+    src: /home/centos/gerrit-os-tripleo-ci-password
+  register: gerrit_password
+
 - name: Start services
   environment:
     GRAFANA_ADMIN_PASSWORD: "{{ gf_admin_password['content'] | b64decode }}"
     GRAFANA_SMTP_PASSWORD: "{{ gf_smtp_password['content'] | b64decode }}"
+    GERRIT_SERVICE_PASSWORD: "{{ gerrit_password['content'] | b64decode }}"
   docker_compose:
     project_src: "{{ role_path }}/files/"
     state: present

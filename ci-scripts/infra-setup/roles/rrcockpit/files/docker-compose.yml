@@ -87,10 +87,17 @@ services:
     volumes:
       - telegraf-volume:/tmp/
 
+# to enable gerrit in development environments
+# export your gerrit id and http_passwd
+# GERRIT_SERVICE_USER
+# GERRIT_SERVICE_PASSWORD
   telegraf_py3:
     build: telegraf_py3
     restart: always
     container_name: telegraf_py3
+    environment:
+      - TG_GERRIT_SERVICE_USER=${GERRIT_SERVICE_USER:-foo}
+      - TG_GERRIT_SERVICE_PASSWORD=${GERRIT_SERVICE_PASSWORD:-bar}
     hostname: telegraf_py3.rrcockpit
     env_file:
       - 'telegraf_py3/env'
