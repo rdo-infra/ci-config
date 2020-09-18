@@ -13,7 +13,8 @@ from influxdb_utils import format_ts_from_float, format_ts_from_last_modified
 # except ImportError:
 from promoter_utils import (get_consistent, get_dlrn_instance,
                             get_promoter_component_config, get_promoter_config,
-                            get_url_promotion_details)
+                            get_url_promotion_details, get_promotion_log,
+                            get_config_url)
 
 PROMOTION_INFLUXDB_LINE = ("dlrn-promotion,"
                            "release={release},distro={distro},"
@@ -24,6 +25,8 @@ PROMOTION_INFLUXDB_LINE = ("dlrn-promotion,"
                            "repo_url=\"{repo_url}\","
                            "consistent_date={consistent_date},"
                            "promotion_details=\"{promotion_details}\","
+                           "promotion_log=\"{promotion_log}\","
+                           "config_url=\"{config_url}\","
                            "component=\"{component}\" "
                            "{timestamp}")
 
@@ -80,19 +83,31 @@ if __name__ == '__main__':
                 if promo:
                     promotion_details = get_url_promotion_details(
                         promoter_config, promo)
+                    promotion_log = get_promotion_log(args.distro,
+                                                      args.release)
+                    # get config url from real promoter server(s)
+                    config_url = get_config_url(args.distro, args.release)
             else:
                 promo = get_last_promotion(dlrn, args.release, args.distro,
                                            promotion_name, args.component)
                 consistent = format_ts_from_last_modified(
                     get_consistent(promoter_config, args.component))
                 promotion_details = "None"
-            # get the promotion for consistent to establish how old the
-            # promotion is.  date(promomtion) - date(consistent)
-            if promo and consistent:
-                promo.update({'consistent_date': consistent})
-            if promo and promotion_details:
-                promo.update({'promotion_details': promotion_details})
+                promotion_log = "None"
+                config_url = "None"
+
             if promo:
+                # get the promotion for consistent to establish how old the
+                # promotion is.  date(promomtion) - date(consistent)
+                if consistent:
+                    promo.update({'consistent_date': consistent})
+                if promotion_details:
+                    promo.update({'promotion_details': promotion_details})
+                if promotion_log:
+                    promo.update({'promotion_log': promotion_log})
+                if config_url:
+                    promo.update({'config_url': config_url})
+
                 print(influxdb(promo))
     else:
         print('the dlrn configuration was not found')
