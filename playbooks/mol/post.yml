@@ -19,6 +19,18 @@
           - --include=reports.html
           - --exclude=*
 
+    - name: "Check file tripleo-contianer-image.prepare.log"
+      stat:
+        path: "/tmp/tripleo-container-image.prepare.log"
+      register: stat_result
+
+    - name: "Copy tripleo-container-image.prepare.log file"
+      fetch:
+        src: "/tmp/tripleo-container-image.prepare.log"
+        dest: "{{ zuul.executor.log_root }}/"
+        flat: yes
+      when: stat_result.stat.exists
+
     - name: Verify that successful job produced expected artifacts
       when:
         - zuul_success | bool
