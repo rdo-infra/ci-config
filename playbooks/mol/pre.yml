@@ -1,5 +1,8 @@
 ---
 - hosts: all
+  vars:
+    promoter_user: promoter
+    promoter_virtualenv: promoter_venv
   roles:
     - bindep  # python3-libselinux and alike
   tasks:
@@ -13,3 +16,57 @@
         path: /etc/hosts
         line: "127.0.0.1 instance tester"
         state: present
+
+    - name: Bootstrap instance
+      import_playbook: ../../playbooks/bootstrap_instance.yml
+
+    - name: "Add tripleo group and users"
+      become: true
+      block:
+        - name: Create tripleo group
+          group:
+            name: tripleo
+            state: present
+
+        - name: Create users
+          user:
+            name: "{{ promoter_user}}"
+            shell: /bin/bash
+            groups: tripleo
+            system: true
+            create_home: true
+
+        - name: Allow 'tripleo' group to have passwordless sudo
+          lineinfile:
+            dest: /etc/sudoers
+            state: present
+            line: '%tripleo ALL=(ALL) NOPASSWD: ALL'
+            validate: 'visudo -cf %s'
+
+    - name: "Install tripleo projects"
+      become: true
+      become_user: "{{ promoter_user }}"
+      vars:
+        ansible_python_interpreter: "/usr/bin/python3"
+      when: zuul is defined
+      block:
+        - name: "Install tripleo-common from zuul"
+          pip:
+            name: "file://{{ zuul.executor.work_root }}/{{ zuul.projects['opendev.org/openstack/tripleo-common'].src_dir  }}"
+            virtualenv: "~/{{ promoter_virtualenv }}"
+            state: forcereinstall
+          when: "'opendev.org/openstack/tripleo-common' in zuul.projects"
+
+        - name: "Install python-tripleoclient from zuul"
+          pip:
+            name: "file://{{ zuul.executor.work_root }}/{{ zuul.projects['opendev.org/openstack/python-tripleoclient'].src_dir  }}"
+            virtualenv: "~/{{ promoter_virtualenv }}"
+            state: forcereinstall
+          when: "'opendev.org/openstack/python-tripleoclient' in zuul.projects"
+
+        - name: "Install tripleo-ansible from zuul"
+          pip:
+            name: "file://{{ zuul.executor.work_root }}/{{ zuul.projects['opendev.org/openstack/tripleo-ansible'].src_dir  }}"
+            virtualenv: "~/{{ promoter_virtualenv }}"
+            state: forcereinstall
+          when: "'opendev.org/openstack/tripleo-ansible' in zuul.projects"
