@@ -79,6 +79,80 @@
                         "thresholds":[],
                         "type":"string",
                         "unit":"short"
+                    },
+                    {
+                      "alias": "promotion name",
+                      "colorMode": null,
+                      "colors": [
+                        "rgba(245, 54, 54, 0.9)",
+                        "rgba(237, 129, 40, 0.89)",
+                        "rgba(50, 172, 45, 0.97)"
+                      ],
+                      "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                      "decimals": 2,
+                      "link": true,
+                      "linkTargetBlank": true,
+                      "linkTooltip": "link to the promotion log",
+                      "linkUrl": "${__cell_6:raw}",
+                      "mappingType": 1,
+                      "pattern": "name",
+                      "sanitize": true,
+                      "thresholds": [],
+                      "type": "string",
+                      "unit": "short"
+                    },
+                    {
+                      "alias": "",
+                      "colorMode": null,
+                      "colors": [
+                        "rgba(245, 54, 54, 0.9)",
+                        "rgba(237, 129, 40, 0.89)",
+                        "rgba(50, 172, 45, 0.97)"
+                      ],
+                      "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                      "decimals": 2,
+                      "mappingType": 1,
+                      "pattern": "promotion_log",
+                      "thresholds": [],
+                      "type": "hidden",
+                      "unit": "short"
+                    },
+                    {
+                      "alias": "release",
+                      "colorMode": null,
+                      "colors": [
+                        "rgba(245, 54, 54, 0.9)",
+                        "rgba(237, 129, 40, 0.89)",
+                        "rgba(50, 172, 45, 0.97)"
+                      ],
+                      "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                      "decimals": 2,
+                      "link": true,
+                      "linkTargetBlank": true,
+                      "linkTooltip": "link to config url",
+                      "linkUrl": "${__cell_7:raw}",
+                      "mappingType": 1,
+                      "pattern": "release",
+                      "sanitize": true,
+                      "thresholds": [],
+                      "type": "string",
+                      "unit": "short"
+                    },
+                    {
+                      "alias": "",
+                      "colorMode": null,
+                      "colors": [
+                        "rgba(245, 54, 54, 0.9)",
+                        "rgba(237, 129, 40, 0.89)",
+                        "rgba(50, 172, 45, 0.97)"
+                      ],
+                      "dateFormat": "YYYY-MM-DD HH:mm:ss",
+                      "decimals": 2,
+                      "mappingType": 1,
+                      "pattern": "config_url",
+                      "thresholds": [],
+                      "type": "hidden",
+                      "unit": "short"
                     }
                 ],
                 "targets":[
@@ -99,7 +173,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query": "SELECT release, distro, promotion_details, last(\"repo_hash\"), promotion_log, config_url FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -136,7 +210,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'ussuri' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query": "SELECT release, distro, promotion_details, last(\"repo_hash\"), promotion_log, config_url FROM \"dlrn-promotion\" WHERE (\"release\" = 'ussuri' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"table",
@@ -173,7 +247,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query": "SELECT release, distro, promotion_details, last(\"repo_hash\"), promotion_log, config_url FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"table",
@@ -210,7 +284,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query": "SELECT release, distro, promotion_details, last(\"repo_hash\"), promotion_log, config_url FROM \"dlrn-promotion\" WHERE (\"release\" = 'rocky' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY release, \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"D",
                         "resultFormat":"table",
@@ -247,7 +321,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'stein' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query": "SELECT release, distro, promotion_details, last(\"repo_hash\"), promotion_log, config_url FROM \"dlrn-promotion\" WHERE (\"release\" = 'queens' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY release, \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"E",
                         "resultFormat":"table",
