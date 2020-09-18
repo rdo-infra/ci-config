@@ -96,3 +96,18 @@ def get_url_promotion_details(config, promotion_data):
                + 'distro_hash=' + distro_hash)
 
     return url
+
+
+def get_config_url(distro, release):
+    url = PROMOTER_CONFIG_URL.format(distro, release)
+
+    return url
+
+def get_promotion_log(distro, release):
+    url = { 'CentOS-8': 'http://promoter.rdoproject.org/logs/',
+            'CentOS-7': 'http://38.102.83.109/promoter_logs/'
+          }
+    log = url[distro] + distro.lower().replace('-', '') \
+          + '_' + release + '.log'
+
+    return log
