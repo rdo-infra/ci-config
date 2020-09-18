@@ -1,0 +1,21 @@
+---
+- name: "Clone projects tripleo-common, tripleo-ansible, python-tripleoclient"
+  git:
+    repo: "{{ item.repo }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { repo: "https://opendev.org/openstack/tripleo-common",
+        dest: "/tmp/tripleo-common"}
+    - { repo: "https://opendev.org/openstack/python-triploclient",
+        dest: "/tmp/python-tripleoclient"}
+    - { repo: "https://opendev.org/openstack/tripleo-ansible",
+        dest: "/tmp/tripleo-ansible"}
+
+- name: "Install projects using pip"
+  pip:
+    name: "file://{{ item }}"
+    virtualenv: "~/{{ promoter_virtualenv }}"
+  with_items:
+    - "/tmp/tripleo-common"
+    - "/tmp/python-tripleoclient"
+    - "/tmp/tripleo-ansible"
