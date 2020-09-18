@@ -19,6 +19,11 @@
           - --include=reports.html
           - --exclude=*
 
+    - name: "Copy tripleo-container-image.prepare.log file"
+      copy:
+        src: "/tmp/tripleo-container-image.prepare.log"
+        dest: "{{ zuul.executor.log_root }}"
+
     - name: Verify that successful job produced expected artifacts
       when:
         - zuul_success | bool
