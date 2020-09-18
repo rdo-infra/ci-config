@@ -4,45 +4,33 @@
     staging_action: setup
     staging_args: "--scenes dlrn,registries,containers"
   tasks:
-
     # Setup the promoter-staging environment
     # (--scenes 'dlrn,registries,containers')
     - name: Setup staging environment
       include_role:
         name: _ensure_staging
 
-    - name: install tripleo-common and python-tripleoclient
-      become: true
-      become_user: "{{ promoter_user }}"
-      vars:
-        ansible_python_interpreter: "/usr/bin/python3"
-      pip:
-        name: ['tripleo-common', 'python-tripleoclient']
-        virtualenv: "~/{{ promoter_virtualenv }}"
-      when: zuul is not defined
-
-    - name: Install tripleo projects from zuul
-      become: true
-      become_user: "{{ promoter_user }}"
-      vars:
-        ansible_python_interpreter: "/usr/bin/python3"
+    - name: Install packages using pip
+      when: zuul is undefined
       block:
-        - name: use python-tripleoclient from zuul if it's in the correct dir
+        - name: "Install tripleo-common and python-tripleoclient"
           pip:
-            name: "file://{{ zuul.executor.work_root }}/{{ zuul.projects['opendev.org/openstack/python-tripleoclient'].src_dir  }}"
             virtualenv: "~/{{ promoter_virtualenv }}"
-            state: forcereinstall
-          when: "'opendev.org/openstack/python-tripleoclient' in zuul.projects"
+            name:
+              - tripleo-common
+              - python-tripleoclient
 
-        - name: use tripleo-common from zuul if it's in the correct dir
+        - name: "Clone tripleo-ansible"
+          git:
+            repo: "https://opendev.org/openstack/tripleo-ansible.git"
+            dest: "/tmp/tripleo-ansible"
+
+        - name: "Install tripleo-ansible"
           pip:
-            name: "file://{{ zuul.executor.work_root }}/{{ zuul.projects['opendev.org/openstack/tripleo-common'].src_dir  }}"
             virtualenv: "~/{{ promoter_virtualenv }}"
-            state: forcereinstall
-          when: "'opendev.org/openstack/tripleo-common' in zuul.projects"
-      when: zuul is defined
+            name: "file:///tmp/tripleo-ansible"
 
-   # populate the promote_registry
+    # populate the promote_registry
     - name: Include tasks from promote_containers.yml
       include_tasks: ../container_push/promote_containers.yml
       args:
@@ -76,8 +64,8 @@
       become: true
       become_user: "{{ promoter_user }}"
       include_vars:
-          file: ~/stage-info.yaml
-          name: stage_info
+        file: ~/stage-info.yaml
+        name: stage_info
 
     - name: set full_hash
       set_fact:
@@ -95,7 +83,7 @@
       become_user: "{{ promoter_user }}"
       copy:
         content: |
-            container_images_template:
+          container_images_template:
         dest: /tmp/staging_overcloud_containers.yaml.j2
 
     - name: Read containers file
@@ -116,13 +104,13 @@
       blockinfile:
         path: /tmp/staging_overcloud_containers.yaml.j2
         block: |
-            - imagename: {% raw %}{{ namespace }}/{{ name_prefix }}{% endraw %}{{ item }}{% raw %}{{ name_suffix }}:{{ tag }}
-              image_source: kolla
-              params:
-              - ContainerTripleoclientImage
-              services:
-              - OS::TripleO::Services::TripleoClient
-              {%endraw%}
+          - imagename: {% raw %}{{ namespace }}/{{ name_prefix }}{% endraw %}{{ item }}{% raw %}{{ name_suffix }}:{{ tag }}
+            image_source: kolla
+            params:
+            - ContainerTripleoclientImage
+            services:
+            - OS::TripleO::Services::TripleoClient
+            {%endraw%}
         marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
       with_items: "{{ staging_containers_list }}"
 
@@ -131,32 +119,32 @@
       become_user: "{{ promoter_user }}"
       copy:
         content: |
-            parameter_defaults:
-              ContainerImagePrepare:
-              - push_destination: "{{ undercloud_registry['host'] }}"
-                set:
-                  ceph_alertmanager_image: alertmanager
-                  ceph_alertmanager_namespace: docker.io/prom
-                  ceph_alertmanager_tag: latest
-                  ceph_grafana_image: grafana
-                  ceph_grafana_namespace: docker.io/grafana
-                  ceph_grafana_tag: latest
-                  ceph_image: daemon
-                  ceph_namespace: docker.io/ceph
-                  ceph_node_exporter_image: node-exporter
-                  ceph_node_exporter_namespace: docker.io/prom
-                  ceph_node_exporter_tag: latest
-                  ceph_prometheus_image: prometheus
-                  ceph_prometheus_namespace: docker.io/prom
-                  ceph_prometheus_tag: latest
-                  ceph_tag: v4.0.1-stable-4.0-nautilus-centos-7-x86_64
-                  name_prefix: "{{ container_name_prefix }}-"
-                  name_suffix: ''
-                  namespace: "{{ promote_registries[0]['host'] }}/{{ promote_registries[0]['namespace'] }}"
-                  neutron_driver: ovn
-                  rhel_containers: false
-                  tag: "{{ full_hash }}"
-                tag_from_label: rdo_version
+          parameter_defaults:
+            ContainerImagePrepare:
+            - push_destination: "{{ undercloud_registry['host'] }}"
+              set:
+                ceph_alertmanager_image: alertmanager
+                ceph_alertmanager_namespace: docker.io/prom
+                ceph_alertmanager_tag: latest
+                ceph_grafana_image: grafana
+                ceph_grafana_namespace: docker.io/grafana
+                ceph_grafana_tag: latest
+                ceph_image: daemon
+                ceph_namespace: docker.io/ceph
+                ceph_node_exporter_image: node-exporter
+                ceph_node_exporter_namespace: docker.io/prom
+                ceph_node_exporter_tag: latest
+                ceph_prometheus_image: prometheus
+                ceph_prometheus_namespace: docker.io/prom
+                ceph_prometheus_tag: latest
+                ceph_tag: v4.0.1-stable-4.0-nautilus-centos-7-x86_64
+                name_prefix: "{{ container_name_prefix }}-"
+                name_suffix: ''
+                namespace: "{{ promote_registries[0]['host'] }}/{{ promote_registries[0]['namespace'] }}"
+                neutron_driver: ovn
+                rhel_containers: false
+                tag: "{{ full_hash }}"
+              tag_from_label: rdo_version
         dest: "/tmp/staging-containers-prepare-parameter.yaml"
 
     - name: copy staging_overcloud_containers.yaml.j2
