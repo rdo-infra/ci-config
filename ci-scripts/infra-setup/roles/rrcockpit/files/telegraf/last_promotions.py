@@ -6,14 +6,14 @@ import dlrnapi_client
 from influxdb_utils import format_ts_from_float, format_ts_from_last_modified
 # only run upstream or downstream promotion checks
 # do not run both.
-# try:
-#    from internal_promoter_utils import (get_consistent, get_dlrn_instance,
-#                                         get_promoter_component_config,
-#                                         get_promoter_config)
-# except ImportError:
-from promoter_utils import (get_consistent, get_dlrn_instance,
-                            get_promoter_component_config, get_promoter_config,
-                            get_url_promotion_details)
+try:
+    from internal_promoter_utils import (get_consistent, get_dlrn_instance,
+                                         get_promoter_component_config,
+                                         get_promoter_config)
+except ImportError:
+    from promoter_utils import (get_consistent, get_dlrn_instance,
+                                get_promoter_component_config, get_promoter_config,
+                                get_url_promotion_details)
 
 PROMOTION_INFLUXDB_LINE = ("dlrn-promotion,"
                            "release={release},distro={distro},"
