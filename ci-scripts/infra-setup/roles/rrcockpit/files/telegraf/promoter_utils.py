@@ -1,8 +1,14 @@
-import ConfigParser
 import dlrnapi_client
 import requests
+import six
 import yaml
-from StringIO import StringIO
+
+if six.PY2:
+    import ConfigParser
+    from StringIO import StringIO
+elif six.PY3:
+    import configparser as ConfigParser
+    from io import StringIO
 
 PROMOTER_CONFIG_URL = ("https://raw.githubusercontent.com/rdo-infra/ci-config/"
                        "master/ci-scripts/dlrnapi_promoter/config/{}/{}.ini")
