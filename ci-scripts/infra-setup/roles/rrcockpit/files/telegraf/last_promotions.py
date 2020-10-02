@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import six
 
 import dlrnapi_client
 from influxdb_utils import format_ts_from_float, format_ts_from_last_modified
