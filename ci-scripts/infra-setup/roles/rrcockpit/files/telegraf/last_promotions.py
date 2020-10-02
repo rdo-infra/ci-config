@@ -61,9 +61,6 @@ if __name__ == '__main__':
     parser.add_argument('--component', default=None)
     args = parser.parse_args()
 
-    if args is None:
-        SystemExit(1)
-
     if args.component is None:
         promoter_config = get_promoter_config(args.release, args.distro)
     else:
