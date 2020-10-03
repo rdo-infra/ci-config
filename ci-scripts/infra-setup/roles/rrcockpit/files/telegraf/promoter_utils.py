@@ -10,60 +10,42 @@ elif six.PY3:
     import configparser as ConfigParser
     from io import StringIO
 
-PROMOTER_CONFIG_URL = ("https://raw.githubusercontent.com/rdo-infra/ci-config/"
-                       "master/ci-scripts/dlrnapi_promoter/config/{}/{}.ini")
 
-COMPONENT_CONFIG_URL = ("https://raw.githubusercontent.com/rdo-infra/ci-config/"
-                        "master/ci-scripts/dlrnapi_promoter/"
-                        "config/{}/component/{}.yaml")
+def get_promoter_config(base_url, release, distro, component):
 
+    integration_tail = "/ci-scripts/dlrnapi_promoter/config/{}/{}.ini"
+    component_tail = "/ci-scripts/dlrnapi_promoter/config/{}/component/{}.yaml"
 
-def get_promoter_config(release, distro='CentOS-7'):
+    if component:
+        tail = component_tail
+    else:
+        tail = integration_tail
 
-    response = requests.get(PROMOTER_CONFIG_URL.format(distro, release))
+    url_template = base_url.rstrip('/') + tail
+    url = url_template.format(distro, release)
+    response = requests.get(url)
 
     if response.ok:
-        config = ConfigParser.SafeConfigParser(allow_no_value=True)
-        config.readfp(StringIO(response.content))
-        config = config._sections
-        return config
+        try:
+            config = ConfigParser.SafeConfigParser(allow_no_value=True)
+            config.readfp(StringIO(response.content))
+            config = config._sections
+        except ConfigParser.MissingSectionHeaderError:
+            config = yaml.load(response.text, Loader=yaml.FullLoader)
     else:
-        return None
+        raise Exception(
+            'Unable to fetch promoter configuration from {}'.format(url)
+        )
+
+    return config
 
 
-def get_promoter_component_config(release, distro='CentOS-8'):
-
-    response = requests.get(COMPONENT_CONFIG_URL.format(distro, release))
-
-    if response.ok:
-        config = yaml.load(response.text, Loader=yaml.FullLoader)
-        return config
-    else:
-        return None
-
-
-def get_dlrn_instance(config=None):
-
-    if config is None:
-        return None
-
-    if isinstance(config, dict):
-        api_client = dlrnapi_client.ApiClient(host=config['main']['api_url'])
-    else:
-        api_client = dlrnapi_client.ApiClient(
-            host=config.get('main', 'api_url'))
-
+def get_dlrn_client(config):
+    api_client = dlrnapi_client.ApiClient(host=config['main']['api_url'])
     return dlrnapi_client.DefaultApi(api_client=api_client)
 
 
-def get_dlrn_instance_for_release(release):
-    promoter_config = get_promoter_config(release)
-    if promoter_config:
-        return get_dlrn_instance(promoter_config)
-
 # get the date of the consistent link in dlrn
-
-
 def get_consistent(config, component=None):
     if component is None:
         response = requests.get(
