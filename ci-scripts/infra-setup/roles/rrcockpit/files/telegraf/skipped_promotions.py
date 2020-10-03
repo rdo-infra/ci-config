@@ -7,7 +7,6 @@ import dlrnapi_client
 import influxdb_utils
 import requests
 from diskcache import Cache
-from promoter_utils import get_dlrn_instance_for_release
 
 cache = Cache('/tmp/skipped_promotions_cache')
 cache.expire()
@@ -26,7 +25,7 @@ def get_failing_jobs_html(dlrn_hashes, release_name):
     in_progress = False
 
     try:
-        dlrn = get_dlrn_instance_for_release(release_name)
+        dlrn = 'foo'
         if dlrn:
             params = dlrnapi_client.Params2()
             params.commit_hash = dlrn_hashes['commit_hash']
