@@ -5,6 +5,11 @@ This is where the code behind
 README will help you setup a development environment for the tripleo-ci
 ruck|rover cockpit.
 
+### Note for Fedora 32+:
+Please read through and follow...
+
+https://fedoramagazine.org/docker-and-fedora-32/
+
 ### Note for Fedora 31:
 
 The Docker package has been removed from Fedora 31. It has been replaced by the upstream
