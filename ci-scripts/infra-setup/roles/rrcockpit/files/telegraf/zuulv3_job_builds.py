@@ -26,7 +26,7 @@ OOO_PROJECTS = [
     'openstack/tripleo-ansible', 'openstack/tripleo-validations',
     'rdo-infra/ansible-role-tripleo-ci-reproducer',
     'containers/libpod', 'ceph/ceph-ansible',
-    'openstack/ansible-collections-openstack'
+    'openstack/ansible-collections-openstack', 'openstack/heat'
 ]
 
 INTERNAL_OOO_PROJECTS = [
