@@ -369,7 +369,7 @@ def main():
         report_projects = INTERNAL_OOO_PROJECTS
     else:
         report_projects = OOO_PROJECTS
-
+    import rpdb;rpdb.set_trace()
     for project in report_projects:
         print_influx(
             args.type,
