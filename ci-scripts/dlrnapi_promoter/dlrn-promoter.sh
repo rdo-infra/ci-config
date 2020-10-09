@@ -16,10 +16,10 @@ KILLTIME=120m
 LOG_LEVEL="INFO"
 STAGING_DIR=""
 
-DEFAULT_RELEASES=( "CentOS-8/master" "CentOS-8/ussuri" \
-                   "CentOS-8/train" "CentOS-7/stein" \
-                   "CentOS-7/rocky" "CentOS-7/queens" \
-                   "CentOS-7/train" )
+DEFAULT_RELEASES=( "CentOS-8/master" "CentOS-8/victoria" \
+                   "CentOS-8/ussuri" "CentOS-8/train" \
+                   "CentOS-7/stein" "CentOS-7/rocky" \
+                   "CentOS-7/queens" "CentOS-7/train" )
 declare -p DEFAULT_RELEASES
 
 
