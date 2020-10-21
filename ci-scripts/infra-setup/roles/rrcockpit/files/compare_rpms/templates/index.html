@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <p><strong>setup</strong></p>
+<pre><code># --<span class="hljs-built_in">system</span>-site-packages required due <span class="hljs-keyword">to</span> rpm <span class="hljs-keyword">python</span> libs can not <span class="hljs-keyword">be</span> pip installed
+<span class="hljs-keyword">python3</span> -<span class="hljs-keyword">m</span> venv --<span class="hljs-built_in">system</span>-site-packages {dir}
+<span class="hljs-keyword">source</span> {dir}/bin/activate
+pip3 install -r requirements.txt
+<span class="hljs-keyword">python3</span> setup.<span class="hljs-keyword">py</span> install
+
+#execute
+diff_tripleo_builds --<span class="hljs-keyword">help</span>
+</code></pre><p>This script takes two urls for ci log files and compares the rpms installed in each environment.
+We have named the first a control_url as in a control and experiment to display the diff.</p>
+<p>The script will pull rpms from ALL the nodes available, and the containers hosted on that node.
+This workds with both upstream tripleo jobs and infrared job logs.</p>
+<pre><code>USAGE:
+    The script expects only <span class="hljs-keyword">the</span> base url ( up <span class="hljs-built_in">to</span> <span class="hljs-keyword">the</span> logs dir ) <span class="hljs-keyword">of</span> <span class="hljs-keyword">the</span> logs <span class="hljs-built_in">from</span> <span class="hljs-keyword">any</span> job.
+    e.g. <span class="hljs-keyword">https</span>://logserver.rdoproject.org/foo/check/jobs/<span class="hljs-number">7822e6</span>c/logs/
+</code></pre><pre><code>Options:
+  -c, <span class="hljs-comment">--control_url TEXT  a url that points to list of rpms that are used as</span>
+                          <span class="hljs-keyword">the</span> control <span class="hljs-keyword">in</span> <span class="hljs-keyword">the</span> diff  [required]
+
+  -t, <span class="hljs-comment">--test_url TEXT     a url that points to the rpms to be compared against</span>
+                          <span class="hljs-keyword">the</span> control list  [required]
+
+  -n, <span class="hljs-comment">--no_diff           print all rpms on all systems, no diff.</span>
+
+  -<span class="hljs-keyword">a</span>, <span class="hljs-comment">--all_available     Some jobs are not logging container rpms, use output</span>
+                          <span class="hljs-built_in">from</span> repoquery instead
+  -p, <span class="hljs-comment">--package_ignore PATH  A file that enables some packages to be ignored</span>
+                             <span class="hljs-built_in">from</span> <span class="hljs-keyword">the</span> diff
+  -q, <span class="hljs-comment">--diff_compose         diff the metadata rpms.json from a compose</span>
+  <span class="hljs-comment">--help                  Show this message and exit.</span>
+</code></pre><p><strong>Examples</strong></p>
+<pre><code># Diff logs from CI
+diff_tripleo_builds.py  -c https://storage.gra.cloud.ovh.net/v1/AUTH_dcaab5e32b234d56b626f72581e3644c/zuul_opendev_logs_a7d/756888/2/gate/tripleo-ci-centos<span class="hljs-string">-8</span>-containers-multinode-train/a7d91e1/logs -t https://logserver.rdoproject.org/openstack-periodic-integration-stable2/opendev.org/openstack/tripleo-ci/master/periodic-tripleo-ci-centos<span class="hljs-string">-8</span>-multinode<span class="hljs-string">-1</span>ctlr-featureset010-train/b2de4cb/logs
+
+# Diff logs from a Compose
+diff_builds.py -q -c http://foo/RHOS<span class="hljs-string">-16</span>.2-RHEL<span class="hljs-string">-8</span><span class="hljs-string">-20201015</span>.n.1/compose -t http://foo/RHOS<span class="hljs-string">-16</span>.2-RHEL<span class="hljs-string">-8</span><span class="hljs-string">-20201014</span>.n.3/compose
+</code></pre><p><strong>Example Ignore Package File</strong></p>
+<pre><code>zsh
+zsh-<span class="hljs-selector-tag">html</span>
+zstd
+</code></pre><p><strong>Example Output</strong></p>
+<pre><code>+------------+---------------------------------------+-------------------------+----------------------+
+|<span class="hljs-string">    Node    </span>|<span class="hljs-string">              Package_Name             </span>|<span class="hljs-string"> Control Package Version </span>|<span class="hljs-string"> Test Package Version </span>|
++------------+---------------------------------------+-------------------------+----------------------+
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">              libmodulemd              </span>|<span class="hljs-string">      not installed      </span>|<span class="hljs-string">        2.8.2         </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">           openstack-heat-api          </span>|<span class="hljs-string">          13.1.0         </span>|<span class="hljs-string">        13.0.3        </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">         openstack-heat-common         </span>|<span class="hljs-string">          13.1.0         </span>|<span class="hljs-string">        13.0.3        </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">         openstack-heat-engine         </span>|<span class="hljs-string">          13.1.0         </span>|<span class="hljs-string">        13.0.3        </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">        openstack-heat-monolith        </span>|<span class="hljs-string">          13.1.0         </span>|<span class="hljs-string">        13.0.3        </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string"> openstack-ironic-python-agent-builder </span>|<span class="hljs-string">          2.2.1          </span>|<span class="hljs-string">        2.1.1         </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">           openstack-neutron           </span>|<span class="hljs-string">          15.3.1         </span>|<span class="hljs-string">        15.2.1        </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">        openstack-neutron-common       </span>|<span class="hljs-string">          15.3.1         </span>|<span class="hljs-string">        15.2.1        </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">         openstack-neutron-ml2         </span>|<span class="hljs-string">          15.3.1         </span>|<span class="hljs-string">        15.2.1        </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">     openstack-neutron-openvswitch     </span>|<span class="hljs-string">          15.3.1         </span>|<span class="hljs-string">        15.2.1        </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">           openstack-tempest           </span>|<span class="hljs-string">          25.0.0         </span>|<span class="hljs-string">        24.0.0        </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">            puppet-pacemaker           </span>|<span class="hljs-string">          1.1.1          </span>|<span class="hljs-string">        1.0.1         </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">        python-oslo-privsep-lang       </span>|<span class="hljs-string">          1.33.4         </span>|<span class="hljs-string">        1.33.3        </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">           python3-heatclient          </span>|<span class="hljs-string">          1.18.1         </span>|<span class="hljs-string">        1.18.0        </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">            python3-neutron            </span>|<span class="hljs-string">          15.3.1         </span>|<span class="hljs-string">        15.2.1        </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">          python3-oslo-privsep         </span>|<span class="hljs-string">          1.33.4         </span>|<span class="hljs-string">        1.33.3        </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">            python3-tempest            </span>|<span class="hljs-string">          25.0.0         </span>|<span class="hljs-string">        24.0.0        </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">        python3-validations-libs       </span>|<span class="hljs-string">          1.0.5          </span>|<span class="hljs-string">    not installed     </span>|
+|<span class="hljs-string"> undercloud </span>|<span class="hljs-string">           validations-common          </span>|<span class="hljs-string">          1.1.2          </span>|<span class="hljs-string">    not installed     </span>|
++------------+---------------------------------------+-------------------------+----------------------+
++------------+--------------------------+-------------------------+----------------------+
+|<span class="hljs-string">    Node    </span>|<span class="hljs-string">       Package_Name       </span>|<span class="hljs-string"> Control Package Version </span>|<span class="hljs-string"> Test Package Version </span>|
++------------+--------------------------+-------------------------+----------------------+
+|<span class="hljs-string"> controller </span>|<span class="hljs-string">       libmodulemd        </span>|<span class="hljs-string">      not installed      </span>|<span class="hljs-string">        2.8.2         </span>|
+|<span class="hljs-string"> controller </span>|<span class="hljs-string">    openstack-heat-ui     </span>|<span class="hljs-string">          2.0.2          </span>|<span class="hljs-string">        2.0.1         </span>|
+|<span class="hljs-string"> controller </span>|<span class="hljs-string">    openstack-neutron     </span>|<span class="hljs-string">          15.3.1         </span>|<span class="hljs-string">        15.2.1        </span>|
+|<span class="hljs-string"> controller </span>|<span class="hljs-string"> openstack-neutron-common </span>|<span class="hljs-string">          15.3.1         </span>|<span class="hljs-string">        15.2.1        </span>|
+|<span class="hljs-string"> controller </span>|<span class="hljs-string">  openstack-neutron-ml2   </span>|<span class="hljs-string">          15.3.1         </span>|<span class="hljs-string">        15.2.1        </span>|
+|<span class="hljs-string"> controller </span>|<span class="hljs-string">  platform-python-devel   </span>|<span class="hljs-string">      not installed      </span>|<span class="hljs-string">        3.6.8         </span>|
+|<span class="hljs-string"> controller </span>|<span class="hljs-string">     puppet-pacemaker     </span>|<span class="hljs-string">          1.1.1          </span>|<span class="hljs-string">        1.0.1         </span>|
+|<span class="hljs-string"> controller </span>|<span class="hljs-string"> python-oslo-privsep-lang </span>|<span class="hljs-string">          1.33.4         </span>|<span class="hljs-string">        1.33.3        </span>|
+|<span class="hljs-string"> controller </span>|<span class="hljs-string">    python-rpm-macros     </span>|<span class="hljs-string">      not installed      </span>|<span class="hljs-string">          3           </span>|
+|<span class="hljs-string"> controller </span>|<span class="hljs-string">    python3-heatclient    </span>|<span class="hljs-string">          1.18.1         </span>|<span class="hljs-string">        1.18.0        </span>|
+|<span class="hljs-string"> controller </span>|<span class="hljs-string">     python3-neutron      </span>|<span class="hljs-string">          15.3.1         </span>|<span class="hljs-string">        15.2.1        </span>|
+|<span class="hljs-string"> controller </span>|<span class="hljs-string">   python3-oslo-privsep   </span>|<span class="hljs-string">          1.33.4         </span>|<span class="hljs-string">        1.33.3        </span>|
+|<span class="hljs-string"> controller </span>|<span class="hljs-string">  python3-rpm-generators  </span>|<span class="hljs-string">      not installed      </span>|<span class="hljs-string">          5           </span>|
+|<span class="hljs-string"> controller </span>|<span class="hljs-string">    python3-virtualenv    </span>|<span class="hljs-string">      not installed      </span>|<span class="hljs-string">        15.1.0        </span>|
+|<span class="hljs-string"> controller </span>|<span class="hljs-string">   python3-wheel-wheel    </span>|<span class="hljs-string">      not installed      </span>|<span class="hljs-string">        0.31.1        </span>|
+|<span class="hljs-string"> controller </span>|<span class="hljs-string">      python36-devel      </span>|<span class="hljs-string">      not installed      </span>|<span class="hljs-string">        3.6.8         </span>|
++------------+--------------------------+-------------------------+----------------------+
+</code></pre>
+{% endblock %}
