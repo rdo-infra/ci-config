@@ -99,6 +99,16 @@ services:
     volumes:
       - telegraf-volume:/tmp/telegraf_py3
 
+  compare_rpms:
+    build: compare_rpms
+    restart: always
+    container_name: compare_rpms
+    hostname: compare_rpms.rrcockpit
+    ports:
+      - "127.0.0.1:8585:8585"
+    depends_on:
+      - nginx
+
 volumes:
   mariadb-volume:
   influxdb-volume:
