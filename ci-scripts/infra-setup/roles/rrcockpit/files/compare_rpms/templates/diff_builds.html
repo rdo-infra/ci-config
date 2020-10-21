@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Diff Builds</h1>
+    <form action="" method="post" id="diff_build" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            <b>{{ form.control_baseurl.label }}</b><br>
+            {{ form.control_baseurl(size=180) }}<br>
+            {% for error in form.control_baseurl.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            <b>{{ form.test_baseurl.label }}</b><br>
+            {{ form.test_baseurl(size=180) }}<br>
+            {% for error in form.test_baseurl.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            <b>{{ form.diff_type.label }}</b><br>
+            {{ form.diff_type() }} </p>
+        <p>
+            <b>{{ form.undercloud_only.label }}</b><br>
+            {{ form.undercloud_only() }} </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
+

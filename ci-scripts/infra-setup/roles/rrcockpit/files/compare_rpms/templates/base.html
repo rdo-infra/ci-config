@@ -1,0 +1,72 @@
+<html>
+    <head>
+        {% if title %}
+        <title>{{ title }} - Diff TripleO Builds</title>
+        {% else %}
+        <title>Diff TripleO Builds</title>
+        {% endif %}
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>jQuery UI Progressbar - Default functionality</title>
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <script>
+          var timeInterval;
+          var maxSec=100;
+          var curSec=1;
+
+          $(function () {
+              $('#submit').click(function(){
+                  progressStart(20)
+              })
+          });
+
+          function progressStart(pauseDurationSec)
+          {
+              maxSec=pauseDurationSec;
+              timeInterval= setInterval(function(){
+                  progessSet()
+              }, 1000);
+          }
+
+          function progessSet()
+          {
+              curSec++;
+              var proc=10*curSec/maxSec;
+              $('#progressbar div').width(proc+'%');
+
+              if(curSec>=maxSec) progressStop();
+          }
+          function progressStop()
+          {
+              clearInterval(timeInterval);
+          }
+
+        </script>
+    </head>
+    <body>
+        <div>
+            Diff TripleO Builds:
+            <a href="{{ url_for('docs') }}">Docs</a>
+            <a href="{{ url_for('diff_builds') }}">Diff Builds</a>
+        </div>
+        <br>
+        <div id="progressbar">
+              <div></div>
+            </div>
+
+        <hr>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </body>
+</html>
