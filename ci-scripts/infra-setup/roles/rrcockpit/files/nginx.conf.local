@@ -40,6 +40,24 @@ http {
                     proxy_set_header X-Real-IP $remote_addr;
                     proxy_pass http://localhost:8080/;
         }
+                # redirect to compare_rpms
+                location /diff {
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_pass http://localhost:8585/docs;
+        }
+                # redirect to compare_rpms, allows user to toggle to docs
+                location /docs {
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_pass http://localhost:8585/docs;
+        }
+                # redirect to compare_rpms form
+                location /diff_builds {
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_pass http://localhost:8585/diff_builds;
+        }
 
 
         error_page 404 /404.html;
