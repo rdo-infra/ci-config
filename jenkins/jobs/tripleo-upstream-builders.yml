@@ -19,6 +19,9 @@
                 state: absent
             EOF
 
+            # Workaround for missing opstools repo on ppc64le
+             sed -i 's/opstools//' ${WORKSPACE}/roles/tripleo-repos/tasks/main.yml
+
             # Place roles for the tripleo-ci container build playbooks in the proper directory
             mkdir ${WORKSPACE}/roles
             cp -r ${WORKSPACE}/tripleo-ci/roles/* ${WORKSPACE}/roles
@@ -239,9 +242,6 @@
 
             # We keep connecting onto the same hosts that are continuously reinstalled
             export ANSIBLE_HOST_KEY_CHECKING=False
-
-            # opstools workaround
-            sed -i 's/opstools//' ${WORKSPACE}/roles/tripleo-repos/tasks/main.yml
 
             # cat the playbook for building images to the workspace
             cat << EOF > ${WORKSPACE}/images-build.yml
