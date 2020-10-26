@@ -19,9 +19,6 @@
                 state: absent
             EOF
 
-            # Workaround for missing opstools repo on ppc64le
-             sed -i 's/opstools//' ${WORKSPACE}/roles/tripleo-repos/tasks/main.yml
-
             # Place roles for the tripleo-ci container build playbooks in the proper directory
             mkdir ${WORKSPACE}/roles
             cp -r ${WORKSPACE}/tripleo-ci/roles/* ${WORKSPACE}/roles
@@ -33,6 +30,9 @@
 
             # Copy over any zuul roles needed
             cp -r ${WORKSPACE}/zuul-jobs/roles/ensure-pip ${WORKSPACE}/roles
+
+            # Workaround for missing opstools repo on ppc64le
+             sed -i 's/opstools//' ${WORKSPACE}/roles/tripleo-repos/tasks/main.yml
 
             # Mock prerequisite zuul vars so the playbooks can run on jenkins
             cat <<EOF >> ${WORKSPACE}/roles/build-containers/vars/main.yaml
