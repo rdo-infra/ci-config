@@ -2,6 +2,7 @@ set -ex
 CICO_USER_DIR=${CICO_USER_DIR:-/root}
 WORKSPACE=${WORKSPACE:-/tmp}
 ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
+CONTAINER_BUILD_LOG_DIR=${CONTAINER_LOG_DIR:-container-builds}
 LOGSERVER="logserver.rdoproject.org ansible_user=loguser"
 LOG_DISPLAY_URL="https://logserver.rdoproject.org/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
 CI_CENTOS_URL="https://ci.centos.org/job/${JOB_NAME}/${BUILD_NUMBER}"
@@ -34,12 +35,11 @@ cat << EOF > collect-logs.yaml
   gather_facts: no
   tasks:
    - shell: |
-        mkdir -p ${CICO_USER_DIR}/workspace/logs/buildah-builds/
-
         pushd ${CICO_USER_DIR}/workspace
+            mkdir -p ./logs/${CONTAINER_BUILD_LOG_DIR}/
             cp *.log ./logs/ || true
             cp *.conf ./logs/ || true
-            cp -r /tmp/kolla-* ./logs/buildah-builds/ || true
+            cp -r /tmp/${CONTAINER_BUILD_LOG_DIR}  ./logs/${CONTAINER_BUILD_LOG_DIR}/ || true
             chmod -R 755 ./logs
         popd
 
