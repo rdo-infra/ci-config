@@ -243,6 +243,12 @@
             # We keep connecting onto the same hosts that are continuously reinstalled
             export ANSIBLE_HOST_KEY_CHECKING=False
 
+            # Mock some zuul vars so the playbooks can run on jenkins
+            cat <<EOF >> ${WORKSPACE}/roles/oooci-build-images/vars/main.yaml
+            tripleo_image_source: https://cloud.centos.org/centos/8/ppc64le/images/CentOS-8-GenericCloud-8.1.1911-20200113.3.ppc64le.qcow2
+            tripleo_image_type: overcloud-full
+            EOF
+
             # cat the playbook for building images to the workspace
             cat << EOF > ${WORKSPACE}/images-build.yml
             ---
