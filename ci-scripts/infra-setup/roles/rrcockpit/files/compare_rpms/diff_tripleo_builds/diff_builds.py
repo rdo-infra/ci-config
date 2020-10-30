@@ -84,8 +84,8 @@ class DiffBuilds(object):
             if req.status_code == 200:
                 container_info_temp = str(req.content.decode('UTF-8'))
             else:
-                url = ("{}/{}/var/log/extra/podman/containers/{}podman_info.\
-                        podman_info.log.txt.gz".format(base_url, node, c))
+                url = ("{}/{}/var/log/extra/podman/containers/{}"
+                       "podman_info.log.txt.gz".format(base_url, node, c))
                 req = cache.get(url, verify=False)
                 if req.status_code == 200:
                     container_info_temp = str(req.content.decode('UTF-8'))
