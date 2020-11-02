@@ -45,6 +45,18 @@ class TestDiffTripleOBuilds(unittest.TestCase):
         with open(full_path + '/rpms_test.json') as json_file:
             self.rpms_test_json = json.load(json_file)
 
+        with open(full_path + '/container_rpms.txt') as file:
+            self.container_rpms = file.read()
+
+    def test_parse_container_rpms(self):
+        # start after the log file has been split
+        # into container info and rpm_info
+        dict_of_containers = {}
+        container_info_temp = self.container_rpms.split("\n")
+        dict_of_containers["test_container"] = container_info_temp
+        parsed_list = self.diff.process_containers_step2(dict_of_containers)
+        self.assertEqual(len(parsed_list['test_container']), 40)
+
     def test_parse_list_control(self):
         result = self.diff.parse_list(self.control_list)
         self.assertEqual(len(self.control_list), 7)

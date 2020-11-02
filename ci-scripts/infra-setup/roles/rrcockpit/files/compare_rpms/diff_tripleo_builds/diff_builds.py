@@ -48,13 +48,24 @@ class DiffBuilds(object):
             if '.' in i.get('href')[0]:
                 continue
             if "/" in i.get('href'):
-                all_containers.append("{}{}".format(
-                    i.get('href').split("/")[0], "/"))
+                all_containers.append(
+                    "{}{}".format(i.get('href').split("/")[0], "/"))
             else:
                 all_containers.append(i.get('href'))
         return all_containers
 
     def process_containers(self, cache, base_url, node, containers_list):
+        """
+        break this into two parts for better unit testing
+        """
+        containers_strings = self.process_containers_step1(cache,
+                                                           base_url,
+                                                           node,
+                                                           containers_list)
+        dict_of_containers = self.process_containers_step2(containers_strings)
+        return dict_of_containers
+
+    def process_containers_step1(self, cache, base_url, node, containers_list):
         """
         Pull the podman_info file and scrape out rpm info
 
@@ -84,8 +95,8 @@ class DiffBuilds(object):
             if req.status_code == 200:
                 container_info_temp = str(req.content.decode('UTF-8'))
             else:
-                url = ("{}/{}/var/log/extra/podman/containers/{}podman_info.\
-                        podman_info.log.txt.gz".format(base_url, node, c))
+                url = ("{}/{}/var/log/extra/podman/containers/{}"
+                       "podman_info.log.txt.gz".format(base_url, node, c))
                 req = cache.get(url, verify=False)
                 if req.status_code == 200:
                     container_info_temp = str(req.content.decode('UTF-8'))
@@ -96,17 +107,35 @@ class DiffBuilds(object):
                 container_info_temp = container_info_temp.partition(
                     "Installed Packages")[2].split("\n")
                 container_info_temp.pop(0)
-                container_info = []
-                for i in container_info_temp:
-                    # remove .x86_64
-                    try:
-                        container_info.append("{}-{}".format(
-                            i.strip().split()[0][:-7], i.strip().split()[1]))
-                    except IndexError:
-                        if str(i) != "":
-                            logging.warning("Index Error found on\
-                                            (ignore empty): " + str(i))
-                dict_of_containers[container_name] = container_info
+                dict_of_containers[container_name] = container_info_temp
+        return dict_of_containers
+
+    def process_containers_step2(self, dict_of_containers):
+        for container_name, value in dict_of_containers.items():
+            container_info = []
+            for counter, i in enumerate(value):
+                # remove .x86_64
+                try:
+                    parts = i.split(" ")
+                    # rpms can be logged to multiple lines
+                    # the length of a full line should be three
+                    is_alpha = re.match('[a-zA-Z]', parts[0])
+                    if len(parts) > 1 and is_alpha:
+                        nvr = "{}-{}".format(i.strip().split()[0][:-7],
+                                             i.strip().split()[1])
+                        container_info.append(nvr)
+                    else:
+                        # rpm info on more than one line
+                        if len(parts) == 1 and is_alpha:
+                            name = i[:-7]
+                            version = value[counter + 1].strip().split(" ")[0]
+                            nvr = "{}-{}".format(name, version)
+                            container_info.append(nvr)
+                except IndexError:
+                    if str(i) != "":
+                        logging.warning("Index Error found on\
+                                        (ignore empty): " + str(i))
+            dict_of_containers[container_name] = container_info
         return dict_of_containers
 
     def get_repoquery_logs(self, cache, base_url, node):
@@ -266,6 +295,9 @@ class DiffBuilds(object):
         packages: a dictionary of rpm key, value pairs
         """
         packages = defaultdict(list)
+        # TO-DO pass ignored and error to result
+        # packages_ignored = ()
+        packages_error = ()
         for item in this_list:
             # sanitize
             ignored = False
@@ -297,6 +329,12 @@ class DiffBuilds(object):
                 logging.warning(
                     "error found getting package name/version for {}"
                     .format(str(item)))
+                is_alpha = re.match('[a-zA-Z]', nvr[0])
+                if not is_alpha:
+                    packages_error.add(item)
+                    logging.warning("package name does not meet criteria "
+                                    "for item: {}".format(item))
+                    continue
                 continue
         return packages
 
