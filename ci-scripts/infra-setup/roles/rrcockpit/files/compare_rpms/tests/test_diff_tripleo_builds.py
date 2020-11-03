@@ -2,6 +2,7 @@ import json
 import os
 import unittest
 
+import mock
 from diff_tripleo_builds import diff_builds
 
 # execute w/ python -m unittest
@@ -47,6 +48,57 @@ class TestDiffTripleOBuilds(unittest.TestCase):
 
         with open(full_path + '/container_rpms.txt') as file:
             self.container_rpms = file.read()
+
+        with open(full_path + '/upstream_container_list.txt') as file:
+            self.upstream_container_html = file.read()
+
+        with open(full_path + '/downstream_container_list.txt') as file:
+            self.downstream_container_html = file.read()
+
+    def _mock_response(
+            self,
+            status=200,
+            content="CONTENT",
+            json_data=None,
+            raise_for_status=None):
+        mock_resp = mock.Mock()
+        # mock raise_for_status call w/optional error
+        mock_resp.raise_for_status = mock.Mock()
+        if raise_for_status:
+            mock_resp.raise_for_status.side_effect = raise_for_status
+        # set status code and content
+        mock_resp.status_code = status
+        mock_resp.content = content
+        # add json data if provided
+        if json_data:
+            mock_resp.json = mock.Mock(
+                return_value=json_data
+            )
+        return mock_resp
+
+    @mock.patch('requests.get')
+    def test_upstream_containers_dir(self, mock_get):
+        # the containers directory is rendered in
+        # different ways upstream/downstream
+        html = self.upstream_container_html
+        mock_resp = self._mock_response(content=html)
+        mock_get.return_value = mock_resp
+        containers = self.diff.get_directory_list("foo", "undercloud")
+        self.assertEqual(len(containers), 72)
+        self.assertEqual(containers[0], 'container-puppet-crond')
+        self.assertEqual(containers[71], 'tempest_init_logs')
+
+    @mock.patch('requests.get')
+    def test_downstream_containers_dir(self, mock_get):
+        # the containers directory is rendered in
+        # different ways upstream/downstream
+        html = self.downstream_container_html
+        mock_resp = self._mock_response(content=html)
+        mock_get.return_value = mock_resp
+        containers = self.diff.get_directory_list("foo", "undercloud")
+        self.assertEqual(len(containers), 38)
+        self.assertEqual(containers[0], 'create_swift_temp_url_key')
+        self.assertEqual(containers[37], 'zaqar_websocket')
 
     def test_parse_container_rpms(self):
         # start after the log file has been split
