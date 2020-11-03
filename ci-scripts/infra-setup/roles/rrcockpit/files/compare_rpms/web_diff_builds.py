@@ -1,5 +1,5 @@
+import logging
 import os
-
 import requests
 from cachecontrol import CacheControl
 from diff_tripleo_builds import diff_builds
@@ -7,7 +7,7 @@ from flask import Flask, render_template
 from forms import WebDiffBuilds
 from prettytable import PrettyTable
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 app.config['SECRET_KEY'] = os.environ.get(
     'SECRET_KEY') or 'you-will-never-guess'
 
@@ -15,11 +15,21 @@ diff = diff_builds.DiffBuilds()
 sess = requests.session()
 cached_sess = CacheControl(sess)
 
+debug_format = '%(asctime)s %(name)-12s %(levelname)-8s %(message)s'
+logging.basicConfig(level=logging.INFO,
+                    format=debug_format,
+                    datefmt='%m-%d %H:%M',
+                    filename='static/debug.log',
+                    filemode='w')
 
 @app.route('/')
 @app.route('/index')
 def index():
     return render_template('index.html', title='Home')
+
+@app.route('/debug')
+def send_to_debug():
+    return app.send_static_file('debug.log')
 
 
 @app.route('/docs')
