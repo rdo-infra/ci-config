@@ -33,10 +33,11 @@ class DiffBuilds(object):
         try:
             rows = table.findAll('tr')
         except Exception:
-            logging.error("A list of containers was not found"
-                          "at: {}".format(containers_url))
+            this_error = ("(A list of containers was not found "
+                          "at: {})".format(containers_url))
+            logging.error(this_error)
             logging.warning("Try using the -a option for a repoquery")
-            sys.exit()
+            raise Exception(this_error)
         containers = []
         for tr in rows:
             logging.debug(tr)
