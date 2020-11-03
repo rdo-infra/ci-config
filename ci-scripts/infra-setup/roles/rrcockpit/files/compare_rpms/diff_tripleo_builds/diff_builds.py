@@ -36,7 +36,7 @@ class DiffBuilds(object):
             logging.error("A list of containers was not found"
                           "at: {}".format(containers_url))
             logging.warning("Try using the -a option for a repoquery")
-            sys.exit()
+            raise Exception('Container directory is not available')
         containers = []
         for tr in rows:
             logging.debug(tr)
