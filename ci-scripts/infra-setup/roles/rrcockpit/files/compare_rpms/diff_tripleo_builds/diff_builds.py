@@ -19,6 +19,45 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 class DiffBuilds(object):
 
+    def __fetch_container_directory_list(self, base_url, node):
+        containers_url = ("{}/{}/var/log/extra/podman/"
+                          "containers/".format(base_url, node))
+        page = requests.get(containers_url).content
+        return [page, containers_url]
+
+    def __parse_container_directory_list(self, html_page):
+        page = html_page[0]
+        containers_url = html_page[1]
+        soup = BeautifulSoup(page, 'html.parser')
+        table = soup.find('table')
+        try:
+            rows = table.findAll('tr')
+        except Exception:
+            logging.error("A list of containers was not found"
+                          "at: {}".format(containers_url))
+            logging.warning("Try using the -a option for a repoquery")
+            sys.exit()
+        containers = []
+        for tr in rows:
+            logging.debug(tr)
+            if tr.find('a'):
+                full_link = tr.find('a').get('href')
+                dirty_link = re.match(r'^\.', full_link)
+                index_link = re.match(r'.*\/index.html', full_link)
+                if index_link:
+                    # container_name/index.html
+                    container_name = full_link[:-11]
+                elif dirty_link:
+                    # ./container_name/
+                    container_name = full_link[2:-1]
+                else:
+                    # container_name/
+                    container_name = full_link[:-1]
+                is_alpha = re.match('[a-zA-Z]', container_name[0:4])
+                if is_alpha:
+                    containers.append(container_name)
+        return containers
+
     def get_directory_list(self, base_url, node):
         """
         Gets the directory listing of the directory
@@ -34,25 +73,9 @@ class DiffBuilds(object):
         Returns:
         list: a list of ALL the directories in the containers dir
         """
-        containers_url = "{}/{}/var/log/extra/podman/containers/".format(
-            base_url, node)
-        page = requests.get(containers_url).text
-        soup = BeautifulSoup(page, 'html.parser')
-        containers = soup.find_all('a')
-        all_containers = []
-        for i in containers:
-            if '?' in i.get('href')[0]:
-                continue
-            if '/' in i.get('href')[0]:
-                continue
-            if '.' in i.get('href')[0]:
-                continue
-            if "/" in i.get('href'):
-                all_containers.append(
-                    "{}{}".format(i.get('href').split("/")[0], "/"))
-            else:
-                all_containers.append(i.get('href'))
-        return all_containers
+        page = self.__fetch_container_directory_list(base_url, node)
+        containers = self.__parse_container_directory_list(page)
+        return containers
 
     def process_containers(self, cache, base_url, node, containers_list):
         """
@@ -88,20 +111,27 @@ class DiffBuilds(object):
             return dict_of_containers
         containers_list.pop(0)
         for c in containers_list:
-            logging.info("processing {} containers: {}".format(node, c[:-1]))
-            url = ("{}/{}/var/log/extra/podman/containers/{}podman_info.log"
+            logging.info("processing {} containers: {}".format(node, c))
+            # for podman_info_log.txt, .gz, .txt.gz
+            url = ("{}/{}/var/log/extra/podman/containers/{}/podman_info.log"
                    .format(base_url, node, c))
             req = cache.get(url, verify=False)
             if req.status_code == 200:
                 container_info_temp = str(req.content.decode('UTF-8'))
             else:
                 url = ("{}/{}/var/log/extra/podman/containers/{}"
-                       "podman_info.log.txt.gz".format(base_url, node, c))
+                       "/podman_info.log.txt.gz".format(base_url, node, c))
                 req = cache.get(url, verify=False)
                 if req.status_code == 200:
                     container_info_temp = str(req.content.decode('UTF-8'))
                 else:
-                    sys.exit("request failed to fetch: {}".format(url))
+                    url = ("{}/{}/var/log/extra/podman/containers/{}"
+                           "/podman_info.log.gz".format(base_url, node, c))
+                    req = cache.get(url, verify=False)
+                    if req.status_code == 200:
+                        container_info_temp = str(req.content.decode('UTF-8'))
+                    else:
+                        sys.exit("request failed to fetch: {}".format(url))
             if "Installed Packages" in container_info_temp:
                 container_name = c[:-1]
                 container_info_temp = container_info_temp.partition(
@@ -545,7 +575,6 @@ class DiffBuilds(object):
         even_nodes = self.check_for_even_nodes(nodes, column_list)
         if not even_nodes[0]:
             return [even_nodes[1], column_list]
-
         for i in node_list:
             if i in nodes['control'].keys():
                 control_list = self.get_logs(
