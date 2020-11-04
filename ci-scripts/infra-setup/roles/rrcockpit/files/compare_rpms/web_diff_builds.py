@@ -16,6 +16,8 @@ diff = diff_builds.DiffBuilds()
 sess = requests.session()
 cached_sess = CacheControl(sess)
 
+# To-DO consider:
+# https://pypi.org/project/PyLog2html/
 debug_format = '%(asctime)s %(levelname)-8s %(message)s'
 logging.basicConfig(level=logging.INFO,
                     format=debug_format,

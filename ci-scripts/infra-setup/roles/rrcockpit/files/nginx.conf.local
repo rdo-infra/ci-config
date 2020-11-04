@@ -52,6 +52,12 @@ http {
                     proxy_set_header X-Real-IP $remote_addr;
                     proxy_pass http://localhost:8585/docs;
         }
+                # redirect to log file
+                location /info {
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_pass http://localhost:8585/info;
+        }
                 # redirect to compare_rpms form
                 location /web_diff_builds {
                     proxy_set_header Host $host;
