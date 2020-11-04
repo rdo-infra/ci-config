@@ -2,7 +2,6 @@
 
 import logging
 import re
-import sys
 import urllib
 from collections import defaultdict
 
@@ -132,7 +131,9 @@ class DiffBuilds(object):
                     if req.status_code == 200:
                         container_info_temp = str(req.content.decode('UTF-8'))
                     else:
-                        sys.exit("request failed to fetch: {}".format(url))
+                        this_error = "request failed to fetch: {}".format(url)
+                        raise Exception(this_error)
+
             if "Installed Packages" in container_info_temp:
                 container_name = c[:-1]
                 container_info_temp = container_info_temp.partition(
@@ -193,9 +194,9 @@ class DiffBuilds(object):
                 base_url, node)
             list = cache.get(url, verify=False)
             if list.status_code != 200:
-                sys.exit(
-                    "logs for base node {} were unavailable: {}"
-                    .format(node, url))
+                repoquery_not_avail = ("logs for base node {} were NOT "
+                                       "available: {}".format(node, url))
+                raise Exception(repoquery_not_avail)
         nice_list = list.content.decode('UTF-8').splitlines()
         return nice_list
 
@@ -245,8 +246,9 @@ class DiffBuilds(object):
         url = "{}/metadata/rpms.json".format(base_url)
         result = cache.get(url, verify=False)
         if result.status_code != 200:
-            sys.exit("logs for the compose were unavailable: {}".format(url))
-
+            compose_not_avail = ("logs for the compose were NOT "
+                                 "available: {}".format(url))
+            raise Exception(compose_not_avail)
         return result.json()
 
     def parse_compose(self, json_result):
@@ -282,8 +284,8 @@ class DiffBuilds(object):
         # first test if we're using http(s) or local file
         test_url = urllib.parse.urlparse(base_url)
         if test_url.scheme == 'file':
-            logging.debug("file format is not supported, yet")
-            sys.exit()
+            file_error = "file format is not supported, yet"
+            raise Exception(file_error)
         else:
             url = "{}/{}/var/log/extra/rpm-list.txt".format(base_url, node)
             logging.info("processing host node {}".format(node))
@@ -293,9 +295,9 @@ class DiffBuilds(object):
                     base_url, node)
                 list = cache.get(url, verify=False)
                 if list.status_code != 200:
-                    sys.exit(
-                        "logs for base node {} were unavailable: {}"
-                        .format(node, url))
+                    logs_not_avail = ("logs for base node {} were NOT "
+                                      "available: {}".format(node, url))
+                    raise Exception(logs_not_avail)
             nice_list = list.content.decode('UTF-8').splitlines()
         if nice_list:
             # check containers

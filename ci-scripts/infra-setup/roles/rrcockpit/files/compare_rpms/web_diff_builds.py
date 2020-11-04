@@ -76,6 +76,11 @@ def display_packages_table(node,
                    package_diff['control'],
                    package_diff['test']
                    ])
+    elif node == "exception_caught":
+        t.add_row([node, "error",
+                   package_diff[0][0],
+                   package_diff[0][1]
+                   ])
     else:
         for package_name in list(package_diff.keys()):
             t.add_row([node, package_name,
@@ -89,42 +94,52 @@ def display_packages_table(node,
 def result(diff_type, control_url, test_url, undercloud_only):
 
     undercloud_only = bool(undercloud_only)
-    if diff_type == "ci_installed":
-        all_available = False
-        ignore_packages = {}
-        core_results = diff.execute_installed_package_diff(cached_sess,
-                                                           control_url,
-                                                           test_url,
-                                                           all_available,
-                                                           ignore_packages,
-                                                           undercloud_only
-                                                           )
-        full_package_diff = core_results[0]
-        column_list = core_results[1]
+    error = {}
+    column_list = ['ERROR:', 'Exception', 'sorry', 'Package_Name']
+    try:
+        if diff_type == "ci_installed":
+            all_available = False
+            ignore_packages = {}
+            core_results = diff.execute_installed_package_diff(cached_sess,
+                                                               control_url,
+                                                               test_url,
+                                                               all_available,
+                                                               ignore_packages,
+                                                               undercloud_only
+                                                               )
+            full_package_diff = core_results[0]
+            column_list = core_results[1]
 
-    elif diff_type == "all_available":
-        all_available = True
-        ignore_packages = {}
-        core_results = diff.execute_repoquery_diff(cached_sess,
-                                                   control_url,
-                                                   test_url,
-                                                   all_available,
-                                                   ignore_packages
-                                                   )
-        full_package_diff = core_results[0]
-        column_list = core_results[1]
+        elif diff_type == "all_available":
+            all_available = True
+            ignore_packages = {}
+            core_results = diff.execute_repoquery_diff(cached_sess,
+                                                       control_url,
+                                                       test_url,
+                                                       all_available,
+                                                       ignore_packages
+                                                       )
+            full_package_diff = core_results[0]
+            column_list = core_results[1]
 
-    elif diff_type == "diff_compose":
-        all_available = False
-        ignore_packages = {}
-        core_results = diff.execute_compose_diff(cached_sess,
-                                                 control_url,
-                                                 test_url,
-                                                 all_available,
-                                                 ignore_packages
-                                                 )
-        full_package_diff = core_results[0]
-        column_list = core_results[1]
+        elif diff_type == "diff_compose":
+            all_available = False
+            ignore_packages = {}
+
+            core_results = diff.execute_compose_diff(cached_sess,
+                                                     control_url,
+                                                     test_url,
+                                                     all_available,
+                                                     ignore_packages
+                                                     )
+            full_package_diff = core_results[0]
+            column_list = core_results[1]
+
+    except Exception as e:
+        exception_caught = ['error', "{}, {}".format(str(e), ("check "
+                            "the debug log"))]
+        error['exception_caught'] = [exception_caught]
+        full_package_diff = error
 
     result = ""
     for k in full_package_diff.keys():
