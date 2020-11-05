@@ -343,7 +343,7 @@ class DiffBuilds(object):
                 if ignore_packages:
                     search_term = "{}".format(nvr[0])
                     for ignore in ignore_packages:
-                        if "*" in ignore:
+                        if ".*" in ignore:
                             r = re.compile(ignore)
                             match = r.match(search_term)
                             if match:
@@ -361,7 +361,7 @@ class DiffBuilds(object):
                 logging.error(e)
                 logging.warning(
                     "error found getting package name/version for {}"
-                    .format(str(item)))
+                    " OR the ignore package regex {}".format(str(item), ignore))
                 is_alpha = re.match('[a-zA-Z]', nvr[0])
                 if not is_alpha:
                     packages_error.add(item)
