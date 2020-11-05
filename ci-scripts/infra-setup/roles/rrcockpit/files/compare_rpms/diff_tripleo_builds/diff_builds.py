@@ -340,6 +340,7 @@ class DiffBuilds(object):
                 nvr = utils.splitFilename(item)
                 version = nvr[1]
                 release = nvr[2]
+                patch = nvr[3]
                 if ignore_packages:
                     search_term = "{}".format(nvr[0])
                     for ignore in ignore_packages:
@@ -356,7 +357,9 @@ class DiffBuilds(object):
                                     "Ignoring Package: {}".format(search_term))
                                 ignored = True
                 if not ignored:
-                    packages[nvr[0]].append((version, release))
+                    #import pdb
+                    #pdb.set_trace()
+                    packages[nvr[0]].append((patch, version, release))
             except Exception as e:
                 logging.error(e)
                 logging.warning(
@@ -388,7 +391,7 @@ class DiffBuilds(object):
         for key in packages:
             highest_version_tuple = packages[key][0]
             for item in packages[key]:
-                if rpmvercmp.labelCompare(item, highest_version_tuple) == 1:
+                if utils.cpaas_label_compare(item, highest_version_tuple) == 1:
                     highest_version_tuple = item
 
             highest_version = highest_version_tuple[0]
@@ -726,7 +729,9 @@ def main(control_url,
     ignore_packages = {".*debuginfo",
                        ".*debugsource",
                        ".*-devel",
-                       ".*-doc"}
+                       ".*-doc",
+                       ".*-tests",
+                       ".*-test"}
 
     # debug inputs
     logging.debug("input: control_url: {}".format(control_url))
