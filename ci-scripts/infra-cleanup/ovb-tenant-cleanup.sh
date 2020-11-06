@@ -161,17 +161,18 @@ else
 fi
 
 # DOWN port cleanup
-PORT_TIME_EXPIRED=300
+PORT_TIME_EXPIRED=600
 DATE_TIME_EXPIRED=$(`which gdate date|head -n1` -d " $PORT_TIME_EXPIRED minutes ago" -u  "+%Y-%m-%dT%H:%M:%SZ")
 # Get a list of ports which are DOWN
 echo "INFO: Getting a list of ports which are DOWN"
 DOWN_PORT_LIST=$(openstack port list -f json | jq -r '.[]| select(.["Status"] == "DOWN") | .["ID"]')
 # Get a list of ports which are down for 5 hours
 for PORT in $DOWN_PORT_LIST; do
-    DOWN_PORT=$(openstack port show $PORT -f json | jq --arg date_time_expired "$DATE_TIME_EXPIRED" -r '. |select(.updated_at <= $date_time_expired)| .id')
+    DOWN_PORT=$(openstack port show $PORT -f json | jq --arg date_time_expired "$DATE_TIME_EXPIRED" -r '. |select(.created_at <= $date_time_expired)| .id')
     if [[ -n "$DOWN_PORT" && "$DOWN_PORT" != "null" ]]; then
         echo "INFO: Deleting Down Port $DOWN_PORT"
         if [[ "$DRY_RUN" == "0" ]]; then
+            openstack port set --enable $DOWN_PORT || true
             openstack port delete $DOWN_PORT
         fi
     fi
@@ -231,6 +232,7 @@ else
         else
             for SERVER in $SERVER_IDS; do
                 echo "INFO: Deleting server ID $SERVER ..." >&2
+                openstack server set --state active || true
                 openstack server delete $SERVER
             done
         fi
@@ -257,8 +259,15 @@ else
             else
                 for PORT_SUBNET_ID in $PORT_SUBNET_IDS; do
                     echo "INFO: Deleting port ID $PORT_SUBNET_ID ..." >&2
+                    openstack port set --enable || true
                     openstack port delete $PORT_SUBNET_ID
                 done
+            fi
+            if [[ "$DRY_RUN" == "1" ]]; then
+                echo "INFO: DRY RUN - subnets to delete:
+                $SUBNET_IDS" >&2
+            else
+                openstack subnet delete $SUBNET_ID
             fi
         done
 
