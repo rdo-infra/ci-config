@@ -39,6 +39,7 @@ cat << EOF > collect-logs.yaml
             mkdir -p ./logs/${CONTAINER_BUILD_LOG_DIR}/
             cp *.log ./logs/ || true
             cp *.conf ./logs/ || true
+            cp *.sh ./logs/ || true
             cp -r /tmp/${CONTAINER_BUILD_LOG_DIR}  ./logs/${CONTAINER_BUILD_LOG_DIR}/ || true
             chmod -R 755 ./logs
         popd
