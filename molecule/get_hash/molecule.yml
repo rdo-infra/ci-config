@@ -1,22 +1,16 @@
 ---
 driver:
-  name: docker
+  name: delegated
 
 platforms:
   - name: instance
-    hostname: instance  # <-- keep it compatibility with zuul mol jobs
-    image: pycontribs/centos:8
-    environment: &env
-      http_proxy: "{{ lookup('env', 'http_proxy') }}"
-      https_proxy: "{{ lookup('env', 'https_proxy') }}"
+    options:
+      managed: False
 
 provisioner:
   name: ansible
 
 scenario:
   test_sequence:
-    - destroy
-    - create
     - prepare
     - converge
-    - destroy
