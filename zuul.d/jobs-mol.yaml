@@ -6,7 +6,7 @@
       # longer -k match avoids accidental inclusion of more than one scenario
       # molecule/ at the end tells pytest to look only inside this folder, so
       # it will avoid collecting (or failign to collect) other unrelated tests
-      tox_extra_args: "-- molecule/{{ mol_scenario }}/molecule.yml"
+      # tox_extra_args: "-- molecule/{{ mol_scenario }}/molecule.yml"
       tox_environment:
         # See https://click.palletsprojects.com/en/7.x/python3/
         LC_ALL: en_US.utf8
@@ -18,7 +18,7 @@
         # ^ apparently pytest does not pass above value to molecule, so:
         MOLECULE_OPTS: --driver-name delegated
       # avoids an error with "Run tox without tests" due to implicit use of 'venv' in zuul-job
-      tox_envlist: molecule
+      tox_envlist: "{{ mol_scenario }}"
     # pre assures instance/tester hostnames resolve
     pre-run: playbooks/mol/pre.yml
     # Our run avoids calling revoke-sudo
