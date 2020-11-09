@@ -27,9 +27,11 @@ def print_data(data, release, name_filter):
                 for b in j['builds']:
                     b['timestamp'] = int(b['timestamp'] * 1000000)
                     if b['result'] == "SUCCESS":
-                        b['result_int'] = int(0)
-                    else:
                         b['result_int'] = int(1)
+                    else:
+                        b['result_int'] = int(0)
+                    # convert milliseconds to seconds
+                    b['duration'] = round(int(b['duration']) / 1000)
                     print(('jenkins,'
                            'job_name={},build_id="{}",'
                            'duration={},result="{}",'
