@@ -128,9 +128,9 @@ class TestDiffTripleOBuilds(unittest.TestCase):
         result = self.diff.parse_list(self.control_list)
         self.assertEqual(len(self.control_list), 7)
         self.assertEqual(len(result), 5)
-        self.assertIn(('1.0.4', '8.el8'), result['fribidi'])
-        self.assertIn(('1.0.5', '11.el8'), result['fribidi'])
-        self.assertIn(('1.0.5', '9.el8'), result['fribidi'])
+        self.assertIn(('', '1.0.4', '8.el8'), result['fribidi'])
+        self.assertIn(('', '1.0.5', '11.el8'), result['fribidi'])
+        self.assertIn(('', '1.0.5', '9.el8'), result['fribidi'])
 
     def test_parse_list_test(self):
         result = self.diff.parse_list(self.test_list)
@@ -144,6 +144,16 @@ class TestDiffTripleOBuilds(unittest.TestCase):
         self.assertEqual(len(result), 5)
         self.assertNotIn('1.0.4', result['fribidi'])
         self.assertEqual(['1.0.5', '1.0.5-11.el8'], result['fribidi'])
+
+    def test_find_highest_version_cpaas_edition(self):
+        packages = self.diff.parse_list(
+            self.control_list, )
+        result = self.diff.find_highest_version(packages, cpaas=True)
+        self.assertEqual(len(result), 5)
+        self.assertNotIn('1.0.4', result['fribidi'])
+        # 1.0.5-11 is really the highest but the cpaas diff ignores
+        # the -11 and -9 are equal.
+        self.assertIn('1.0.5', result['fribidi'])
 
     def test_nvr(self):
         packages = self.diff.parse_list(
@@ -167,11 +177,11 @@ class TestDiffTripleOBuilds(unittest.TestCase):
         self.assertIn('bar', package_diff.keys())
         self.assertIn('lvm2', package_diff.keys())
         # ensure package in control but not test is correct
-        self.assertEqual(['2.8.08', '2.8.08-3.el8'], package_diff['foo'][0])
+        self.assertEqual(['2.8.08', '8-2.8.08'], package_diff['foo'][0])
         self.assertEqual(['0', 'not installed'], package_diff['foo'][1])
         # ensure package in test but not control is correct
         self.assertEqual(['0', 'not installed'], package_diff['bar'][0])
-        self.assertEqual(['2.8.08', '2.8.08-3.el8'], package_diff['bar'][1])
+        self.assertEqual(['2.8.08', '8-2.8.08'], package_diff['bar'][1])
 
     def test_ignore_packages(self):
         ignore_packages = {"fribidi", "python3-pyasn1-modules",
@@ -186,8 +196,8 @@ class TestDiffTripleOBuilds(unittest.TestCase):
         package_diff = self.diff.diff_packages(
             c_highest, t_highest)
 
-        package_foo = [['2.8.08', '2.8.08-3.el8'], ['0', 'not installed']]
-        package_bar = [['0', 'not installed'], ['2.8.08', '2.8.08-3.el8']]
+        package_foo = [['2.8.08', '8-2.8.08'], ['0', 'not installed']]
+        package_bar = [['0', 'not installed'], ['2.8.08', '8-2.8.08']]
         self.assertEqual(len(package_diff), 2)
         self.assertEqual(package_foo, package_diff['foo'])
         self.assertEqual(package_bar, package_diff['bar'])

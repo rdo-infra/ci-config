@@ -338,6 +338,8 @@ class DiffBuilds(object):
                 continue
             try:
                 nvr = utils.splitFilename(item)
+                # [14:08:17] <lon|on_duty> *labelcompare functions expect (epoch, version, release)
+                epoch = nvr[3]
                 version = nvr[1]
                 release = nvr[2]
                 if ignore_packages:
@@ -356,7 +358,7 @@ class DiffBuilds(object):
                                     "Ignoring Package: {}".format(search_term))
                                 ignored = True
                 if not ignored:
-                    packages[nvr[0]].append((version, release))
+                    packages[nvr[0]].append((epoch, version, release))
             except Exception as e:
                 logging.error(e)
                 logging.warning(
@@ -371,7 +373,7 @@ class DiffBuilds(object):
                 continue
         return packages
 
-    def find_highest_version(self, packages):
+    def find_highest_version(self, packages, cpaas=False):
         """
         Get the highest version of rpms in a list
 
@@ -383,21 +385,39 @@ class DiffBuilds(object):
 
         Returns:
         dict_of_rpms: dictionary of rpms w/ unique highest versions
+
+        note:
+        epoch = nvr[3]
+        version = nvr[1]
+        release = nvr[2]
+        packages[nvr[0]].append((epoch, version, release))
         """
         dict_of_rpms = {}
         for key in packages:
-            highest_version_tuple = packages[key][0]
-            for item in packages[key]:
-                if rpmvercmp.labelCompare(item, highest_version_tuple) == 1:
-                    highest_version_tuple = item
 
-            highest_version = highest_version_tuple[0]
-            if len(highest_version_tuple) >= 2:
-                highest_release = highest_version_tuple[1]
+            highest_version_tuple = packages[key][0]
+            if not cpaas:
+                for item in packages[key]:
+                    if rpmvercmp.labelCompare(item, highest_version_tuple) == 1:
+                        highest_version_tuple = item
+            else:
+                for item in packages[key]:
+                    if utils.cpaas_label_compare(item, highest_version_tuple) == 1:
+                        highest_version_tuple = item
+
+
+            highest_version = highest_version_tuple[1]
+            highest_release = highest_version_tuple[2]
+            # if the epoch is []
+            if len(highest_version_tuple[0]) == 0:
+
                 highest_full_version = "{}-{}".format(highest_version,
                                                       highest_release)
             else:
-                highest_full_version = "{}".format(highest_version)
+                highest_epoch = highest_version_tuple[0]
+                highest_full_version = "{}-{}".format(highest_epoch,
+                                                      highest_version,
+                                                      highest_release)
             dict_of_rpms[key] = [highest_version, highest_full_version]
         return dict_of_rpms
 
@@ -558,7 +578,8 @@ class DiffBuilds(object):
                                        test_url,
                                        all_available,
                                        ignore_packages,
-                                       undercloud_only):
+                                       undercloud_only,
+                                       cpaas=False):
         full_package_diff = {}
         logging.info("\n\nThis will compare packages installed on the host and"
                      " rpms installed on each container running on the host\n")
@@ -587,8 +608,8 @@ class DiffBuilds(object):
                 control_list = self.parse_list(control_list, ignore_packages)
                 test_list = self.parse_list(test_list, ignore_packages)
 
-                control_list = self.find_highest_version(control_list)
-                test_list = self.find_highest_version(test_list)
+                control_list = self.find_highest_version(control_list, cpaas)
+                test_list = self.find_highest_version(test_list, cpaas)
 
                 package_diff = self.diff_packages(control_list,
                                                   test_list)
@@ -683,12 +704,16 @@ class DiffBuilds(object):
 @ click.option("--undercloud_only", "-u", required=False, is_flag=True,
                default=False, help="use the undercloud only, ignore the\
                controller, compute and ceph nodes")
+@ click.option("--cpaas", "-p", required=False, default=False, is_flag=True,
+               help="cpaas built rpms rev the release every stupid time\
+               it builds, this option will ignore the release in compares")
 def main(control_url,
          test_url,
          all_available,
          package_ignore,
          diff_compose,
-         undercloud_only):
+         undercloud_only,
+         cpaas):
     """
     This script takes two urls for ci log files and compares the rpms
     installed in each environment.  We have named the first a control_url as
@@ -746,7 +771,8 @@ def main(control_url,
                                                              test_url,
                                                              all_available,
                                                              ignore_packages,
-                                                             undercloud_only
+                                                             undercloud_only,
+                                                             cpaas
                                                              )
         full_package_diff = results[0]
         column_list = results[1]
