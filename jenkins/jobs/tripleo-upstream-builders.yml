@@ -5,20 +5,6 @@
             WORKSPACE="${WORKSPACE:-/tmp}"
             CICO_USER_DIR="${CICO_USER_DIR:-/root}"
 
-            # Workaround to ensure skydive container, which isn't supported on ppc64le, doesn't build
-            cat <<EOF >> ${WORKSPACE}/tripleo-ci/roles/build-containers/tasks/venv_setup.yml
-
-            - name: Remove skydive from kolla
-              file:
-                path: "${CICO_USER_DIR}/workspace/venv_build/share/kolla/docker/skydive"
-                state: absent
-
-            - name: Remove tempest from kolla
-              file:
-                path: "${CICO_USER_DIR}/workspace/venv_build/share/kolla/docker/tempest"
-                state: absent
-            EOF
-
             # Place roles for the tripleo-ci container build playbooks in the proper directory
             mkdir ${WORKSPACE}/roles
             cp -r ${WORKSPACE}/tripleo-ci/roles/* ${WORKSPACE}/roles
@@ -33,6 +19,9 @@
 
             # Workaround for missing opstools repo on ppc64le
              sed -i 's/opstools//' ${WORKSPACE}/roles/tripleo-repos/tasks/main.yml
+
+            # Skip tempest container
+            sed -i '/.*influxdb/a \ \ \ \ - tempest' ${WORKSPACE}/roles/build-containers/vars/main.yaml
 
             # Mock prerequisite zuul vars so the playbooks can run on jenkins
             cat <<EOF >> ${WORKSPACE}/roles/build-containers/vars/main.yaml
