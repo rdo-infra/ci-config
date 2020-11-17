@@ -294,13 +294,17 @@
             - name: 'Workaround to avoid biosdevname dependency'
               hosts: openstack_nodes
               tasks:
+                - name: 'Glob files'
+                  find:
+                    paths: "${CICO_USER_DIR}/src/opendev.org/openstack/tripleo-common/image-yaml/"
+                    patterns: "*.yaml"
+                  register: image_yaml_files
                 - name: 'Remove any usage of stable-interface-names element'
                   lineinfile:
-                    path: "{{ item }}"
+                    path: "{{ item.path }}"
                     regexp: ".*stable-interface-names.*"
                     state: absent
-                  with_fileglob:
-                    - "${CICO_USER_DIR}/src/opendev.org/openstack/tripleo-common/image-yaml/*.yaml"
+                  loop: "{{ image_yaml_files.files }}"
 
             - name: 'Clone RDO git dependencies, protected repo'
               hosts: openstack_nodes
