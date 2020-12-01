@@ -32,6 +32,7 @@
                   src_dir: "src/opendev.org/openstack/tripleo-repos"
                 opendev.org/openstack/python-tripleoclient:
                   src_dir: "src/opendev.org/openstack/python-tripleoclient"
+
               branch: "master"
               pipeline: "periodic"
 
@@ -147,7 +148,7 @@
             - name: 'Clone RDO git dependencies'
               hosts: openstack_nodes
               tasks:
-                - name: 'Clone rdo-infra/review.rdoproject.org-config'
+                - name: 'Clone rdo-infra/ci-config'
                   git:
                      repo: 'https://github.com/rdo-infra/ci-config.git'
                      dest: '${CICO_USER_DIR}/${RDO_CONFIG_DIR}'
@@ -167,18 +168,18 @@
                                      "https://trunk.registry.rdoproject.org"
                   no_log: true
 
-            - name: Populate hash.info required for dlrn reporting
+
+            - name: 'Get hash and create hash.info for delorean reporting'
               hosts: openstack_nodes
+              vars:
+                workspace: "{{ ansible_user_dir }}/workspace"
+                rdo_infra_ci_config: '${CICO_USER_DIR}/${RDO_CONFIG_DIR}'
+                promote_source: 'tripleo-ci-testing'
               tasks:
-                - shell: |
-                      pushd "${CICO_USER_DIR}"
-                        export WORKSPACE="${CICO_USER_DIR}/workspace"
-                        export RELEASE="${RELEASE}"
-                        export PROMOTE_NAME="tripleo-ci-testing"
-                        export DLRNAPI_DISTRO={{ ansible_distribution }}
-                        export DLRNAPI_DISTRO_VERSION={{ ansible_distribution_major_version }}
-                        bash -xe "${CICO_USER_DIR}/${RDO_CONFIG_DIR}/ci-scripts/tripleo-upstream/get-hash.sh"
-                      popd
+                - name: Create hash_info file with hashes from {{ promote_source }}
+                  include_role:
+                    name: get_hash
+                    tasks_from: get_hash.yaml
 
             - name: 'Setup TripleO Container Registry and repos mirror'
               hosts: openstack_nodes
