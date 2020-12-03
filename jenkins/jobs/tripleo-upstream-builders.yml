@@ -24,7 +24,7 @@
             # Skip tempest container
             sed -i '/.*influxdb/a \ \ \ \ - tempest' ${WORKSPACE}/roles/build-containers/vars/main.yaml
 
-            # Mock prerequisite zuul vars so the playbooks can run on jenkins
+            # Mock prerequisite zuul vars so the container image build playbooks can run on jenkins
             cat <<EOF >> ${WORKSPACE}/roles/build-containers/vars/main.yaml
 
             zuul:
@@ -43,6 +43,20 @@
             use_buildah: true
             use_kolla: false
             build_timeout: 7200
+            EOF
+
+            # Mock prerequisite zuul vars so the image build playbooks can run on jenkins
+            cat <<EOF >> ${WORKSPACE}/roles/oooci-build-images/defaults/main.yaml
+
+            zuul:
+              projects:
+                opendev.org/openstack/tripleo-repos:
+                  src_dir: "src/opendev.org/openstack/tripleo-repos"
+                opendev.org/openstack/python-tripleoclient:
+                  src_dir: "src/opendev.org/openstack/python-tripleoclient"
+
+              branch: "master"
+              pipeline: "periodic"
             EOF
 
             cat <<EOF >> ${WORKSPACE}/roles/tripleo-repos/vars/main.yml
