@@ -4,10 +4,8 @@ import six
 import yaml
 
 if six.PY2:
-    import ConfigParser
     from StringIO import StringIO
 elif six.PY3:
-    import configparser as ConfigParser
     from io import StringIO
 
 
@@ -26,12 +24,7 @@ def get_promoter_config(base_url, release, distro, component):
     response = requests.get(url)
 
     if response.ok:
-        try:
-            config = ConfigParser.SafeConfigParser(allow_no_value=True)
-            config.readfp(StringIO(response.content))
-            config = config._sections
-        except ConfigParser.MissingSectionHeaderError:
-            config = yaml.load(response.text, Loader=yaml.FullLoader)
+        config = yaml.load(response.text, Loader=yaml.FullLoader)
     else:
         raise Exception(
             'Unable to fetch promoter configuration from {}'.format(url)
