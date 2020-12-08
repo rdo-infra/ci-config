@@ -53,7 +53,7 @@ def get_promotion(url, release, distro, component):
     dlrn_client = promoter_utils.get_dlrn_client(promoter_config)
 
     promotions = []
-    for promotion_name in promoter_config['promote_from']:
+    for promotion_name in promoter_config['promotions']:
         if component is None:
             promo = get_last_promotion(
                 dlrn_client, release, distro, promotion_name
