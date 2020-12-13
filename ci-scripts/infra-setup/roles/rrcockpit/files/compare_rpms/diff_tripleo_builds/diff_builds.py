@@ -2,6 +2,7 @@
 
 import logging
 import re
+import sys
 import urllib
 from collections import defaultdict
 
@@ -518,7 +519,7 @@ class DiffBuilds(object):
                            package_diff[package_name][0][1],
                            package_diff[package_name][1][1]
                            ])
-        logging.info("\n{}".format(t.get_string(sortby="Package_Name")))
+        print("\n{}".format(t.get_string(sortby="Package_Name")))
 
         if write_table_to_file:
             with open(table_file_location, 'w') as f:
@@ -744,7 +745,7 @@ def main(control_url,
                         datefmt='%m-%d %H:%M',
                         filename='debug.log',
                         filemode='w')
-    console = logging.StreamHandler()
+    console = logging.StreamHandler(sys.stderr)
     console.setLevel(logging.INFO)
     formatter = logging.Formatter(': %(levelname)-8s %(message)s')
     console.setFormatter(formatter)
@@ -804,7 +805,7 @@ def main(control_url,
         column_list = results[1]
 
     else:
-        print("Error with options provided")
+        print("Error with options provided", file=sys.stderr)
 
     logging.info("\n\n **** RESULT **** \n\n")
     logging.info("Control URL: {}".format(control_url))
