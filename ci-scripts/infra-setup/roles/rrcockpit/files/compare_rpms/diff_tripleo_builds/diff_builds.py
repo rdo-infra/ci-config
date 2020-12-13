@@ -2,6 +2,7 @@
 
 import logging
 import re
+import sys
 import urllib
 from collections import defaultdict
 
@@ -739,7 +740,7 @@ def main(control_url,
                         datefmt='%m-%d %H:%M',
                         filename='debug.log',
                         filemode='w')
-    console = logging.StreamHandler()
+    console = logging.StreamHandler(sys.stdout)
     console.setLevel(logging.INFO)
     formatter = logging.Formatter(': %(levelname)-8s %(message)s')
     console.setFormatter(formatter)
