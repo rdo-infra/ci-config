@@ -188,16 +188,16 @@ class DiffBuilds(object):
         """
         url = "{}/{}/var/log/extra/all_available_packages.txt".format(
             base_url, node)
-        list = cache.get(url, verify=False)
-        if list.status_code != 200:
+        rpmlist = cache.get(url, verify=False)
+        if rpmlist.status_code != 200:
             url = "{}/{}/var/log/extra/all_available_packages.txt.gz".format(
                 base_url, node)
-            list = cache.get(url, verify=False)
-            if list.status_code != 200:
+            rpmlist = cache.get(url, verify=False)
+            if rpmlist.status_code != 200:
                 repoquery_not_avail = ("logs for base node {} were NOT "
                                        "available: {}".format(node, url))
                 raise Exception(repoquery_not_avail)
-        nice_list = list.content.decode('UTF-8').splitlines()
+        nice_list = rpmlist.content.decode('UTF-8').splitlines()
         return nice_list
 
     def json_extract(self, obj, key):
