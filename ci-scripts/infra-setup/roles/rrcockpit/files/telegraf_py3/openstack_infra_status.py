@@ -2,10 +2,10 @@
 import re
 from datetime import datetime
 
-import influxdb_utils
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+import influxdb_utils
 
 infra_status_regexp = re.compile(
     '^ *([0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}) *UTC *(.+)$')
