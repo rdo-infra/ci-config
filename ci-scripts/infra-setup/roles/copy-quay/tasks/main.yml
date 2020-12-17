@@ -1,0 +1,23 @@
+---
+- name: Install pre-requisites
+  become: true
+  package:
+    name:
+      - golang
+      - podman
+    state: present
+
+- name: compile copy-quay script
+  shell: |
+    go build -o copy-quay main.go copy.go utils.go quayapi.go
+  args:
+    chdir: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}/ci-scripts/copy-quay"
+    executable: /bin/bash
+  changed_when: false
+
+- name: "Login to {{ destination_registry }}"
+  command: podman login -u '{{ destination_registry_username }}' -p '{{ destination_registry_password }}'
+  no_log: true
+
+- name: "Copy containers from {{ source_registry }} to {{ destination_registry }}"
+  shell:
