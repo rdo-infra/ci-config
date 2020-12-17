@@ -4,26 +4,27 @@
     run: playbooks/tox-jjb-run.yml
 
 - project:
-    templates:
-      - jobs-promoter-centos-7-jobs
+    # templates:
+    #   - jobs-promoter-centos-7-jobs
     check:
       jobs:
-        - mol-get_hash-centos-7
-        - mol-get_hash-centos-8
-        - mol-promoter
-        - mol-promote_images
-        - mol-container_push
-        - mol-container_push_secure
-        - mol-container_push_multiarch
-        - mol-container_push_manifests
-        - mol-tripleo_common_integration
-        - tox-jjb: &jjb
-            files:
-              - ^jenkins/.*
-              - ^requirements.txt
-              - ^test-requirements.txt
-              - ^tox.ini
+        # - mol-get_hash-centos-7
+        # - mol-get_hash-centos-8
+        # - mol-promoter
+        # - mol-promote_images
+        # - mol-container_push
+        # - mol-container_push_secure
+        # - mol-container_push_multiarch
+        # - mol-container_push_manifests
+        # - mol-tripleo_common_integration
+        # - tox-jjb: &jjb
+        #     files:
+        #       - ^jenkins/.*
+        #       - ^requirements.txt
+        #       - ^test-requirements.txt
+        #       - ^tox.ini
         - tox-py36-ci-config: &py36
+            timeout: 60
             files: &pyfiles
               - .*\.py
               - .*\.ini
@@ -42,17 +43,17 @@
               - ^zuul.d/layout.yaml$
     gate:
       jobs:
-        - tox-jjb:
-            <<: *jjb
-        - mol-get_hash-centos-7
-        - mol-get_hash-centos-8
-        - mol-promoter
-        - mol-promote_images
-        - mol-container_push
-        - mol-container_push_secure
-        - mol-container_push_multiarch
-        - mol-container_push_manifests
-        - mol-tripleo_common_integration
+        # - tox-jjb:
+        #     <<: *jjb
+        # - mol-get_hash-centos-7
+        # - mol-get_hash-centos-8
+        # - mol-promoter
+        # - mol-promote_images
+        # - mol-container_push
+        # - mol-container_push_secure
+        # - mol-container_push_multiarch
+        # - mol-container_push_manifests
+        # - mol-tripleo_common_integration
         - tox-py36-ci-config:
             <<: *py36
     periodic:
