@@ -495,7 +495,9 @@ class DiffBuilds(object):
                                column_list,
                                package_diff,
                                extra_package_data=False,
-                               just_return=False):
+                               just_return=False,
+                               write_table_to_file=False,
+                               table_file_location='diff_table.log'):
         """ print a table with rows showing the
         rpm package name, version and optionally,
         realease.
@@ -516,8 +518,11 @@ class DiffBuilds(object):
                            package_diff[package_name][0][1],
                            package_diff[package_name][1][1]
                            ])
-
         logging.info("\n{}".format(t.get_string(sortby="Package_Name")))
+
+        if write_table_to_file:
+            with open(table_file_location, 'w') as f:
+                f.write(t.get_string(sortby="Package_Name"))
 
     def print_packages(self, name, packages):
         for key in packages:
