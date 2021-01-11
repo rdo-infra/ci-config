@@ -21,8 +21,10 @@
             # Workaround for missing opstools repo on ppc64le
              sed -i 's/opstools//' ${WORKSPACE}/roles/tripleo-repos/tasks/main.yml
 
-            # Skip tempest container
-            sed -i '/.*influxdb/a \ \ \ \ - tempest' ${WORKSPACE}/roles/build-containers/vars/main.yaml
+            # Skip tempest and ironic-pxe containers
+            # TODO(mjturek): Reenable ironic-pxe container once centos-8.4 releases as syslinux-tftpboot
+            #                package will be available for ppc64le in that release.
+            sed -i '/.*influxdb/a \ \ \ \ - tempest \n\ \ \ \ - ironic-pxe' ${WORKSPACE}/roles/build-containers/vars/main.yaml
 
             # Mock prerequisite zuul vars so the container image build playbooks can run on jenkins
             cat <<EOF >> ${WORKSPACE}/roles/build-containers/vars/main.yaml
