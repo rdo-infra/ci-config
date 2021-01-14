@@ -198,6 +198,11 @@
                     name: get_hash
                     tasks_from: get_hash.yaml
 
+            - name: Ensure legacy logs directory
+              file:
+                path: '{{ ansible_user_dir }}/workspace/logs'
+                state: directory
+
             - name: 'Setup TripleO Container Registry and repos mirror'
               hosts: openstack_nodes
               roles:
