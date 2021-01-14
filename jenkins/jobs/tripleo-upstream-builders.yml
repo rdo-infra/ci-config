@@ -129,6 +129,11 @@
                     name: 'decorator'
                     extra_args: '-I'
 
+                - name: Ensure legacy logs directory
+                  file:
+                    path: '{{ workspace }}/logs'
+                    state: directory
+
                 - name: 'Create openstack iptables chain and jump rule'
                   shell: |
                     iptables -N openstack-INPUT
