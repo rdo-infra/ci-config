@@ -13,7 +13,7 @@ from dlrn_hash import DlrnHash, DlrnHashError
 from logic import Promoter
 
 DEFAULT_CONFIG_RELEASE = "CentOS-8/master.yaml"
-DEFAULT_CONFIG_ROOT = "staging"  # "rdo" for production environment
+DEFAULT_CONFIG_ROOT = "rdo"  # "rdo" for production environment
 
 
 def promote_all(promoter, args):
