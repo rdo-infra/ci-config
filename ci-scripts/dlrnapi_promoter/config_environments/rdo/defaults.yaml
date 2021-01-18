@@ -12,6 +12,7 @@ dlrn_api_scheme: "http"
 repo_url: "https://{{ dlrn_api_host }}/{{ distro }}-{{ release }}"
 log_root: "~/web/"
 log_file: "~/web/promoter_logs/{{ distro }}_{{ release }}.log"
+stage_root: /tmp/promoter/
 overcloud_images:
   qcow_servers:
     local:
@@ -29,3 +30,16 @@ containers:
   containers_list_exclude_config: "file:///tmp/promoter-staging/containers/build-containers-main.yaml"
   container_preffix: "openstack-"
   build_method: "tripleo"
+
+dlrn:
+  components:
+     - tripleo
+     - nova
+     - neutron
+  promotion_target: current-tripleo
+  server:
+    username: ciuser
+    password: dlrnapi_password00
+    port: 58080
+    root: dlrn/
+    repo_root: data/repos/
