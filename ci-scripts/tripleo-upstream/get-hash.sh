@@ -43,7 +43,16 @@ curl -sLo $WORKSPACE/commit.yaml $HASHES_URL
 
 COMMIT_HASH=$(shyaml get-value commits.0.commit_hash < $WORKSPACE/commit.yaml)
 DISTRO_HASH=$(shyaml get-value commits.0.distro_hash < $WORKSPACE/commit.yaml)
+EXTENDED_HASH=$(shyaml get-value commits.0.extended_hash < $WORKSPACE/commit.yaml)
 FULL_HASH=${COMMIT_HASH}_${DISTRO_HASH:0:8}
+
+# Check if an extended_hash is defined and add to full_hash
+# and hash_info.sh
+if [ "$EXTENDED_HASH" != 'None' ]; then
+    EXTENDED_HASH_FIRST=$(echo $EXTENDED_HASH | cut -d'_' -f1)
+    EXTENDED_HASH_SECOND=$(echo $EXTENDED_HASH | cut -d'_' -f2)
+    FULL_HASH=${COMMIT_HASH}_${DISTRO_HASH:0:8}_${EXTENDED_HASH_FIRST:0:8}_${EXTENDED_HASH_SECOND:0:8}
+fi
 
 cat > $WORKSPACE/hash_info.sh << EOF
 export DLRNAPI_URL=$DLRNAPI_URL
@@ -54,6 +63,11 @@ export DISTRO_HASH=$DISTRO_HASH
 export COMPONENT_NAME=$COMPONENT_NAME
 EOF
 
+if [ "$EXTENDED_HASH" != 'None']; then
+cat >> $WORKSPACE/hash_info.sh << EOF
+export EXTENDED_HASH=$EXTENDED_HASH
+EOF
+fi
 
 cp $WORKSPACE/hash_info.sh $WORKSPACE/logs
 
