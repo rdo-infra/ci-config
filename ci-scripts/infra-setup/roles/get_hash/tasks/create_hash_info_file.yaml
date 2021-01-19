@@ -9,3 +9,10 @@
       export COMMIT_HASH="{{ commit_hash | default('') }}"
       export DISTRO_HASH="{{ distro_hash | default('') }}"
       export COMPONENT_NAME="{{ component | default('') }}"
+
+- name: add extended hash to hash_info file if it exists
+  lineinfile:
+    path: "{{ workspace }}/{{ hash_info_file_name | default('hash_info.sh') }}"
+    state: present
+    line: 'export EXTENDED_HASH="{{ extended_hash }}"'
+  when: extended_hash is defined and extended_hash != ''
