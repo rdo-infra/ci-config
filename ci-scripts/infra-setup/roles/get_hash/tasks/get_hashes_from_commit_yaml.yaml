@@ -25,6 +25,11 @@
     distro_hash: "{{ hashes['commits'][0]['distro_hash'] }}"
     commit_hash: "{{ hashes['commits'][0]['commit_hash'] }}"
 
+- name: get individual extended hash - if it is not None
+  set_fact:
+    extended_hash: "{{ hashes['commits'][0]['extended_hash'] }}"
+  when: hashes['commits'][0]['extended_hash] is not None
+
 - name: print out commit_hash
   debug:
     msg: "{{ commit_hash }}"
@@ -33,9 +38,19 @@
   debug:
     msg: "{{ distro_hash }}"
 
+- name: print out extended_hash
+  debug:
+    msg: "{{ extended_hash }}"
+  when: extended_hash is defined
+
 - name: converge commit/distro hashes into full_hash
   set_fact:
-     full_hash: "{{ commit_hash }}_{{ distro_hash[:8] }}"
+    full_hash: "{{ commit_hash }}_{{ distro_hash[:8] }}"
+
+- name: add extended_hash to full_hash if defined
+  set_fact:
+    full_hash: "{{ full_hash }}_{{ extended_hash.split('_')[0][:8] }}_{{ extended_hash.split('_')[1][:8] }}"
+  when: extended_hash is defined
 
 - name: print out full_hash
   debug:
