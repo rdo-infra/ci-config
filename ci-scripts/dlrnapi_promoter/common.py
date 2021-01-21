@@ -201,7 +201,6 @@ def get_log_file(env, release_config, log=None):
     if log is None:
         log = logging.getLogger("get-log-file")
 
-    # TODO (akahat) optimize this code.
     paths = get_root_paths()
     config_base = 'config_environments'
     log_file_path = os.path.join(paths[1],
@@ -210,19 +209,16 @@ def get_log_file(env, release_config, log=None):
     config_file = yaml.safe_load(open(log_file_path))
     config_file['distro'] = config_file['distro_name'] + str(
         config_file['distro_version'])
-    if hasattr(config_file, 'log_file'):
-        log.INFO("Log file is not present in release "
-                 "config: {}, using default.".format(release_config))
 
+    if 'log_file' in config_file:
         conf_template = jinja2.Template(config_file['log_file'])
-
         return conf_template.render(config_file)
+
     else:
         default_path = os.path.join(paths[1],
                                     config_base, env, 'defaults.yaml')
-        log.info("Getting log file from: {}".format(default_path))
-        config_file = yaml.safe_load(open(default_path))
-        config_file['distro'] = config_file['distro_name'] + str(
-            config_file['distro_version'])
-        conf_template = jinja2.Template(config_file['log_file'])
+        log.info("Log file is not present in release config: {}, using "
+                 "default log file from: {}".format(release_config, default_path))
+        default_config_file = yaml.safe_load(open(default_path))
+        conf_template = jinja2.Template(default_config_file['log_file'])
         return conf_template.render(config_file)
