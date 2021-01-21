@@ -199,7 +199,13 @@ class Promoter(object):
                 self.log.warning("Candidate hash '%s': criteria NOT met "
                                  "for promotion to %s"
                                  "", candidate_hash, target_label)
-                continue
+                # if criteria is not met stop promotion
+                self.log.info("=" * 100)
+                self.log.info("Aborting promotion {} to {}. "
+                              "Criteria not met.".format(candidate_label,
+                                                         target_label))
+                self.log.info("=" * 100)
+                break
 
             self.log.info("Candidate hash '%s': criteria met, attempting "
                           "promotion to %s"
