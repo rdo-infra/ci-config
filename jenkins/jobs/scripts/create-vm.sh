@@ -14,6 +14,10 @@ if [[ -n "${properties}" ]]; then
     source "./$(basename ${properties})"
 fi
 
+if [[ -n "${stream_image}" ]]; then
+    export IMAGE="${stream_image}"
+fi
+
 # Ansible config
 CLOUD=${CLOUD:-vexxhost}
 NETWORK=${NETWORK:-private-network}
