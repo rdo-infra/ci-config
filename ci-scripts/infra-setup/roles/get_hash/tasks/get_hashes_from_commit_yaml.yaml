@@ -47,10 +47,19 @@
   set_fact:
     full_hash: "{{ commit_hash }}_{{ distro_hash[:8] }}"
 
-- name: add extended_hash to full_hash if defined
+- name: add extended_hash to full_hash if defined with underscore
   set_fact:
     full_hash: "{{ full_hash }}_{{ extended_hash.split('_')[0][:8] }}_{{ extended_hash.split('_')[1][:8] }}"
-  when: extended_hash is defined
+  when:
+    - extended_hash is defined
+    - "'_' in {{ extended_hash }}"
+
+- name: add extended_hash to full_hash if not defined with underscore
+  set_fact:
+    full_hash: "{{ full_hash }}_{{ extended_hash[:8] }}"
+  when:
+    - extended_hash is defined
+    - "'_' not in {{ extended_hash }}"
 
 - name: print out full_hash
   debug:
