@@ -49,9 +49,13 @@ FULL_HASH=${COMMIT_HASH}_${DISTRO_HASH:0:8}
 # Check if an extended_hash is defined and add to full_hash
 # and hash_info.sh
 if [ "$EXTENDED_HASH" != 'None' ]; then
-    EXTENDED_HASH_FIRST=$(echo $EXTENDED_HASH | cut -d'_' -f1)
-    EXTENDED_HASH_SECOND=$(echo $EXTENDED_HASH | cut -d'_' -f2)
-    FULL_HASH=${COMMIT_HASH}_${DISTRO_HASH:0:8}_${EXTENDED_HASH_FIRST:0:8}_${EXTENDED_HASH_SECOND:0:8}
+    if [ "$EXTENDED_HASH" == *"_"* ]; then
+        EXTENDED_HASH_FIRST=$(echo $EXTENDED_HASH | cut -d'_' -f1)
+        EXTENDED_HASH_SECOND=$(echo $EXTENDED_HASH | cut -d'_' -f2)
+        FULL_HASH=${COMMIT_HASH}_${DISTRO_HASH:0:8}_${EXTENDED_HASH_FIRST:0:8}_${EXTENDED_HASH_SECOND:0:8}
+    else
+        FULL_HASH=${COMMIT_HASH}_${DISTRO_HASH:0:8}_${EXTENDED_HASH:0:8}
+    fi
 fi
 
 cat > $WORKSPACE/hash_info.sh << EOF
