@@ -58,11 +58,17 @@ def get_consistent(config, component=None):
     return consistent_date
 
 
-def get_url_promotion_details(config, promotion_data):
+def get_url_promotion_details(config, promotion_data, component):
     promotion = str(promotion_data['promote_name'])
-    response = requests.get(
-        config['base_url'] + promotion + '/delorean.repo.md5')
-    if response.ok:
+    # TO-DO, this doesn't make sense yet
+    if component:
+        response = requests.get(
+            config['main']['base_url'] + promotion + '/delorean.repo.md5')
+    else:
+        response = requests.get(
+            config['base_url'] + promotion + '/delorean.repo.md5')
+
+    if response.ok and not component:
         aggregate_hash = response.content.decode()
         url = (config['api_url']
                + '/api/civotes_agg_detail.html?ref_hash='
@@ -70,9 +76,15 @@ def get_url_promotion_details(config, promotion_data):
     else:
         commit_hash = promotion_data['commit_hash']
         distro_hash = promotion_data['distro_hash']
-        url = (config['api_url']
-               + '/api/civotes_detail.html?commit_hash='
-               + commit_hash + '&'
-               + 'distro_hash=' + distro_hash)
+        if component:
+            url = (config['main']['api_url']
+                + '/api/civotes_detail.html?commit_hash='
+                + commit_hash + '&'
+                + 'distro_hash=' + distro_hash)
+        else:
+            url = (config['api_url']
+                + '/api/civotes_detail.html?commit_hash='
+                + commit_hash + '&'
+                + 'distro_hash=' + distro_hash)
 
     return url
