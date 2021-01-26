@@ -15,7 +15,8 @@ PROMOTION_INFLUXDB_LINE = ("dlrn-promotion,"
                            "repo_url=\"{repo_url}\","
                            "consistent_date={consistent_date},"
                            "promotion_details=\"{promotion_details}\","
-                           "component=\"{component}\" "
+                           "component=\"{component}\","
+                           "extended_hash=\"{extended_hash}\" "
                            "{timestamp}")
 
 DEFAULT_PROMOTER_BASE_URL = (
@@ -28,13 +29,28 @@ def influxdb(promotion):
     return PROMOTION_INFLUXDB_LINE.format(**promotion)
 
 
-def get_last_promotion(dlrn_client, release, distro, name, component=None):
+def get_dlrn_client(url, release, distro, component):
+    promoter_config = promoter_utils.get_promoter_config(
+        url, release, distro, component
+    )
+    dlrn_client = promoter_utils.get_dlrn_client(promoter_config, component)
+    return dlrn_client
+
+
+def get_dlrn_promotions(dlrn_client, name, component=None):
     query = dlrnapi_client.PromotionQuery()
     query.promote_name = name
     if component:
         query.component = component
     promotions = dlrn_client.api_promotions_get(query)
+    return promotions
+
+
+def get_last_promotion(promotions, release, distro, component=None):
     if promotions:
+        # TO-DO
+        # perhaps loop through the promotions and
+        # ensure [0] is in fact the latest
         last_promotion = promotions[0].to_dict()
         last_promotion['release'] = release
         last_promotion['distro'] = distro
@@ -45,42 +61,14 @@ def get_last_promotion(dlrn_client, release, distro, name, component=None):
     return
 
 
-def get_promotion(url, release, distro, component):
-    promoter_config = promoter_utils.get_promoter_config(
-        url, release, distro, component
-    )
-    dlrn_client = promoter_utils.get_dlrn_client(promoter_config, component)
+def update_promotion(promo, promotion_details, consistent):
 
-    promotions = []
-    if component is None:
-        for promotion_name in promoter_config['promotions']:
-            promo = get_last_promotion(
-                dlrn_client, release, distro, promotion_name
-            )
-            consistent = format_ts_from_last_modified(
-                promoter_utils.get_consistent(promoter_config))
-            if promo:
-                promotion_details = promoter_utils.get_url_promotion_details(
-                    promoter_config, promo)
-    else:
-        promotion_name = "promoted-components"
-        promo = get_last_promotion(
-            dlrn_client, release, distro, promotion_name, component
-        )
-        consistent = format_ts_from_last_modified(
-            promoter_utils.get_consistent(promoter_config, component)
-        )
-        promotion_details = "None"
-        # get the promotion for consistent to establish how old the
-        # promotion is.  date(promomtion) - date(consistent)
     if promo and consistent:
         promo.update({'consistent_date': consistent})
     if promo and promotion_details:
         promo.update({'promotion_details': promotion_details})
-    if promo:
-        promotions.append(influxdb(promo))
 
-    return promotions
+    return promo
 
 
 if __name__ == '__main__':
@@ -115,8 +103,44 @@ if __name__ == '__main__':
         default=DEFAULT_PROMOTER_BASE_URL,
         help='Promoter repository base URL.'
     )
+    promotions = []
     args = parser.parse_args()
-    promotions = get_promotion(
-        args.url, args.release, args.distro, args.component)
+
+    promoter_config = promoter_utils.get_promoter_config(args.url,
+                                                         args.release,
+                                                         args.distro,
+                                                         args.component)
+
+    dlrn_client = get_dlrn_client(args.url,
+                                  args.release,
+                                  args.distro,
+                                  args.component)
+    # with components we are only concerned with promotions to
+    # promoted-components
+    if args.component is not None:
+        promoter_config['promotions'] = ["promoted-components"]
+
+    for promotion_name in promoter_config['promotions']:
+        promos = get_dlrn_promotions(dlrn_client,
+                                     promotion_name,
+                                     args.component)
+
+        promo = get_last_promotion(promos,
+                                   args.release,
+                                   args.distro,
+                                   args.component)
+
+        if promo:
+            promotion_details = promoter_utils.get_url_promotion_details(
+                promoter_config, promo, args.component)
+
+            consistent = format_ts_from_last_modified(
+                promoter_utils.get_consistent(promoter_config, args.component))
+
+            promo = update_promotion(promo,
+                                     promotion_details,
+                                     consistent)
+            promotions.append(promo)
+
     for promotion in promotions:
-        print(promotion)
+        print(influxdb(promotion))
