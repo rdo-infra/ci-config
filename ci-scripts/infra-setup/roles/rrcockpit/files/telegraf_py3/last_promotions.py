@@ -49,12 +49,11 @@ def get_promotion(url, release, distro, component):
     promoter_config = promoter_utils.get_promoter_config(
         url, release, distro, component
     )
-
-    dlrn_client = promoter_utils.get_dlrn_client(promoter_config)
+    dlrn_client = promoter_utils.get_dlrn_client(promoter_config, component)
 
     promotions = []
-    for promotion_name in promoter_config['promotions']:
-        if component is None:
+    if component is None:
+        for promotion_name in promoter_config['promotions']:
             promo = get_last_promotion(
                 dlrn_client, release, distro, promotion_name
             )
@@ -63,22 +62,23 @@ def get_promotion(url, release, distro, component):
             if promo:
                 promotion_details = promoter_utils.get_url_promotion_details(
                     promoter_config, promo)
-        else:
-            promo = get_last_promotion(
-                dlrn_client, release, distro, promotion_name, component
-            )
-            consistent = format_ts_from_last_modified(
-                promoter_utils.get_consistent(promoter_config, component)
-            )
-            promotion_details = "None"
+    else:
+        promotion_name = "promoted-components"
+        promo = get_last_promotion(
+            dlrn_client, release, distro, promotion_name, component
+        )
+        consistent = format_ts_from_last_modified(
+            promoter_utils.get_consistent(promoter_config, component)
+        )
+        promotion_details = "None"
         # get the promotion for consistent to establish how old the
         # promotion is.  date(promomtion) - date(consistent)
-        if promo and consistent:
-            promo.update({'consistent_date': consistent})
-        if promo and promotion_details:
-            promo.update({'promotion_details': promotion_details})
-        if promo:
-            promotions.append(influxdb(promo))
+    if promo and consistent:
+        promo.update({'consistent_date': consistent})
+    if promo and promotion_details:
+        promo.update({'promotion_details': promotion_details})
+    if promo:
+        promotions.append(influxdb(promo))
 
     return promotions
 
