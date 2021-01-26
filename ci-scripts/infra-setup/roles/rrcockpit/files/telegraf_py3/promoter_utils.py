@@ -27,8 +27,12 @@ def get_promoter_config(base_url, release, distro, component):
     return config
 
 
-def get_dlrn_client(config):
-    api_client = dlrnapi_client.ApiClient(host=config['api_url'])
+def get_dlrn_client(config, component):
+    #TO-DO normalize component and intergration config
+    if component is None:
+        api_client = dlrnapi_client.ApiClient(host=config['api_url'])
+    else:
+        api_client = dlrnapi_client.ApiClient(host=config['main']['api_url'])
     return dlrnapi_client.DefaultApi(api_client=api_client)
 
 
@@ -42,8 +46,9 @@ def get_consistent(config, component=None):
         else:
             return None
     else:
+        #TO-DO normalize component and intergration config
         response = requests.get(
-            config['base_url'] + 'component/'
+            config['main']['base_url'] + 'component/'
             + component + '/consistent/delorean.repo')
         if response.ok:
             consistent_date = response.headers['Last-Modified']
