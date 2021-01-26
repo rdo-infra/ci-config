@@ -15,7 +15,8 @@ PROMOTION_INFLUXDB_LINE = ("dlrn-promotion,"
                            "repo_url=\"{repo_url}\","
                            "consistent_date={consistent_date},"
                            "promotion_details=\"{promotion_details}\","
-                           "component=\"{component}\" "
+                           "component=\"{component}\","
+                           "extended_hash=\"{extended_hash}\" "
                            "{timestamp}")
 
 DEFAULT_PROMOTER_BASE_URL = (
@@ -27,13 +28,22 @@ def influxdb(promotion):
     promotion['timestamp'] = format_ts_from_float(promotion['timestamp'])
     return PROMOTION_INFLUXDB_LINE.format(**promotion)
 
-
-def get_last_promotion(dlrn_client, release, distro, name, component=None):
+def get_dlrn_promotions(dlrn_client, name, component=None):
     query = dlrnapi_client.PromotionQuery()
     query.promote_name = name
     if component:
         query.component = component
     promotions = dlrn_client.api_promotions_get(query)
+    return promotions
+
+def get_last_promotion(dlrn_client, release, distro, name, component=None):
+    # query = dlrnapi_client.PromotionQuery()
+    # query.promote_name = name
+    # if component:
+    #     query.component = component
+    # promotions = dlrn_client.api_promotions_get(query)
+    promotions = get_dlrn_promotions(dlrn_client, name, component)
+
     if promotions:
         last_promotion = promotions[0].to_dict()
         last_promotion['release'] = release
@@ -57,11 +67,18 @@ def get_promotion(url, release, distro, component):
             promo = get_last_promotion(
                 dlrn_client, release, distro, promotion_name
             )
+
             consistent = format_ts_from_last_modified(
                 promoter_utils.get_consistent(promoter_config))
             if promo:
                 promotion_details = promoter_utils.get_url_promotion_details(
                     promoter_config, promo)
+            if promo and consistent:
+                promo.update({'consistent_date': consistent})
+            if promo and promotion_details:
+                promo.update({'promotion_details': promotion_details})
+            if promo:
+                promotions.append(influxdb(promo))
     else:
         promotion_name = "promoted-components"
         promo = get_last_promotion(
@@ -73,12 +90,12 @@ def get_promotion(url, release, distro, component):
         promotion_details = "None"
         # get the promotion for consistent to establish how old the
         # promotion is.  date(promomtion) - date(consistent)
-    if promo and consistent:
-        promo.update({'consistent_date': consistent})
-    if promo and promotion_details:
-        promo.update({'promotion_details': promotion_details})
-    if promo:
-        promotions.append(influxdb(promo))
+        if promo and consistent:
+            promo.update({'consistent_date': consistent})
+        if promo and promotion_details:
+            promo.update({'promotion_details': promotion_details})
+        if promo:
+            promotions.append(influxdb(promo))
 
     return promotions
 
