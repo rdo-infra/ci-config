@@ -35,8 +35,10 @@ class TestMain(unittest.TestCase):
             pass
 
     def test_arg_parser_defaults_promote_all(self):
-        cmd_line = "--release-config CentOS-8/master.yaml promote-all"
+        cmd_line = "--config-root rdo --release-config \
+                    CentOS-8/master.yaml promote-all"
         args = arg_parser(cmd_line)
+        self.assertEqual(args.config_root, "rdo")
         self.assertEqual(args.release_config, "CentOS-8/master.yaml")
         self.assertEqual(args.log_level, "INFO")
         self.assertEqual(args.handler, promote_all)

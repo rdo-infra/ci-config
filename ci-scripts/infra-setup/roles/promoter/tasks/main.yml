@@ -192,6 +192,14 @@
     group: 'root'
   become: true
 
+- name: 'Set env variable for promoter_config_root {{ promoter_config_root }}'
+  lineinfile:
+    dest: /etc/environment
+    state: present
+    regexp: '^PROMOTER_CONFIG_ROOT'
+    line: 'PROMOTER_CONFIG_ROOT={{ promoter_config_root }}'
+  become: true
+
 - name: Install promoter service
   template:
     src: dlrn-promoter.service.j2
