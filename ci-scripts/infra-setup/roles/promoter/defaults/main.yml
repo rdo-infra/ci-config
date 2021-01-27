@@ -50,6 +50,9 @@ container_name_prefix: >-
 # This is only to enable the right repo
 distro: "{{ (ansible_distribution == 'CentOS') | ternary('centos', 'rhel') }}"
 
+# Set config_root for promoter
+promoter_config_root: "{{ (setup_staging | bool) | ternary('staging', 'rdo') }}"
+
 # Pachage virtualenv differs from $distro 7 and 8
 python_virtualenv: "{{ (ansible_facts['distribution_major_version'] is version('8', '>=')) | ternary('python3-virtualenv', 'python36-virtualenv') }}"
 
