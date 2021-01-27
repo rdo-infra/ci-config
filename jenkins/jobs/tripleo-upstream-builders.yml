@@ -26,6 +26,11 @@
             #                package will be available for ppc64le in that release.
             sed -i '/.*influxdb/a \ \ \ \ - tempest\n\ \ \ \ - ironic-pxe' ${WORKSPACE}/roles/build-containers/vars/main.yaml
 
+            # Install greenlet from source to workaround https://github.com/pypa/manylinux/issues/687
+            # greenlet is cloned in the build-containers builder below
+            # TODO(mjturek): Remove workaround once fix is available
+            sed -i "/.*decorator/a \ \ - \"file://${CICO_USER_DIR}/src/python-greenlet/greenlet\"" ${WORKSPACE}/roles/build-containers/vars/centos-8.yml
+
             # Mock prerequisite zuul vars so the container image build playbooks can run on jenkins
             cat <<EOF >> ${WORKSPACE}/roles/build-containers/vars/main.yaml
 
@@ -169,6 +174,15 @@
                   git:
                      repo: 'https://github.com/rdo-infra/ci-config.git'
                      dest: '${CICO_USER_DIR}/${RDO_CONFIG_DIR}'
+
+            - name: 'Clone other dependencies'
+              hosts: openstack_nodes
+              tasks:
+                - name: 'Clone greenlet 1.0.0 to workaround https://github.com/pypa/manylinux/issues/687'
+                  git:
+                     repo: 'https://github.com/python-greenlet/greenlet.git'
+                     dest: '${CICO_USER_DIR}/src/python-greenlet/greenlet'
+                     version: '1.0.0'
 
             - name: 'Login to RDO registry'
               hosts: openstack_nodes
