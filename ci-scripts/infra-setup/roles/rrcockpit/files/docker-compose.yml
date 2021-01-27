@@ -75,18 +75,6 @@ services:
     volumes:
       - grafana-volume:/var/lib/grafana
 
-  telegraf:
-    build: telegraf
-    restart: always
-    container_name: telegraf
-    hostname: telegraf.rrcockpit
-    env_file:
-      - 'telegraf/env'
-    depends_on:
-      - influxdb
-    volumes:
-      - telegraf-volume:/tmp/
-
   telegraf_py3:
     build: telegraf_py3
     restart: always
