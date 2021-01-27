@@ -15,6 +15,7 @@ TIMEOUT=115m
 KILLTIME=120m
 LOG_LEVEL="INFO"
 STAGING_DIR=""
+PROMOTER_CONFIG_ROOT="${PROMOTER_CONFIG_ROOT:=staging}"
 
 DEFAULT_RELEASES=( "CentOS-8/master" "CentOS-8/victoria" \
                    "CentOS-8/ussuri" "CentOS-8/train" \
@@ -53,7 +54,8 @@ source ~/${PROMOTER_VENV:-promoter_venv}/bin/activate
 
 for r in "${RELEASES[@]}"; do
     /usr/bin/timeout --preserve-status -k $KILLTIME $TIMEOUT \
-        python3 $DIR/dlrnapi_promoter.py --log-level ${LOG_LEVEL} --release-config ${r}.yaml promote-all
+        python3 $DIR/dlrnapi_promoter.py --log-level ${LOG_LEVEL} --config-root $PROMOTER_CONFIG_ROOT \
+            --release-config ${r}.yaml promote-all
 done
 
 # After the promoter has cycled through all the releases

@@ -192,6 +192,17 @@
     group: 'root'
   become: true
 
+- name: Set promoter config root
+  shell: echo PROMOTER_CONFIG_ROOT is $PROMOTER_CONFIG_ROOT
+  environment:
+    PROMOTER_CONFIG_ROOT: "{{ promoter_config_root }}"
+  register: config_root_set
+  changed_when: false
+
+- name: show debug info for promoter config root
+  debug:
+    msg: "{{ config_root_set }}"
+
 - name: Install promoter service
   template:
     src: dlrn-promoter.service.j2
