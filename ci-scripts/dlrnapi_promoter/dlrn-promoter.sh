@@ -53,7 +53,7 @@ source ~/${PROMOTER_VENV:-promoter_venv}/bin/activate
 
 for r in "${RELEASES[@]}"; do
     /usr/bin/timeout --preserve-status -k $KILLTIME $TIMEOUT \
-        python3 $DIR/dlrnapi_promoter.py --log-level ${LOG_LEVEL} --release-config ${r}.yaml promote-all
+        python3 $DIR/dlrnapi_promoter.py --log-level ${LOG_LEVEL} --config-root rdo --release-config ${r}.yaml promote-all
 done
 
 # After the promoter has cycled through all the releases

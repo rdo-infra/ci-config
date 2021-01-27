@@ -44,6 +44,11 @@ def arg_parser(cmd_line=None, config=None):
     main_parser.add_argument("--release-config", required=False,
                              default=DEFAULT_CONFIG_RELEASE,
                              help="Release config file")
+    main_parser.add_argument("--config-root", required=False,
+                             default=DEFAULT_CONFIG_ROOT,
+                             help="Specify the environment type "
+                                  "Default: staging, For production"
+                                  "use rdo and downstream")
     main_parser.add_argument("--log-level",
                              default='INFO',
                              help="Set the log level")
@@ -115,7 +120,7 @@ def main(cmd_line=None):
         CONFIG_RELEASE = DEFAULT_CONFIG_RELEASE
 
     log.info("Checking for log directory")
-    log_file = os.path.expanduser(get_log_file(DEFAULT_CONFIG_ROOT,
+    log_file = os.path.expanduser(get_log_file(args.config_root,
                                                CONFIG_RELEASE))
     log_dir = "/".join(log_file.split("/")[:-1])
     if not os.path.exists(log_dir):
@@ -123,7 +128,7 @@ def main(cmd_line=None):
         os.makedirs(log_dir)
 
     config_builder = PromoterConfigFactory(**{'log_file': log_file})
-    config = config_builder(DEFAULT_CONFIG_ROOT,
+    config = config_builder(args.config_root,
                             CONFIG_RELEASE,
                             cli_args=args)
     promoter = Promoter(config)

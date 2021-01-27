@@ -64,7 +64,8 @@ def staged_env(request):
         setup_cmd_line += " --db-data-file integration-pipeline.yaml"
         teardown_cmd_line += " --db-data-file integration-pipeline.yaml"
 
-    setup_cmd_line += " setup --release-config {}".format(release_config)
+    setup_cmd_line += " setup --config-root staging \
+                        --release-config {}".format(release_config)
 
     teardown_cmd_line += " teardown"
 
