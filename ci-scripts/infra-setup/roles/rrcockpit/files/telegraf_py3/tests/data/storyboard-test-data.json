@@ -1,0 +1,154 @@
+[
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "In keypair.py, the keypair provided by openstack is not rstrip()'ed, but the one loaded from local file is, leading to failure during key comparison if the key already exists. \n\n\n114         if self.params['public_key_file']:\n115             with open(self.params['public_key_file']) as public_key_fh:\n116                 public_key = public_key_fh.read().rstrip()\n117 \n118         keypair = self.conn.get_keypair(name)\n\n...\n125                 if public_key and (public_key != keypair['public_key']):\n126                     if state == 'present':\n127                         self.fail_json(\n130                            msg=\"Key name %s present but key hash not the same\"\n131                                \" as offered. Delete key first.\" % name\n132                         )\n\nFixed by changing line 125 to\n125                 if public_key and (public_key != keypair['public_key'].rstrip()):",
+    "title": "keypair comparison asymetric rstrip",
+    "created_at": "2021-02-01T20:46:08+00:00",
+    "tags": [],
+    "updated_at": "2021-02-01T20:46:28+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7463,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008574,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 2,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "- 'openstack.cloud.role_assignment' cannot create role assignments for group in multidomain context:\nfailing with \"Must specify either a user or a group\"\n\n- 'openstack.cloud.os_group' is not idempotent in multidomain context - second run failing with error:\nConflict occurred attempting to store group - Duplicate entry found with name group_1 at domain ID\n\nTested with:\n- ansible-collections-openstack 1.2.1\n- openstacksdk 0.52.0\n\nbased on story - https://storyboard.openstack.org/#!/story/2007209\n\n### Steps to reproduce :\n```\n- hosts: localhost\n  gather_facts: no\n\n  tasks:\n    - openstack.cloud.os_keystone_domain:\n        state: present\n        name: \"{{ item }}\"\n      with_items:\n        - \"domain_1\"\n        - \"domain_2\"\n      register: domains\n\n    - openstack.cloud.os_group:\n        name: group_1\n        domain_id: \"{{ item.id }}\"\n      with_items: \"{{ domains.results }}\"\n\n    - openstack.cloud.os_project:\n        name: project_1\n        domain_id: \"{{ item.id }}\"\n      with_items: \"{{ domains.results }}\"\n\n    - openstack.cloud.role_assignment:\n        role: admin\n        group: group_1\n        project: project_1\n        domain: \"{{ item.id }}\"\n      with_items: \"{{ domains.results }}\"",
+    "title": "role_assignment and os_group in multidomain context",
+    "created_at": "2021-01-15T16:19:13+00:00",
+    "tags": [],
+    "updated_at": "2021-01-15T16:20:10+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 2159,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008525,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "I am currently unable to provision vm on openstack. However, when i use openstack cli I was able to create the instance with same credentials. \n\nansible --version\nansible 2.10.4\n  config file = /etc/ansible/ansible.cfg\n  configured module search path = ['/home/srallaba/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']\n  ansible python module location = /home/srallaba/.local/lib/python3.8/site-packages/ansible\n  executable location = /home/srallaba/.local/bin/ansible\n  python version = 3.8.6 (default, Sep 25 2020, 00:00:00) [GCC 10.2.1 20200723 (Red Hat 10.2.1-1)]\n\nThe following is the playbook am using on ansible 2.10.4 \n```yaml\n---\n- name: \"Provision Open Stack Instance\"\n  hosts: '{{ hosts | default(\"all\") }}'\n  become: '{{ become | default(\"no\") }}'\n  gather_facts: '{{ gather_facts | default(\"no\") }}'\n  tasks:\n\n    - name: \"provision a key pair\"\n      os_keypair:\n        state: present\n        name: ansible_key\n      register: keypair_output\n\n    - name: \"copy the keypair_output to a file\"\n      copy:\n        content: keypair_output[\"private_key\"]\n        dest: \"~/.ssh/keypair_output.pem\"\n\n    - name: \"Create a new OpenShift instance on Virtual Machine\"\n      openstack.cloud.server:\n        state: present\n        name: \"{{ vm_name }}\"\n        image: \"{{ image }}\"\n        key_name: ansible_key\n        flavor: 3\n        network: \"{{ network }}\"\n        security_groups: \"{{ sec_groups }}\"\n```\nAnd running it using \n\n ansible-playbook -vvvvv -i \"localhost,\" --connection=local provision_openstack_instance.yml -e \"vm_name=test_vm_sk\" -e\"image=minishift-CentOS-7-v3\" -e \"flavor=m1.xlarge\" -e\"network=provider_net_cci_2\" -e \"sec_groups=provider_net_cci_2\"\n\nAm currently using python 3.8 and openstack sdk version 0.52.0\n\n```\n[srallaba@localhost test_ansible_openstack]$ python \nPython 3.8.6 (default, Sep 25 2020, 00:00:00) \n[GCC 10.2.1 20200723 (Red Hat 10.2.1-1)] on linux\nType \"help\", \"copyright\", \"credits\" or \"license\" for more information.\n>>> import openstack\n>>> openstack.version.__version__\n'0.52.0'\n```\n\nThe following is the error, \n```\nTASK [Create a new OpenShift instance on Virtual Machine] ************************************\ntask path: /home/srallaba/workspace/test_ansible_openstack/provision_openstack_instance.yml:19\n<localhost> ESTABLISH LOCAL CONNECTION FOR USER: srallaba\n<localhost> EXEC /bin/sh -c 'echo ~srallaba && sleep 0'\n<localhost> EXEC /bin/sh -c '( umask 77 && mkdir -p \"` echo /home/srallaba/.ansible/tmp `\"&& mkdir \"` echo /home/srallaba/.ansible/tmp/ansible-tmp-1610548916.375024-3047348-115235364556473 `\" && echo ansible-tmp-1610548916.375024-3047348-115235364556473=\"` echo /home/srallaba/.ansible/tmp/ansible-tmp-1610548916.375024-3047348-115235364556473 `\" ) && sleep 0'\nIncluding module_utils file ansible/__init__.py\nIncluding module_utils file ansible/module_utils/__init__.py\nIncluding module_utils file ansible/module_utils/basic.py\nIncluding module_utils file ansible/module_utils/_text.py\nIncluding module_utils file ansible/module_utils/common/_collections_compat.py\nIncluding module_utils file ansible/module_utils/common/__init__.py\nIncluding module_utils file ansible/module_utils/common/_json_compat.py\nIncluding module_utils file ansible/module_utils/common/_utils.py\nIncluding module_utils file ansible/module_utils/common/file.py\nIncluding module_utils file ansible/module_utils/common/parameters.py\nIncluding module_utils file ansible/module_utils/common/collections.py\nIncluding module_utils file ansible/module_utils/common/process.py\nIncluding module_utils file ansible/module_utils/common/sys_info.py\nIncluding module_utils file ansible/module_utils/common/text/converters.py\nIncluding module_utils file ansible/module_utils/common/text/__init__.py\nIncluding module_utils file ansible/module_utils/common/text/formatters.py\nIncluding module_utils file ansible/module_utils/common/validation.py\nIncluding module_utils file ansible/module_utils/common/warnings.py\nIncluding module_utils file ansible/module_utils/compat/selectors.py\nIncluding module_utils file ansible/module_utils/compat/__init__.py\nIncluding module_utils file ansible/module_utils/compat/_selectors2.py\nIncluding module_utils file ansible/module_utils/distro/__init__.py\nIncluding module_utils file ansible/module_utils/distro/_distro.py\nIncluding module_utils file ansible/module_utils/parsing/convert_bool.py\nIncluding module_utils file ansible/module_utils/parsing/__init__.py\nIncluding module_utils file ansible/module_utils/pycompat24.py\nIncluding module_utils file ansible/module_utils/six/__init__.py\nIncluding module_utils file ansible_collections/openstack/cloud/plugins/module_utils/openstack.py\nIncluding module_utils file ansible_collections/__init__.py\nIncluding module_utils file ansible_collections/openstack/__init__.py\nIncluding module_utils file ansible_collections/openstack/cloud/__init__.py\nIncluding module_utils file ansible_collections/openstack/cloud/plugins/__init__.py\nIncluding module_utils file ansible_collections/openstack/cloud/plugins/module_utils/__init__.py\nUsing module file /home/srallaba/.local/lib/python3.8/site-packages/ansible_collections/openstack/cloud/plugins/modules/server.py\n<localhost> PUT /home/srallaba/.ansible/tmp/ansible-local-3047293kd3wd7f9/tmpsj8pihml TO /home/srallaba/.ansible/tmp/ansible-tmp-1610548916.375024-3047348-115235364556473/AnsiballZ_server.py\n<localhost> EXEC /bin/sh -c 'chmod u+x /home/srallaba/.ansible/tmp/ansible-tmp-1610548916.375024-3047348-115235364556473/ /home/srallaba/.ansible/tmp/ansible-tmp-1610548916.375024-3047348-115235364556473/AnsiballZ_server.py && sleep 0'\n<localhost> EXEC /bin/sh -c '/usr/bin/python /home/srallaba/.ansible/tmp/ansible-tmp-1610548916.375024-3047348-115235364556473/AnsiballZ_server.py && sleep 0'\n<localhost> EXEC /bin/sh -c 'rm -f -r /home/srallaba/.ansible/tmp/ansible-tmp-1610548916.375024-3047348-115235364556473/ > /dev/null 2>&1 && sleep 0'\nThe full traceback is:\n  File \"/tmp/ansible_openstack.cloud.server_payload_6jr193q2/ansible_openstack.cloud.server_payload.zip/ansible_collections/openstack/cloud/plugins/module_utils/openstack.py\", line 388, in __call__\n    results = self.run()\n  File \"/tmp/ansible_openstack.cloud.server_payload_6jr193q2/ansible_openstack.cloud.server_payload.zip/ansible_collections/openstack/cloud/plugins/modules/server.py\", line 682, in run\n  File \"/tmp/ansible_openstack.cloud.server_payload_6jr193q2/ansible_openstack.cloud.server_payload.zip/ansible_collections/openstack/cloud/plugins/modules/server.py\", line 695, in _get_server_state\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/cloud/_compute.py\", line 551, in get_server\n    server = _utils._get_entity(self, searchfunc, name_or_id, filters)\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/cloud/_utils.py\", line 197, in _get_entity\n    entities = search(name_or_id, filters, **kwargs)\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/cloud/_compute.py\", line 99, in search_servers\n    servers = self.list_servers(\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/cloud/_compute.py\", line 331, in list_servers\n    self._servers = self._list_servers(\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/cloud/_compute.py\", line 346, in _list_servers\n    servers = [\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/cloud/_compute.py\", line 346, in <listcomp>\n    servers = [\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/resource.py\", line 1745, in list\n    exceptions.raise_from_response(response)\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/exceptions.py\", line 233, in raise_from_response\n    raise cls(\nfatal: [localhost]: FAILED! => {\n    \"changed\": false,\n    \"extra_data\": {\n        \"data\": null,\n        \"details\": \"Unexpected API Error. Please report this at http://bugs.launchpad.net/nova/ and attach the Nova API log if possible.\\n<class 'nova.exception.OrphanedObjectError'>\",\n        \"response\": \"{\\\"computeFault\\\": {\\\"code\\\": 500, \\\"message\\\": \\\"Unexpected API Error. Please report this at http://bugs.launchpad.net/nova/ and attach the Nova API log if possible.\\\\n<class 'nova.exception.OrphanedObjectError'>\\\"}}\"\n    },\n    \"invocation\": {\n        \"module_args\": {\n            \"api_timeout\": null,\n            \"auth\": null,\n            \"auth_type\": null,\n            \"auto_ip\": true,\n            \"availability_zone\": null,\n            \"boot_from_volume\": false,\n            \"boot_volume\": null,\n            \"ca_cert\": null,\n            \"client_cert\": null,\n            \"client_key\": null,\n            \"config_drive\": false,\n            \"delete_fip\": false,\n            \"flavor\": \"m1.xlarge\",\n            \"flavor_include\": null,\n            \"flavor_ram\": null,\n            \"floating_ip_pools\": null,\n            \"floating_ips\": null,\n            \"image\": \"minishift-CentOS-7-v3\",\n            \"image_exclude\": \"(deprecated)\",\n            \"interface\": \"public\",\n            \"key_name\": \"ansible_key\",\n            \"meta\": null,\n            \"name\": \"test_vm_sk\",\n            \"network\": \"provider_net_cci_2\",\n            \"nics\": [],\n            \"region_name\": null,\n            \"reuse_ips\": true,\n            \"scheduler_hints\": null,\n            \"security_groups\": [\n                \"provider_net_cci_2\"\n            ],\n            \"state\": \"present\",\n            \"terminate_volume\": false,\n            \"timeout\": 180,\n            \"userdata\": null,\n            \"validate_certs\": null,\n            \"volume_size\": null,\n            \"volumes\": [],\n            \"wait\": true\n        }\n    },\n    \"msg\": \"HttpException: 500: Server Error for url: https://rhos-d.infra.prod.upshift.rdu2.redhat.com:13774/v2.1/servers/detail, Unexpected API Error. Please report this at http://bugs.launchpad.net/nova/ and attach the Nova API log if possible.\\n<class 'nova.exception.OrphanedObjectError'>\"\n}\n\nPLAY RECAP ***********************************************************************************\nlocalhost                  : ok=2    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0  \n```\n\nam not sure if it is an error with the ansible openstack module, \nsince when I try running with openstack cli it works as expected. \nany help would be highly appreciated.",
+    "title": "Unable to provision openstack server using ansible playbook",
+    "created_at": "2021-01-13T14:46:00+00:00",
+    "tags": [],
+    "updated_at": "2021-01-15T17:21:04+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 1815,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008508,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "When you create an instance with a volume specified, if this volume is originated from a volume type that support cinder multi-attach feature, it won't be created and complain about the fact that cinder multi-attach is only supported on NOVA starting with 2.60 microversion.\n\nThis is due to openstacksdk/python-openstackclient change that call for the default version instead of the available microversion as previously.\n\nHowever, you can overcome this issue by specifying your compute_api_version either from CLI option or within your clouds.yaml using `--os-compute-api-version` or `compute_api_version: 2.79` directive.\n\nBut even if you specify compute_api_version directive within your clouds.yaml openstack.cloud.server module doesn't honor it where openstacksdk and CLI client do.\n\nopenstack.cloud.server module should be able to use clouds.yaml additional directive such as compute_api_version or identity_version etc.",
+    "title": "instance creation doesn't work on multi-attach enabled volume type",
+    "created_at": "2021-01-12T10:18:42+00:00",
+    "tags": [],
+    "updated_at": "2021-01-12T10:18:46+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7420,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008503,
+    "users": []
+  }
+]
