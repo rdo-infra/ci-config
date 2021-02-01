@@ -1,0 +1,1142 @@
+[
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "In keypair.py, the keypair provided by openstack is not rstrip()'ed, but the one loaded from local file is, leading to failure during key comparison if the key already exists. \n\n\n114         if self.params['public_key_file']:\n115             with open(self.params['public_key_file']) as public_key_fh:\n116                 public_key = public_key_fh.read().rstrip()\n117 \n118         keypair = self.conn.get_keypair(name)\n\n...\n125                 if public_key and (public_key != keypair['public_key']):\n126                     if state == 'present':\n127                         self.fail_json(\n130                            msg=\"Key name %s present but key hash not the same\"\n131                                \" as offered. Delete key first.\" % name\n132                         )\n\nFixed by changing line 125 to\n125                 if public_key and (public_key != keypair['public_key'].rstrip()):",
+    "title": "keypair comparison asymetric rstrip",
+    "created_at": "2021-02-01T20:46:08+00:00",
+    "tags": [],
+    "updated_at": "2021-02-01T20:46:28+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7463,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008574,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 2,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "- 'openstack.cloud.role_assignment' cannot create role assignments for group in multidomain context:\nfailing with \"Must specify either a user or a group\"\n\n- 'openstack.cloud.os_group' is not idempotent in multidomain context - second run failing with error:\nConflict occurred attempting to store group - Duplicate entry found with name group_1 at domain ID\n\nTested with:\n- ansible-collections-openstack 1.2.1\n- openstacksdk 0.52.0\n\nbased on story - https://storyboard.openstack.org/#!/story/2007209\n\n### Steps to reproduce :\n```\n- hosts: localhost\n  gather_facts: no\n\n  tasks:\n    - openstack.cloud.os_keystone_domain:\n        state: present\n        name: \"{{ item }}\"\n      with_items:\n        - \"domain_1\"\n        - \"domain_2\"\n      register: domains\n\n    - openstack.cloud.os_group:\n        name: group_1\n        domain_id: \"{{ item.id }}\"\n      with_items: \"{{ domains.results }}\"\n\n    - openstack.cloud.os_project:\n        name: project_1\n        domain_id: \"{{ item.id }}\"\n      with_items: \"{{ domains.results }}\"\n\n    - openstack.cloud.role_assignment:\n        role: admin\n        group: group_1\n        project: project_1\n        domain: \"{{ item.id }}\"\n      with_items: \"{{ domains.results }}\"",
+    "title": "role_assignment and os_group in multidomain context",
+    "created_at": "2021-01-15T16:19:13+00:00",
+    "tags": [],
+    "updated_at": "2021-01-15T16:20:10+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 2159,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008525,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "I am currently unable to provision vm on openstack. However, when i use openstack cli I was able to create the instance with same credentials. \n\nansible --version\nansible 2.10.4\n  config file = /etc/ansible/ansible.cfg\n  configured module search path = ['/home/srallaba/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']\n  ansible python module location = /home/srallaba/.local/lib/python3.8/site-packages/ansible\n  executable location = /home/srallaba/.local/bin/ansible\n  python version = 3.8.6 (default, Sep 25 2020, 00:00:00) [GCC 10.2.1 20200723 (Red Hat 10.2.1-1)]\n\nThe following is the playbook am using on ansible 2.10.4 \n```yaml\n---\n- name: \"Provision Open Stack Instance\"\n  hosts: '{{ hosts | default(\"all\") }}'\n  become: '{{ become | default(\"no\") }}'\n  gather_facts: '{{ gather_facts | default(\"no\") }}'\n  tasks:\n\n    - name: \"provision a key pair\"\n      os_keypair:\n        state: present\n        name: ansible_key\n      register: keypair_output\n\n    - name: \"copy the keypair_output to a file\"\n      copy:\n        content: keypair_output[\"private_key\"]\n        dest: \"~/.ssh/keypair_output.pem\"\n\n    - name: \"Create a new OpenShift instance on Virtual Machine\"\n      openstack.cloud.server:\n        state: present\n        name: \"{{ vm_name }}\"\n        image: \"{{ image }}\"\n        key_name: ansible_key\n        flavor: 3\n        network: \"{{ network }}\"\n        security_groups: \"{{ sec_groups }}\"\n```\nAnd running it using \n\n ansible-playbook -vvvvv -i \"localhost,\" --connection=local provision_openstack_instance.yml -e \"vm_name=test_vm_sk\" -e\"image=minishift-CentOS-7-v3\" -e \"flavor=m1.xlarge\" -e\"network=provider_net_cci_2\" -e \"sec_groups=provider_net_cci_2\"\n\nAm currently using python 3.8 and openstack sdk version 0.52.0\n\n```\n[srallaba@localhost test_ansible_openstack]$ python \nPython 3.8.6 (default, Sep 25 2020, 00:00:00) \n[GCC 10.2.1 20200723 (Red Hat 10.2.1-1)] on linux\nType \"help\", \"copyright\", \"credits\" or \"license\" for more information.\n>>> import openstack\n>>> openstack.version.__version__\n'0.52.0'\n```\n\nThe following is the error, \n```\nTASK [Create a new OpenShift instance on Virtual Machine] ************************************\ntask path: /home/srallaba/workspace/test_ansible_openstack/provision_openstack_instance.yml:19\n<localhost> ESTABLISH LOCAL CONNECTION FOR USER: srallaba\n<localhost> EXEC /bin/sh -c 'echo ~srallaba && sleep 0'\n<localhost> EXEC /bin/sh -c '( umask 77 && mkdir -p \"` echo /home/srallaba/.ansible/tmp `\"&& mkdir \"` echo /home/srallaba/.ansible/tmp/ansible-tmp-1610548916.375024-3047348-115235364556473 `\" && echo ansible-tmp-1610548916.375024-3047348-115235364556473=\"` echo /home/srallaba/.ansible/tmp/ansible-tmp-1610548916.375024-3047348-115235364556473 `\" ) && sleep 0'\nIncluding module_utils file ansible/__init__.py\nIncluding module_utils file ansible/module_utils/__init__.py\nIncluding module_utils file ansible/module_utils/basic.py\nIncluding module_utils file ansible/module_utils/_text.py\nIncluding module_utils file ansible/module_utils/common/_collections_compat.py\nIncluding module_utils file ansible/module_utils/common/__init__.py\nIncluding module_utils file ansible/module_utils/common/_json_compat.py\nIncluding module_utils file ansible/module_utils/common/_utils.py\nIncluding module_utils file ansible/module_utils/common/file.py\nIncluding module_utils file ansible/module_utils/common/parameters.py\nIncluding module_utils file ansible/module_utils/common/collections.py\nIncluding module_utils file ansible/module_utils/common/process.py\nIncluding module_utils file ansible/module_utils/common/sys_info.py\nIncluding module_utils file ansible/module_utils/common/text/converters.py\nIncluding module_utils file ansible/module_utils/common/text/__init__.py\nIncluding module_utils file ansible/module_utils/common/text/formatters.py\nIncluding module_utils file ansible/module_utils/common/validation.py\nIncluding module_utils file ansible/module_utils/common/warnings.py\nIncluding module_utils file ansible/module_utils/compat/selectors.py\nIncluding module_utils file ansible/module_utils/compat/__init__.py\nIncluding module_utils file ansible/module_utils/compat/_selectors2.py\nIncluding module_utils file ansible/module_utils/distro/__init__.py\nIncluding module_utils file ansible/module_utils/distro/_distro.py\nIncluding module_utils file ansible/module_utils/parsing/convert_bool.py\nIncluding module_utils file ansible/module_utils/parsing/__init__.py\nIncluding module_utils file ansible/module_utils/pycompat24.py\nIncluding module_utils file ansible/module_utils/six/__init__.py\nIncluding module_utils file ansible_collections/openstack/cloud/plugins/module_utils/openstack.py\nIncluding module_utils file ansible_collections/__init__.py\nIncluding module_utils file ansible_collections/openstack/__init__.py\nIncluding module_utils file ansible_collections/openstack/cloud/__init__.py\nIncluding module_utils file ansible_collections/openstack/cloud/plugins/__init__.py\nIncluding module_utils file ansible_collections/openstack/cloud/plugins/module_utils/__init__.py\nUsing module file /home/srallaba/.local/lib/python3.8/site-packages/ansible_collections/openstack/cloud/plugins/modules/server.py\n<localhost> PUT /home/srallaba/.ansible/tmp/ansible-local-3047293kd3wd7f9/tmpsj8pihml TO /home/srallaba/.ansible/tmp/ansible-tmp-1610548916.375024-3047348-115235364556473/AnsiballZ_server.py\n<localhost> EXEC /bin/sh -c 'chmod u+x /home/srallaba/.ansible/tmp/ansible-tmp-1610548916.375024-3047348-115235364556473/ /home/srallaba/.ansible/tmp/ansible-tmp-1610548916.375024-3047348-115235364556473/AnsiballZ_server.py && sleep 0'\n<localhost> EXEC /bin/sh -c '/usr/bin/python /home/srallaba/.ansible/tmp/ansible-tmp-1610548916.375024-3047348-115235364556473/AnsiballZ_server.py && sleep 0'\n<localhost> EXEC /bin/sh -c 'rm -f -r /home/srallaba/.ansible/tmp/ansible-tmp-1610548916.375024-3047348-115235364556473/ > /dev/null 2>&1 && sleep 0'\nThe full traceback is:\n  File \"/tmp/ansible_openstack.cloud.server_payload_6jr193q2/ansible_openstack.cloud.server_payload.zip/ansible_collections/openstack/cloud/plugins/module_utils/openstack.py\", line 388, in __call__\n    results = self.run()\n  File \"/tmp/ansible_openstack.cloud.server_payload_6jr193q2/ansible_openstack.cloud.server_payload.zip/ansible_collections/openstack/cloud/plugins/modules/server.py\", line 682, in run\n  File \"/tmp/ansible_openstack.cloud.server_payload_6jr193q2/ansible_openstack.cloud.server_payload.zip/ansible_collections/openstack/cloud/plugins/modules/server.py\", line 695, in _get_server_state\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/cloud/_compute.py\", line 551, in get_server\n    server = _utils._get_entity(self, searchfunc, name_or_id, filters)\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/cloud/_utils.py\", line 197, in _get_entity\n    entities = search(name_or_id, filters, **kwargs)\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/cloud/_compute.py\", line 99, in search_servers\n    servers = self.list_servers(\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/cloud/_compute.py\", line 331, in list_servers\n    self._servers = self._list_servers(\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/cloud/_compute.py\", line 346, in _list_servers\n    servers = [\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/cloud/_compute.py\", line 346, in <listcomp>\n    servers = [\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/resource.py\", line 1745, in list\n    exceptions.raise_from_response(response)\n  File \"/home/srallaba/.local/lib/python3.8/site-packages/openstack/exceptions.py\", line 233, in raise_from_response\n    raise cls(\nfatal: [localhost]: FAILED! => {\n    \"changed\": false,\n    \"extra_data\": {\n        \"data\": null,\n        \"details\": \"Unexpected API Error. Please report this at http://bugs.launchpad.net/nova/ and attach the Nova API log if possible.\\n<class 'nova.exception.OrphanedObjectError'>\",\n        \"response\": \"{\\\"computeFault\\\": {\\\"code\\\": 500, \\\"message\\\": \\\"Unexpected API Error. Please report this at http://bugs.launchpad.net/nova/ and attach the Nova API log if possible.\\\\n<class 'nova.exception.OrphanedObjectError'>\\\"}}\"\n    },\n    \"invocation\": {\n        \"module_args\": {\n            \"api_timeout\": null,\n            \"auth\": null,\n            \"auth_type\": null,\n            \"auto_ip\": true,\n            \"availability_zone\": null,\n            \"boot_from_volume\": false,\n            \"boot_volume\": null,\n            \"ca_cert\": null,\n            \"client_cert\": null,\n            \"client_key\": null,\n            \"config_drive\": false,\n            \"delete_fip\": false,\n            \"flavor\": \"m1.xlarge\",\n            \"flavor_include\": null,\n            \"flavor_ram\": null,\n            \"floating_ip_pools\": null,\n            \"floating_ips\": null,\n            \"image\": \"minishift-CentOS-7-v3\",\n            \"image_exclude\": \"(deprecated)\",\n            \"interface\": \"public\",\n            \"key_name\": \"ansible_key\",\n            \"meta\": null,\n            \"name\": \"test_vm_sk\",\n            \"network\": \"provider_net_cci_2\",\n            \"nics\": [],\n            \"region_name\": null,\n            \"reuse_ips\": true,\n            \"scheduler_hints\": null,\n            \"security_groups\": [\n                \"provider_net_cci_2\"\n            ],\n            \"state\": \"present\",\n            \"terminate_volume\": false,\n            \"timeout\": 180,\n            \"userdata\": null,\n            \"validate_certs\": null,\n            \"volume_size\": null,\n            \"volumes\": [],\n            \"wait\": true\n        }\n    },\n    \"msg\": \"HttpException: 500: Server Error for url: https://rhos-d.infra.prod.upshift.rdu2.redhat.com:13774/v2.1/servers/detail, Unexpected API Error. Please report this at http://bugs.launchpad.net/nova/ and attach the Nova API log if possible.\\n<class 'nova.exception.OrphanedObjectError'>\"\n}\n\nPLAY RECAP ***********************************************************************************\nlocalhost                  : ok=2    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0  \n```\n\nam not sure if it is an error with the ansible openstack module, \nsince when I try running with openstack cli it works as expected. \nany help would be highly appreciated.",
+    "title": "Unable to provision openstack server using ansible playbook",
+    "created_at": "2021-01-13T14:46:00+00:00",
+    "tags": [],
+    "updated_at": "2021-01-15T17:21:04+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 1815,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008508,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "When you create an instance with a volume specified, if this volume is originated from a volume type that support cinder multi-attach feature, it won't be created and complain about the fact that cinder multi-attach is only supported on NOVA starting with 2.60 microversion.\n\nThis is due to openstacksdk/python-openstackclient change that call for the default version instead of the available microversion as previously.\n\nHowever, you can overcome this issue by specifying your compute_api_version either from CLI option or within your clouds.yaml using `--os-compute-api-version` or `compute_api_version: 2.79` directive.\n\nBut even if you specify compute_api_version directive within your clouds.yaml openstack.cloud.server module doesn't honor it where openstacksdk and CLI client do.\n\nopenstack.cloud.server module should be able to use clouds.yaml additional directive such as compute_api_version or identity_version etc.",
+    "title": "instance creation doesn't work on multi-attach enabled volume type",
+    "created_at": "2021-01-12T10:18:42+00:00",
+    "tags": [],
+    "updated_at": "2021-01-12T10:18:46+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7420,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008503,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "When using the administrator credentials of a cloud I can not remove resources in another project.\n\nI tried to remove a server using the UUID, but when i use the module like this:\n\n```yaml\n    - name: Delete all VMs of the project\n      openstack.cloud.server:\n        auth:\n          auth_url: \"{{ admin_os_auth_url }}\"\n          username: \"{{ admin_os_username }}\"\n          password: \"{{ admin_os_password }}\"\n          project_name: \"{{ admin_os_projectname }}\"\n          project_domain_id: \"{{ os_project_domain_id }}\"\n          user_domain_name: \"{{ os_user_domain_name }}\"\n        name: '850f1296-7499-402d-850b-6305f0428fed'\n        state: absent\n      register: deleted\n```\n\nThe return says the machine is not found.\n\nWhen I run the same command with the openstack CLI (openstack server delete 850f1296-7499-402d-850b-6305f0428fed) having sourced the admin credentials it works.",
+    "title": "Can not remove resources in other project as admin",
+    "created_at": "2020-12-03T14:16:19+00:00",
+    "tags": [],
+    "updated_at": "2020-12-03T14:16:23+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7370,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008413,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "os_server should allow the server description field to be set.    Description can be set with a compute API version >= 2.19",
+    "title": "Allow description field to be set with os_server",
+    "created_at": "2020-11-27T01:20:31+00:00",
+    "tags": [],
+    "updated_at": "2020-11-27T01:30:18+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7359,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008395,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "Currently there isn't a module that exists to check:\n* The status of a stack (absent, present, failed)\n* The output of a stack that exists",
+    "title": "Create a stack_info module",
+    "created_at": "2020-11-17T22:50:55+00:00",
+    "tags": [],
+    "updated_at": "2021-02-01T12:14:20+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7353,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008364,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "From the openstack cli i can do \"--nic net-name=network0,v4-fixed-ip=192.168.0.10\", doesn't look like the module supports v4-fixed-ip?",
+    "title": "server parameter nics v4-fixed-ip",
+    "created_at": "2020-10-10T22:34:35+00:00",
+    "tags": [],
+    "updated_at": "2020-10-10T22:34:38+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7272,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008244,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 1,
+        "key": "review"
+      },
+      {
+        "count": 0,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "OpenStack allows to attach multiple floating ips to a single server. Ansible's `os_floating_ip` module supports only one floating ip per server. It calls openstacksdk's `get_server_public_ip()`, which in turn returns just one of the attached floating ips. If this floating ip does not point to the right `nat_destination` or `fixed_address`, then the module fails.\n\nIf no floating ip is attached to a server, then this module calls openstacksdk's `add_ips_to_server()` with both parameters `floating_ip_address` and `network`, to attach a floating ip to the server. But both parameters are mutually exclusive [1], i.e. `add_ips_to_server()` will ignore `floating_ip_address` if `network` is set and then choose any non-attached floating ip from `network`. If `floating_ip_address` has not been created in OpenStack before and `network` is not given, then the current module code will not create this floating ip [2].\n\nA patch to fix these problems is available at [3]. The new module code allows to create and add more than one floating ip to a server. It priorizes more specific parameters over generic ones, i.e. if both `floating_ip_address` and `network` are given, then `floating_ip_address` precedes `network`. Parameter `network` is now required if `floating_ip_address` is specified, because both are necessary when creating floating ips. Module documentation and args have been updated accordingly.\n\nRef.:\n[1] https://github.com/openstack/openstacksdk/blob/a6b0ece2821ea79330c4067100295f6bdcbe456e/openstack/cloud/_floating_ip.py#L987\n[2] https://github.com/openstack/openstacksdk/blob/a6b0ece2821ea79330c4067100295f6bdcbe456e/openstack/cloud/_floating_ip.py#L907\n[3] https://github.com/JM1/ansible-collection-openstack-cloud/commit/8c056990852b215a8f287e5558d35fcb16a2f14f",
+    "title": "Allow to attach multiple floating ips to a server [PATCH INCLUDED]",
+    "created_at": "2020-09-22T13:32:06+00:00",
+    "tags": [],
+    "updated_at": "2021-01-11T13:05:11+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7169,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008181,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 1,
+        "key": "review"
+      },
+      {
+        "count": 0,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "Previously, all subnet properties were updated if any value did not match. But this behaviour caused errors like e.g. `Current gateway ip 192.168.0.1 already in use by port [ID]. Unable to update.` even if that gateway was not about to be changed.\n\nA patch to fix this is available here:\nhttps://github.com/JM1/ansible-collection-openstack-cloud/commit/00c7c18aa3a286d43de72e35a53ff49f922a662b",
+    "title": "Only apply necessary changes to subnets in os_subnet [PATCH INCLUDED]",
+    "created_at": "2020-09-21T12:38:55+00:00",
+    "tags": [],
+    "updated_at": "2021-01-12T11:07:09+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7169,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008172,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "I created a subnet_pool using the command line openstack and I was able to create subnet pertaining to the pool using\n\n```\nopenstack subnet create --ip-version 4 --subnet-pool cdflabs-subnetpool --network med3_net test_n1\n+----------------------+--------------------------------------+\n| Field                | Value                                |\n+----------------------+--------------------------------------+\n| allocation_pools     | 192.168.3.2-192.168.3.254            |\n| cidr                 | 192.168.3.0/24                       |\n| created_at           | 2020-09-14T10:02:11Z                 |\n| description          |                                      |\n| dns_nameservers      |                                      |\n| dns_publish_fixed_ip | None                                 |\n| enable_dhcp          | True                                 |\n| gateway_ip           | 192.168.3.1                          |\n| host_routes          |                                      |\n| id                   | 6ce480fd-71cb-4d7d-bd76-b267f12a0500 |\n| ip_version           | 4                                    |\n| ipv6_address_mode    | None                                 |\n| ipv6_ra_mode         | None                                 |\n| name                 | test_n1                              |\n| network_id           | 5e2cb7ca-c75e-4875-aad8-342b9ba7d1fe |\n| prefix_length        | None                                 |\n| project_id           | 6df2d436c7bb4c03984cee2340a8e9b5     |\n| revision_number      | 0                                    |\n| segment_id           | None                                 |\n| service_types        |                                      |\n| subnetpool_id        | e05213c9-33d8-4320-b33d-e31e7502b014 |\n| tags                 |                                      |\n| updated_at           | 2020-09-14T10:02:11Z                 |\n+----------------------+--------------------------------------+\n```\n \nWhen creating a subnet in a subnet_pool with ansible I get an error\n```yaml\n- name: \"Create subnetwork from pool\"\n  openstack.cloud.subnet:\n    state: present\n    network_name: \"med3_net\"\n    name: \"testn1\"\n    extra_specs:\n      subnetpool_id: \"e05213c9-33d8-4320-b33d-e31e7502b014\"\n```\nerror is \n```\ninvocation:\n    module_args:\n      allocation_pool_end: null\n      allocation_pool_start: null\n      api_timeout: null\n      auth: null\n      auth_type: null\n      availability_zone: null\n      ca_cert: null\n      cidr: null\n      client_cert: null\n      client_key: null\n      dns_nameservers: null\n      enable_dhcp: true\n      extra_specs:\n        subnetpool_id: e05213c9-33d8-4320-b33d-e31e7502b014\n      gateway_ip: null\n      host_routes: null\n      interface: public\n      ip_version: '4'\n      ipv6_address_mode: null\n      ipv6_ra_mode: null\n      name: testn1\n      network_name: med3_net\n      no_gateway_ip: false\n      region_name: null\n      state: present\n      timeout: 180\n      use_default_subnetpool: false\n      validate_certs: null\n      wait: true\n  msg: arg:cidr is required when a subnetpool is not used\n``` \nbut it removes any interest if we have to do that.\n\nit is a bug or an expected behavior ?\n\ncollection version is 1.1.0\n\nBest.",
+    "title": "subnet module asks for cidr for creation in a subnet_pool when the openstack equivalent cmd line does not",
+    "created_at": "2020-09-14T10:08:31+00:00",
+    "tags": [],
+    "updated_at": "2020-09-14T10:10:14+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7075,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008135,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "*This issue was migrated from https://github.com/ansible/ansible/issues/31360.*\n\n##### ISSUE TYPE\n\n    * Feature Idea\n\n##### COMPONENT NAME\n\nAnsible os_object.py\n##### ANSIBLE VERSION\n\n```\nansible 2.4.0.0\n```\n\n##### CONFIGURATION\n\nDefault\n##### OS / ENVIRONMENT\n\nN/A\n##### SUMMARY\n\nIf you see\n\nhttps://github.com/ansible/ansible/blob/d8b1cb9a634d0e828a7be39d4019a6215410e643/lib/ansible/modules/cloud/openstack/os_object.py#L120\n\nand\nhttp://docs.ansible.com/ansible/latest/os_object_module.html\n\"container_access | no | private | private public | desired container access level.\"\n\nIn Ansible os_object it's possible to only specify public or private containers.\n\nIn Swift though. it's possible to create much more finegrained ACLs, as defined in here:\nhttps://docs.openstack.org/swift/latest/overview_acl.html\n\nWould it be possible to add these fine grained ACLs into the Ansible implementation as well?\nFor example, it would be interesting to be able to set R/W ACLs for PROJECT_ID:USER_ID.",
+    "title": "Ansible os_object lacks finegrained ACL capability",
+    "created_at": "2020-08-29T22:17:44+00:00",
+    "tags": [],
+    "updated_at": "2020-08-29T22:21:11+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7177,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008088,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "*This issue was migrated from https://github.com/ansible/ansible/issues/62760.*\n\n##### SUMMARY\n\nI need to be able to run the following command in order to set a user-specific access key for the container:\n\n```\nopenstack container set --property Full-Key=$CONTAINER_API_KEY $CONTAINER_NAME\n```\n\n...but this doesn't appear possible with the module currently.\n\n##### ISSUE TYPE\n\n- Feature Idea\n\n##### COMPONENT NAME\n\nAnsible os_object.py\n\n##### ADDITIONAL INFORMATION\n\nThis functionality is needed for enabling [container-specific API keys](http://docs.clouda.ca/bulk-storage/container-keys).  Without it, one must resort to running a `command` task to issue the command above.\n\nI'm assuming we can add a `properties` parameter to enable this.  Here's an example task:\n\n```yaml\n- name: Create an object storage container\n  os_object:\n    state: present\n    container: \"{{ container_name }}\"\n    properties:\n      - Full-Key: \"{{ container_api_key }}\"\n      - ...\n  delegate_to: \"{{ control_server }}\"\n```",
+    "title": "Allow `os_object` to set container properties",
+    "created_at": "2020-08-29T22:11:24+00:00",
+    "tags": [],
+    "updated_at": "2020-08-29T22:11:58+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7177,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008087,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "*This issue was migrated from https://github.com/ansible/ansible/issues/60449.*\n\nToday if you try to delete a container that still has any files in it, you receive the message: `The container is not empty. Please delete the objects inside it before deleting the container.` On the openstack CLI, normally you would pass in the `--recursive` option to delete the container and all its contents. Alternatively, the `os_object` module could support a means to list all container contents in an order that could be passed to an ansible `loop` invocation of `os_object` prior to deleting the container itself. The latter solution, while more complicated to get in the right order, is more powerful as it allows users to retrieve the contents of a swift container.\n\n```yaml\n- name: Destroy the Openstack Swift Container and its contents\n  os_object:\n    auth:\n      auth_url: \"{{ tf_swift_auth_url }}\"\n      tenant_name: \"{{ tf_swift_tenant_name }}\"\n      domain_name: \"{{ tf_swift_domain_name }}\"\n      tenant_id: \"{{ tf_swift_tenant_id }}\"\n    region_name: \"{{ tf_swift_region_name }}\"\n    container: \"{{ tf_swift_container_name }}\"\n    state: absent\n    recursive: true\n\n# OR\n\n- name: Get the Openstack Swift Container contents\n  os_object:\n    auth:\n      auth_url: \"{{ tf_swift_auth_url }}\"\n      tenant_name: \"{{ tf_swift_tenant_name }}\"\n      domain_name: \"{{ tf_swift_domain_name }}\"\n      tenant_id: \"{{ tf_swift_tenant_id }}\"\n    region_name: \"{{ tf_swift_region_name }}\"\n    container: \"{{ tf_swift_container_name }}\"\n    state: list\n  register: container_contents\n\n- name: Destroy the contents of the Openstack Swift Container\n  os_object:\n    auth:\n      auth_url: \"{{ tf_swift_auth_url }}\"\n      tenant_name: \"{{ tf_swift_tenant_name }}\"\n      domain_name: \"{{ tf_swift_domain_name }}\"\n      tenant_id: \"{{ tf_swift_tenant_id }}\"\n    region_name: \"{{ tf_swift_region_name }}\"\n    container: \"{{ tf_swift_container_name }}\"\n    state: absent\n    filename: \"{{ item }}\"\n  with_items: \"{{ container_contents }}\"\n\n- name: Destroy the Openstack Swift Container\n  os_object:\n    auth:\n      auth_url: \"{{ tf_swift_auth_url }}\"\n      tenant_name: \"{{ tf_swift_tenant_name }}\"\n      domain_name: \"{{ tf_swift_domain_name }}\"\n      tenant_id: \"{{ tf_swift_tenant_id }}\"\n    region_name: \"{{ tf_swift_region_name }}\"\n    container: \"{{ tf_swift_container_name }}\"\n    state: absent\n```",
+    "title": "Add support for deleting a container and all files to `os_object`",
+    "created_at": "2020-08-29T22:02:03+00:00",
+    "tags": [],
+    "updated_at": "2020-08-29T22:02:06+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7177,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008086,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "Resize with new flavor is not available with os_server_action module, can this be added? there was a request in github previously\nhttps://github.com/ansible/ansible/pull/62030\nwas this merged?",
+    "title": "os_server_action: resize",
+    "created_at": "2020-08-26T20:41:30+00:00",
+    "tags": [],
+    "updated_at": "2020-08-26T20:44:40+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7173,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008072,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "This does not work (extracted from bifrost):\n```yaml\n- name: \"Create keystone service record for ironic\"\n  openstack.cloud.catalog_service:\n    state: present\n    name: \"ironic\"\n    service_type: \"baremetal\"\n    description: OpenStack Baremetal Service\n    auth: \"{{ keystone_auth }}\"\n    wait: yes\n  no_log: true\n\n- name: \"Create ironic admin endpoint\"\n  openstack.cloud.endpoint:\n    state: present\n    service: \"baremetal\"\n    endpoint_interface: admin\n    url: \"{{ ironic.keystone.admin_url | default(ironic_api_url) }}\"\n    region: \"{{ keystone.bootstrap.region_name | default('RegionOne') }}\"\n    auth: \"{{ keystone_auth }}\"\n  no_log: true\n```\nFails with:\n```\nfatal: [127.0.0.1]: FAILED! => {\"changed\": false, \"msg\": \"Service baremetal does not exist\"}\n```\n\nThis seems to work:\n```yaml\n- name: \"Create keystone service record for ironic\"\n  openstack.cloud.catalog_service:\n    state: present\n    name: \"ironic\"\n    service_type: \"baremetal\"\n    description: OpenStack Baremetal Service\n    auth: \"{{ keystone_auth }}\"\n    wait: yes\n  register: baremetal_catalog_service\n  no_log: true\n\n- name: \"Create ironic admin endpoint\"\n  openstack.cloud.endpoint:\n    state: present\n    service: \"{{ baremetal_catalog_service.id }}\"\n    endpoint_interface: admin\n    url: \"{{ ironic.keystone.admin_url | default(ironic_api_url) }}\"\n    region: \"{{ keystone.bootstrap.region_name | default('RegionOne') }}\"\n    auth: \"{{ keystone_auth }}\"\n  no_log: true\n```",
+    "title": "openstack.cloud.endpoint does not accept names in \"service\"",
+    "created_at": "2020-08-26T14:10:41+00:00",
+    "tags": [],
+    "updated_at": "2020-08-26T14:15:29+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 443,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008069,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "See https://github.com/ansible/ansible/issues/19863",
+    "title": "os_floating_ip returns OK but does not assign designated floating IP",
+    "created_at": "2020-08-26T07:32:46+00:00",
+    "tags": [],
+    "updated_at": "2020-09-22T13:34:49+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7171,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008065,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "See https://github.com/ansible/ansible/issues/20251",
+    "title": "os_security_group_rule is not idempotent for a /32 if /32 is omitted",
+    "created_at": "2020-08-26T07:32:18+00:00",
+    "tags": [],
+    "updated_at": "2020-08-26T07:32:22+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7171,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008064,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "See https://github.com/ansible/ansible/issues/68209",
+    "title": "os_server_volume fails due to openstacksdk version",
+    "created_at": "2020-08-26T07:31:51+00:00",
+    "tags": [],
+    "updated_at": "2020-08-26T07:31:55+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7171,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008063,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "Hi, the project page on [https://galaxy.ansible.com/openstack/cloud](Ansible Galaxy) has some bad links.\n\n* The `Issue Tracker` button points to https://review.opendev.org/q/project:openstack/ansible-collections-openstack which should go to https://storyboard.openstack.org/#!/project/openstack/ansible-collections-openstack\n\n* The `Docs` button points to https://docs.openstack.org/ansible-collections-openstack/latest/ which does not exist.",
+    "title": "Bad links on Ansible Galaxy page",
+    "created_at": "2020-08-26T07:26:02+00:00",
+    "tags": [],
+    "updated_at": "2020-08-26T07:26:06+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7171,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008062,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "Migrated from https://github.com/ansible/ansible/issues/15871\n\nISSUE TYPE\n\nBug Report\n\nCOMPONENT NAME\n\nopenstack dynamic inventory script\n\nANSIBLE VERSION\n\n2.2\n\nCONFIGURATION\n\nOS / ENVIRONMENT\n\nSUMMARY\n\nThis line means that if there is no internal IP on the node it is not in the inventory: https://github.com/ansible/ansible/blob/devel/contrib/inventory/openstack.py#L136\nThis means that you cannot use the anisb le inventory to remove errored hosts, and you can't recreate them as it sees them as already existing, but in an errored state.\n\nSTEPS TO REPRODUCE\n\nRun the openstack inventory when there are openstack servers that failed to be scheduled\n\nEXPECTED RESULTS\n\nI can see them in the inventory to delete them\n\nACTUAL RESULTS\n\nThey do not appear in the inventory",
+    "title": "Openstack inventory needs to list errored nodes that don't have an internal_ip",
+    "created_at": "2020-08-18T10:16:37+00:00",
+    "tags": [],
+    "updated_at": "2020-08-18T10:16:40+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 1028,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2008027,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "We are working on a tool for producing container images that are populated with both Ansible collections, and the dependencies needed to use them. See https://github.com/ansible/ansible-builder\n\nThe main thing that is needed to make use of the modules and plugins here is the SDK library for interacting with openstack. I ran a scraper script and found a [few more requirements](https://github.com/AlanCoding/collection-dependencies-demo/blob/master/sniff_req/discovered.json#L12-L18) declared inside of plugin DOCUMENTATION. Taking the most conservative ones of those, I would put together this requirements.txt file for python requirements:\n\n```diff\ndiff --git a/requirements.txt b/requirements.txt\nnew file mode 100644\nindex 0000000..1043d10\n--- /dev/null\n+++ b/requirements.txt\n@@ -0,0 +1,4 @@\n+openstacksdk>=0.44\n+keystoneauth1>=3.4.0\n+jsonpatch\n+\n```\n\nIf you add this file to this collection, it will be picked up by the `ansible-builder` tool when building an execution environment. This is intended to replace the [requirements listing](https://github.com/ansible/awx/blob/devel/requirements/requirements_ansible.in#L63) for AWX and Ansible Tower.\n\nI would have put up a PR for this, but I still have worked through all the issues in getting fully authenticated to opendev.\n\nIt's also completely possible to combine these requirements with `test-requirements.txt` similar to what the `theforeman.foreman` collection does: https://github.com/theforeman/foreman-ansible-modules/blob/develop/requirements-dev.txt",
+    "title": "Add Execution Environment metadata",
+    "created_at": "2020-08-06T17:47:48+00:00",
+    "tags": [],
+    "updated_at": "2020-09-10T12:22:05+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 6917,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2007990,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "os_server module has \"security_groups\" parameter which has a default value \"default\".\n\nWhen I try to apply os_server for an existing server which has no security groups, os_server module incorrectly tries to add the \"default\" security group.\nThe os_server task failed because the port security is disable in my OpenStack environment.\nEven when I set security_groups as a blank list (i.g., security_groups: []), it does not work.\n\nHow can I set the security_groups param as no security groups?\nIf there are no ways to set that, the security_groups param should not have any default value in order to set no security groups.\n\nEnvironment:\nansible version: 2.9.9\nopenstacksdk version: 0.47.0\npython version: 3.6.8\n\nError message:\n```\nThe full traceback is:\n  File \"/tmp/ansible_os_server_payload_9b1ma_ua/ansible_os_server_payload.zip/ansible/modules/cloud/openstack/os_server.py\", line 749, in main\n  File \"/tmp/ansible_os_server_payload_9b1ma_ua/ansible_os_server_payload.zip/ansible/modules/cloud/openstack/os_server.py\", line 672, in _get_server_state\n  File \"/tmp/ansible_os_server_payload_9b1ma_ua/ansible_os_server_payload.zip/ansible/modules/cloud/openstack/os_server.py\", line 654, in _check_security_groups\n  File \"/usr/local/lib/python3.6/site-packages/openstack/cloud/_compute.py\", line 253, in add_server_security_groups\n    self.compute.add_security_group_to_server(server, sg)\n  File \"/usr/local/lib/python3.6/site-packages/openstack/compute/v2/_proxy.py\", line 672, in add_security_group_to_server\n    server.add_security_group(self, security_group.name)\n  File \"/usr/local/lib/python3.6/site-packages/openstack/compute/v2/server.py\", line 348, in add_security_group\n    self._action(session, body)\n  File \"/usr/local/lib/python3.6/site-packages/openstack/compute/v2/server.py\", line 240, in _action\n    exceptions.raise_from_response(response)\n  File \"/usr/local/lib/python3.6/site-packages/openstack/exceptions.py\", line 235, in raise_from_response\n    http_status=http_status, request_id=request_id\nfatal: [localhost]: FAILED! => {\n    \"changed\": false,\n    \"extra_data\": null,\n    \"invocation\": {\n        \"module_args\": {\n            \"api_timeout\": null,\n            \"auth\": null,\n            \"auth_type\": null,\n            \"auto_ip\": true,\n            \"availability_zone\": null,\n            \"boot_from_volume\": false,\n            \"boot_volume\": null,\n            \"ca_cert\": null,\n            \"client_cert\": null,\n            \"client_key\": null,\n            \"config_drive\": true,\n            \"delete_fip\": false,\n            \"flavor\": \"xxxx\",\n            \"flavor_include\": null,\n            \"flavor_ram\": null,\n            \"floating_ip_pools\": null,\n            \"floating_ips\": null,\n            \"image\": \"xxxx\",\n            \"image_exclude\": \"(deprecated)\",\n            \"interface\": \"public\",\n            \"key_name\": \"xxxx\",\n            \"meta\": {\n                \"xxxx\": \"xxxx\"\n            },\n            \"name\": \"xxxx\",\n            \"network\": null,\n            \"nics\": [\n                {\n                    \"port-id\": \"537ec450-c3a2-4022-9128-855d14d46c10\"\n                },\n                {\n                    \"port-id\": \"81345ffa-7b9b-4b3c-a5f0-fa687545ead4\"\n                },\n                {\n                    \"port-id\": \"1db3653b-04fb-4baa-ac96-0ec013badc67\"\n                }\n            ],\n            \"region_name\": null,\n            \"reuse_ips\": true,\n            \"scheduler_hints\": {\n                \"group\": \"94efc477-c6d3-42fb-8270-3d3db70d3866\"\n            },\n            \"security_groups\": [\n                \"default\"\n            ],\n            \"state\": \"present\",\n            \"terminate_volume\": false,\n            \"timeout\": 300,\n            \"userdata\": null,\n            \"validate_certs\": null,\n            \"volume_size\": false,\n            \"volumes\": [],\n            \"wait\": true\n        }\n    },\n    \"msg\": \"BadRequestException: 400: Client Error for url: https://xxxx/v2.1/6859ba052c284603b1777a64a1016c02/servers/6eeecb52-8f62-46f8-a80a-e544f80226a4/action, Network requires port_security_enabled and subnet associated in order to apply security groups.\"\n}\n```",
+    "title": "os_server module incorrectly tries to add the \"default\" security group to existing servers",
+    "created_at": "2020-07-03T04:55:34+00:00",
+    "tags": [],
+    "updated_at": "2020-07-08T22:44:29+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 4968,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2007893,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "Hello, \ni am not sure if if this is the Right place for my Question. So feel free to move it.\nDuring the creation of a Server instance (ansible os_server) from a Image, it is not possible to Change the disk type. Only the disk size is changeable. Otherwise, all new Servers will created with a disk that have only common I/O. \nThanks",
+    "title": "Change Disk_Type os_server",
+    "created_at": "2020-07-02T12:51:43+00:00",
+    "tags": [],
+    "updated_at": "2020-07-08T11:56:18+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7102,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2007891,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "CCed from https://github.com/ansible/ansible/issues/67122 on behalf of the reporter\n\nos_server_info documentation states that the filters parameter :\n\n>  restrict results to servers matching a dictionary of filters\n\nbut does not describes what these filters are or where to find more information about how to write them.\n\nhttps://docs.ansible.com/ansible/latest/modules/os_server_info_module.html#os-server-info-module\n\nVERSION ansible 2.9.4",
+    "title": "os_server_info filters documentation",
+    "created_at": "2020-06-29T18:35:47+00:00",
+    "tags": [],
+    "updated_at": "2020-06-29T18:35:51+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7075,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2007873,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "I would like to attach \"multi attach\" volume.\nFrom command line doable using $> openstack --os-compute-api-version 2.60 server add volume\n\nPassing in \"compute_api_version: '2.60'\" is not possible, please add this feature.\n\nSurprisingly also adding \"compute_api_version\" into cloud.yaml does not fix the issue.\nDetach works fine.\n\n\"msg\": \"Error attaching volume 111-long-id-111 to server 111-long-id-111 : Client Error for url: https://xxxxx:8774/v2.1/servers/4653ce78-1778-4895-ab36-a761127e302a/os-volume\n_attachments, Multiattach volumes are only supported starting with compute API version 2.60.\"",
+    "title": "enable pass in os-compute-api-version parameter",
+    "created_at": "2020-06-23T13:35:59+00:00",
+    "tags": [],
+    "updated_at": "2020-06-23T13:36:02+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7090,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2007850,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "if exists sg rule\n                \"port_range_max\": 65535,\n                \"port_range_min\": 0,\n                \"protocol\": \"any\",\nthen\nos_security_group_rule:\n  #protocol: any i.e.None or any, does not matter\n  #port_range_min: -1 i.e.None\n  #port_range_max: -1 i.e.None\nis not matched and call causes error\n\"msg\": \"ConflictException: 409: Client Error for url: https://xxxxx/v2.0/security-group-rules, Security group rule already exists. Rule id is 454dcac7-798e-422d-9254-c9d806b35b40.\"\n\nfix:\nplugins\\modules\\os_security_group_rule.py:262 (def _find_matching_rule)\n            protocol == rule['protocol'] ==> (protocol == rule['protocol'] or (rule['protocol'] == 'any' and protocol is None ) )",
+    "title": "os_security_group_rule does not match protocol:any port:any",
+    "created_at": "2020-06-23T13:21:04+00:00",
+    "tags": [],
+    "updated_at": "2020-06-23T13:25:15+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7090,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2007849,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "There is this function `_validate_subnets` which may create ports:\n```\ndef _validate_subnets(module, cloud, filters=None):\n...\n                    if iface['portip'] not in existing_port_ips:\n                        p = cloud.create_port(network_id=net.id, fixed_ips=[{'ip_address': iface['portip'], 'subnet_id': subnet.id}])\n...\n```\nand this gets called before we even know if we are allowed to change anything, i.e. even if check mode is true:\n```\n        # Validate and cache the subnet IDs so we can avoid duplicate checks\n        # and expensive API calls.\n        external_ids, subnet_internal_ids, internal_portids = _validate_subnets(module, cloud, filters)\n        if module.check_mode:\n            module.exit_json(\n                changed=_system_state_change(cloud, module, router, net, subnet_internal_ids, internal_portids, filters)\n            )\n```",
+    "title": "os_router may change things even in check mode",
+    "created_at": "2020-06-23T11:56:01+00:00",
+    "tags": [],
+    "updated_at": "2020-09-14T12:03:01+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7088,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2007848,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 1,
+        "key": "review"
+      },
+      {
+        "count": 0,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "`ansible/modules/cloud/openstack/os_router.py` has a systematic bug when it updates the ports that are attached to a router. It does this by first removing all existing ports, and then adding back all the ones that are wanted. Howeever, this strategy is fundamentally wrong, as can be seen in the following case:\n\n```\nTASK [task : Create router] *************************************\nfatal: [hostname.sys11cloud.net]: FAILED! => {\"changed\": false, \"failed\": true, \"msg\": \"Error detaching interface from router 2c85d143-6414-4b27-93c8-8f13ffff7284. (409) Client Error for url: https://api.cbk.sys11cloud.net:9696/v2.0/routers/2c85d143-6414-4b27-93c8-8f13ffff7284/remove_router_interface.json Router interface for subnet 0150378d-b7c7-4a62-aad3-1ac80fe9bbc2 on router 2c85d143-6414-4b27-93c8-8f13ffff7284 cannot be deleted, as it is required by one or more floating IPs.\"}\n```\n\nThis kind of error can easily occur in the middle of \"updating\" the router. After this, it is in a bad state: neither the old state, nor the new desired state. It is broken completely.\n\nFor an older Ansible version, I fixed this like so:\n\n```\n--- /usr/lib/python2.7/dist-packages/ansible/modules/cloud/openstack/os_router.py       2018-07-06 01:37:16.000000000 +0000\n+++ os_router.py        2020-06-22 14:25:04.401642194 +0000\n@@ -188,11 +188,21 @@\n\n\n def _router_internal_interfaces(cloud, router):\n+    # This is an expensive lookup:\n     for port in cloud.list_router_interfaces(router, 'internal'):\n         if port['device_owner'] in ROUTER_INTERFACE_OWNERS:\n             yield port\n\n\n+def _existing_subnet_ids(cloud, router):\n+    existing_subnet_ids = []\n+    for port in _router_internal_interfaces(cloud, router):\n+        if 'fixed_ips' in port:\n+            for fixed_ip in port['fixed_ips']:\n+                existing_subnet_ids.append(fixed_ip['subnet_id'])\n+    return existing_subnet_ids\n+\n+\n def _needs_update(cloud, module, router, network, internal_subnet_ids):\n     \"\"\"Decide if the given router needs an update.\n     \"\"\"\n@@ -232,11 +242,7 @@\n\n     # check internal interfaces\n     if module.params['interfaces']:\n-        existing_subnet_ids = []\n-        for port in _router_internal_interfaces(cloud, router):\n-            if 'fixed_ips' in port:\n-                for fixed_ip in port['fixed_ips']:\n-                    existing_subnet_ids.append(fixed_ip['subnet_id'])\n+        existing_subnet_ids = _existing_subnet_ids(cloud, router)\n\n         if set(internal_subnet_ids) != set(existing_subnet_ids):\n             return True\n@@ -386,18 +392,25 @@\n                         changed = False\n\n                     # On a router update, if any internal interfaces were supplied,\n-                    # just detach all existing internal interfaces and attach the new.\n+                    # remove the ones that exist but that we don't want,\n+                    # and add the ones that we want but don't exist.\n                     elif internal_ids:\n                         router = updated_router\n-                        ports = _router_internal_interfaces(cloud, router)\n-                        for port in ports:\n-                            cloud.remove_router_interface(router, port_id=port['id'])\n-                        for internal_subnet_id in internal_ids:\n-                            cloud.add_router_interface(router, subnet_id=internal_subnet_id)\n-                        changed = True\n+                        existing_subnet_ids = set(_existing_subnet_ids(cloud, router))\n+                        wanted_subnet_ids = set(internal_ids)\n+\n+                        # Remove extras\n+                        for subnet_id in existing_subnet_ids - wanted_subnet_ids:\n+                            cloud.remove_router_interface(router, subnet_id=subnet_id)\n+                            changed = True\n+                        # Add missing\n+                        for subnet_id in wanted_subnet_ids - existing_subnet_ids:\n+                            cloud.add_router_interface(router, subnet_id=subnet_id)\n+                            changed = True\n\n             module.exit_json(changed=changed,\n                              router=router,\n+                             internal_subnet_ids=internal_ids,\n                              id=router['id'])\n\n         elif state == 'absent':\n```\nresulting in the following code where it matters:\n```\n                    # On a router update, if any internal interfaces were supplied,\n                    # remove the ones that exist but that we don't want,\n                    # and add the ones that we want but don't exist.\n                    elif internal_ids:\n                        router = updated_router\n                        existing_subnet_ids = set(_existing_subnet_ids(cloud, router))\n                        wanted_subnet_ids = set(internal_ids)\n\n                        # Remove extras\n                        for subnet_id in existing_subnet_ids - wanted_subnet_ids:\n                            cloud.remove_router_interface(router, subnet_id=subnet_id)\n                            changed = True\n                        # Add missing\n                        for subnet_id in wanted_subnet_ids - existing_subnet_ids:\n                            cloud.add_router_interface(router, subnet_id=subnet_id)\n                            changed = True\n```\n\nHowever, in 2.9 the code is more complex and this patch won't just apply. Nevertheless a similar approach would seem to work.",
+    "title": "os_router removes all interfaces on change and breaks the router",
+    "created_at": "2020-06-22T15:49:49+00:00",
+    "tags": [],
+    "updated_at": "2021-01-12T11:24:27+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7088,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2007845,
+    "users": []
+  },
+  {
+    "status": "active",
+    "task_statuses": [
+      {
+        "count": 0,
+        "key": "review"
+      },
+      {
+        "count": 1,
+        "key": "todo"
+      },
+      {
+        "count": 0,
+        "key": "invalid"
+      },
+      {
+        "count": 0,
+        "key": "merged"
+      },
+      {
+        "count": 0,
+        "key": "inprogress"
+      }
+    ],
+    "description": "SUMMARY\n\nUnable to Assign fixed IP address to Openstack Instance using os_server\nISSUE TYPE\n\n    Bug Report\n\nCOMPONENT NAME\n\nos_server\nANSIBLE VERSION\n\nansible 2.9.9\n\nopenstack  client version 5.2.0\n\nCONFIGURATION\n\n\nOS / ENVIRONMENT\n\nUbuntu 18.04 : 4.15.0-91-generic\nSTEPS TO REPRODUCE\n\ncluster.yml\n```yaml\n---\n- hosts: localhost\n  tasks:\n  - include_vars: settings.yml\n  - name: launch openstack instances\n    os_server:\n      state: present\n      auth:\n        auth_url: \"{{ os_cloud_profile.os_auth_url }}\"\n        username: \"{{ os_cloud_profile.os_username }}\"\n        password: \"{{ os_cloud_profile.os_password }}\"\n        project_name: \"{{ os_cloud_profile.os_tenant_name }}\"\n      name: \"{{ item.0 }}\"\n      region_name: \"{{ os_cloud_profile.os_region |default('') }}\"\n      availability_zone: \"{{ os_cloud_profile.os_availability_zone |default('') }}\"\n      image: \"{{ os_cloud_profile.os_image_name }}\"\n      key_name: \"{{ os_cloud_profile.os_key_name |default('') }}\"\n      flavor: \"{{ os_cloud_profile.os_flavor_name }}\"\n      nics:\n        - net-id: \"{{ os_cloud_profile.os_network_id }},v4-fixed-ip={{ item.2 }}\"\n      security_groups: \"{{ os_cloud_profile.os_security_groups |default('') }}\"\n    with_together:\n      - \"{{ nodes }}\"\n      - \"{{ nodes_role }}\"\n      - \"{{ nodes_ip }}\"\n    when: create_nodes\n-----\n```\nsettings,yml\n```yaml\n---\n#Define all program variables here\n#Set to true for the instances to be created\ncreate_nodes: true\nnodes: [\"esm03\",\"esm04\",\"esd02\"]\nnodes_role: [\"master\",\"master\",\"data\"]\nnodes_ip: [\"10.239.51.145\",\"10.239.51.146\",\"10.239.51.147\"]\nansible_user: <ANSIBLE_USER_NAME>\n#Openstack profile for launching instances\n#Change the below value to match your deployment\nos_cloud_profile:\n  os_compute_api_version: \"3.0\"\n  os_ssh_user: <USER_NAME>\n  os_username: <USER_NAME>\n  os_password: <PASSWORD>\n  os_tenant_name: <TENANT NAME>\n  os_project_name: <PROJECT NAME>\n  os_region: regionOne\n  os_availability_zone: nova\n  os_security_groups:\n    - \"<SEC GRP>\"\n  os_network_name: <NETWORK_NAME>\n  os_network_id: <NETWORK ID>\n  os_key_name: <PUB KEY>\n  os_flavor_name: h1.c8m8\n  os_image_name: <IMAGE_NAME>\n  os_auth_url: 'https://<AUTH_URL_IP>/v3'\n```\nEXPECTED RESULTS\n\nInstance should get preassigned IP address as possible with openstack client execution but it picks up any available address with out any additional specs. when specifying v4-fixed-ip address it gives error\nACTUAL RESULTS\n\nIt is not able to take parameters available in openstack instance creation with network_id and specified fixed IP address. Documentation says quote:\n\"A list of networks to which the instance's interface should be attached. Networks may be referenced by net-id/net-name/port-id or port-name.\nAlso this accepts a string containing a list of (net/port)-(id/name) Eg: nics: \"net-id=uuid-1,port-name=myport\" Only one of network or nics should be supplied.\"\nEnd quote.\n```\n<127.0.0.1> ESTABLISH LOCAL CONNECTION FOR USER: local\n<127.0.0.1> EXEC /bin/sh -c 'echo ~local && sleep 0'\n<127.0.0.1> EXEC /bin/sh -c '( umask 77 && mkdir -p \"` echo /home/local/.ansible/tmp `\"&& mkdir /home/local/.ansible/tmp/ansible-tmp-1590085495.526485-4643-69995998945224 && echo ansible-tmp-1590085495.526485-4643-69995998945224=\"` echo /home/local/.ansible/tmp/ansible-tmp-1590085495.526485-4643-69995998945224 `\" ) && sleep 0'\nUsing module file /home/local/.local/lib/python3.6/site-packages/ansible/modules/cloud/openstack/os_server.py\n<127.0.0.1> PUT /home/local/.ansible/tmp/ansible-local-4567jmek3do1/tmpvi5mh4wk TO /home/local/.ansible/tmp/ansible-tmp-1590085495.526485-4643-69995998945224/AnsiballZ_os_server.py\n<127.0.0.1> EXEC /bin/sh -c 'chmod u+x /home/local/.ansible/tmp/ansible-tmp-1590085495.526485-4643-69995998945224/ /home/local/.ansible/tmp/ansible-tmp-1590085495.526485-4643-69995998945224/AnsiballZ_os_server.py && sleep 0'\n<127.0.0.1> EXEC /bin/sh -c '/usr/bin/python3 /home/local/.ansible/tmp/ansible-tmp-1590085495.526485-4643-69995998945224/AnsiballZ_os_server.py && sleep 0'\n<127.0.0.1> EXEC /bin/sh -c 'rm -f -r /home/local/.ansible/tmp/ansible-tmp-1590085495.526485-4643-69995998945224/ > /dev/null 2>&1 && sleep 0'\nThe full traceback is:\n  File \"/tmp/ansible_os_server_payload_vtgmap1n/ansible_os_server_payload.zip/ansible/modules/cloud/openstack/os_server.py\", line 750, in main\n  File \"/tmp/ansible_os_server_payload_vtgmap1n/ansible_os_server_payload.zip/ansible/modules/cloud/openstack/os_server.py\", line 544, in _create_server\n  File \"<decorator-gen-4>\", line 2, in create_server\n  File \"/usr/local/lib/python3.6/dist-packages/openstack/cloud/_utils.py\", line 378, in func_wrapper\n    return func(*args, **kwargs)\n  File \"/usr/local/lib/python3.6/dist-packages/openstack/cloud/_compute.py\", line 935, in create_server\n    microversion=microversion))\n  File \"/usr/local/lib/python3.6/dist-packages/openstack/proxy.py\", line 543, in _json_response\n    exceptions.raise_from_response(response, error_message=error_message)\n  File \"/usr/local/lib/python3.6/dist-packages/openstack/exceptions.py\", line 236, in raise_from_response\n    http_status=http_status, request_id=request_id\nfailed: [localhost] (item=['esm03', 'master', '10.239.51.145']) => {\n    \"ansible_loop_var\": \"item\",\n    \"changed\": false,\n    \"extra_data\": null,\n    \"invocation\": {\n        \"module_args\": {\n            \"api_timeout\": null,\n            \"auth\": {\n                \"auth_url\": \"VALUE_SPECIFIED_IN_NO_LOG_PARAMETER\",\n                \"password\": \"VALUE_SPECIFIED_IN_NO_LOG_PARAMETER\",\n                \"project_name\": \"VALUE_SPECIFIED_IN_NO_LOG_PARAMETER\",\n                \"username\": \"VALUE_SPECIFIED_IN_NO_LOG_PARAMETER\"\n            },\n            \"auth_type\": null,\n            \"auto_ip\": true,\n            \"availability_zone\": \"nova\",\n            \"boot_from_volume\": false,\n            \"boot_volume\": null,\n            \"ca_cert\": null,\n            \"client_cert\": null,\n            \"client_key\": null,\n            \"config_drive\": false,\n            \"delete_fip\": false,\n            \"flavor\": \"h1.c8m8\",\n            \"flavor_include\": null,\n            \"flavor_ram\": null,\n            \"floating_ip_pools\": null,\n            \"floating_ips\": null,\n            \"image\": \"image_762_v1a\",\n            \"image_exclude\": \"(deprecated)\",\n            \"interface\": \"public\",\n            \"key_name\": \"pubkey20\",\n            \"meta\": {},\n            \"name\": \"esm03\",\n            \"network\": null,\n            \"nics\": [\n                {}\n            ],\n            \"region_name\": \"regionOne\",\n            \"reuse_ips\": true,\n            \"scheduler_hints\": null,\n            \"security_groups\": [\n                \"default\"\n            ],\n            \"state\": \"present\",\n            \"terminate_volume\": false,\n            \"timeout\": 180,\n            \"userdata\": null,\n            \"validate_certs\": null,\n            \"volume_size\": false,\n            \"volumes\": [],\n            \"wait\": true\n        }\n    },\n    \"item\": [\n        \"esm03\",\n        \"master\",\n        \"10.239.51.145\"\n    ],\n    \"msg\": \"BadRequestException: 400: Client Error for url: https://10.231.101.250:13774/v2.1/servers, Bad networks format: network uuid is not in proper format (4d43b98d-b848-4b05-8e05-d3f58f70390d,v4-fixed-ip=10.239.51.145)\"\n}\n```",
+    "title": "Unable to Assign fixed IP address to Openstack Instance using os_server",
+    "created_at": "2020-05-21T20:46:59+00:00",
+    "tags": [],
+    "updated_at": "2020-06-07T23:41:15+00:00",
+    "private": false,
+    "teams": [],
+    "is_bug": true,
+    "creator_id": 7035,
+    "story_type_id": 1,
+    "security": false,
+    "id": 2007705,
+    "users": []
+  }
+]
