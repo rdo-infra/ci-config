@@ -62,7 +62,7 @@
 - name: add configuration for the log rotation
   copy:
     content: |
-        /home/{{ promoter_user }}/promoter_logs/*.log {
+        /home/{{ promoter_user }}/{{ promoter_logs }}/*.log {
             daily
             missingok
             su {{ promoter_user }} {{ promoter_user }}
@@ -114,7 +114,7 @@
 
       <VirtualHost *:80>
           ServerAdmin rdo-ci-admins@redhat.com
-          DocumentRoot "/home/{{ promoter_user }}/promoter_logs"
+          DocumentRoot "/home/{{ promoter_user }}/{{ promoter_logs }}"
           ServerPath "/promoter_logs/"
           RewriteEngine On
           RewriteRule "^(/promoter_logs/.*)" "/home/{{ promoter_user }}/web$"
