@@ -23,7 +23,8 @@ class RegistriesClient(object):
     def __init__(self, config):
         self.config = config
         self.git_root = self.config.git_root
-        self.log_root = os.path.expanduser(self.config.log_root)
+        self.log_root = os.path.expanduser(
+            self.config.container_push_logfile)
         self.logfile = os.path.join(
             self.log_root,
             "%s.log" % datetime.datetime.now().strftime(
