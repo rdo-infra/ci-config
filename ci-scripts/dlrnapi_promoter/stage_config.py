@@ -2,6 +2,7 @@
 THis file contains classes that deal with configuration of the staging
 environment
 """
+import datetime
 import logging
 import os
 
@@ -21,6 +22,15 @@ class StageConfig(PromoterConfig):
                                         self['release'])
         log_file = os.path.join(self['stage_root'], log_name)
         return log_file
+
+    def _constructor_container_push_logfile(self):
+        container_push_logdir = os.path.expanduser(
+            self['container_push_logdir'])
+        container_push_logfile = os.path.join(
+            container_push_logdir,
+            "%s.log" % datetime.datetime.now().strftime(
+                "%Y%m%d-%H%M%S"))
+        return container_push_logfile
 
     def _constructor_components_mode(self):
         # If commits do not contain the component key or if it's None
