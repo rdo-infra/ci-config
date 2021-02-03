@@ -22,6 +22,15 @@ class StageConfig(PromoterConfig):
         log_file = os.path.join(self['stage_root'], log_name)
         return log_file
 
+    def _constructor_container_push_logdir(self):
+        self.log_root = os.path.expanduser(
+            self['container_push_logdir'])
+        container_push_logfile = os.path.join(
+            self.log_root,
+            "%s.log" % datetime.datetime.now().strftime(
+                "%Y%m%d-%H%M%S"))
+        return container_push_logfile
+
     def _constructor_components_mode(self):
         # If commits do not contain the component key or if it's None
         # We are in the single pipeline, otherwise we are in the integration
