@@ -32,7 +32,7 @@ def get_dlrn_client(config, component):
     if component is None:
         api_client = dlrnapi_client.ApiClient(host=config['api_url'])
     else:
-        api_client = dlrnapi_client.ApiClient(host=config['main']['api_url'])
+        api_client = dlrnapi_client.ApiClient(host=config['api_url'])
     return dlrnapi_client.DefaultApi(api_client=api_client)
 
 
@@ -48,7 +48,7 @@ def get_consistent(config, component=None):
     else:
         # TO-DO normalize component and intergration config
         response = requests.get(
-            config['main']['base_url'] + 'component/'
+            config['base_url'] + 'component/'
             + component + '/consistent/delorean.repo')
         if response.ok:
             consistent_date = response.headers['Last-Modified']
@@ -63,7 +63,7 @@ def get_url_promotion_details(config, promotion_data, component):
     # TO-DO, this doesn't make sense yet
     if component:
         response = requests.get(
-            config['main']['base_url'] + promotion + '/delorean.repo.md5')
+            config['base_url'] + promotion + '/delorean.repo.md5')
     else:
         response = requests.get(
             config['base_url'] + promotion + '/delorean.repo.md5')
@@ -77,7 +77,7 @@ def get_url_promotion_details(config, promotion_data, component):
         commit_hash = promotion_data['commit_hash']
         distro_hash = promotion_data['distro_hash']
         if component:
-            url = (config['main']['api_url']
+            url = (config['api_url']
                    + '/api/civotes_detail.html?commit_hash='
                    + commit_hash + '&'
                    + 'distro_hash=' + distro_hash)
