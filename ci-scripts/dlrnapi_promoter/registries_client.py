@@ -24,9 +24,10 @@ class RegistriesClient(object):
         self.config = config
         self.git_root = self.config.git_root
         self.log_root = os.path.expanduser(self.config.log_root)
+        os.mkdir(os.path.join(self.log_root, "container-push"))
         self.logfile = os.path.join(
             self.log_root,
-            "%s.log" % datetime.datetime.now().strftime(
+            "container-push/%s.log" % datetime.datetime.now().strftime(
                 "%Y%m%d-%H%M%S"))
         self.promote_playbook = os.path.join(self.git_root,
                                              'ci-scripts',
