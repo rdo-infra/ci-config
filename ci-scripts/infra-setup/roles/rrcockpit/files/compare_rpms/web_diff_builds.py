@@ -144,14 +144,14 @@ def result(diff_type, control_url, test_url, undercloud_only):
         full_package_diff = error
 
     result = ""
-    for k in full_package_diff.keys():
-        if len(full_package_diff[k]) == 0:
-            full_package_diff[k] = {'no_diff': [["No Diff Found",
+    for key in full_package_diff:
+        if len(full_package_diff[key]) == 0:
+            full_package_diff[key] = {'no_diff': [["No Diff Found",
                                                 "No Diff Found"],
                                                 ["No Diff Found",
                                                 "No Diff Found"]]}
         result += "<br>"
-        result += display_packages_table(k,
+        result += display_packages_table(key,
                                          column_list,
                                          full_package_diff[k],
                                          extra_package_data=False

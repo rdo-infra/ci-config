@@ -175,7 +175,16 @@
 #
 # Promoter preparation
 #
+
 - name: Create a virtualenv for the promoter script
+  become: true
+  become_user: "{{ promoter_user }}"
+  pip:
+    name: "pip>=19.1.1"
+    virtualenv: "/home/{{ promoter_user }}/{{ promoter_virtualenv }}"
+    virtualenv_command: "/usr/bin/python3 -m venv"
+
+- name: "Install requirements from requirements.txt"
   become: true
   become_user: "{{ promoter_user }}"
   pip:

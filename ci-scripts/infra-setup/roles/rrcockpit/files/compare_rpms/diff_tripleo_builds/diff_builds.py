@@ -809,14 +809,14 @@ def main(control_url,
     logging.info("\n\n **** RESULT **** \n\n")
     logging.info("Control URL: {}".format(control_url))
     logging.info("Test URL: {}".format(test_url))
-    for k in full_package_diff.keys():
-        if len(full_package_diff[k]) == 0:
-            full_package_diff[k] = {'no_diff': [["No Diff Found",
+    for key in full_package_diff:
+        if len(full_package_diff[key]) == 0:
+            full_package_diff[key] = {'no_diff': [["No Diff Found",
                                                 "No Diff Found"],
                                                 ["No Diff Found",
                                                 "No Diff Found"]]}
         diff_builds.display_packages_table(
-            k, column_list, full_package_diff[k])
+            key, column_list, full_package_diff[key])
 
 
 if __name__ == "__main__":
