@@ -28,6 +28,13 @@
 # While testing, we usually not provisioning a second disk for the server
 # So we emulate the second disk with a loopback device
 #
+
+    - name: Ensure recent version of pip is installed
+      become: true
+      pip:
+        name: "pip>=19.1.1"
+        virtualenv_command: "/usr/bin/python3 -m venv"
+
     - name: Setup local loop device as docker partition
       include_role:
         name: promoter
