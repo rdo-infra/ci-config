@@ -175,6 +175,14 @@
 #
 # Promoter preparation
 #
+
+- name: "Ensure recent version of pip is installed"
+  become: true
+  become_user: "{{ promoter_user }}"
+  pip:
+    name: "pip>=19.1.1"
+    virtualenv_command: "/usr/bin/python3 -m venv"
+
 - name: Create a virtualenv for the promoter script
   become: true
   become_user: "{{ promoter_user }}"
