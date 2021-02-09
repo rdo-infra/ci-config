@@ -50,7 +50,7 @@ class TestStoryBoard(unittest.TestCase):
     def test_invalid_storyboard_data(self):
         self.project_id = 0000
         self.story_status = 'inactive'
-        expected = []
+        expected = None
         result = storyboard.get_storyboard_data(
             self.host, self.project_id, self.story_status, self.limit)
         assert(expected == result)
