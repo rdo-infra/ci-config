@@ -45,7 +45,9 @@ def main():
                     dashboard['dashboard'].pop('id', None)
                     dashboard['dashboard'].pop('uid', None)
                     dashboard['dashboard'].pop('iteration', None)
-                    json.dump(dashboard, json_file, **json_options)
+                    text_b = json.dumps(dashboard, **json_options)
+                    text_b += "\n"
+                    json_file.write(text_b)
 
             datasources_list = json.loads(
                 requests.get("{}/api/datasources".format(args.host),
