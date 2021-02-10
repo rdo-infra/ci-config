@@ -4,7 +4,7 @@ import argparse
 import json
 
 import irc.bot
-import thread
+import _thread
 from flask import Flask, request
 from get_alerts import get_alerts
 
@@ -93,5 +93,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     irc_alert = GrafanaIRCAlertBot(args.grafana_host, args.grafana_key)
-    thread.start_new_thread(app.run, ())
+    _thread.start_new_thread(app.run, ())
     irc_alert.start()
