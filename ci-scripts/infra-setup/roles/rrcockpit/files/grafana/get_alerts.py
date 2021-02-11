@@ -16,11 +16,28 @@ def call_alerts_api(host, key, suffix):
 
 def get_alerts(host, key):
     alerts = []
-    for alert_meta in call_alerts_api(host, key, "?state=alerting"):
-        alert = call_alerts_api(host, key, "/{}".format(alert_meta['id']))
-        alert.update(alert_meta)
-        alerts.append(alert)
+    all_alerts = call_alerts_api(host, key, "?state=alerting")
+    if isinstance(all_alerts, list):
+        for alert_meta in all_alerts:
+            alert = call_alerts_api(host, key, "/{}".format(alert_meta['id']))
+            alert.update(alert_meta)
+            alerts.append(alert)
+    else:
+        message = str(all_alerts)
+        raise Exception(message)
     return alerts
+
+
+def post_alert_irc(server, port, alert):
+    url = "http://{}:{}".format(server, port)
+    this_alert = {}
+    this_alert['title'] = alert['name']
+    this_alert['message'] = alert['Message']
+    this_alert['state'] = 'alerting'
+    this_alert = json.dumps(this_alert)
+    req = requests.post(url, data=this_alert)
+    if req.status_code != 200:
+        raise Exception("Post to flask failed")
 
 
 def main():
@@ -35,6 +52,7 @@ def main():
 
     for alert in get_alerts(args.host, args.key):
         print(alert)
+        post_alert_irc("0.0.0.0", "5000", alert)
 
 
 if __name__ == '__main__':
