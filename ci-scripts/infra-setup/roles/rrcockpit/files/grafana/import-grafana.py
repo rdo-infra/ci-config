@@ -1,9 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 import argparse
 import glob
 import json
-
 import requests
 
 
