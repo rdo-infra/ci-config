@@ -17,9 +17,8 @@ if [ ! -f $api_key_path ]; then
     fi
 fi
 
+python3 import-grafana.py --host http://$host --key $api_key_path
 
-./import-grafana.py --host http://$host --key $api_key_path
-
-./grafana-alert-notification-server.py \
+python3 grafana-alert-notification-server.py \
                         --grafana-host http://$host \
                         --grafana-key $(cat $api_key_path)
