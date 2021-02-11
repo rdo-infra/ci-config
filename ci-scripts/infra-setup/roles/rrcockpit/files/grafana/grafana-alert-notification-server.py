@@ -1,40 +1,66 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
-import _thread
 import argparse
 import json
+import threading
+import time
 
 import irc.bot
 from flask import Flask, request
-from get_alerts import get_alerts
+from get_alerts import get_alerts, post_alert_irc
 
 app = Flask(__name__)
 
 
-class GrafanaIRCAlertBot(irc.bot.SingleServerIRCBot):
-    def __init__(self, grafana_host, grafana_key):
-        irc.bot.SingleServerIRCBot.__init__(
-            self, [('chat.freenode.net', 6667)], 'ruck-rover-alert',
-            'Openstack triplo ci alert bot')
-        self.channel = '#tripleo-ci'
-        self.grafana_host = grafana_host
-        self.grafana_key = grafana_key
+class ircThread(threading.Thread):
+    def __init__(self, irc_object):
+        threading.Thread.__init__(self)
+        self.name = "irc_bot"
+        self.irc = irc_object
 
-    def on_welcome(self, connection, event):
-        connection.join(self.channel)
+    def run(self):
+        print("Starting " + self.name)
+        self.irc.start()
+
+
+class getalertThread(threading.Thread):
+    def __init__(self, host, key, timeout):
+        threading.Thread.__init__(self)
+        self.name = "get_alerts"
+        self.host = host
+        self.key = key
+        self.timeout = int(timeout)
+
+    def run(self):
+        print("Starting " + self.name)
+        while True:
+            time.sleep(self.timeout)
+            for alert in get_alerts(self.host, self.key):
+                post_alert_irc("127.0.0.1", "5000", alert)
+
+
+class GrafanaIRCAlertBot(irc.bot.SingleServerIRCBot):
+    def __init__(self,
+                 channel,
+                 nickname,
+                 server,
+                 port=6667):
+        irc.bot.SingleServerIRCBot.__init__(self,
+                                            [(server, port)],
+                                            nickname,
+                                            nickname)
+        self.channel = channel
+
+    def on_welcome(self, c, e):
+        c.join(self.channel)
 
     def on_privmsg(self, c, e):
-        self.do_command(e, e.arguments[0])
+        pass
 
     def on_pubmsg(self, c, e):
-        line = e.arguments[0]
-        a = line.split(":", 1)
-        if len(a) <= 1:
-            a = line.split(",", 1)
-        if len(a) > 1 and irc.strings.lower(a[0]) == irc.strings.lower(
-                self.connection.get_nickname()):
-            self.do_command(e, a[1].strip())
-        return
+        # e.target, e.source, e.arguments, e.type
+        print(e.arguments)
+        c.privmsg(self.channel, "I'm a bot jim, not a person")
 
     def send_message(self, message):
         self.connection.privmsg(self.channel, message)
@@ -43,38 +69,6 @@ class GrafanaIRCAlertBot(irc.bot.SingleServerIRCBot):
         if alert['state'] != 'ok':
             self.send_message("[{title}] {message}".format(**alert))
 
-    def filter_alerts(self, alerts, command):
-        filtered_alerts = []
-
-        if len(command) <= 1:
-            filtered_alerts = alerts
-        else:
-            for alert in alerts:
-                filters = command[1:]
-                name = alert['name'].lower()
-                message = alert['Message'].lower()
-                if any(filter.lower() in name + message for filter in filters):
-                    filtered_alerts.append(alert)
-        return filtered_alerts
-
-    def do_command(self, e, cmd):
-        splitted_cmd = cmd.split()
-        action = splitted_cmd[0]
-        if action == "alerts":
-            alerts = self.filter_alerts(
-                get_alerts(self.grafana_host, self.grafana_key), splitted_cmd)
-            if alerts:
-                for alert in alerts:
-                    self.send_alert({
-                        'title': alert['name'],
-                        'message': alert['Message'],
-                        'state': 'alerting'
-                    })
-            else:
-                self.send_message("No alerts")
-        else:
-            self.send_message("Not understood: " + cmd)
-
 
 @app.route('/', methods=['POST'])
 def alert():
@@ -82,16 +76,32 @@ def alert():
     return "OK"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(
-        description="Export grafana as json files")
+    ap = argparse.ArgumentParser("IRC Bot")
+    ap.add_argument('--grafana-host', required=True)
+    ap.add_argument('--grafana-key', required=True)
+    ap.add_argument("--server", default="irc.freenode.net")
+    ap.add_argument("--port", type=int, default=6667)
+    ap.add_argument("--channel", default="#tripleo-ci")
+    ap.add_argument("--nickname", default="ruck-rover-alert")
+    ap.add_argument("--timeout", default=14400)
+    args = ap.parse_args()
 
-    parser.add_argument('--grafana-host', required=True)
-    parser.add_argument('--grafana-key', required=True)
+    irc_alert = GrafanaIRCAlertBot(args.channel,
+                                   args.nickname,
+                                   args.server,
+                                   args.port)
 
-    args = parser.parse_args()
+    irc_thread = ircThread(irc_alert)
+    irc_thread.start()
 
-    irc_alert = GrafanaIRCAlertBot(args.grafana_host, args.grafana_key)
-    _thread.start_new_thread(app.run, ())
-    irc_alert.start()
+    # timeout is how often we check and post alerts
+    # default is every 4 hours, 14400
+    cockpit_alerts = getalertThread(args.grafana_host,
+                                    args.grafana_key,
+                                    args.timeout)
+    cockpit_alerts.start()
+
+    # flask must be started last
+    app.run(host="127.0.0.1", port="5000", debug=True)
