@@ -25,6 +25,11 @@
       key: "{{ item.key }}"
     with_items: "{{ users }}"
 
+  - name: Ensure a recent version of pip is installed
+    pip:
+      name: "pip>=19.1.1"
+      virtualenv_command: "/usr/bin/python3 -m venv"
+
   - name: Allow 'tripleo' group to have passwordless sudo
     lineinfile:
       dest: /etc/sudoers
