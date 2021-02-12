@@ -40,6 +40,23 @@
         fstype: xfs
         dev: "{{ docker_partition }}"
 
+    - name: Read device information (always use unit when probing)
+      parted:
+        device: "{{ docker_partition }}"
+        unit: GiB
+      register: partition_info
+
+    - name: fail the play if the device size is less than 100 GB
+      fail:
+        msg: "The device size should be greater than 100 GB"
+      when:
+        - " partition_info.disk.size < 100 "
+        - not setup_staging | bool
+
+    - name: Check if device are already mounted
+      shell: df | grep "{{ docker_partition }}" | wc -l
+      register: mount_checked
+
     - name: create a mount folder
       file:
         path: /var/lib/docker
@@ -51,6 +68,7 @@
         src: "{{ docker_partition }}"
         fstype: xfs
         state: mounted
+      when: "{{ mount_checked.stdout }} == 0"
 
 - name: Configure docker
   become: true
