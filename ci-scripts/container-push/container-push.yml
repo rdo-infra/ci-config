@@ -86,6 +86,14 @@
             file: "/tmp/stage-info.yaml"
             name: stage_info
 
+        - name: "make sure tmp file root exists"
+          file:
+            path: "~/tmp_files"
+            state: directory
+            owner: "{{ stage_info.main.promoter_user }}"
+            group: "{{ stage_info.main.promoter_user }}"
+            mode: u=rwx,g=rwx,o=rwx
+
         - name: override source registry if running under test
           # Setting no_log as this can potentially expose passwords
           no_log: true
@@ -93,6 +101,21 @@
             source_registry: "{{ stage_info.registries.source }}"
             target_registries: "{{ stage_info.registries.targets }}"
             full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+            tmp_file_root: "~/tmp_files"
+
+    - name: "Check /tmp/zuul_vars.yaml file"
+      stat:
+        path: "/var/tmp/promoter_logs/zuul_vars.yaml"
+      register: zuul_vars_file
+
+    - name: "Include zuul vars if exists"
+      when: zuul_vars_file.stat.exists
+      block:
+        - name: "Include zuul vars"
+          no_log: true
+          include_vars:
+            file: "/var/tmp/promoter_logs/zuul_vars.yaml"
+            name: zuul
 
     # TODO(gcerami) assert that the hash associated to promote_name in dlrn is
     # different from full_hash. If that happens it means that promoted_name was
