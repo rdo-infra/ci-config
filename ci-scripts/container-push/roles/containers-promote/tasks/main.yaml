@@ -13,31 +13,52 @@
   set_fact:
     pushed_containers: []
 
+- name: "Check promoter log directory exists"
+  block:
+    - name: "Check promoter log dir exists"
+      stat:
+        path: "{{ tmp_file_root }}"
+      register: stat_tmp_file_root
+
+    - name: "Create promoter log dir"
+      file:
+        path: "{{ tmp_file_root }}"
+        state: directory
+      when: not stat_tmp_file_root.stat.exists
+
 - name: Truncate containers file
-  command: truncate -s 0 {{ containers_file }}
+  command: "truncate -s 0 {{ item }}"
+  with_items:
+    - "{{ tmp_file_root }}/{{ containers_file.split('/')[-1] }}"
+    - "{{ tmp_file_root }}/{{ missing_containers_file.split('/')[-1] }}"
+    - "{{ tmp_file_root }}/containers_pushed_list.txt"
+    - "{{ tmp_file_root }}/containers_missed_list.txt"
   changed_when: false
 
+- name: Copy container inspect script
+  template:
+    src: generate_list.sh.j2
+    dest: "{{ tmp_file_root }}/generate_list.sh"
+
 - name: Generate list of containers to push  # noqa 306
-  shell: |
-    echo -n "Checking {{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }} ... ";
-    docker manifest inspect \
-        --insecure "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}"
-    if [[ "$?" == "0" ]]; then
-        echo {{ item }} >> {{ containers_file }};
-        echo "OK";
-    else
-        echo "FAIL";
-        echo "ERROR ========== {{ container_name_prefix }}-{{ item }} does not exists on registry, Please check the latest tripleo-ci-testing hash! ==========";
-        exit 1
-    fi
-  loop: "{{ containers_list }}"
+  command: "bash {{ tmp_file_root }}/generate_list.sh"
   args:
     executable: /bin/bash
   changed_when: true
 
+- name: check for missing containers
+  stat:
+    path: "{{ tmp_file_root }}/{{ missing_containers_file }}"
+  register: missing_containers_stat
+
+- name: "Fail if there are missing containers"
+  fail:
+    msg: "There are missing containers"
+  when: missing_containers_stat.stat.size != 0
+
 - name: extract file stats
   stat:
-    path: "{{ containers_file }}"
+    path: "{{ tmp_file_root }}/{{ containers_file }}"
   register: containers_file_stat
 
 - name: Fail if containers list contains no images
@@ -48,15 +69,15 @@
 - name: append base images to containers list
   when: base_container_images|length > 0
   lineinfile:
-    path: "{{ containers_file }}"
-    line: "{{ item }}"
+    path: "{{ tmp_file_root }}/{{ containers_file }}"
+    line: "{{ container_name_prefix }}-{{ item }}"
   loop: "{{ base_container_images }}"
 
 - name: run container tagging and always cleanup at the end
   block:
     - name: Retrieve list of built images
       shell: >
-        cat {{ containers_file }}
+        cat {{ tmp_file_root }}/{{ containers_file }}
       register: built_images
       tags:
         - rdoproject_pull
@@ -98,7 +119,7 @@
 
         - name: Pull the images from source registry
           docker_image:
-            name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}"
+            name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ item }}"
             tag: "{{ full_hash }}"
             source: pull
           with_items: "{{ built_images.stdout_lines }}"
@@ -108,16 +129,15 @@
 
         - name: Tag images to source registry with named label
           shell: >
-            docker tag
-            {{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}
-            {{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ named_label }}
+            docker tag {{ source_registry.host }}/{{ source_registry.namespace }}/{{ item }}:{{ full_hash }}
+            {{ source_registry.host }}/{{ source_registry.namespace }}/{{ item }}:{{ named_label }}
           with_items: "{{ built_images.stdout_lines }}"
           tags:
             - rdoproject_push
 
         - name: Push images to source registry with named label
           shell: >
-            docker push {{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item  }}:{{ named_label  }}
+            docker push {{ source_registry.host }}/{{ source_registry.namespace }}/{{ item }}:{{ named_label }}
           with_items: "{{ built_images.stdout_lines }}"
           retries: 3
           tags:
@@ -138,6 +158,7 @@
         docker images --filter=reference='{{ source_registry.host }}/{{ source_registry.namespace }}/*:{{ named_label }}' \
         --format {% raw %}'{{ .Repository }}:{{ .Tag }}'{% endraw %}
       register: source_registry_images
+      no_log: 'yes'
 
     - name: Locally remove source registry images
       docker_image:

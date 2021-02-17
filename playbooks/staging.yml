@@ -3,6 +3,19 @@
 ---
 - hosts: all
   tasks:
+    - name: "Dump zuul variables to file"
+      when: zuul is defined
+      block:
+        - name: "Make sure /var/tmp/promoter_logs exists"
+          file:
+            path: "/var/tmp/promoter_logs"
+            state: directory
+
+        - name: "Dump zuul vars"
+          copy:
+            content: "{{ zuul | to_nice_json }}"
+            dest: "/var/tmp/promoter_logs/zuul_vars.yaml"
+
     - name: Include defaults from the role
       include_vars:
         file: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}/ci-scripts/infra-setup/roles/promoter/defaults/main.yml"  # noqa 204
@@ -39,6 +52,18 @@
         name: "{{ promoter_user }}"
         system: true
         create_home: true
+
+    - name: "Add passwordless sudo permission for {{ promoter_user }} user"
+      become: true
+      copy:
+        dest: "/etc/sudoers.d/{{ promoter_user }}"
+        content: "{{ promoter_user }} ALL=(ALL) NOPASSWD:ALL"
+        mode: 0440
+
+    - name: "Validate sudoers permissions update"
+      become: true
+      changed_when: false
+      command: "/usr/sbin/visudo -c"
 
     - name: Ensure credentials are created
       include_role:
