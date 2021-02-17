@@ -17,7 +17,7 @@
   block:
   - name: 'Pull any {{ ppc_tag }} tagged container images from {{ source_registry.host }} registry'
     docker_image:
-      name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}"
+      name: "{{ item }}"
       tag: "{{ full_hash }}_{{ ppc_tag }}"
       source: pull
     loop: "{{ built_images.stdout_lines }}"
@@ -36,10 +36,10 @@
 
   - name: 'Tag and push {{ ppc_tag }} container images to {{ registry.host }}'
     docker_image:
-      name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}"
+      name: "{{ item }}"
       tag: "{{ full_hash }}_{{ ppc_tag }}"
       source: local
-      repository: "{{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}"
+      repository: "{{ item }}"
       push: yes
     retries: 3
     loop: "{{ built_images.stdout_lines }}"
@@ -64,7 +64,7 @@
 
 - name: 'Pull {{ x86_tag }} tagged container images from {{ source_registry.host }}'
   docker_image:
-    name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}"
+    name: "{{ item }}"
     tag: "{{ full_hash }}_{{ x86_tag }}"
     source: pull
   loop: "{{ built_images.stdout_lines }}"
@@ -72,10 +72,10 @@
 
 - name: 'Tag and push {{ x86_tag }} container images to {{ registry.host }}'
   docker_image:
-    name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}"
+    name: "{{ item }}"
     tag: "{{ full_hash }}_{{ x86_tag }}"
     source: local
-    repository: "{{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}"
+    repository: "{{ item }}"
     push: yes
   retries: 3
   register: pushed_x86
@@ -95,16 +95,15 @@
 # First create manifest for those containers built both in x86 and ppc
 - name: 'Create manifests for containers with both {{ x86_tag }} {{ ppc_tag }}'
   shell: |
-    docker manifest create {{ manifest_extra_opts }} \
-    {{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}{{ manifest_tag }} \
-    {{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}_{{ x86_tag }} \
-    {{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}_{{ ppc_tag }}
+    docker manifest create {{ manifest_extra_opts }} {{ item }}:{{ full_hash }}{{ manifest_tag }} \
+    {{ item }}:{{ full_hash }}_{{ x86_tag }} \
+    {{ item }}:{{ full_hash }}_{{ ppc_tag }}
     docker manifest annotate --arch amd64 \
-    {{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}{{ manifest_tag }} \
-    {{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}_{{ x86_tag }}
+    {{ item }}:{{ full_hash }}{{ manifest_tag }} \
+    {{ item }}:{{ full_hash }}_{{ x86_tag }}
     docker manifest annotate --arch {{ ppc_tag }} \
-    {{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}{{ manifest_tag }} \
-    {{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}_{{ ppc_tag }}
+    {{ item }}:{{ full_hash }}{{ manifest_tag }} \
+    {{ item }}:{{ full_hash }}_{{ ppc_tag }}
   loop_control:
     index_var: index
   loop: "{{ built_images.stdout_lines }}"
@@ -116,11 +115,11 @@
 - name: 'Create manifests for {{ x86_tag }} only containers'
   shell: |
     docker manifest create {{ manifest_extra_opts }} \
-    {{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}{{ manifest_tag }} \
-    {{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}_{{ x86_tag }}
+    {{ item }}:{{ full_hash }}{{ manifest_tag }} \
+    {{ item }}:{{ full_hash }}_{{ x86_tag }}
     docker manifest annotate --arch amd64 \
-    {{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}{{ manifest_tag }} \
-    {{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}_{{ x86_tag }}
+    {{ item }}:{{ full_hash }}{{ manifest_tag }} \
+    {{ item }}:{{ full_hash }}_{{ x86_tag }}
   loop_control:
     index_var: index
   loop: "{{ built_images.stdout_lines }}"
@@ -130,7 +129,7 @@
 - name: 'Push container manifests to {{ registry.host }}'
   shell: >
     docker manifest push -p {{ manifest_extra_opts }}
-    {{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}{{ manifest_tag }}
+    {{ item }}:{{ full_hash }}{{ manifest_tag }}
   retries: 3
   with_items: "{{ built_images.stdout_lines }}"
   changed_when: true
@@ -138,7 +137,7 @@
 # Check that we pushed all the things correctly to {{ registry.host }}
 - name: 'Inspect manifests and {{ x86_tag }} containers in {{ registry.host }}'
   shell: |
-    docker manifest inspect --insecure {{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item.0 }}:{{ full_hash }}{{ item.1 }}
+    docker manifest inspect --insecure {{ item.0 }}:{{ full_hash }}{{ item.1 }}
   with_nested:
     - "{{ built_images.stdout_lines }}"
     - ["{{ manifest_tag }}", "_{{ x86_tag }}"]
@@ -147,8 +146,8 @@
 
 - name: 'Inspect manifests and {{ ppc_tag }} containers in {{ registry.host }}'
   shell: |
-    docker manifest inspect --insecure {{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}{{ manifest_tag }}
-    docker manifest inspect --insecure {{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}_{{ ppc_tag }}
+    docker manifest inspect --insecure {{ item }}:{{ full_hash }}{{ manifest_tag }}
+    docker manifest inspect --insecure {{ item }}:{{ full_hash }}_{{ ppc_tag }}
   loop: "{{ built_images.stdout_lines }}"
   loop_control:
     index_var: index

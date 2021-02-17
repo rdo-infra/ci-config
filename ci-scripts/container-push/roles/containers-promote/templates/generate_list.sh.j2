@@ -1,0 +1,22 @@
+c_list=(
+{% for item in containers_list %}
+'{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}'
+{% endfor %}
+)
+
+{% if zuul is defined %}
+    inspect_logs="{{ zuul.executor.work_root }}/inspect_logs.txt"
+{% else %}
+    inspect_logs="/tmp/inspect_logs.txt"
+{% endif %}
+
+for container in "${c_list[@]}"; do
+    echo "$container" >> $inspect_logs
+    docker manifest inspect --insecure "$container:{{ full_hash }}" >> $inspect_logs
+    res=$?
+    if [ $res -eq 0 ]; then
+        echo "$container" >> {{ containers_file }}
+    else
+        echo "$container" >> {{ missing_containers_file }}
+    fi
+done
