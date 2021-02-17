@@ -9,7 +9,14 @@ distro_version: "{{ lookup('env', 'DISTRO_VERSION') }}"
 release: "{{ lookup('env','RELEASE') }}"
 namespace: "tripleo{{ release }}"
 # This file is truncated at each rerun, so it's safe to put it in a non reantrant location (to be more accessible from other)
-containers_file: "/tmp/parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+tmp_file_root: >-
+  {% if zuul is defined %}
+  {{ zuul.executor.work_root }}
+  {% else %}
+  /tmp
+  {% endif %}
+containers_file: "{{ tmp_file_root.strip() }}/parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+missing_containers_file: "{{ tmp_file_root.strip() }}/missing_parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
 registry_hostname: trunk.registry.rdoproject.org
 registry_api: "https://{{ registry_hostname }}:8443/oapi/v1/namespaces/tripleo{{ release }}/imagestreamtags"
 source_namespace: "tripleo{{ release }}"
