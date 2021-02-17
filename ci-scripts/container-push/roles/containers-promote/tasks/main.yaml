@@ -17,13 +17,14 @@
   command: truncate -s 0 {{ containers_file }}
   changed_when: false
 
-- name: Generate list of containers to push  # noqa 306
+- name: Generate list of containers to push  # noqa 306 var-spacing
   shell: |
     echo -n "Checking {{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }} ... ";
     docker manifest inspect \
-        --insecure "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}"
+        --insecure "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}" >> /tmp/inspect_logs.txt
     if [[ "$?" == "0" ]]; then
         echo {{ item }} >> {{ containers_file }};
+        echo "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }} manifest exists."
         echo "OK";
     else
         echo "FAIL";
