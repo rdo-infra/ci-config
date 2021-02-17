@@ -16,6 +16,7 @@
     registry_host: docker.io
     enable_downstream: false
     use_quay: false
+    tmp_file_root: "/var/tmp/promoter_logs"
     target_registries:
       # There's no easy way to transparently override these hosts.
       # We would need to force their ip in /etc/hosts, but also reroute ports to
@@ -86,6 +87,16 @@
             file: "/tmp/stage-info.yaml"
             name: stage_info
 
+        - name: "make sure tmp file root exists"
+          become: true
+          become_user: "root"
+          file:
+            path: "{{ tmp_file_root }}"
+            state: directory
+            owner: "{{ stage_info.main.promoter_user }}"
+            group: "{{ stage_info.main.promoter_user }}"
+            mode: u=rwx,g=rwx,o=rwx
+
         - name: override source registry if running under test
           # Setting no_log as this can potentially expose passwords
           no_log: true
@@ -93,6 +104,7 @@
             source_registry: "{{ stage_info.registries.source }}"
             target_registries: "{{ stage_info.registries.targets }}"
             full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
+            tmp_file_root: "{{ tmp_file_root }}"
 
     # TODO(gcerami) assert that the hash associated to promote_name in dlrn is
     # different from full_hash. If that happens it means that promoted_name was
