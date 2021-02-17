@@ -5,6 +5,18 @@
     system: true
     create_home: true
 
+- name: "Add passwordless sudo permission for {{ promoter_user }} user"
+  become: true
+  copy:
+    dest: "/etc/sudoers.d/{{ promoter_user }}"
+    content: "{{ promoter_user }} ALL=(ALL) NOPASSWD:ALL"
+    mode: 0440
+
+- name: "Validate sudoers permissions update"
+  become: true
+  changed_when: false
+  command: "/usr/sbin/visudo -c"
+
 - name: Ensure credentials are created
   include_role:
     name: _ensure_credentials
