@@ -3,6 +3,11 @@
 ---
 - hosts: all
   tasks:
+    - name: "Dump zuul variables to file"
+      copy:
+        content: "{{ zuul | to_nice_json }}"
+        dest: "/tmp/zuul_vars.yml"
+
     - name: Include defaults from the role
       include_vars:
         file: "{{ zuul.executor.work_root }}/{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}/ci-scripts/infra-setup/roles/promoter/defaults/main.yml"  # noqa 204
