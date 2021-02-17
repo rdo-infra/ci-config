@@ -1,0 +1,17 @@
+c_list=(
+{% for item in containers_list %}
+'{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}'
+{% endfor %}
+)
+
+echo $c_list
+
+for container in "${c_list[@]}"; do
+    docker manifest inspect --insecure "$container" >> inspect_logs.txt
+    res=$?
+    if [ $res -eq 0 ]; then
+        echo "$container" >> {{ containers_file }}
+    else
+        echo "$container" >> {{ missing_containers_file }}
+    fi
+done

@@ -14,23 +14,19 @@
     pushed_containers: []
 
 - name: Truncate containers file
-  command: truncate -s 0 {{ containers_file }}
+  command: "truncate -s 0 {{ item }}"
+  with_items:
+    - "{{ containers_file }}"
+    - "{{ missing_containers_file }}"
   changed_when: false
 
+- name: Copy container inspect script
+  template:
+    src: generate_list.sh.j2
+    dest: /tmp/generate_list.sh
+
 - name: Generate list of containers to push  # noqa 306
-  shell: |
-    echo -n "Checking {{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }} ... ";
-    docker manifest inspect \
-        --insecure "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ full_hash }}"
-    if [[ "$?" == "0" ]]; then
-        echo {{ item }} >> {{ containers_file }};
-        echo "OK";
-    else
-        echo "FAIL";
-        echo "ERROR ========== {{ container_name_prefix }}-{{ item }} does not exists on registry, Please check the latest tripleo-ci-testing hash! ==========";
-        exit 1
-    fi
-  loop: "{{ containers_list }}"
+  shell: bash /tmp/generate_list.sh
   args:
     executable: /bin/bash
   changed_when: true
@@ -49,7 +45,7 @@
   when: base_container_images|length > 0
   lineinfile:
     path: "{{ containers_file }}"
-    line: "{{ item }}"
+    line: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}"
   loop: "{{ base_container_images }}"
 
 - name: run container tagging and always cleanup at the end
@@ -98,7 +94,7 @@
 
         - name: Pull the images from source registry
           docker_image:
-            name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}"
+            name: "{{ item }}"
             tag: "{{ full_hash }}"
             source: pull
           with_items: "{{ built_images.stdout_lines }}"
@@ -117,7 +113,7 @@
 
         - name: Push images to source registry with named label
           shell: >
-            docker push {{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item  }}:{{ named_label  }}
+            docker push {{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item }}:{{ named_label }}
           with_items: "{{ built_images.stdout_lines }}"
           retries: 3
           tags:
