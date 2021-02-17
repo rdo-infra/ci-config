@@ -55,9 +55,9 @@
 # Nested loop order here is on purpose, so we push first all the images with the full hash, then we tag with the named label.
 - name: Tag and push images to registry
   docker_image:
-    name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item[1] }}"
+    name: "{{ item[1] }}"
     tag: "{{ item[0] }}"
-    repository: "{{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item[1] }}"
+    repository: "{{ item[1] }}"
     push: yes
     source: local
     # This force-tag is absolutely needed, if image exists with this tag,
@@ -86,7 +86,7 @@
     tag={{ full_hash }}
     for image in $(cat {{ containers_file }})
     do
-        if docker manifest inspect --insecure "{{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-${image}:${tag}" 1>/dev/null;
+        if docker manifest inspect --insecure "${image}:${tag}" 1>/dev/null;
         then
             echo "$image OK";
         else
