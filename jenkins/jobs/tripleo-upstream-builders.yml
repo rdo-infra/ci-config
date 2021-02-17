@@ -29,7 +29,8 @@
             # Install greenlet from source to workaround https://github.com/pypa/manylinux/issues/687
             # greenlet is cloned in the build-containers builder below
             # TODO(mjturek): Remove workaround once fix is available
-            sed -i "/.*decorator/a \ \ - \"file://${CICO_USER_DIR}/src/python-greenlet/greenlet\"" ${WORKSPACE}/roles/build-containers/vars/centos-8.yml
+            sed -i "/source_items:/a \ \ - \"file://${CICO_USER_DIR}/src/python-greenlet/greenlet\"" ${WORKSPACE}/roles/build-containers/vars/centos-8.yml
+            sed -i "/tripleo_pip_projects:/a \ \ - \"file://${CICO_USER_DIR}/src/python-greenlet/greenlet\"" ${WORKSPACE}/roles/oooci-build-images/defaults/main.yaml
 
             # Mock prerequisite zuul vars so the container image build playbooks can run on jenkins
             cat <<EOF >> ${WORKSPACE}/roles/build-containers/vars/main.yaml
@@ -372,6 +373,15 @@
                   git:
                      repo: 'https://github.com/rdo-infra/ci-config.git'
                      dest: '${CICO_USER_DIR}/${RDO_CONFIG_DIR}'
+
+            - name: 'Clone other dependencies'
+              hosts: openstack_nodes
+              tasks:
+                - name: 'Clone greenlet 1.0.0 to workaround https://github.com/pypa/manylinux/issues/687'
+                  git:
+                     repo: 'https://github.com/python-greenlet/greenlet.git'
+                     dest: '${CICO_USER_DIR}/src/python-greenlet/greenlet'
+                     version: '1.0.0'
 
             - name: 'Pre-tasks for TripleO image builds'
               hosts: openstack_nodes
