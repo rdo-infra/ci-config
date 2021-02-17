@@ -13,7 +13,7 @@
 - block:
     - name: 'Production - Pull {{ ppc_pull_attempts }} random {{ ppc_tag }} tagged container images from {{ source_registry.host }} registry'
       docker_image:
-        name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ built_images.stdout_lines|random }}"
+        name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ built_images.stdout_lines|random }}"
         tag: "{{ full_hash }}_{{ ppc_tag }}"
         source: pull
       loop: "{{ range(0, ppc_pull_attempts)|list }}"
@@ -38,7 +38,7 @@
     # For testing we want to avoid the use of random in the containers we pull
     - name: 'Testing - Pull first {{ ppc_pull_attempts }} {{ ppc_tag }} tagged container images from {{ source_registry.host }} registry'
       docker_image:
-        name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ built_images.stdout_lines[index] }}"
+        name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ built_images.stdout_lines[index] }}"
         tag: "{{ full_hash }}_{{ ppc_tag }}"
         source: pull
       loop: "{{ range(0, ([stage_info.containers.images|length, ppc_pull_attempts]|min))|list }}"
