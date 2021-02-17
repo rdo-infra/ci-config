@@ -46,3 +46,8 @@
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         mode: "g-w,o-wx"
+
+    - name: "Dump zuul variables to file"
+      copy:
+        content: "{{ zuul | to_nice_json }}"
+        dest: "/var/tmp/promoter_logs/zuul_vars.yml"

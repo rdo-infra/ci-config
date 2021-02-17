@@ -55,6 +55,23 @@
             target_registries: "{{ stage_info.registries.targets }}"
             full_hash: "{{ stage_info.dlrn.promotions.promotion_candidate.full_hash }}"
 
+    - name: "Check /tmp/zuul_vars.yaml file"
+      stat:
+        path: "/var/tmp/promoter_logs/zuul_vars.yaml"
+      register: zuul_vars_file
+
+    - name: "Include zuul vars if exists"
+      when: zuul_vars_file.stat.exists
+      block:
+        - name: "Include zuul vars"
+          no_log: true
+          include_vars:
+            file: "/var/tmp/promoter_logs/zuul_vars.yaml"
+
+        - name: "Set facts"
+          no_log: true
+          set_fact:
+            tmp_file_root: "{{ zuul.executor.log_root }}"
     # TODO(gcerami) assert that the hash associated to promote_name in dlrn is
     # different from full_hash. If that happens it means that promoted_name was
     # promoted before pushing the containers, and it's an error
