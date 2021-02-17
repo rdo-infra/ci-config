@@ -55,9 +55,9 @@
 # Nested loop order here is on purpose, so we push first all the images with the full hash, then we tag with the named label.
 - name: Tag and push images to registry
   docker_image:
-    name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ container_name_prefix }}-{{ item[1] }}"
+    name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ item[1] }}"
     tag: "{{ item[0] }}"
-    repository: "{{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-{{ item[1] }}"
+    repository: "{{ registry.host }}/{{ registry.namespace }}/{{ item[1] }}"
     push: yes
     source: local
     # This force-tag is absolutely needed, if image exists with this tag,
@@ -81,24 +81,21 @@
     - "registry.schema|default('v2_s1') == 'v2_s2'"
 
 
-- name: Check if images were pushed
-  shell: |
-    tag={{ full_hash }}
-    for image in $(cat {{ containers_file }})
-    do
-        if docker manifest inspect --insecure "{{ registry.host }}/{{ registry.namespace }}/{{ container_name_prefix }}-${image}:${tag}" 1>/dev/null;
-        then
-            echo "$image OK";
-        else
-            echo "$image ERROR";
-        fi
-    done
-  register: command_result
-  failed_when: "'ERROR' in command_result.stdout or command_result.rc != 0"
-  retries: 1
-  changed_when: false
-  # manifest commands are only compatible with v2_s2 API schema
-  when: "registry.schema|default('v2_s1') == 'v2_s2'"
+- name: Check if images were pushed # noqa 301
+  vars:
+    containers_file: "{{- tmp_file_root -}}/containers_pushed_list.txt"
+    missing_containers_file: "{{- tmp_file_root -}}/containers_missed_list.txt"
+  command: "bash /{{- tmp_file_root -}}/generate_list.sh target {{ containers_file }} {{ missing_containers_file }}"
+
+- name: Check if images are not pushed
+  stat:
+    path: '{{- tmp_file_root -}}/containers_missed_list.txt'
+  register: missing_containers_stat
+
+- name: "Fail if there are missing containers"
+  fail:
+    msg: "There are missing containers"
+  when: missing_containers_stat.stat.exists | bool
 
 - name: Add pushed containers to the cleanup list
   set_fact:
