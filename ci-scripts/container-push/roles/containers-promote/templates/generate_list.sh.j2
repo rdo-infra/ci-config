@@ -1,0 +1,38 @@
+c_list=(
+{% for item in containers_list %}
+'{{ container_name_prefix }}-{{ item }}'
+{% endfor %}
+)
+
+{% for registry in target_registries %}
+target_registry='{{ registry.host }}/{{ registry.namespace }}'
+{% endfor %}
+source_registry='{{ source_registry.host }}/{{ source_registry.namespace }}'
+
+
+LOG_HOME="{{ tmp_file_root.strip() }}"
+
+if [ $# -eq 3 ]; then
+    containers_file=$1
+    missing_containers_file=$2
+    if [[ "$1" == "target" ]]; then
+        registry=$target_registry
+    else
+        registry=$source_registry
+    fi
+else
+    containers_file=$LOG_HOME/{{ containers_file.split("/")[-1] }}
+    missing_containers_file=$LOG_HOME/{{ missing_containers_file.split("/")[-1] }}
+    registry=$source_registry
+fi
+
+for container in "${c_list[@]}"; do
+    echo "$container" >> $LOG_HOME/inspect_logs.txt
+    docker manifest inspect --insecure "$registry/$container:{{ full_hash }}" >> $LOG_HOME/inspect_logs.txt
+    res=$?
+    if [ $res -eq 0 ]; then
+        echo "$container" >> $containers_file
+    else
+        echo "$container" >> $missing_containers_file
+    fi
+done
