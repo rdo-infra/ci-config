@@ -7,10 +7,10 @@
         state: directory
       delegate_to: localhost
 
-    - name: Copy files from /home/promoter_user on node
+    - name: Copy files from /tmp on node
       failed_when: false
       synchronize:
-        src: '/home/zuul/'
+        src: '{{ item }}'
         dest: '{{ zuul.executor.log_root }}/logs'
         mode: pull
         copy_links: true
@@ -24,3 +24,7 @@
           - --include=*.yaml
           - --include=*.log
           - --exclude=*
+      with_fileglob:
+        - '/tmp/stage-info.yaml'
+        - '/tmp/promoter-staging/containers/tripleo-common/*'
+        - '~/web/promoter_logs/*'
