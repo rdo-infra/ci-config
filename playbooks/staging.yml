@@ -115,3 +115,14 @@
       loop: "{{ stage_info.registries.targets | map(attribute='password') | list }}"
       loop_control:
         loop_var: password
+
+    - name: 'Copy staging logs to {{ promoter_user }} home directory'
+      become: true
+      become_user: "{{ promoter_user }}"
+      copy:
+        src: "{{ item }}"
+        dest: "/home/{{ promoter_user }}"
+      with_fileglob:
+        - '/tmp/stage-info.yaml'
+        - '/tmp/promoter-staging/containers/tripleo-common/*'
+        - '~/web/promoter_logs/*'
