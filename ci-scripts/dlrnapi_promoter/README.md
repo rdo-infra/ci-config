@@ -1,79 +1,117 @@
-DLRN API Promoter
-=================
+Promoter Server
+===============
 
-This script takes a config file and tries to promote an existing DLRN link to a
-new one in case all the defined jobs posted a successful result for the current
-link.
+## Installation
 
-For more information about the DLRN API, see
-[dlrnapi_client](https://github.com/softwarefactory-project/dlrnapi_client/).
+- Requirements:
+  - CentOS-8 box
+  - 100GB storage
 
-Configuration
--------------
+- Promoter server can be installed using Ansible playbooks. Promoter server can be deployed using different roles as per
+  user need.
 
-Set the following variables in the `[main]` section:
+Ansible Roles
+  - base: This role will create users and groups.
+  - dns: Configure and run dnsmsq service.
+  - promoter: This role will deploy promoter server.
+  - sova:
+  - rcockpit:
+  - incockpit:
 
-* `api_url` -- The full URL for the DLRN API
-* `username` -- The username to access the DLRN API. The password is taken from
-  the `DLRNAPI_PASSWORD` environment variable to avoid exposing it in the logs.
-* `dry_run` -- When true, skip promotion even if all the promotion requirements
-  are satisfied.
-* `log_file` -- The path for a file where the script logs its activities.
+- To install and configure:
+  ```shell
+  ansible-playbook ci-config/ci-scripts/infra-setup/servers_setup.yaml
+  ```
+  It will configure box to run promoter server.
 
-`[promote_from]` section:
+## Configuration
 
-List of the intended promotion names (on the left) and the link to promote
-from (on the right). This allows to build out multiple chains of promotions
-easily.
+- Promoter server configuration is specified with a yaml file. An example configuration is given below:
+  ```yaml
+  ---
+  release: ussuri
+  api_url: https://trunk.rdoproject.org/api-centos8-ussuri
+  base_url: https://trunk.rdoproject.org/centos8-ussuri/
+  distro_name: centos
+  distro_version: 8
+  dlrn_api_host: "trunk.rdoproject.org"
+  # dlrn_api_endpoint: "centos8-ussuri"
+  dlrn_api_scheme: "https"
+  dlrn_api_port: ""
+  promotions:
+    current-tripleo:
+      candidate_label: tripleo-ci-testing
+      criteria:
+        # Jobs to be added as they are defined and qualified
+        # - periodic-tripleo-centos-8-ussuri-containers-build-push
+        - periodic-tripleo-centos-8-buildimage-overcloud-full-ussuri
+        - periodic-tripleo-centos-8-buildimage-ironic-python-agent-ussuri
+        - periodic-tripleo-ci-centos-8-standalone-ussuri
+        - periodic-tripleo-ci-centos-8-scenario001-standalone-ussuri
+        - periodic-tripleo-ci-centos-8-scenario002-standalone-ussuri
+        - periodic-tripleo-ci-centos-8-scenario003-standalone-ussuri
 
-Create pairs as `promotion_link_name: current_link_name`. The script will try
-to check the successfully finished jobs of `current_link_name` and if all the
-listed jobs from the `[promotion_link_name]` section (see below) are present,
-it will promote the repository as `promotion_link_name`.
+  current-tripleo-rdo:
+      candidate_label: current-tripleo
+      criteria:
+        # Not ready for CentOS8 yet, uncomment once ready
+        - tripleo-quickstart-promote-ussuri-current-tripleo-delorean-minimal
+        - weirdo-ussuri-promote-packstack-scenario001
+        - weirdo-ussuri-promote-packstack-scenario002
+        - weirdo-ussuri-promote-packstack-scenario003
+  ```
 
-Tip: It is easy to disable a specific promotion step by commenting out a line
-here, the promotion requirements can stay in the file.
+- `release`:  Release
+- `api_url`: DLRN api url
+- `base_url`: DLRN base url
+- `distro_name`: Distribution which you are using
+- `distro_version`: Distribution version, like 7, 8, 9 etc.
+- `dlrn_api_host`: Hostname where DLRN is hosted (optional if base_url is specified)
+- `dlrn_api_endpoint`: DLRN endpoint (optional if base_url is speificed)
+- `dlrn_api_scheme`: DLRN scheme (‘http/https’) (optional if base_url is specified)
+- `dlrn_api_port`: DLRN host port (optional if base_url is specified)
+- `promotions`: This section will define promotion source, target and criteria
+  - `current-tripleo`: Target name.
+  - `candidate-label`: Source label, this will be promotion candidate.
+  - `criteria`: This will be Zuul jobs list. DLRN promoter server will check all the jobs which got passed against candidate hash.
 
-Example:
+Configuration files by default live in the `ci-config/ci-script/dlrnapi_promoter/config_environments/rdo/CentOS-8/`.  Promoter server will access those files and proceed with the promotion. Default file location can be changed in `ci-scripts/dlrnapio_promoter/config_environments/global_defaults.yaml`
 
-    [promote_from]
-    phase1-link: newest-but-unstable-link
-    phase2-link: phase1-link
-    alternative-phase2-link: phase-1-link
-    phase3-link: phase2-link
+Some default values for the promoter server can be added to the defaults.yaml under rdo directory.
 
-`[promotion_link_name]` section:
+## Promotions
 
-A list of job IDs that need to successfully complete before the link can be
-promoted as `promotion_link_name`. The source is defined in the `[promote_from]`
-section.
+- TripleO promotion server has 3 promotion tasks
+  - DLRN Promotion
+  - Container promotion
+  - Qcow promotion
 
-Example:
 
-    [phase1-link]
-    promotion-job-for-phase1-featureset001
-    promotion-job-for-phase1-featureset002
 
-    [phase2-link]
-    promotion-job-for-phase2-featureset001-baremetal
-    promotion-job-for-phase2-featureset002-baremetal
-    promotion-job-for-phase2-featureset003-baremetal
+- DLRN promotion
 
-Installation
-------------
+  DLRN promotion can promote only dlrn packages. All the clients can be enabled by adding in the defaults.yaml or can be enabled passing parameter to the dlrnapi_promoter.py command.
 
-Create a virtualenv to run the script and install the requirements before the
-first run:
+```shell
+$ python3 dlrnapi_promoter.py --release-config CentOS-8/master.yaml \
+  force-promote --allowed-client dlrn_client
+```
 
-    virtualenv /tmp/dlrnapi_promoter
-    source /tmp/dlrnapi_promoter/bin/activate
-    pip install -r requirements.txt
+- Container promotion
 
-Running
--------
+Container promotion promote containers from source registry to target registry. Source and target registry can be same or different. For example, promoting tripleo-ci-testing to current-tripleo for the RDO registry, or pushing the new current-tripleo from rdo to quay.io.
+During container promotion containers can be pulled from source registry tagged with latest hash and promotion target name.
 
-It's recommended to run the script with various release configurations
-periodically from crontab, specifying the config file as the first argument of
-the script:
+```shell
+$ python3 dlrnapi_promoter.py --release-confing CentOS-8/master.yaml \
+  force-promote --allowed-client registry_client
+```
 
-    python dlrnapi_promoter.py --config-file config/master.ini promote-all
+- QCow Promotion
+
+  QCow promotion will promote QCow images. It will upload the images to the image server.
+
+```shell
+$ python3 dlrnapi_promoter --release-config CentOS-8/master.yaml \
+  force-promote --allowed-client qcow_client
+```
