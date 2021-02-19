@@ -143,7 +143,8 @@ class RepoClient(object):
                 # - image_source: tripleo
                 #   imagename: quay.io/tripleo/openstack-base:current-tripleo
 
-                if self.release in ["queens", "rocky", "stein", "train"]:
+                if self.release in ["queens", "rocky", "stein",
+                                    "train", "ussuri"]:
                     if self.container_preffix != "centos-binary-":
                         self.container_preffix = "centos-binary-"
                     full_list = [
