@@ -133,7 +133,8 @@ def main(cmd_line=None):
 
     config = config_builder("staging", release_config,
                             validate=None)
-
+    # Export dlrn password
+    os.environ['DLRNAPI_PASSWORD'] = config.dlrn['server']['password']
     staged_env = StageOrchestrator(config)
     args.handler(staged_env)
 
