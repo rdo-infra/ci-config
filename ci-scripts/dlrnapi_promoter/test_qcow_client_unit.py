@@ -125,7 +125,7 @@ class TestQcowClient(ConfigSetup):
     def tearDown(self):
         super(TestQcowClient, self).tearDown()
         os.chdir("/")
-        shutil.rmtree(os.path.join(self.config.stage_root,
+        shutil.rmtree(os.path.join(self.config.image_dir,
                                    self.images_root))
 
 
