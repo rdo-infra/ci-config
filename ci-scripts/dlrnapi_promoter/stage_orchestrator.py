@@ -37,6 +37,7 @@ class StageOrchestrator(object):
         self.stage_root = self.config['stage_root']
         self.dry_run = self.config['dry_run']
         self.stage_info_path = self.config['stage_info_path']
+        import pdb; pdb.set_trace()
 
         self.scenes_controllers = {
             'dlrn': DlrnStagingServer(self.config),
