@@ -13,17 +13,21 @@ repo_url: "https://{{ dlrn_api_host }}/{{ distro }}-{{ release }}"
 log_root: "~/web/"
 log_file: "~/web/promoter_logs/{{ distro }}_{{ release }}.log"
 container_push_logfile: "~/web/promoter_logs/container-push/"
-stage_root: /tmp/promoter/
+stage_root: /var/www/html/
 overcloud_images:
   qcow_servers:
-    local:
-      user: "promoter"
-      host: localhost
-      root: overcloud_images/
-      key: "sample_key"
+    promoter:
+      user: "uploader"
+      host: "images.rdoproject.org"
+      root: images/
       client: "sftp"
-      keypath: "~/.ssh/id_rsa"
-default_qcow_server: local
+      keypath: "~/.ssh/id_rsa_uploader"
+  qcow_images:
+    - ironic-python-agent.tar
+    - ironic-python-agent.tar.md5
+    - overcloud-full.tar
+    - overcloud-full.tar.md5
+default_qcow_server: promoter
 
 containers:
   containers_list_base_url: "https://opendev.org/openstack/tripleo-common/raw/commit/"
