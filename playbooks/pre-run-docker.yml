@@ -46,3 +46,6 @@
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         mode: "g-w,o-wx"
+
+    - name: 'Add {{ ansible_user }} user ssh key to authorized_key' # noqa 301
+      command: "cat /home/{{ ansible_user }}/.ssh/id_rsa.pub > /home/{{ ansible_user }}/.ssh/authorized_keys"
