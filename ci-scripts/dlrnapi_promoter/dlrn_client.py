@@ -69,7 +69,8 @@ class DlrnClient(object):
         """
         self.config = config
         # TODO(gcerami): fix credentials gathering
-        if isinstance(self.config, PromoterConfig):
+        self.log.debug("Config------------------------------- %s", self.config)
+        if isinstance(self.config, StageConfig):
             dlrnapi_client.configuration.password = self.config.dlrn[
                 'server']['password']
         else:

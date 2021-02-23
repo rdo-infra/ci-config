@@ -18,7 +18,7 @@ class QcowConnectionClient(object):
 
     def __init__(self, server_conf):
         self._host = server_conf['host']
-        self._user = os.environ.get("USER")
+        self._user = server_conf['user']
         self._client_type = server_conf['client']
         self._keypath = server_conf['keypath']
         self._client = os
@@ -70,13 +70,14 @@ class QcowClient(object):
         self.distro_version = self.config.distro_version
         self.rollback_links = {}
         server_conf = self.config.overcloud_images.get('qcow_servers')
-        self.user = server_conf['local']['user']
-        self.root = server_conf['local']['root']
-        self.host = server_conf['local']['host']
+        qcow_server = self.config.default_qcow_server
+        self.user = server_conf[qcow_server]['user']
+        self.root = server_conf[qcow_server]['root']
+        self.host = server_conf[qcow_server]['host']
 
-        self.client = QcowConnectionClient(server_conf['local'])
+        self.client = QcowConnectionClient(server_conf[qcow_server])
         self.images_dir = os.path.join(
-            os.path.join(config.stage_root, self.root),
+            os.path.join(config.image_dir, self.root),
             config.distro, config.release, "rdo_trunk")
 
     def validate_qcows(self, dlrn_hash, name=None, assume_valid=False):
