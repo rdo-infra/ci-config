@@ -314,7 +314,7 @@ class DlrnStagingServer(object):
         self.host = self.config.dlrn['server']['host']
         self.port = self.config.dlrn['server']['port']
         self.username = self.config.dlrn['server']['username']
-        self.password = self.config.dlrn['server']['password']
+        self.password = self.config.dlrnauth_password
         self.api_url = 'http://{}:{}'.format(self.host, self.port)
 
         # Client
