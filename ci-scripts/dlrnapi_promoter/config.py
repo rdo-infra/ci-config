@@ -310,6 +310,9 @@ class PromoterConfig(ConfigCore):
         return self['overcloud_images']['qcow_servers'][
             self.default_qcow_server]
 
+    def _constructor_image_dir(self):
+        return self['image_dir']
+
     def _constructor_promoter_user(self):
         return os.environ.get('USER', None)
 
