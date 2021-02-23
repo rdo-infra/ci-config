@@ -90,12 +90,13 @@ def staged_env(request):
     with open(stage_info_path, "r") as stage_info_file:
         stage_info = yaml.safe_load(stage_info_file)
 
+    self.log.debug('Stage info ===================%s', stage_info)
     overrides = {
         'log_file': stage_info['main']['log_file'],
         'repo_url': stage_info['dlrn']['server']['repo_url'],
         'log_level': 'DEBUG',
         'experimental': experimental,
-        'default_qcow_server': 'staging',
+        'default_qcow_server': 'local',
         'config_file': release_config,
     }
     if "containers_" in test_case:
