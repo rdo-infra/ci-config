@@ -70,11 +70,12 @@ class QcowClient(object):
         self.distro_version = self.config.distro_version
         self.rollback_links = {}
         server_conf = self.config.overcloud_images.get('qcow_servers')
-        self.user = server_conf['local']['user']
-        self.root = server_conf['local']['root']
-        self.host = server_conf['local']['host']
+        qcow_server = self.config.default_qcow_server
+        self.user = server_conf[qcow_server]['user']
+        self.root = server_conf[qcow_server]['root']
+        self.host = server_conf[qcow_server]['host']
 
-        self.client = QcowConnectionClient(server_conf['local'])
+        self.client = QcowConnectionClient(server_conf[qcow_server])
         self.images_dir = os.path.join(
             os.path.join(config.stage_root, self.root),
             config.distro, config.release, "rdo_trunk")
