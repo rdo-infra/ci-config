@@ -123,3 +123,11 @@
         src: "/home/{{ promoter_user }}/{{ promoter_logs }}/"
         dest: "/var/tmp/promoter_logs"
         remote_src: yes
+
+    - name: 'Add promoter user ssh key to authorized_key' # noqa 207
+      become: true
+      become_user: "{{ promoter_user }}"
+      authorized_key:
+        user: "{{ promoter_user }}"
+        state: present
+        key: "{{ lookup('file', '/home/{{ promoter_user }}/.ssh/id_rsa.pub') }}"
