@@ -46,3 +46,9 @@
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         mode: "g-w,o-wx"
+
+    - name: 'Add {{ ansible_user }} user ssh key to authorized_key' # noqa 207
+      authorized_key:
+        user: "{{ ansible_user }}"
+        state: present
+        key: "{{ lookup('file', '/home/{{ ansibleOA_user }}/.ssh/id_rsa.pub') }}"
