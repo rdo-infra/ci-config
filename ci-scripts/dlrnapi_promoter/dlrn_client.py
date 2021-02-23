@@ -69,12 +69,7 @@ class DlrnClient(object):
         """
         self.config = config
         # TODO(gcerami): fix credentials gathering
-        if isinstance(self.config, PromoterConfig):
-            dlrnapi_client.configuration.password = self.config.dlrn[
-                'server']['password']
-        else:
-            dlrnapi_client.configuration.password = \
-                self.config.dlrnauth_password
+        dlrnapi_client.configuration.password = self.config.dlrnauth_password
         dlrnapi_client.configuration.username = self.config.dlrnauth_username
         api_client = dlrnapi_client.ApiClient(host=self.config.api_url)
         self.api_instance = dlrnapi_client.DefaultApi(api_client=api_client)

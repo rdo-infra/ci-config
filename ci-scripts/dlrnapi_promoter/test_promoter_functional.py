@@ -95,7 +95,7 @@ def staged_env(request):
         'repo_url': stage_info['dlrn']['server']['repo_url'],
         'log_level': 'DEBUG',
         'experimental': experimental,
-        'default_qcow_server': 'staging',
+        'default_qcow_server': stage_info['default_qcow_server'],
         'config_file': release_config,
     }
     if "containers_" in test_case:
