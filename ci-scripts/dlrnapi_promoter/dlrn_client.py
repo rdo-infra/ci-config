@@ -12,7 +12,6 @@ import tempfile
 
 import dlrnapi_client
 import yaml
-from config import PromoterConfig
 from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
 
 try:
@@ -23,6 +22,7 @@ try:
 except ImportError:
     # Python 2 imports
     import ConfigParser as ini_parser  # noqa N813
+
     JSONDecodeError = ValueError
     import urllib2 as url
 
@@ -69,12 +69,7 @@ class DlrnClient(object):
         """
         self.config = config
         # TODO(gcerami): fix credentials gathering
-        if isinstance(self.config, PromoterConfig):
-            dlrnapi_client.configuration.password = self.config.dlrn[
-                'server']['password']
-        else:
-            dlrnapi_client.configuration.password = \
-                self.config.dlrnauth_password
+        dlrnapi_client.configuration.password = self.config.dlrnauth_password
         dlrnapi_client.configuration.username = self.config.dlrnauth_username
         api_client = dlrnapi_client.ApiClient(host=self.config.api_url)
         self.api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
@@ -198,7 +193,7 @@ class DlrnClient(object):
                 self.log.debug("%s passed on %s, logs at '%s'"
                                "", job.job_id,
                                datetime.datetime.fromtimestamp(
-                                    job.timestamp).isoformat(),
+                                   job.timestamp).isoformat(),
                                job.url)
         else:
             self.log.debug("No successful jobs for hash %s"
@@ -383,7 +378,7 @@ class DlrnClient(object):
         try:
             # FIXME: in python2 urlopen is not a context manager
             with contextlib.closing(
-                url.urlopen(commit_url)
+                    url.urlopen(commit_url)
             ) as commits_yaml:
                 commits = yaml.safe_load(commits_yaml.read().decode("UTF-8"))
         # FIXME(gcerami) it is very difficult to make urlopen generate
@@ -434,7 +429,7 @@ class DlrnClient(object):
         try:
             # FIXME: in python2 urlopen is not a context manager
             with contextlib.closing(
-                url.urlopen(candidate_url)
+                    url.urlopen(candidate_url)
             ) as remote_repo_content:
                 # FIXME: in python2 configparser can read a config only from
                 #  a file or a file-like obj. But python3 need the file
