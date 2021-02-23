@@ -134,6 +134,7 @@ class Promoter(object):
             client = getattr(self, client_name)
             self.dlrn_client.check_named_hashes_unchanged()
             try:
+                self.log.debug('Client: %s started', client_name)
                 client.promote(candidate_hash, target_label,
                                candidate_label=candidate_label)
                 self.log.debug(
