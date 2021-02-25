@@ -21,6 +21,20 @@
                 !include-raw:
                     - scripts/tripleo-upstream-collect-logs.sh
 
+
+- publisher:
+    name: 'tripleo-upstream-images-upload'
+    publishers:
+        - post-tasks:
+            - matches:
+                - log-text: Image build succeeded
+                script: |
+              run-if-job-successful: true
+              script: |
+                pushd $WORKSPACE/ci-config/jenkins/jobs
+                  bash -ex scripts/tripleo-upstream-image-upload.sh
+                popd
+
 - publisher:
     name: 'tripleo-upstream-dlrn-report'
     publishers:
