@@ -52,6 +52,7 @@ class RepoSetup(unittest.TestCase):
         containers_list_exclude_config_path = os.path.join(self.temp_dir,
                                                            "exclude_file.yaml")
         config = type("Config", (), {
+            'distro': 'centos8',
             'repo_url': repo_url,
             'release': 'master',
             'containers': {
