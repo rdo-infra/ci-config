@@ -43,8 +43,15 @@ class RepoClient(object):
         :return: A csv reader (None in case of error)
         """
 
-        versions_url = ("{}/{}/versions.csv"
-                        "".format(self.root_url, dlrn_hash.commit_dir))
+        if self.config.distro in ['centos7']:
+            # NOTE: Newer dlrn version support dlrn hash url inside candidate
+            # label.
+            commit_dir = "/".join(dlrn_hash.commit_dir.split("/")[1:])
+            versions_url = ("{}/{}/versions.csv".format(self.root_url,
+                                                        commit_dir))
+        else:
+            versions_url = ("{}/{}/versions.csv"
+                            "".format(self.root_url, dlrn_hash.commit_dir))
         self.log.debug("Accessing versions at %s", versions_url)
         try:
             versions_content = url.urlopen(versions_url).read()
