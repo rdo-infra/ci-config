@@ -270,18 +270,25 @@ class TestGetVersionsCsv(RepoSetup):
                                   mock_log_debug,
                                   mock_log_error,
                                   mock_log_exception):
-        out_versions_csv_reader = \
-            self.client.get_versions_csv(self.dlrn_hash_commitdistro2,
-                                         candidate_label="tripleo-ci-testing")
+        url1 = 'file://' + os.path.join(
+            self.versions_csv_dir,
+            "/".join(self.dlrn_hash_commitdistro2.commit_dir.split("/")[1:]),
+            'versions.csv')
+        url2 = 'file://' + os.path.join(
+            self.versions_csv_dir,
+            self.dlrn_hash_commitdistro2.commit_dir,
+            'versions.csv')
+        with self.assertRaises(ValueError):
+            out_versions_csv_reader = self.client.get_versions_csv(
+                self.dlrn_hash_commitdistro2,
+                candidate_label="tripleo-ci-testing")
 
-        self.assertEqual(out_versions_csv_reader, None)
-        mock_log_debug.assert_has_calls([
-            mock.call("Accessing versions at %s", mock.ANY)
-        ])
+            self.assertEqual(out_versions_csv_reader, None)
         mock_log_error.assert_has_calls([
-            mock.call("Error downloading versions.csv file at %s", mock.ANY)
+            mock.call("Not valid url: {}".format(url1)),
+            mock.call("Not valid url: {}".format(url2))
         ])
-        self.assertTrue(mock_log_exception.called)
+        self.assertFalse(mock_log_exception.called)
 
 
 class TestGetContainersList(RepoSetup):
