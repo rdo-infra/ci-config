@@ -422,8 +422,23 @@ class DlrnClient(object):
 
         # Aggregate promotion step 1: download the full delorean repo
         # and save it locally for parsing
-        candidate_url = ("{}/{}/delorean.repo"
-                         "".format(self.config.repo_url, dlrn_hash.commit_dir))
+
+        # NOTE: Newer dlrn version support dlrn hash url inside candidate
+        # label.
+        commit_dir = "/".join(dlrn_hash.commit_dir.split("/")[1:])
+        candidate_url = ""
+        candidate_url1 = os.path.join(self.config.repo_url, commit_dir,
+                                      "delorean.repo")
+        candidate_url2 = os.path.join(self.config.repo_url,
+                                      dlrn_hash.commit_dir, "delorean.repo")
+        for r_path in [candidate_url1, candidate_url2]:
+            try:
+                url.urlopen(r_path)
+                candidate_url = r_path
+                break
+            except (url.HTTPError, url.URLError):
+                self.log.error("Not valid url: {}".format(r_path))
+
         self.log.debug("Dlrn promote '%s': URL for candidate label repo: %s",
                        dlrn_hash, candidate_url)
         try:
