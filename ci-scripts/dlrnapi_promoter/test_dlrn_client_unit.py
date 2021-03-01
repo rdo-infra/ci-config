@@ -583,7 +583,7 @@ class TestGetHashes(DlrnSetup):
                       mock.ANY, ', '.join(['delorean-component1',
                                            'delorean-component2'])),
         ])
-        self.assertFalse(mock_log_error.called)
+        self.assertTrue(mock_log_error.called)
         shutil.rmtree(tmp_dir)
 
     @patch('logging.Logger.error')
@@ -615,18 +615,16 @@ class TestGetHashes(DlrnSetup):
                                                get_hash_mock,
                                                mock_log_error):
         self.config.repo_url = "file:///not.exist"
-        with self.assertRaises(PromotionError):
+        with self.assertRaises(ValueError):
             self.client.get_promotion_aggregate_hashes("",
                                                        self.dlrn_hash_aggregate,
                                                        'tripleo-ci-testing',
                                                        'current-tripleo')
-        self.assertFalse(get_hash_mock.called)
-        mock_log_error.assert_has_calls([
-            mock.call("Dlrn Promote: Error downloading delorean repo at %s",
-                      mock.ANY),
-            mock.call("------- -------- Promoter aborted")
-        ])
-        self.assertEqual(mock_log_error.call_count, 2)
+            self.assertFalse(get_hash_mock.called)
+            mock_log_error.assert_has_calls([
+                mock.call("Not valid url: %s", mock.ANY),
+            ])
+            self.assertEqual(mock_log_error.call_count, 2)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')

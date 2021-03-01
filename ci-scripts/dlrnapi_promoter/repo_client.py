@@ -43,8 +43,22 @@ class RepoClient(object):
         :return: A csv reader (None in case of error)
         """
 
-        versions_url = ("{}/{}/versions.csv"
-                        "".format(self.root_url, dlrn_hash.commit_dir))
+        # NOTE: For c7, we get the version.csv using commit_hash and for
+        # c8 we are geting version.csv using aggregate hash.
+
+        commit_dir = "/".join(dlrn_hash.commit_dir.split("/")[1:])
+        versions_url = ""
+        versions_url1 = os.path.join(self.config.repo_url, commit_dir,
+                                     "versions.csv")
+        versions_url2 = os.path.join(self.config.repo_url,
+                                     dlrn_hash.commit_dir, "versions.csv")
+        for r_path in [versions_url1, versions_url2]:
+            try:
+                url.urlopen(r_path)
+                versions_url = r_path
+                break
+            except (url.HTTPError, url.URLError):
+                self.log.error("Not valid url: {}".format(r_path))
         self.log.debug("Accessing versions at %s", versions_url)
         try:
             versions_content = url.urlopen(versions_url).read()
