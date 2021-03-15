@@ -144,7 +144,7 @@ class RepoClient(object):
                 #   imagename: quay.io/tripleo/openstack-base:current-tripleo
 
                 if self.release in ["queens", "rocky", "stein",
-                                    "train", "ussuri"]:
+                                    "train", "ussuri", "osp16-2"]:
                     if self.container_preffix != "centos-binary-":
                         self.container_preffix = "centos-binary-"
                     full_list = [
@@ -209,6 +209,14 @@ class RepoClient(object):
                 exclude_content = yaml.safe_load(exclude_content_yaml)
             except yaml.YAMLError:
                 self.log.error("Unable to read container exclude config_file")
+
+        # Check for downstream release and set appropriate release for the
+        # same, for osp16-2 -> rhos-16.2 and osp-17 -> rhos-17
+        downstream_release_map = {'osp16-2': 'rhos-16.2',
+                                  'osp-17': 'rhos-17'}
+
+        if self.release.startswith('osp'):
+            self.release = downstream_release_map[self.release]
 
         if exclude_content:
             try:
