@@ -18,16 +18,20 @@ except ImportError:
     from urllib.parse import urljoin
 
 
+# OOO_PROJECTS = [
+#     'openstack/puppet-tripleo', 'openstack/python-tripleoclient',
+#     'openstack/tripleo-upgrade', 'openstack/tripleo-quickstart-extras',
+#     'openstack/tripleo-common', 'openstack/tripleo-ci',
+#     'openstack/tripleo-quickstart', 'openstack/tripleo-heat-templates',
+#     'openstack/tripleo-ansible', 'openstack/tripleo-validations',
+#     'rdo-infra/ansible-role-tripleo-ci-reproducer',
+#     'containers/libpod', 'ceph/ceph-ansible',
+#     'openstack/ansible-collections-openstack', 'openstack/heat',
+#     'rdoinfo', 'nfvinfo'
+# ]
 OOO_PROJECTS = [
-    'openstack/puppet-tripleo', 'openstack/python-tripleoclient',
-    'openstack/tripleo-upgrade', 'openstack/tripleo-quickstart-extras',
-    'openstack/tripleo-common', 'openstack/tripleo-ci',
-    'openstack/tripleo-quickstart', 'openstack/tripleo-heat-templates',
-    'openstack/tripleo-ansible', 'openstack/tripleo-validations',
-    'rdo-infra/ansible-role-tripleo-ci-reproducer',
-    'containers/libpod', 'ceph/ceph-ansible',
-    'openstack/ansible-collections-openstack', 'openstack/heat',
-    'rdoinfo', 'nfvinfo'
+     'openstack/puppet-tripleo', 'openstack/python-tripleoclient',
+     'rdoinfo', 'nfvinfo'
 ]
 
 INTERNAL_OOO_PROJECTS = [
@@ -179,6 +183,36 @@ def add_sova_info(build, json_view=False):
         pass
 
 
+# rdoinfo and nfvinfo job meta re which package is updated
+def add_rdopkg_change(build, json_view=False):
+    upstream_file = "logs/undercloud/var/log/extra/package-list-installed.txt"
+    rdo_file = "logs/tested_pkgs_updates.txt.gz"
+    rdo_project = ["rdoinfo", "nfvinfo"]
+    if build['type'] == "upstream":
+        file = upstream_file
+    elif build['type'] == "rdo" and build['project'] in rdo_project:
+        file = rdo_file
+    try:
+        rpm_change_file = get_file_from_build(build,
+                                              file,
+                                              json_view)
+        rpm_change_file = rpm_change_file.splitlines()
+    except Exception:
+        pass
+    if build['type'] == "upstream" and rpm_change_file:
+        packages = []
+        for line in rpm_change_file:
+            if "gating-repo" in line:
+                s = line.split()
+                packages.append("{}-{}".format(s[0], s[1]))
+        if packages:
+            print(packages)
+    if build['type'] == "rdo" and build['project'] in rdo_project:
+        if rpm_change_file:
+            print(rpm_change_file)
+            print("FOUND IT")
+
+
 def add_container_prep_time(build):
     if build['log_url'] is not None:
         job_terms = ['featureset', 'oooq', 'multinode']
@@ -279,6 +313,7 @@ def influx(build):
     add_inventory_info(build)
     # add_container_prep_time(build)
     add_sova_info(build)
+    add_rdopkg_change(build)
 
     if build['end_time'] is None:
         build['end_time'] = datetime.datetime.fromtimestamp(
