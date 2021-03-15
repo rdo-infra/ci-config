@@ -19,15 +19,15 @@ except ImportError:
 
 
 OOO_PROJECTS = [
-    'openstack/puppet-tripleo', 'openstack/python-tripleoclient',
-    'openstack/tripleo-upgrade', 'openstack/tripleo-quickstart-extras',
-    'openstack/tripleo-common', 'openstack/tripleo-ci',
-    'openstack/tripleo-quickstart', 'openstack/tripleo-heat-templates',
-    'openstack/tripleo-ansible', 'openstack/tripleo-validations',
-    'rdo-infra/ansible-role-tripleo-ci-reproducer',
-    'containers/libpod', 'ceph/ceph-ansible',
-    'openstack/ansible-collections-openstack', 'openstack/heat',
-    'rdoinfo', 'nfvinfo'
+     'openstack/puppet-tripleo', 'openstack/python-tripleoclient',
+     'openstack/tripleo-upgrade', 'openstack/tripleo-quickstart-extras',
+     'openstack/tripleo-common', 'openstack/tripleo-ci',
+     'openstack/tripleo-quickstart', 'openstack/tripleo-heat-templates',
+     'openstack/tripleo-ansible', 'openstack/tripleo-validations',
+     'rdo-infra/ansible-role-tripleo-ci-reproducer',
+     'containers/libpod', 'ceph/ceph-ansible',
+     'openstack/ansible-collections-openstack', 'openstack/heat',
+     'rdoinfo', 'nfvinfo'
 ]
 
 INTERNAL_OOO_PROJECTS = [
@@ -179,6 +179,25 @@ def add_sova_info(build, json_view=False):
         pass
 
 
+# rdoinfo and nfvinfo job meta re which package is updated
+def add_rdopkg_change(build, json_view=False):
+    rdo_file = "logs/tested_pkgs_updates.txt.gz"
+    rdo_project = ["rdoinfo", "nfvinfo"]
+
+    if build['type'] == "rdo" and build['project'] in rdo_project:
+        file = rdo_file
+    try:
+        rpm_change_file = get_file_from_build(build,
+                                              file,
+                                              json_view)
+        rpm_change_file = rpm_change_file.splitlines()
+    except Exception:
+        pass
+    if build['type'] == "rdo" and build['project'] in rdo_project:
+        if rpm_change_file:
+            build['dep_change'] = " ".join(rpm_change_file)
+
+
 def add_container_prep_time(build):
     if build['log_url'] is not None:
         job_terms = ['featureset', 'oooq', 'multinode']
@@ -279,6 +298,7 @@ def influx(build):
     add_inventory_info(build)
     # add_container_prep_time(build)
     add_sova_info(build)
+    add_rdopkg_change(build)
 
     if build['end_time'] is None:
         build['end_time'] = datetime.datetime.fromtimestamp(
@@ -317,6 +337,7 @@ def influx(build):
             'provider="%s",'
             'sova_reason="%s",'
             'sova_tag="%s",'
+            'dep_change="%s",'
             'container_prep_time_u=0'
             ' '
             '%s' %
@@ -337,6 +358,7 @@ def influx(build):
              build.get('provider', 'null'),
              build.get('sova_reason', ''),
              build.get('sova_tag', ''),
+             build.get('dep_change', ''),
              to_ts(build['end_time'])))
 
 
