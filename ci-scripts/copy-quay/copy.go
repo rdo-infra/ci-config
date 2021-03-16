@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"os"
 
 	"github.com/containers/image/v5/copy"
@@ -31,11 +32,15 @@ func copyCmd(global *globalOptions) *cobra.Command {
 
 func (opts *copyOptions) run(cmd *cobra.Command, args []string) error {
 	if len(args) > 0 {
+        if opts.global.hash == "" {
+            return fmt.Errorf("You must specify a hash if you are copying specific images")
+        }
 		for _, image := range args {
-			from := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pullRegistry, opts.global.fromNamespace, image, opts.global.tag)
-			to := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pushRegistry, opts.global.toNamespace, image, opts.global.tag)
+			from := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pullRegistry, opts.global.fromNamespace, image, opts.global.hash)
+			to := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pushRegistry, opts.global.toNamespace, image, opts.global.hash)
 			if _, err := copyImage(from, to); err != nil {
-				logrus.Errorln("Failed to copy container %s: %v", image, err)
+                msg := fmt.Sprintf("Failed to copy container %s: %v", image, err)
+				logrus.Errorln(msg)
 			}
 		}
 	} else {
@@ -47,24 +52,25 @@ func (opts *copyOptions) run(cmd *cobra.Command, args []string) error {
 			logrus.Error("Failed to fetch list of repositories ", err)
 		}
 		for _, res := range res {
-			logrus.Info(fmt.Sprintf("Copying image %s/%s", opts.global.toNamespace, res[0]))
+			tagToPull := res[1]
+			if(opts.global.hash != "") {
+				tagToPull = opts.global.hash
+			}
+			logrus.Info(fmt.Sprintf("Copying image %s/%s:%s", opts.global.toNamespace, res[0], tagToPull))
 			if !repoExists(res[0], repositories) {
 				_, err := createNewRepository(opts.global.toNamespace, res[0])
 				if err != nil {
 					logrus.Errorln("Failed to create repository: ", err)
+                    continue
 				}
 			}
-			from := fmt.Sprintf("docker://%s/%s/%s:current-tripleo", opts.global.pullRegistry, opts.global.fromNamespace, res[0])
-			to := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pushRegistry, opts.global.toNamespace, res[0], res[1])
+			// from := fmt.Sprintf("docker://%s/%s/%s:current-tripleo", opts.global.pullRegistry, opts.global.fromNamespace, res[0])
+			from := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pullRegistry, opts.global.fromNamespace, res[0], tagToPull)
+			to := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pushRegistry, opts.global.toNamespace, res[0], tagToPull)
 			_, err := copyImage(from, to)
 			if err != nil {
 				logrus.Errorln("Failed to copy container image: ", err)
 			}
-			sha, err := getImageManifest(opts.global.toNamespace, res[0])
-			if err != nil {
-				logrus.Errorln("Unable to get image manifest: ", err)
-			}
-			tagImage(opts.global.toNamespace, res[0], "current-tripleo", sha)
 		}
 	}
 
