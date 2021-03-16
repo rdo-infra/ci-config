@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e1fb1b9f_32a1e05b",
+        "filename": "ci-scripts/container-push/container-push.yml",
+        "patchSetId": 26
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 403
+      },
+      "writtenOn": "2021-03-16T07:14:02Z",
+      "side": 1,
+      "message": "i checked promoter user don\u0027t have sudo privaleges that\u0027s why it can\u0027t become root, so would need something like below to add allow passwordless sudo roles/_ensure_staging/tasks/main.yml or use paths which have permissions for promoter user.\n\n    - name: Add passwordless sudo permissions for promoter user\n      copy:\n        dest: /etc/sudoers.d/promoter\n        content: \"promoter ALL\u003d(ALL) NOPASSWD:ALL\"\n        mode: 0440\n      become: true\n\n    - name: Validate sudoers permissions update\n      command: \"/usr/sbin/visudo -c\"\n      become: true\n      changed_when: false",
+      "range": {
+        "startLine": 91,
+        "startChar": 0,
+        "endLine": 91,
+        "endChar": 29
+      },
+      "revId": "2cf923673ac362b8732a090721e162d83c3a9dac",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": true
+    }
+  ]
+}
