@@ -19,30 +19,604 @@
         "links":[],
         "panels":[
             {
-                "content":"\n# RPM Dependency pipeline\n\nTripleO-CI takes the lastest good build of TripleO and deploys on top of unknown depenencies.\n\nPending releases for Example:\n\n- CentOS cr repo [link](https://wiki.centos.org/AdditionalResources/Repositories/CR)\n- Ansible releases\n- Ceph re\n- Openvswitch\n- Pacemaker\n\n\n",
+                "datasource":null,
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "gridPos":{
-                    "h":9,
-                    "w":23,
+                    "h":12,
+                    "w":10,
                     "x":0,
                     "y":0
                 },
-                "id":4,
-                "links":[],
-                "mode":"markdown",
+                "id":6,
+                "links":[
+                    {
+                        "title":"Link",
+                        "url":"https://docs.openstack.org/tripleo-docs/latest/ci/tripleo_dependencies_pipelines.html"
+                    },
+                    {
+                        "targetBlank":true,
+                        "title":"internal zuul",
+                        "url":"https://sf.hosted.upshift.rdu2.redhat.com/zuul/t/tripleo-ci-internal/status"
+                    }
+                ],
+                "options":{
+                    "content":"\n# RPM Dependency pipeline\n\nTripleO-CI takes the lastest good build of TripleO and deploys on top of unknown depenencies.\n\nPending releases for Example:\n\n- CentOS cr repo [link](https://wiki.centos.org/AdditionalResources/Repositories/CR)\n- Ansible releases\n- Ceph re\n- Openvswitch\n- Pacemaker\n\nMore Details : \nhttps://docs.openstack.org/tripleo-docs/latest/ci/tripleo_dependencies_pipelines.html\n\nRDO Zuul : \nhttps://review.rdoproject.org/zuul/status\n",
+                    "mode":"markdown"
+                },
+                "pluginVersion":"7.3.6",
                 "timeFrom":null,
                 "timeShift":null,
                 "title":"Intro",
                 "type":"text"
             },
             {
+                "datasource":null,
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "gridPos":{
+                    "h":12,
+                    "w":14,
+                    "x":10,
+                    "y":0
+                },
+                "id":8,
+                "links":[
+                    {
+                        "title":"Link",
+                        "url":"https://docs.openstack.org/tripleo-docs/latest/ci/tripleo_dependencies_pipelines.html"
+                    },
+                    {
+                        "targetBlank":true,
+                        "title":"internal zuul",
+                        "url":"https://sf.hosted.upshift.rdu2.redhat.com/zuul/t/tripleo-ci-internal/status"
+                    }
+                ],
+                "options":{
+                    "content":"\n# How this works\n\nA known good and validated OSP build is executed with specific unkown versions of a particular dependency e.g OpenVSwitch.  \nThe unknown dependencies are injected into the build.\n\nTo find the rpm version difference between the known good build dependency rpm version vs. the dependency being tested refer to the log file for each job.\n\n1. Open the logs link by clicking the job name\n2. Navigate to logs/undercloud/home/zuul/\n3. View control_test_diff_table.log\n\n  * \"Control Package Version\": refers to the known good and validated version of the dependency\n\n  * \"Test Package Version\": refers to the new version of the dependency being tested prior to the packaging teams adding to an OSP build.\n\n```\n+------------+---------------------------------+-------------------------+----------------------+\n|    Node    |           Package_Name          | Control Package Version | Test Package Version |\n+------------+---------------------------------+-------------------------+----------------------+\n| repo_query | network-scripts-openvswitch2.11 |     2.11.3-74.el8fdp    |   2.11.3-85.el8fdp   |\n| repo_query | network-scripts-openvswitch2.12 |     2.12.0-22.el8fdp    |   2.12.0-23.el8fdp   |\n\n```\n\n",
+                    "mode":"markdown"
+                },
+                "pluginVersion":"7.3.6",
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"Intro",
+                "type":"text"
+            },
+            {
+                "datasource":null,
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "gridPos":{
+                    "h":6,
+                    "w":24,
+                    "x":0,
+                    "y":12
+                },
+                "id":10,
+                "options":{
+                    "content":"# Centos8Stream Info\n\n**Purpose:** detect breaking changes in the base operating system.\n\n* As the next minor update for CentOS becomes available, the CI team will target a known good OSP build against preproduction upstream release.\n* This may be used to qualify a new version of CentOS, or to qualify pending changes to CentOS-8-Stream or CentOS-9-Stream\n* **Config:** [yum repository config](https://github.com/openstack/tripleo-quickstart/blob/master/config/release/dependency_ci/centos8stream/repo_config.yaml)\n\n\n        \n        ",
+                    "mode":"markdown"
+                },
+                "pluginVersion":"7.3.6",
+                "targets":[
+                    {
+                        "queryType":"randomWalk",
+                        "refId":"A"
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"openstack-dependencies-centos8stream info",
+                "type":"text"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of internal  *centos8stream* jobs that are passing vs failing vs timing out.\n\n",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":7,
+                    "w":5,
+                    "x":0,
+                    "y":18
+                },
+                "id":12,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"Under graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"pipeline\" = 'openstack-dependencies-centos8stream') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"pipeline\" = 'openstack-dependencies-centos8stream') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"pipeline\" = 'openstack-dependencies-centos8stream') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":null,
+                "title":"openstack-dependencies-centos8stream stats",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
                 "columns":[],
                 "datasource":"telegraf",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":7,
+                    "w":19,
+                    "x":5,
+                    "y":18
+                },
+                "hideTimeOverride":false,
+                "id":14,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":4,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "align":"auto",
+                        "dateFormat":"YYYY-MM-DD",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Job",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Statistics",
+                        "linkUrl":"http://zuul.openstack.org/builds?job_name=${__cell}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "thresholds":[
+                            "A"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job Time ( mean )",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "#73BF69",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"mean",
+                        "thresholds":[
+                            "10000",
+                            "10800"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Count",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"count",
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Success rate",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"sum_count",
+                        "thresholds":[
+                            "80",
+                            "90"
+                        ],
+                        "type":"number",
+                        "unit":"percent"
+                    },
+                    {
+                        "alias":"",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job Time ( max )",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"max",
+                        "thresholds":[
+                            "10000",
+                            "10800"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Job Time (  aggregate )",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"sum",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Container Prep ( mean)",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"mean_1",
+                        "thresholds":[
+                            "1400",
+                            "1500"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Container Prep (max)",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"max_1",
+                        "thresholds":[
+                            "1400",
+                            "1500"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "job_name"
+                                ],
+                                "type":"tag"
+                            }
+                        ],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"autogen",
+                        "query":"SELECT count(\"result_num\"), mean(\"duration\"), max(\"duration\"),  sum(\"duration\"), sum(\"result_num\")*100/count(\"result_num\") FROM \"autogen\".\"build\" WHERE (\"type\" = 'rdo' AND pipeline = 'openstack-dependencies-centos8stream') AND $timeFilter GROUP BY \"job_name\"",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"sum"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"openstack-dependencies-centos8stream Job Pass Rates",
+                "transform":"table",
+                "type":"table-old"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":8,
-                    "w":23,
+                    "w":24,
                     "x":0,
-                    "y":9
+                    "y":25
                 },
                 "id":2,
                 "links":[],
@@ -56,12 +630,14 @@
                 "styles":[
                     {
                         "alias":"Time",
+                        "align":"auto",
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "pattern":"Time",
                         "type":"date"
                     },
                     {
                         "alias":"Branch",
+                        "align":"auto",
                         "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
@@ -76,6 +652,7 @@
                     },
                     {
                         "alias":"Job",
+                        "align":"auto",
                         "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
@@ -97,6 +674,7 @@
                     },
                     {
                         "alias":"Passed",
+                        "align":"auto",
                         "colorMode":"row",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
@@ -126,6 +704,7 @@
                     },
                     {
                         "alias":"Duration",
+                        "align":"auto",
                         "colorMode":"cell",
                         "colors":[
                             "rgba(50, 172, 45, 0.97)",
@@ -185,12 +764,1368 @@
                 ],
                 "timeFrom":null,
                 "timeShift":null,
-                "title":"CentOS-8 Stream",
+                "title":"openstack-dependencies-centos8stream",
                 "transform":"table",
-                "type":"table"
+                "type":"table-old"
+            },
+            {
+                "datasource":null,
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "gridPos":{
+                    "h":5,
+                    "w":24,
+                    "x":0,
+                    "y":33
+                },
+                "id":16,
+                "options":{
+                    "content":"# Container_Tools Info\n\n* **Purpose:** detect breaking changes in buildah, podman etc.\n* **Config:** [yum repository config](https://github.com/openstack/tripleo-quickstart/blob/master/config/release/dependency_ci/container-tools/repo_config.yaml)\n",
+                    "mode":"markdown"
+                },
+                "pluginVersion":"7.3.6",
+                "targets":[
+                    {
+                        "queryType":"randomWalk",
+                        "refId":"A"
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"openstack-dependencies-containertools info",
+                "type":"text"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of internal  *containertools* jobs that are passing vs failing vs timing out.\n\n",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":7,
+                    "w":5,
+                    "x":0,
+                    "y":38
+                },
+                "id":18,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"Under graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"pipeline\" = 'openstack-dependencies-containertools') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"pipeline\" = 'openstack-dependencies-containertools') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"pipeline\" = 'openstack-dependencies-containertools') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":null,
+                "title":"openstack-dependencies-containertools stats",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":7,
+                    "w":19,
+                    "x":5,
+                    "y":38
+                },
+                "hideTimeOverride":false,
+                "id":20,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":4,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "align":"auto",
+                        "dateFormat":"YYYY-MM-DD",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Job",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Statistics",
+                        "linkUrl":"http://zuul.openstack.org/builds?job_name=${__cell}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "thresholds":[
+                            "A"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job Time ( mean )",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "#73BF69",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"mean",
+                        "thresholds":[
+                            "10000",
+                            "10800"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Count",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"count",
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Success rate",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"sum_count",
+                        "thresholds":[
+                            "80",
+                            "90"
+                        ],
+                        "type":"number",
+                        "unit":"percent"
+                    },
+                    {
+                        "alias":"",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job Time ( max )",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"max",
+                        "thresholds":[
+                            "10000",
+                            "10800"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Job Time (  aggregate )",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"sum",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Container Prep ( mean)",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"mean_1",
+                        "thresholds":[
+                            "1400",
+                            "1500"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Container Prep (max)",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"max_1",
+                        "thresholds":[
+                            "1400",
+                            "1500"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "job_name"
+                                ],
+                                "type":"tag"
+                            }
+                        ],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"autogen",
+                        "query":"SELECT count(\"result_num\"), mean(\"duration\"), max(\"duration\"),  sum(\"duration\"), sum(\"result_num\")*100/count(\"result_num\") FROM \"autogen\".\"build\" WHERE (\"type\" = 'rdo' AND pipeline = 'openstack-dependencies-containertools') AND $timeFilter GROUP BY \"job_name\"",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"sum"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"openstack-dependencies-containertools Job Pass Rates",
+                "transform":"table",
+                "type":"table-old"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":8,
+                    "w":24,
+                    "x":0,
+                    "y":45
+                },
+                "id":22,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "align":"auto",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Passed",
+                        "align":"auto",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"Yes",
+                                "value":"1"
+                            },
+                            {
+                                "text":"No",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Duration",
+                        "align":"auto",
+                        "colorMode":"cell",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE (\"pipeline\" = 'openstack-dependencies-containertools' and \"type\"='rdo') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"openstack-dependencies-containertools",
+                "transform":"table",
+                "type":"table-old"
+            },
+            {
+                "datasource":null,
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "gridPos":{
+                    "h":5,
+                    "w":24,
+                    "x":0,
+                    "y":53
+                },
+                "id":24,
+                "options":{
+                    "content":"# OpenVSwitch Info\n\n* **Purpose:** detect breaking changes in OpenVSwitch and OVN\n* **Config:** [yum repository config](https://github.com/openstack/tripleo-quickstart/blob/master/config/release/dependency_ci/openvswitch/repo_config.yaml)\n   \n        ",
+                    "mode":"markdown"
+                },
+                "pluginVersion":"7.3.6",
+                "targets":[
+                    {
+                        "queryType":"randomWalk",
+                        "refId":"A"
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"openstack-dependencies-openvswitch info",
+                "type":"text"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "cacheTimeout":null,
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":"telegraf",
+                "decimals":null,
+                "description":"Percentage of internal  *openvswitch* jobs that are passing vs failing vs timing out.\n\n",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":7,
+                    "w":5,
+                    "x":0,
+                    "y":58
+                },
+                "id":26,
+                "interval":null,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"Under graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"pipeline\" = 'openstack-dependencies-openvswitch') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"pipeline\" = 'openstack-dependencies-openvswitch') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"pipeline\" = 'openstack-dependencies-openvswitch') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":null,
+                "title":"openstack-dependencies-openvswitch stats",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":7,
+                    "w":19,
+                    "x":5,
+                    "y":58
+                },
+                "hideTimeOverride":false,
+                "id":28,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":4,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "align":"auto",
+                        "dateFormat":"YYYY-MM-DD",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Job",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Statistics",
+                        "linkUrl":"http://zuul.openstack.org/builds?job_name=${__cell}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "thresholds":[
+                            "A"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job Time ( mean )",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "#73BF69",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"mean",
+                        "thresholds":[
+                            "10000",
+                            "10800"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Count",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"count",
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Success rate",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"sum_count",
+                        "thresholds":[
+                            "80",
+                            "90"
+                        ],
+                        "type":"number",
+                        "unit":"percent"
+                    },
+                    {
+                        "alias":"",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job Time ( max )",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"max",
+                        "thresholds":[
+                            "10000",
+                            "10800"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Job Time (  aggregate )",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"sum",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Container Prep ( mean)",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"mean_1",
+                        "thresholds":[
+                            "1400",
+                            "1500"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "alias":"Container Prep (max)",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"max_1",
+                        "thresholds":[
+                            "1400",
+                            "1500"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "job_name"
+                                ],
+                                "type":"tag"
+                            }
+                        ],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"autogen",
+                        "query":"SELECT count(\"result_num\"), mean(\"duration\"), max(\"duration\"),  sum(\"duration\"), sum(\"result_num\")*100/count(\"result_num\") FROM \"autogen\".\"build\" WHERE (\"type\" = 'rdo' AND pipeline = 'openstack-dependencies-openvswitch') AND $timeFilter GROUP BY \"job_name\"",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"sum"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"openstack-dependencies-openvswitch Job Pass Rates",
+                "transform":"table",
+                "type":"table-old"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":8,
+                    "w":24,
+                    "x":0,
+                    "y":65
+                },
+                "id":30,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "align":"auto",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Passed",
+                        "align":"auto",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"Yes",
+                                "value":"1"
+                            },
+                            {
+                                "text":"No",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Duration",
+                        "align":"auto",
+                        "colorMode":"cell",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\" FROM \"build\" WHERE (\"pipeline\" = 'openstack-dependencies-openvswitch' and \"type\"='rdo') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"openstack-dependencies-openvswitch",
+                "transform":"table",
+                "type":"table-old"
             }
         ],
-        "schemaVersion":18,
+        "schemaVersion":26,
         "style":"dark",
         "tags":[],
         "templating":{
@@ -229,3 +2164,4 @@
         "title":"RPM Dependency Pipeline"
     }
 }
+
