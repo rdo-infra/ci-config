@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 )
@@ -15,6 +16,7 @@ type Build struct {
 	Status string `json:"result"`
 	URL    string `json:"log_url"`
 }
+
 
 func getLatestGoodBuildURL(jobName string, opts *globalOptions) string {
 	url := fmt.Sprintf("%sbuilds?job_name=%s", opts.zuulAPI, opts.job)
@@ -44,8 +46,9 @@ func _fetch(URL string) (string, error) {
 		return "", err
 	}
 	if response.StatusCode == 404 {
-		logrus.Errorln("URL not found: %s", URL)
-		return "", fmt.Errorf("URL %s not found", URL)
+        msg := fmt.Sprintf("URL not found: %s", URL)
+		logrus.Errorln(msg)
+		return "", fmt.Errorf(msg)
 	}
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -56,8 +59,15 @@ func _fetch(URL string) (string, error) {
 }
 
 func fetchLogs(URL string) string {
+    // There are three different places where we can get the list of
+    // containers...
 	path := fmt.Sprintf("%slogs/containers-successfully-built.log", URL)
 	data, _ := _fetch(path)
+
+    if data == "" {
+        path := fmt.Sprintf("%slogs/containers-built.log", URL)
+        data , _ = _fetch(path)
+    }
 
 	if data == "" {
 		path := fmt.Sprintf("%sjob-output.txt", URL)
@@ -75,12 +85,46 @@ func repoExists(repoName string, repositories []Container) bool {
 	}
 	return false
 }
+
+func getCurrentTripleoRepo(api string) string {
+
+    type DlrnApiResponse struct {
+        PromoteName string `json:"promote_name"`
+        RepoHash    string `json:"repo_hash"`
+    }
+
+    var returnApi []DlrnApiResponse
+
+    apiEndpoint := "api/promotions?promote_name=current-tripleo&limit=1"
+    apiUrl := fmt.Sprintf("%s/%s", api, apiEndpoint)
+
+	response, err := http.Get(apiUrl)
+
+	if err != nil {
+		logrus.Errorln("The HTTP request failed with error ", err)
+	} else {
+		data, _ := ioutil.ReadAll(response.Body)
+		if err := json.Unmarshal(data, &returnApi); err != nil {
+			logrus.Errorln("The unmarshal failed with error ", err)
+		}
+	}
+    if len(returnApi) > 0 {
+        return returnApi[0].RepoHash
+    }
+
+    return ""
+}
+
 func parseLog(data string) [][2]string {
-	r, _ := regexp.Compile(`(?m)item=docker push.*\/([\w-]+):([\w]+_[\w]+)`)
+	// r, _ := regexp.Compile(`(?m)item=docker push.*\/([\w-]+):([\w]+_[\w]+)`)
+	r, _ := regexp.Compile(`(?m)primary \|\s(\w+)\: digest\:.*\n.*\n.*Tag w\/ arch suffix and push image: .*\/([\w-]+)`)
 	var result [][2]string
 
 	for _, matches := range r.FindAllStringSubmatch(data, -1) {
-		result = append(result, [2]string{matches[1], matches[2]})
+		if strings.Contains(matches[1], "x86_64") {
+			result = append(result, [2]string{matches[2], matches[1][:len(matches[1])-7]})
+		}
+        // result = append(result, [2]string{matches[2], matches[1]})
 	}
 	if len(result) == 0 {
 		r, _ := regexp.Compile(`(?m)\/([\w-]+)\s+([\w_]+)`)

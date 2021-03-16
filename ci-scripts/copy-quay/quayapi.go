@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Container - Basic struct to return list of repositories
@@ -80,8 +82,12 @@ func tagExist(namespace, repositoryName, tag string) bool {
 	return true
 }
 
-func getImageManifest(namespace, repositoryName string) (string, error) {
-	url := fmt.Sprintf("https://quay.io/api/v1/repository/%s/%s/tag/", namespace, repositoryName)
+func getImageManifest(namespace, repositoryName string, specificTag string) (string, error) {
+	var url = fmt.Sprintf("https://quay.io/api/v1/repository/%s/%s/tag/", namespace, repositoryName)
+    //if specificTag != "" {
+        url = fmt.Sprintf("%s?specificTag=%s", url, specificTag)
+    //}
+
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 
