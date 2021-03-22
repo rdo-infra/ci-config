@@ -87,9 +87,9 @@
             file: "/tmp/stage-info.yaml"
             name: stage_info
 
-        - name: "make sure tmp file root exists"
+        - name: "make sure {{ tmp_file_root }} exists"
           become: true
-          become_user: "root"
+          become_user: "{{ stage_info.main.promoter_user }}"
           file:
             path: "{{ tmp_file_root }}"
             state: directory
