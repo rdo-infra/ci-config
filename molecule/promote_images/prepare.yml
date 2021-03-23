@@ -4,7 +4,47 @@
     staging_action: setup
     release_config_args: "--release-config CentOS-8/master.yaml"
   tasks:
+    - name: "Check firewalld is installed and configure ports"
+      become: true
+      block:
+        - name: "Install firewalld"
+          package:
+            name: "firewalld"
+            state: present
+
+        - name: "Enable and start firewalld service"
+          service:
+            name: firewalld
+            enabled: yes
+            state: started
+
+        - name: "Ensure ports are open"
+          ansible.posix.firewalld:
+            zone: public
+            port: "{{ item }}"
+            permanent: true
+            state: enabled
+          with_items:
+            - "58080/tcp"
+            - "6500/tcp"
+            - "6000/tcp"
+          notify:
+            - restart firewalld
+
+        - name: "List firewall zones"
+          command: "firewall-cmd --list-zones"
+          register: cmd_out
+
+        - name: "Print ports"
+          debug:
+             var: cmd_out
 
     - name: Setup staging environment
       include_role:
         name: _ensure_staging
+
+  handlers:
+    - name: restart firewalld
+      service:
+        name: firewalld
+        state: started
