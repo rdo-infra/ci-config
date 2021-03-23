@@ -18,15 +18,40 @@
     - name: Set full hash
       set_fact:
         full_hash: "{{ stage_info_vars.dlrn.promotions.promotion_candidate.full_hash }}"
+        commit_hash: "{{ stage_info_vars.dlrn.promotions.promotion_candidate.commit_hash }}"
+        distro_hash: "{{ stage_info_vars.dlrn.promotions.promotion_candidate.distro_hash }}"
         images_path: "{{ stage_info_vars.overcloud_images.root }}"
         stage_info: "{{ stage_info_vars }}"
+        os_distro: "{{ stage_info_vars.main.distro_name }}{{ stage_info_vars.main.distro_version }}"
         cacheable: yes
 
-    - name: Run the image promotion script promote-images.sh
+    - name: Edit yaml file add dlrnapi attributes
+      become: true
+      become_user: "root"
+      lineinfile:
+        path: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/config_environments/staging/CentOS-8/master.yaml"
+        insertafter: 'release: master'
+        line: "{{ item }}"
+      with_items:
+        - "dlrn_api_scheme: http"
+        - "dlrn_api_port: 58080"
+        - "dlrn_api_host: instance"
+
+
+    - name: Run promoter server
+      retries: 5
+      delay: 5
       shell: |
          source ~/{{ promoter_virtualenv }}/bin/activate
-         bash promote-images.sh master {{ full_hash }} tripleo-ci-staging-promoted
+         python dlrnapi_promoter.py --release-config CentOS-8/master.yaml force-promote \
+         --commit-hash {{ commit_hash }} --distro-hash {{ distro_hash }} \
+         --aggregate-hash {{ commit_hash }}_{{ distro_hash[:8] }} \
+         --allowed-client dlrn_client,qcow_client \
+         tripleo-ci-staging tripleo-ci-staging-promoted
       args:
-        chdir: "{{ ci_config_remote_src_dir }}/ci-scripts"
+        chdir: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/"
+      environment:
+        DLRNAPI_PASSWORD: "{{ stage_info_vars.dlrn.server.password }}"
       register: promote_images_result # need to check this as sftp can fail
       changed_when: false
+      until: promote_images_result.rc == 0
