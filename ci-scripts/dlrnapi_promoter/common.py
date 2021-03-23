@@ -223,3 +223,12 @@ def get_log_file(env, release_config, log=None):
         default_config_file = yaml.safe_load(open(default_path))
         conf_template = jinja2.Template(default_config_file['log_file'])
         return conf_template.render(config_file)
+
+
+def get_release_map(release):
+    downstream_release_map = {'osp16-2': 'rhos-16.2',
+                              'osp17': 'rhos-17'}
+    if release.startswith("osp"):
+        return downstream_release_map[release]
+    else:
+        return release

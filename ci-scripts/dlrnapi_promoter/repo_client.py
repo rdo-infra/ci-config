@@ -3,6 +3,7 @@ import logging
 import os
 
 import yaml
+from common import get_release_map
 
 try:
     # Python3 imports
@@ -212,11 +213,7 @@ class RepoClient(object):
 
         # Check for downstream release and set appropriate release for the
         # same, for osp16-2 -> rhos-16.2 and osp-17 -> rhos-17
-        downstream_release_map = {'osp16-2': 'rhos-16.2',
-                                  'osp-17': 'rhos-17'}
-
-        if self.release.startswith('osp'):
-            self.release = downstream_release_map[self.release]
+        self.release = get_release_map(self.release)
 
         if exclude_content:
             try:
