@@ -69,10 +69,11 @@ class StageConfig(PromoterConfig):
 
     def _filter_containers(self, new_container):
         # Hardcode base images into containers suffixes
-        base_images = ['base']
-        new_container['images-suffix'] = base_images + new_container[
-            'images-suffix']
-
+        if 'base' not in new_container['images-suffix']:
+            new_container['images-suffix'] = ['base'] + new_container[
+                'images-suffix']
+        else:
+            new_container['images-suffix'] = new_container['images-suffix']
         # Expand containers namespace
         new_container['namespace'] = \
             "{}{}".format(new_container['namespace_prefix'], self.release)

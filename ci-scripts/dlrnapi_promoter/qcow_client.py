@@ -63,9 +63,6 @@ class QcowClient(object):
         self.config = config
 
         self.git_root = self.config.git_root
-        self.promote_script = os.path.join(self.git_root,
-                                           'ci-scripts', 'promote-images.sh')
-
         self.distro_name = self.config.distro_name
         self.distro_version = self.config.distro_version
         self.rollback_links = {}
