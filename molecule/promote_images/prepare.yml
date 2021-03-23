@@ -4,6 +4,17 @@
     staging_action: setup
     release_config_args: "--release-config CentOS-8/master.yaml"
   tasks:
+    - name: "Ensure ports are open"
+      become: true
+      ansible.posix.firewalld:
+        zone: public
+        port: "{{ item }}"
+        permanent: true
+        state: enabled
+      with_items:
+        - "58080/tcp"
+        - "6500/tcp"
+        - "6000/tcp"
 
     - name: Setup staging environment
       include_role:
