@@ -63,9 +63,6 @@ class QcowClient(object):
         self.config = config
 
         self.git_root = self.config.git_root
-        self.promote_script = os.path.join(self.git_root,
-                                           'ci-scripts', 'promote-images.sh')
-
         self.distro_name = self.config.distro_name
         self.distro_version = self.config.distro_version
         self.rollback_links = {}
@@ -182,7 +179,7 @@ class QcowClient(object):
             self.validate_qcows(candidate_hash)
 
         self.client.chdir(self.images_dir)
-
+        self.log.debug("Changing dir: {}".format(self.images_dir))
         log_header = "Qcow promote '{}' to {}:".format(candidate_hash,
                                                        target_label)
         self.log.info("%s Attempting promotion", log_header)
@@ -190,6 +187,7 @@ class QcowClient(object):
         # Check if candidate_hash dir is present
         try:
             self.client.stat(candidate_hash.full_hash)
+            self.log.debug("Checking candidate hash dir: {}".format(candidate_hash.full_hash))
         except EnvironmentError as ex:
             self.log.error("%s images dir for hash %s not present or not "
                            "accessible", log_header, candidate_hash)
@@ -202,6 +200,7 @@ class QcowClient(object):
         current_hash = None
         try:
             current_hash = self.client.readlink(target_label)
+            self.log.debug("Checking target link: {}".format(current_hash))
         except EnvironmentError:
             self.log.debug("%s No link named %s exists", log_header,
                            target_label)
@@ -211,6 +210,7 @@ class QcowClient(object):
             self.rollback_links['target_label'] = current_hash
             try:
                 self.client.remove(target_label)
+                self.log.debug("Removing label: {}".format(target_label))
             except EnvironmentError as ex:
                 self.log.debug("Unable to remove the target_label: %s",
                                target_label)
@@ -223,6 +223,7 @@ class QcowClient(object):
         previous_hash = None
         try:
             previous_hash = self.client.readlink(previous_label)
+            self.log.debug("Previous hash: {}".format(previous_hash))
         except EnvironmentError:
             self.log.debug("%s No previous-link named %s exists",
                            log_header,
@@ -234,6 +235,7 @@ class QcowClient(object):
             self.rollback_links[previous_label] = previous_hash
             try:
                 self.client.remove(previous_label)
+                self.log.debug("Removing previous label: {}".format(previous_label))
             except EnvironmentError as ex:
                 self.log.debug("Unable to remove the target_label: %s",
                                target_label)
@@ -245,6 +247,7 @@ class QcowClient(object):
                 raise
             try:
                 self.client.symlink(current_hash, previous_label)
+                self.log.debug("Created symlink: {} -> {}".format(current_hash, previous_label))
             except EnvironmentError as ex:
                 self.log.error("%s failed to link %s to %s", log_header,
                                previous_label, current_hash)
