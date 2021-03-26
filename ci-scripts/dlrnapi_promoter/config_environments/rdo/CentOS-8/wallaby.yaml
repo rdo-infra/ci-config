@@ -1,0 +1,41 @@
+---
+release: wallaby
+api_url: https://trunk.rdoproject.org/api-centos8-wallaby
+base_url: https://trunk.rdoproject.org/centos8-wallaby/
+distro_name: centos
+distro_version: 8
+source_namespace: tripleowallaby
+target_namespace: tripleowallaby
+dlrn_api_host: "trunk.rdoproject.org"
+# dlrn_api_endpoint: "centos8-wallaby"
+dlrn_api_scheme: "https"
+dlrn_api_port: ""
+latest_hashes_count: 15
+
+promotions:
+  current-tripleo:
+    candidate_label: tripleo-ci-testing
+    criteria:
+      # Jobs to be added as they are defined and qualified
+      - periodic-tripleo-ci-build-containers-ubi-8-push-wallaby
+      - periodic-tripleo-centos-8-buildimage-overcloud-full-wallaby
+      - periodic-tripleo-centos-8-buildimage-ironic-python-agent-wallaby
+      - periodic-tripleo-centos-8-buildimage-overcloud-hardened-full-wallaby
+      - periodic-tripleo-ci-centos-8-standalone-wallaby
+      - periodic-tripleo-ci-centos-8-scenario001-standalone-wallaby
+      - periodic-tripleo-ci-centos-8-scenario002-standalone-wallaby
+      - periodic-tripleo-ci-centos-8-scenario003-standalone-wallaby
+      - periodic-tripleo-ci-centos-8-scenario004-standalone-wallaby
+      - periodic-tripleo-ci-centos-8-ovb-3ctlr_1comp-featureset001-wallaby
+  current-tripleo-rdo:
+    candidate_label: current-tripleo
+    criteria:
+      # Not ready for CentOS8 yet, uncomment once ready
+      #- tripleo-quickstart-promote-master-current-tripleo-delorean-minimal
+      - weirdo-wallaby-promote-packstack-scenario001
+      - weirdo-wallaby-promote-packstack-scenario002
+      - weirdo-wallaby-promote-packstack-scenario003
+      - weirdo-wallaby-promote-puppet-openstack-scenario001
+      - weirdo-wallaby-promote-puppet-openstack-scenario002
+      - weirdo-wallaby-promote-puppet-openstack-scenario003
+      - weirdo-wallaby-promote-puppet-openstack-scenario004
