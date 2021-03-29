@@ -141,6 +141,24 @@
                     name: 'decorator'
                     extra_args: '-I'
 
+                - name: 'Create stream repos'
+                  shell: |
+                  blockinfile:
+                    path: /etc/yum.repos.d/centos-stream.repo
+                    create: 'yes'
+                    block: |
+                      '[8-stream-baseos]
+                      name=CentOS Linux $releasever - BaseOS
+                      baseurl=http://mirror.centos.org/$contentdir/8-stream/BaseOS/$basearch/os/
+                      gpgcheck=0
+                      enabled=1
+
+                      [8-stream-appstream]
+                      name=CentOS Linux $releasever - AppStream
+                      baseurl=http://mirror.centos.org/$contentdir/8-stream/AppStream/$basearch/os/
+                      gpgcheck=0
+                      enabled=1'
+
                 - name: 'Create openstack iptables chain and jump rule'
                   shell: |
                     iptables -N openstack-INPUT
