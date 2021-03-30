@@ -18,5 +18,5 @@ export BUILD_SYS='delorean'
 # rpm instead of git repo in p-o-i jobs
 export ENABLE_PUPPET_MODULES_RPM=true
 export HASH_FILE='/tmp/delorean_master_current_tripleo_hash'
-export IMAGE=template-rdo-centos8-stable
+export IMAGE=template-rdo-centos8-stream
 export ANSIBLE_PYTHON_INTERPRETER=/usr/libexec/platform-python
