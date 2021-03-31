@@ -16,9 +16,12 @@ type globalOptions struct {
 	pushRegistry  string
 	fromNamespace string
 	toNamespace   string
-	tag           string
+	hash          string
+	pushHash      string
+	forceTag      string
 	job           string
 	token         string
+    release       string
 	debug         bool
 }
 
@@ -27,7 +30,7 @@ var opts = &globalOptions{}
 func createApp() (*cobra.Command, *globalOptions) {
 
 	rootCommand := &cobra.Command{
-		Use:  "quay-copy",
+		Use:  "copy-quay",
 		Long: "Copy a container from one location to another",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return opts.before(cmd)
@@ -41,11 +44,14 @@ func createApp() (*cobra.Command, *globalOptions) {
 	rootCommand.PersistentFlags().StringVar(&opts.pushRegistry, "push-registry", "quay.io", "Registry to push images to")
 	rootCommand.PersistentFlags().StringVar(&opts.fromNamespace, "from-namespace", "tripleomaster", "Namespace of pushed image")
 	rootCommand.PersistentFlags().StringVar(&opts.toNamespace, "to-namespace", "tripleomaster", "Namespace of pushed image")
-	rootCommand.PersistentFlags().StringVar(&opts.tag, "tag", "current-tripleo", "Tag to be pulled/pushed")
+	rootCommand.PersistentFlags().StringVar(&opts.hash, "hash", "", "Hash to be pulled/pushed")
+	rootCommand.PersistentFlags().StringVar(&opts.pushHash, "push-hash", "", "Hash to be pulled/pushed")
 	rootCommand.PersistentFlags().StringVar(&opts.token, "token", "", "Token to use with quay api")
 	rootCommand.PersistentFlags().BoolVar(&opts.debug, "debug", false, "Enable debug output")
-	rootCommand.PersistentFlags().StringVar(&opts.job, "job", "periodic-tripleo-ci-build-containers-ubi-8-push", "Job to collect the list of containers")
+	rootCommand.PersistentFlags().StringVar(&opts.job, "job", "", "Job to collect the list of containers")
+    rootCommand.PersistentFlags().StringVar(&opts.release, "release", "master", "Release")
 	rootCommand.AddCommand(copyCmd(opts))
+    rootCommand.AddCommand(tagCmd(opts))
 	return rootCommand, opts
 }
 
