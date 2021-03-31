@@ -1,0 +1,40 @@
+---
+- name: Install required packages
+  package:
+    name:
+      - device-mapper-devel
+      - gpgme-devel
+      - btrfs-progs-devel
+      - golang
+  become: true
+
+- name: Create temporary directory
+  tempfile:
+    state: directory
+    suffix: copy-container
+  register: temporary_copy_container_dir
+
+- name: Copy go files to temporary directory
+  copy:
+    src: copy-quay/
+    dest: "{{ temporary_copy_container_dir.path }}"
+
+- name: Build the copy-container
+  command:
+    cmd: go build
+    chdir: "{{ temporary_copy_container_dir.path }}"
+  register: go_build
+  changed_when: false
+
+- name: Copy binary to /usr/local/bin
+  copy:
+    src: "{{ temporary_copy_container_dir.path }}/copy-quay"
+    dest: /usr/local/bin
+    mode: '0755'
+  become: true
+  when: go_build.rc == 0
+
+- name: Install cron jobs
+  include_tasks: cron.yml
+  # become: true
+  when: enable_cron|default(true)|bool
