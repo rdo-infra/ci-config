@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Container - Basic struct to return list of repositories
@@ -80,8 +82,9 @@ func tagExist(namespace, repositoryName, tag string) bool {
 	return true
 }
 
-func getImageManifest(namespace, repositoryName string) (string, error) {
-	url := fmt.Sprintf("https://quay.io/api/v1/repository/%s/%s/tag/", namespace, repositoryName)
+func getImageManifest(namespace, repositoryName string, specificTag string) (string, error) {
+	var url = fmt.Sprintf("https://quay.io/api/v1/repository/%s/%s/tag/", namespace, repositoryName)
+    url = fmt.Sprintf("%s?specificTag=%s", url, specificTag)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 
@@ -117,7 +120,7 @@ func getImageManifest(namespace, repositoryName string) (string, error) {
 	return "", fmt.Errorf("Manifest digest for given image was not found")
 }
 
-func tagImage(namespace, repositoryName, tag, manifestDigest string) {
+func tagImage(namespace, repositoryName, tag, manifestDigest string)  error {
     logrus.Info(fmt.Sprintf("Tagging %s/%s with tag %s and manifest %s", namespace, repositoryName, tag, manifestDigest))
 	url := fmt.Sprintf("https://quay.io/api/v1/repository/%s/%s/tag/%s", namespace, repositoryName, tag)
 
@@ -126,11 +129,11 @@ func tagImage(namespace, repositoryName, tag, manifestDigest string) {
 	})
 
 	if err != nil {
-		//return "", err
+		return err
 	}
 	req, err := http.NewRequest(http.MethodPut, url, bytes.NewBuffer(requestBody))
 	if err != nil {
-		//return "", err
+		return err
 	}
 	client := http.Client{}
 	var bearer = "Bearer " + opts.token
@@ -140,11 +143,12 @@ func tagImage(namespace, repositoryName, tag, manifestDigest string) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-
+		return err
 	}
 	defer resp.Body.Close()
 	data, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println(string(data))
+	return nil
 }
 
 func listRepositories(namespace string) ([]Container, error) {
