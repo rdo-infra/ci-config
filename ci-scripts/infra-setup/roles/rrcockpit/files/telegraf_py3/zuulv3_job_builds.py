@@ -186,14 +186,13 @@ def add_rdopkg_change(build, json_view=False):
 
     if build['type'] == "rdo" and build['project'] in rdo_project:
         file = rdo_file
-    try:
-        rpm_change_file = get_file_from_build(build,
-                                              file,
-                                              json_view)
-        rpm_change_file = rpm_change_file.splitlines()
-    except Exception:
-        pass
-    if build['type'] == "rdo" and build['project'] in rdo_project:
+        try:
+            rpm_change_file = get_file_from_build(build,
+                                                  file,
+                                                  json_view)
+            rpm_change_file = rpm_change_file.splitlines()
+        except Exception:
+            pass
         if rpm_change_file:
             build['dep_change'] = " ".join(rpm_change_file)
 
