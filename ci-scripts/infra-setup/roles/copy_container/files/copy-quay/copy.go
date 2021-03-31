@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"os"
 
 	"github.com/containers/image/v5/copy"
@@ -13,6 +14,7 @@ import (
 
 type copyOptions struct {
 	global *globalOptions
+	htmlOutput string
 }
 
 var optsCopy = &copyOptions{}
@@ -25,46 +27,78 @@ func copyCmd(global *globalOptions) *cobra.Command {
 		Short: "Copy images from source to destiny",
 		RunE:  optsCopy.run,
 	}
-
+	cmd.Flags().StringVar(&optsCopy.htmlOutput, "html", "", "HTML output report file")
 	return cmd
 }
 
 func (opts *copyOptions) run(cmd *cobra.Command, args []string) error {
 	if len(args) > 0 {
+        if opts.global.hash == "" {
+            return fmt.Errorf("You must specify a hash if you are copying specific images")
+        }
+
+		tagToPush := opts.global.hash
 		for _, image := range args {
-			from := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pullRegistry, opts.global.fromNamespace, image, opts.global.tag)
-			to := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pushRegistry, opts.global.toNamespace, image, opts.global.tag)
+			if(opts.global.pushHash != "") {
+				tagToPush = opts.global.pushHash
+			}
+			from := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pullRegistry, opts.global.fromNamespace, image, opts.global.hash)
+			to := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pushRegistry, opts.global.toNamespace, image, tagToPush)
 			if _, err := copyImage(from, to); err != nil {
-				logrus.Errorln("Failed to copy container %s: %v", image, err)
+                msg := fmt.Sprintf("Failed to copy container %s: %v", image, err)
+				logrus.Errorln(msg)
 			}
 		}
 	} else {
-		image := getLatestGoodBuildURL(opts.global.job, opts.global)
+		var job = opts.global.job
+		if opts.global.job == "" {
+			job = getJobPerRelease(opts.global.release)
+		}
+		image := getLatestGoodBuildURL(job, opts.global)
 		data := fetchLogs(image)
 		res := parseLog(data)
 		repositories, err := listRepositories(opts.global.toNamespace)
+
+		failed_push := make([]string, 0)
+		success_pushed := make([]string, 0)
+
 		if err != nil {
 			logrus.Error("Failed to fetch list of repositories ", err)
 		}
+		tagToPush := ""
 		for _, res := range res {
-			logrus.Info(fmt.Sprintf("Copying image %s/%s", opts.global.toNamespace, res[0]))
+			tagToPull := res[1]
+			if(opts.global.hash != "") {
+				tagToPull = opts.global.hash
+			}
+			tagToPush = tagToPull
+			logrus.Debugln("Tag is: ", opts.global.pushHash)
+			if(opts.global.pushHash != "") {
+				tagToPush = opts.global.pushHash
+				logrus.Debugln("Tag to push: ", tagToPush)
+			}
+			logrus.Info(fmt.Sprintf("Copying image %s/%s:%s", opts.global.toNamespace, res[0], tagToPull))
 			if !repoExists(res[0], repositories) {
 				_, err := createNewRepository(opts.global.toNamespace, res[0])
 				if err != nil {
 					logrus.Errorln("Failed to create repository: ", err)
+                    continue
 				}
 			}
-			from := fmt.Sprintf("docker://%s/%s/%s:current-tripleo", opts.global.pullRegistry, opts.global.fromNamespace, res[0])
-			to := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pushRegistry, opts.global.toNamespace, res[0], res[1])
+			// from := fmt.Sprintf("docker://%s/%s/%s:current-tripleo", opts.global.pullRegistry, opts.global.fromNamespace, res[0])
+			from := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pullRegistry, opts.global.fromNamespace, res[0], tagToPull)
+			to := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pushRegistry, opts.global.toNamespace, res[0], tagToPush)
 			_, err := copyImage(from, to)
 			if err != nil {
+				failed_push = append(failed_push, res[0])
 				logrus.Errorln("Failed to copy container image: ", err)
+			} else {
+				success_pushed = append(success_pushed, res[0])
 			}
-			sha, err := getImageManifest(opts.global.toNamespace, res[0])
-			if err != nil {
-				logrus.Errorln("Unable to get image manifest: ", err)
-			}
-			tagImage(opts.global.toNamespace, res[0], "current-tripleo", sha)
+		}
+
+		if(opts.htmlOutput != "") {
+			writeHTLMReport(success_pushed, failed_push, tagToPush, opts.htmlOutput)
 		}
 	}
 
@@ -102,7 +136,7 @@ func copyImage(from, to string) (string, error) {
 		SourceCtx:             sourceCtx,
 		DestinationCtx:        destinationCtx,
 		ForceManifestMIMEType: manifest.DockerV2Schema2MediaType,
-		ImageListSelection:    copy.CopySystemImage,
+		ImageListSelection:    copy.CopyAllImages,
 	})
 	if err != nil {
 		return "", fmt.Errorf("Error in copy the image: %v", err)
