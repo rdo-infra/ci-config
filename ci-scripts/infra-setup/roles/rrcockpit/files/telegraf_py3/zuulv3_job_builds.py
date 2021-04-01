@@ -183,6 +183,7 @@ def add_sova_info(build, json_view=False):
 def add_rdopkg_change(build, json_view=False):
     rdo_file = "logs/tested_pkgs_updates.txt.gz"
     rdo_project = ["rdoinfo", "nfvinfo"]
+    rpm_change_file = ""
 
     if build['type'] == "rdo" and build['project'] in rdo_project:
         file = rdo_file
