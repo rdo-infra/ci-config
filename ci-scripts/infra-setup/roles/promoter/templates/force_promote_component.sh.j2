@@ -1,0 +1,43 @@
+set -e
+source promoter_venv/bin/activate
+source dlrnapi_secret
+
+
+# Setup virtualenv for dlrnapi
+
+: ${DLRNAPI_USERNAME:="ciuser"}
+#: ${PROMOTE_TO:="${promotion_symlink}"}
+: ${PROMOTE_TO:=$2}
+: ${DLRNAPI_URL:=https://trunk.rdoproject.org/api-centos8-master-uc
+
+echo $DLRNAPI_USERNAME
+echo $PROMOTE_TO
+echo $DLRNAPI_URL
+
+export delorean_components_url="https://trunk.rdoproject.org/centos8-master/component/"
+export source_name=$1
+#export delorean_components="baremetal cinder clients cloudops common compute glance manila network octavia security swift tempest tripleo ui validation"
+export delorean_components="tripleo"
+
+echo ${delorean_components}
+
+for component in $delorean_components; do
+    curl -sLo commit.yaml $delorean_components_url/${component}/${source_name}/commit.yaml
+    COMMIT_HASH=$(shyaml get-value commits.0.commit_hash < ./commit.yaml)
+    DISTRO_HASH=$(shyaml get-value commits.0.distro_hash < ./commit.yaml)
+    EXTENDED_HASH=$(shyaml get-value commits.0.extended_hash < ./commit.yaml)
+
+    echo $component
+    echo $COMMIT_HASH
+    echo $DISTRO_HASH
+    echo $EXTENDED_HASH
+
+    # Assign label to the specific hash using the DLRN API
+    dlrnapi --url $DLRNAPI_URL \
+        --username $DLRNAPI_USERNAME \
+        repo-promote \
+        --commit-hash $COMMIT_HASH \
+        --distro-hash $DISTRO_HASH \
+        --extended-hash $EXTENDED_HASH \
+        --promote-name $PROMOTE_TO
+done
