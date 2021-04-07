@@ -107,10 +107,7 @@
               become: yes
               tasks:
                 - name: 'Switch to centos stream'
-                  cmd: 'dnf swap -y centos-linux-repos centos-stream-repos'
-
-                - name: 'Commit switch to centos stream'
-                  cmd: 'dnf -y distrosync'
+                  shell: 'dnf swap -y centos-linux-repos centos-stream-repos && dnf -y distrosync'
 
                 - name: 'Install dependencies with dnf'
                   package:
@@ -302,10 +299,7 @@
               become: yes
               tasks:
                 - name: 'Switch to centos stream'
-                  cmd: 'dnf swap -y centos-linux-repos centos-stream-repos'
-
-                - name: 'Commit switch to centos stream'
-                  cmd: 'dnf -y distrosync'
+                  shell: 'dnf swap -y centos-linux-repos centos-stream-repos && dnf -y distrosync'
 
                 - name: 'Install dependencies with dnf'
                   package:
