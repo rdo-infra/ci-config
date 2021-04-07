@@ -202,6 +202,15 @@
     group: 'root'
   become: true
 
+- name: Add script to promoter to promote a component by force
+  template:
+    src: "dlrn-promoter-service.sh.j2"
+    dest: "/home/{{ promoter_user }}"
+    mode: '0755'
+    owner: "{{ promoter_user }}"
+    group: "{{ promoter_user }}"
+  become: true
+
 - name: 'Set env variable for promoter_config_root {{ promoter_config_root }}'
   lineinfile:
     dest: /etc/environment

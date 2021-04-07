@@ -1,0 +1,16 @@
+#!/bin/bash
+
+pushd ${distro}/${release}
+
+current_tripleo=$(ls -la | grep current-tripleo | head -n 1 | awk '{print $11}')
+echo $current_tripleo
+unlink current-tripleo
+unlink previous-current-tripleo
+ln -s $current_tripleo previous-current-tripleo
+
+# get hash for tripleo-ci-testing
+tripleo_ci_testing=$(ls -la | grep tripleo-ci-testing | awk '{print $11}')
+ln -s $tripleo_ci_testing current-tripleo
+
+popd
+

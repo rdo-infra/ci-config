@@ -1,0 +1,46 @@
+set -e
+source promoter_venv/bin/activate
+source ~/dlrnapi_secret
+
+# Setup virtualenv for dlrnapi
+: ${DLRNAPI_USERNAME:="ciuser"}
+: ${PROMOTE_TO:="${promotion_to_symlink}"}
+: ${PROMOTE_FROM:="${promotion_from_symlink}"}
+: ${DLRNAPI_URL:="${dlrn_api_url}"}
+
+echo $DLRNAPI_USERNAME
+echo $PROMOTE_FROM
+echo $PROMOTE_TO
+echo $DLRNAPI_URL
+
+export delorean_components_url="${dlrn_url}/component/"
+export source_name=$PROMOTE_FROM
+export delorean_components="baremetal cinder clients cloudops common compute glance manila network octavia security swift tempest tripleo ui validation"
+echo ${delorean_components}
+
+for component in $delorean_components; do
+    curl -sLo commit.yaml $delorean_components_url/${component}/${source_name}/commit.yaml
+    COMMIT_HASH=$(shyaml get-value commits.0.commit_hash < ./commit.yaml)
+    DISTRO_HASH=$(shyaml get-value commits.0.distro_hash < ./commit.yaml)
+    EXTENDED_HASH=$(shyaml get-value commits.0.extended_hash < ./commit.yaml)
+
+    echo $component
+    echo $COMMIT_HASH
+    echo $DISTRO_HASH
+    echo $EXTENDED_HASH
+
+    # Assign label to the specific hash using the DLRN API
+    dlrnapi --url $DLRNAPI_URL \
+        --username $DLRNAPI_USERNAME \
+        repo-promote \
+        --commit-hash $COMMIT_HASH \
+        --distro-hash $DISTRO_HASH \
+        --extended-hash $EXTENDED_HASH \
+        --promote-name $PROMOTE_TO
+done
+
+# Promote image and dockerfiles
+uploader_key_path="${ssh_key}"
+ssh -i $uploader_key_path "${upload_user}@${image_server}" "cd images; bash -x ${promote_script_sh}"
+sleep 5
+ssh -i $uploader_key_path "${upload_user}@${image_server}" "cd dockerfiles; bash -x ${promote_script_sh}"
