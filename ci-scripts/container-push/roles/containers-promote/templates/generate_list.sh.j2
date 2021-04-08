@@ -4,11 +4,14 @@ c_list=(
 {% endfor %}
 )
 
+target_registry=[
 {% for registry in target_registries %}
-target_registry='{{ registry.host }}/{{ registry.namespace }}'
+'{{ registry.host }}/{{ registry.namespace }}'
 {% endfor %}
+]
 source_registry='{{ source_registry.host }}/{{ source_registry.namespace }}'
-
+use_quay={{ use_quay }}
+enable_downstream={{ enable_downstream }}
 
 LOG_HOME="{{- tmp_file_root -}}"
 
@@ -26,13 +29,20 @@ else
     registry=$source_registry
 fi
 
-for container in "${c_list[@]}"; do
-    echo "$container" >> $LOG_HOME/inspect_logs.txt
-    docker manifest inspect --insecure "$registry/$container:{{ full_hash }}" >> $LOG_HOME/inspect_logs.txt
-    res=$?
-    if [ $res -eq 0 ]; then
-        echo "$container" >> $containers_file
-    else
-        echo "$container" >> $missing_containers_file
-    fi
+for reg in "${registry[@]}"; do
+    for container in "${c_list[@]}"; do
+        echo "$container" >> $LOG_HOME/inspect_logs.txt
+        # As we are pushing the container to docker.io so adding the condition specifically for docker.io to avoid the failures while doing the promotion.
+        if [[ "$use_quay" == false && "$enable_downstream" == false && "$reg" == *"docker.io"* ]]; then
+            docker manifest inspect --insecure "$reg/$container:{{ full_hash }}" >> $LOG_HOME/inspect_logs.txt
+        else
+            docker manifest inspect --insecure "$reg/$container:{{ full_hash }}" >> $LOG_HOME/inspect_logs.txt
+        fi
+        res=$?
+        if [ $res -eq 0 ]; then
+            echo "$container" >> $containers_file
+        else
+            echo "$container" >> $missing_containers_file
+        fi
+    done
 done
