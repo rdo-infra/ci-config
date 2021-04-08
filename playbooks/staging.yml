@@ -135,3 +135,11 @@
         src: "/home/{{ promoter_user }}/{{ promoter_logs }}/"
         dest: "/var/tmp/promoter_logs"
         remote_src: yes
+
+    - name: 'Copy staging container logs to /var/tmp directory'
+      become: true
+      become_user: "{{ promoter_user }}"
+      copy:
+        src: "/home/{{ promoter_user }}/web/{{ promoter_logs }}/"
+        dest: "/var/tmp/promoter_logs"
+        remote_src: yes
