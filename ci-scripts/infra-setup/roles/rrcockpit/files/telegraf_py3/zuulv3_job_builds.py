@@ -153,7 +153,7 @@ def add_inventory_info(build, json_view=False):
                                         json_view)
         inventory = yaml.safe_load(inventory)
         hosts = inventory['all']['hosts']
-        host = hosts[hosts.keys()[0]]
+        host = hosts[list(hosts.keys())[0]]
         if 'nodepool' in host:
             nodepool = host['nodepool']
             build['cloud'] = nodepool['cloud']
