@@ -14,57 +14,31 @@
   hosts: localhost
   vars:
     registry_host: docker.io
-    enable_downstream: false
-    use_quay: false
     tmp_file_root: "/var/tmp/promoter_logs"
     target_registries:
-      # There's no easy way to transparently override these hosts.
-      # We would need to force their ip in /etc/hosts, but also reroute ports to
-      # Their equivalent target registry
-      - name: Enable login to docker registry
-        host: "{{ registry_host }}"
+      - host: "{{ registry_host }}"
         namespace: "{{ target_namespace }}"
         username: "{{ lookup('env','DOCKERHUB_USERNAME') }}"
         password: "{{ lookup('env','DOCKERHUB_PASSWORD') }}"
         auth_url: "https://index.{{ registry_host }}/v1/"
         schema: "v2_s2"
-        when:
-          - not enable_downstream | bool
-          - not use_quay | bool
 
-      - name: Enable login to Quay Registry
-        host: "{{ registry_host }}"
-        namespace: "tripleo{{ lookup('env','RELEASE') }}"
-        username: "{{ lookup('env','QUAYDOTIO_USERNAME') }}"
-        password: "{{ lookup('env','QUAYDOTIO_PASSWORD') }}"
-        token: "{{ lookup('env','QUAYDOTIO_TOKEN') }}"
-        auth_url: "https://{{ registry_host }}/api/v1/'"
-        schema: "v2_s1"
-        when: use_quay | bool
+# Note(chkumar): Enable only when we want to push it to quay registry also.
+#      - host: "{{ registry_host | default(quay.io) }}"
+#        namespace: "tripleo{{ lookup('env','RELEASE') }}"
+#        username: "{{ lookup('env','QUAYDOTIO_USERNAME') }}"
+#        password: "{{ lookup('env','QUAYDOTIO_PASSWORD') }}"
+#        token: "{{ lookup('env','QUAYDOTIO_TOKEN') }}"
+#        auth_url: "https://{{ registry_host }}/api/v1/'"
+#        schema: "v2_s1"
 
-      - name: Enable config for Downstream Registry
-        when: enable_downstream | bool
-        block:
-          - name: Enable login to Downstream Registry
-            host: "{{ registry_host }}"
-            namespace: "tripleo{{ lookup('env','RELEASE') }}"
-            username: "{{ lookup('env','UPSHIFT_USERNAME') }}"
-            password: "{{ lookup('env','UPSHIFT_PASSWORD') }}"
-            auth_url: "https://{{ registry_host }}/v2/"
-            schema: "v2_s1"
-
-          - name: Set fact for Downstream registry
-            set_fact:
-              registry_hostname: "{{ registry_host }}"
-              enable_downstream: true
-              source_registry:
-                host: "{{ registry_hostname }}"
-                namespace: "{{ source_namespace }}"
-                username: "{{ lookup('env','UPSHIFT_USERNAME') }}"
-                password: "{{ lookup('env','UPSHIFT_PASSWORD') }}"
-                auth_url: "https://{{ registry_hostname }}/v2/"
-                schema: "v2_s1"
-            cacheable: true
+# NOTE(chkumar): Enable only when we push to downstream registry
+#      - host: "{{ registry_host }}"
+#        namespace: "tripleo{{ lookup('env','RELEASE') }}"
+#        username: "{{ lookup('env','UPSHIFT_USERNAME') }}"
+#        password: "{{ lookup('env','UPSHIFT_PASSWORD') }}"
+#        auth_url: "https://{{ registry_host }}/v2/"
+#        schema: "v2_s1"
 
   tasks:
     # This same playbook will run in both production and testing.
