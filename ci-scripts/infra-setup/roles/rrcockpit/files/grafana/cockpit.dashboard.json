@@ -19,390 +19,13 @@
         "links":[],
         "panels":[
             {
-                "columns":[],
-                "datasource":"telegraf",
-                "description":"Running list of all upstream jobs including *check* and *gate* queues.\n\nClick on individual job names to go to logs or on the patch number to see the gerrit review.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
-                "fontSize":"100%",
-                "gridPos":{
-                    "h":10,
-                    "w":24,
-                    "x":0,
-                    "y":0
-                },
-                "id":490,
-                "links":[],
-                "pageSize":null,
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":0,
-                    "desc":true
-                },
-                "styles":[
-                    {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"Branch",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"branch",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Job",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_3}",
-                        "mappingType":1,
-                        "pattern":"job_name",
-                        "sanitize":true,
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Pipeline",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"pipeline",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Duration",
-                        "align":"auto",
-                        "colorMode":"cell",
-                        "colors":[
-                            "#2f575e",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":1,
-                        "mappingType":1,
-                        "pattern":"duration",
-                        "thresholds":[
-                            "10000",
-                            "10600"
-                        ],
-                        "type":"number",
-                        "unit":"dtdurations"
-                    },
-                    {
-                        "alias":"Passed",
-                        "align":"auto",
-                        "colorMode":"row",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "#e24d42",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"result_num",
-                        "rangeMaps":[
-                            {
-                                "from":"",
-                                "text":"",
-                                "to":""
-                            }
-                        ],
-                        "thresholds":[
-                            "-1",
-                            "1"
-                        ],
-                        "type":"string",
-                        "unit":"short",
-                        "valueMaps":[
-                            {
-                                "text":"YES",
-                                "value":"1"
-                            },
-                            {
-                                "text":"NO",
-                                "value":"0"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"Log URL",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"log_url",
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Patch",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(50, 172, 45, 0.97)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Gerrit",
-                        "linkUrl":"https://review.opendev.org/${__cell}",
-                        "mappingType":1,
-                        "pattern":"change",
-                        "thresholds":[
-                            ""
-                        ],
-                        "type":"string",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
-                        "alias":"Job",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "mappingType":1,
-                        "pattern":"log_link",
-                        "sanitize":true,
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"passed",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Result",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"result",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "decimals":2,
-                        "pattern":"/.*/",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    }
-                ],
-                "targets":[
-                    {
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "project"
-                                ],
-                                "type":"tag"
-                            }
-                        ],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\", \"pipeline\", \"voting\" FROM \"build\" WHERE (\"branch\" =~ /.*wallaby.*/ AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /.*tripleo-.*/ ) AND $timeFilter GROUP BY \"project\"",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "branch"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "change"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "log_link"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "duration"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "result"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "voting"
-                                    ],
-                                    "type":"field"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"job_name",
-                                "operator":"=~",
-                                "value":"/.*tripleo-.*/"
-                            },
-                            {
-                                "condition":"OR",
-                                "key":"job_name",
-                                "operator":"=~",
-                                "value":"/.*molecule.*/"
-                            }
-                        ]
-                    }
-                ],
-                "title":"Upstream wallaby last jobs",
-                "transform":"table",
-                "type":"table-old"
-            },
-            {
                 "collapsed":false,
                 "datasource":null,
                 "gridPos":{
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":10
+                    "y":0
                 },
                 "id":334,
                 "panels":[],
@@ -439,7 +62,7 @@
                     "h":10,
                     "w":5,
                     "x":0,
-                    "y":11
+                    "y":1
                 },
                 "id":144,
                 "interval":null,
@@ -581,7 +204,7 @@
                     "h":10,
                     "w":5,
                     "x":5,
-                    "y":11
+                    "y":1
                 },
                 "id":147,
                 "interval":null,
@@ -704,7 +327,7 @@
                     "h":10,
                     "w":14,
                     "x":10,
-                    "y":11
+                    "y":1
                 },
                 "hideTimeOverride":false,
                 "id":61,
@@ -1017,7 +640,7 @@
                     "h":9,
                     "w":5,
                     "x":0,
-                    "y":21
+                    "y":11
                 },
                 "id":145,
                 "interval":null,
@@ -1146,7 +769,7 @@
                     "h":9,
                     "w":5,
                     "x":5,
-                    "y":21
+                    "y":11
                 },
                 "id":164,
                 "interval":null,
@@ -1355,7 +978,7 @@
                     "h":9,
                     "w":5,
                     "x":10,
-                    "y":21
+                    "y":11
                 },
                 "id":447,
                 "interval":null,
@@ -1564,7 +1187,7 @@
                     "h":9,
                     "w":4,
                     "x":15,
-                    "y":21
+                    "y":11
                 },
                 "id":203,
                 "interval":null,
@@ -1774,7 +1397,7 @@
                     "h":9,
                     "w":5,
                     "x":19,
-                    "y":21
+                    "y":11
                 },
                 "id":469,
                 "interval":null,
@@ -1895,7 +1518,7 @@
                     "h":9,
                     "w":10,
                     "x":0,
-                    "y":30
+                    "y":20
                 },
                 "id":253,
                 "links":[],
@@ -1922,7 +1545,7 @@
                     "h":9,
                     "w":14,
                     "x":10,
-                    "y":30
+                    "y":20
                 },
                 "hideTimeOverride":false,
                 "id":468,
@@ -2219,7 +1842,7 @@
                     "h":6,
                     "w":4,
                     "x":0,
-                    "y":39
+                    "y":29
                 },
                 "id":448,
                 "interval":null,
@@ -2428,7 +2051,7 @@
                     "h":6,
                     "w":4,
                     "x":4,
-                    "y":39
+                    "y":29
                 },
                 "id":482,
                 "interval":null,
@@ -2637,7 +2260,7 @@
                     "h":6,
                     "w":3,
                     "x":8,
-                    "y":39
+                    "y":29
                 },
                 "id":451,
                 "interval":null,
@@ -2846,7 +2469,7 @@
                     "h":6,
                     "w":3,
                     "x":11,
-                    "y":39
+                    "y":29
                 },
                 "id":449,
                 "interval":null,
@@ -3055,7 +2678,7 @@
                     "h":6,
                     "w":3,
                     "x":14,
-                    "y":39
+                    "y":29
                 },
                 "id":453,
                 "interval":null,
@@ -3264,7 +2887,7 @@
                     "h":6,
                     "w":4,
                     "x":17,
-                    "y":39
+                    "y":29
                 },
                 "id":450,
                 "interval":null,
@@ -3473,7 +3096,7 @@
                     "h":6,
                     "w":3,
                     "x":21,
-                    "y":39
+                    "y":29
                 },
                 "id":452,
                 "interval":null,
@@ -3673,7 +3296,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":45
+                    "y":35
                 },
                 "hideTimeOverride":false,
                 "id":473,
@@ -3945,7 +3568,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":53
+                    "y":43
                 },
                 "id":480,
                 "links":[],
@@ -4120,7 +3743,7 @@
                     "h":6,
                     "w":4,
                     "x":0,
-                    "y":61
+                    "y":51
                 },
                 "id":427,
                 "interval":null,
@@ -4329,7 +3952,7 @@
                     "h":6,
                     "w":4,
                     "x":4,
-                    "y":61
+                    "y":51
                 },
                 "id":484,
                 "interval":null,
@@ -4538,7 +4161,7 @@
                     "h":6,
                     "w":4,
                     "x":8,
-                    "y":61
+                    "y":51
                 },
                 "id":430,
                 "interval":null,
@@ -4747,7 +4370,7 @@
                     "h":6,
                     "w":3,
                     "x":12,
-                    "y":61
+                    "y":51
                 },
                 "id":428,
                 "interval":null,
@@ -4957,7 +4580,7 @@
                     "h":6,
                     "w":3,
                     "x":15,
-                    "y":61
+                    "y":51
                 },
                 "id":455,
                 "interval":null,
@@ -5167,7 +4790,7 @@
                     "h":6,
                     "w":3,
                     "x":18,
-                    "y":61
+                    "y":51
                 },
                 "id":429,
                 "interval":null,
@@ -5376,7 +4999,7 @@
                     "h":6,
                     "w":3,
                     "x":21,
-                    "y":61
+                    "y":51
                 },
                 "id":431,
                 "interval":null,
@@ -5576,7 +5199,7 @@
                     "h":12,
                     "w":24,
                     "x":0,
-                    "y":67
+                    "y":57
                 },
                 "hideTimeOverride":false,
                 "id":475,
@@ -5857,7 +5480,7 @@
                     "h":6,
                     "w":4,
                     "x":0,
-                    "y":79
+                    "y":69
                 },
                 "id":432,
                 "interval":null,
@@ -6066,7 +5689,7 @@
                     "h":6,
                     "w":4,
                     "x":4,
-                    "y":79
+                    "y":69
                 },
                 "id":486,
                 "interval":null,
@@ -6275,7 +5898,7 @@
                     "h":6,
                     "w":4,
                     "x":8,
-                    "y":79
+                    "y":69
                 },
                 "id":433,
                 "interval":null,
@@ -6484,7 +6107,7 @@
                     "h":6,
                     "w":3,
                     "x":12,
-                    "y":79
+                    "y":69
                 },
                 "id":470,
                 "interval":null,
@@ -6693,7 +6316,7 @@
                     "h":6,
                     "w":3,
                     "x":15,
-                    "y":79
+                    "y":69
                 },
                 "id":454,
                 "interval":null,
@@ -6902,7 +6525,7 @@
                     "h":6,
                     "w":3,
                     "x":18,
-                    "y":79
+                    "y":69
                 },
                 "id":434,
                 "interval":null,
@@ -7111,7 +6734,7 @@
                     "h":6,
                     "w":3,
                     "x":21,
-                    "y":79
+                    "y":69
                 },
                 "id":436,
                 "interval":null,
@@ -7311,7 +6934,7 @@
                     "h":11,
                     "w":24,
                     "x":0,
-                    "y":85
+                    "y":75
                 },
                 "hideTimeOverride":false,
                 "id":474,
@@ -7592,7 +7215,7 @@
                     "h":6,
                     "w":5,
                     "x":0,
-                    "y":96
+                    "y":86
                 },
                 "id":442,
                 "interval":null,
@@ -7795,7 +7418,7 @@
                     "h":6,
                     "w":5,
                     "x":5,
-                    "y":96
+                    "y":86
                 },
                 "hideTimeOverride":true,
                 "id":488,
@@ -8001,7 +7624,7 @@
                     "h":6,
                     "w":5,
                     "x":10,
-                    "y":96
+                    "y":86
                 },
                 "hideTimeOverride":true,
                 "id":444,
@@ -8207,7 +7830,7 @@
                     "h":6,
                     "w":5,
                     "x":15,
-                    "y":96
+                    "y":86
                 },
                 "id":471,
                 "interval":null,
@@ -8410,7 +8033,7 @@
                     "h":6,
                     "w":4,
                     "x":20,
-                    "y":96
+                    "y":86
                 },
                 "id":457,
                 "interval":null,
@@ -8613,7 +8236,7 @@
                     "h":6,
                     "w":5,
                     "x":0,
-                    "y":102
+                    "y":92
                 },
                 "id":456,
                 "interval":null,
@@ -8817,7 +8440,7 @@
                     "h":6,
                     "w":5,
                     "x":5,
-                    "y":102
+                    "y":92
                 },
                 "id":445,
                 "interval":null,
@@ -9011,7 +8634,7 @@
                     "h":11,
                     "w":24,
                     "x":0,
-                    "y":108
+                    "y":98
                 },
                 "hideTimeOverride":false,
                 "id":476,
@@ -9284,7 +8907,7 @@
                     "h":9,
                     "w":24,
                     "x":0,
-                    "y":119
+                    "y":109
                 },
                 "id":391,
                 "links":[],
@@ -9657,7 +9280,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":128
+                    "y":118
                 },
                 "id":422,
                 "links":[],
@@ -10034,7 +9657,7 @@
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":138
+                    "y":128
                 },
                 "id":63,
                 "links":[],
@@ -10393,6 +10016,383 @@
                     }
                 ],
                 "title":"Upstream master last jobs",
+                "transform":"table",
+                "type":"table-old"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"Running list of all upstream jobs including *check* and *gate* queues.\n\nClick on individual job names to go to logs or on the patch number to see the gerrit review.",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":10,
+                    "w":24,
+                    "x":0,
+                    "y":138
+                },
+                "id":490,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "alias":"Time",
+                        "align":"auto",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "alias":"Branch",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Job",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Pipeline",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Duration",
+                        "align":"auto",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "alias":"Passed",
+                        "align":"auto",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"Log URL",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Patch",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "alias":"Job",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"Result",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "alias":"",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "project"
+                                ],
+                                "type":"tag"
+                            }
+                        ],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\", \"pipeline\", \"voting\" FROM \"build\" WHERE (\"branch\" =~ /.*wallaby.*/ AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /.*tripleo-.*/ ) AND $timeFilter GROUP BY \"project\"",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "voting"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"job_name",
+                                "operator":"=~",
+                                "value":"/.*tripleo-.*/"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"job_name",
+                                "operator":"=~",
+                                "value":"/.*molecule.*/"
+                            }
+                        ]
+                    }
+                ],
+                "title":"Upstream wallaby last jobs",
                 "transform":"table",
                 "type":"table-old"
             },
