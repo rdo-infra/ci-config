@@ -106,6 +106,9 @@
               hosts: openstack_nodes
               become: yes
               tasks:
+                - name: 'Switch to centos stream'
+                  shell: 'dnf swap -y centos-linux-repos centos-stream-repos && dnf -y distrosync'
+
                 - name: 'Install dependencies with dnf'
                   package:
                     name:
@@ -295,6 +298,9 @@
               hosts: openstack_nodes
               become: yes
               tasks:
+                - name: 'Switch to centos stream'
+                  shell: 'dnf swap -y centos-linux-repos centos-stream-repos && dnf -y distrosync'
+
                 - name: 'Install dependencies with dnf'
                   package:
                     name:
