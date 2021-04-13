@@ -1,0 +1,53 @@
+---
+- hosts: instance
+  become: true
+  become_user: "{{ promoter_user }}"
+  vars:
+    hash: "360d335e94246d7095672c5aa92b59afa380a059_9e598812"
+    source:
+      host: docker.io
+      name: rdoregistry
+      namespace: tripleomaster
+      port: 80
+      schema: v2_s2
+      secure: false
+      url: docker.io
+
+    target:
+      host: localhost:5000
+      name: local-target-registry-1
+      namespace: tripleomaster
+      password: unused
+      username: unused
+      port: 5000
+      schema: v2_s2
+      secure: false
+      url: http://localhost:5000
+
+  tasks:
+    - name: "Copy get_hashesh.py"
+      copy:
+        src: get_hashesh.py
+        dest: /var/tmp/promoter_logs/
+
+    - name: "Run get_hashesh.py for previous-current-tripleo" # noqa 305 301
+      shell:
+        "~/{{ promoter_virtualenv }}/bin/python3 /var/tmp/promoter_logs/get_hashesh.py"
+      register: hashesh_out
+
+    - name: "Set hash fact"
+      set_fact:
+        hash: "{{ hashesh_out.stdout }}"
+
+    - name: sets critical variables
+      set_fact:
+        full_hash: "{{ hash['repo_hash'] }}"
+        source_registry: "{{ source }}"
+        target_registries: "{{ [ target ] }}"
+        cacheable: yes
+
+    - name: Include containers-promote role to test
+      include_role:
+        name: "../../ci-scripts/container-push/roles/containers-promote"
+      vars:
+        ansible_python_interpreter: "~/{{ promoter_virtualenv }}/bin/python3"
