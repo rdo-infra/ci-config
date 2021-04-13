@@ -1,0 +1,15 @@
+# Teardown staging environment
+- hosts: instance
+  vars:
+    staging_action: teardown
+    staging_args: "--scenes dlrn,registries,containers"
+  tasks:
+    - name: Teardown
+      become: true
+      become_user: "{{ promoter_user }}"
+      shell: |
+        source ~/{{ promoter_virtualenv }}/bin/activate
+        python3 stage.py {{ staging_args }} {{ staging_action }}
+      args:
+        chdir: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter"
+      changed_when: false

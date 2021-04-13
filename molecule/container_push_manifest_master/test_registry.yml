@@ -1,0 +1,18 @@
+---
+- name: "tag docker container"
+  docker_image:
+    name: registry
+    repository: localhost:5000
+    tag: latest
+    push: yes
+    source: local
+
+- name: "Check if image is pushed"
+  uri:
+    url: localhost:5000
+    method: GET
+    body_format: json
+    headers:
+      Content-Type: "application/json"
+  register: check_status
+  fail_when: 'registry' not in check_status
