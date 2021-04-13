@@ -1,0 +1,25 @@
+- hosts: instance
+  tasks:
+    - name: "Setup registry"
+      include_tasks: setup_registry.yml
+
+    - name: "Get master containers list"
+      get_url:
+        url: "https://opendev.org/openstack/tripleo-common/raw/branch/master/container-images/tripleo_containers.yaml"
+        dest: "/var/tmp/promoter_logs/tripleo_containers.yaml"
+
+    - name: "Get all container names" # noqa 505
+      include_vars:
+        file: "/var/tmp/promoter_logs/tripleo_containers.yaml"
+        name: c_list
+
+    - name: "Create containers list"
+      set_fact:
+        containers_list: []
+
+    - name: "Add container names to list"
+      no_log: true
+      set_fact:
+        containers_list: "{{ containers_list + [item['imagename'].split('/')[-1].split(':')[0] | replace('openstack-', '')] }}"
+        cacheable: yes
+      with_items: "{{ c_list.container_images }}"
