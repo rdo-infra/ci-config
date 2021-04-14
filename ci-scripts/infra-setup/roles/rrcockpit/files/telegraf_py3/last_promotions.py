@@ -82,7 +82,7 @@ if __name__ == '__main__':
         '--release',
         required=True,
         choices=[
-            'rhos-17', 'rhos-16.2', 'master', 'victoria', 'ussuri', 'train',
+            'rhos-17', 'rhos-16.2', 'master', 'wallaby', 'victoria', 'ussuri', 'train',
             'stein', 'rocky', 'queens'
         ],
         help='Upstream or downstream release.'
