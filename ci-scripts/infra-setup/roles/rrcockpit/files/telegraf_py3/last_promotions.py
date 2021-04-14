@@ -25,6 +25,8 @@ DEFAULT_PROMOTER_BASE_URL = (
 
 
 def influxdb(promotion):
+    if 'extended_hash' not in promotion.keys():
+        promotion['extended_hash'] = None
     promotion['timestamp'] = format_ts_from_float(promotion['timestamp'])
     return PROMOTION_INFLUXDB_LINE.format(**promotion)
 
@@ -82,7 +84,7 @@ if __name__ == '__main__':
         '--release',
         required=True,
         choices=[
-            'rhos-17', 'rhos-16.2', 'master', 'victoria', 'ussuri', 'train',
+            'rhos-17', 'rhos-16.2', 'master', 'wallaby', 'victoria', 'ussuri', 'train',
             'stein', 'rocky', 'queens'
         ],
         help='Upstream or downstream release.'
