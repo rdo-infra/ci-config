@@ -20,8 +20,7 @@ PROMOTER_CONFIG_ROOT="${PROMOTER_CONFIG_ROOT:=staging}"
 DEFAULT_RELEASES=( "CentOS-8/master" "CentOS-8/wallaby" \
                    "CentOS-8/victoria" "CentOS-8/ussuri" \
                    "CentOS-8/train" "CentOS-7/stein" \
-                   "CentOS-7/rocky" "CentOS-7/queens" \
-                   "CentOS-7/train" )
+                   "CentOS-7/queens" "CentOS-7/train" )
 declare -p DEFAULT_RELEASES
 
 
