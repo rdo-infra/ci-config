@@ -9,7 +9,7 @@
   set_fact:
     commit_url: "{{ dlrn_hash_baseurl }}/{{ promote_source }}/commit.yaml"
   when:
-    - release in ['queens', 'rocky', 'stein', 'train']
+    - release in ['queens', 'stein', 'train']
     - ansible_distribution_major_version is version("8", "<")
 
 # commit/distro hashes for component pipeline (an unique commit hash for each component)
@@ -18,7 +18,7 @@
     commit_url: "{{ dlrn_hash_baseurl }}/component/{{ component }}/{{ promote_source }}/commit.yaml"
   when:
     - component|default(None) != None
-    - release not in ['queens','rocky','stein']
+    - release not in ['queens','stein']
     - ansible_distribution_major_version is version("8", ">=")
 
 - name: print out dlrn_api url
