@@ -17,6 +17,6 @@ export BUILD_SYS='delorean'
 # When ENABLE_PUPPET_MODULES_RPM is true, puppet modules are installed from
 # rpm instead of git repo in p-o-i jobs
 export ENABLE_PUPPET_MODULES_RPM=true
-export IMAGE='template-rdo-centos8-stable'
+export IMAGE='template-rdo-centos8-stream'
 export ANSIBLE_PYTHON_INTERPRETER='/usr/libexec/platform-python'
 export HASH_FILE='/tmp/delorean_victoria_current_tripleo_hash'
