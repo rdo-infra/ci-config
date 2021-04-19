@@ -19,7 +19,7 @@ try:
 except ImportError:
     import urllib.request as url
 
-from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroExtendedHash, DlrnHash
 from dlrnapi_client.rest import ApiException
 from logic import Promoter
 from stage import main as stage_main
@@ -151,9 +151,11 @@ def test_select_candidates(staged_env):
     assert candidate_hashes_list != []
 
     if stage_info['main']['pipeline_type'] == "integration":
-        assert type(candidate_hashes_list[0]) == DlrnAggregateHash
+        assert isinstance(candidate_hashes_list[0], DlrnAggregateHash)
     elif stage_info['main']['pipeline_type'] == "single":
-        assert type(candidate_hashes_list[0]) == DlrnCommitDistroHash
+        assert isinstance(
+            candidate_hashes_list[0],
+            DlrnCommitDistroExtendedHash)
 
 
 def test_promote_all_links(staged_env):
@@ -170,10 +172,11 @@ def test_promote_all_links(staged_env):
     for promoted_hash, label in promoted_pairs:
         if stage_info['main']['pipeline_type'] == "single":
             error_msg = "Single pipeline should promote a commit/distro hash"
-            assert type(promoted_hash) == DlrnCommitDistroHash, error_msg
+            assert isinstance(
+                promoted_hash, DlrnCommitDistroExtendedHash), error_msg
         elif stage_info['main']['pipeline_type'] == "integration":
             error_msg = "Integration pipeline should promote an aggregate hash"
-            assert type(promoted_hash) == DlrnAggregateHash, error_msg
+            assert isinstance(promoted_hash, DlrnAggregateHash), error_msg
 
     promoter_integration_checks.check_dlrn_promoted_hash(
         stage_info=stage_info)
