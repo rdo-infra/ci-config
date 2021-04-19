@@ -3,7 +3,7 @@ import shutil
 import unittest
 
 from common import LockError
-from dlrn_hash import DlrnCommitDistroHash
+from dlrn_hash import DlrnCommitDistroExtendedHash
 
 try:
     # Python3 imports
@@ -151,7 +151,8 @@ class TestForcePromote(unittest.TestCase):
                                    start_process_mock,
                                    init_mock):
 
-        candidate_hash = DlrnCommitDistroHash(commit_hash="a", distro_hash="b")
+        candidate_hash = DlrnCommitDistroExtendedHash(
+            commit_hash="a", distro_hash="b")
         cmd_line = ("--release-config CentOS-8/master.yaml force-promote "
                     "--commit-hash a "
                     "--distro-hash b "

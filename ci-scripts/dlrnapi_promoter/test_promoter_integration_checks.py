@@ -19,7 +19,7 @@ except ImportError:
     import urllib.request as url_lib
 
 import yaml
-from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroExtendedHash, DlrnHash
 from promoter_integration_checks import (check_dlrn_promoted_hash,
                                          compare_tagged_image_hash,
                                          parse_promotion_logs,
@@ -168,19 +168,23 @@ def test_compare_tagged(staged_env):
 
 success_pattern_container_positive_single_pipeline = (
     "Candidate hash 'commit: 360d335e94246d7095672c5aa92b59afa380a059, "
-    "distro: 9e5988125e88f803ba20743be7aa99079dd275f2, component: None, "
+    "distro: 9e5988125e88f803ba20743be7aa99079dd275f2, extended: None, "
+    "component: None, "
     "timestamp: None': criteria met, attempting promotion to "
     "tripleo-ci-staging-promoted\n"
     "Qcow promote 'commit: 360d335e94246d7095672c5aa92b59afa380a059, distro:"
-    " 9e5988125e88f803ba20743be7aa99079dd275f2, component: None, "
+    " 9e5988125e88f803ba20743be7aa99079dd275f2, extended: None, "
+    "component: None, "
     "timestamp: None' to tripleo-ci-staging-promoted: Successful promotion\n"
     "Candidate hash 'commit: 360d335e94246d7095672c5aa92b59afa380a059, "
-    "distro: 9e5988125e88f803ba20743be7aa99079dd275f2, component: None, "
+    "distro: 9e5988125e88f803ba20743be7aa99079dd275f2, extended: None, "
+    "component: None, "
     "timestamp: None': SUCCESSFUL promotion to tripleo-ci-staging-promoted\n"
     "promoter SUCCESS promoting centos7-master tripleo-ci-staging as"
     " tripleo-ci-staging-promoted \n"
     "Containers promote 'commit: 360d335e94246d7095672c5aa92b59afa380a059, "
-    "distro: 9e5988125e88f803ba20743be7aa99079dd275f2, component: None, "
+    "distro: 9e5988125e88f803ba20743be7aa99079dd275f2, extended: None, "
+    "component: None, "
     "timestamp: None' to tripleo-ci-staging-promoted: Successful promotion\n"
     "Summary: Promoted 1 hashes this round\n"
     "Promoter terminated normally\n"
@@ -221,7 +225,7 @@ def test_parse(staged_env):
     stage_info = staged_env
     candidate_dict = stage_info['dlrn']['promotions']['promotion_candidate']
     candidate_hash = DlrnHash(source=candidate_dict)
-    if type(candidate_hash) is DlrnCommitDistroHash:
+    if type(candidate_hash) is DlrnCommitDistroExtendedHash:
         with open(os.path.expanduser(stage_info['main']['log_file']),
                   "w") as log_file:
             log_file.write(success_pattern_container_positive_single_pipeline)
