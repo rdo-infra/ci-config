@@ -13,7 +13,7 @@ import pytest
 import yaml
 from common import close_logging
 from config import PromoterConfigFactory
-from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroExtendedHash, DlrnHash
 from logic import Promoter
 from stage import main as stage_main
 
@@ -170,7 +170,7 @@ def test_promote_qcows(staged_env):
 
     if stage_info['main']['pipeline_type'] == "single":
         error_msg = "Single pipeline should promote a commit/distro hash"
-        assert type(candidate_hash) == DlrnCommitDistroHash, error_msg
+        assert type(candidate_hash) == DlrnCommitDistroExtendedHash, error_msg
     else:
         error_msg = "Integration pipeline should promote an aggregate hash"
         assert type(candidate_hash) == DlrnAggregateHash, error_msg
