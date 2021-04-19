@@ -46,6 +46,7 @@
                 },
                 "styles":[
                     {
+                        "$$hashKey":"object:179",
                         "alias":"Time",
                         "align":"auto",
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
@@ -54,6 +55,7 @@
                         "unit":"dateTimeFromNow"
                     },
                     {
+                        "$$hashKey":"object:180",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -69,6 +71,7 @@
                         "unit":"short"
                     },
                     {
+                        "$$hashKey":"object:181",
                         "alias":"promotion details",
                         "align":"auto",
                         "colorMode":null,
@@ -90,6 +93,7 @@
                         "unit":"short"
                     },
                     {
+                        "$$hashKey":"object:182",
                         "alias":"Time since last build",
                         "align":"auto",
                         "colorMode":null,
@@ -128,6 +132,43 @@
                         "query":"SELECT release, distro, promotion_details, \"consistent_date\", last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT release, distro, promotion_details, \"consistent_date\", last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'wallaby' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "rawQuery":true,
+                        "refId":"I",
                         "resultFormat":"table",
                         "select":[
                             [
@@ -313,43 +354,6 @@
                         "query":"SELECT release, distro, promotion_details, \"consistent_date\",  last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'stein' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY release, \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"E",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "value"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"mean"
-                                }
-                            ]
-                        ],
-                        "tags":[]
-                    },
-                    {
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "$__interval"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "null"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, \"consistent_date\", last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'rocky' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY release, \"name\" fill(0)",
-                        "rawQuery":true,
-                        "refId":"F",
                         "resultFormat":"table",
                         "select":[
                             [
