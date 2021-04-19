@@ -16,7 +16,7 @@ except ImportError:
     import mock
 
 from config import PromoterConfigFactory
-from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroExtendedHash
 from repo_client import RepoClient
 
 log_dir = "~/web/promoter_logs"
@@ -29,15 +29,18 @@ class RepoSetup(unittest.TestCase):
         if not os.path.isdir(log_d):
             os.makedirs(log_d)
 
-        self.dlrn_hash_commitdistro = DlrnCommitDistroHash(commit_hash='abc',
+        self.dlrn_hash_commitdistro = DlrnCommitDistroExtendedHash(
+                                                           commit_hash='abc',
                                                            distro_hash='def',
                                                            component="comp1",
                                                            timestamp=1)
-        self.dlrn_hash_commitdistro2 = DlrnCommitDistroHash(commit_hash='ghj',
+        self.dlrn_hash_commitdistro2 = DlrnCommitDistroExtendedHash(
+                                                            commit_hash='ghj',
                                                             distro_hash='klm',
                                                             component="comp2",
                                                             timestamp=2)
-        self.dlrn_hash_aggregate = DlrnAggregateHash(commit_hash='abc',
+        self.dlrn_hash_aggregate = DlrnAggregateHash(
+                                                     commit_hash='abc',
                                                      distro_hash='def',
                                                      aggregate_hash='ghjk',
                                                      timestamp=1)
