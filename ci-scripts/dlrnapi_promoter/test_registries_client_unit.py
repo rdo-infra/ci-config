@@ -12,7 +12,7 @@ except ImportError:
     import mock
 
 from common import PromotionError
-from dlrn_hash import DlrnCommitDistroHash, DlrnHash
+from dlrn_hash import DlrnCommitDistroExtendedHash, DlrnHash
 from test_unit_fixtures import ConfigSetup, hashes_test_cases
 
 
@@ -23,7 +23,7 @@ class TestPrepareExtraVars(ConfigSetup):
     def setUp(self):
         super(TestPrepareExtraVars, self).setUp()
         self.client = self.promoter.registries_client
-        self.dlrn_hash_commitdistro = DlrnCommitDistroHash(commit_hash='abc',
+        self.dlrn_hash_commitdistro = DlrnCommitDistroExtendedHash(commit_hash='abc',
                                                            distro_hash='def',
                                                            component="comp1",
                                                            timestamp=1)
@@ -196,7 +196,7 @@ class TestPromote(ConfigSetup):
     def setUp(self):
         super(TestPromote, self).setUp()
         self.client = self.promoter.registries_client
-        self.dlrn_hash_commitdistro = DlrnCommitDistroHash(
+        self.dlrn_hash_commitdistro = DlrnCommitDistroExtendedHash(
             commit_hash='abc',
             distro_hash='def',
             component="comp1",

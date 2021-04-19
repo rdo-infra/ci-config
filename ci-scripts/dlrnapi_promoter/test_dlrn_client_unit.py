@@ -9,7 +9,7 @@ import pytest
 import yaml
 from common import PromotionError, setup_logging, str_api_object
 from dlrn_client import DlrnClient, DlrnClientConfig, HashChangedError
-from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroExtendedHash, DlrnHash
 from dlrnapi_client.rest import ApiException
 from test_unit_fixtures import hashes_test_cases
 
@@ -57,11 +57,13 @@ class DlrnSetup(unittest.TestCase):
         self.api_exception.reason = "Not found"
 
         # Set up some ready to use hashes
-        self.dlrn_hash_commitdistro1 = DlrnCommitDistroHash(commit_hash='a',
+        self.dlrn_hash_commitdistro1 = DlrnCommitDistroExtendedHash(
+                                                            commit_hash='a',
                                                             distro_hash='b',
                                                             component="comp1",
                                                             timestamp=1)
-        self.dlrn_hash_commitdistro2 = DlrnCommitDistroHash(commit_hash='c',
+        self.dlrn_hash_commitdistro2 = DlrnCommitDistroExtendedHash(
+                                                            commit_hash='c',
                                                             distro_hash='d',
                                                             component="comp2",
                                                             timestamp=2)
@@ -171,7 +173,7 @@ class TestHashesToHashes(DlrnSetup):
     def test_hashes_to_hashes_single_hash(self, mock_log_debug):
         for api_hash_list in self.api_hashes_all_types_with_duplicates:
             dlrn_hash = self.client.hashes_to_hashes(api_hash_list, count=1)
-            self.assertIn(type(dlrn_hash), [DlrnCommitDistroHash,
+            self.assertIn(type(dlrn_hash), [DlrnCommitDistroExtendedHash,
                                             DlrnAggregateHash])
             mock_log_debug.assert_has_calls([
                 mock.call("Added hash %s built from %s", dlrn_hash,
@@ -282,7 +284,7 @@ class TestFetchHashes(DlrnSetup):
             self.assertEqual(params.limit, 1)
             # Ensure that fetch_hashes return a single hash and not a list when
             # count=1
-            self.assertIn(type(dlrn_hash), [DlrnCommitDistroHash,
+            self.assertIn(type(dlrn_hash), [DlrnCommitDistroExtendedHash,
                                             DlrnAggregateHash])
             mock_log_debug.assert_has_calls([
                 mock.call("Fetching hashes with criteria: %s", str_params),
@@ -346,7 +348,7 @@ class TestFetchJobs(DlrnSetup):
     def test_fetch_jobs_api_error(self, api_repo_status_get_mock,
                                   mock_log_error):
         api_repo_status_get_mock.side_effect = self.api_exception
-        dlrn_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b')
+        dlrn_hash = DlrnCommitDistroExtendedHash(commit_hash='a', distro_hash='b')
         with self.assertRaises(ApiException):
             self.client.fetch_jobs(dlrn_hash)
         mock_log_error.assert_has_calls([
@@ -363,7 +365,7 @@ class TestFetchJobs(DlrnSetup):
     def test_fetch_jobs_no_jobs(self, api_repo_status_get_mock,
                                 mock_log_debug, mock_log_error):
         api_repo_status_get_mock.return_value = []
-        dlrn_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b')
+        dlrn_hash = DlrnCommitDistroExtendedHash(commit_hash='a', distro_hash='b')
         job_list = self.client.fetch_jobs(dlrn_hash)
         self.assertEqual(len(job_list), 0)
         self.assertEqual(job_list, [])
@@ -382,7 +384,7 @@ class TestFetchJobs(DlrnSetup):
                                 mock_log_debug,
                                 mock_log_error):
         api_repo_status_get_mock.return_value = self.api_jobs
-        dlrn_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b')
+        dlrn_hash = DlrnCommitDistroExtendedHash(commit_hash='a', distro_hash='b')
         job_list = self.client.fetch_jobs(dlrn_hash)
         self.assertEqual(len(job_list), 2)
         self.assertEqual(job_list, ["job0", "job1"])
@@ -896,7 +898,7 @@ class TestPromote(DlrnSetup):
 class TestVotes(DlrnSetup):
 
     def test_get_civotes_info_commitdistro(self):
-        dlrn_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b')
+        dlrn_hash = DlrnCommitDistroExtendedHash(commit_hash='a', distro_hash='b')
         get_detail = self.client.get_civotes_info(dlrn_hash)
         urlparse(get_detail)
         detail = ("Check results at: "
@@ -956,7 +958,7 @@ class TestVotes(DlrnSetup):
                                        mock_log_info,
                                        mock_log_debug,
                                        mock_log_error):
-        dlrn_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b',
+        dlrn_hash = DlrnCommitDistroExtendedHash(commit_hash='a', distro_hash='b',
                                          timestamp=1)
         params = copy.deepcopy(self.client.report_params)
         params.aggregate_hash = None
@@ -988,7 +990,7 @@ class TestVotes(DlrnSetup):
     @patch('dlrnapi_client.DefaultApi.api_report_result_post')
     def test_vote_api_error(self, mock_api_report, mock_log_error):
         mock_api_report.side_effect = self.api_exception
-        dlrn_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b',
+        dlrn_hash = DlrnCommitDistroExtendedHash(commit_hash='a', distro_hash='b',
                                          timestamp=1)
         with self.assertRaises(ApiException):
             self.client.vote(dlrn_hash, 'job_id', 'url', True)
@@ -1004,7 +1006,7 @@ class TestVotes(DlrnSetup):
     @patch('dlrnapi_client.DefaultApi.api_report_result_post')
     def test_vote_empty_api_response(self, mock_api_report, mock_log_error):
         mock_api_report.return_value = []
-        dlrn_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b',
+        dlrn_hash = DlrnCommitDistroExtendedHash(commit_hash='a', distro_hash='b',
                                          timestamp=1)
         with self.assertRaises(PromotionError):
             self.client.vote(dlrn_hash, 'job_id', 'url', True)
