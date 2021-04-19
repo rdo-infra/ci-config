@@ -19,7 +19,7 @@ except ImportError:
     import urllib.request as url_lib
 
 import yaml
-from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroExtendedHash, DlrnHash
 from promoter_integration_checks import (check_dlrn_promoted_hash,
                                          compare_tagged_image_hash,
                                          parse_promotion_logs,
@@ -221,7 +221,7 @@ def test_parse(staged_env):
     stage_info = staged_env
     candidate_dict = stage_info['dlrn']['promotions']['promotion_candidate']
     candidate_hash = DlrnHash(source=candidate_dict)
-    if type(candidate_hash) is DlrnCommitDistroHash:
+    if type(candidate_hash) is DlrnCommitDistroExtendedHash:
         with open(os.path.expanduser(stage_info['main']['log_file']),
                   "w") as log_file:
             log_file.write(success_pattern_container_positive_single_pipeline)
