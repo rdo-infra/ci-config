@@ -73,24 +73,6 @@
             create 0600 root root
         }
 
-  - name: Create cron job to run mini cleanup of servers in error
-    cron:
-      name: 'Cleaning servers in error'
-      minute: 30
-      job: >-
-        source /etc/nodepoolrc &&
-        bash /opt/stack/ci-config/ci-scripts/infra-cleanup/cleanup-servers.sh
-        &>>/var/log/clean_errored_servers.log
-
-  - name: Create cron job to run mini cleanup of failed stacks
-    cron:
-      name: 'Cleaning failed stacks'
-      minute: 40
-      job: >-
-        source /etc/nodepoolrc &&
-        bash /opt/stack/ci-config/ci-scripts/infra-cleanup/cleanup-failed-stacks.sh
-        &>>/var/log/clean_failed_stacks.log
-
   - name: Create cron job to cleanup keypairs
     cron:
       name: 'Cleaning keypairs'
@@ -100,32 +82,13 @@
         bash /opt/stack/ci-config/ci-scripts/infra-cleanup/cleanup-keys.sh
         &>>/var/log/clean_keypairs.log
 
-  # - name: Create cron job to clean OVB old stacks
-  #   cron:
-  #     name: 'Cleaning old OVB stacks'
-  #     minute: 0
-  #     job: >-
-  #       source /etc/nodepoolrc &&
-  #       bash /opt/stack/ci-config/ci-scripts/infra-cleanup/ovb-tenant-cleanup.sh
-  #       &>>/var/log/clean_stacks_rdo.log'
-
-  # - name: Create cron job to clean OVB old stacks on vexxhost
-  #   cron:
-  #     name: 'Cleaning old OVB stacks on vexxhost'
-  #     minute: 30
-  #     job: >-
-  #       source /etc/vexxhostrc &&
-  #       bash /opt/stack/ci-config/ci-scripts/infra-cleanup/ovb-tenant-cleanup.sh
-  #       &>>/var/log/clean_stacks_vexx.log
-
-  - name: Create cron job to get influxdb stats
+  - name: Create cron job to clean OVB old stacks on vexxhost
     cron:
-      name: 'Get influxdb stats'
-      minute: '*/15'
+      name: 'Cleaning old OVB stacks on vexxhost'
+      minute: 30
       job: >-
-        python3 /opt/stack/ci-config/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/rdocloud.py
-        --webdir {{ web_directory }}
-        &>/var/log/influxdb_stats.log
+        source /etc/vexxhostrc &&
+        python3 /opt/stack/ci-config/ci-scripts/infra-cleanup/tenant_cleanup/ovb_tenant_cleanup.py
 
   - name: Create cron job to get influxdb stats on vexxhost
     cron:
