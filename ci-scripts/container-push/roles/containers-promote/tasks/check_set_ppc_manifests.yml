@@ -62,7 +62,8 @@
 - name: 'Set fact for ppc_manifests false if any containers failed to pull'
   set_fact:
     ppc_manifests: false
-  when: pulled_ppc.results|map(attribute='failed')|select|list == []
+    matches: "{{ pulled_ppc.results|map(attribute='failed')|select('match', '^t.*')|list }}"
+  when: pulled_ppc.results|map(attribute='failed')|select('match', '^t.*')|list|length > 0
 
 # When staging also set ppc_manifests into stage-info.yaml
 - name: set ppc_manifests into stage-info.yaml when staging environment
