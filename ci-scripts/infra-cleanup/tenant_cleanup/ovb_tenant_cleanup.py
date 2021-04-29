@@ -269,6 +269,18 @@ def routers_with_identifier(cloud_name, identifier):
     return router_list
 
 
+def router_interface_delete(cloud_name, router_id, dry_run=False):
+    """ This function takes a router id and deattaches its
+        interfaces"""
+    conn = openstack.connect(cloud=cloud_name)
+    for port in conn.network.ports(device_id=router_id):
+        if port['device_owner'] == 'network:router_interface':
+            logger.info("Deattaching %s from  %s", port['id'], router_id)
+            if not dry_run:
+                conn.network.remove_interface_from_router(
+                        router_id, port_id=port['id'])
+
+
 def router_delete(cloud_name, router_ids, dry_run=False):
     """ This function takes a list of routers and delete them if dry_run
         is False.
@@ -280,6 +292,7 @@ def router_delete(cloud_name, router_ids, dry_run=False):
         else:
             for router_id in router_ids:
                 logger.info("Deleting router ID %s", router_id)
+                router_interface_delete(cloud_name, router_id, dry_run)
                 conn.network.delete_router(router_id)
     else:
         logger.info("There are no router to delete")
@@ -335,6 +348,8 @@ def delete_individual_resources(cloud_name, stack_list, prefix='baremetal_',
             logger.info("Identifier is %s", identifier)
             fetched_servers = servers_with_identifier(cloud_name, identifier)
             server_delete(cloud_name, fetched_servers, dry_run)
+            fetched_routers = routers_with_identifier(cloud_name, identifier)
+            router_delete(cloud_name, fetched_routers, dry_run)
             # delete empty ports associated with subnets and then networkso
             fetched_subnets_list = subnets_with_identifier(cloud_name,
                                                            identifier)
@@ -344,8 +359,6 @@ def delete_individual_resources(cloud_name, stack_list, prefix='baremetal_',
             port_delete(cloud_name, fetched_subnet_ports, dry_run)
             fetched_networks = networks_with_identifier(cloud_name, identifier)
             network_delete(cloud_name, fetched_networks, dry_run)
-            fetched_routers = routers_with_identifier(cloud_name, identifier)
-            router_delete(cloud_name, fetched_routers, dry_run)
             fetched_sec_groups = sec_gp_with_identifier(cloud_name, identifier)
             sec_group_delete(cloud_name, fetched_sec_groups, dry_run)
 
