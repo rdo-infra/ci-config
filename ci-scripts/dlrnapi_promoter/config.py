@@ -399,7 +399,10 @@ class PromoterConfig(ConfigCore):
         :return: A list
         """
         if isinstance(allowed_clients, str):
-            return allowed_clients.split(',')
+            allowed_clients_list = allowed_clients.split(',')
+            if self.release == "queens":
+                return allowed_clients_list.remove('qcow_client')
+            return allowed_clients_list
         else:
             self._log.error("allowed_clients is not a string")
             return allowed_clients
