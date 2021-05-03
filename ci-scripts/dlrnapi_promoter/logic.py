@@ -117,6 +117,8 @@ class Promoter(object):
 
         if allowed_clients is None:
             allowed_clients = self.config.allowed_clients
+           if self.config.release == 'queens':
+               allowed_clients.remove('qcow_client')
 
         # DLRN client should always be called last,
         # This ensures the order of the called clients, it uses alphabetical
