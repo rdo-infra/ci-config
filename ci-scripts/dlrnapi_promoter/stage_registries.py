@@ -219,7 +219,8 @@ class StagingRegistries(object):
         self.registries = {}
         for registry_conf in self.config.registries:
             registry_conf = copy.deepcopy(registry_conf)
-            registry_conf['host'] = "localhost:{}".format(registry_conf['port'])
+            registry_conf['host'] = "{}:{}".format(registry_conf['hostname'],
+                                                   registry_conf['port'])
             registry_conf['url'] = "http://{}".format(registry_conf['host'])
             registry_conf['namespace'] = self.config.containers['namespace']
             type = registry_conf.pop('type')

@@ -165,11 +165,13 @@ class StagingContainers(object):
                 target_image_name = "openstack-{}".format(image_name)
             for tag in tags:
                 image = "{}/{}".format(self.namespace, target_image_name)
-                full_image = "localhost:{}/{}".format(
+                full_image = "{}:{}/{}".format(
+                    self.source_registry['hostname'],
                     self.source_registry['port'], image)
                 self.log.debug("Pushing container %s:%s"
-                               " to localhost:%s",
-                               image, tag, self.source_registry['port'])
+                               " to %s:%s",
+                               image, tag, self.source_registry['hostname'],
+                               self.source_registry['port'])
                 # Skip ppc tagging on the last image in the list
                 # to emulate real life scenario
                 if "ppc64le" in tag and image_name == self.suffixes[-1]:

@@ -46,7 +46,7 @@ def conditional_run(orig_function):
 # script to run staging dlrn server
 dlrn_staging_server = '''#!/usr/bin/env python3
 from dlrn.api import app
-app.run(debug=True, port=58080)
+app.run(debug=True, host='{}', port=58080)
 '''
 
 # template for the single pipeline delorean.repo to put in
@@ -412,7 +412,9 @@ class DlrnStagingServer(object):
         dlrn_server_path = os.path.join(self.server_root,
                                         "dlrn_staging_server.py")
         with open(dlrn_server_path, "w") as dlrn_staging_script:
-            dlrn_staging_script.write(dlrn_staging_server)
+            dlrn_staging_script.write(dlrn_staging_server.format(
+                self.config.dlrn['server']['host']
+            ))
 
         # Create server configuration in project.ini
         # It'optional for the single pipeline, but needed for the component
