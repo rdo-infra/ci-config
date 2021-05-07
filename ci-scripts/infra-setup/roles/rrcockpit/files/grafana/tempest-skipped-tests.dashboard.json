@@ -22,6 +22,12 @@
                 "columns":[],
                 "datasource":"mariadb",
                 "description":"List the tests on master passing or failing",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":13,
@@ -41,6 +47,7 @@
                 "styles":[
                     {
                         "alias":"Last passing",
+                        "align":"auto",
                         "colorMode":"cell",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
@@ -91,18 +98,190 @@
                 "timeShift":null,
                 "title":"Tests in master",
                 "transform":"table",
-                "type":"table"
+                "type":"table-old"
             },
             {
                 "columns":[],
                 "datasource":"mariadb",
-                "description":"List the tests on ussuri passing or failing",
+                "description":"List the tests on wallaby passing or failing",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":13,
                     "w":24,
                     "x":0,
                     "y":13
+                },
+                "id":8,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "$$hashKey":"object:116",
+                        "alias":"Last passing",
+                        "align":"auto",
+                        "colorMode":"cell",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"last_ten_passing",
+                        "thresholds":[
+                            "1",
+                            " 9"
+                        ],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "format":"table",
+                        "group":[],
+                        "metricColumn":"none",
+                        "rawQuery":true,
+                        "rawSql":"SELECT testname, passing, failing, last_ten_passing, last_ten_failing from rr_skipped_list where branch = 'wallaby' order by last_ten_passing",
+                        "refId":"A",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"column"
+                                }
+                            ]
+                        ],
+                        "timeColumn":"time",
+                        "where":[
+                            {
+                                "name":"$__timeFilter",
+                                "params":[],
+                                "type":"macro"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"Tests in wallaby",
+                "transform":"table",
+                "type":"table-old"
+            },
+            {
+                "columns":[],
+                "datasource":"mariadb",
+                "description":"List the tests on victoria passing or failing",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":13,
+                    "w":24,
+                    "x":0,
+                    "y":26
+                },
+                "id":9,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "$$hashKey":"object:116",
+                        "alias":"Last passing",
+                        "align":"auto",
+                        "colorMode":"cell",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"last_ten_passing",
+                        "thresholds":[
+                            "1",
+                            " 9"
+                        ],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "format":"table",
+                        "group":[],
+                        "metricColumn":"none",
+                        "rawQuery":true,
+                        "rawSql":"SELECT testname, passing, failing, last_ten_passing, last_ten_failing from rr_skipped_list where branch = 'victoria' order by last_ten_passing",
+                        "refId":"A",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"column"
+                                }
+                            ]
+                        ],
+                        "timeColumn":"time",
+                        "where":[
+                            {
+                                "name":"$__timeFilter",
+                                "params":[],
+                                "type":"macro"
+                            }
+                        ]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"Tests in victoria",
+                "transform":"table",
+                "type":"table-old"
+            },
+            {
+                "columns":[],
+                "datasource":"mariadb",
+                "description":"List the tests on ussuri passing or failing",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":13,
+                    "w":24,
+                    "x":0,
+                    "y":39
                 },
                 "id":3,
                 "links":[],
@@ -116,6 +295,7 @@
                 "styles":[
                     {
                         "alias":"Last passing",
+                        "align":"auto",
                         "colorMode":"cell",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
@@ -166,18 +346,24 @@
                 "timeShift":null,
                 "title":"Tests in ussuri",
                 "transform":"table",
-                "type":"table"
+                "type":"table-old"
             },
             {
                 "columns":[],
                 "datasource":"mariadb",
                 "description":"List the tests on train passing or failing",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":12,
                     "w":24,
                     "x":0,
-                    "y":26
+                    "y":52
                 },
                 "id":4,
                 "links":[],
@@ -191,6 +377,7 @@
                 "styles":[
                     {
                         "alias":"Last passing",
+                        "align":"auto",
                         "colorMode":"cell",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
@@ -241,18 +428,24 @@
                 "timeShift":null,
                 "title":"Tests in train",
                 "transform":"table",
-                "type":"table"
+                "type":"table-old"
             },
             {
                 "columns":[],
                 "datasource":"mariadb",
                 "description":"List the tests on stein passing or failing",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":12,
                     "w":24,
                     "x":0,
-                    "y":38
+                    "y":64
                 },
                 "id":5,
                 "links":[],
@@ -266,6 +459,7 @@
                 "styles":[
                     {
                         "alias":"Last passing",
+                        "align":"auto",
                         "colorMode":"cell",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
@@ -316,18 +510,24 @@
                 "timeShift":null,
                 "title":"Tests in stein",
                 "transform":"table",
-                "type":"table"
+                "type":"table-old"
             },
             {
                 "columns":[],
                 "datasource":"mariadb",
                 "description":"List the tests on rocky passing or failing",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":15,
                     "w":24,
                     "x":0,
-                    "y":50
+                    "y":76
                 },
                 "id":6,
                 "links":[],
@@ -341,6 +541,7 @@
                 "styles":[
                     {
                         "alias":"Last passing",
+                        "align":"auto",
                         "colorMode":"cell",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
@@ -391,18 +592,24 @@
                 "timeShift":null,
                 "title":"Tests in rocky",
                 "transform":"table",
-                "type":"table"
+                "type":"table-old"
             },
             {
                 "columns":[],
                 "datasource":"mariadb",
                 "description":"List the tests on queens passing or failing",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":13,
                     "w":24,
                     "x":0,
-                    "y":65
+                    "y":91
                 },
                 "id":7,
                 "links":[],
@@ -416,6 +623,7 @@
                 "styles":[
                     {
                         "alias":"Last passing",
+                        "align":"auto",
                         "colorMode":"cell",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
@@ -466,10 +674,10 @@
                 "timeShift":null,
                 "title":"Tests in queens",
                 "transform":"table",
-                "type":"table"
+                "type":"table-old"
             }
         ],
-        "schemaVersion":18,
+        "schemaVersion":26,
         "style":"dark",
         "tags":[],
         "templating":{
