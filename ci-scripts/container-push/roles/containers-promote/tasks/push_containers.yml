@@ -1,0 +1,14 @@
+---
+- name: Check if we are logged
+  command: podman login --get-login "{{ registry.host }}"
+  register: registry_logged
+  changed_when: false
+
+- name: Login in the registry if we are not logged
+  command: podman login "{{ registry.host }} --username "{{ registry.username }}" --password "{{ registry.password }}"
+  when: registry_logged.rc == 0 
+  changed_when: false
+
+- name: Copy containers
+  command:
+
