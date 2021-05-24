@@ -59,7 +59,8 @@ class RegistriesClient(object):
                            "commit")
             raise PromotionError
 
-        containers_list = self.repo_client.get_containers_list(tripleo_sha)
+        containers_dict = self.repo_client.get_containers_list(tripleo_sha)
+        containers_list = containers_dict['containers_full_list']
         if not containers_list:
             self.log.error("Containers list is empty")
             raise PromotionError
@@ -74,6 +75,13 @@ class RegistriesClient(object):
             'source_namespace': self.config.source_namespace,
             'target_namespace': self.config.target_namespace
         }
+        try:
+           ppc_containers_list = containers_dict['ppc_containers_full_list']
+        except KeyError:
+            self.log.debug("ppc manifest push may be set as false")
+        if ppc_containers_list:
+            extra_vars('ppc_containers_list') = ppc_containers_list
+
         self.extra_vars.update(extra_vars)
         __, extra_vars_path = tempfile.mkstemp(suffix=".yaml")
         self.log.debug("Crated extra vars file at %s", extra_vars_path)
