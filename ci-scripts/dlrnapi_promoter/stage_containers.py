@@ -131,6 +131,7 @@ class StagingContainers(object):
         self.pushed_images = []
         self.containers_root = self.config.containers['root']
         self.excluded_containers = ['nonexisting', 'excluded']
+        self.exclude_ppc_containers = ['nonppc', 'ppc_excluded']
 
     def setup(self):
         """
@@ -244,6 +245,9 @@ class StagingContainers(object):
                 'master': self.excluded_containers,
                 'ussuri': self.excluded_containers,
                 'train': self.excluded_containers,
+            },
+            'exclude_ppc_containers': {
+                'master': self.exclude_ppc_containers
             },
         }
         f_name = self.containers_list_exclude_config

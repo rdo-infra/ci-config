@@ -16,7 +16,7 @@
     - name: Check that the containers are pushed correctly to all target registries
       loop: "{{ target_registries | map(attribute='host') | product(stage_info.containers.images) | map('join', '/') | list }}"
       shell: |
-        docker manifest inspect --insecure {{ image }}
+        docker inspect --insecure {{ image }}
       loop_control:
         loop_var: image
       when:
