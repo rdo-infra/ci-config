@@ -1,0 +1,43 @@
+# Add container name prefix to the list of ppc containers
+ppc_c_list=(
+{% for item in ppc_containers_list %}
+'{{ container_name_prefix }}-{{ item }}'
+{% endfor %}
+)
+
+# Pick a target registry name over the list of target_registries
+{% for registry in target_registries %}
+target_registry='{{ registry.host }}/{{ registry.namespace }}'
+{% endfor %}
+source_registry='{{ source_registry.host }}/{{ source_registry.namespace }}'
+
+
+LOG_HOME="{{- tmp_file_root -}}"
+
+# Set registry value for inspecting the containers
+if [ $# -eq 3 ]; then
+    containers_file=$2
+    missing_containers_file=$3
+    if [[ "$1" == "target" ]]; then
+        registry=$target_registry
+    else
+        registry=$source_registry
+    fi
+else
+    ppc_containers_file=$LOG_HOME/{{ ppc_containers_file.split("/")[-1] }}
+    missing_ppc_containers_file=$LOG_HOME/{{ missing_ppc_containers_file.split("/")[-1] }}
+    registry=$source_registry
+fi
+
+# Inspect all the list of ppc containers and put the name of container
+# to the respective files with the help of inspect result
+for container in "${ppc_c_list[@]}"; do
+    echo "$container" >> $LOG_HOME/ppc_inspect_logs.txt
+    docker manifest inspect --insecure "$registry/$container:{{ full_hash }}_{{ ppc_tag }}" >> $LOG_HOME/ppc_inspect_logs.txt
+    res=$?
+    if [ $res -eq 0 ]; then
+        echo "$container" >> $ppc_containers_file
+    else
+        echo "$container" >> $missing_ppc_containers_file
+    fi
+done
