@@ -59,7 +59,15 @@ class RegistriesClient(object):
                            "commit")
             raise PromotionError
 
+        ppc_containers_list = []
+        x86_containers_list = []
         containers_list = self.repo_client.get_containers_list(tripleo_sha)
+        if isinstance(containers_list, dict):
+            x86_containers_list = containers_list['containers_list']
+            try:
+                ppc_containers_list = containers_list['ppc_containers_list']
+            except KeyError:
+                self.log.debug("ppc manifest push may be set as false")
         if not containers_list:
             self.log.error("Containers list is empty")
             raise PromotionError
@@ -70,10 +78,12 @@ class RegistriesClient(object):
             'commit_hash': candidate_hash.commit_hash,
             'distro_hash': candidate_hash.distro_hash,
             'full_hash': candidate_hash.full_hash,
-            'containers_list': containers_list,
+            'containers_list': x86_containers_list,
+            'ppc_containers_list': ppc_containers_list,
             'source_namespace': self.config.source_namespace,
             'target_namespace': self.config.target_namespace
         }
+
         self.extra_vars.update(extra_vars)
         __, extra_vars_path = tempfile.mkstemp(suffix=".yaml")
         self.log.debug("Crated extra vars file at %s", extra_vars_path)
