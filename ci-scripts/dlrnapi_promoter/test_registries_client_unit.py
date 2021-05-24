@@ -110,7 +110,7 @@ class TestPrepareExtraVars(ConfigSetup):
 
         get_versions_mock.return_value = "reader"
         get_commit_mock.return_value = "abc"
-        get_containers_mock.return_value = []
+        get_containers_mock.return_value = {'containers_list': []}
         with self.assertRaises(PromotionError):
             self.client.prepare_extra_vars(self.dlrn_hash_commitdistro,
                                            "current-tripleo",
@@ -146,7 +146,7 @@ class TestPrepareExtraVars(ConfigSetup):
 
         get_versions_mock.return_value = "reader"
         get_commit_mock.return_value = "abc"
-        get_containers_mock.return_value = ['a', 'b']
+        get_containers_mock.return_value = {'containers_list': ['a', 'b']}
         extra_vars_path = \
             self.client.prepare_extra_vars(self.dlrn_hash_commitdistro,
                                            "current-tripleo",
@@ -165,6 +165,7 @@ class TestPrepareExtraVars(ConfigSetup):
             'target_registries_push': 'true',
             'candidate_label': "tripleo-ci-testing",
             "named_label": "current-tripleo",
+            'ppc_containers_list': [],
             "source_namespace": "tripleomaster",
             "target_namespace": "tripleomaster",
             "commit_hash": self.dlrn_hash_commitdistro.commit_hash,
