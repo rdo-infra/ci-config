@@ -165,6 +165,7 @@ class TestPrepareExtraVars(ConfigSetup):
             'target_registries_push': 'true',
             'candidate_label': "tripleo-ci-testing",
             "named_label": "current-tripleo",
+            'ppc_containers_list': [],
             "source_namespace": "tripleomaster",
             "target_namespace": "tripleomaster",
             "commit_hash": self.dlrn_hash_commitdistro.commit_hash,
