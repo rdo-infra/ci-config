@@ -341,8 +341,9 @@ class TestGetContainersList(RepoSetup):
         )
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
-        self.assertEqual(containers_list, ['nova-api', 'neutron-server',
-                                           'ovn-controller'])
+        self.assertEqual(containers_list,
+                         {'containers_full_list': ['nova-api',
+                          'neutron-server', 'ovn-controller']})
         mock_log_debug.assert_has_calls([
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
@@ -361,7 +362,8 @@ class TestGetContainersList(RepoSetup):
             'container-images/tripleo_containers.yaml')
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
-        self.assertEqual(containers_list, ['base', 'os', 'aodh-base'])
+        self.assertEqual(containers_list, {'containers_full_list':
+                                           ['base', 'os', 'aodh-base']})
         mock_log_debug.assert_has_calls([
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
@@ -381,7 +383,8 @@ class TestGetContainersList(RepoSetup):
         )
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
-        self.assertEqual(containers_list, ['base', 'os', 'aodh-base'])
+        self.assertEqual(containers_list,
+                         {'containers_full_list': ['base', 'os', 'aodh-base']})
         mock_log_debug.assert_has_calls([
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
@@ -414,7 +417,7 @@ class TestGetContainersList(RepoSetup):
                                                mock_log_debug,
                                                mock_log_error):
         containers_list = self.client.get_containers_list("abc")
-        self.assertEqual(containers_list, [])
+        self.assertEqual(containers_list, {'containers_full_list': []})
         mock_log_debug.assert_has_calls([
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
@@ -451,7 +454,8 @@ class TestGetContainersList(RepoSetup):
                                    mock_log_exception,
                                    mock_log_debug):
         input_full_list = ['nova-api', 'neutron-server', 'excluded']
-        expect_full_list = ['nova-api', 'neutron-server']
+        expect_full_list = {'containers_full_list': ['nova-api',
+                                                     'neutron-server']}
         full_list = self.client.load_excludes(input_full_list)
         self.assertEqual(full_list, expect_full_list)
 
@@ -479,6 +483,7 @@ class TestGetContainersList(RepoSetup):
         self.client.containers_list_exclude_config = 'file:///not/existing'
         input_full_list = ['nova-api', 'neutron-server', 'excluded']
         full_list = self.client.load_excludes(input_full_list)
+        full_list = full_list['containers_full_list']
         self.assertEqual(full_list, input_full_list)
 
         mock_log_warning.assert_has_calls([
@@ -506,6 +511,7 @@ class TestGetContainersList(RepoSetup):
         self.client.release = 'ussuri'
         input_full_list = ['nova-api', 'neutron-server', 'excluded']
         full_list = self.client.load_excludes(input_full_list)
+        full_list = full_list['containers_full_list']
         self.assertEqual(full_list, input_full_list)
 
         mock_log_warning.assert_has_calls([
@@ -533,5 +539,6 @@ class TestGetContainersList(RepoSetup):
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
         ])
-        self.assertEqual(containers_list, ['base', 'os', 'aodh-base'])
+        self.assertEqual(containers_list,
+                         {'containers_full_list': ['base', 'os', 'aodh-base']})
         mock_log_error.assert_not_called()
