@@ -95,7 +95,7 @@ class RepoClient(object):
         Gets a tripleo containers template file from a specific
         tripleo-common commit
         :param tripleo_common_commit:  A sha1 from a tripleo-common commit
-        :return: A list of containers base names
+        :return: A dict of containers base names
         """
 
         containers_url = os.path.join(self.containers_list_base_url,
@@ -113,7 +113,7 @@ class RepoClient(object):
             self.log.error("Unable to download containers template at %s",
                            containers_url)
             self.log.exception(ex)
-            return []
+            return {'containers_list': []}
 
         # convert it readable content from byte to string
         if not isinstance(containers_content, str):
@@ -180,9 +180,10 @@ class RepoClient(object):
             self.log.error("No containers name found in %s", containers_url)
 
         if load_excludes:
-            full_list = self.load_excludes(full_list)
-
-        return full_list
+            containers_dict = self.load_excludes(full_list)
+            return containers_dict
+        containers_dict = {'containers_list': full_list}
+        return containers_dict
 
     def load_excludes(self, full_list):
         """
@@ -196,6 +197,7 @@ class RepoClient(object):
         exclude_content_yaml = None
         exclude_content = None
         exclude_list = []
+        ppc_exclude_list = []
         try:
             exclude_content_yaml = url.urlopen(
                 self.containers_list_exclude_config).read().decode()
@@ -223,11 +225,31 @@ class RepoClient(object):
                 self.log.warning("Unable to find container exclude list for "
                                  "%s", self.release)
 
+            try:
+                ppc_exclude_list = exclude_content['exclude_ppc_containers'][
+                    self.release]
+            except KeyError:
+                self.log.warning("Unable to find ppc container exclude list "
+                                 "for %s", self.release)
+
+        containers_full_list = full_list.copy()
         for name in exclude_list:
             try:
-                full_list.remove(name)
+                containers_full_list.remove(name)
                 self.log.info("Excluding %s from the containers list", name)
             except ValueError:
                 self.log.debug("%s not in containers list", name)
 
-        return full_list
+        containers_dict = {'containers_list': containers_full_list}
+        if ppc_exclude_list:
+            ppc_containers_list = full_list.copy()
+            for name in ppc_exclude_list:
+                try:
+                    ppc_containers_list.remove(name)
+                    self.log.info("Excluding %s from the ppc containers list",
+                                  name)
+                except ValueError:
+                    self.log.debug("%s not in containers list", name)
+            containers_dict['ppc_containers_list'] = ppc_containers_list
+
+        return containers_dict

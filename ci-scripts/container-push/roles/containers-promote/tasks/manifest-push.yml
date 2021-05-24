@@ -8,59 +8,30 @@
 # {{container-name}}:{{full_hash}}_manifest
 # As a safety we check {{ ppc_pull_attempts }} number of ppc containers
 # If any of those fail to pull, we flip ppc_manifests to false
+
 - name: 'Check if ppc containers are available and can be pulled correctly'
   when: ppc_manifests
   include_tasks: check_set_ppc_manifests.yml
 
 - name: 'Handle ppc containers and manifests if ppc_manifests is set true'
-  when: ppc_manifests
+  when:
+    - ppc_manifests | bool
   block:
-  - name: 'Pull any {{ ppc_tag }} tagged container images from {{ source_registry.host }} registry'
-    docker_image:
-      name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ item }}"
-      tag: "{{ full_hash }}_{{ ppc_tag }}"
-      source: pull
-    loop: "{{ built_images.stdout_lines }}"
-    loop_control:
-      index_var: index
-    retries: 3
-    ignore_errors: true
-    register: pulled_ppc
+    - name: 'Tag and push {{ ppc_tag }} container images to {{ registry.host }}'
+      docker_image:
+        name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ item }}"
+        tag: "{{ full_hash }}_{{ ppc_tag }}"
+        source: local
+        repository: "{{ registry.host }}/{{ registry.namespace }}/{{ item }}"
+        push: yes
+      retries: 3
+      loop: "{{ built_images.stdout_lines }}"
+      register: pushed_ppc
 
-  - debug:
-      msg: "manifest-push.yml debug: Could not pull {{ ppc_tag }} container {{ item }}"
-    loop_control:
-      index_var: index
-    when: pulled_ppc.results[index] is failed
-    loop: "{{  built_images.stdout_lines }}"
-
-  - name: 'Tag and push {{ ppc_tag }} container images to {{ registry.host }}'
-    docker_image:
-      name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ item }}"
-      tag: "{{ full_hash }}_{{ ppc_tag }}"
-      source: local
-      repository: "{{ registry.host }}/{{ registry.namespace }}/{{ item }}"
-      push: yes
-    retries: 3
-    loop: "{{ built_images.stdout_lines }}"
-    loop_control:
-      index_var: index
-    register: pushed_ppc
-    when: pulled_ppc.results[index] is success
-
-  - name: 'Add pushed {{ ppc_tag }} containers to the cleanup list'
-    set_fact:
-      pushed_containers: "{{ pushed_containers + [item.invocation.module_args.repository + ':' + item.invocation.module_args.tag] }}"
-    when: 'pushed_ppc.results[index].skipped is not defined'
-    loop: "{{ pushed_ppc.results }}"
-    loop_control:
-      label: |-
-        {% if pushed_ppc.results[index].skipped is defined -%}
-        {{ pushed_ppc.results[index].item }}
-        {%- else -%}
-        {{ item.invocation.module_args.repository + ':' + item.invocation.module_args.tag }}
-        {%- endif %}
-      index_var: index
+    - name: 'Add pushed {{ ppc_tag }} containers to the cleanup list'
+      set_fact:
+        pushed_containers: "{{ pushed_containers + [item.invocation.module_args.repository + ':' + item.invocation.module_args.tag] }}"
+      loop: "{{ pushed_ppc.results }}"
 
 - name: 'Pull {{ x86_tag }} tagged container images from {{ source_registry.host }}'
   docker_image:
@@ -86,7 +57,7 @@
     pushed_containers: "{{ pushed_containers + [item.invocation.module_args.repository + ':' + item.invocation.module_args.tag] }}"
   loop: "{{ pushed_x86.results }}"
   loop_control:
-      label: "{{ item.invocation.module_args.repository + ':' + item.invocation.module_args.tag }}"
+    label: "{{ item.invocation.module_args.repository + ':' + item.invocation.module_args.tag }}"
 
 - name: Registry manifest_create_command with --insecure for local registry
   set_fact:
@@ -105,12 +76,9 @@
     docker manifest annotate --arch {{ ppc_tag }} \
     {{ registry.host }}/{{ registry.namespace }}/{{ item }}:{{ full_hash }}{{ manifest_tag }} \
     {{ registry.host }}/{{ registry.namespace }}/{{ item }}:{{ full_hash }}_{{ ppc_tag }}
-  loop_control:
-    index_var: index
   loop: "{{ built_images.stdout_lines }}"
   when:
     - ppc_manifests
-    - pulled_ppc.results[index] is success
 
 # Now create manifest for the rest of the x86 only containers
 - name: 'Create manifests for {{ x86_tag }} only containers'
@@ -121,10 +89,7 @@
     docker manifest annotate --arch amd64 \
     {{ registry.host }}/{{ registry.namespace }}/{{ item }}:{{ full_hash }}{{ manifest_tag }} \
     {{ registry.host }}/{{ registry.namespace }}/{{ item }}:{{ full_hash }}_{{ x86_tag }}
-  loop_control:
-    index_var: index
   loop: "{{ built_images.stdout_lines }}"
-  when: pulled_ppc.results[index] is failed or pulled_ppc.results[index] is skipped
   changed_when: true
 
 - name: 'Push container manifests to {{ registry.host }}'
@@ -141,7 +106,7 @@
     docker manifest inspect --insecure {{ registry.host }}/{{ registry.namespace }}/{{ item.0 }}:{{ full_hash }}{{ item.1 }}
   with_nested:
     - "{{ built_images.stdout_lines }}"
-    - ["{{ manifest_tag }}", "_{{ x86_tag }}"]
+    - [ "{{ manifest_tag }}", "_{{ x86_tag }}" ]
   retries: 3
   changed_when: false
 
@@ -150,9 +115,6 @@
     docker manifest inspect --insecure {{ registry.host }}/{{ registry.namespace }}/{{ item }}:{{ full_hash }}{{ manifest_tag }}
     docker manifest inspect --insecure {{ registry.host }}/{{ registry.namespace }}/{{ item }}:{{ full_hash }}_{{ ppc_tag }}
   loop: "{{ built_images.stdout_lines }}"
-  loop_control:
-    index_var: index
   retries: 3
   when:
     - ppc_manifests
-    - pulled_ppc.results[index] is success
