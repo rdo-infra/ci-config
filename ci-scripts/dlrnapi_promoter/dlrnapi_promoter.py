@@ -5,6 +5,8 @@ Main file for the promoter
 import argparse
 import logging
 import os
+import shutil
+from datetime import datetime
 
 import common
 from common import LockError, get_log_file
@@ -134,6 +136,10 @@ def main(cmd_line=None):
     promoter = Promoter(config)
 
     args.handler(promoter, args)
+    c_date_t = datetime.now().isoformat(timespec='minutes')
+    log_file_name = log_file.split(".")[0] + "_" + c_date_t + ".log"
+    shutil.copyfile(log_file, log_file_name)
+    log.info("Log file copied: {}".format(log_file_name))
 
 
 if __name__ == '__main__':
