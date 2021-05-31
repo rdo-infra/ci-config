@@ -44,6 +44,10 @@ class DlrnHashBase(object):
         :param source: a dictionary with all the parameters as keys
         :param component:  the eventual component of the hash
         """
+        # Make sure extended_hash value should be None not "None"
+        if extended_hash == 'None':
+            extended_hash = None
+
         # Load from default values into unified source
         _source = {
             'commit_hash': commit_hash,
@@ -119,8 +123,8 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
         """
         return ("<DlrnCommitDistroExtendedHash object commit: %s,"
                 " distro: %s, component: %s, extended: %s, timestamp: %s>"
-                "" % (self.commit_hash, self.distro_hash, self.extended_hash,
-                      self.component, self.timestamp))
+                "" % (self.commit_hash, self.distro_hash, self.component,
+                      self.extended_hash, self.timestamp))
 
     def __str__(self):
         """
@@ -129,9 +133,9 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
         :return: The string representation of the hash informations
         """
         return ("commit: %s, distro: %s, extended: %s, component: %s,"
-                "timestamp: %s"
-                "" % (self.commit_hash, self.distro_hash, self.extended_hash,
-                      self.component, self.timestamp))
+                "timestamp: %s" % (self.commit_hash, self.distro_hash,
+                                   self.extended_hash, self.component,
+                                   self.timestamp))
 
     def __ne__(self, other):
         """
@@ -388,11 +392,11 @@ class DlrnHash(object):
         that needs to contain *_hash as keys
         :return: The DlrnCommitDistroExtendedHash or DlrnAggregateHash instance
         """
-        hash_instance = DlrnCommitDistroExtendedHash(**kwargs)
+        hash_instance = DlrnAggregateHash(**kwargs)
 
         try:
-            if kwargs['aggregate_hash'] is not None:
-                hash_instance = DlrnAggregateHash(**kwargs)
+            if kwargs['extended_hash'] is not None:
+                hash_instance = DlrnCommitDistroExtendedHash(**kwargs)
         except KeyError:
             try:
                 if kwargs['source']['aggregate_hash'] is not None:
