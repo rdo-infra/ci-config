@@ -12,7 +12,6 @@ except ImportError:
     # Python2 imports
     from mock import Mock
 
-
 # Passwordles ssh key
 SSH_CONTENT = """-----BEGIN RSA PRIVATE KEY-----
 MIIG5QIBAAKCAYEAoPmVjDOjLAbOfE+8wfWMiaL5II0QQa8sCzgMe5fE8f/jphv6
@@ -56,16 +55,38 @@ ANVlQh7pYqCrYudNESL0qyGQ+dxcESo3XxCZHHFax4e8+9FeXWN4knRQBsjlGDyb
 
 # These are preparation for all the types of dlrn_hashes we are going to test
 # on the following test cases.
-valid_commitdistro_kwargs = dict(commit_hash='abcd', distro_hash='defg',
-                                 timestamp=1)
-valid_commitdistro_notimestamp_kwargs = dict(commit_hash='a', distro_hash='b')
-invalid_commitdistro_kwargs = dict(commit='a', distro='b')
-different_commitdistro_kwargs = dict(commit_hash='b', distro_hash='c',
-                                     timestamp=1)
-different_commitdistro_notimestamp_kwargs = dict(commit_hash='a',
-                                                 distro_hash='b')
-valid_aggregate_kwargs = dict(aggregate_hash='abcd', commit_hash='defg',
-                              distro_hash='hijk', timestamp=1)
+valid_commitdistro_kwargs = dict(
+    commit_hash='f6ef2e4e4e4cce030e5ef2f7799bff4e968af03a',
+    distro_hash='41b4c09cabc2df6450eeb997594077fc7d4ebe6e',
+    extended_hash='85ddd74e99da98ad07e637d0b42d4692910e4e70_'
+                  '7ecd11cd44cbe7b93e4ff27d0049d937945d3a75',
+    timestamp=1)
+valid_commitdistro_notimestamp_kwargs = dict(
+    commit_hash='ec60849c773e4649d22d4b976e7c5892596d4d1b',
+    distro_hash='030bf177f0394ece3dc912dd22ae7ccee8e4af0b',
+    extended_hash='35e7cd373aa33c4fe9dfc21ff41da81810c69715_'
+                  '86d134f3ea6848af3f1968b8904ba0da1fa7a074')
+invalid_commitdistro_kwargs = dict(
+    commit='26c19986a58560b90bfa4b39bd3bc1ef43ad57f5',
+    distro='34d2c7ae120f6c07767c5638f28d4a35515ade67',
+    extended='e99c5941564f63e6c2f99592c0c6ff5ac815914a_'
+             '6772f32196d090a6cd303471538fa963727a58e7')
+different_commitdistro_kwargs = dict(
+    commit_hash='4f4774d4e410ce72b024c185d3054cf649e5c578',
+    distro_hash='fe88530aa04df13ebc63287c819c721740837aae',
+    extended_hash='255baafa43d70533e93abb74a67f97b974ee314c_'
+                  'eaf928319df5cdeb87e646e940eacc0402a49751',
+    timestamp=1)
+different_commitdistro_notimestamp_kwargs = dict(
+    commit_hash='96e24bb1dbbac0313cea1f233f8cd918c6d820ac',
+    distro_hash='c3a41aaf53b9ea10333387b7d40797ba2c1018d2',
+    extended_hash='29c28719aaf8b6b58a75e9aa9d9307b6248e9717_'
+                  '14078f4c7615d8b21a2a6d7c75afb84b4920f59b')
+valid_aggregate_kwargs = dict(
+    aggregate_hash='d7c3cd922f91d83aacb5d7555de9d5bc',
+    commit_hash='f21ff147b907701bfbc840a1ee59a8014e77684a',
+    distro_hash='ea06708141614decfdc4af687a26c9586a23b9ff',
+    timestamp=1)
 valid_aggregate_notimestamp_kwargs = dict(aggregate_hash='a', commit_hash='b',
                                           distro_hash='c')
 invalid_aggregate_kwargs = dict(aggregate='a')

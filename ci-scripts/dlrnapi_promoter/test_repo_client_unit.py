@@ -30,20 +30,24 @@ class RepoSetup(unittest.TestCase):
             os.makedirs(log_d)
 
         self.dlrn_hash_commitdistro = DlrnCommitDistroExtendedHash(
-                                                           commit_hash='abc',
-                                                           distro_hash='def',
-                                                           component="comp1",
-                                                           timestamp=1)
+            commit_hash='26c19986a58560b90bfa4b39bd3bc1ef43ad57f5',
+            distro_hash='34d2c7ae120f6c07767c5638f28d4a35515ade67',
+            extended_hash='e99c5941564f63e6c2f99592c0c6ff5ac815914a_'
+                          '6772f32196d090a6cd303471538fa963727a58e7',
+            component="security",
+            timestamp=1)
         self.dlrn_hash_commitdistro2 = DlrnCommitDistroExtendedHash(
-                                                            commit_hash='ghj',
-                                                            distro_hash='klm',
-                                                            component="comp2",
-                                                            timestamp=2)
+            commit_hash='adce3dce8a017f30c2214df4802dd9b6bd79cce6',
+            distro_hash='030bf177f0394ece3dc912dd22ae7ccee8e4af0b',
+            extended_hash='3dbc2b82127cdfbbdc5967e57d2acfca2c442978_'
+                          '12a790ca4bbf61f2f4c04a9d2fcd1c12b7615925',
+            component="octavia",
+            timestamp=2)
         self.dlrn_hash_aggregate = DlrnAggregateHash(
-                                                     commit_hash='abc',
-                                                     distro_hash='def',
-                                                     aggregate_hash='ghjk',
-                                                     timestamp=1)
+            commit_hash='28fe6735517a32c6b4d6e73b95ad752ed172d9d3',
+            distro_hash='4acaff5b0437c615562fa2860fdd48abd11117d6',
+            aggregate_hash='8188496b0d154cf2f22f408851ed418b',
+            timestamp=1)
         self.hashes = [self.dlrn_hash_commitdistro,
                        self.dlrn_hash_aggregate]
         self.temp_dir = tempfile.mkdtemp()

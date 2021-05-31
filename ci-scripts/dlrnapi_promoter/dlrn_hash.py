@@ -11,6 +11,35 @@ based on the information present in the source
 import logging
 
 
+def check_hash(hash_value):
+    """
+    This function will check the hash function properties like
+    hash size, valid hash etc.
+    """
+    if hash_value is not None:
+        try:
+            int(hash_value, 16)
+            len(hash_value) == 40
+        except (TypeError, ValueError):
+            raise DlrnHashError("Invalid hash format!!")
+
+
+def check_extended_hash(extended_hash):
+    """
+    This function will check valid extended hash.
+    """
+    if extended_hash is not None and extended_hash not in ['None', '']:
+        try:
+            e_hash = extended_hash.split("_")
+            if len(e_hash) == 2:
+                check_hash(e_hash[0])
+                check_hash(e_hash[1])
+            else:
+                raise DlrnHashError("Invalid extended hash format")
+        except (TypeError, ValueError):
+            raise DlrnHashError("Invalid extended hash, not a hex hash!")
+
+
 class DlrnHashError(Exception):
     """
     Raised on various errors on DlrnHash operations
@@ -44,6 +73,10 @@ class DlrnHashBase(object):
         :param source: a dictionary with all the parameters as keys
         :param component:  the eventual component of the hash
         """
+        # Make sure extended_hash value should be None not "None"
+        if extended_hash in ['None', '']:
+            extended_hash = None
+
         # Load from default values into unified source
         _source = {
             'commit_hash': commit_hash,
@@ -107,9 +140,11 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
         Checks if the basic components of the hash are present
         component and timestamp are optional
         """
-        if self.commit_hash is None or self.distro_hash is None or \
-                self.extended_hash == '':
-            raise DlrnHashError("Invalid commit or distro or extended hash")
+        if self.commit_hash is None or self.distro_hash is None:
+            raise DlrnHashError("Invalid commit or distro hash")
+        check_hash(self.commit_hash)
+        check_hash(self.distro_hash)
+        check_extended_hash(self.extended_hash)
 
     def __repr__(self):
         """
@@ -119,8 +154,8 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
         """
         return ("<DlrnCommitDistroExtendedHash object commit: %s,"
                 " distro: %s, component: %s, extended: %s, timestamp: %s>"
-                "" % (self.commit_hash, self.distro_hash, self.extended_hash,
-                      self.component, self.timestamp))
+                "" % (self.commit_hash, self.distro_hash, self.component,
+                      self.extended_hash, self.timestamp))
 
     def __str__(self):
         """
@@ -129,9 +164,9 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
         :return: The string representation of the hash informations
         """
         return ("commit: %s, distro: %s, extended: %s, component: %s,"
-                "timestamp: %s"
-                "" % (self.commit_hash, self.distro_hash, self.extended_hash,
-                      self.component, self.timestamp))
+                "timestamp: %s" % (self.commit_hash, self.distro_hash,
+                                   self.extended_hash, self.component,
+                                   self.timestamp))
 
     def __ne__(self, other):
         """
@@ -179,7 +214,7 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
         Work only with single norma dlrn haseh
         :return:  The full hash format or None
         """
-        if self.extended_hash not in [None, 'None']:
+        if self.extended_hash is not None:
             ext_distro_hash, ext_commit_hash = self.extended_hash.split('_')
             return '{0}_{1}_{2}_{3}'.format(self.commit_hash,
                                             self.distro_hash[:8],
@@ -245,9 +280,12 @@ class DlrnAggregateHash(DlrnHashBase):
         component and timestamp are optional
         """
         if self.commit_hash is None or self.distro_hash is None or \
-                self.extended_hash == '' or self.aggregate_hash is None:
-            raise DlrnHashError("Invalid commit or distro or "
-                                "extended aggregate hash")
+                self.aggregate_hash is None:
+            raise DlrnHashError("Invalid commit or distro or aggregate hash")
+        check_hash(self.commit_hash)
+        check_hash(self.distro_hash)
+        check_hash(self.aggregate_hash)
+        check_extended_hash(self.extended_hash)
 
     def __repr__(self):
         """
