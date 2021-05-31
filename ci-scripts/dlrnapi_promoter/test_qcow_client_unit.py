@@ -103,12 +103,17 @@ class TestQcowClient(ConfigSetup):
 
         self.images_root = self.client.root
         self.images_dir = self.client.images_dir
-        self.previous_hash_dir = os.path.join(self.images_dir, "efgh")
+        self.previous_hash_dir = os.path.join(
+            self.images_dir,
+            DlrnHash(source=hashes_test_cases['aggregate']['object'][
+                'valid_notimestamp']).full_hash)
         self.current_hash_dir = os.path.join(self.images_dir, "dunno")
-        self.candidate_hash_dir = os.path.join(self.images_dir, "abcd")
+        self.candidate_hash_dir = os.path.join(
+            self.images_dir,
+            DlrnHash(source=hashes_test_cases['aggregate']['object'][
+                'valid']).full_hash)
         self.target_label = "test-label"
         self.previous_target_label = "previous-{}".format(self.target_label)
-
         try:
             os.makedirs(self.candidate_hash_dir)
         except FileExistsError:
@@ -138,7 +143,6 @@ class TestQcowClientPromotion(TestQcowClient):
                                          mock_log_error):
         self.client.promote(self.valid_candidate_hash, self.target_label,
                             create_previous=False, validation=False)
-
         promotion_link = os.path.join(self.images_dir, self.target_label)
         check_links(os, promotion_link, "test", self.candidate_hash_dir)
 
@@ -159,7 +163,10 @@ class TestQcowClientPromotion(TestQcowClient):
 
         promotion_link = os.path.join(self.images_dir, self.target_label)
         previous_link = os.path.join(self.images_dir, "previous-test-label")
-        previous_dir = os.path.join(self.images_dir, "efgh")
+        previous_dir = os.path.join(
+            self.images_dir,
+            DlrnHash(source=hashes_test_cases['aggregate']['object'][
+                'valid_notimestamp']).full_hash)
         check_links(os, promotion_link, "test", self.candidate_hash_dir,
                     previous_link=previous_link, previous_dir=previous_dir)
         self.assertFalse(mock_log_error.called)
