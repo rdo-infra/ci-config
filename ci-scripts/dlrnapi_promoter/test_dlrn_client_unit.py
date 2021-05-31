@@ -58,19 +58,22 @@ class DlrnSetup(unittest.TestCase):
 
         # Set up some ready to use hashes
         self.dlrn_hash_commitdistro1 = DlrnCommitDistroExtendedHash(
-                                                            commit_hash='a',
-                                                            distro_hash='b',
-                                                            component="comp1",
-                                                            timestamp=1)
+            commit_hash='90633a3785687ddf3d37c0f86f9ad9f93926d639',
+            distro_hash='d68290fed3d9aa069c95fc16d0d481084adbadc6',
+            extended_hash='6137f83ab8defe688e70a18ef1c7e5bf3fbf02ef_'
+                          '3945701fc2ae9b1b14e4261e87e203b2a89ccdca',
+            component="tripleo",
+            timestamp=1)
         self.dlrn_hash_commitdistro2 = DlrnCommitDistroExtendedHash(
-                                                            commit_hash='c',
-                                                            distro_hash='d',
-                                                            component="comp2",
-                                                            timestamp=2)
-        self.dlrn_hash_aggregate = DlrnAggregateHash(commit_hash='abc',
-                                                     distro_hash='def',
-                                                     aggregate_hash='ghjk',
-                                                     timestamp=1)
+            commit_hash='4f4774d4e410ce72b024c185d3054cf649e5c578',
+            distro_hash='fe88530aa04df13ebc63287c819c721740837aae',
+            component="tempest",
+            timestamp=2)
+        self.dlrn_hash_aggregate = DlrnAggregateHash(
+            commit_hash='98da7b0933a2975598844bf40edec4b61714db40',
+            distro_hash='c3a41aaf53b9ea10333387b7d40797ba2c1018d2',
+            aggregate_hash='26b9d4d1d8fd09cdc2b11c7dd0f71f93',
+            timestamp=1)
         self.promote_log_header = ("Dlrn promote '{}' from {} to {}:"
                                    "".format(self.dlrn_hash_commitdistro1,
                                              'tripleo-ci-testing',
@@ -433,13 +436,13 @@ class TestNamedHashes(DlrnSetup):
         super(TestNamedHashes, self).setUp()
         dlrn_start_hash_dict = {
             'timestamp': '1528085427',
-            'commit_hash': 'd221f4b33cf2763875fc6394902f7923108a34da',
-            'distro_hash': '70bdcd40eb5cc62e4762a7db0086e09f6edf2e5c'
+            'commit_hash': '326452e5851e8347b15b53c3d6b70e6f5225f3ea',
+            'distro_hash': '589b556babb2d0c5c6e79d5c2a505341b70ef370'
         }
         dlrn_changed_hash_dict = {
             'timestamp': '1528085529',
-            'commit_hash': 'e3d9fffbf82ec71deff60ba914f1db0e1625466a',
-            'distro_hash': 'Iba78e857267ac771d23919fbd1e3c9fcc5813c9'
+            'commit_hash': '6b3bf3bba01055ca8e544ce258b44e4f5da3da34',
+            'distro_hash': '6aaa73f4925b38ae77d468257bced8d3baf8dd97'
         }
         self.dlrn_changed_hash = DlrnHash(source=dlrn_changed_hash_dict)
         self.dlrn_start_hash = DlrnHash(source=dlrn_start_hash_dict)
@@ -447,7 +450,6 @@ class TestNamedHashes(DlrnSetup):
     @patch('logging.Logger.error')
     @patch('dlrn_client.DlrnClient.fetch_hashes')
     def test_named_hashes_unchanged(self, mock_fetch_hashes, mock_log_err):
-
         mock_fetch_hashes.side_effect = [self.dlrn_start_hash,
                                          self.dlrn_start_hash]
         # positive test for hashes_unchanged
@@ -506,7 +508,7 @@ class TestNamedHashes(DlrnSetup):
     @patch('logging.Logger.debug')
     @patch('dlrn_client.DlrnClient.fetch_hashes')
     def test_update_current_named_hash(
-                                    self, mock_fetch_hashes, mock_log_debug):
+            self, mock_fetch_hashes, mock_log_debug):
         mock_fetch_hashes.side_effect = [
             self.dlrn_changed_hash, self.dlrn_changed_hash
         ]
@@ -523,7 +525,7 @@ class TestNamedHashes(DlrnSetup):
     @patch('logging.Logger.debug')
     @patch('dlrn_client.DlrnClient.fetch_promotions')
     def test_fetch_current_named_hashes_no_hashes(
-                   self, fetch_promotions_mock, mock_log_debug, mock_log_warn):
+            self, fetch_promotions_mock, mock_log_debug, mock_log_warn):
         fetch_promotions_mock.return_value = []
         self.client.fetch_current_named_hashes()
         self.assertFalse(mock_log_debug.called)
@@ -543,7 +545,6 @@ class TestGetHashes(DlrnSetup):
                                                     mock_log_debug,
                                                     mock_log_info,
                                                     mock_log_error):
-
         self.maxDiff = None
         delorean_repo_path, tmp_dir = self.get_tmp_delorean_repo()
         # Extremely important that we ensure this method does not produce
@@ -594,7 +595,6 @@ class TestGetHashes(DlrnSetup):
                                                           mock_log_debug,
                                                           mock_log_info,
                                                           mock_log_error):
-
         delorean_repo_path, tmp_dir = self.get_tmp_delorean_repo(empty=True)
         with self.assertRaises(PromotionError):
             self.client.get_promotion_aggregate_hashes("",
@@ -614,7 +614,6 @@ class TestGetHashes(DlrnSetup):
     def test_get_promotion_aggregate_url_error(self,
                                                get_hash_mock,
                                                mock_log_error):
-
         self.config.repo_url = "file:///not.exist"
         with self.assertRaises(PromotionError):
             self.client.get_promotion_aggregate_hashes("",
