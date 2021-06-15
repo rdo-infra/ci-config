@@ -77,9 +77,13 @@ func main() {
     var sumBuilds, lastTenBuilds []Builds
 
     for _, job := range jobs {
+        jobSlice := 10
         buildsJob := getBuilds(job)
         builds[job] = buildsJob
-        lastTenBuilds = append(lastTenBuilds, buildsJob[:10]...)
+        if len(buildsJob) < 10 {
+            jobSlice = len(buildsJob) - 1
+        }
+        lastTenBuilds = append(lastTenBuilds, buildsJob[:jobSlice]...)
         sumBuilds = append(sumBuilds, buildsJob...)
     }
 
