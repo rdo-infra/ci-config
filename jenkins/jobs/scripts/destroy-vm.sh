@@ -45,14 +45,14 @@ fi
 pushd $WORKSPACE
 
 # Install dependencies
-[[ ! -d provision_venv ]] && virtualenv provision_venv
+[[ ! -d provision_venv ]] && virtualenv -p python3 provision_venv
 source provision_venv/bin/activate
-pip install -c https://raw.githubusercontent.com/openstack/requirements/stable/train/upper-constraints.txt ansible==2.5.2 'ara<1.0.0' shade 'cmd2<0.9.0' 'pyfakefs<4.0.0'
+pip install ansible==2.9.16 'Django<2.2' ara[server] shade
 
 ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
 export ANSIBLE_HOST_KEY_CHECKING=False
-export ANSIBLE_CALLBACK_PLUGINS="${ara_location}/plugins/callbacks"
-export ARA_DATABASE="sqlite:///${WORKSPACE}/${JOB_NAME}.sqlite"
+export ANSIBLE_CALLBACK_PLUGINS="${ara_location}/plugins/callback"
+export ARA_DATABASE_NAME="$WORKSPACE/$JOB_NAME.sqlite"
 
 cat <<EOF >prep-logs.yml
 - name: Collect logs
@@ -147,7 +147,7 @@ EOF
 ansible-playbook -i "${ANSIBLE_HOSTS}" destroy-vm.yml
 
 # Recover console log, generate and upload ARA report
-ara generate html "${WORKSPACE}/ara"
+ara-manage generate "${WORKSPACE}/ara"
 
 # Copy database (experimental)
 mkdir ${WORKSPACE}/ara-database

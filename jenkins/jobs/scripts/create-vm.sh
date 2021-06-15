@@ -36,9 +36,9 @@ fi
 pushd $WORKSPACE
 
 # Install dependencies
-[[ ! -d provision_venv ]] && virtualenv provision_venv
+[[ ! -d provision_venv ]] && virtualenv -p python3 provision_venv
 source provision_venv/bin/activate
-pip install -c https://raw.githubusercontent.com/openstack/requirements/stable/train/upper-constraints.txt ansible==2.5.2 'ara<1.0.0' shade 'cmd2<0.9.0' 'pyfakefs<4.0.0'
+pip install ansible==2.9.16 'Django<2.2' ara[server] shade
 
 # Is there a better way ?
 git clone https://github.com/rdo-infra/ci-config
@@ -46,11 +46,11 @@ nodepool_image=$(python ci-config/jenkins/jobs/scripts/get-nodepool-image.py "${
 
 ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
 export ANSIBLE_HOST_KEY_CHECKING=False
-export ANSIBLE_CALLBACK_PLUGINS="${ara_location}/plugins/callbacks"
+export ANSIBLE_CALLBACK_PLUGINS="${ara_location}/plugins/callback"
 export ANSIBLE_GATHERING="implicit"
 # Unreachable tasks may not be handled: https://github.com/ansible/ansible/issues/18287
 export ANSIBLE_SSH_RETRIES=6
-export ARA_DATABASE="sqlite:///${WORKSPACE}/${JOB_NAME}.sqlite"
+export ARA_DATABASE_NAME="$WORKSPACE/$JOB_NAME.sqlite"
 
 # Write the header of the hosts file
 cat << EOF > ${ANSIBLE_HOSTS}
