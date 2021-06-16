@@ -7,38 +7,9 @@ except ImportError:
     # Python2 imports
     from mock import Mock
 
-from dlrn_hash import (DlrnAggregateHash, DlrnCommitDistroExtendedHash,
-                       DlrnHash, DlrnHashError)
+from dlrn_hash import (DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash,
+                       DlrnHashError)
 from test_unit_fixtures import hashes_test_cases
-
-
-def get_commit_dir(hash_dict, hash_type="commitdistro"):
-    if isinstance(hash_dict, dict):
-        commit_hash = hash_dict.get("commit_hash")
-        distro_hash = hash_dict.get("distro_hash")
-    else:
-        commit_hash = hash_dict.commit_hash
-        distro_hash = hash_dict.distro_hash
-    if hash_type == 'commitdistro':
-        try:
-            extended_hash = hash_dict.extended_hash
-        except (AttributeError):
-            extended_hash = hash_dict.get('extended_hash')
-        e_hash = '_'
-        if extended_hash:
-            e_d_hash, e_c_hash = extended_hash.split("_")
-            e_hash += "{}_{}".format(e_d_hash[:8], e_c_hash[:8])
-
-            return "{}/{}/{}_{}{}".format(commit_hash[:2], commit_hash[2:4],
-                                          commit_hash, distro_hash[:8], e_hash)
-    elif hash_type == "aggregate":
-        try:
-            aggregate_hash = hash_dict.aggregate_hash
-        except (AttributeError):
-            aggregate_hash = hash_dict.get("aggregate_hash")
-
-        return "{}/{}/{}".format(aggregate_hash[:2], aggregate_hash[2:4],
-                                 aggregate_hash)
 
 
 class TestDlrnHashSubClasses(unittest.TestCase):
@@ -47,17 +18,13 @@ class TestDlrnHashSubClasses(unittest.TestCase):
         for hash_type, source_types in hashes_test_cases.items():
             values = source_types['dict']['valid']
             if hash_type == "commitdistro":
-                dh = DlrnCommitDistroExtendedHash(
-                    commit_hash=values['commit_hash'],
-                    distro_hash=values['distro_hash'],
-                    extended_hash=values['extended_hash'],
-                    timestamp=values['timestamp'])
+                dh = DlrnCommitDistroHash(commit_hash=values['commit_hash'],
+                                          distro_hash=values['distro_hash'],
+                                          timestamp=values['timestamp'])
                 self.assertEqual(dh.commit_hash,
                                  source_types['dict']['valid']['commit_hash'])
                 self.assertEqual(dh.distro_hash,
                                  source_types['dict']['valid']['distro_hash'])
-                self.assertEqual(dh.extended_hash,
-                                 source_types['dict']['valid']['extended_hash'])
             elif hash_type == "aggregate":
                 aggregate_hash = source_types['dict']['valid'][
                     'aggregate_hash']
@@ -73,13 +40,11 @@ class TestDlrnHashSubClasses(unittest.TestCase):
         for hash_type, source_types in hashes_test_cases.items():
             values = source_types['dict']['valid']
             if hash_type == "commitdistro":
-                dh = DlrnCommitDistroExtendedHash(source=values)
+                dh = DlrnCommitDistroHash(source=values)
                 self.assertEqual(dh.commit_hash,
                                  source_types['dict']['valid']['commit_hash'])
                 self.assertEqual(dh.distro_hash,
                                  source_types['dict']['valid']['distro_hash'])
-                self.assertEqual(dh.extended_hash,
-                                 source_types['dict']['valid']['extended_hash'])
             elif hash_type == "aggregate":
                 aggregate_hash = source_types['dict']['valid'][
                     'aggregate_hash']
@@ -91,7 +56,7 @@ class TestDlrnHashSubClasses(unittest.TestCase):
     def test_build_invalid_from_source(self):
         with self.assertRaises(DlrnHashError):
             source = hashes_test_cases['commitdistro']['dict']['invalid']
-            DlrnCommitDistroExtendedHash(source=source)
+            DlrnCommitDistroHash(source=source)
         with self.assertRaises(DlrnHashError):
             source = hashes_test_cases['aggregate']['dict']['invalid']
             DlrnAggregateHash(source=source)
@@ -103,7 +68,7 @@ class TestDlrnHash(unittest.TestCase):
         for hash_type, source_types in hashes_test_cases.items():
             dh = DlrnHash(**source_types['dict']['valid'])
             if hash_type == "commitdistro":
-                self.assertEqual(type(dh), DlrnCommitDistroExtendedHash)
+                self.assertEqual(type(dh), DlrnCommitDistroHash)
             elif hash_type == 'aggregate':
                 self.assertEqual(type(dh), DlrnAggregateHash)
 
@@ -115,7 +80,7 @@ class TestDlrnHash(unittest.TestCase):
         for hash_type, source_types in hashes_test_cases.items():
             dh = DlrnHash(source=source_types['dict']['valid'])
             if hash_type == "commitdistro":
-                self.assertEqual(type(dh), DlrnCommitDistroExtendedHash)
+                self.assertEqual(type(dh), DlrnCommitDistroHash)
             elif hash_type == "aggregate":
                 self.assertEqual(type(dh), DlrnAggregateHash)
             with self.assertRaises(DlrnHashError):
@@ -151,10 +116,8 @@ class TestDlrnHash(unittest.TestCase):
             source = source_types['object']['valid']
             dh = DlrnHash(source=source)
             if hash_type == "commitdistro":
-                e_d_hash, e_c_hash = source.extended_hash.split("_")
                 full_hash = "{}_{}_{}_{}".format(source.commit_hash,
-                                                 source.distro_hash[:8],
-                                                 e_d_hash[:8], e_c_hash[:8])
+                                                 source.distro_hash[:8])
                 self.assertEqual(dh.full_hash, full_hash)
             elif hash_type == "aggregate":
                 self.assertEqual(dh.full_hash, source.aggregate_hash)
@@ -175,31 +138,24 @@ class TestDlrnHash(unittest.TestCase):
         for hash_type, source_types in hashes_test_cases.items():
             dh = DlrnHash(source=source_types['object']['valid'])
             if hash_type == "commitdistro":
-                commit_dir = get_commit_dir(source_types['object'][
-                                                'valid'])
-                self.assertEqual(dh.commit_dir, commit_dir)
+                self.assertEqual(dh.commit_dir, "ab/cd/abcd_defg")
             elif hash_type == "aggregate":
                 dh.label = "label"
-                commit_dir = get_commit_dir(source_types['object']['valid'],
-                                            "aggregate")
-                self.assertEqual(dh.commit_dir, "label/{}".format(commit_dir))
+                self.assertEqual(dh.commit_dir, "label/ab/cd/abcd")
 
     def test_commit_dir_no_label(self):
         for hash_type, source_types in hashes_test_cases.items():
             dh = DlrnHash(source=source_types['object']['valid'])
             if hash_type == "commitdistro":
-                commit_dir = get_commit_dir(source_types['object']['valid'])
-                self.assertEqual(dh.commit_dir, commit_dir)
+                 self.assertEqual(dh.commit_dir, "ab/cd/abcd_defg")
             elif hash_type == "aggregate":
-                commit_dir = get_commit_dir(source_types['object']['valid'],
-                                            'aggregate')
-                self.assertEqual(dh.commit_dir, commit_dir)
+                self.assertEqual(dh.commit_dir, "ab/cd/abcd")
 
     def test_commit_dir_component(self):
         for hash_type, source_types in hashes_test_cases.items():
             dh = DlrnHash(source=source_types['object']['valid'])
             if hash_type == "commitdistro":
                 dh.component = "component1"
-                commit_dir = get_commit_dir(source_types['object']['valid'])
                 self.assertEqual(dh.commit_dir,
-                                 "component/component1/{}".format(commit_dir))
+                                 "component/component1/ab/cd/abcd_defg")
+
