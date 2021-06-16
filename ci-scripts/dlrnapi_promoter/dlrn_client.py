@@ -12,7 +12,7 @@ import tempfile
 
 import dlrnapi_client
 import yaml
-from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroExtendedHash, DlrnHash
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
 
 try:
     # Python3 imports
@@ -156,7 +156,7 @@ class DlrnClient(object):
 
         hash_type = type(dlrn_hash)
 
-        if hash_type is DlrnCommitDistroExtendedHash:
+        if hash_type is DlrnCommitDistroHash:
             api_call = self.api_instance.api_repo_status_get
             jobs_params = self.jobs_params
         elif hash_type is DlrnAggregateHash:
@@ -397,7 +397,7 @@ class DlrnClient(object):
                        component_name, promotion_info)
 
         # AP step5: add hashes to promotion list
-        promotion_hash = DlrnCommitDistroExtendedHash(source=promotion_info)
+        promotion_hash = DlrnCommitDistroHash(source=promotion_info)
         self.log.debug("%s adding '%s' to promotion list", log_header,
                        promotion_hash)
         return promotion_hash
@@ -495,7 +495,7 @@ class DlrnClient(object):
         hash_type = type(dlrn_hash)
         self.log.debug("%s promoting a %s", log_header, hash_type)
 
-        if hash_type is DlrnCommitDistroExtendedHash:
+        if hash_type is DlrnCommitDistroHash:
             promotion_parameters = copy.deepcopy(self.promote_params)
             dlrn_hash.dump_to_params(promotion_parameters)
             promotion_parameters.promote_name = target_label
@@ -572,7 +572,7 @@ class DlrnClient(object):
         """
         params = copy.deepcopy(self.report_params)
 
-        if type(dlrn_hash) == DlrnCommitDistroExtendedHash:
+        if type(dlrn_hash) == DlrnCommitDistroHash:
             dlrn_hash.dump_to_params(params)
         elif type(dlrn_hash) == DlrnAggregateHash:
             # votes for the aggregate hash cannot contain commit and distro
@@ -626,7 +626,7 @@ class DlrnClient(object):
         """
         civotes_info = "Check results at: "
         hash_type = type(dlrn_hash)
-        if hash_type is DlrnCommitDistroExtendedHash:
+        if hash_type is DlrnCommitDistroHash:
             civotes_info += (
                 "{}/api/civotes_detail.html?commit_hash={}&distro_hash={}"
                 "".format(self.config.api_url, dlrn_hash.commit_hash,
