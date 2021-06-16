@@ -159,6 +159,7 @@ class TestPrepareExtraVars(ConfigSetup):
         self.assertDictEqual(extra_vars, {
             'release': "master",
             'script_root': mock.ANY,
+            'distro_hash': 'def',
             'distro_name': "centos",
             'distro_version': 8,
             'manifest_push': 'true',
