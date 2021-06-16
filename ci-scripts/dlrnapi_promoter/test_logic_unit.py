@@ -10,7 +10,7 @@ except ImportError:
     from mock import patch
     import mock
 
-from dlrn_hash import DlrnCommitDistroExtendedHash, DlrnHash
+from dlrn_hash import DlrnCommitDistroHash, DlrnHash
 from test_unit_fixtures import ConfigSetup
 
 
@@ -33,8 +33,7 @@ class TestPromote(ConfigSetup):
         mock_qcow_client.side_effect = PromotionError
         mock_registries_client.return_value = None
         mock_check_named_hashes.return_value = None
-        candidate_hash = DlrnCommitDistroExtendedHash(commit_hash='a',
-                                                      distro_hash='b')
+        candidate_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b')
         with self.assertRaises(PromotionError):
             self.promoter.promote(candidate_hash, 'tripleo-ci-testing',
                                   'tripleo-ci-staging-promoted')
@@ -61,8 +60,7 @@ class TestPromote(ConfigSetup):
                                               mock_dlrn_client,
                                               mock_check_named_hashes,
                                               mock_log_debug):
-        candidate_hash = DlrnCommitDistroExtendedHash(commit_hash='a',
-                                                      distro_hash='b')
+        candidate_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b')
         mock_check_named_hashes.return_value = None
         self.promoter.promote(candidate_hash, 'tripleo-ci-testing',
                               'tripleo-ci-staging-promoted',
@@ -92,8 +90,7 @@ class TestPromote(ConfigSetup):
                              mock_log_error,
                              mock_log_debug,
                              mock_log_warning):
-        candidate_hash = DlrnCommitDistroExtendedHash(commit_hash='a',
-                                                      distro_hash='b')
+        candidate_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b')
         mock_check_named_hashes.return_value = None
 
         # The order here is VERY important, and we MUST ensure it's respected
@@ -144,8 +141,7 @@ class TestPromote(ConfigSetup):
                                                mock_dlrn_client,
                                                mock_check_named_hashes,
                                                mock_log_debug):
-        candidate_hash = DlrnCommitDistroExtendedHash(commit_hash='a',
-                                                      distro_hash='b')
+        candidate_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b')
         mock_check_named_hashes.side_effect = HashChangedError
         with self.assertRaises(HashChangedError):
             self.promoter.promote(candidate_hash, 'tripleo-ci-testing',
@@ -188,8 +184,7 @@ class TestPromoteLabelToLabel(ConfigSetup):
             'staging-job-2'
         }
         mock_fetch_jobs.return_value = successful_jobs
-        candidate_hash = DlrnCommitDistroExtendedHash(commit_hash='a',
-                                                      distro_hash='b')
+        candidate_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b')
         mock_select_candidates.return_value = [
             candidate_hash
         ]
@@ -238,8 +233,7 @@ class TestPromoteLabelToLabel(ConfigSetup):
         mock_civotes.return_value = ci_votes
         successful_jobs = []
         mock_fetch_jobs.return_value = successful_jobs
-        candidate_hash = DlrnCommitDistroExtendedHash(commit_hash='a',
-                                                      distro_hash='b')
+        candidate_hash = DlrnCommitDistroHash(commit_hash='a', distro_hash='b')
         mock_select_candidates.return_value = [
             candidate_hash
         ]
@@ -298,8 +292,8 @@ class TestPromoteLabelToLabel(ConfigSetup):
                                             mock_log_debug):
         ci_votes = "http://host.to/detailspage.html"
         candidate_hashes = [
-            DlrnCommitDistroExtendedHash(commit_hash='a', distro_hash='b'),
-            DlrnCommitDistroExtendedHash(commit_hash='c', distro_hash='c')
+            DlrnCommitDistroHash(commit_hash='a', distro_hash='b'),
+            DlrnCommitDistroHash(commit_hash='c', distro_hash='c')
         ]
         required_set = {
             'staging-job-1',
@@ -354,8 +348,8 @@ class TestPromoteLabelToLabel(ConfigSetup):
             mock_log_error):
         ci_votes = "http://host.to/detailspage.html"
         candidate_hashes = [
-            DlrnCommitDistroExtendedHash(commit_hash='a', distro_hash='b'),
-            DlrnCommitDistroExtendedHash(commit_hash='c', distro_hash='c')
+            DlrnCommitDistroHash(commit_hash='a', distro_hash='b'),
+            DlrnCommitDistroHash(commit_hash='c', distro_hash='c')
         ]
         required_set = {
             'staging-job-1',
