@@ -21,7 +21,7 @@ except ImportError:
     import urllib.request as url
 
 import yaml
-from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroExtendedHash, DlrnHash
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
 from stage import main as stage_main
 
 log = logging.getLogger("promoter-staging")
@@ -261,7 +261,7 @@ def test_containers(staged_env):
         if stage_info['main']['pipeline_type'] == "integration":
             assert type(candidate_hash) == DlrnAggregateHash
         elif stage_info['main']['pipeline_type'] == "single":
-            assert type(candidate_hash) == DlrnCommitDistroExtendedHash
+            assert type(candidate_hash) == DlrnCommitDistroHash
 
         assert candidate_hash.full_hash in full_name
 
