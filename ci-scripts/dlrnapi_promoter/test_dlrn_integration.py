@@ -19,7 +19,7 @@ try:
 except ImportError:
     import urllib.request as url
 
-from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroExtendedHash, DlrnHash
+from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroHash, DlrnHash
 from dlrnapi_client.rest import ApiException
 from logic import Promoter
 from stage import main as stage_main
@@ -155,7 +155,7 @@ def test_select_candidates(staged_env):
     elif stage_info['main']['pipeline_type'] == "single":
         assert isinstance(
             candidate_hashes_list[0],
-            DlrnCommitDistroExtendedHash)
+            DlrnCommitDistroHash)
 
 
 def test_promote_all_links(staged_env):
@@ -173,7 +173,7 @@ def test_promote_all_links(staged_env):
         if stage_info['main']['pipeline_type'] == "single":
             error_msg = "Single pipeline should promote a commit/distro hash"
             assert isinstance(
-                promoted_hash, DlrnCommitDistroExtendedHash), error_msg
+                promoted_hash, DlrnCommitDistroHash), error_msg
         elif stage_info['main']['pipeline_type'] == "integration":
             error_msg = "Integration pipeline should promote an aggregate hash"
             assert isinstance(promoted_hash, DlrnAggregateHash), error_msg

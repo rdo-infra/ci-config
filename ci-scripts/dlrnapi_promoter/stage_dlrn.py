@@ -169,6 +169,7 @@ class StagingRepo(object):
         self.commits = self.config.dlrn['commits']
         self.release = self.config.release
         self.distro = self.config.distro
+        self.enable_extended_hash = self.config.enable_extended_hash
         self.dry_run = self.config['dry_run']
         self.server_root = self.config.dlrn['server']['root']
         self.repo_root_server = self.config.dlrn['server']['repo_root']
