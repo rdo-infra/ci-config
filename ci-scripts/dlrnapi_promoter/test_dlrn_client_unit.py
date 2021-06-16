@@ -9,7 +9,8 @@ import pytest
 import yaml
 from common import PromotionError, setup_logging, str_api_object
 from dlrn_client import DlrnClient, DlrnClientConfig, HashChangedError
-from dlrn_hash import DlrnAggregateHash, DlrnCommitDistroExtendedHash, DlrnHash
+from dlrn_hash import (DlrnAggregateHash, DlrnCommitDistroExtendedHash,
+                       DlrnHash, DlrnCommitDistroHash)
 from dlrnapi_client.rest import ApiException
 from test_unit_fixtures import hashes_test_cases
 
@@ -34,7 +35,8 @@ class DlrnSetup(unittest.TestCase):
         self.config = DlrnClientConfig(dlrnauth_username='foo',
                                        dlrnauth_password='bar',
                                        api_url="http://api.url",
-                                       repo_url="file:///tmp")
+                                       repo_url="file:///tmp",
+                                       enable_extended_hash=False)
         self.config.promotions = {
             'current-tripleo': 'tripleo-ci-testing'
         }
@@ -57,14 +59,12 @@ class DlrnSetup(unittest.TestCase):
         self.api_exception.reason = "Not found"
 
         # Set up some ready to use hashes
-        self.dlrn_hash_commitdistro1 = DlrnCommitDistroExtendedHash(
+        self.dlrn_hash_commitdistro1 = DlrnCommitDistroHash(
             commit_hash='90633a3785687ddf3d37c0f86f9ad9f93926d639',
             distro_hash='d68290fed3d9aa069c95fc16d0d481084adbadc6',
-            extended_hash='6137f83ab8defe688e70a18ef1c7e5bf3fbf02ef_'
-                          '3945701fc2ae9b1b14e4261e87e203b2a89ccdca',
             component="tripleo",
             timestamp=1)
-        self.dlrn_hash_commitdistro2 = DlrnCommitDistroExtendedHash(
+        self.dlrn_hash_commitdistro2 = DlrnCommitDistroHash(
             commit_hash='4f4774d4e410ce72b024c185d3054cf649e5c578',
             distro_hash='fe88530aa04df13ebc63287c819c721740837aae',
             component="tempest",
@@ -176,7 +176,8 @@ class TestHashesToHashes(DlrnSetup):
     def test_hashes_to_hashes_single_hash(self, mock_log_debug):
         for api_hash_list in self.api_hashes_all_types_with_duplicates:
             dlrn_hash = self.client.hashes_to_hashes(api_hash_list, count=1)
-            self.assertIn(type(dlrn_hash), [DlrnCommitDistroExtendedHash,
+            self.assertIn(type(dlrn_hash), [DlrnCommitDistroHash,
+                                            DlrnCommitDistroExtendedHash,
                                             DlrnAggregateHash])
             mock_log_debug.assert_has_calls([
                 mock.call("Added hash %s built from %s", dlrn_hash,
@@ -287,7 +288,8 @@ class TestFetchHashes(DlrnSetup):
             self.assertEqual(params.limit, 1)
             # Ensure that fetch_hashes return a single hash and not a list when
             # count=1
-            self.assertIn(type(dlrn_hash), [DlrnCommitDistroExtendedHash,
+            self.assertIn(type(dlrn_hash), [DlrnCommitDistroHash,
+                                            DlrnCommitDistroExtendedHash,
                                             DlrnAggregateHash])
             mock_log_debug.assert_has_calls([
                 mock.call("Fetching hashes with criteria: %s", str_params),

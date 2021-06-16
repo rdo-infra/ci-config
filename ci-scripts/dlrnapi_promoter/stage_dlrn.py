@@ -169,6 +169,7 @@ class StagingRepo(object):
         self.commits = self.config.dlrn['commits']
         self.release = self.config.release
         self.distro = self.config.distro
+        self.enable_extended_hash = self.config.enable_extended_hash
         self.dry_run = self.config['dry_run']
         self.server_root = self.config.dlrn['server']['root']
         self.repo_root_server = self.config.dlrn['server']['repo_root']
@@ -316,12 +317,15 @@ class DlrnStagingServer(object):
         self.port = self.config.dlrn['server']['port']
         self.username = self.config.dlrn['server']['username']
         self.password = self.config.dlrnauth_password
+        self.enable_extended_hash = self.config.enable_extended_hash
         self.api_url = 'http://{}:{}'.format(self.host, self.port)
 
         # Client
-        client_config = DlrnClientConfig(dlrnauth_username=self.username,
-                                         dlrnauth_password=self.password,
-                                         api_url=self.api_url)
+        client_config = DlrnClientConfig(
+            dlrnauth_username=self.username,
+            dlrnauth_password=self.password,
+            api_url=self.api_url,
+            enable_extended_hash=self.enable_extended_hash)
 
         self.client = DlrnClient(client_config)
 
