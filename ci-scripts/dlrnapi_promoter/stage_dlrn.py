@@ -26,7 +26,7 @@ from common import check_port
 from dlrn import db as dlrn_db
 from dlrn import utils
 from dlrn_client import DlrnClient, DlrnClientConfig
-from dlrn_hash import DlrnCommitDistroExtendedHash
+from dlrn_hash import DlrnCommitDistroHash
 from sqlalchemy import exc as sql_a_exc
 
 
@@ -135,8 +135,7 @@ def expand_dlrn_config(dlrn_config):
             promotions_map.get(index, (None, None))
         if promotion_name is not None:
             commit['name'] = promotion_name
-            commit['full_hash'] = \
-                DlrnCommitDistroExtendedHash(source=commit).full_hash
+            commit['full_hash'] = DlrnCommitDistroHash(source=commit).full_hash
         if promotion_alias is not None:
             dlrn_config['promotions'][promotion_alias] = \
                 commit
@@ -214,7 +213,7 @@ class StagingRepo(object):
         # One will be used for single pipeline
         # The other will be used for component pipeline
 
-        dlrn_hash = DlrnCommitDistroExtendedHash(source=commit)
+        dlrn_hash = DlrnCommitDistroHash(source=commit)
 
         subst_dict = {
             'distro': self.distro,
@@ -249,7 +248,7 @@ class StagingRepo(object):
         :return: None
         """
         target_label = commit['name']
-        dlrn_hash = DlrnCommitDistroExtendedHash(source=commit)
+        dlrn_hash = DlrnCommitDistroHash(source=commit)
         link_path = os.path.join(self.repo_root_files,
                                  target_label)
         try:
@@ -448,7 +447,7 @@ class DlrnStagingServer(object):
         actual target_label
         :return:
         """
-        dlrn_hash = DlrnCommitDistroExtendedHash(source=commit)
+        dlrn_hash = DlrnCommitDistroHash(source=commit)
         self.client.promote(dlrn_hash, commit['name'],
                             create_previous=False)
         promotion_hash = self.client.fetch_promotions_from_hash(
