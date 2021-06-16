@@ -3,6 +3,12 @@
     name: tox-jjb
     run: playbooks/tox-jjb-run.yml
 
+- job:
+    name: tox-jjb-v2
+    parent: tox-jjb
+    vars:
+      toxenv: jjb-v2
+
 - project:
     templates:
       - jobs-promoter-centos-7-jobs
@@ -20,6 +26,12 @@
         - tox-jjb: &jjb
             files:
               - ^jenkins/.*
+              - ^requirements.txt
+              - ^test-requirements.txt
+              - ^tox.ini
+        - tox-jjb-v2: &jjb-v2
+            files:
+              - ^jenkins-v2/.*
               - ^requirements.txt
               - ^test-requirements.txt
               - ^tox.ini
@@ -48,6 +60,8 @@
       jobs:
         - tox-jjb:
             <<: *jjb
+        - tox-jjb-v2:
+            <<: *jjb-v2
         - mol-get_hash-centos-7
         - mol-get_hash-centos-8
         - mol-promoter
