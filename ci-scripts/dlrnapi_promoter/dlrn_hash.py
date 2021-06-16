@@ -11,35 +11,6 @@ based on the information present in the source
 import logging
 
 
-def check_hash(hash_value):
-    """
-    This function will check the hash function properties like
-    hash size, valid hash etc.
-    """
-    if hash_value is not None:
-        try:
-            int(hash_value, 16)
-            len(hash_value) == 40
-        except (TypeError, ValueError):
-            raise DlrnHashError("Invalid hash format!!")
-
-
-def check_extended_hash(extended_hash):
-    """
-    This function will check valid extended hash.
-    """
-    if extended_hash is not None and extended_hash not in ['None', '']:
-        try:
-            e_hash = extended_hash.split("_")
-            if len(e_hash) == 2:
-                check_hash(e_hash[0])
-                check_hash(e_hash[1])
-            else:
-                raise DlrnHashError("Invalid extended hash format")
-        except (TypeError, ValueError):
-            raise DlrnHashError("Invalid extended hash, not a hex hash!")
-
-
 class DlrnHashError(Exception):
     """
     Raised on various errors on DlrnHash operations
@@ -58,30 +29,24 @@ class DlrnHashBase(object):
 
     log = logging.getLogger("promoter")
 
-    def __init__(self, commit_hash=None, distro_hash=None, extended_hash=None,
-                 timestamp=None, aggregate_hash=None, source=None,
-                 component=None, label=None):
+    def __init__(self, commit_hash=None, distro_hash=None, timestamp=None,
+                 aggregate_hash=None, source=None, component=None, label=None):
         """
         Takes care of filling the hash attributes from the instantiation
         parameters.
         Also implements sanity checks on the parameters
         :param commit_hash:  the commit part of the hash
         :param distro_hash: the distro part of the hash
-        :param extended_hash: the extended part of the hash
         :param timestamp: the timestamp of the hash
         :param aggregate_hash: the computed aggregated part of the hash
         :param source: a dictionary with all the parameters as keys
         :param component:  the eventual component of the hash
         """
-        # Make sure extended_hash value should be None not "None"
-        if extended_hash in ['None', '']:
-            extended_hash = None
 
         # Load from default values into unified source
         _source = {
             'commit_hash': commit_hash,
             'distro_hash': distro_hash,
-            'extended_hash': extended_hash,
             'timestamp': timestamp,
             'dt_commit': timestamp,
             'aggregate_hash': aggregate_hash,
@@ -90,8 +55,8 @@ class DlrnHashBase(object):
         }
 
         # Checks on sources
-        valid_attributes = {'commit_hash', 'distro_hash', 'extended_hash',
-                            'aggregate_hash', 'timestamp', 'component'}
+        valid_attributes = {'commit_hash', 'distro_hash', 'aggregate_hash',
+                            'timestamp', 'component'}
         source_attributes = dir(source)
         valid_source_object = bool(valid_attributes.intersection(
             source_attributes))
@@ -128,9 +93,9 @@ class DlrnHashBase(object):
         # hashes with correct size
 
 
-class DlrnCommitDistroExtendedHash(DlrnHashBase):
+class DlrnCommitDistroHash(DlrnHashBase):
     """
-    This class implements methods for the commit/distro/extended dlrn hash
+    This class implements methods for the commit/distro dlrn hash
     for the single pipeline
     It inherits from the base class and does not override the init
     """
@@ -142,9 +107,6 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
         """
         if self.commit_hash is None or self.distro_hash is None:
             raise DlrnHashError("Invalid commit or distro hash")
-        check_hash(self.commit_hash)
-        check_hash(self.distro_hash)
-        check_extended_hash(self.extended_hash)
 
     def __repr__(self):
         """
@@ -152,10 +114,10 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
         useful for logging and debugging
         :return: The string representation of the object
         """
-        return ("<DlrnCommitDistroExtendedHash object commit: %s,"
-                " distro: %s, component: %s, extended: %s, timestamp: %s>"
-                "" % (self.commit_hash, self.distro_hash, self.component,
-                      self.extended_hash, self.timestamp))
+        return ("<DlrnCommitDistroHash object commit: %s,"
+                " distro: %s, component: %s, timestamp: %s>"
+                "" % (self.commit_hash, self.distro_hash,
+                      self.component, self.timestamp))
 
     def __str__(self):
         """
@@ -163,10 +125,9 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
         useful for logging and debugging
         :return: The string representation of the hash informations
         """
-        return ("commit: %s, distro: %s, extended: %s, component: %s,"
-                "timestamp: %s" % (self.commit_hash, self.distro_hash,
-                                   self.extended_hash, self.component,
-                                   self.timestamp))
+        return ("commit: %s, distro: %s, component: %s, timestamp: %s"
+                "" % (self.commit_hash, self.distro_hash,
+                      self.component, self.timestamp))
 
     def __ne__(self, other):
         """
@@ -178,7 +139,6 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
         try:
             result = (self.commit_hash != other.commit_hash
                       or self.distro_hash != other.distro_hash
-                      or self.extended_hash != other.extended_hash
                       or self.component != other.component
                       or self.timestamp != other.timestamp)
         except AttributeError:
@@ -189,15 +149,14 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
 
     def __eq__(self, other):
         """
-        Implement special methods of comparison with other object if
-        compatible. Raises error if not.
+        Implement special methods of comparison with other object if compatible.
+        Raises error if not.
         :param other: The object to compare self to
         :return: bool
         """
         try:
             result = (self.commit_hash == other.commit_hash
                       and self.distro_hash == other.distro_hash
-                      and self.extended_hash == other.extended_hash
                       and self.component == other.component
                       and self.timestamp == other.timestamp)
         except AttributeError:
@@ -210,18 +169,11 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
     def full_hash(self):
         """
         Property to abstract the common representation of a full dlrn hash
-        containing full commit, abbreviated distro and extended hashes
+        containing full commit and abbreviated distro hashes
         Work only with single norma dlrn haseh
         :return:  The full hash format or None
         """
-        if self.extended_hash is not None:
-            ext_distro_hash, ext_commit_hash = self.extended_hash.split('_')
-            return '{0}_{1}_{2}_{3}'.format(self.commit_hash,
-                                            self.distro_hash[:8],
-                                            ext_distro_hash[:8],
-                                            ext_commit_hash[:8])
-        else:
-            return '{0}_{1}'.format(self.commit_hash, self.distro_hash[:8])
+        return '{0}_{1}'.format(self.commit_hash, self.distro_hash[:8])
 
     def dump_to_dict(self):
         """
@@ -231,7 +183,6 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
         result = dict(
             commit_hash=self.commit_hash,
             distro_hash=self.distro_hash,
-            extended_hash=self.extended_hash,
             full_hash=self.full_hash,
             component=self.component,
             timestamp=self.timestamp,
@@ -246,7 +197,6 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
         """
         params.commit_hash = self.commit_hash
         params.distro_hash = self.distro_hash
-        params.extended_hash = self.extended_hash
         params.component = self.component
         params.timestamp = self.timestamp
 
@@ -281,11 +231,7 @@ class DlrnAggregateHash(DlrnHashBase):
         """
         if self.commit_hash is None or self.distro_hash is None or \
                 self.aggregate_hash is None:
-            raise DlrnHashError("Invalid commit or distro or aggregate hash")
-        check_hash(self.commit_hash)
-        check_hash(self.distro_hash)
-        check_hash(self.aggregate_hash)
-        check_extended_hash(self.extended_hash)
+            raise DlrnHashError("Invalid commit or distro or aggregate_hash")
 
     def __repr__(self):
         """
@@ -294,9 +240,9 @@ class DlrnAggregateHash(DlrnHashBase):
         :return: The string representation of the object
         """
         return ("<DlrnAggregateHash object aggregate: %s, commit: %s,"
-                " distro: %s, extended: %s, component: %s, timestamp: %s>"
+                " distro: %s, component: %s, timestamp: %s>"
                 "" % (self.aggregate_hash, self.commit_hash, self.distro_hash,
-                      self.extended_hash, self.component, self.timestamp))
+                      self.component, self.timestamp))
 
     def __str__(self):
         """
@@ -305,9 +251,9 @@ class DlrnAggregateHash(DlrnHashBase):
         :return: The string representation of the hash informations
         """
         return ("aggregate: %s, commit: %s,"
-                " distro: %s, extended: %s, component: %s, timestamp: %s"
+                " distro: %s, component: %s, timestamp: %s"
                 "" % (self.aggregate_hash, self.commit_hash, self.distro_hash,
-                      self.extended_hash, self.component, self.timestamp))
+                      self.component, self.timestamp))
 
     def __eq__(self, other):
         """
@@ -321,7 +267,6 @@ class DlrnAggregateHash(DlrnHashBase):
             result = (self.aggregate_hash == other.aggregate_hash
                       and self.commit_hash == other.commit_hash
                       and self.distro_hash == other.distro_hash
-                      and self.extended_hash == other.extended_hash
                       and self.timestamp == other.timestamp)
         except AttributeError:
             raise TypeError("Cannot compare {} with {}"
@@ -340,7 +285,6 @@ class DlrnAggregateHash(DlrnHashBase):
             result = (self.aggregate_hash != other.aggregate_hash
                       or self.commit_hash != other.commit_hash
                       or self.distro_hash != other.distro_hash
-                      or self.extended_hash != other.extended_hash
                       or self.timestamp != other.timestamp)
         except AttributeError:
             raise TypeError("Cannot compare {} with {}"
@@ -366,7 +310,6 @@ class DlrnAggregateHash(DlrnHashBase):
             aggregate_hash=self.full_hash,
             commit_hash=self.commit_hash,
             distro_hash=self.distro_hash,
-            extended_hash=self.extended_hash,
             full_hash=self.full_hash,
             timestamp=self.timestamp,
         )
@@ -381,7 +324,6 @@ class DlrnAggregateHash(DlrnHashBase):
         params.aggregate_hash = self.aggregate_hash
         params.commit_hash = self.commit_hash
         params.distro_hash = self.distro_hash
-        params.extended_hash = self.extended_hash
         params.timestamp = self.timestamp
 
     @property
@@ -419,14 +361,13 @@ class DlrnHash(object):
         dictionary, or from a dlrn api response object
         :param commit: the direct commit hash
         :param distro:  the direct distro hash
-        :param extended:  the direct extended hash
         :param aggregate: the direct aggregate_hash
         :param timstamp: the direct timestamp value, must be float
         :param source: A valid dlrn api response object or a dictionary
         that needs to contain *_hash as keys
-        :return: The DlrnCommitDistroExtendedHash or DlrnAggregateHash instance
+        :return: The DlrnCommitDistroHash or DlrnAggregateHash instance
         """
-        hash_instance = DlrnCommitDistroExtendedHash(**kwargs)
+        hash_instance = DlrnCommitDistroHash(**kwargs)
 
         try:
             if kwargs['aggregate_hash'] is not None:
