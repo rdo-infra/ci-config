@@ -181,7 +181,7 @@ cat <<EOF >create-vm.yml
     - name: Ensure the server is reachable
       ping:
       register: ping
-      until: ping | success
+      until: ping is successful
       retries: 6
       delay: 5
       delegate_to: "{{ vm.openstack.name }}"

@@ -171,7 +171,7 @@ cat <<EOF >wrap-up.yml
       synchronize:
         src: "${WORKSPACE}/console.txt.gz"
         dest: "/var/www/logs/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}/"
-      when: console | succeeded
+      when: console is successful
 
     - name: Upload ARA report
       synchronize:
