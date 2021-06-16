@@ -49,9 +49,8 @@ pushd $WORKSPACE
 source provision_venv/bin/activate
 pip install ansible==2.9.16 'Django<2.2' ara[server] shade
 
-ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
 export ANSIBLE_HOST_KEY_CHECKING=False
-export ANSIBLE_CALLBACK_PLUGINS="${ara_location}/plugins/callback"
+export ANSIBLE_CALLBACK_PLUGINS="$(python3 -m ara.setup.callback_plugins)"
 export ARA_DATABASE_NAME="$WORKSPACE/$JOB_NAME.sqlite"
 
 cat <<EOF >prep-logs.yml

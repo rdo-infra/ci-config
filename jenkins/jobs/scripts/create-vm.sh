@@ -44,9 +44,8 @@ pip install ansible==2.9.16 'Django<2.2' ara[server] shade
 git clone https://github.com/rdo-infra/ci-config
 nodepool_image=$(python ci-config/jenkins/jobs/scripts/get-nodepool-image.py "${CLOUD}" --pattern "${IMAGE}")
 
-ara_location=$(python -c "import os,ara; print(os.path.dirname(ara.__file__))")
 export ANSIBLE_HOST_KEY_CHECKING=False
-export ANSIBLE_CALLBACK_PLUGINS="${ara_location}/plugins/callback"
+export ANSIBLE_CALLBACK_PLUGINS="$(python3 -m ara.setup.callback_plugins)"
 export ANSIBLE_GATHERING="implicit"
 # Unreachable tasks may not be handled: https://github.com/ansible/ansible/issues/18287
 export ANSIBLE_SSH_RETRIES=6
