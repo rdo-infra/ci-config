@@ -19,7 +19,7 @@ def check_hash(hash_value):
     if hash_value is not None:
         try:
             int(hash_value, 16)
-            len(hash_value) == 40
+            return len(hash_value) == 40
         except (TypeError, ValueError):
             raise DlrnHashError("Invalid hash format!!")
 
@@ -32,8 +32,10 @@ def check_extended_hash(extended_hash):
         try:
             e_hash = extended_hash.split("_")
             if len(e_hash) == 2:
-                check_hash(e_hash[0])
-                check_hash(e_hash[1])
+                result1 = check_hash(e_hash[0])
+                result2 = check_hash(e_hash[1])
+            if result1 and result2:
+                return True
             else:
                 raise DlrnHashError("Invalid extended hash format")
         except (TypeError, ValueError):
@@ -214,7 +216,8 @@ class DlrnCommitDistroExtendedHash(DlrnHashBase):
         Work only with single norma dlrn haseh
         :return:  The full hash format or None
         """
-        if self.extended_hash is not None:
+        result = check_extended_hash(self.extended_hash)
+        if self.extended_hash is not None and result:
             ext_distro_hash, ext_commit_hash = self.extended_hash.split('_')
             return '{0}_{1}_{2}_{3}'.format(self.commit_hash,
                                             self.distro_hash[:8],
