@@ -20,7 +20,7 @@ fi
 
 # Ansible config
 CLOUD=${CLOUD:-vexxhost}
-NETWORK=${NETWORK:-private-network}
+NETWORK=${NETWORK:-public}
 NAME="${JOB_NAME_SIMPLIFIED}-${BUILD_NUMBER}"
 IMAGE=${IMAGE:-template-rdo-centos-7}
 TIMEOUT=${TIMEOUT:-120}
