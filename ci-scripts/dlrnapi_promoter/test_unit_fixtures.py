@@ -66,6 +66,10 @@ valid_commitdistro_notimestamp_kwargs = dict(
     distro_hash='030bf177f0394ece3dc912dd22ae7ccee8e4af0b',
     extended_hash='35e7cd373aa33c4fe9dfc21ff41da81810c69715_'
                   '86d134f3ea6848af3f1968b8904ba0da1fa7a074')
+valid_commitdistro_noextended_kwargs = dict(
+    commit_hash='ec60849c773e4649d22d4b976e7c5892596d4d1b',
+    distro_hash='030bf177f0394ece3dc912dd22ae7ccee8e4af0b',
+    extended_hash='None')
 invalid_commitdistro_kwargs = dict(
     commit='26c19986a58560b90bfa4b39bd3bc1ef43ad57f5',
     distro='34d2c7ae120f6c07767c5638f28d4a35515ade67',
@@ -106,6 +110,7 @@ hashes_test_cases = {
             "valid": valid_commitdistro_kwargs,
             "valid_notimestamp":
                 valid_commitdistro_notimestamp_kwargs,
+            'valid_noextended': valid_commitdistro_noextended_kwargs,
             'invalid': invalid_commitdistro_kwargs,
             'different': different_commitdistro_kwargs,
             'different_notimestamp':
@@ -126,6 +131,7 @@ hashes_test_cases = {
             "valid": valid_aggregate_kwargs,
             "valid_notimestamp":
                 valid_aggregate_notimestamp_kwargs,
+            'valid_noextended': valid_aggregate_kwargs,
             'invalid': invalid_aggregate_kwargs,
             'different': different_aggregate_kwargs,
             'different_notimestamp':
