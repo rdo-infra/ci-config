@@ -85,6 +85,7 @@ class TestDlrnHashSubClasses(unittest.TestCase):
                     'aggregate_hash']
                 dh = DlrnAggregateHash(source=values)
                 self.assertEqual(dh.aggregate_hash, aggregate_hash)
+                self.assertEqual(dh.extended_hash, None)
         self.assertEqual(dh.timestamp,
                          source_types['dict']['valid']['timestamp'])
 
@@ -95,6 +96,25 @@ class TestDlrnHashSubClasses(unittest.TestCase):
         with self.assertRaises(DlrnHashError):
             source = hashes_test_cases['aggregate']['dict']['invalid']
             DlrnAggregateHash(source=source)
+
+    def test_build_valid_extended_from_source(self):
+        for hash_type, source_types in hashes_test_cases.items():
+            values = source_types['dict']['valid_noextended']
+            if hash_type == 'commitdistro':
+                dh = DlrnCommitDistroExtendedHash(source=values)
+                self.assertEqual(dh.commit_hash,
+                                 source_types['dict']['valid_noextended'][
+                                     'commit_hash'])
+                self.assertEqual(dh.distro_hash,
+                                 source_types['dict']['valid_noextended'][
+                                     'distro_hash'])
+                self.assertEqual(dh.extended_hash, None)
+            elif hash_type == "aggregate":
+                aggregate_hash = source_types['dict']['valid'][
+                    'aggregate_hash']
+                dh = DlrnAggregateHash(source=values)
+                self.assertEqual(dh.aggregate_hash, aggregate_hash)
+                self.assertEqual(dh.extended_hash, None)
 
 
 class TestDlrnHash(unittest.TestCase):

@@ -121,6 +121,8 @@ class DlrnHashBase(object):
         # load from unified source
         for key, value in _source.items():
             setattr(self, key, value)
+            if key == 'extended_hash' and value in ['', 'None']:
+                setattr(self, key, None)
 
         self.sanity_check()
 
