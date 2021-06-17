@@ -9,7 +9,7 @@
       become_user: "{{ promoter_user }}"
       shell: |
         source ~/{{ promoter_virtualenv }}/bin/activate
-        python3 stage.py {{ staging_args }} {{ staging_action }}
+        python3 -m stage.stage_server {{ staging_args }} {{ staging_action }}
       args:
         chdir: "{{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter"
       changed_when: false
