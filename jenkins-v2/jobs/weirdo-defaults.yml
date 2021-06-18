@@ -1,0 +1,50 @@
+- defaults:
+    name: 'weirdo-defaults'
+    description: |
+        Managed by Jenkins Job Builder. Do not edit via web.
+    concurrent: false
+    node: 'cico-workspace-rdo'
+    logrotate:
+        daysToKeep: 31
+        artifactDaysToKeep: 31
+    properties:
+      - inject:
+          properties-content: |
+            ANSIBLE_FORCE_COLOR=1
+            ANSIBLE_STDOUT_CALLBACK=debug
+    publishers:
+        - weirdo-archive-logs
+    wrappers:
+        - ansicolor
+        - timestamps
+        - workspace-cleanup
+        - timeout:
+            type: absolute
+            timeout: 120
+            fail: true
+        - credentials-binding:
+          - text:
+             credential-id: d31fc651-105c-4af6-a2a5-ed486a5897ca
+             variable: DLRNAPI_PASSWD
+    tempest_version: ''
+    tempest_from_source: ''
+    enable_puppet_modules_rpm: true
+
+- publisher:
+    name: 'weirdo-archive-logs'
+    publishers:
+        - archive:
+            artifacts: 'properties,logs.html'
+            allow-empty: true
+
+# "Building remotely" should always be in the build console output
+- publisher:
+    name: 'weirdo-release-node'
+    publishers:
+        - post-tasks:
+            - matches:
+                - log-text: Building remotely
+              script:
+                !include-raw:
+                    - scripts/weirdo-collect-logs.sh
+                    - scripts/cico-node-done-from-ansible.sh
