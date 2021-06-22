@@ -31,10 +31,16 @@
     register: container_ps
     changed_when: false
 
+  - name: Create config
+    template:
+      src: nginx-default.conf.j2
+      dest: ~/nginx-default.conf
+
   - name: Start web server
     command: >-
       podman run -d
       -p 80:80
+      -v ~/nginx-default.conf:/etc/nginx/conf.d/default.conf:ro,z
       -v {{ web_directory }}:/usr/share/nginx/html:ro,z
       --name nginx
       --log-driver=journald
