@@ -60,6 +60,14 @@
         full_hash: "{{ md5_hash.stdout }}"
   when: md5_url|default(None) != None
 
+- name: "If set use a passed hash {{ featureset_override['dlrn_hash_tag']|default('') }}"
+  set_fact:
+    full_hash: "{{ featureset_override['dlrn_hash_tag'] }}"
+  when:
+    - md5_url|default(None) != None
+    - featureset_override is defined
+    - featureset_override['dlrn_hash_tag'] is defined
+
 - name: create hash_info file
   import_tasks: create_hash_info_file.yaml
 
