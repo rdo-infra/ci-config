@@ -140,6 +140,40 @@ def stack_delete(cloud_name, stack_list, dry_run=False):
         logger.info("There are no stack to delete")
 
 
+def progress_heat_stacks(cloud_name):
+    """ This function fetches list of all heat stacks that are in
+        DELETE_IN_PROGRESS state by ID and by Name.
+    """
+    conn = openstack.connect(cloud=cloud_name)
+    progress_stack_id_list = []
+    progress_stack_name_list = []
+    for stack in conn.orchestration.stacks():
+        if "DELETE_IN_PROGRESS" in stack['status']:
+            progress_stack_id_list.append(stack["id"])
+            progress_stack_name_list.append(stack["name"])
+    return progress_stack_id_list, progress_stack_name_list
+
+
+def mark_stack_check(cloud_name, stack_list, dry_run=False):
+    """ This function takes a list of heat stacks and check them if dry_run
+        is False.
+    """
+    conn = openstack.connect(cloud=cloud_name)
+    if stack_list:
+        if dry_run:
+            logger.info("DRY RUN - Stack list to "
+                        "check: %s", stack_list)
+        else:
+            logger.info("These stacks will be "
+                        "checked: %s", stack_list)
+            for stack in stack_list:
+                logger.info("Checking stack id %s", stack)
+                conn.orchestration.check_stack(stack)
+                time.sleep(3)
+    else:
+        logger.info("There are no stack to check")
+
+
 def failed_heat_stacks(cloud_name):
     """ This function fetches list of all heat stacks that are in i.e
         CREATE_FAILED or DELETE_FAILED state
@@ -273,8 +307,9 @@ def router_interface_delete(cloud_name, router_id, dry_run=False):
     """ This function takes a router id and deattaches its
         interfaces"""
     conn = openstack.connect(cloud=cloud_name)
+    print("Running interface dettach")
     for port in conn.network.ports(device_id=router_id):
-        if port['device_owner'] == 'network:router_interface':
+        if port['device_owner'] == 'network:router_interface' or port['device_owner']=='network:ha_router_replicated_interface':
             logger.info("Deattaching %s from  %s", port['id'], router_id)
             if not dry_run:
                 conn.network.remove_interface_from_router(
@@ -398,12 +433,25 @@ def main(cloud_name, time_expired=360, dry_run=False,
     # wait for stack to delete
     if not dry_run:
         logger.info("Waiting for 150s for stacks to delete ")
-        # wait for 150s
         time.sleep(150)
 
     #  ReCheck if there are stacks left in CREATE_FAILED/ DELETE_FAILED state
     logger.info("Rechecking if there are stacks left in CREATE_FAILED"
-                " or DELETE_FAILED state")
+                " or DELETE_FAILED state or DELETE_IN_PROGRESS")
+
+    # Check stack which are stuck in DELETE_IN_PROGRESS, and delete individual
+    # resources before trying to delete them again.
+    progress_stack_id_list, progress_stack_name_list = progress_heat_stacks(cloud_name)
+    logger.info("Stacks which stuck in Delete %s", progress_stack_name_list)
+    if progress_stack_id_list:
+        mark_stack_check(cloud_name, progress_stack_id_list, dry_run)
+        delete_individual_resources(cloud_name, progress_stack_name_list, prefix,
+                                    suffix, dry_run)
+        stack_delete(cloud_name, progress_stack_name_list, dry_run)
+        if not dry_run:
+            logger.info("wait for 150s for stack to delete")
+            time.sleep(150)
+
     failed_stack_list = failed_heat_stacks(cloud_name)
     logger.info("Stacks which are in FAILED state %s", failed_stack_list)
 
@@ -414,7 +462,7 @@ def main(cloud_name, time_expired=360, dry_run=False,
                                     suffix, dry_run)
         stack_delete(cloud_name, failed_stack_list, dry_run)
         if not dry_run:
-            # wait for 150s
+            logger.info("wait for 150s for stack to delete")
             time.sleep(150)
 
     # Success/ Failure based on left over stacks
@@ -468,10 +516,24 @@ if __name__ == '__main__':
                         'current directory, $HOME/.config/openstack or '
                         '/etc/openstack')
 
+    parser.add_argument('-n',
+                        '--stack',
+                        metavar='',
+                        default='',
+                        help='Individual stack to delete ')
+
     args = parser.parse_args()
 
-    main(time_expired=args.time_expired,
-         prefix=args.prefix,
-         suffix=args.suffix,
-         dry_run=args.dry_run,
-         cloud_name=args.cloud_name)
+    if args.stack:
+        delete_individual_resources(cloud_name=args.cloud_name,
+                                    stack_list=[args.stack],
+                                    prefix=args.prefix,
+                                    suffix=args.suffix,
+                                    dry_run=args.dry_run)
+        stack_delete(cloud_name=args.cloud_name, stack_list=[args.stack], dry_run=args.dry_run)
+    else:
+        main(time_expired=args.time_expired,
+             prefix=args.prefix,
+             suffix=args.suffix,
+             dry_run=args.dry_run,
+             cloud_name=args.cloud_name)
