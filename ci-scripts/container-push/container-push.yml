@@ -8,14 +8,11 @@
 # It will also mirror the images to docker.io.
 # When using it from downstream purpose, update
 # the registry_host with correct registry name
-# set enable_downstream var to true.
 # Set registry_host to quay.io when using quay
 - name: Download and repush container images
   hosts: localhost
   vars:
     registry_host: docker.io
-    enable_downstream: false
-    use_quay: false
     tmp_file_root: "/var/tmp/promoter_logs"
     # It contains all the required registry metadata
     target_registries_group:
@@ -35,7 +32,7 @@
         auth_url: "https://{{ registry_host }}/api/v1/'"
         schema: "v2_s1"
       downstream:
-        host: "foo"
+        host: "{{ registry_host }}"
         namespace: "tripleo{{ lookup('env','RELEASE') }}"
         username: "{{ lookup('env','UPSHIFT_USERNAME') }}"
         password: "{{ lookup('env','UPSHIFT_PASSWORD') }}"
