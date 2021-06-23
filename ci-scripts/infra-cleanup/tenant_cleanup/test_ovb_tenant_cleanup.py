@@ -264,6 +264,12 @@ class HeatTests(unittest.TestCase):
             stack_name='baremetal_43666',
             stack_status='CREATE_COMPLETE',
             creation_time='2021-04-04T18:04:17Z',
+            tags=None),
+        openstack.orchestration.v1.stack.Stack(
+            id='39ce9687-0c9a-463f-b4c1-2d30f082f3cf',
+            stack_name='baremetal_123456',
+            stack_status='DELETE_IN_PROGRESS',
+            creation_time='2021-04-04T23:05:17Z',
             tags=None)]
 
     def setUp(self):
@@ -311,6 +317,12 @@ class HeatTests(unittest.TestCase):
         """ Unit test for failed_heat_stacks function """
         self.assertEqual(ovb_tenant_cleanup.failed_heat_stacks('testcloud'),
                          ['baremetal_73703'])
+
+    def test_progress_heat_stacks(self):
+        """ Unit test for progress_heat_stacks function """
+        self.assertEqual(ovb_tenant_cleanup.progress_heat_stacks('testcloud'),
+                         (['39ce9687-0c9a-463f-b4c1-2d30f082f3cf'],
+                          ['baremetal_123456']))
 
 
 if __name__ == '__main__':
