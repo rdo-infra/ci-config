@@ -302,6 +302,14 @@ def influxdb(jobs_result):
     # jobs_result = the measurement
     # job_type is a tag, note the space
     # rest of the values are fields in a row of data
+
+    # grafana can only color code w/ numbers, not text
+    # 0 = success, 1 = failed
+    if jobs_result['status'] == "passed":
+        jobs_result['status'] = 0
+    else:
+        jobs_result['status'] = 1
+
     results_influxdb_line = ('jobs_result,'
                              'job_type={job_type},'
                              'job_name={job},'
@@ -327,10 +335,8 @@ def track_integration_promotion(aggregate_hash='tripleo-ci-testing',
                                 promotion="current-tripleo",
                                 compare_upstream=False,
                                 influx=False):
-    if release == 'master':
-        promoter_url = 'http://10.0.148.74/config/CentOS-8/'
-    else:
-        promoter_url = 'http://38.102.83.109/config/CentOS-8/'
+    # do not use 10.x addresses
+    promoter_url = 'http://38.102.83.109/config/CentOS-8/'
     url = promoter_url + release + '.yaml'
     api_url, base_url = gather_basic_info_from_criteria(url)
     md5sum_url = base_url + aggregate_hash + '/delorean.repo.md5'
