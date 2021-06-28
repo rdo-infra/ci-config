@@ -27,7 +27,15 @@ overcloud_images:
     - ironic-python-agent.tar.md5
     - overcloud-full.tar
     - overcloud-full.tar.md5
+  dockerfile_servers:
+    promoter:
+      user: "uploader"
+      host: "images.rdoproject.org"
+      root: dockerfiles/
+      client: "sftp"
+      keypath: "~/.ssh/id_rsa_uploader"
 default_qcow_server: promoter
+default_dockerfile_server: promoter
 
 containers:
   containers_list_base_url: "https://opendev.org/openstack/tripleo-common/raw/commit/"
