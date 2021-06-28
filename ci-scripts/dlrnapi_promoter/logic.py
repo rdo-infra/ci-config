@@ -5,6 +5,7 @@ workflow
 import logging
 
 from common import PromotionError
+from dockerfile_client import DockerfileClient
 from dlrn_client import DlrnClient
 from qcow_client import QcowClient
 from registries_client import RegistriesClient
@@ -29,6 +30,7 @@ class Promoter(object):
         self.dlrn_client = DlrnClient(self.config)
         self.registries_client = RegistriesClient(self.config)
         self.qcow_client = QcowClient(self.config)
+        self.dockerfile_client = DockerfileClient(self.config)
 
     def select_candidates(self, candidate_label, target_label):
         """
