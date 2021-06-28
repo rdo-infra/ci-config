@@ -1819,30 +1819,26 @@
                 },
                 "styles":[
                     {
+                        "$$hashKey":"object:280",
                         "alias":"Time",
                         "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"Branch",
-                        "align":"auto",
                         "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"branch",
+                        "pattern":"Time",
                         "thresholds":[],
-                        "type":"string",
+                        "type":"date",
                         "unit":"short"
                     },
                     {
-                        "alias":"Job",
+                        "$$hashKey":"object:293",
+                        "alias":"job",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -1855,55 +1851,16 @@
                         "link":true,
                         "linkTargetBlank":true,
                         "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
+                        "linkUrl":"${__cell_4:raw}",
                         "mappingType":1,
                         "pattern":"job_name",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Result",
-                        "align":"auto",
-                        "colorMode":"cell",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"result",
-                        "thresholds":[
-                            "AA"
-                        ],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Job",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"log_link",
                         "sanitize":true,
                         "thresholds":[],
                         "type":"string",
                         "unit":"short"
                     },
                     {
+                        "$$hashKey":"object:319",
                         "alias":"Duration",
                         "align":"auto",
                         "colorMode":"cell",
@@ -1924,20 +1881,55 @@
                         "unit":"dtdurations"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:330",
+                        "alias":"result",
                         "align":"auto",
-                        "colorMode":null,
+                        "colorMode":"row",
                         "colors":[
-                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
+                            "rgba(50, 172, 45, 0.97)"
                         ],
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"",
+                        "pattern":"status",
+                        "thresholds":[
+                            "0",
+                            " 0",
+                            " 1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "$$hashKey":"object:351",
+                                "text":"SUCCESS",
+                                "value":"0"
+                            },
+                            {
+                                "$$hashKey":"object:353",
+                                "text":"FAILED",
+                                "value":"1"
+                            }
+                        ]
+                    },
+                    {
+                        "$$hashKey":"object:1126",
+                        "alias":"logs",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"logs",
                         "thresholds":[],
-                        "type":"number",
+                        "type":"hidden",
                         "unit":"short"
                     }
                 ],
@@ -1959,7 +1951,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT \"log_link\", \"duration\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND \"pipeline\" =~ /periodic/ AND \"type\" = 'rdo' AND \"result\" != 'SKIPPED' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /master/) AND $timeFilter",
+                        "query":"SELECT \"job_name\",\"status\",\"criteria\",\"logs\",\"duration\",\"failure_reason\",\"test_hash\"  FROM \"autogen\".\"jobs_result\" WHERE (\"job_type\" = 'integration' AND \"release\" = 'master') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -1982,7 +1974,7 @@
                 ],
                 "timeFrom":"12h",
                 "timeShift":null,
-                "title":"Master failing periodic jobs",
+                "title":"Master Integration periodic jobs",
                 "transform":"table",
                 "type":"table-old"
             },
@@ -2987,20 +2979,6 @@
                 }
             },
             {
-                "collapsed":false,
-                "datasource":null,
-                "gridPos":{
-                    "h":1,
-                    "w":24,
-                    "x":0,
-                    "y":49
-                },
-                "id":17,
-                "panels":[],
-                "title":"Master Promotions",
-                "type":"row"
-            },
-            {
                 "columns":[],
                 "datasource":"telegraf",
                 "description":"List of the latest failing integration / promotion  jobs.",
@@ -3015,9 +2993,9 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":50
+                    "y":49
                 },
-                "id":48,
+                "id":49,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -3028,30 +3006,26 @@
                 },
                 "styles":[
                     {
+                        "$$hashKey":"object:280",
                         "alias":"Time",
                         "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"Branch",
-                        "align":"auto",
                         "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"branch",
+                        "pattern":"Time",
                         "thresholds":[],
-                        "type":"string",
+                        "type":"date",
                         "unit":"short"
                     },
                     {
-                        "alias":"Job",
+                        "$$hashKey":"object:293",
+                        "alias":"job",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -3064,55 +3038,16 @@
                         "link":true,
                         "linkTargetBlank":true,
                         "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
+                        "linkUrl":"${__cell_4:raw}",
                         "mappingType":1,
                         "pattern":"job_name",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Result",
-                        "align":"auto",
-                        "colorMode":"cell",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"result",
-                        "thresholds":[
-                            "AA"
-                        ],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Job",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"log_link",
                         "sanitize":true,
                         "thresholds":[],
                         "type":"string",
                         "unit":"short"
                     },
                     {
+                        "$$hashKey":"object:319",
                         "alias":"Duration",
                         "align":"auto",
                         "colorMode":"cell",
@@ -3131,6 +3066,58 @@
                         ],
                         "type":"number",
                         "unit":"dtdurations"
+                    },
+                    {
+                        "$$hashKey":"object:330",
+                        "alias":"result",
+                        "align":"auto",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"status",
+                        "thresholds":[
+                            "0",
+                            " 0",
+                            " 1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "$$hashKey":"object:351",
+                                "text":"SUCCESS",
+                                "value":"0"
+                            },
+                            {
+                                "$$hashKey":"object:353",
+                                "text":"FAILED",
+                                "value":"1"
+                            }
+                        ]
+                    },
+                    {
+                        "$$hashKey":"object:1284",
+                        "alias":"logs",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"logs",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
                     }
                 ],
                 "targets":[
@@ -3151,7 +3138,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT \"log_link\", \"duration\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND \"pipeline\" =~ /periodic/ AND \"type\" = 'rdo' AND \"result\" != 'SKIPPED' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /wallaby/) AND $timeFilter",
+                        "query":"SELECT \"job_name\",\"status\",\"criteria\",\"logs\",\"duration\",\"failure_reason\",\"test_hash\"  FROM \"autogen\".\"jobs_result\" WHERE (\"job_type\" = 'integration' AND \"release\" = 'wallaby') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -3172,9 +3159,9 @@
                         "tags":[]
                     }
                 ],
-                "timeFrom":null,
+                "timeFrom":"12h",
                 "timeShift":null,
-                "title":"Wallaby failing periodic jobs",
+                "title":"Wallaby  Integration periodic jobs",
                 "transform":"table",
                 "type":"table-old"
             },
@@ -3197,7 +3184,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":58
+                    "y":57
                 },
                 "hiddenSeries":false,
                 "id":37,
@@ -3333,7 +3320,7 @@
                     "h":16,
                     "w":12,
                     "x":12,
-                    "y":58
+                    "y":57
                 },
                 "id":39,
                 "links":[],
@@ -4056,7 +4043,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":66
+                    "y":65
                 },
                 "hiddenSeries":false,
                 "id":38,
@@ -4193,9 +4180,9 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":74
+                    "y":73
                 },
-                "id":40,
+                "id":50,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -4206,30 +4193,26 @@
                 },
                 "styles":[
                     {
+                        "$$hashKey":"object:280",
                         "alias":"Time",
                         "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"Branch",
-                        "align":"auto",
                         "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"branch",
+                        "pattern":"Time",
                         "thresholds":[],
-                        "type":"string",
+                        "type":"date",
                         "unit":"short"
                     },
                     {
-                        "alias":"Job",
+                        "$$hashKey":"object:293",
+                        "alias":"job",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -4242,55 +4225,16 @@
                         "link":true,
                         "linkTargetBlank":true,
                         "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
+                        "linkUrl":"${__cell_4:raw}",
                         "mappingType":1,
                         "pattern":"job_name",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Result",
-                        "align":"auto",
-                        "colorMode":"cell",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"result",
-                        "thresholds":[
-                            "AA"
-                        ],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Job",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"log_link",
                         "sanitize":true,
                         "thresholds":[],
                         "type":"string",
                         "unit":"short"
                     },
                     {
+                        "$$hashKey":"object:319",
                         "alias":"Duration",
                         "align":"auto",
                         "colorMode":"cell",
@@ -4309,6 +4253,58 @@
                         ],
                         "type":"number",
                         "unit":"dtdurations"
+                    },
+                    {
+                        "$$hashKey":"object:330",
+                        "alias":"result",
+                        "align":"auto",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"status",
+                        "thresholds":[
+                            "0",
+                            " 0",
+                            " 1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "$$hashKey":"object:351",
+                                "text":"SUCCESS",
+                                "value":"0"
+                            },
+                            {
+                                "$$hashKey":"object:353",
+                                "text":"FAILED",
+                                "value":"1"
+                            }
+                        ]
+                    },
+                    {
+                        "$$hashKey":"object:1284",
+                        "alias":"logs",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"logs",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
                     }
                 ],
                 "targets":[
@@ -4329,7 +4325,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT \"log_link\", \"duration\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND \"pipeline\" =~ /periodic/ AND \"type\" = 'rdo' AND \"result\" != 'SKIPPED' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /victoria/) AND $timeFilter",
+                        "query":"SELECT \"job_name\",\"status\",\"criteria\",\"logs\",\"duration\",\"failure_reason\",\"test_hash\"  FROM \"autogen\".\"jobs_result\" WHERE (\"job_type\" = 'integration' AND \"release\" = 'victoria') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -4350,9 +4346,9 @@
                         "tags":[]
                     }
                 ],
-                "timeFrom":null,
+                "timeFrom":"12h",
                 "timeShift":null,
-                "title":"Victoria failing periodic jobs",
+                "title":"Victoria  Integration periodic jobs",
                 "transform":"table",
                 "type":"table-old"
             },
@@ -4363,7 +4359,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":82
+                    "y":81
                 },
                 "id":9,
                 "panels":[],
@@ -4389,7 +4385,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":83
+                    "y":82
                 },
                 "hiddenSeries":false,
                 "id":2,
@@ -4525,7 +4521,7 @@
                     "h":16,
                     "w":12,
                     "x":12,
-                    "y":83
+                    "y":82
                 },
                 "id":35,
                 "links":[],
@@ -5248,7 +5244,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":91
+                    "y":90
                 },
                 "hiddenSeries":false,
                 "id":5,
@@ -5385,9 +5381,9 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":99
+                    "y":98
                 },
-                "id":15,
+                "id":51,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -5398,30 +5394,26 @@
                 },
                 "styles":[
                     {
+                        "$$hashKey":"object:280",
                         "alias":"Time",
                         "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"Branch",
-                        "align":"auto",
                         "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"branch",
+                        "pattern":"Time",
                         "thresholds":[],
-                        "type":"string",
+                        "type":"date",
                         "unit":"short"
                     },
                     {
-                        "alias":"Job",
+                        "$$hashKey":"object:293",
+                        "alias":"job",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -5434,55 +5426,16 @@
                         "link":true,
                         "linkTargetBlank":true,
                         "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
+                        "linkUrl":"${__cell_4:raw}",
                         "mappingType":1,
                         "pattern":"job_name",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Result",
-                        "align":"auto",
-                        "colorMode":"cell",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"result",
-                        "thresholds":[
-                            "AA"
-                        ],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Job",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"log_link",
                         "sanitize":true,
                         "thresholds":[],
                         "type":"string",
                         "unit":"short"
                     },
                     {
+                        "$$hashKey":"object:319",
                         "alias":"Duration",
                         "align":"auto",
                         "colorMode":"cell",
@@ -5501,6 +5454,58 @@
                         ],
                         "type":"number",
                         "unit":"dtdurations"
+                    },
+                    {
+                        "$$hashKey":"object:330",
+                        "alias":"result",
+                        "align":"auto",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"status",
+                        "thresholds":[
+                            "0",
+                            " 0",
+                            " 1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "$$hashKey":"object:351",
+                                "text":"SUCCESS",
+                                "value":"0"
+                            },
+                            {
+                                "$$hashKey":"object:353",
+                                "text":"FAILED",
+                                "value":"1"
+                            }
+                        ]
+                    },
+                    {
+                        "$$hashKey":"object:1284",
+                        "alias":"logs",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"logs",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
                     }
                 ],
                 "targets":[
@@ -5521,7 +5526,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT \"log_link\", \"duration\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND \"pipeline\" =~ /periodic/ AND \"type\" = 'rdo' AND \"result\" != 'SKIPPED' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /ussuri/) AND $timeFilter",
+                        "query":"SELECT \"job_name\",\"status\",\"criteria\",\"logs\",\"duration\",\"failure_reason\",\"test_hash\"  FROM \"autogen\".\"jobs_result\" WHERE (\"job_type\" = 'integration' AND \"release\" = 'ussuri') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -5542,9 +5547,9 @@
                         "tags":[]
                     }
                 ],
-                "timeFrom":null,
+                "timeFrom":"12h",
                 "timeShift":null,
-                "title":"Ussuri failing periodic jobs",
+                "title":"Ussuri  Integration periodic jobs",
                 "transform":"table",
                 "type":"table-old"
             },
@@ -5555,7 +5560,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":107
+                    "y":106
                 },
                 "id":7,
                 "panels":[],
@@ -5581,7 +5586,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":108
+                    "y":107
                 },
                 "hiddenSeries":false,
                 "id":18,
@@ -5717,7 +5722,7 @@
                     "h":16,
                     "w":12,
                     "x":12,
-                    "y":108
+                    "y":107
                 },
                 "id":36,
                 "links":[],
@@ -6440,7 +6445,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":116
+                    "y":115
                 },
                 "hiddenSeries":false,
                 "id":21,
@@ -6581,7 +6586,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":124
+                    "y":123
                 },
                 "hiddenSeries":false,
                 "id":20,
@@ -6722,7 +6727,7 @@
                     "h":8,
                     "w":12,
                     "x":12,
-                    "y":124
+                    "y":123
                 },
                 "hiddenSeries":false,
                 "id":22,
@@ -6859,9 +6864,9 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":132
+                    "y":131
                 },
-                "id":19,
+                "id":52,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -6872,30 +6877,26 @@
                 },
                 "styles":[
                     {
+                        "$$hashKey":"object:280",
                         "alias":"Time",
                         "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"Branch",
-                        "align":"auto",
                         "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"branch",
+                        "pattern":"Time",
                         "thresholds":[],
-                        "type":"string",
+                        "type":"date",
                         "unit":"short"
                     },
                     {
-                        "alias":"Job",
+                        "$$hashKey":"object:293",
+                        "alias":"job",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -6908,55 +6909,16 @@
                         "link":true,
                         "linkTargetBlank":true,
                         "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
+                        "linkUrl":"${__cell_4:raw}",
                         "mappingType":1,
                         "pattern":"job_name",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Result",
-                        "align":"auto",
-                        "colorMode":"cell",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"result",
-                        "thresholds":[
-                            "AA"
-                        ],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Job",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"log_link",
                         "sanitize":true,
                         "thresholds":[],
                         "type":"string",
                         "unit":"short"
                     },
                     {
+                        "$$hashKey":"object:319",
                         "alias":"Duration",
                         "align":"auto",
                         "colorMode":"cell",
@@ -6975,6 +6937,58 @@
                         ],
                         "type":"number",
                         "unit":"dtdurations"
+                    },
+                    {
+                        "$$hashKey":"object:330",
+                        "alias":"result",
+                        "align":"auto",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"status",
+                        "thresholds":[
+                            "0",
+                            " 0",
+                            " 1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "$$hashKey":"object:351",
+                                "text":"SUCCESS",
+                                "value":"0"
+                            },
+                            {
+                                "$$hashKey":"object:353",
+                                "text":"FAILED",
+                                "value":"1"
+                            }
+                        ]
+                    },
+                    {
+                        "$$hashKey":"object:1284",
+                        "alias":"logs",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"logs",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
                     }
                 ],
                 "targets":[
@@ -6995,7 +7009,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT \"log_link\", \"duration\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND \"pipeline\" =~ /periodic/ AND \"type\" = 'rdo' AND \"result\" != 'SKIPPED' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /train/) AND $timeFilter",
+                        "query":"SELECT \"job_name\",\"status\",\"criteria\",\"logs\",\"duration\",\"failure_reason\",\"test_hash\"  FROM \"autogen\".\"jobs_result\" WHERE (\"job_type\" = 'integration' AND \"release\" = 'train') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -7016,9 +7030,9 @@
                         "tags":[]
                     }
                 ],
-                "timeFrom":null,
+                "timeFrom":"12h",
                 "timeShift":null,
-                "title":"Train failing periodic jobs",
+                "title":"Train CentOS-8  Integration periodic jobs",
                 "transform":"table",
                 "type":"table-old"
             },
@@ -7041,7 +7055,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":140
+                    "y":139
                 },
                 "hiddenSeries":false,
                 "id":26,
@@ -7182,7 +7196,7 @@
                     "h":8,
                     "w":12,
                     "x":12,
-                    "y":140
+                    "y":139
                 },
                 "hiddenSeries":false,
                 "id":24,
@@ -7319,7 +7333,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":148
+                    "y":147
                 },
                 "id":25,
                 "links":[],
@@ -7501,7 +7515,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":156
+                    "y":155
                 },
                 "hiddenSeries":false,
                 "id":29,
@@ -7642,7 +7656,7 @@
                     "h":8,
                     "w":12,
                     "x":12,
-                    "y":156
+                    "y":155
                 },
                 "hiddenSeries":false,
                 "id":30,
@@ -7779,7 +7793,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":164
+                    "y":163
                 },
                 "id":31,
                 "links":[],
