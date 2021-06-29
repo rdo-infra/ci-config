@@ -20,6 +20,10 @@ console = Console()
 # ZUUL_BUILDS_API
 ZB_UPSTREAM = "https://zuul.openstack.org/api/builds"
 ZB_RDO = "https://review.rdoproject.org/zuul/api/builds"
+PROMOTER_BASE_URL = "http://38.102.83.109"
+DLRN_SERVER = "https://trunk.rdoproject.org"
+COMPONENT_CRITERIA_URL = ('https://raw.githubusercontent.com/rdo-infra/ci-config/master/'
+               'ci-scripts/dlrnapi_promoter/config/')
 
 
 def date_diff_in_seconds(dt2, dt1):
@@ -332,18 +336,41 @@ def influxdb(jobs_result):
     return results_influxdb_line.format(**jobs_result)
 
 
-def track_integration_promotion(aggregate_hash='tripleo-ci-testing',
-                                release='master',
+def track_integration_promotion(release,
+                                distro,
+                                aggregate_hash='tripleo-ci-testing',
                                 promotion="current-tripleo",
                                 compare_upstream=False,
                                 influx=False):
-    # do not use 10.x addresses
-    promoter_url = 'http://38.102.83.109/config/CentOS-8/'
+    if distro == "centos-8":
+        promoter_path = "/config/CentOS-8/"
+        dlrn_api_path = "api-centos8-"
+    elif distro == "centos-7":
+        promoter_path = "/config/CentOS-7/"
+        dlrn_api_path = "api-centos-"
+    elif distro == "rhel-8":
+        promoter_path = "/config/RedHat-8"
+        dlrn_api_path = "api-rhel8-"
+    elif distro == "rhel-9":
+        promoter_path = "/config/RedHat-9"
+        dlrn_api_path = "api-rhel9-"
+
+    promoter_url = PROMOTER_BASE_URL + promoter_path
     url = promoter_url + release + '.yaml'
     api_url, base_url = gather_basic_info_from_criteria(url)
-    md5sum_url = base_url + aggregate_hash + '/delorean.repo.md5'
-    test_hash = web_scrape(md5sum_url)
-    api_response = find_results_from_dlrn_agg(api_url, test_hash)
+    if distro != "centos-7":
+        md5sum_url = base_url + aggregate_hash + '/delorean.repo.md5'
+        test_hash = web_scrape(md5sum_url)
+        api_response = find_results_from_dlrn_agg(api_url, test_hash)
+    else:
+        commit_url = base_url + aggregate_hash + '/commit.yaml'
+        commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
+                                                    commit_url)
+        api_response = find_results_from_dlrn_repo_status(api_url,
+                                                          commit_hash,
+                                                          distro_hash,
+                                                          extended_hash)
+
     (all_jobs_result_available,
      passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
     jobs_in_criteria = set(find_jobs_in_integration_criteria(url))
@@ -380,14 +407,25 @@ def track_integration_promotion(aggregate_hash='tripleo-ci-testing',
             print(influxdb(jobs_result))
 
     else:
-        dlrn_server = "https://trunk.rdoproject.org"
-        dlrn_api = "api-centos8-" + release
-        dlrn_api_suffix = "api/civotes_agg_detail.html?ref_hash="
-        # hash under test
-        hut = "{}/{}/{}{}".format(dlrn_server,
-                                  dlrn_api,
-                                  dlrn_api_suffix,
-                                  test_hash)
+        dlrn_server = DLRN_SERVER
+        dlrn_api = dlrn_api_path + release
+        if distro != "centos-7":
+            dlrn_api_suffix = "api/civotes_agg_detail.html?ref_hash="
+            # hash under test
+            hut = "{}/{}/{}{}".format(dlrn_server,
+                                      dlrn_api,
+                                      dlrn_api_suffix,
+                                      test_hash)
+        else:
+            dlrn_api_suffix = "api/civotes_detail.html?commit_hash="
+            # hash under test
+            hut = "{}/{}/{}{}&distro_hash={}".format(dlrn_server,
+                                      dlrn_api,
+                                      dlrn_api_suffix,
+                                      commit_hash,
+                                      distro_hash)
+
+
         console.print(f"Hash under test: {hut}")
         print_a_set_in_table(passed_jobs, "Jobs which passed:")
         print_a_set_in_table(failed_jobs, "Jobs which failed:")
@@ -405,7 +443,9 @@ def track_integration_promotion(aggregate_hash='tripleo-ci-testing',
             console.print(value)
 
 
-def track_component_promotion(release, test_component,
+def track_component_promotion(release,
+                              distro,
+                              test_component,
                               promotion="promoted-components",
                               compare_upstream=False,
                               influx=False):
@@ -413,6 +453,9 @@ def track_component_promotion(release, test_component,
     :param release: The OpenStack release e.g. wallaby
     :param component:
     """
+
+    if distro == "centos-7":
+        raise Exception("centos-7 components do not exist")
 
     if test_component == "all":
         all_components = ["baremetal", "cinder", "clients", "cloudops",
@@ -422,8 +465,17 @@ def track_component_promotion(release, test_component,
     else:
         all_components = [test_component]
 
-    git_url = ('https://raw.githubusercontent.com/rdo-infra/ci-config/master/'
-               'ci-scripts/dlrnapi_promoter/config/CentOS-8/component/')
+    if distro == "centos-8":
+        component_path = "CentOS-8/component/"
+        dlrn_api_path = "api-centos8-"
+    elif distro == "rhel-8":
+        component_path = "RedHat-8/component/"
+        dlrn_api_path = "api-rhel8-"
+    elif distro == "rhel-9":
+        component_path = "RedHat-9/component/"
+        dlrn_api_path = "api-rhel9-"
+
+    git_url = COMPONENT_CRITERIA_URL + component_path
     url = git_url + release + '.yaml'
     api_url, base_url = gather_basic_info_from_criteria(url)
     for component in all_components:
@@ -510,6 +562,9 @@ def track_component_promotion(release, test_component,
 @ click.option("--release", default='master',
                type=click.Choice(['master', 'wallaby', 'victoria', 'ussuri',
                                   'train', 'osp17', 'osp16-2']))
+@ click.option("--distro", default='centos-8',
+               type=click.Choice(['centos-8', 'centos-9', 'centos-7',
+                                  'rhel-8', 'rhel-9']))
 @ click.option("--component",
                type=click.Choice(["all", "baremetal", "cinder", "clients",
                                   "cloudops", "common", "compute",
@@ -524,19 +579,22 @@ def track_component_promotion(release, test_component,
                # TO-DO w/ tripleo-get-hash
                help=("default:tripleo-ci-testing"
                      "\nexample:tripleo-ci-testing/e6/ad/e6ad..."))
-def main(release='master',
+def main(release,
+         distro,
          influx=False,
          component=None,
          compare_upstream=False,
          aggregate_hash="tripleo-ci-testing"):
     if component:
-        track_component_promotion(release=release,
+        track_component_promotion(release,
+                                  distro,
                                   test_component=component,
                                   promotion="promoted-components",
                                   compare_upstream=compare_upstream,
                                   influx=influx)
     else:
-        track_integration_promotion(release=release,
+        track_integration_promotion(release,
+                                    distro,
                                     promotion="current-tripleo",
                                     compare_upstream=compare_upstream,
                                     influx=influx,
