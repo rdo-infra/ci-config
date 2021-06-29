@@ -187,8 +187,8 @@ class TestRuckRoverWithCommonSetup(unittest.TestCase):
         mock_resp = self._mock_response(text=self.data, raise_for_status=None)
         mock_get.return_value = mock_resp
         job = "periodic-tripleo-ci-centos-8-standalone-master"
-        ZB_RDO = "https://review.rdoproject.org/zuul/api/builds"
-        history = ruck_rover.get_job_history(job, ZB_RDO)
+        ZB_PERIODIC = "https://review.rdoproject.org/zuul/api/builds"
+        history = ruck_rover.get_job_history(job, ZB_PERIODIC)
         self.assertIn(job, history.keys())
         self.assertEqual(history[job]['SUCCESS'], 3)
         self.assertEqual(history[job]['FAILURE'], 2)
