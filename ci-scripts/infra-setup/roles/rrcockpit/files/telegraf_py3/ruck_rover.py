@@ -304,11 +304,13 @@ def influxdb(jobs_result):
     # rest of the values are fields in a row of data
 
     # grafana can only color code w/ numbers, not text
-    # 0 = success, 1 = failed
-    if jobs_result['status'] == "passed":
+    # 0 = failed, 5 = pending, 9 = success # grafana thresholds.
+    if jobs_result['status'] == "failed":
         jobs_result['status'] = 0
-    else:
-        jobs_result['status'] = 1
+    elif jobs_result['status'] == "pending":
+        jobs_result['status'] = 5
+    elif jobs_result['status'] == "passed":
+        jobs_result['status'] = 9
 
     results_influxdb_line = ('jobs_result,'
                              'job_type={job_type},'
