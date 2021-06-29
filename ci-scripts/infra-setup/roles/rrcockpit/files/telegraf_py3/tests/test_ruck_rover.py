@@ -149,6 +149,13 @@ class TestRuckRover(unittest.TestCase):
             expected = ('c6', '03', 'None')
             self.assertEqual(expected, obtained)
 
+    def test_load_conf_file(self):
+        full_path = os.path.dirname(os.path.abspath(__file__))
+        my_file = full_path + '/data/test_conf_ruck_rover.yaml'
+        obtained = ruck_rover.load_conf_file(my_file, "upstream")
+        expected = ('abc', 'def', 'ghi', 'jkl')
+        self.assertEqual(expected, obtained)
+
 
 class TestRuckRoverWithCommonSetup(unittest.TestCase):
     def setUp(self):
@@ -187,8 +194,8 @@ class TestRuckRoverWithCommonSetup(unittest.TestCase):
         mock_resp = self._mock_response(text=self.data, raise_for_status=None)
         mock_get.return_value = mock_resp
         job = "periodic-tripleo-ci-centos-8-standalone-master"
-        ZB_RDO = "https://review.rdoproject.org/zuul/api/builds"
-        history = ruck_rover.get_job_history(job, ZB_RDO)
+        zb_periodic = "https://review.rdoproject.org/zuul/api/builds"
+        history = ruck_rover.get_job_history(job, zb_periodic)
         self.assertIn(job, history.keys())
         self.assertEqual(history[job]['SUCCESS'], 3)
         self.assertEqual(history[job]['FAILURE'], 2)
