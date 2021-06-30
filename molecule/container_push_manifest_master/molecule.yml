@@ -1,0 +1,99 @@
+---
+# container_push_manifests scenario
+# Download and repush container and manifests on insecure registries:
+# - insecure local registries
+# - multi-arch manifests but
+# - ppc_manifests disabled
+
+driver:
+  name: delegated
+
+platforms:
+  - name: instance  # must be able to `ssh host`, edit your ~/.ssh/config
+    options:
+      managed: False
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      fact_caching: jsonfile
+      fact_caching_connection: /tmp/molecule/facts
+  inventory:
+    host_vars:
+      instance:
+        # constants and default vars used across scenarios
+        # avoids including vars from defaults/main.yml everywhere
+        promoter_user: promoter
+        remote_path_dlrnapi_secret: "~/dlrnapi_secret"
+        remote_path_registry_secret: "~/registry_secret"
+        remote_path_uploader_key: "~/.ssh/id_rsa"
+        setup_staging: true
+        promoter_virtualenv: promoter_venv
+        ci_config_local_src_dir: "{{ playbook_dir }}/../.."
+        ci_config_remote_src_dir: "/home/{{ promoter_user }}/ci-config"
+
+        # container_push_manifests vars
+        release: master
+        named_label: current-tripleo
+        source_namespace: tripleomaster
+        target_namespace: tripleomaster
+        # full_hash is provided by the staging environment
+        script_root: UNUSED
+        distro_name: centos
+        distro_version: 8
+        containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+        container_name_prefix: "openstack"
+        # Source and target registries are provided by staging environment
+        manifest_push: true
+        ppc_manifests: true
+        # Logs dir
+        promoter_logs: /var/tmp/promoter_logs/
+        invalid_containers:
+          - neutron-mlnx-agent
+          - daemon
+          - prometheus
+          - alertmanager
+          - node-exporter
+          - grafana
+        tag_list:
+          - ''
+          - _x86_64
+          - _manifest
+          - _ppc64le
+        rdo_source:
+          host: docker.io
+          name: dockerregistry
+          namespace: tripleomaster
+          port: 8443
+          schema: v2_s2
+          secure: false
+          url: https://index.docker.io/v1
+
+        source:
+          host: localhost:5000
+          name: local-source-registry-1
+          namespace: tripleomaster
+          password: unused
+          username: unused
+          port: 5000
+          schema: v2_s2
+          secure: false
+          url: http://localhost:5000
+
+        target:
+          host: localhost:6500
+          name: local-target-registry-1
+          namespace: tripleomaster
+          password: unused
+          username: unused
+          port: 6500
+          schema: v2_s2
+          secure: false
+          url: http://localhost:6500
+
+scenario:
+  test_sequence:
+    - prepare
+    - converge
+    - verify
