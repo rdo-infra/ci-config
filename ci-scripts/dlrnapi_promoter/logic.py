@@ -8,6 +8,51 @@ from common import PromotionError
 from dlrn_client import DlrnClient
 from qcow_client import QcowClient
 from registries_client import RegistriesClient
+from tabulate import tabulate
+
+
+def print_job_table(log, c_hash_list, candidate_hash, jobs):
+    table_headers = ['Aggregate Hash', 'Commit Hash', 'Distro Hash',
+                     'Extended Hash', 'Component', 'Timestamp', 'Missing jobs']
+    if c_hash_list == []:
+        c_hash_list.append(table_headers)
+    flag = True
+    for job in jobs:
+        if flag:
+            c_hash_list.append([
+                candidate_hash.aggregate_hash
+                if hasattr(candidate_hash, 'aggregate_hash') else '',
+                candidate_hash.commit_hash, candidate_hash.distro_hash,
+                candidate_hash.extended_hash
+                if hasattr(candidate_hash, 'extended_hash') else '',
+                candidate_hash.component, candidate_hash.timestamp, job])
+            flag = False
+        else:
+            c_hash_list.append(['', '', '', '', '', '', job])
+
+
+def print_hash_table(log, hash_list):
+    table_headers = ['Aggregate Hash', 'Commit Hash', 'Distro Hash',
+                     'Extended Hash', 'Component', 'Timestamp']
+    table_list = [table_headers]
+    if isinstance(hash_list, list):
+        for hashes in hash_list:
+            t_hash_l = [hashes.aggregate_hash
+                        if hasattr(hashes, 'aggregate_hash') else '',
+                        hashes.commit_hash, hashes.distro_hash,
+                        hashes.extended_hash
+                        if hasattr(hashes, 'extended_hash') else '',
+                        hashes.component, hashes.timestamp]
+            table_list.append(t_hash_l)
+    else:
+        table_list.append([hash_list.aggregate_hash
+                           if hasattr(hash_list, 'aggregate_hash') else '',
+                           hash_list.commit_hash, hash_list.distro_hash,
+                           hash_list.extended_hash
+                           if hasattr(hash_list, 'extended_hash') else '',
+                           hash_list.component, hash_list.timestamp])
+    log.info("\n {}".format(tabulate(table_list, headers='firstrow',
+                                     tablefmt='grid')))
 
 
 class Promoter(object):
@@ -52,6 +97,7 @@ class Promoter(object):
                           "".format(candidate_label,
                                     len(candidate_hashes_list)))
 
+        print_hash_table(self.log, candidate_hashes_list)
         # This will be a map of recent hashes candidate for
         # promotion. We'll map here the timestamp for each promotion to
         # promote name, if any
@@ -88,8 +134,8 @@ class Promoter(object):
                 break
 
         if candidate_hashes_list:
-            self.log.info("Candidate hashes younger than target label current"
-                          ": {}".format(candidate_hashes_list))
+            self.log.info("Candidate hashes younger than target label current")
+            print_hash_table(self.log, candidate_hashes_list)
         else:
             self.log.info("Candidate hashes: none found younger than target "
                           "label current")
@@ -163,6 +209,8 @@ class Promoter(object):
         :return: None
         """
         promoted_pair = ()
+        missing_jobs_list = []
+        successful_jobs_list = []
         selected_candidates = self.select_candidates(candidate_label,
                                                      target_label)
         if not selected_candidates:
@@ -176,26 +224,28 @@ class Promoter(object):
         self.log.info("Candidate label '%s': Checking candidates that meet "
                       "promotion criteria for target label '%s'"
                       "", candidate_label, target_label)
+        required_jobs = self.config.promotions[target_label]['criteria']
+        self.log.info("Required jobs: {}".format(required_jobs))
         for candidate_hash in selected_candidates:
             ci_votes = self.dlrn_client.get_civotes_info(candidate_hash)
-            self.log.info("Candidate hash '%s' vote details page: %s"
-                          "", candidate_hash, ci_votes)
-            required_jobs = self.config.promotions[target_label]['criteria']
-            self.log.debug("Candidate hash '%s': required jobs %s"
-                           "", candidate_hash, required_jobs)
             successful_jobs = \
                 set(self.dlrn_client.fetch_jobs(candidate_hash))
             if successful_jobs:
-                self.log.info("Candidate hash '%s': successful jobs %s"
-                              "", candidate_hash, successful_jobs)
+                print_job_table(self.log, successful_jobs_list, candidate_hash,
+                                successful_jobs)
+                self.log.info("Candidate hash '%s': vote details page "
+                              "- %s", candidate_hash,
+                              ci_votes)
             else:
                 self.log.warning("Candidate hash '%s': NO successful jobs"
                                  "", candidate_hash)
 
             missing_jobs = set(required_jobs - successful_jobs)
             if missing_jobs:
-                self.log.warning("Candidate hash '%s': missing jobs %s"
-                                 "", candidate_hash, missing_jobs)
+                # self.log.warning("Candidate hash '%s': missing jobs %s"
+                #                 "", candidate_hash, missing_jobs)
+                print_job_table(self.log, missing_jobs_list, candidate_hash,
+                                missing_jobs)
                 self.log.warning("Candidate hash '%s': criteria NOT met "
                                  "for promotion to %s"
                                  "", candidate_hash, target_label)
@@ -210,7 +260,12 @@ class Promoter(object):
             if promoted_pair:
                 # stop here, don't try to promote other hashes
                 break
-
+        self.log.info("\n {}".format(tabulate(successful_jobs_list,
+                                              headers='firstrow',
+                                              tablefmt='grid')))
+        self.log.info("\n {}".format(tabulate(missing_jobs_list,
+                                              headers='firstrow',
+                                              tablefmt='grid')))
         return promoted_pair
 
     def promote_all(self):

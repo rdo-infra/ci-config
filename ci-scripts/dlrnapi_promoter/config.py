@@ -464,7 +464,7 @@ class PromoterConfigFactory(object):
         file
         """
         # Initial log setup
-        setup_logging("promoter", logging.DEBUG,
+        setup_logging("promoter", logging.INFO,
                       log_file=kwargs.get(
                           'log_file',
                           '~/web/promoter_logs/centos8_master.log'))
