@@ -1,0 +1,142 @@
+- hosts: instance
+  tasks:
+    - name: Ensure promoter user exists
+      become: true
+      user:
+        name: "{{ promoter_user }}"
+        system: true
+        create_home: true
+
+    - name: "Add passwordless sudo permission for {{ promoter_user }} user"
+      become: true
+      copy:
+        dest: "/etc/sudoers.d/{{ promoter_user }}"
+        content: "{{ promoter_user }} ALL=(ALL) NOPASSWD:ALL"
+        mode: 0440
+
+    - name: "Validate sudoers permissions update"
+      become: true
+      changed_when: false
+      command: "/usr/sbin/visudo -c"
+
+    - name: "Ensure Credentials"
+      include_role:
+        name: _ensure_credentials
+
+    - name: "Setup loop"
+      import_role:
+        name: promoter
+        tasks_from: setup_loop.yml
+
+    - name: "Run promoter role"
+      include_role:
+        name: promoter
+
+    - name: "Create promoter log dirs"
+      become: true
+      become_user: "{{ promoter_user }}"
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ promoter_user }}"
+        group: "{{ promoter_user }}"
+        mode: u=rwX,g=rX,o=rwX
+      with_items:
+        - "{{ promoter_logs }}"
+
+    - name: "Setup registry"
+      include_tasks: setup_registry.yml
+
+    # Note: we are using default hash
+    # Once infra is fixed we can get the current-tripleo ppc images
+    # directly from rdo registry.
+    #    - name: "Copy get_hashesh.py"
+    #      copy:
+    #        src: get_hashesh.py
+    #        dest: /var/tmp/promoter_logs/
+    #
+    #    - name: "Run get_hashesh.py for previous-current-tripleo" # noqa 305 301
+    #      shell:
+    #        "~/{{ promoter_virtualenv }}/bin/python3 /var/tmp/promoter_logs/get_hashesh.py"
+    #      register: hashesh_out
+    #
+    - name: "Set hash fact"
+      set_fact:
+        hash: "a0b5b6178c97179f9d59cee27705df92"
+        cacheable: yes
+
+    - name: sets critical variables
+      set_fact:
+        full_hash: "{{ hash }}"
+        source_registry: "{{ source }}"
+        target_registries: "{{ [ target ] }}"
+        cacheable: yes
+
+    - name: "Get master containers list"
+      get_url:
+        url: "https://opendev.org/openstack/tripleo-common/raw/branch/master/container-images/tripleo_containers.yaml"
+        dest: "/var/tmp/promoter_logs/tripleo_containers.yaml"
+
+    - name: "Get all container names" # noqa 505
+      include_vars:
+        file: "/var/tmp/promoter_logs/tripleo_containers.yaml"
+        name: c_list
+
+    - name: "Create containers list"
+      set_fact:
+        tmp_c_list: [ ]
+
+    - name: "Add container names to list"
+      no_log: true
+      set_fact:
+        tmp_c_list: "{{ tmp_c_list + [item['imagename'].split('/')[-1].split(':')[0] | replace('openstack-', '')] }}"
+        cacheable: yes
+      with_items: "{{ c_list.container_images }}"
+
+    - name: "Containers list"
+      debug:
+        var: tmp_c_list
+
+    - name: "Remove invalid containers"
+      set_fact:
+        tmp_c_list: "{{ tmp_c_list | difference(invalid_containers) | shuffle | list }}"
+
+    - name: "Choose only 3 random containers"
+      set_fact:
+        containers_list: "{{ tmp_c_list[:2] | list }}"
+        ppc_containers_list: "{{ tmp_c_list[:2] | list }}"
+        cacheable: true
+
+    - name: "Print Containers name"
+      debug:
+        var: containers_list
+
+    - name: "Pull containers from source registry"
+      become: true
+      become_user: "{{ promoter_user }}"
+      docker_image:
+        name: "{{ rdo_source.host }}/{{ rdo_source.namespace }}/{{ container_name_prefix }}-{{ item[0] }}"
+        tag: "{{ full_hash }}{{ item[1] }}"
+        source: pull
+      with_nested:
+        - "{{ containers_list }}"
+        - "{{ tag_list }}"
+      vars:
+        ansible_python_interpreter: "~/{{ promoter_virtualenv }}/bin/python3"
+
+    - name: "Push containers to the local source registry"
+      become: true
+      become_user: "{{ promoter_user }}"
+      docker_image:
+        name: "{{ source.namespace }}/{{ container_name_prefix }}-{{ item[0] }}"
+        tag: "{{ full_hash }}{{ item[1] }}"
+        source: local
+        repository: "{{ source.host }}/{{ source.namespace }}/{{ container_name_prefix }}-{{ item[0] }}"
+        push: yes
+      retries: 3
+      with_nested:
+        - "{{ containers_list }}"
+        - "{{ tag_list }}"
+      register: pushed_images
+      vars:
+        ansible_python_interpreter: "~/{{ promoter_virtualenv }}/bin/python3"

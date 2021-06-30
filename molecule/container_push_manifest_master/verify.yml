@@ -1,0 +1,60 @@
+---
+- hosts: instance
+  become: true
+  become_user: "{{ promoter_user }}"
+  tasks:
+    - name: Check that the containers are pushed correctly to all target registries
+      with_nested:
+        - "{{ containers_list }}"
+        - [ '', '_x86_64', '_manifest' ]
+      shell: |
+        docker manifest inspect --insecure {{ target.host }}/{{ target_namespace }}/{{ container_name_prefix }}-{{ image.0 }}:{{ hash }}{{ image.1 }}
+      when: manifest_push | bool
+      loop_control:
+        loop_var: image
+
+    - name: Check that the ppc64le containers are pushed correctly to all target registries
+      with_nested:
+        - "{{ ppc_containers_list }}"
+        - "_ppc64le"
+      shell: |
+        docker manifest inspect --insecure {{ target.host }}/{{ target_namespace }}/{{ container_name_prefix }}-{{ image.0 }}:{{ hash }}{{ image.1 }}
+      when: ppc_manifests | bool
+      loop_control:
+        loop_var: image
+
+    - name: Gather list of local images referencing registries
+      shell: |
+        docker images --filter=reference='{{ registry.host }}/{{ registry.namespace }}/*:*' --format {% raw %}'{{ .ID }}'{% endraw %}
+      loop: "{{ target_registries + [source_registry] }}"
+      register: inspections
+      loop_control:
+        loop_var: registry
+        label: "{{ registry.host }}"
+      changed_when: false
+
+    - name: Check that container-push run did not leave any image behind
+      assert:
+        that: item.stdout | length == 0
+        fail_msg: "Some images for '{{ item.registry.name }}({{ item.registry.host }})' were left behind"
+        success_msg: "All images for '{{ item.registry.name }}({{ item.registry.host }})' removed properly"
+      loop: "{{ inspections.results }}"
+      loop_control:
+        label: "{{ item.registry.host }}"
+
+    - name: list files in docker manifest dir
+      find:
+        paths: ~/.docker/manifests
+      register: manifest_files
+
+    # if manifests files are left in manifest dir, they tend to conflict
+    # with each other. It's best that they are cleaned after pushing to
+    # prevent errors
+    # TODO(gcerami) gather the actual manifest for comparison, not just
+    # blindly the whole dir, which may contain other manifest wehn testing with
+    # delegated driver
+    - name: asserts no manifest leftovers
+      assert:
+        that: manifest_files.matched == 0
+        fail_msg: Manifest push left some files in manifest dir
+        success_msg: Manifest directory left clean
