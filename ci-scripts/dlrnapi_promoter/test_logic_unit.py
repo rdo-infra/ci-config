@@ -176,17 +176,9 @@ class TestPromoteLabelToLabel(ConfigSetup):
                                                  mock_log_debug):
         ci_votes = "http://host.to/detailspage.html"
         mock_civotes.return_value = ci_votes
-        required_set = {
-            'staging-job-1',
-            'staging-job-2'
-        }
         successful_jobs = [
             'periodic-tripleo-centos-7-master-containers-build-push',
         ]
-        missing_jobs = {
-            'staging-job-1',
-            'staging-job-2'
-        }
         mock_fetch_jobs.return_value = successful_jobs
         candidate_hash = DlrnCommitDistroExtendedHash(commit_hash='a',
                                                       distro_hash='b')
@@ -195,13 +187,7 @@ class TestPromoteLabelToLabel(ConfigSetup):
         ]
         promoted_pair = self.promoter.promote_label_to_label(
             'tripleo-ci-testing', 'tripleo-ci-staging-promoted')
-        mock_log_debug.assert_has_calls([
-            mock.call("Candidate hash '%s': required jobs %s", candidate_hash,
-                      required_set)
-        ])
         mock_log_warning.assert_has_calls([
-            mock.call("Candidate hash '%s': missing jobs %s", candidate_hash,
-                      missing_jobs),
             mock.call("Candidate hash '%s': criteria NOT met for promotion to "
                       "%s", candidate_hash, 'tripleo-ci-staging-promoted'),
         ])
@@ -211,10 +197,8 @@ class TestPromoteLabelToLabel(ConfigSetup):
             mock.call("Candidate label '%s': Checking candidates that meet "
                       "promotion criteria for target label '%s'",
                       'tripleo-ci-testing', 'tripleo-ci-staging-promoted'),
-            mock.call("Candidate hash '%s' vote details page: %s",
+            mock.call("Candidate hash '%s': vote details page - %s",
                       candidate_hash, ci_votes),
-            mock.call("Candidate hash '%s': successful jobs %s",
-                      candidate_hash, set(successful_jobs))
         ])
         self.assertFalse(mock_promote.called)
         self.assertFalse(mock_log_error.called)
@@ -313,21 +297,14 @@ class TestPromoteLabelToLabel(ConfigSetup):
         promoted_pair = self.promoter.promote_label_to_label(
             'tripleo-ci-testing', 'tripleo-ci-staging-promoted')
 
-        mock_log_debug.assert_has_calls([
-            mock.call("Candidate hash '%s': required jobs %s",
-                      candidate_hashes[0],
-                      required_set)
-        ])
         mock_log_info.assert_has_calls([
             mock.call("Candidate label '%s': %d candidates",
                       'tripleo-ci-testing', 2),
             mock.call("Candidate label '%s': Checking candidates that meet "
                       "promotion criteria for target label '%s'",
                       'tripleo-ci-testing', 'tripleo-ci-staging-promoted'),
-            mock.call("Candidate hash '%s' vote details page: %s",
+            mock.call("Candidate hash '%s': vote details page - %s",
                       candidate_hashes[0], ci_votes),
-            mock.call("Candidate hash '%s': successful jobs %s",
-                      candidate_hashes[0], required_set),
             mock.call("Candidate hash '%s': criteria met, attempting promotion "
                       "to %s", candidate_hashes[0],
                       'tripleo-ci-staging-promoted'),
