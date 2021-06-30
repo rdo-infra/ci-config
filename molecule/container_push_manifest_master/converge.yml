@@ -1,0 +1,17 @@
+---
+- hosts: instance
+  become: true
+  become_user: "{{ promoter_user }}"
+  tasks:
+    - name: Include containers-promote role to test
+      include_role:
+        name: "../../ci-scripts/container-push/roles/containers-promote"
+        apply:
+          tags:
+            - rdoproject_pull
+            - rdoproject_push
+            - dockerhub_push
+            - quaydotio_push
+            - remove_local_containers
+      vars:
+        ansible_python_interpreter: "~/{{ promoter_virtualenv }}/bin/python3"
