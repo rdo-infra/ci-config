@@ -1,0 +1,35 @@
+---
+- name: "Setup loop"
+  import_role:
+    name: promoter
+    tasks_from: setup_loop.yml
+
+- name: "Deploy docker source and target registry container"
+  docker_container:
+    name: "{{ item.name }}"
+    image: registry
+    restart_policy: always
+    ports:
+      - "{{item.port}}"
+    volumes:
+      - /dev/vdb:/var/lib/docker/
+    comparisons:
+      env: strict
+  with_items:
+    - {"name": "registry_1", "port": "5000:5000" }
+    - {"name": "registry_2", "port": "6500:5000" }
+  vars:
+    ansible_python_interpreter: "~/{{ promoter_virtualenv }}/bin/python3"
+
+# Check registry is deployed and it is empty
+
+- name: "Test docker registry container"
+  uri:
+    url: "http://localhost:5000/v2/_catalog"
+  register: registry_output
+
+- name: "Asserting metadata for registry"
+  assert:
+    that:
+      - "registry_output.status == 200"
+      - "registry_output.json['repositories'] == []"
