@@ -1,0 +1,140 @@
+---
+- name: "Setup loop"
+  import_role:
+    name: promoter
+    tasks_from: setup_loop.yml
+
+- name: "Make sure /auth dir exists"
+  become: true
+  file:
+    path: /auth/certs
+    state: directory
+    recurse: yes
+    owner: 'promoter'
+    group: 'promoter'
+    mode: '0755'
+
+- name: "Copy openssl.cnf file"
+  copy:
+    src: "openssl.cnf"
+    dest: "/auth/certs/openssl.cnf"
+    owner: 'promoter'
+    group: 'promoter'
+
+      #- name: "Generate CA certificate key" # noqa 301
+      #  shell: |
+      #    openssl genrsa -aes256 -passout pass:SECret.123 \
+      #    -out /auth/certs/ca_key.pem 4096
+      #  register: ca_key
+      #
+      #- name: "Fail if  key is not generated"
+      #  fail:
+      #    msg: "CA key is not generated."
+      #  when: ca_key.rc != 0
+      #
+      #- name: "Generate CA Certificate Req" # noqa 301
+      #  shell: |
+      #    openssl req -new -x509 -days 365 \
+      #    -key /auth/certs/ca_key.pem -sha256 \
+      #    -out /auth/certs/ca_cert.pem \
+      #    -passin pass:SECret.123 \
+      #    -subj '/C=IN/ST=MH/L=Pune/O=TripleO Quickstart/OU=PCCI/CN=rdoregistry'
+      #  register: ca_cert_req
+      #
+      #- name: "Failed when certificate req is not generated"
+      #  fail:
+      #    msg: "Certificate req is not generated"
+      #  when: ca_cert_req.rc != 0
+      #
+      #- name: "Generate Server certificate key" # noqa 301
+      #  shell: |
+      #    openssl genrsa -out /auth/certs/server_key.pem 4096
+      #  register: server_cert_key
+      #
+      #- name: "Fail if server key is not generated"
+      #  fail:
+      #    msg: "Server key is not generated."
+      #  when: server_cert_key.rc != 0
+      #
+      #- name: "Generate server certificate req" # noqa 301
+      #  shell: |
+      #    openssl req -subj '/CN=10.0.150.119' -sha256 -new \
+      #    -key /auth/certs/server_key.pem -out /auth/certs/server_req.csr
+      #  register: server_cert_req
+      #
+      #- name: "Fail when certificate req is not generated"
+      #  fail:
+      #    msg: "Certificate req is not generated"
+      #  when: server_cert_req.rc != 0
+      #
+      #- name: "Approve server cert req" # noqa 301
+      #  shell: |
+      #    openssl x509 -req -days 365 -sha256 -in /auth/certs/server_req.csr \
+      #    -CA /auth/certs/ca_cert.pem -CAkey /auth/certs/ca_key.pem -CAcreateserial \
+      #    -out /auth/certs/server_cert.pem -passin pass:SECret.123 \
+      #    -extfile /auth/certs/openssl.cnf -extensions v3_ca
+      #  register: approve_req
+      #
+      #- name: "Fail if failed to issue certificate"
+      #  fail:
+      #    msg: "Failed to issue certificate"
+      #  when: approve_req.rc != 0
+
+      #- name: "Pull docker registry container"
+      #  docker_image:
+      #    name: registry
+      #    tag: 2
+      #    source: pull
+      #  retries: 3
+      #
+      #- name: "Create htpassword"
+      #  docker_container:
+      #    name: registry_1
+      #    image: registry:2
+      #    entrypoint: htpasswd
+      #    command: ["testuser", "testpassword"]
+      #  register: htpassword
+      #
+      #- name: "Store htpassword on machine"
+      #  copy:
+      #    content: htpassword.stdout
+      #    dest: /auth/htpasswd
+      #
+      #- name: "Remove htpassword container"
+      #  docker_container:
+      #    name: registry_1
+      #    state: absent
+      #
+- name: "Deploy docker registry container"
+  docker_container:
+    name: registry_1
+    image: registry
+    restart_policy: always
+    ports:
+      - "5000:5000"
+    env:
+      #      REGISTRY_AUTH: htpasswd
+      #      REGISTRY_AUTH_HTPASSWD_REALM: "Registry Realm"
+      #      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+      #      REGISTRY_HTTP_ADDR: 0.0.0.0:443
+      #      REGISTRY_HTTP_TLS_CERTIFICATE: /auth/certs/server.pem
+      #      REGISTRY_HTTP_TLS_KEY: /auth/certs/server.key
+    volumes:
+      - /dev/vdb:/var/lib/docker/
+    comparisons:
+      env: strict
+  vars:
+    ansible_python_interpreter: "~/{{ promoter_virtualenv }}/bin/python3"
+
+# Check registry is deployed and it is empty
+
+- name: "Test docker registry contianer"
+  uri:
+    url: "http://localhost:5000/v2/_catalog"
+  register: registry_output
+
+- name: "Asserting metadata for registry"
+  assert:
+    that:
+      - "registry_output.status == 200"
+      - "registry_output.json['repositories'] == []"
