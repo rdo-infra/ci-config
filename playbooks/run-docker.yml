@@ -1,0 +1,69 @@
+---
+- name: Ensure promoter user exists
+  become: true
+  user:
+    name: "{{ promoter_user | default('promoter') }}"
+    system: true
+    create_home: true
+
+- name: "Add passwordless sudo permission for {{ promoter_user | default('promoter') }} user"
+  become: true
+  copy:
+    dest: "/etc/sudoers.d/{{ promoter_user | default('promoter') }}"
+    content: "{{ promoter_user }} ALL=(ALL) NOPASSWD:ALL"
+    mode: 0440
+
+- name: "Validate sudoers permissions update"
+  become: true
+  changed_when: false
+  command: "/usr/sbin/visudo -c"
+
+- name: create docker group
+  become: true
+  group:
+    name: "{{ docker_group | default('docker') }}"
+    system: true
+
+- name: Add user to docker group
+  become: true
+  user:
+    name: "{{ ansible_user | default('promoter') }}"
+    groups:
+      - "{{ docker_group | default('docker') }}"
+
+- include_role:
+    name: ensure-docker
+  vars:
+    use_upstream_docker: true
+
+- name: Create user config dir
+  file:
+    path: "{{ ansible_user_dir }}/.docker/"
+    owner: "{{ ansible_user | default('promoter') }}"
+    state: directory
+
+- name: Enable experimental commands in user config
+  copy:
+    content: |
+       {
+           "experimental": "enabled"
+       }
+    dest: "{{ ansible_user_dir }}/.docker/config.json"
+
+- name: "set ~ directory permissions"
+  become: true
+  file:
+    path: "{{ ansible_user_dir }}"
+    owner: "{{ ansible_user | default('promoter') }}"
+    group: "{{ ansible_user | default('promoter') }}"
+    mode: "g-w,o-wx"
+
+- name: "Add {{ ansible_user | default('promoter') }} user ssh key to authorized_key" # noqa 301
+  shell: "cat /home/{{ ansible_user | default('promoter') }}/.ssh/id_rsa.pub >> /home/{{ ansible_user | default('promoter') }}/.ssh/authorized_keys"
+
+- name: "Set authorized_key file permissions"
+  file:
+    path: "{{ ansible_user_dir }}/.ssh/authorized_keys"
+    owner: "{{ ansible_user | default('promoter') }}"
+    group: "{{ ansible_user | default('promoter') }}"
+    mode: "0600"
