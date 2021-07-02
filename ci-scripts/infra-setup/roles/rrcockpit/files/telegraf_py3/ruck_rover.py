@@ -4,6 +4,7 @@
 import json
 import os
 import re
+import time
 from datetime import datetime
 from tempfile import mkstemp
 
@@ -161,6 +162,60 @@ def find_results_from_dlrn_agg(api_url, test_hash):
     return api_response
 
 
+def format_ts_from_last_modified(ts, pattern='%a, %d %b %Y %H:%M:%S %Z'):
+    ts = datetime.strptime(ts, pattern)
+    return int(time.mktime(ts.timetuple()))
+
+
+# get the date of the consistent link in dlrn
+def get_consistent(url, component=None):
+    if "centos7" not in url:
+        short_url = url.split("/")[:-5]
+    else:
+        short_url = url.split("/")[:-3]
+    short_url = "/".join(short_url)
+
+    if component is None:
+        response = requests.get(short_url + '/consistent/delorean.repo')
+        if response.ok:
+            cd = response.headers['Last-Modified']
+            consistent_date = format_ts_from_last_modified(cd)
+        else:
+            return None
+    else:
+        # TO-DO normalize component and intergration config
+        short_url = (short_url + '/component/'
+                     + component + '/consistent/delorean.repo')
+        response = requests.get(short_url)
+        if response.ok:
+            cd = response.headers['Last-Modified']
+            consistent_date = format_ts_from_last_modified(cd)
+        else:
+            return None
+
+    return consistent_date
+
+
+def get_dlrn_promotions(api_url,
+                        promotion_name,
+                        aggregate_hash=None,
+                        commit_hash=None,
+                        distro_hash=None,
+                        component=None):
+    api_client = dlrnapi_client.ApiClient(host=api_url)
+    api_instance = dlrnapi_client.DefaultApi(api_client)
+    query = dlrnapi_client.PromotionQuery(limit=1,
+                                          promote_name=promotion_name)
+    if component:
+        query.component = component
+    pr = api_instance.api_promotions_get_with_http_info(query)[0][0]
+    consistent = get_consistent(pr.repo_url, component)
+    promotion = {}
+    promotion = pr.to_dict()
+    promotion['consistent_date'] = consistent
+    return promotion
+
+
 def find_results_from_dlrn_repo_status(api_url, commit_hash,
                                        distro_hash, extended_hash):
     """ This function returns api_response from dlrn for a particular
@@ -313,7 +368,7 @@ def load_conf_file(config_file, key):
     return zuul_url, dlrnapi_url, promoter_url, git_url
 
 
-def influxdb(jobs_result):
+def influxdb_jobs(jobs_result):
     # https://docs.influxdata.com/influxdb/v2.0/reference/syntax/line-protocol/
     # jobs_result = the measurement
     # job_type is a tag, note the space
@@ -348,6 +403,21 @@ def influxdb(jobs_result):
     return results_influxdb_line.format(**jobs_result)
 
 
+def influxdb_promo(promotion):
+    promotion_influxdb_line = ("dlrn-promotion,"
+                               "release={release},distro={distro},"
+                               "name={promote_name} "
+                               "commit_hash=\"{commit_hash}\","
+                               "distro_hash=\"{distro_hash}\","
+                               "repo_hash=\"{repo_hash}\","
+                               "repo_url=\"{repo_url}\","
+                               "consistent_date={consistent_date},"
+                               "component=\"{component}\","
+                               "extended_hash=\"{extended_hash}\" "
+                               "{timestamp}")
+    return promotion_influxdb_line.format(**promotion)
+
+
 def track_integration_promotion(release,
                                 distro,
                                 dlrn_server,
@@ -380,10 +450,12 @@ def track_integration_promotion(release,
     promoter_url = promoter_base_url + promoter_path
     url = promoter_url + release_criteria + '.yaml'
     api_url, base_url = gather_basic_info_from_criteria(url)
+    promotions = get_dlrn_promotions(api_url, "current-tripleo")
     if distro != "centos-7":
         md5sum_url = base_url + aggregate_hash + '/delorean.repo.md5'
         test_hash = web_scrape(md5sum_url)
         api_response = find_results_from_dlrn_agg(api_url, test_hash)
+
     else:
         commit_url = base_url + aggregate_hash + '/commit.yaml'
         commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
@@ -392,6 +464,7 @@ def track_integration_promotion(release,
                                                           commit_hash,
                                                           distro_hash,
                                                           extended_hash)
+        test_hash = commit_hash
 
     (all_jobs_result_available,
      passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
@@ -400,6 +473,7 @@ def track_integration_promotion(release,
     jobs_with_no_result = jobs_in_criteria.difference(all_jobs_result_available)
     all_jobs = all_jobs_result_available.union(jobs_with_no_result)
     if influx:
+        # print out jobs in influxdb format
         log_urls = latest_job_results_url(
             api_response, all_jobs_result_available)
         for job in all_jobs:
@@ -426,7 +500,12 @@ def track_integration_promotion(release,
             jobs_result['failure_reason'] = failure_reason
             jobs_result['duration'] = find_job_run_time(
                 log_url)
-            print(influxdb(jobs_result))
+            print(influxdb_jobs(jobs_result))
+
+        # print out last promotions in influxdb format
+        promotions['release'] = release
+        promotions['distro'] = distro
+        print(influxdb_promo(promotions))
 
     else:
         dlrn_api = dlrn_api_path + release
@@ -446,7 +525,9 @@ def track_integration_promotion(release,
                                                      commit_hash,
                                                      distro_hash)
 
-        console.print(f"Hash under test: {hut}")
+        last_p = datetime.utcfromtimestamp(promotions['timestamp'])
+        console.print(f"Hash under test: {hut}",
+                      f"\nlast_promotion={last_p}")
         print_a_set_in_table(passed_jobs, "Jobs which passed:")
         print_a_set_in_table(failed_jobs, "Jobs which failed:")
         print_a_set_in_table(jobs_with_no_result,
@@ -512,6 +593,9 @@ def track_component_promotion(release,
                                                           commit_hash,
                                                           distro_hash,
                                                           extended_hash)
+        promotions = get_dlrn_promotions(api_url,
+                                         "promoted-components",
+                                         component=component)
         (all_jobs_result_available,
          passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
         if 'consistent' in all_jobs_result_available:
@@ -553,7 +637,13 @@ def track_component_promotion(release,
                 jobs_result['failure_reason'] = failure_reason
                 jobs_result['duration'] = find_job_run_time(
                     log_url)
-                print(influxdb(jobs_result))
+                # print out jobs in influxdb format
+                print(influxdb_jobs(jobs_result))
+
+                # print out promtions in influxdb format
+                promotions['release'] = release
+                promotions['distro'] = distro
+                print(influxdb_promo(promotions))
         else:
             log_urls = latest_job_results_url(
                 api_response, failed_jobs)
@@ -565,7 +655,11 @@ def track_component_promotion(release,
                 component_status = "Green"
             else:
                 component_status = "Yellow"
-            console.print(f"{component} component, status={component_status}")
+            last_p = datetime.utcfromtimestamp(promotions['timestamp'])
+            console.print(f"{component} component",
+                          f"status={component_status}",
+                          f"last_promotion={last_p}")
+
             print_a_set_in_table(passed_jobs, "Jobs which passed:")
             if component_status != "Green":
                 print_a_set_in_table(failed_jobs, "Jobs which failed:")
