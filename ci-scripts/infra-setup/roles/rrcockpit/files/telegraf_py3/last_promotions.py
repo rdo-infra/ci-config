@@ -4,6 +4,7 @@ import argparse
 
 import dlrnapi_client
 import promoter_utils
+from datetime import datetime
 from influxdb_utils import format_ts_from_float, format_ts_from_last_modified
 
 PROMOTION_INFLUXDB_LINE = ("dlrn-promotion,"
@@ -84,15 +85,15 @@ if __name__ == '__main__':
         '--release',
         required=True,
         choices=[
-            'rhos-17', 'rhos-16.2', 'master', 'wallaby', 'victoria',
+            'osp17', 'osp16-2', 'master', 'wallaby', 'victoria',
             'ussuri', 'train', 'stein', 'rocky', 'queens'
         ],
         help='Upstream or downstream release.'
     )
     parser.add_argument(
         '--distro',
-        default='CentOS-7',
-        choices=['CentOS-7', 'CentOS-8', 'RedHat-8'],
+        default='centos-8',
+        choices=['centos-7', 'centos-8', 'rhel-8', 'rhel-9'],
         help='Distribution to query.'
     )
     parser.add_argument(
@@ -105,8 +106,31 @@ if __name__ == '__main__':
         default=DEFAULT_PROMOTER_BASE_URL,
         help='Promoter repository base URL.'
     )
+    parser.add_argument(
+        '--human',
+        default=False,
+        action='store_true',
+        help='Display results for a human, not influx'
+    )
     promotions = []
     args = parser.parse_args()
+
+    # align args w/ ruck_rover.py
+    if args.distro == "centos-7":
+        args.distro = "CentOS-7"
+    elif args.distro == "centos-8":
+        args.distro = "CentOS-8"
+    elif args.distro == "centos-9":
+        args.distro = "CentOS-9"
+    elif args.distro == "rhel-8":
+        args.distro = "RedHat-8"
+    elif args.distro == "rhel-9":
+        args.distro = "RedHat-9"
+
+    if args.release == "osp16-2":
+        args.release = "rhos-16.2"
+    elif args.release == "osp17":
+        args.release = "rhos-17"
 
     promoter_config = promoter_utils.get_promoter_config(args.url,
                                                          args.release,
@@ -144,5 +168,19 @@ if __name__ == '__main__':
                                      consistent)
             promotions.append(promo)
 
-    for promotion in promotions:
-        print(influxdb(promotion))
+    if not args.human:
+        for promotion in promotions:
+            print(influxdb(promotion))
+    else:
+        for pr in promotions:
+            delin = " ============ "
+            ct = int(str(pr['consistent_date'])[:-3])
+            pt = datetime.utcfromtimestamp(pr['timestamp'])
+            ct = datetime.utcfromtimestamp(ct)
+            age = ct - pt
+            print("\n{} promoted tag: {}, {} days old {}".format(delin,
+                                             pr['promote_name'],
+                                             age.days,
+                                             delin))
+            for key, value in pr.items():
+                print("{}: {}".format(key, value))
