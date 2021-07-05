@@ -47,7 +47,7 @@ Options:
 **Examples**
 ```
 # Diff logs from CI
-diff_tripleo_builds.py  -c https://storage.gra.cloud.ovh.net/v1/AUTH_dcaab5e32b234d56b626f72581e3644c/zuul_opendev_logs_a7d/756888/2/gate/tripleo-ci-centos-8-containers-multinode-train/a7d91e1/logs -t https://logserver.rdoproject.org/openstack-periodic-integration-stable2/opendev.org/openstack/tripleo-ci/master/periodic-tripleo-ci-centos-8-multinode-1ctlr-featureset010-train/b2de4cb/logs
+diff_tripleo_builds.py  -c https://storage.gra.cloud.ovh.net/v1/AUTH_dcaab5e32b234d56b626f72581e3644c/zuul_opendev_logs_a7d/756888/2/gate/tripleo-ci-centos-8-containers-multinode-train/a7d91e1/logs -t https://logserver.rdoproject.org/openstack-periodic-integration-stable2/opendev.org/openstack/tripleo-ci/master/periodic-tripleo-ci-centos-8-containers-multinode-train/b2de4cb/logs
 
 # Diff logs from a Compose
 diff_builds.py -q -c http://foo/RHOS-16.2-RHEL-8-20201015.n.1/compose -t http://foo/RHOS-16.2-RHEL-8-20201014.n.3/compose
