@@ -41,22 +41,22 @@
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
-                    "col":0,
+                    "col":null,
                     "desc":false
                 },
                 "styles":[
                     {
                         "$$hashKey":"object:179",
-                        "alias":"Time",
+                        "alias":"Date of last promotion",
                         "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "dateFormat":"YYYY-MM-DD",
                         "pattern":"Time",
                         "type":"number",
                         "unit":"dateTimeFromNow"
                     },
                     {
-                        "$$hashKey":"object:180",
-                        "alias":"",
+                        "$$hashKey":"object:498",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -64,15 +64,35 @@
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
+                        "dateFormat":"YYYY-MM-DD",
                         "decimals":2,
-                        "pattern":"promotion_details",
+                        "mappingType":1,
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
+                    },
+                    {
+                        "$$hashKey":"object:643",
+                        "alias":"Promotion Name",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"promo_name",
+                        "thresholds":[],
+                        "type":"number",
                         "unit":"short"
                     },
                     {
-                        "$$hashKey":"object:181",
-                        "alias":"promotion details",
+                        "$$hashKey":"object:780",
+                        "alias":"Promotion Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -83,8 +103,8 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "link":true,
-                        "linkTooltip":"link to the results of each job",
-                        "linkUrl":"${__cell_4:raw}",
+                        "linkTargetBlank":true,
+                        "linkUrl":"${__cell_5:raw}",
                         "mappingType":1,
                         "pattern":"last",
                         "sanitize":true,
@@ -93,8 +113,8 @@
                         "unit":"short"
                     },
                     {
-                        "$$hashKey":"object:182",
-                        "alias":"Time since last build",
+                        "$$hashKey":"object:822",
+                        "alias":"",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -105,10 +125,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"consistent_date",
+                        "pattern":"promotion_details",
                         "thresholds":[],
-                        "type":"number",
-                        "unit":"dateTimeFromNow"
+                        "type":"hidden",
+                        "unit":"short"
                     }
                 ],
                 "targets":[
@@ -129,7 +149,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, \"consistent_date\", last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8' AND \"release\" = 'master') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -166,44 +186,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, \"consistent_date\", last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'wallaby' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
-                        "rawQuery":true,
-                        "refId":"I",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "value"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"mean"
-                                }
-                            ]
-                        ],
-                        "tags":[]
-                    },
-                    {
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "$__interval"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "null"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, \"consistent_date\", last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'victoria' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8' AND \"release\" = 'wallaby') ",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"table",
@@ -240,44 +223,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, \"consistent_date\", last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'ussuri' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
-                        "rawQuery":true,
-                        "refId":"H",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "value"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"mean"
-                                }
-                            ]
-                        ],
-                        "tags":[]
-                    },
-                    {
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "$__interval"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "null"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, \"consistent_date\", last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8' AND \"release\" = 'victoria') ",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"table",
@@ -314,7 +260,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, \"consistent_date\", last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8' AND \"release\" = 'ussuri') ",
                         "rawQuery":true,
                         "refId":"D",
                         "resultFormat":"table",
@@ -351,7 +297,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, \"consistent_date\",  last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'stein' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8' AND \"release\" = 'train') ",
                         "rawQuery":true,
                         "refId":"E",
                         "resultFormat":"table",
@@ -388,9 +334,9 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, \"consistent_date\", last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'queens' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-7' AND \"release\" = 'train') ",
                         "rawQuery":true,
-                        "refId":"G",
+                        "refId":"F",
                         "resultFormat":"table",
                         "select":[
                             [
@@ -442,6 +388,7 @@
                 },
                 "styles":[
                     {
+                        "$$hashKey":"object:1480",
                         "alias":"Time",
                         "align":"auto",
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
@@ -450,6 +397,7 @@
                         "unit":"dateTimeFromNow"
                     },
                     {
+                        "$$hashKey":"object:1481",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -465,6 +413,7 @@
                         "unit":"short"
                     },
                     {
+                        "$$hashKey":"object:1482",
                         "alias":"promotion details",
                         "align":"auto",
                         "colorMode":null,
@@ -504,7 +453,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo-rdo' AND \"distro\" = 'centos-8' AND \"release\" = 'master') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -868,7 +817,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -959,7 +908,8 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time since last promotion",
+                        "$$hashKey":"object:2120",
+                        "alias":"Time since last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -967,16 +917,17 @@
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "dateFormat":"YYYY-MM-DD",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"Time",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
                         "type":"number",
                         "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:2136",
+                        "alias":"promotion details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -988,16 +939,16 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkUrl":"${__cell_2:raw} ",
+                        "linkUrl":"${__cell_4:raw} ",
                         "mappingType":1,
                         "pattern":"last",
-                        "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
                         "type":"string",
                         "unit":"short"
                     },
                     {
+                        "$$hashKey":"object:2403",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -1009,13 +960,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"repo_url",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"Time since last build",
+                        "$$hashKey":"object:2424",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -1026,7 +978,7 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"consistent_date",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
                         "unit":"dateTimeFromNow"
@@ -1051,7 +1003,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'baremetal' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'baremetal' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -1089,7 +1041,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cinder' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'cinder' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"table",
@@ -1127,7 +1079,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'clients' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'clients' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"table",
@@ -1165,7 +1117,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cloudops' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'cloudops' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"D",
                         "resultFormat":"table",
@@ -1203,7 +1155,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'common' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'common' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"E",
                         "resultFormat":"table",
@@ -1241,7 +1193,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'compute' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'compute' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"F",
                         "resultFormat":"table",
@@ -1279,7 +1231,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'glance' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'glance' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"G",
                         "resultFormat":"table",
@@ -1317,7 +1269,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'manila' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'manila' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"H",
                         "resultFormat":"table",
@@ -1355,7 +1307,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'network' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'network' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"I",
                         "resultFormat":"table",
@@ -1393,7 +1345,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'octavia' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'octavia' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"J",
                         "resultFormat":"table",
@@ -1431,7 +1383,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'security' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'security' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"K",
                         "resultFormat":"table",
@@ -1469,7 +1421,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'swift' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'swift' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"L",
                         "resultFormat":"table",
@@ -1507,7 +1459,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tempest' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'tempest' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"M",
                         "resultFormat":"table",
@@ -1545,7 +1497,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tripleo' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'tripleo' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"N",
                         "resultFormat":"table",
@@ -1581,10 +1533,9 @@
                                 "type":"fill"
                             }
                         ],
-                        "hide":false,
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'ui' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'ui' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"O",
                         "resultFormat":"table",
@@ -1620,10 +1571,9 @@
                                 "type":"fill"
                             }
                         ],
-                        "hide":false,
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'master' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'validation' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'master' AND \"component\" = 'validation' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"P",
                         "resultFormat":"table",
@@ -1728,7 +1678,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'master' AND \"promo_name\" = 'current-tripleo-rdo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -2010,7 +1960,7 @@
                 "dashLength":10,
                 "dashes":false,
                 "datasource":"telegraf",
-                "description":"Bars represent successful promotions to current-tripleo for wallaby. ",
+                "description":"Bars represent successful promotions to current-tripleo for master.\n\n",
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -2026,7 +1976,7 @@
                     "y":33
                 },
                 "hiddenSeries":false,
-                "id":42,
+                "id":57,
                 "legend":{
                     "alignAsTable":true,
                     "avg":false,
@@ -2043,8 +1993,8 @@
                 "links":[
                     {
                         "targetBlank":true,
-                        "title":"ussuri current-tripleo",
-                        "url":"https://trunk.rdoproject.org/centos8-ussuri/current-tripleo/delorean.repo"
+                        "title":"Master current-tripleo link",
+                        "url":"https://trunk.rdoproject.org/centos8-master/current-tripleo/delorean.repo"
                     }
                 ],
                 "nullPointMode":"null",
@@ -2082,7 +2032,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'wallaby' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'wallaby' AND \"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -2107,7 +2057,7 @@
                 "timeFrom":null,
                 "timeRegions":[],
                 "timeShift":null,
-                "title":"Promotions for CentOS-8 Wallaby tripleo ci ( current-tripleo )",
+                "title":"Promotions for CentOS-8 wallaby tripleo ci ( current-tripleo )",
                 "tooltip":{
                     "shared":true,
                     "sort":0,
@@ -2161,7 +2111,7 @@
                     "x":12,
                     "y":33
                 },
-                "id":46,
+                "id":56,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -2172,7 +2122,8 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time since last promotion",
+                        "$$hashKey":"object:2120",
+                        "alias":"Time since last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -2180,16 +2131,17 @@
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "dateFormat":"YYYY-MM-DD",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"Time",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
                         "type":"number",
                         "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:2136",
+                        "alias":"promotion details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -2201,16 +2153,16 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkUrl":"${__cell_2:raw} ",
+                        "linkUrl":"${__cell_4:raw} ",
                         "mappingType":1,
                         "pattern":"last",
-                        "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
                         "type":"string",
                         "unit":"short"
                     },
                     {
+                        "$$hashKey":"object:2403",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -2222,13 +2174,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"repo_url",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"Time since last build",
+                        "$$hashKey":"object:2424",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -2239,7 +2192,7 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"consistent_date",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
                         "unit":"dateTimeFromNow"
@@ -2264,7 +2217,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'baremetal' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'baremetal' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -2302,7 +2255,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cinder' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'cinder' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"table",
@@ -2340,7 +2293,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'clients' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'clients' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"table",
@@ -2378,7 +2331,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cloudops' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'cloudops' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"D",
                         "resultFormat":"table",
@@ -2416,7 +2369,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'common' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'common' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"E",
                         "resultFormat":"table",
@@ -2454,7 +2407,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'compute' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'compute' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"F",
                         "resultFormat":"table",
@@ -2492,7 +2445,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'glance' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'glance' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"G",
                         "resultFormat":"table",
@@ -2530,7 +2483,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'manila' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'manila' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"H",
                         "resultFormat":"table",
@@ -2568,7 +2521,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'network' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'network' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"I",
                         "resultFormat":"table",
@@ -2606,7 +2559,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'octavia' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'octavia' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"J",
                         "resultFormat":"table",
@@ -2644,7 +2597,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'security' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'security' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"K",
                         "resultFormat":"table",
@@ -2682,7 +2635,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'swift' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'swift' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"L",
                         "resultFormat":"table",
@@ -2720,7 +2673,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tempest' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'tempest' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"M",
                         "resultFormat":"table",
@@ -2758,7 +2711,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tripleo' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'tripleo' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"N",
                         "resultFormat":"table",
@@ -2794,10 +2747,9 @@
                                 "type":"fill"
                             }
                         ],
-                        "hide":false,
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'ui' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'ui' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"O",
                         "resultFormat":"table",
@@ -2833,10 +2785,9 @@
                                 "type":"fill"
                             }
                         ],
-                        "hide":false,
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'validation' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'validation' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"P",
                         "resultFormat":"table",
@@ -3223,7 +3174,7 @@
                 "dashLength":10,
                 "dashes":false,
                 "datasource":"telegraf",
-                "description":"Bars represent successful promotions to current-tripleo for ussuri. ",
+                "description":"Bars represent successful promotions to current-tripleo for master.\n\n",
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -3239,7 +3190,7 @@
                     "y":57
                 },
                 "hiddenSeries":false,
-                "id":37,
+                "id":59,
                 "legend":{
                     "alignAsTable":true,
                     "avg":false,
@@ -3256,8 +3207,8 @@
                 "links":[
                     {
                         "targetBlank":true,
-                        "title":"ussuri current-tripleo",
-                        "url":"https://trunk.rdoproject.org/centos8-ussuri/current-tripleo/delorean.repo"
+                        "title":"Master current-tripleo link",
+                        "url":"https://trunk.rdoproject.org/centos8-master/current-tripleo/delorean.repo"
                     }
                 ],
                 "nullPointMode":"null",
@@ -3295,7 +3246,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'victoria' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'victoria' AND \"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -3320,7 +3271,7 @@
                 "timeFrom":null,
                 "timeRegions":[],
                 "timeShift":null,
-                "title":"Promotions for CentOS-8 Victoria tripleo ci ( current-tripleo )",
+                "title":"Promotions for CentOS-8 victoria tripleo ci ( current-tripleo )",
                 "tooltip":{
                     "shared":true,
                     "sort":0,
@@ -3361,6 +3312,7 @@
             {
                 "columns":[],
                 "datasource":"telegraf",
+                "description":"",
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -3374,7 +3326,7 @@
                     "x":12,
                     "y":57
                 },
-                "id":39,
+                "id":58,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -3385,7 +3337,8 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time since last promotion",
+                        "$$hashKey":"object:2120",
+                        "alias":"Time since last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -3393,16 +3346,17 @@
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "dateFormat":"YYYY-MM-DD",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"Time",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
                         "type":"number",
                         "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:2136",
+                        "alias":"promotion details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -3414,16 +3368,16 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkUrl":"${__cell_2:raw} ",
+                        "linkUrl":"${__cell_4:raw} ",
                         "mappingType":1,
                         "pattern":"last",
-                        "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
                         "type":"string",
                         "unit":"short"
                     },
                     {
+                        "$$hashKey":"object:2403",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -3435,13 +3389,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"repo_url",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"Time since last build",
+                        "$$hashKey":"object:2424",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -3452,7 +3407,7 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"consistent_date",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
                         "unit":"dateTimeFromNow"
@@ -3477,7 +3432,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'baremetal' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'baremetal' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -3515,7 +3470,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cinder' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'cinder' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"table",
@@ -3553,7 +3508,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'clients' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'clients' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"table",
@@ -3591,7 +3546,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cloudops' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'cloudops' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"D",
                         "resultFormat":"table",
@@ -3629,7 +3584,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'common' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'common' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"E",
                         "resultFormat":"table",
@@ -3667,7 +3622,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'compute' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'compute' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"F",
                         "resultFormat":"table",
@@ -3705,7 +3660,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'glance' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'glance' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"G",
                         "resultFormat":"table",
@@ -3743,7 +3698,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'manila' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'manila' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"H",
                         "resultFormat":"table",
@@ -3781,7 +3736,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'network' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'network' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"I",
                         "resultFormat":"table",
@@ -3819,7 +3774,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'octavia' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'octavia' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"J",
                         "resultFormat":"table",
@@ -3857,7 +3812,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'security' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'security' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"K",
                         "resultFormat":"table",
@@ -3895,7 +3850,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'swift' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'swift' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"L",
                         "resultFormat":"table",
@@ -3933,7 +3888,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tempest' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'tempest' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"M",
                         "resultFormat":"table",
@@ -3971,7 +3926,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tripleo' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'tripleo' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"N",
                         "resultFormat":"table",
@@ -4007,10 +3962,9 @@
                                 "type":"fill"
                             }
                         ],
-                        "hide":false,
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'ui' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'ui' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"O",
                         "resultFormat":"table",
@@ -4046,10 +4000,9 @@
                                 "type":"fill"
                             }
                         ],
-                        "hide":false,
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'victoria' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'validation' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'validation' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"P",
                         "resultFormat":"table",
@@ -4430,26 +4383,12 @@
                 "type":"table-old"
             },
             {
-                "collapsed":false,
-                "datasource":null,
-                "gridPos":{
-                    "h":1,
-                    "w":24,
-                    "x":0,
-                    "y":81
-                },
-                "id":9,
-                "panels":[],
-                "title":"Ussuri Promotions",
-                "type":"row"
-            },
-            {
                 "aliasColors":{},
                 "bars":true,
                 "dashLength":10,
                 "dashes":false,
                 "datasource":"telegraf",
-                "description":"Bars represent successful promotions to current-tripleo for ussuri. ",
+                "description":"Bars represent successful promotions to current-tripleo for master.\n\n",
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -4462,10 +4401,10 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":82
+                    "y":81
                 },
                 "hiddenSeries":false,
-                "id":2,
+                "id":61,
                 "legend":{
                     "alignAsTable":true,
                     "avg":false,
@@ -4482,8 +4421,8 @@
                 "links":[
                     {
                         "targetBlank":true,
-                        "title":"ussuri current-tripleo",
-                        "url":"https://trunk.rdoproject.org/centos8-ussuri/current-tripleo/delorean.repo"
+                        "title":"Master current-tripleo link",
+                        "url":"https://trunk.rdoproject.org/centos8-master/current-tripleo/delorean.repo"
                     }
                 ],
                 "nullPointMode":"null",
@@ -4521,7 +4460,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'ussuri' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'ussuri' AND \"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -4546,7 +4485,7 @@
                 "timeFrom":null,
                 "timeRegions":[],
                 "timeShift":null,
-                "title":"Promotions for CentOS-8 ussuri tripleo ci ( current-tripleo )",
+                "title":"Promotions for CentOS-8 victoria tripleo ci ( current-tripleo )",
                 "tooltip":{
                     "shared":true,
                     "sort":0,
@@ -4587,6 +4526,7 @@
             {
                 "columns":[],
                 "datasource":"telegraf",
+                "description":"",
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -4598,9 +4538,9 @@
                     "h":16,
                     "w":12,
                     "x":12,
-                    "y":82
+                    "y":81
                 },
-                "id":35,
+                "id":60,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -4611,7 +4551,8 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time since last promotion",
+                        "$$hashKey":"object:2120",
+                        "alias":"Time since last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -4619,16 +4560,17 @@
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "dateFormat":"YYYY-MM-DD",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"Time",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
                         "type":"number",
                         "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:2136",
+                        "alias":"promotion details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -4640,16 +4582,16 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkUrl":"${__cell_2:raw} ",
+                        "linkUrl":"${__cell_4:raw} ",
                         "mappingType":1,
                         "pattern":"last",
-                        "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
                         "type":"string",
                         "unit":"short"
                     },
                     {
+                        "$$hashKey":"object:2403",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -4661,13 +4603,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"repo_url",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"Time since last build",
+                        "$$hashKey":"object:2424",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -4678,7 +4621,7 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"consistent_date",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
                         "unit":"dateTimeFromNow"
@@ -4703,7 +4646,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'baremetal' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'baremetal' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -4741,7 +4684,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cinder' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'cinder' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"table",
@@ -4779,7 +4722,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'clients' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'clients' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"table",
@@ -4817,7 +4760,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cloudops' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'cloudops' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"D",
                         "resultFormat":"table",
@@ -4855,7 +4798,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'common' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'common' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"E",
                         "resultFormat":"table",
@@ -4893,7 +4836,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'compute' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'compute' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"F",
                         "resultFormat":"table",
@@ -4931,7 +4874,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'glance' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'glance' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"G",
                         "resultFormat":"table",
@@ -4969,7 +4912,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'manila' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'manila' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"H",
                         "resultFormat":"table",
@@ -5007,7 +4950,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'network' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'network' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"I",
                         "resultFormat":"table",
@@ -5045,7 +4988,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'octavia' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'octavia' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"J",
                         "resultFormat":"table",
@@ -5083,7 +5026,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'security' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'security' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"K",
                         "resultFormat":"table",
@@ -5121,7 +5064,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'swift' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'swift' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"L",
                         "resultFormat":"table",
@@ -5159,7 +5102,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tempest' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'tempest' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"M",
                         "resultFormat":"table",
@@ -5197,7 +5140,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tripleo' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'tripleo' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"N",
                         "resultFormat":"table",
@@ -5233,10 +5176,9 @@
                                 "type":"fill"
                             }
                         ],
-                        "hide":false,
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'ui' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'ui' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"O",
                         "resultFormat":"table",
@@ -5272,10 +5214,9 @@
                                 "type":"fill"
                             }
                         ],
-                        "hide":false,
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'ussuri' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'validation' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'validation' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"P",
                         "resultFormat":"table",
@@ -5321,7 +5262,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":90
+                    "y":89
                 },
                 "hiddenSeries":false,
                 "id":5,
@@ -5442,6 +5383,20 @@
                     "align":false,
                     "alignLevel":null
                 }
+            },
+            {
+                "collapsed":false,
+                "datasource":null,
+                "gridPos":{
+                    "h":1,
+                    "w":24,
+                    "x":0,
+                    "y":97
+                },
+                "id":9,
+                "panels":[],
+                "title":"Ussuri Promotions",
+                "type":"row"
             },
             {
                 "columns":[],
@@ -5656,26 +5611,12 @@
                 "type":"table-old"
             },
             {
-                "collapsed":false,
-                "datasource":null,
-                "gridPos":{
-                    "h":1,
-                    "w":24,
-                    "x":0,
-                    "y":106
-                },
-                "id":7,
-                "panels":[],
-                "title":"Older Releases Promotions",
-                "type":"row"
-            },
-            {
                 "aliasColors":{},
                 "bars":true,
                 "dashLength":10,
                 "dashes":false,
                 "datasource":"telegraf",
-                "description":"Bars represent successful promotions to current-tripleo for ussuri. ",
+                "description":"Bars represent successful promotions to current-tripleo for master.\n\n",
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -5688,10 +5629,10 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":107
+                    "y":106
                 },
                 "hiddenSeries":false,
-                "id":18,
+                "id":63,
                 "legend":{
                     "alignAsTable":true,
                     "avg":false,
@@ -5708,8 +5649,8 @@
                 "links":[
                     {
                         "targetBlank":true,
-                        "title":"ussuri current-tripleo",
-                        "url":"https://trunk.rdoproject.org/centos8-ussuri/current-tripleo/delorean.repo"
+                        "title":"Master current-tripleo link",
+                        "url":"https://trunk.rdoproject.org/centos8-master/current-tripleo/delorean.repo"
                     }
                 ],
                 "nullPointMode":"null",
@@ -5747,7 +5688,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -5813,6 +5754,7 @@
             {
                 "columns":[],
                 "datasource":"telegraf",
+                "description":"",
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -5824,9 +5766,9 @@
                     "h":16,
                     "w":12,
                     "x":12,
-                    "y":107
+                    "y":106
                 },
-                "id":36,
+                "id":62,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -5837,7 +5779,8 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time since last promotion",
+                        "$$hashKey":"object:2120",
+                        "alias":"Time since last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -5845,16 +5788,17 @@
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "dateFormat":"YYYY-MM-DD",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"Time",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
                         "type":"number",
                         "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:2136",
+                        "alias":"promotion details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -5866,16 +5810,16 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkUrl":"${__cell_2:raw} ",
+                        "linkUrl":"${__cell_4:raw} ",
                         "mappingType":1,
                         "pattern":"last",
-                        "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
                         "type":"string",
                         "unit":"short"
                     },
                     {
+                        "$$hashKey":"object:2403",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -5887,13 +5831,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"repo_url",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"Time since last build",
+                        "$$hashKey":"object:2424",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -5904,7 +5849,7 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"consistent_date",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
                         "unit":"dateTimeFromNow"
@@ -5929,7 +5874,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'baremetal' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'ussuri' AND \"component\" = 'baremetal' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -5967,7 +5912,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cinder' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'cinder' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"table",
@@ -6005,7 +5950,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'clients' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'clients' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"table",
@@ -6043,7 +5988,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cloudops' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'cloudops' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"D",
                         "resultFormat":"table",
@@ -6081,7 +6026,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'common' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'common' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"E",
                         "resultFormat":"table",
@@ -6119,7 +6064,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'compute' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'compute' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"F",
                         "resultFormat":"table",
@@ -6157,7 +6102,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'glance' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'glance' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"G",
                         "resultFormat":"table",
@@ -6195,7 +6140,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'manila' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'manila' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"H",
                         "resultFormat":"table",
@@ -6233,7 +6178,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'network' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'network' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"I",
                         "resultFormat":"table",
@@ -6271,7 +6216,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'octavia' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'octavia' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"J",
                         "resultFormat":"table",
@@ -6309,7 +6254,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'security' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'security' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"K",
                         "resultFormat":"table",
@@ -6347,7 +6292,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'swift' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'swift' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"L",
                         "resultFormat":"table",
@@ -6385,7 +6330,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tempest' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'tempest' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"M",
                         "resultFormat":"table",
@@ -6423,7 +6368,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tripleo' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'tripleo' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"N",
                         "resultFormat":"table",
@@ -6459,10 +6404,9 @@
                                 "type":"fill"
                             }
                         ],
-                        "hide":false,
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'ui' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'ui' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"O",
                         "resultFormat":"table",
@@ -6498,10 +6442,9 @@
                                 "type":"fill"
                             }
                         ],
-                        "hide":false,
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'train' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'validation' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'validation' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"P",
                         "resultFormat":"table",
@@ -6547,7 +6490,7 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":115
+                    "y":114
                 },
                 "hiddenSeries":false,
                 "id":21,
@@ -6670,288 +6613,6 @@
                 }
             },
             {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
-                "datasource":"telegraf",
-                "description":"Bars represent successful promotions to current-tripleo for train. ",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
-                "fill":1,
-                "fillGradient":0,
-                "gridPos":{
-                    "h":8,
-                    "w":12,
-                    "x":0,
-                    "y":123
-                },
-                "hiddenSeries":false,
-                "id":20,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
-                "links":[
-                    {
-                        "targetBlank":true,
-                        "title":"train current-tripleo",
-                        "url":"https://trunk.rdoproject.org/centos7-train/current-tripleo/delorean.repo"
-                    }
-                ],
-                "nullPointMode":"null",
-                "options":{
-                    "alertThreshold":true
-                },
-                "percentage":false,
-                "pluginVersion":"7.3.6",
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
-                    {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":false,
-                "targets":[
-                    {
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "$__interval"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "null"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "value"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"mean"
-                                }
-                            ]
-                        ],
-                        "tags":[]
-                    }
-                ],
-                "thresholds":[],
-                "timeFrom":null,
-                "timeRegions":[],
-                "timeShift":null,
-                "title":"Promotions for CentOS-7 train TripleO ( current-tripleo)",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of Promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
-            },
-            {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
-                "datasource":"telegraf",
-                "description":"Bars represent successful promotions to current-tripleo for train. ",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
-                "fill":1,
-                "fillGradient":0,
-                "gridPos":{
-                    "h":8,
-                    "w":12,
-                    "x":12,
-                    "y":123
-                },
-                "hiddenSeries":false,
-                "id":22,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
-                "links":[
-                    {
-                        "targetBlank":true,
-                        "title":"train current-tripleo",
-                        "url":"https://trunk.rdoproject.org/centos7-train/current-tripleo-rdo/delorean.repo"
-                    }
-                ],
-                "nullPointMode":"null",
-                "options":{
-                    "alertThreshold":true
-                },
-                "percentage":false,
-                "pluginVersion":"7.3.6",
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
-                    {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":false,
-                "targets":[
-                    {
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "$__interval"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "null"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "value"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"mean"
-                                }
-                            ]
-                        ],
-                        "tags":[]
-                    }
-                ],
-                "thresholds":[],
-                "timeFrom":null,
-                "timeRegions":[],
-                "timeShift":null,
-                "title":"Promotions for CentOS-7 train RDO ( current-tripleo-rdo)",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of Promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
-            },
-            {
                 "columns":[],
                 "datasource":"telegraf",
                 "description":"List of the latest failing integration / promotion  jobs.",
@@ -6966,7 +6627,7 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":131
+                    "y":122
                 },
                 "id":55,
                 "links":[],
@@ -7169,7 +6830,7 @@
                 "dashLength":10,
                 "dashes":false,
                 "datasource":"telegraf",
-                "description":"Bars represent successful promotions to current-tripleo for train. ",
+                "description":"Bars represent successful promotions to current-tripleo for master.\n\n",
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -7182,10 +6843,10 @@
                     "h":8,
                     "w":12,
                     "x":0,
-                    "y":139
+                    "y":130
                 },
                 "hiddenSeries":false,
-                "id":26,
+                "id":64,
                 "legend":{
                     "alignAsTable":true,
                     "avg":false,
@@ -7202,8 +6863,8 @@
                 "links":[
                     {
                         "targetBlank":true,
-                        "title":"stein current-tripleo",
-                        "url":"https://trunk.rdoproject.org/centos7-stein/current-tripleo/delorean.repo"
+                        "title":"Master current-tripleo link",
+                        "url":"https://trunk.rdoproject.org/centos8-master/current-tripleo/delorean.repo"
                     }
                 ],
                 "nullPointMode":"null",
@@ -7241,7 +6902,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'stein' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-7') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -7266,7 +6927,7 @@
                 "timeFrom":null,
                 "timeRegions":[],
                 "timeShift":null,
-                "title":"Promotions for CentOS-7 stein TripleO ( current-tripleo)",
+                "title":"Promotions for CentOS-7 train tripleo ci ( current-tripleo )",
                 "tooltip":{
                     "shared":true,
                     "sort":0,
@@ -7323,10 +6984,10 @@
                     "h":8,
                     "w":12,
                     "x":12,
-                    "y":139
+                    "y":130
                 },
                 "hiddenSeries":false,
-                "id":24,
+                "id":22,
                 "legend":{
                     "alignAsTable":true,
                     "avg":false,
@@ -7343,8 +7004,8 @@
                 "links":[
                     {
                         "targetBlank":true,
-                        "title":"stein current-tripleo",
-                        "url":"https://trunk.rdoproject.org/centos7-stein/current-tripleo-rdo/delorean.repo"
+                        "title":"train current-tripleo",
+                        "url":"https://trunk.rdoproject.org/centos7-train/current-tripleo-rdo/delorean.repo"
                     }
                 ],
                 "nullPointMode":"null",
@@ -7382,7 +7043,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'stein' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -7407,7 +7068,7 @@
                 "timeFrom":null,
                 "timeRegions":[],
                 "timeShift":null,
-                "title":"Promotions for CentOS-7 stein RDO ( current-tripleo-rdo)",
+                "title":"Promotions for CentOS-7 train RDO ( current-tripleo-rdo)",
                 "tooltip":{
                     "shared":true,
                     "sort":0,
@@ -7460,9 +7121,9 @@
                     "h":8,
                     "w":24,
                     "x":0,
-                    "y":147
+                    "y":138
                 },
-                "id":25,
+                "id":65,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -7473,30 +7134,26 @@
                 },
                 "styles":[
                     {
+                        "$$hashKey":"object:280",
                         "alias":"Time",
                         "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"Branch",
-                        "align":"auto",
                         "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
                             "rgba(50, 172, 45, 0.97)"
                         ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"branch",
+                        "pattern":"Time",
                         "thresholds":[],
-                        "type":"string",
+                        "type":"date",
                         "unit":"short"
                     },
                     {
-                        "alias":"Job",
+                        "$$hashKey":"object:293",
+                        "alias":"job",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -7509,55 +7166,16 @@
                         "link":true,
                         "linkTargetBlank":true,
                         "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
+                        "linkUrl":"${__cell_4:raw}",
                         "mappingType":1,
                         "pattern":"job_name",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Result",
-                        "align":"auto",
-                        "colorMode":"cell",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"result",
-                        "thresholds":[
-                            "AA"
-                        ],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Job",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"log_link",
                         "sanitize":true,
                         "thresholds":[],
                         "type":"string",
                         "unit":"short"
                     },
                     {
+                        "$$hashKey":"object:319",
                         "alias":"Duration",
                         "align":"auto",
                         "colorMode":"cell",
@@ -7576,6 +7194,83 @@
                         ],
                         "type":"number",
                         "unit":"dtdurations"
+                    },
+                    {
+                        "$$hashKey":"object:330",
+                        "alias":"result",
+                        "align":"auto",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgb(128, 128, 128)",
+                            "#56A64B"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"status",
+                        "thresholds":[
+                            "1",
+                            "6",
+                            "10"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "$$hashKey":"object:351",
+                                "text":"FAILED",
+                                "value":"0"
+                            },
+                            {
+                                "$$hashKey":"object:353",
+                                "text":"PENDING",
+                                "value":"5"
+                            },
+                            {
+                                "$$hashKey":"object:412",
+                                "text":"SUCCESS",
+                                "value":"9"
+                            }
+                        ]
+                    },
+                    {
+                        "$$hashKey":"object:1284",
+                        "alias":"logs",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"logs",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:2904",
+                        "alias":"aggregate_hash",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkUrl":"https://trunk.rdoproject.org/api-centos8-train/api/civotes_agg_detail.html?ref_hash=${__cell_7:raw}",
+                        "mappingType":1,
+                        "pattern":"test_hash",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
                     }
                 ],
                 "targets":[
@@ -7596,7 +7291,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT \"log_link\", \"duration\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND \"pipeline\" =~ /periodic/ AND \"type\" = 'rdo' AND \"result\" != 'SKIPPED' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /stein/) AND $timeFilter",
+                        "query":"SELECT \"job_name\",\"status\",\"criteria\",\"logs\",\"duration\",\"failure_reason\",\"test_hash\"  FROM \"autogen\".\"jobs_result\" WHERE (\"job_type\" = 'integration' AND \"release\" = 'train' AND 'job_name' =~ /.*centos-7.*/) AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -7617,469 +7312,9 @@
                         "tags":[]
                     }
                 ],
-                "timeFrom":null,
+                "timeFrom":"12h",
                 "timeShift":null,
-                "title":"Stein failing periodic jobs",
-                "transform":"table",
-                "type":"table-old"
-            },
-            {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
-                "datasource":"telegraf",
-                "description":"Bars represent successful promotions to current-tripleo for queens. ",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
-                "fill":1,
-                "fillGradient":0,
-                "gridPos":{
-                    "h":8,
-                    "w":12,
-                    "x":0,
-                    "y":155
-                },
-                "hiddenSeries":false,
-                "id":29,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
-                "links":[
-                    {
-                        "targetBlank":true,
-                        "title":"queens current-tripleo",
-                        "url":"https://trunk.rdoproject.org/centos7-queens/current-tripleo/delorean.repo"
-                    }
-                ],
-                "nullPointMode":"null",
-                "options":{
-                    "alertThreshold":true
-                },
-                "percentage":false,
-                "pluginVersion":"7.3.6",
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
-                    {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":false,
-                "targets":[
-                    {
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "$__interval"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "null"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'queens' AND \"name\" = 'current-tripleo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "value"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"mean"
-                                }
-                            ]
-                        ],
-                        "tags":[]
-                    }
-                ],
-                "thresholds":[],
-                "timeFrom":null,
-                "timeRegions":[],
-                "timeShift":null,
-                "title":"Promotions for CentOS-7 queens TripleO ( current-tripleo)",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of Promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
-            },
-            {
-                "aliasColors":{},
-                "bars":true,
-                "dashLength":10,
-                "dashes":false,
-                "datasource":"telegraf",
-                "description":"Bars represent successful promotions to current-tripleo for queens. ",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
-                "fill":1,
-                "fillGradient":0,
-                "gridPos":{
-                    "h":8,
-                    "w":12,
-                    "x":12,
-                    "y":155
-                },
-                "hiddenSeries":false,
-                "id":30,
-                "legend":{
-                    "alignAsTable":true,
-                    "avg":false,
-                    "current":true,
-                    "max":false,
-                    "min":false,
-                    "rightSide":true,
-                    "show":false,
-                    "total":false,
-                    "values":true
-                },
-                "lines":false,
-                "linewidth":1,
-                "links":[
-                    {
-                        "targetBlank":true,
-                        "title":"queens current-tripleo-rdo",
-                        "url":"https://trunk.rdoproject.org/centos7-queens-rdo/current-tripleo/delorean.repo"
-                    }
-                ],
-                "nullPointMode":"null",
-                "options":{
-                    "alertThreshold":true
-                },
-                "percentage":false,
-                "pluginVersion":"7.3.6",
-                "pointradius":2,
-                "points":false,
-                "renderer":"flot",
-                "seriesOverrides":[
-                    {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
-                    }
-                ],
-                "spaceLength":10,
-                "stack":false,
-                "steppedLine":false,
-                "targets":[
-                    {
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "$__interval"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "null"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'queens' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "value"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"mean"
-                                }
-                            ]
-                        ],
-                        "tags":[]
-                    }
-                ],
-                "thresholds":[],
-                "timeFrom":null,
-                "timeRegions":[],
-                "timeShift":null,
-                "title":"Promotions for CentOS-7 queens RDO ( current-tripleo-rdo)",
-                "tooltip":{
-                    "shared":true,
-                    "sort":0,
-                    "value_type":"individual"
-                },
-                "type":"graph",
-                "xaxis":{
-                    "buckets":null,
-                    "mode":"time",
-                    "name":null,
-                    "show":true,
-                    "values":[]
-                },
-                "yaxes":[
-                    {
-                        "decimals":0,
-                        "format":"short",
-                        "label":"Number of Promotions",
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":true
-                    },
-                    {
-                        "format":"short",
-                        "label":null,
-                        "logBase":1,
-                        "max":null,
-                        "min":null,
-                        "show":false
-                    }
-                ],
-                "yaxis":{
-                    "align":false,
-                    "alignLevel":null
-                }
-            },
-            {
-                "columns":[],
-                "datasource":"telegraf",
-                "description":"List of the latest failing integration / promotion  jobs.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
-                "fontSize":"100%",
-                "gridPos":{
-                    "h":8,
-                    "w":24,
-                    "x":0,
-                    "y":163
-                },
-                "id":31,
-                "links":[],
-                "pageSize":null,
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":0,
-                    "desc":true
-                },
-                "styles":[
-                    {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"Branch",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"branch",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Job",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"job_name",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Result",
-                        "align":"auto",
-                        "colorMode":"cell",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"result",
-                        "thresholds":[
-                            "AA"
-                        ],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Job",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"log_link",
-                        "sanitize":true,
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Duration",
-                        "align":"auto",
-                        "colorMode":"cell",
-                        "colors":[
-                            "rgba(50, 172, 45, 0.97)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":1,
-                        "mappingType":1,
-                        "pattern":"duration",
-                        "thresholds":[
-                            "10000",
-                            "10600"
-                        ],
-                        "type":"number",
-                        "unit":"dtdurations"
-                    }
-                ],
-                "targets":[
-                    {
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "$__interval"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "null"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT \"log_link\", \"duration\", \"result\" FROM \"autogen\".\"build\" WHERE (\"passed\" = 'False' AND \"pipeline\" =~ /periodic/ AND \"type\" = 'rdo' AND \"result\" != 'SKIPPED' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /queens/) AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "value"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"mean"
-                                }
-                            ]
-                        ],
-                        "tags":[]
-                    }
-                ],
-                "timeFrom":null,
-                "timeShift":null,
-                "title":"Queens failing periodic jobs",
+                "title":"Train CentOS-7 Integration periodic jobs",
                 "transform":"table",
                 "type":"table-old"
             }

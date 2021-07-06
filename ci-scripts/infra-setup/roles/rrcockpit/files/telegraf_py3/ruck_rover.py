@@ -170,13 +170,16 @@ def format_ts_from_last_modified(ts, pattern='%a, %d %b %Y %H:%M:%S %Z'):
 # get the date of the consistent link in dlrn
 def get_consistent(url, component=None):
     if "centos7" not in url:
+        dlrn_tag = "/promoted-components"
         short_url = url.split("/")[:-5]
     else:
+        dlrn_tag = "/consistent"
         short_url = url.split("/")[:-3]
     short_url = "/".join(short_url)
 
     if component is None:
-        response = requests.get(short_url + '/consistent/delorean.repo')
+        # integration build, use last promoted_components date
+        response = requests.get(short_url + dlrn_tag + '/delorean.repo')
         if response.ok:
             cd = response.headers['Last-Modified']
             consistent_date = format_ts_from_last_modified(cd)
@@ -212,7 +215,7 @@ def get_dlrn_promotions(api_url,
     consistent = get_consistent(pr.repo_url, component)
     promotion = {}
     promotion = pr.to_dict()
-    promotion['consistent_date'] = consistent
+    promotion['lastest_build'] = consistent
     return promotion
 
 
@@ -404,17 +407,24 @@ def influxdb_jobs(jobs_result):
 
 
 def influxdb_promo(promotion):
+    # grafana renders epoch only w/ * 1000
+    gr_promotion_date = str(int(promotion['timestamp']) * 1000000000)
+    gr_latest_build = str(int(promotion['lastest_build']) * 1000)
+    promotion['grafana_timestamp'] = gr_promotion_date
+    promotion['grafana_latest_build'] = gr_latest_build
     promotion_influxdb_line = ("dlrn-promotion,"
                                "release={release},distro={distro},"
-                               "name={promote_name} "
+                               "promo_name={promote_name} "
                                "commit_hash=\"{commit_hash}\","
                                "distro_hash=\"{distro_hash}\","
+                               "aggregate_hash=\"{aggregate_hash}\","
                                "repo_hash=\"{repo_hash}\","
                                "repo_url=\"{repo_url}\","
-                               "consistent_date={consistent_date},"
+                               "latest_build_date={grafana_latest_build},"
                                "component=\"{component}\","
+                               "promotion_details=\"{dlrn_details}\","
                                "extended_hash=\"{extended_hash}\" "
-                               "{timestamp}")
+                               "{grafana_timestamp}")
     return promotion_influxdb_line.format(**promotion)
 
 
@@ -472,6 +482,37 @@ def track_integration_promotion(release,
     jobs_which_need_pass_to_promote = jobs_in_criteria.difference(passed_jobs)
     jobs_with_no_result = jobs_in_criteria.difference(all_jobs_result_available)
     all_jobs = all_jobs_result_available.union(jobs_with_no_result)
+
+    # get the dlrn details, hash under test ( hut ) and promoted hash ( ph )
+    dlrn_api = dlrn_api_path + release
+    if distro != "centos-7":
+        if release == "master":
+            dlrn_api = dlrn_api + "-uc"
+        dlrn_api_suffix = "api/civotes_agg_detail.html?ref_hash="
+        # hash under test
+        hut = "{}/{}/{}{}".format(dlrn_server,
+                                  dlrn_api,
+                                  dlrn_api_suffix,
+                                  test_hash)
+        ph = "{}/{}/{}{}".format(dlrn_server,
+                                 dlrn_api,
+                                 dlrn_api_suffix,
+                                 promotions['aggregate_hash'])
+
+    else:
+        dlrn_api_suffix = "api/civotes_detail.html?commit_hash="
+        # hash under test
+        hut = "{}/{}/{}{}&distro_hash={}".format(dlrn_server,
+                                                 dlrn_api,
+                                                 dlrn_api_suffix,
+                                                 commit_hash,
+                                                 distro_hash)
+        ph = "{}/{}/{}{}&distro_hash={}".format(dlrn_server,
+                                                dlrn_api,
+                                                dlrn_api_suffix,
+                                                promotions['commit_hash'],
+                                                promotions['distro_hash'])
+
     if influx:
         # print out jobs in influxdb format
         log_urls = latest_job_results_url(
@@ -505,26 +546,9 @@ def track_integration_promotion(release,
         # print out last promotions in influxdb format
         promotions['release'] = release
         promotions['distro'] = distro
+        promotions['dlrn_details'] = ph
         print(influxdb_promo(promotions))
-
     else:
-        dlrn_api = dlrn_api_path + release
-        if distro != "centos-7":
-            dlrn_api_suffix = "api/civotes_agg_detail.html?ref_hash="
-            # hash under test
-            hut = "{}/{}/{}{}".format(dlrn_server,
-                                      dlrn_api,
-                                      dlrn_api_suffix,
-                                      test_hash)
-        else:
-            dlrn_api_suffix = "api/civotes_detail.html?commit_hash="
-            # hash under test
-            hut = "{}/{}/{}{}&distro_hash={}".format(dlrn_server,
-                                                     dlrn_api,
-                                                     dlrn_api_suffix,
-                                                     commit_hash,
-                                                     distro_hash)
-
         last_p = datetime.utcfromtimestamp(promotions['timestamp'])
         console.print(f"Hash under test: {hut}",
                       f"\nlast_promotion={last_p}")
@@ -550,6 +574,7 @@ def track_component_promotion(release,
                               test_component,
                               git_base_url,
                               zb_periodic,
+                              dlrn_server,
                               promotion="promoted-components",
                               compare_upstream=False,
                               influx=False):
@@ -571,13 +596,16 @@ def track_component_promotion(release,
 
     if distro == "centos-8":
         component_path = "CentOS-8/component/"
+        dlrn_api_path = "api-centos8-"
         release_criteria = release
     elif distro == "rhel-8":
         component_path = "RedHat-8/component/"
         if release == "osp16-2":
             release_criteria = "rhos-16.2"
+            dlrn_api_path = "api-rhel8-"
         elif release == "osp17":
             release_criteria = "rhos-17"
+            dlrn_api_path = "api-rhel8-"
     # elif distro == "rhel-9":
     #     component_path = "RedHat-9/component/"
 
@@ -593,9 +621,28 @@ def track_component_promotion(release,
                                                           commit_hash,
                                                           distro_hash,
                                                           extended_hash)
+
+        # component promotion details
         promotions = get_dlrn_promotions(api_url,
                                          "promoted-components",
                                          component=component)
+
+        dlrn_api = dlrn_api_path + release
+        if distro != "centos-7":
+            if release == "master":
+                dlrn_api = dlrn_api + "-uc"
+        dlrn_api_suffix = "api/civotes_detail.html?commit_hash="
+        # hash under test
+        hut = "{}/{}/{}{}&distro_hash={}".format(dlrn_server,
+                                                 dlrn_api,
+                                                 dlrn_api_suffix,
+                                                 commit_hash,
+                                                 distro_hash)
+        ph = "{}/{}/{}{}&distro_hash={}".format(dlrn_server,
+                                                dlrn_api,
+                                                dlrn_api_suffix,
+                                                promotions['commit_hash'],
+                                                promotions['distro_hash'])
         (all_jobs_result_available,
          passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
         if 'consistent' in all_jobs_result_available:
@@ -643,6 +690,7 @@ def track_component_promotion(release,
                 # print out promtions in influxdb format
                 promotions['release'] = release
                 promotions['distro'] = distro
+                promotions['dlrn_details'] = ph
                 print(influxdb_promo(promotions))
         else:
             log_urls = latest_job_results_url(
@@ -658,7 +706,8 @@ def track_component_promotion(release,
             last_p = datetime.utcfromtimestamp(promotions['timestamp'])
             console.print(f"{component} component",
                           f"status={component_status}",
-                          f"last_promotion={last_p}")
+                          f"last_promotion={last_p}",
+                          f"\nHash_under_test={hut}")
 
             print_a_set_in_table(passed_jobs, "Jobs which passed:")
             if component_status != "Green":
@@ -731,6 +780,7 @@ def main(release,
     if component:
         track_component_promotion(release,
                                   distro,
+                                  dlrn_server=dlrnapi_url,
                                   test_component=component,
                                   git_base_url=git_url,
                                   zb_periodic=zuul_url,
