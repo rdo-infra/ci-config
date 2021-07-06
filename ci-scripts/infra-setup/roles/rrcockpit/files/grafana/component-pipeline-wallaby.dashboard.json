@@ -19,10 +19,8 @@
         "links":[],
         "panels":[
             {
-                "cacheTimeout":null,
                 "columns":[],
                 "datasource":"telegraf",
-                "description":"promotions to promoted-components and current-tripleo listed here.",
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -31,258 +29,51 @@
                 },
                 "fontSize":"100%",
                 "gridPos":{
-                    "h":8,
+                    "h":17,
                     "w":12,
                     "x":0,
                     "y":0
                 },
-                "hideTimeOverride":false,
-                "id":450,
+                "id":504,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
-                    "col":0,
-                    "desc":true
-                },
-                "styles":[
-                    {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "alias":"host",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"host",
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"count",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"count",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
-                        "mappingType":1,
-                        "pattern":"repo",
-                        "preserveFormat":false,
-                        "sanitize":true,
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
-                        "alias":"",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"distro",
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"release",
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
-                    }
-                ],
-                "targets":[
-                    {
-                        "alias":"repo",
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "24h"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "name"
-                                ],
-                                "type":"tag"
-                            },
-                            {
-                                "params":[
-                                    "0"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "measurement":"dlrn-promotion",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby'  and \"distro\" = 'CentOS-8') group by time(24h), *\n",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "repo_hash"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"release",
-                                "operator":"=",
-                                "value":"wallaby"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"name",
-                                "operator":"=",
-                                "value":"current-tripleo"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"distro",
-                                "operator":"=",
-                                "value":"CentOS-7"
-                            }
-                        ]
-                    }
-                ],
-                "timeFrom":"2w",
-                "timeShift":null,
-                "title":"Upstream wallaby Promotions",
-                "transform":"table",
-                "type":"table-old"
-            },
-            {
-                "columns":[],
-                "datasource":"telegraf",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
-                "fontSize":"100%",
-                "gridPos":{
-                    "h":8,
-                    "w":12,
-                    "x":12,
-                    "y":0
-                },
-                "id":466,
-                "interval":"",
-                "links":[],
-                "pageSize":null,
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":0,
+                    "col":null,
                     "desc":false
                 },
                 "styles":[
                     {
-                        "alias":"Time since last promotion",
+                        "$$hashKey":"object:179",
+                        "alias":"Date of last promotion",
                         "align":"auto",
-                        "colorMode":null,
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
+                        "dateFormat":"YYYY-MM-DD",
                         "pattern":"Time",
-                        "thresholds":[
-                            ""
-                        ],
                         "type":"number",
                         "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"Time since last build",
+                        "$$hashKey":"object:498",
+                        "alias":"Date of last build",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"latest_build_date",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
+                    },
+                    {
+                        "$$hashKey":"object:643",
+                        "alias":"Promotion Name",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -291,15 +82,16 @@
                             "rgba(50, 172, 45, 0.97)"
                         ],
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":0,
+                        "decimals":2,
                         "mappingType":1,
-                        "pattern":"consistent_date",
+                        "pattern":"promo_name",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"dateTimeFromNow"
+                        "unit":"short"
                     },
                     {
-                        "alias":"Promoted repo",
+                        "$$hashKey":"object:5925",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -310,34 +102,18 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "link":true,
-                        "linkTargetBlank":true,
-                        "linkUrl":"${__cell_2:raw} ",
+                        "linkUrl":"${__cell_5:raw}",
                         "mappingType":1,
-                        "pattern":"last",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"last",
-                        "sanitize":true,
+                        "pattern":"aggregate_hash",
+                        "preserveFormat":true,
+                        "sanitize":false,
                         "thresholds":[],
                         "type":"string",
                         "unit":"short"
                     },
                     {
-                        "alias":"repo_url",
+                        "$$hashKey":"object:5951",
+                        "alias":"",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -348,26 +124,9 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"repo_url",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Component name",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"component",
-                        "thresholds":[],
-                        "type":"number",
                         "unit":"short"
                     }
                 ],
@@ -389,7 +148,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'baremetal' ) ",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, aggregate_hash from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8' AND \"release\" = 'wallaby') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -426,7 +185,195 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cinder' ) \n\n",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, aggregate_hash from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo-rdo' AND \"distro\" = 'centos-8' AND \"release\" = 'wallaby') ",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "timeFrom":"30d",
+                "timeShift":null,
+                "title":"TripleO-CI promotions",
+                "transform":"table",
+                "type":"table-old"
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":17,
+                    "w":12,
+                    "x":12,
+                    "y":0
+                },
+                "id":487,
+                "links":[],
+                "pageSize":null,
+                "repeat":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":false
+                },
+                "styles":[
+                    {
+                        "$$hashKey":"object:2120",
+                        "alias":"Time since last build",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"latest_build_date",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
+                    },
+                    {
+                        "$$hashKey":"object:2136",
+                        "alias":"promotion details",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkUrl":"${__cell_4:raw} ",
+                        "mappingType":1,
+                        "pattern":"last",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:2403",
+                        "alias":"",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"promotion_details",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:2424",
+                        "alias":"Date of last promotion",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"Time",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'baremetal' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'cinder' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"table",
@@ -447,6 +394,7 @@
                         "tags":[]
                     },
                     {
+                        "alias":"",
                         "groupBy":[
                             {
                                 "params":[
@@ -463,7 +411,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'clients' ) \n\n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'clients' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"table",
@@ -484,6 +432,7 @@
                         "tags":[]
                     },
                     {
+                        "alias":"",
                         "groupBy":[
                             {
                                 "params":[
@@ -500,7 +449,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'cloudops' ) \n\n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'cloudops' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"D",
                         "resultFormat":"table",
@@ -521,6 +470,7 @@
                         "tags":[]
                     },
                     {
+                        "alias":"",
                         "groupBy":[
                             {
                                 "params":[
@@ -537,7 +487,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'common' ) \n\n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'common' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"E",
                         "resultFormat":"table",
@@ -558,6 +508,7 @@
                         "tags":[]
                     },
                     {
+                        "alias":"",
                         "groupBy":[
                             {
                                 "params":[
@@ -574,7 +525,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'compute' ) \n\n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'compute' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"F",
                         "resultFormat":"table",
@@ -595,6 +546,7 @@
                         "tags":[]
                     },
                     {
+                        "alias":"",
                         "groupBy":[
                             {
                                 "params":[
@@ -611,7 +563,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'glance' ) \n\n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'glance' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"G",
                         "resultFormat":"table",
@@ -632,6 +584,7 @@
                         "tags":[]
                     },
                     {
+                        "alias":"",
                         "groupBy":[
                             {
                                 "params":[
@@ -648,7 +601,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'manila' ) \n\n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'manila' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"H",
                         "resultFormat":"table",
@@ -669,6 +622,7 @@
                         "tags":[]
                     },
                     {
+                        "alias":"",
                         "groupBy":[
                             {
                                 "params":[
@@ -685,7 +639,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'network' ) \n\n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'network' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"I",
                         "resultFormat":"table",
@@ -706,6 +660,7 @@
                         "tags":[]
                     },
                     {
+                        "alias":"",
                         "groupBy":[
                             {
                                 "params":[
@@ -722,7 +677,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'octavia' ) \n\n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'octavia' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"J",
                         "resultFormat":"table",
@@ -743,6 +698,7 @@
                         "tags":[]
                     },
                     {
+                        "alias":"",
                         "groupBy":[
                             {
                                 "params":[
@@ -759,7 +715,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\", \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'security' ) \n\n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'security' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"K",
                         "resultFormat":"table",
@@ -780,6 +736,7 @@
                         "tags":[]
                     },
                     {
+                        "alias":"",
                         "groupBy":[
                             {
                                 "params":[
@@ -796,7 +753,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'swift' ) \n\n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'swift' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"L",
                         "resultFormat":"table",
@@ -817,6 +774,7 @@
                         "tags":[]
                     },
                     {
+                        "alias":"",
                         "groupBy":[
                             {
                                 "params":[
@@ -833,7 +791,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tempest' ) \n\n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'tempest' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"M",
                         "resultFormat":"table",
@@ -854,6 +812,7 @@
                         "tags":[]
                     },
                     {
+                        "alias":"",
                         "groupBy":[
                             {
                                 "params":[
@@ -870,7 +829,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\",  last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'tripleo' ) \n\n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'tripleo' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"N",
                         "resultFormat":"table",
@@ -891,6 +850,7 @@
                         "tags":[]
                     },
                     {
+                        "alias":"",
                         "groupBy":[
                             {
                                 "params":[
@@ -907,7 +867,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'ui' ) \n\n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'ui' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"O",
                         "resultFormat":"table",
@@ -928,6 +888,7 @@
                         "tags":[]
                     },
                     {
+                        "alias":"",
                         "groupBy":[
                             {
                                 "params":[
@@ -944,7 +905,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select   \"component\",  \"repo_url\",  \"consistent_date\", last(\"repo_hash\") from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8'  and \"component\" = 'validation' ) \n\n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'wallaby' AND \"component\" = 'validation' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"P",
                         "resultFormat":"table",
@@ -967,7 +928,7 @@
                 ],
                 "timeFrom":null,
                 "timeShift":null,
-                "title":"Days since last promotion",
+                "title":"wallaby Components: Days since last promotion",
                 "transform":"table",
                 "type":"table-old"
             },
@@ -978,7 +939,7 @@
                     "h":1,
                     "w":24,
                     "x":0,
-                    "y":8
+                    "y":17
                 },
                 "id":370,
                 "panels":[],
@@ -1000,7 +961,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":9
+                    "y":18
                 },
                 "id":470,
                 "links":[],
@@ -1214,7 +1175,7 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":9
+                    "y":18
                 },
                 "hideTimeOverride":false,
                 "id":464,
@@ -1228,6 +1189,7 @@
                 },
                 "styles":[
                     {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -1245,7 +1207,26 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"Time",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
+                    },
+                    {
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -1257,10 +1238,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -1268,30 +1249,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -1303,13 +1261,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -1320,47 +1279,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"Date",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"Time",
-                        "thresholds":[],
-                        "type":"date",
-                        "unit":"short"
-                    },
-                    {
-                        "alias":"",
-                        "align":"auto",
-                        "colorMode":"row",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"Time",
-                        "thresholds":[
-                            "1",
-                            "2"
-                        ],
                         "type":"number",
-                        "unit":"d"
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -1389,7 +1311,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'baremetal') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'baremetal') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -1449,7 +1371,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":17
+                    "y":26
                 },
                 "id":471,
                 "links":[],
@@ -1663,10 +1585,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":17
+                    "y":26
                 },
                 "hideTimeOverride":false,
-                "id":451,
+                "id":488,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -1677,13 +1599,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -1701,7 +1617,8 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"count",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -1712,13 +1629,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"count",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -1730,10 +1648,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -1741,30 +1659,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -1776,13 +1671,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -1793,10 +1689,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -1825,7 +1721,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'cinder') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'cinder') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -1885,7 +1781,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":25
+                    "y":34
                 },
                 "id":472,
                 "links":[],
@@ -2099,10 +1995,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":25
+                    "y":34
                 },
                 "hideTimeOverride":false,
-                "id":452,
+                "id":489,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -2113,13 +2009,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -2137,7 +2027,8 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"count",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -2148,13 +2039,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"count",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -2166,10 +2058,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -2177,30 +2069,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -2212,13 +2081,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -2229,10 +2099,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -2261,7 +2131,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'clients') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'clients') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -2321,7 +2191,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":33
+                    "y":42
                 },
                 "id":473,
                 "links":[],
@@ -2535,10 +2405,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":33
+                    "y":42
                 },
                 "hideTimeOverride":false,
-                "id":453,
+                "id":490,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -2549,13 +2419,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -2573,7 +2437,8 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"count",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -2584,13 +2449,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"count",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -2602,10 +2468,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -2613,30 +2479,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -2648,13 +2491,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -2665,10 +2509,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -2697,7 +2541,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'common') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'common') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -2757,7 +2601,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":41
+                    "y":50
                 },
                 "id":474,
                 "links":[],
@@ -2971,10 +2815,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":41
+                    "y":50
                 },
                 "hideTimeOverride":false,
-                "id":454,
+                "id":491,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -2985,13 +2829,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -3009,7 +2847,8 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"count",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -3020,13 +2859,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"count",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -3038,10 +2878,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -3049,30 +2889,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -3084,13 +2901,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -3101,10 +2919,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -3133,7 +2951,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'cloudops') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'cloudops') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -3193,7 +3011,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":49
+                    "y":58
                 },
                 "id":475,
                 "links":[],
@@ -3407,10 +3225,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":49
+                    "y":58
                 },
                 "hideTimeOverride":false,
-                "id":455,
+                "id":492,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -3421,13 +3239,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -3445,7 +3257,8 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"count",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -3456,13 +3269,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"count",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -3474,10 +3288,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -3485,30 +3299,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -3520,13 +3311,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -3537,10 +3329,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -3569,7 +3361,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'compute') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'compute') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -3629,7 +3421,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":57
+                    "y":66
                 },
                 "id":476,
                 "links":[],
@@ -3843,10 +3635,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":57
+                    "y":66
                 },
                 "hideTimeOverride":false,
-                "id":456,
+                "id":493,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -3857,13 +3649,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -3881,7 +3667,8 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"count",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -3892,13 +3679,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"count",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -3910,10 +3698,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -3921,30 +3709,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -3956,13 +3721,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -3973,10 +3739,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -4005,7 +3771,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'glance') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'glance') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -4065,7 +3831,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":65
+                    "y":74
                 },
                 "id":477,
                 "links":[],
@@ -4279,10 +4045,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":65
+                    "y":74
                 },
                 "hideTimeOverride":false,
-                "id":457,
+                "id":494,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -4293,13 +4059,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -4317,7 +4077,8 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"count",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -4328,13 +4089,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"count",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -4346,10 +4108,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -4357,30 +4119,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -4392,13 +4131,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -4409,10 +4149,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -4441,7 +4181,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'manila') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'manila') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -4501,7 +4241,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":73
+                    "y":82
                 },
                 "id":478,
                 "links":[],
@@ -4715,10 +4455,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":73
+                    "y":82
                 },
                 "hideTimeOverride":false,
-                "id":458,
+                "id":495,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -4729,13 +4469,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -4753,7 +4487,8 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"count",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -4764,13 +4499,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"count",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -4782,10 +4518,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -4793,30 +4529,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -4828,13 +4541,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -4845,10 +4559,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -4877,7 +4591,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'network') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'network') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -4937,7 +4651,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":81
+                    "y":90
                 },
                 "id":479,
                 "links":[],
@@ -5151,10 +4865,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":81
+                    "y":90
                 },
                 "hideTimeOverride":false,
-                "id":449,
+                "id":496,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -5165,13 +4879,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -5189,7 +4897,8 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"count",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -5200,13 +4909,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"count",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -5218,10 +4928,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -5229,30 +4939,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -5264,13 +4951,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -5281,10 +4969,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -5313,7 +5001,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'octavia') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'octavia') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -5373,7 +5061,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":89
+                    "y":98
                 },
                 "id":480,
                 "links":[],
@@ -5587,10 +5275,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":89
+                    "y":98
                 },
                 "hideTimeOverride":false,
-                "id":459,
+                "id":497,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -5601,13 +5289,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -5625,7 +5307,8 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"count",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -5636,13 +5319,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"count",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -5654,10 +5338,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -5665,30 +5349,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -5700,13 +5361,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -5717,10 +5379,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -5749,7 +5411,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'security') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'security') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -5809,7 +5471,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":97
+                    "y":106
                 },
                 "id":481,
                 "links":[],
@@ -5980,7 +5642,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT \"job_name\",\"status\",\"criteria\",\"logs\",\"duration\",\"failure_reason\",\"test_hash\"  FROM \"autogen\".\"jobs_result\" WHERE (\"job_type\" = 'component' AND \"release\" = 'wallaby' AND \"component\" = 'security') AND $timeFilter",
+                        "query":"SELECT \"job_name\",\"status\",\"criteria\",\"logs\",\"duration\",\"failure_reason\",\"test_hash\"  FROM \"autogen\".\"jobs_result\" WHERE (\"job_type\" = 'component' AND \"release\" = 'wallaby' AND \"component\" = 'swift') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -6003,7 +5665,7 @@
                 ],
                 "timeFrom":"12h",
                 "timeShift":null,
-                "title":"Security Component",
+                "title":"Swift Component",
                 "transform":"table",
                 "type":"table-old"
             },
@@ -6023,10 +5685,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":97
+                    "y":106
                 },
                 "hideTimeOverride":false,
-                "id":460,
+                "id":498,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -6037,13 +5699,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -6061,7 +5717,8 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"count",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -6072,13 +5729,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"count",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -6090,10 +5748,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -6101,30 +5759,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -6136,13 +5771,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -6153,10 +5789,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -6185,7 +5821,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'swift') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'swift') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -6245,7 +5881,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":105
+                    "y":114
                 },
                 "id":482,
                 "links":[],
@@ -6459,10 +6095,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":105
+                    "y":114
                 },
                 "hideTimeOverride":false,
-                "id":461,
+                "id":499,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -6473,13 +6109,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -6497,7 +6127,8 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"count",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -6508,13 +6139,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"count",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -6526,10 +6158,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -6537,30 +6169,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -6572,13 +6181,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -6589,10 +6199,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -6621,7 +6231,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'tempest') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'tempest') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -6681,7 +6291,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":113
+                    "y":122
                 },
                 "id":483,
                 "links":[],
@@ -6895,10 +6505,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":113
+                    "y":122
                 },
                 "hideTimeOverride":false,
-                "id":462,
+                "id":500,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -6909,13 +6519,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -6933,7 +6537,8 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"count",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -6944,13 +6549,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"count",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -6962,10 +6568,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -6973,30 +6579,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -7008,13 +6591,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -7025,10 +6609,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -7057,7 +6641,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'tripleo') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'tripleo') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -7117,7 +6701,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":121
+                    "y":130
                 },
                 "id":484,
                 "links":[],
@@ -7288,7 +6872,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT \"job_name\",\"status\",\"criteria\",\"logs\",\"duration\",\"failure_reason\",\"test_hash\"  FROM \"autogen\".\"jobs_result\" WHERE (\"job_type\" = 'component' AND \"release\" = 'wallaby' AND \"component\" = 'tripleo') AND $timeFilter",
+                        "query":"SELECT \"job_name\",\"status\",\"criteria\",\"logs\",\"duration\",\"failure_reason\",\"test_hash\"  FROM \"autogen\".\"jobs_result\" WHERE (\"job_type\" = 'component' AND \"release\" = 'wallaby' AND \"component\" = 'ui') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -7311,7 +6895,7 @@
                 ],
                 "timeFrom":"12h",
                 "timeShift":null,
-                "title":"TripleO Component",
+                "title":"UI Component",
                 "transform":"table",
                 "type":"table-old"
             },
@@ -7331,10 +6915,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":121
+                    "y":130
                 },
                 "hideTimeOverride":false,
-                "id":463,
+                "id":501,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -7345,13 +6929,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -7369,7 +6947,8 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"count",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -7380,13 +6959,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"count",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -7398,10 +6978,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -7409,30 +6989,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -7444,13 +7001,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -7461,10 +7019,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -7493,7 +7051,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'ui') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'ui') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -7553,7 +7111,7 @@
                     "h":8,
                     "w":15,
                     "x":0,
-                    "y":129
+                    "y":138
                 },
                 "id":485,
                 "links":[],
@@ -7767,10 +7325,10 @@
                     "h":8,
                     "w":9,
                     "x":15,
-                    "y":129
+                    "y":138
                 },
                 "hideTimeOverride":false,
-                "id":468,
+                "id":502,
                 "links":[],
                 "pageSize":null,
                 "scroll":true,
@@ -7781,13 +7339,7 @@
                 },
                 "styles":[
                     {
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
+                        "$$hashKey":"object:654",
                         "alias":"host",
                         "align":"auto",
                         "colorMode":null,
@@ -7805,7 +7357,8 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"count",
+                        "$$hashKey":"object:786",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -7816,13 +7369,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"count",
+                        "pattern":"Time",
                         "thresholds":[],
                         "type":"number",
-                        "unit":"short"
+                        "unit":"dateTimeFromNow"
                     },
                     {
-                        "alias":"repo",
+                        "$$hashKey":"object:802",
+                        "alias":"Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -7834,10 +7388,10 @@
                         "decimals":2,
                         "link":true,
                         "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_7:raw} ",
+                        "linkTooltip":"link to details",
+                        "linkUrl":"${__cell_1:raw} ",
                         "mappingType":1,
-                        "pattern":"repo",
+                        "pattern":"promo_name",
                         "preserveFormat":false,
                         "sanitize":true,
                         "thresholds":[],
@@ -7845,30 +7399,7 @@
                         "unit":"short"
                     },
                     {
-                        "alias":"repo",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"",
-                        "linkUrl":"${__cell_6:raw}",
-                        "mappingType":1,
-                        "pattern":"repo_url",
-                        "preserveFormat":true,
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
+                        "$$hashKey":"object:854",
                         "alias":"",
                         "align":"auto",
                         "colorMode":null,
@@ -7880,13 +7411,14 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"distro",
+                        "pattern":"promotion_details",
                         "thresholds":[],
                         "type":"hidden",
                         "unit":"short"
                     },
                     {
-                        "alias":"",
+                        "$$hashKey":"object:877",
+                        "alias":"Date of last build",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -7897,10 +7429,10 @@
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "decimals":2,
                         "mappingType":1,
-                        "pattern":"release",
+                        "pattern":"latest_build_date",
                         "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
                     }
                 ],
                 "targets":[
@@ -7929,7 +7461,7 @@
                         "measurement":"dlrn-promotion",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select count(\"repo_hash\") as \"count\", last(\"repo_hash\") as \"repo\", last(\"repo_url\") as \"repo_url\" from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"name\" = 'promoted-components' and \"distro\" = 'CentOS-8' and \"component\" = 'validation') group by time(24h), *\n",
+                        "query":"select  promotion_details,  promo_name, commit_hash, distro_hash  from \"dlrn-promotion\" where (\"release\" = 'wallaby' and \"promo_name\" = 'promoted-components' and \"distro\" = 'centos-8' and \"component\" = 'validation') ",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -7970,7 +7502,7 @@
                 ],
                 "timeFrom":"2w",
                 "timeShift":null,
-                "title":"Validation promotions",
+                "title":"Validations promotions",
                 "transform":"table",
                 "type":"table-old"
             }
