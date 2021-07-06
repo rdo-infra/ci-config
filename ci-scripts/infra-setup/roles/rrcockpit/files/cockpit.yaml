@@ -1,0 +1,164 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: cockpit
+  name: cockpit
+
+spec:
+  hostAliases:
+    - ip: "127.0.0.1"
+      hostnames:
+        - mariadb
+        - influxdb
+        - nginx
+        - grafana
+  containers:
+
+    - name: mariadb
+      image: mariadb:10.4.2-bionic
+      env:
+        - name: MYSQL_ALLOW_EMPTY_PASSWORD
+          value: "yes"
+        - name: MYSQL_ROOT_PASSWORD
+          value: ""
+        - name: MYSQL_DATABASE
+          value: rrcockpit
+        - name: MYSQL_USER
+          value: rrcockpit
+        - name: MYSQL_PASSWORD
+          value: "rrcockpit"
+      volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: mariadb-volume
+
+    - name: influxdb
+      image: influxdb:1.7.1
+      volumeMounts:
+        - mountPath: /var/lib/influxdb
+          name: influxdb-volume
+      env:
+        - name: INFLUXDB_DATA_INDEX_VERSION
+          value: "tsi1"
+      ports:
+        - containerPort: 8083
+          hostPort: 8083
+        - containerPort: 8086
+          hostPort: 8086
+        - containerPort: 8090
+          hostPort: 8090
+
+    - name: nginx
+      image: nginx:1.21.0
+      ports:
+        - containerPort: 80
+          hostPort: 7080
+      volumeMounts:
+        - mountPath: /etc/nginx/nginx.conf
+          name: nginx-config
+
+    - name: grafana
+      image: grafana/grafana:7.3.6
+      env:
+        - name: GF_SMTP_ENABLED
+          value: "true"
+        - name: GF_SMTP_HOST
+          value: "smtp.gmail.com:587"
+        - name: GF_SMTP_USER
+          value: tripleo.ci.ruck.rover@gmail.com
+        - name: GF_SMTP_FROM_ADDRESSS
+          value: tripleo.ci.ruck.rover@gmail.com
+        - name: GF_SMTP_FROM_NAME
+          value: "Tripleo CI alerts"
+        - name: GF_SMTP_EHLO_IDENTITY
+          value: dashboard-ci.tripleo.org
+        - name: GF_SMTP_PASSWORD
+          value: smtppassword
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: admin
+        - name: GF_INSTALL_PLUGINS
+          value: grafana-piechart-panel,grafana-clock-panel,grafana-googlesheets-datasource,snuids-trafficlights-panel
+        - name: GF_USERS_ALLOW_SIGN_UP
+          value: "false"
+        - name: GF_USERS_ALLOW_ORG_CREATE
+          value: "false"
+        - name: GF_AUTH_ANONYMOUS_ENABLED
+          value: "true"
+      ports:
+        - containerPort: 3000
+          hostPort: 8080
+          hostIP: 127.0.0.1
+      volumeMounts:
+        - mountPath: /var/lib/grafana
+          name: grafana-volume
+
+    - name: mariadb-sidecar
+      image: mariadb-sidecar
+      tty: true
+
+    - name: grafana-sidecar
+      image: grafana-sidecar
+      env:
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: admin
+      volumeMounts:
+        - mountPath: /var/lib/grafana
+          name: grafana-volume
+
+    - name: telegraf_py3
+      image: telegraf_py3
+      hostname: telegraf_py3.rrcockpit
+      env:
+        - name: HOST_NAME
+          value: telegraf_py3
+        - name: INFLUXDB_HOST
+          value: influxdb
+        - name: INFLUXDB_PORT
+          value: "8086"
+        - name: DATABASE
+          value: telegraf
+      volumeMounts:
+        - mountPath: /tmp/telegraf_py3
+          name: telegraf-volume
+
+    - name: compare_rpms
+      image: compare_rpms
+      hostname: compare_rpms.rrcockpit
+      ports:
+        - containerPort: 8585
+          hostPort: 8585
+          hostIP: 127.0.0.1
+
+  volumes:
+
+    - name: nginx-config
+      hostPath:
+        path: ./nginx.conf
+
+    - name: influxdb-volume
+      persistentVolumeClaim:
+        claimName: influxdb-volume
+    - name: telegraf-volume
+      persistentVolumeClaim:
+        claimName: telegraf-volume
+    - name: grafana-volume
+      persistentVolumeClaim:
+        claimName: grafana-volume
+    - name: mariadb-volume
+      persistentVolumeClaim:
+        claimName: mariadb-volume
+
+    # - name: influxdb-volume
+    #   hostPath:
+    #     path: /var/lib/docker/volumes/influxdb-volume/_data
+
+    # - name: telegraf-volume
+    #   hostPath:
+    #     path: /var/lib/docker/volumes/telegraf-volume/_data
+
+    # - name: grafana-volume
+    #   hostPath:
+    #     path: /var/lib/docker/volumes/grafana-volume/_data
+
+

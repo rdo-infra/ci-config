@@ -2,20 +2,32 @@
 
 admin_user=admin
 admin_password=$GF_SECURITY_ADMIN_PASSWORD
-data_dir=/var/lib/grafana/
+data_dir=/var/lib/grafana
 api_key_name="grafana-sidecar"
 api_key_path=$data_dir/$api_key_name.api.key
 host=grafana:3000
 api_url=http://$admin_user:$admin_password@$host
 
 # Wait a little for grafana to startup
+status=1
+retries=0
+
+while [[ $retries -lt 30 && $status != 0 ]]
+do
+    sleep 5
+    curl --head http://${host} 1>/dev/null && break || status=$?
+    retries=$(( retries + 1 ))
+done
+
 sleep 10
 
 if [ ! -f $api_key_path ]; then
     if ! ./create-api-key.py --url $api_url --key-name ${api_key_name} > $api_key_path; then
+        cat $api_key_path
         rm $api_key_path
     fi
 fi
+
 
 
 ./import-grafana.py --host http://$host --key $api_key_path
