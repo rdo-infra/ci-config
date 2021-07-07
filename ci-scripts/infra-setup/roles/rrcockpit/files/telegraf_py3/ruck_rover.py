@@ -777,6 +777,10 @@ def main(release,
     if release == 'osp16-2':
         distro = "rhel-8"
 
+    # prompt user: #osp-17 can be rhel-8 or rhel-9
+    if release == 'osp17' and distro == 'centos-8':
+        print("please set the distro option on the cli")
+
     if component:
         track_component_promotion(release,
                                   distro,
