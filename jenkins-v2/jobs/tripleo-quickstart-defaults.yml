@@ -1,0 +1,69 @@
+- defaults:
+    name: 'tripleo-quickstart-promote-defaults'
+    description: |
+        <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
+        <br>
+        <p>This job runs the script <a href="https://github.com/openstack/tripleo-quickstart/blob/master/ci-scripts/{test}.sh" target="_blank">{test}.sh</a></p>
+        <br>
+        In order to run this job locally:
+        <pre>
+
+        export VIRTHOST='my-cool-virthost.example.com'
+
+        bash ci-scripts/{test}.sh \
+            {release} \
+            {build_system} \
+            {topology} \
+            {job_type}
+
+        </pre>
+    concurrent: false
+    node: 'cico-workspace-rdo'
+    logrotate:
+        daysToKeep: 31
+        artifactDaysToKeep: 31
+    publishers:
+        - tripleo-quickstart-cleanup:
+            topology: '{topology}'
+            job_type: '{job_type}'
+        - tripleo-quickstart-full-logs-link
+    wrappers:
+        - ansicolor
+        - timestamps
+        - workspace-cleanup
+        - timeout:
+            type: absolute
+            timeout: 300
+            fail: true
+        - credentials-binding:
+          - text:
+              credential-id: d31fc651-105c-4af6-a2a5-ed486a5897ca
+              variable: DLRNAPI_PASSWORD
+          - text:
+              credential-id: 8a8657ce-adba-465d-9ef9-8d9759327fa9
+              variable: RSYNC_PASSWORD
+
+# "Building remotely" should always be in the build console output
+- publisher:
+    name: 'tripleo-quickstart-cleanup'
+    publishers:
+        - post-tasks:
+            - matches:
+                - log-text: Building remotely
+              escalate-status: false
+              script: |
+                # Collects logs and return the node
+                set -eux
+
+                pushd $WORKSPACE/tripleo-quickstart
+                # We are only interested in output from the collect-logs script if it fails
+                bash ci-scripts/collect-logs.sh {topology} centosci {job_type} &> $WORKSPACE/collect_logs.txt ||
+                    cat $WORKSPACE/collect_logs.txt
+                bash ci-scripts/return-node.sh
+                popd
+
+- publisher:
+    name: 'tripleo-quickstart-full-logs-link'
+    publishers:
+        - archive:
+            artifacts: '**/full_logs.html, **/collect_logs.txt'
