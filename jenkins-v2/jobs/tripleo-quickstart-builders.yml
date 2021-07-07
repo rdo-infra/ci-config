@@ -1,0 +1,50 @@
+- builder:
+    name: 'tripleo-quickstart-builder'
+    builders:
+        - copyartifact:
+            project: rdo-promote-get-hash-{release}-current-tripleo-test
+            filter: "delorean_{release}_current_tripleo_hash"
+            target: "/tmp"
+            which-build: multijob-build
+            optional: false
+        - inject:
+            properties-file: "/tmp/delorean_{release}_current_tripleo_hash"
+        - shell: |
+              for DIR in /usr/sbin /sbin /usr/local/bin /usr/local/sbin ~/.local/bin ; do
+                if [[ ! ":$PATH:" == *":$DIR:"* ]] && [ -d "$DIR" ]; then
+                  export PATH=$DIR:$PATH
+                fi
+              done
+
+              ls $HOME/.ssh >/dev/null 2>&1 || mkdir $HOME/.ssh
+              cp /duffy-ssh-key/ssh-privatekey $HOME/.ssh/id_rsa
+              chmod 600 $HOME/.ssh/id_rsa
+              export USER=default
+
+              if [[ "$RDO_VERSION" == *"centos8"* ]] || [[ '{centos_release|7}' == '8'* ]]; then
+                  export CENTOS_RELEASE=8-stream
+              else
+                  export CENTOS_RELEASE=7
+              fi
+
+              if [[ "$RDO_VERSION" == *"centos"* ]]; then
+                  export CI_ENV=centosci
+              fi
+
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh -r $CENTOS_RELEASE
+              export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
+              echo $VIRTHOST
+              export OPT_ENVIRONMENT=$WORKSPACE/tripleo-quickstart/config/environments/ci_centos_libvirt.yml
+              echo $OPT_ENVIRONMENT
+              export OPT_ADDITIONAL_PARAMETERS=' -e deploy_timeout=120 '
+              echo $OPT_ADDITIONAL_PARAMETERS
+
+              pushd $WORKSPACE/tripleo-quickstart
+
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/{test}.sh \
+                {release} \
+                {build_system} \
+                {topology} \
+                {job_type}
+
+              popd
