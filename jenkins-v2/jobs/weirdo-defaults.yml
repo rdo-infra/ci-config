@@ -30,6 +30,31 @@
     tempest_from_source: ''
     enable_puppet_modules_rpm: true
 
+- defaults:
+    name: 'weirdo-promote-defaults'
+    description: |
+        Managed by Jenkins Job Builder. Do not edit via web.
+    concurrent: false
+    node: 'cico-workspace-rdo'
+    logrotate:
+        daysToKeep: 31
+        artifactDaysToKeep: 31
+    publishers:
+        - weirdo-archive-logs
+    wrappers:
+        - ansicolor
+        - timestamps
+        - workspace-cleanup
+        - timeout:
+            type: absolute
+            timeout: 120
+            fail: true
+        - credentials-binding:
+          - text:
+             credential-id: d31fc651-105c-4af6-a2a5-ed486a5897ca
+             variable: DLRNAPI_PASSWD
+    enable_puppet_modules_rpm: true
+
 - publisher:
     name: 'weirdo-archive-logs'
     publishers:
@@ -48,3 +73,50 @@
                 !include-raw:
                     - scripts/weirdo-collect-logs.sh
                     - scripts/cico-node-done-from-ansible.sh
+
+# "Building remotely" should always be in the build console output
+- publisher:
+    name: 'weirdo-report-dlrn-api'
+    publishers:
+        - post-tasks:
+            - matches:
+                - log-text: Building remotely
+              script: |
+                # Use variables provided by a job earlier in the pipeline, if available
+                delorean_hash=${delorean_current_hash:-current}
+                api_worker="api-${RDO_VERSION}"
+                mkdir ${WORKSPACE}/${BUILD_ID}
+                echo export DLRNAPI_URL="https://trunk.rdoproject.org/$api_worker" > ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
+                if [[ "${delorean_hash}" == *"_"* ]]; then
+                    delorean_commit_url="https://trunk.rdoproject.org/centos7-${RDO_VERSION_DIR}/${delorean_hash}/commit.yaml"
+                    echo export COMMIT_HASH=$(echo $delorean_hash | awk -F/ '{print $3}' |awk -F_ '{print $1}') >> ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
+                    echo export DISTRO_HASH=`curl $delorean_commit_url | grep distro_hash |  awk -F: '{print $2}' |xargs echo` >> ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
+                else
+                    echo export AGG_HASH=$(echo $delorean_hash | awk -F/ '{print $3}') >> ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
+                fi
+                echo export INFO_URL="https://jenkins-cloudsig-ci.apps.ocp.ci.centos.org/job/${JOB_NAME}/${BUILD_NUMBER}/artifact/logs.html" >> ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
+        - post-tasks:
+            - matches:
+                - log-text: marked build as failure
+              script: |
+                . ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
+                rm -rf ${WORKSPACE}/${BUILD_ID}
+                export JOB_SUCCESS="false"
+                export DLRNAPI_USER="ciuser"
+                # Report
+                # DLRNAPI_PASSWD is provided by a credential binding
+                cd weirdo
+                tox -e ansible-playbook -- -i ${WORKSPACE}/hosts playbooks/dlrn-api-report.yml
+        - post-tasks:
+            - matches:
+                - log-text: congratulations
+              run-if-job-successful: true
+              script: |
+                . ${WORKSPACE}/${BUILD_ID}/dlrnapi-varfile
+                rm -rf ${WORKSPACE}/${BUILD_ID}
+                export JOB_SUCCESS="true"
+                export DLRNAPI_USER="ciuser"
+                # Report
+                # DLRNAPI_PASSWD is provided by a credential binding
+                cd weirdo
+                tox -e ansible-playbook -- -i ${WORKSPACE}/hosts playbooks/dlrn-api-report.yml
