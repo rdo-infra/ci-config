@@ -63,3 +63,38 @@
                 </body>
             </html>
             EOF
+
+- builder:
+    name: 'weirdo-promote-ansible-playbook-builder'
+    builders:
+        - shell: |
+            if [[ "{openstack_release}" != "master" ]]; then
+                version="stable/{openstack_release}"
+            else
+                version="{openstack_release}"
+            fi
+
+            # Use variables provided by a job earlier in the pipeline, if available
+            delorean_hash=${{delorean_current_hash:-current}}
+            if [[ "${{RDO_VERSION}}" == *"centos8"* ]]; then
+                delorean_url="http://trunk.rdoproject.org/centos8-{openstack_release}/${{LOCATION}}/${{delorean_hash}}/delorean.repo"
+                delorean_deps_url="http://trunk.rdoproject.org/centos8-{openstack_release}/delorean-deps.repo"
+            else
+                delorean_url="http://trunk.rdoproject.org/centos7-{openstack_release}/${{delorean_hash}}/delorean.repo"
+                delorean_deps_url="http://trunk.rdoproject.org/centos7-{openstack_release}/delorean-deps.repo"
+            fi
+
+            # Use WeIRDO provided by jenkins scm
+            export ARA_DATABASE_NAME="$WORKSPACE/$JOB_NAME.sqlite"
+            # Retry on connection failures
+            export ANSIBLE_SSH_RETRIES=6
+            cd weirdo
+            git log -n 5 --oneline
+
+            # Set up ansible-playbook extra vars because we don't want to override
+            # the defaults if they're not set
+            extra_vars=""
+            [[ -n ${{tempest_version}} ]] && extra_vars="${{extra_vars}} -e tempest_version=${{tempest_version}}"
+            [[ -n ${{enable_puppet_modules_rpm}} ]] && extra_vars="${{extra_vars}} -e enable_puppet_modules_rpm=${{enable_puppet_modules_rpm}}"
+
+            tox -e ansible-playbook -- -vv -i $WORKSPACE/hosts playbooks/{playbook}.yml -e ci_environment=ci-centos -e delorean_url=$delorean_url -e delorean_deps_url=$delorean_deps_url -e openstack_release={openstack_release} -e version=$version ${{extra_vars}}
