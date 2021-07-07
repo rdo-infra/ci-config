@@ -96,3 +96,57 @@
     publishers:
         - weirdo-archive-logs
         - weirdo-release-node
+
+- job-template:
+    name: 'weirdo-{openstack_release}-{distro}-promote-{playbook}'
+    defaults: 'weirdo-promote-defaults'
+    description: |
+        <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
+        <br>
+        <p>This job runs <a href="https://github.com/redhat-openstack/weirdo" target="_blank">WeIRDO</a>.</p>
+        <p>It runs the playbook <a href="https://github.com/redhat-openstack/weirdo/blob/master/playbooks/{playbook}.yml" target="_blank">{playbook}.yml</a></p>
+        <br>
+        This is what this job runs:
+        <pre>
+        if [[ "{openstack_release}" != "master" ]]; then
+            version="stable/{openstack_release}"
+        else
+            version="{openstack_release}"
+        fi
+
+        # Use variables provided by a job earlier in the pipeline, if available
+        delorean_hash=${{delorean_current_hash:-current}}
+        delorean_url="http://trunk.rdoproject.org/centos8-{openstack_release}/${{delorean_hash}}/delorean.repo"
+        delorean_deps_url="http://trunk.rdoproject.org/centos8-{openstack_release}/delorean-deps.repo"
+
+        # Use WeIRDO provided by jenkins scm
+        cd weirdo
+        git log -n 5 --oneline
+        tox -e ansible-playbook -- -i ${{WORKSPACE}}/hosts playbooks/{playbook}.yml \
+          -e ci_environment=ci-centos \
+          -e delorean_url=$delorean_url \
+          -e delorean_deps_url=$delorean_deps_url \
+          -e openstack_release={openstack_release} \
+          -e version=$version
+        </pre>
+
+    scm:
+        - weirdo-core-master-repository
+    builders:
+        - copyartifact:
+            project: rdo-promote-get-hash-{openstack_release}-{distro}-current-tripleo
+            filter: "delorean_{openstack_release}_{distro}_current_tripleo_hash"
+            target: /tmp
+            which-build: multijob-build
+            optional: false
+        - inject:
+            properties-file: "/tmp/delorean_{openstack_release}_{distro}_current_tripleo_hash"
+        - rdo-generate-log-rdoproject-org-redirection
+        - weirdo-get-node
+        - weirdo-promote-ansible-playbook-builder:
+            openstack_release: '{openstack_release}'
+            playbook: '{playbook}'
+    publishers:
+        - weirdo-archive-logs
+        - weirdo-release-node
+        - weirdo-report-dlrn-api
