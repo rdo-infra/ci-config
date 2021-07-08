@@ -24,6 +24,18 @@
     - grafana_admin_password
     - grafana_smtp_password
 
+- name: Install golang
+  package:
+    name: golang
+    state: present
+  become: true
+
+- name: Compile skiplist
+  command: |
+    go build "{{ role_path }}/files/mariadb/skiplist.go"
+  args:
+    chdir: "{{ role_path }}/files/mariadb"
+
 - name: Generate custom nginx.conf
   template:
     src: nginx.conf.j2
