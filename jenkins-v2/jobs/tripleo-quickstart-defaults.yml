@@ -1,5 +1,5 @@
 - defaults:
-    name: 'tripleo-quickstart-promote-defaults'
+    name: 'tripleo-quickstart-promote-defaults-test'
     description: |
         <p>Managed by Jenkins Job Builder. Do not edit via web.</p>
         <br>
@@ -23,10 +23,10 @@
         daysToKeep: 31
         artifactDaysToKeep: 31
     publishers:
-        - tripleo-quickstart-cleanup:
+        - tripleo-quickstart-cleanup-test:
             topology: '{topology}'
             job_type: '{job_type}'
-        - tripleo-quickstart-full-logs-link
+        - tripleo-quickstart-full-logs-link-test
     wrappers:
         - ansicolor
         - timestamps
@@ -42,7 +42,7 @@
 
 # "Building remotely" should always be in the build console output
 - publisher:
-    name: 'tripleo-quickstart-cleanup'
+    name: 'tripleo-quickstart-cleanup-test'
     publishers:
         - post-tasks:
             - matches:
@@ -60,7 +60,7 @@
                 popd
 
 - publisher:
-    name: 'tripleo-quickstart-full-logs-link'
+    name: 'tripleo-quickstart-full-logs-link-test'
     publishers:
         - archive:
             artifacts: '**/full_logs.html, **/collect_logs.txt'

@@ -1,11 +1,11 @@
 - builder:
-    name: phase-test-import-master-current-tripleo
+    name: phase-test-import-master-current-tripleo-test
     builders:
         - multijob:
             name: "INSTALL / TEST (IMPORT IMAGES)"
             condition: UNSTABLE
             projects:
-                - name: tripleo-quickstart-promote-master-current-tripleo-delorean-minimal
+                - name: tripleo-quickstart-promote-master-current-tripleo-delorean-minimal-test
                   kill-phase-on: NEVER
                 - name: weirdo-master-promote-packstack-scenario001
                   kill-phase-on: NEVER
@@ -23,31 +23,24 @@
                   kill-phase-on: NEVER
 
 - job-template:
-    name: rdo_trunk-promote-master-current-tripleo
+    name: rdo_trunk-promote-master-current-tripleo-test
     project-type: multijob
-    triggers:
-        - pollurl:
-            cron: "H * * * *"
-            urls:
-                - url: https://trunk.rdoproject.org/centos8-master/current-tripleo/delorean.repo
-                  check-content:
-                    - simple: true
-    defaults: parent-promote-defaults
+    defaults: parent-promote-defaults-test
     builders:
-        - phase-get-hash-master-current-tripleo
-        - phase-test-import-master-current-tripleo
+        - phase-get-hash-master-current-tripleo-test
+        - phase-test-import-master-current-tripleo-test
     properties:
         - ownership:
             owner: trown@redhat.com
 
 - builder:
-    name: phase-get-hash-master-current-tripleo
+    name: phase-get-hash-master-current-tripleo-test
     builders:
         - multijob:
             name: "GET THE LATEST DELOREAN YUM REPOSITORY HASH"
             condition: SUCCESSFUL
             projects:
-              - name: rdo-promote-get-hash-master-current-tripleo
+              - name: rdo-promote-get-hash-master-current-tripleo-test
 
 - publisher:
     name: 'tripleo-quickstart-archive-hash-master-current-tripleo-test'
@@ -56,7 +49,7 @@
             artifacts: 'delorean_master_current_tripleo_hash'
 
 - publisher:
-    name: 'tripleo-quickstart-report-dlrn-api-master-current-tripleo'
+    name: 'tripleo-quickstart-report-dlrn-api-master-current-tripleo-test'
     publishers:
         - post-tasks:
             - matches:
@@ -77,8 +70,8 @@
                     - scripts/dlrn-api-report.sh
 
 - job-template:
-    name: 'rdo-promote-get-hash-master-current-tripleo'
-    defaults: script-defaults
+    name: 'rdo-promote-get-hash-master-current-tripleo-test'
+    defaults: script-defaults-test
     builders:
         - shell:
             !include-raw-escape:
@@ -91,40 +84,34 @@
             owner: trown@redhat.com
 
 - project:
-    name: rdo_trunk-promote-jobs-master-current-tripleo
+    name: rdo_trunk-promote-jobs-master-current-tripleo-test
     jobs:
-        - 'rdo_trunk-promote-master-current-tripleo'
+        - 'rdo_trunk-promote-master-current-tripleo-test'
 
 - project:
-    name: rdo-promote-get-hash-master-current-tripleo
+    name: rdo-promote-get-hash-master-current-tripleo-test
     jobs:
-        - 'rdo-promote-get-hash-master-current-tripleo'
+        - 'rdo-promote-get-hash-master-current-tripleo-test'
 
 - job-template:
-    name: 'tripleo-quickstart-promote-master-current-tripleo-{build_system}-{topology}'
-    defaults: 'tripleo-quickstart-promote-defaults'
+    name: 'tripleo-quickstart-promote-master-current-tripleo-{build_system}-{topology}-test'
+    defaults: 'tripleo-quickstart-promote-defaults-test'
     scm:
         - repo-tripleo-quickstart
     builders:
-        - tripleo-quickstart-builder:
+        - tripleo-quickstart-builder-test:
             test: '{test}'
             job_type: '{job_type}'
             release: '{release}'
             build_system: '{build_system}'
             topology: '{topology}'
-    publishers:
-        - tripleo-quickstart-cleanup:
-            topology: '{topology}'
-            job_type: '{job_type}'
-        - tripleo-quickstart-full-logs-link
-        - tripleo-quickstart-report-dlrn-api-master-current-tripleo
 
 - project:
-    name: 'tripleo-quickstart-promote-master-current-tripleo-jobs'
+    name: 'tripleo-quickstart-promote-master-current-tripleo-jobs-test'
     test: 'full-deploy'
     job_type: 'promote'
     release: 'master'
     build_system: 'delorean'
     topology: 'minimal'
     jobs:
-        - 'tripleo-quickstart-promote-master-current-tripleo-{build_system}-{topology}'
+        - 'tripleo-quickstart-promote-master-current-tripleo-{build_system}-{topology}-test'
