@@ -14,22 +14,26 @@ from tabulate import tabulate
 
 def print_job_table(log, c_hash_list, candidate_hash, promoted=False,
                     success_jobs=[], missing_jobs=[]):
-    table_headers = ['Aggregate Hash', 'Commit Hash', 'Distro Hash',
-                     'Extended Hash', 'Promoted', 'Component',
-                     'Timestamp', 'Successful Jobs', 'Missing jobs']
-    if c_hash_list == []:
-        c_hash_list.append(table_headers)
-    c_hash_list.append([
-        candidate_hash.aggregate_hash
-        if hasattr(candidate_hash, 'aggregate_hash') else '',
-        candidate_hash.commit_hash[:8],
-        candidate_hash.distro_hash[:8],
-        candidate_hash.extended_hash
+    header1 = ['Aggregate Hash', 'Promoted', 'Description']
+    header2 = {
+        'Commit Hash': candidate_hash.commit_hash
+        if hasattr(candidate_hash, 'commit_hash') else '',
+        'Distro Hash': candidate_hash.distro_hash
+        if hasattr(candidate_hash, 'distro_hash') else '',
+        'Extended Hash': candidate_hash.extended_hash
         if hasattr(candidate_hash, 'extended_hash') else '',
-        'Yes' if promoted else 'No',
-        candidate_hash.component, candidate_hash.timestamp,
-        "\n".join(list(success_jobs)),
-        "\n".join(list(missing_jobs))])
+        'Component': candidate_hash.component
+        if hasattr(candidate_hash, 'component') else '',
+        'Timestamp': str(candidate_hash.timestamp)
+        if hasattr(candidate_hash, 'timestamp') else '',
+        'Successful Jobs': "\n".join(list(success_jobs)),
+        'Missing Jobs': "\n".join(list(missing_jobs))}
+    if c_hash_list == []:
+        c_hash_list.append(header1)
+    c_hash_list.append([candidate_hash.aggregate_hash,
+                        'Yes' if promoted else 'No',
+                        tabulate([[i, j] for i, j in header2.items()],
+                                 tablefmt='grid')])
 
 
 def print_hash_table(log, hash_list):
