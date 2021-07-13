@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7a9fa4b9_68dd113e",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/Dockerfile",
+        "patchSetId": 5
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 138
+      },
+      "writtenOn": "2021-07-13T17:35:03Z",
+      "side": 1,
+      "message": "This did not work for me.. however the following did..\n\n\nFROM python:3.6\n\nCOPY requirements.txt /\nRUN pip install -r requirements.txt \\\n    \u0026\u0026 apt-get update \\\n    \u0026\u0026 apt-get install -y mariadb-client \\\n    golang\nRUN go get github.com/jedib0t/go-pretty/table\nRUN go get gopkg.in/yaml.v2\nCOPY *.py *.sh *.sql /usr/local/bin/\nCOPY *.yaml *.sql /tmp/\nCOPY skiplist.go ./\nRUN go build -o /usr/local/bin/skiplist skiplist.go\nCOPY run.sh /tmp/\nCMD run.sh",
+      "revId": "b3fa846ea054f374ef146f1a8e7115cb39e4a3be",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": true
+    }
+  ]
+}
