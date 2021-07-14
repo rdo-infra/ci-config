@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-
+import csv
 import json
 import os
 import re
 import time
 from datetime import datetime
+from io import StringIO
 from tempfile import mkstemp
 
 import click
@@ -13,6 +14,7 @@ import dlrnapi_client
 import requests
 import yaml
 from dlrnapi_client.rest import ApiException
+from rich import print as rich_print
 from rich.console import Console
 from rich.table import Table
 from urllib3.exceptions import InsecureRequestWarning
@@ -197,6 +199,45 @@ def get_consistent(url, component=None):
             return None
 
     return consistent_date
+
+
+def get_dlrn_versions_csv(base_url, distro, release, component, tag):
+    if component:
+        control_tag = "{}/{}-{}/component/{}/{}/versions.csv".format(base_url,
+                                                                     distro,
+                                                                     release,
+                                                                     component,
+                                                                     tag)
+    else:
+        control_tag = "{}/{}-{}/{}/versions.csv".format(base_url,
+                                                        distro,
+                                                        release,
+                                                        tag)
+    return control_tag
+
+
+def get_csv(url):
+    response = requests.get(url)
+    if response.ok:
+        content = response.content.decode('utf-8')
+        f = StringIO(content)
+        reader = csv.reader(f, delimiter=',')
+        return [content, reader]
+
+
+def get_diff(component, control_tag, file1, test_tag, file2):
+    # compare the raw string
+    if file1[0] == file2[0]:
+        return False
+    else:
+        # for the line by line diff, use csv content
+        table = Table(show_header=True, header_style="bold")
+        table.add_column(control_tag, style="dim", width=85)
+        table.add_column(test_tag, style="dim", width=85)
+        for f1, f2 in zip(file1[1], file2[1]):
+            if f1 != f2:
+                table.add_row(str(f1[9]), str(f2[9]))
+        return table
 
 
 def get_dlrn_promotions(api_url,
@@ -441,13 +482,16 @@ def track_integration_promotion(release,
         promoter_path = "/config/CentOS-8/"
         dlrn_api_path = "api-centos8-"
         release_criteria = release
+        dlrn_url_distro = "centos8"
     elif distro == "centos-7":
         promoter_path = "/config/CentOS-7/"
         dlrn_api_path = "api-centos-"
         release_criteria = release
+        dlrn_url_distro = "centos7"
     elif distro == "rhel-8":
         promoter_path = "/config/RedHat-8/"
         dlrn_api_path = "api-rhel8-"
+        dlrn_url_distro = "rhel8"
         if release == "osp16-2":
             release_criteria = "rhos-16.2"
         elif release == "osp17":
@@ -456,6 +500,7 @@ def track_integration_promotion(release,
         promoter_path = "/config/RedHat-9/"
         dlrn_api_path = "api-rhel9-"
         release_criteria = "rhos-17"
+        dlrn_url_distro = "rhel9"
 
     promoter_url = promoter_base_url + promoter_path
     url = promoter_url + release_criteria + '.yaml'
@@ -568,6 +613,30 @@ def track_integration_promotion(release,
         for value in log_urls.values():
             console.print(value)
 
+        # get package diff for the integration test
+        # control_url
+        c_url = get_dlrn_versions_csv(dlrn_server,
+                                      dlrn_url_distro,
+                                      release,
+                                      None,
+                                      "current-tripleo")
+        # test_url, what is currently getting tested
+        t_url = get_dlrn_versions_csv(dlrn_server,
+                                      dlrn_url_distro,
+                                      release,
+                                      None,
+                                      "tripleo-ci-testing")
+        c_csv = get_csv(c_url)
+        t_csv = get_csv(t_url)
+        pkg_diff = get_diff(None,
+                            "current-tripleo",
+                            c_csv,
+                            "tripleo-ci-testing",
+                            t_csv)
+        if pkg_diff:
+            console.print("\n Packages Tested")
+            rich_print(pkg_diff)
+
 
 def track_component_promotion(release,
                               distro,
@@ -586,28 +655,51 @@ def track_component_promotion(release,
     if distro == "centos-7":
         raise Exception("centos-7 components do not exist")
 
-    if test_component == "all":
-        all_components = ["baremetal", "cinder", "clients", "cloudops",
-                          "common", "compute", "glance", "manila",
-                          "network", "octavia", "security", "swift",
-                          "tempest", "tripleo", "ui", "validation"]
-    else:
-        all_components = [test_component]
-
     if distro == "centos-8":
         component_path = "CentOS-8/component/"
         dlrn_api_path = "api-centos8-"
         release_criteria = release
+        dlrn_url_distro = "centos8"
     elif distro == "rhel-8":
         component_path = "RedHat-8/component/"
         if release == "osp16-2":
             release_criteria = "rhos-16.2"
             dlrn_api_path = "api-rhel8-"
+            dlrn_url_distro = "rhel8"
         elif release == "osp17":
             release_criteria = "rhos-17"
             dlrn_api_path = "api-rhel8-"
     # elif distro == "rhel-9":
     #     component_path = "RedHat-9/component/"
+
+    if test_component == "all":
+        all_components = ["baremetal", "cinder", "clients", "cloudops",
+                          "common", "compute", "glance", "manila",
+                          "network", "octavia", "security", "swift",
+                          "tempest", "tripleo", "ui", "validation"]
+        pkg_diff = None
+    else:
+        all_components = [test_component]
+        # get package diff for the component
+        # control_url
+        c_url = get_dlrn_versions_csv(dlrn_server,
+                                      dlrn_url_distro,
+                                      release,
+                                      all_components[0],
+                                      "current-tripleo")
+        # test_url, what is currently getting tested
+        t_url = get_dlrn_versions_csv(dlrn_server,
+                                      dlrn_url_distro,
+                                      release,
+                                      all_components[0],
+                                      "component-ci-testing")
+        c_csv = get_csv(c_url)
+        t_csv = get_csv(t_url)
+        pkg_diff = get_diff(all_components[0],
+                            "current-tripleo",
+                            c_csv,
+                            "component-ci-testing",
+                            t_csv)
 
     git_url = git_base_url + component_path
     url = git_url + release_criteria + '.yaml'
@@ -723,6 +815,10 @@ def track_component_promotion(release,
                     console.print("Logs of failing jobs:")
                     for value in log_urls.values():
                         console.print(value)
+
+            if pkg_diff:
+                console.print("\nPackages Tested: {}".format(all_components[0]))
+                rich_print(pkg_diff)
             print('\n')
 
 
