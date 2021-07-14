@@ -181,6 +181,6 @@ while true; do
     load_mariadb bz 2>&1 | tee -a /tmp/run.log
     load_mariadb skipped 2>&1 | tee -a /tmp/run.log
     load_mariadb recent_lp 2>&1 | tee -a /tmp/run.log
-    sleep 1440;
+    sleep 14400;
 
 done
