@@ -21,7 +21,7 @@ type Repositories struct {
 }
 
 func createNewRepository(namespace, containerName string) (string, error) {
-    logrus.Info(fmt.Sprintf("Creating new repository %s/%s", namespace, containerName))
+	logrus.Info(fmt.Sprintf("Creating new repository %s/%s", namespace, containerName))
 	requestBody, err := json.Marshal(map[string]string{
 		"namespace":   namespace,
 		"repository":  containerName,
@@ -84,7 +84,7 @@ func tagExist(namespace, repositoryName, tag string) bool {
 
 func getImageManifest(namespace, repositoryName string, specificTag string) (string, error) {
 	var url = fmt.Sprintf("https://quay.io/api/v1/repository/%s/%s/tag/", namespace, repositoryName)
-    url = fmt.Sprintf("%s?specificTag=%s", url, specificTag)
+	url = fmt.Sprintf("%s?specificTag=%s", url, specificTag)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 
@@ -120,8 +120,8 @@ func getImageManifest(namespace, repositoryName string, specificTag string) (str
 	return "", fmt.Errorf("Manifest digest for given image was not found")
 }
 
-func tagImage(namespace, repositoryName, tag, manifestDigest string)  error {
-    logrus.Info(fmt.Sprintf("Tagging %s/%s with tag %s and manifest %s", namespace, repositoryName, tag, manifestDigest))
+func tagImage(namespace, repositoryName, tag, manifestDigest string) error {
+	logrus.Info(fmt.Sprintf("Tagging %s/%s with tag %s and manifest %s", namespace, repositoryName, tag, manifestDigest))
 	url := fmt.Sprintf("https://quay.io/api/v1/repository/%s/%s/tag/%s", namespace, repositoryName, tag)
 
 	requestBody, err := json.Marshal(map[string]string{
