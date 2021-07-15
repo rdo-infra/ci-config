@@ -87,3 +87,11 @@
       tox_environment:
         PYTEST_REQPASS: 188
       zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
+
+- job:
+    name: golangci-lint-ci-config
+    parent: golangci-lint
+    pre-run: playbooks/pre-run-docker.yml
+    run: playbooks/golangci_run.yml
+    post-run: playbooks/post-run.yml
+    timeout: 3400
