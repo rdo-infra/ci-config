@@ -1,0 +1,79 @@
+- project:
+    name: rdo_trunk-promote-jobs-train-centos7-current-tripleo
+    jobs:
+        - 'rdo_trunk-promote-train-centos7-current-tripleo'
+
+- job-template:
+    name: rdo_trunk-promote-train-centos7-current-tripleo
+    project-type: multijob
+    triggers:
+        - pollurl:
+            cron: "H * * * *"
+            urls:
+                - url: https://trunk.rdoproject.org/centos7-train/current-tripleo/delorean.repo
+                  check-content:
+                    - simple: true
+    defaults: parent-promote-defaults
+    builders:
+        - phase-get-hash-train-centos7-current-tripleo
+        - phase-test-import-train-centos7-current-tripleo
+    properties:
+        - ownership:
+            owner: whayutin@redhat.com
+
+- builder:
+    name: phase-get-hash-train-centos7-current-tripleo
+    builders:
+        - multijob:
+            name: "GET THE LATEST DELOREAN YUM REPOSITORY HASH"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-get-hash-train-centos7-current-tripleo
+
+- project:
+    name: rdo-promote-get-hash-train-centos7-current-tripleo
+    jobs:
+        - 'rdo-promote-get-hash-train-centos7-current-tripleo'
+
+- job-template:
+    name: 'rdo-promote-get-hash-train-centos7-current-tripleo'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos7-train-current-tripleo.sh
+                - scripts/promote-get-hash.sh
+    publishers:
+        - tripleo-quickstart-archive-hash-train-centos7-current-tripleo
+    properties:
+        - ownership:
+            owner: whayutin@redhat.com
+
+- publisher:
+    name: 'tripleo-quickstart-archive-hash-train-centos7-current-tripleo'
+    publishers:
+        - archive:
+            artifacts: 'delorean_train_centos7_current_tripleo_hash'
+
+- builder:
+    name: phase-test-import-train-centos7-current-tripleo
+    builders:
+        - multijob:
+            name: "INSTALL / TEST (IMPORT IMAGES)"
+            condition: UNSTABLE
+            # Those projects are defined in weirdo-main.yml file
+            projects:
+                - name: weirdo-train-centos7-promote-packstack-scenario001
+                  kill-phase-on: NEVER
+                - name: weirdo-train-centos7-promote-packstack-scenario002
+                  kill-phase-on: NEVER
+                - name: weirdo-train-centos7-promote-packstack-scenario003
+                  kill-phase-on: NEVER
+                - name: weirdo-train-centos7-promote-puppet-openstack-scenario001
+                  kill-phase-on: NEVER
+                - name: weirdo-train-centos7-promote-puppet-openstack-scenario002
+                  kill-phase-on: NEVER
+                - name: weirdo-train-centos7-promote-puppet-openstack-scenario003
+                  kill-phase-on: NEVER
+                - name: weirdo-train-centos7-promote-puppet-openstack-scenario004
+                  kill-phase-on: NEVER
