@@ -1,97 +1,97 @@
 - project:
-    name: rdo_trunk-promote-jobs-master-centos8-current-tripleo
+    name: rdo_trunk-promote-jobs-ussuri-centos8-current-tripleo
     jobs:
-        - 'rdo_trunk-promote-master-centos8-current-tripleo'
+        - 'rdo_trunk-promote-ussuri-centos8-current-tripleo'
 
 - job-template:
-    name: rdo_trunk-promote-master-centos8-current-tripleo
+    name: rdo_trunk-promote-ussuri-centos8-current-tripleo
     project-type: multijob
     triggers:
         - pollurl:
             cron: "H * * * *"
             urls:
-                - url: https://trunk.rdoproject.org/centos8-master/current-tripleo/delorean.repo
+                - url: https://trunk.rdoproject.org/centos8-ussuri/current-tripleo/delorean.repo
                   check-content:
                     - simple: true
     defaults: parent-promote-defaults
     builders:
-        - phase-get-hash-master-centos8-current-tripleo
-        - phase-test-import-master-centos8-current-tripleo
+        - phase-get-hash-ussuri-centos8-current-tripleo
+        - phase-test-import-ussuri-centos8-current-tripleo
     properties:
         - ownership:
             owner: whayutin@redhat.com
 
 - builder:
-    name: phase-get-hash-master-centos8-current-tripleo
+    name: phase-get-hash-ussuri-centos8-current-tripleo
     builders:
         - multijob:
             name: "GET THE LATEST DELOREAN YUM REPOSITORY HASH"
             condition: SUCCESSFUL
             projects:
-              - name: rdo-promote-get-hash-master-centos8-current-tripleo
+              - name: rdo-promote-get-hash-ussuri-centos8-current-tripleo
 
 - project:
-    name: rdo-promote-get-hash-master-centos8-current-tripleo
+    name: rdo-promote-get-hash-ussuri-centos8-current-tripleo
     jobs:
-        - 'rdo-promote-get-hash-master-centos8-current-tripleo'
+        - 'rdo-promote-get-hash-ussuri-centos8-current-tripleo'
 
 - job-template:
-    name: 'rdo-promote-get-hash-master-centos8-current-tripleo'
+    name: 'rdo-promote-get-hash-ussuri-centos8-current-tripleo'
     defaults: script-defaults
     builders:
         - shell:
             !include-raw-escape:
-                - scripts/centos8-master-current-tripleo.sh
+                - scripts/centos8-ussuri-current-tripleo.sh
                 - scripts/promote-get-hash.sh
     publishers:
-        - tripleo-quickstart-archive-hash-master-centos8-current-tripleo
+        - tripleo-quickstart-archive-hash-ussuri-centos8-current-tripleo
     properties:
         - ownership:
             owner: whayutin@redhat.com
 
 - publisher:
-    name: 'tripleo-quickstart-archive-hash-master-centos8-current-tripleo'
+    name: 'tripleo-quickstart-archive-hash-ussuri-centos8-current-tripleo'
     publishers:
         - archive:
-            artifacts: 'delorean_master_centos8_current_tripleo_hash'
+            artifacts: 'delorean_ussuri_centos8_current_tripleo_hash'
 
 - builder:
-    name: phase-test-import-master-centos8-current-tripleo
+    name: phase-test-import-ussuri-centos8-current-tripleo
     builders:
         - multijob:
             name: "INSTALL / TEST (IMPORT IMAGES)"
             condition: UNSTABLE
             projects:
-                - name: tripleo-quickstart-promote-master-current-tripleo-delorean-minimal
+                - name: tripleo-quickstart-promote-ussuri-current-tripleo-delorean-minimal
                   kill-phase-on: NEVER
-                - name: weirdo-master-centos8-promote-packstack-scenario001
+                - name: weirdo-ussuri-centos8-promote-packstack-scenario001
                   kill-phase-on: NEVER
-                - name: weirdo-master-centos8-promote-packstack-scenario002
+                - name: weirdo-ussuri-centos8-promote-packstack-scenario002
                   kill-phase-on: NEVER
-                - name: weirdo-master-centos8-promote-packstack-scenario003
+                - name: weirdo-ussuri-centos8-promote-packstack-scenario003
                   kill-phase-on: NEVER
-                - name: weirdo-master-centos8-promote-puppet-openstack-scenario001
+                - name: weirdo-ussuri-centos8-promote-puppet-openstack-scenario001
                   kill-phase-on: NEVER
-                - name: weirdo-master-centos8-promote-puppet-openstack-scenario002
+                - name: weirdo-ussuri-centos8-promote-puppet-openstack-scenario002
                   kill-phase-on: NEVER
-                - name: weirdo-master-centos8-promote-puppet-openstack-scenario003
+                - name: weirdo-ussuri-centos8-promote-puppet-openstack-scenario003
                   kill-phase-on: NEVER
-                - name: weirdo-master-centos8-promote-puppet-openstack-scenario004
+                - name: weirdo-ussuri-centos8-promote-puppet-openstack-scenario004
                   kill-phase-on: NEVER
 
 - project:
-    name: 'tripleo-quickstart-promote-master-current-tripleo-jobs'
+    name: 'tripleo-quickstart-promote-ussuri-current-tripleo-jobs'
     test: 'full-deploy'
     job_type: 'promote'
-    release: 'master'
+    release: 'ussuri'
     build_system: 'delorean'
     topology: 'minimal'
     distro: 'centos8'
     jobs:
-        - 'tripleo-quickstart-promote-master-current-tripleo-{build_system}-{topology}'
+        - 'tripleo-quickstart-promote-ussuri-current-tripleo-{build_system}-{topology}'
 
 - job-template:
-    name: 'tripleo-quickstart-promote-master-current-tripleo-{build_system}-{topology}'
+    name: 'tripleo-quickstart-promote-ussuri-current-tripleo-{build_system}-{topology}'
     defaults: 'tripleo-quickstart-promote-defaults'
     scm:
         - repo-tripleo-quickstart
@@ -108,17 +108,17 @@
             topology: '{topology}'
             job_type: '{job_type}'
         - tripleo-quickstart-full-logs-link
-        - tripleo-quickstart-report-dlrn-api-master-centos8-current-tripleo
+        - tripleo-quickstart-report-dlrn-api-ussuri-centos8-current-tripleo
 
 - publisher:
-    name: 'tripleo-quickstart-report-dlrn-api-master-centos8-current-tripleo'
+    name: 'tripleo-quickstart-report-dlrn-api-ussuri-centos8-current-tripleo'
     publishers:
         - post-tasks:
             - matches:
                 - log-text: marked build as failure
               script:
                 !include-raw:
-                    - scripts/centos8-master-current-tripleo.sh
+                    - scripts/centos8-ussuri-current-tripleo.sh
                     - scripts/export-success-false.sh
                     - scripts/dlrn-api-report.sh
         - post-tasks:
@@ -127,6 +127,6 @@
               run-if-job-successful: true
               script:
                 !include-raw:
-                    - scripts/centos8-master-current-tripleo.sh
+                    - scripts/centos8-ussuri-current-tripleo.sh
                     - scripts/export-success-true.sh
                     - scripts/dlrn-api-report.sh
