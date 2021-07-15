@@ -1,0 +1,7 @@
+---
+- hosts: all
+  vars:
+    zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}/ci-scripts/infra-setup/roles/copy_container/files/copy-quay/"
+  roles:
+    - role: golangci-lint
+      golangci_lint_options: "-c ~/{{ zuul_work_dir }}/.golangci.yml"
