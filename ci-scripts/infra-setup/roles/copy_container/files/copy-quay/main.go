@@ -21,7 +21,7 @@ type globalOptions struct {
 	forceTag      string
 	job           string
 	token         string
-    release       string
+	release       string
 	debug         bool
 }
 
@@ -39,19 +39,24 @@ func createApp() (*cobra.Command, *globalOptions) {
 		SilenceErrors: true,
 	}
 
-	rootCommand.PersistentFlags().StringVar(&opts.zuulAPI, "zuul-api", "https://review.rdoproject.org/zuul/api/", "Zuul api endpoint")
-	rootCommand.PersistentFlags().StringVar(&opts.pullRegistry, "pull-registry", "trunk.registry.rdoproject.org", "Registry to pull images from")
-	rootCommand.PersistentFlags().StringVar(&opts.pushRegistry, "push-registry", "quay.io", "Registry to push images to")
-	rootCommand.PersistentFlags().StringVar(&opts.fromNamespace, "from-namespace", "tripleomaster", "Namespace of pushed image")
-	rootCommand.PersistentFlags().StringVar(&opts.toNamespace, "to-namespace", "tripleomaster", "Namespace of pushed image")
+	rootCommand.PersistentFlags().StringVar(&opts.zuulAPI, "zuul-api", "https://review.rdoproject.org/zuul/api/",
+		"Zuul api endpoint")
+	rootCommand.PersistentFlags().StringVar(&opts.pullRegistry, "pull-registry", "trunk.registry.rdoproject.org",
+		"Registry to pull images from")
+	rootCommand.PersistentFlags().StringVar(&opts.pushRegistry, "push-registry", "quay.io",
+		"Registry to push images to")
+	rootCommand.PersistentFlags().StringVar(&opts.fromNamespace, "from-namespace", "tripleomaster",
+		"Namespace of pushed image")
+	rootCommand.PersistentFlags().StringVar(&opts.toNamespace, "to-namespace", "tripleomaster",
+		"Namespace of pushed image")
 	rootCommand.PersistentFlags().StringVar(&opts.hash, "hash", "", "Hash to be pulled/pushed")
 	rootCommand.PersistentFlags().StringVar(&opts.pushHash, "push-hash", "", "Hash to be pulled/pushed")
 	rootCommand.PersistentFlags().StringVar(&opts.token, "token", "", "Token to use with quay api")
 	rootCommand.PersistentFlags().BoolVar(&opts.debug, "debug", false, "Enable debug output")
 	rootCommand.PersistentFlags().StringVar(&opts.job, "job", "", "Job to collect the list of containers")
-    rootCommand.PersistentFlags().StringVar(&opts.release, "release", "master", "Release")
+	rootCommand.PersistentFlags().StringVar(&opts.release, "release", "master", "Release")
 	rootCommand.AddCommand(copyCmd(opts))
-    rootCommand.AddCommand(tagCmd(opts))
+	rootCommand.AddCommand(tagCmd(opts))
 	return rootCommand, opts
 }
 
@@ -61,6 +66,7 @@ func (opts *globalOptions) before(cmd *cobra.Command) error {
 	}
 	return nil
 }
+
 func (opts *globalOptions) newImageDestSystemContext() *types.SystemContext {
 	ctx := opts.newSystemContext()
 	ctx.DirForceCompress = false

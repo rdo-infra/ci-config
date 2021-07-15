@@ -13,7 +13,7 @@ import (
 )
 
 type copyOptions struct {
-	global *globalOptions
+	global     *globalOptions
 	htmlOutput string
 }
 
@@ -33,19 +33,21 @@ func copyCmd(global *globalOptions) *cobra.Command {
 
 func (opts *copyOptions) run(cmd *cobra.Command, args []string) error {
 	if len(args) > 0 {
-        if opts.global.hash == "" {
-            return fmt.Errorf("You must specify a hash if you are copying specific images")
-        }
+		if opts.global.hash == "" {
+			return fmt.Errorf("You must specify a hash if you are copying specific images")
+		}
 
 		tagToPush := opts.global.hash
 		for _, image := range args {
-			if(opts.global.pushHash != "") {
+			if opts.global.pushHash != "" {
 				tagToPush = opts.global.pushHash
 			}
-			from := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pullRegistry, opts.global.fromNamespace, image, opts.global.hash)
-			to := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pushRegistry, opts.global.toNamespace, image, tagToPush)
+			from := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pullRegistry, opts.global.fromNamespace,
+				image, opts.global.hash)
+			to := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pushRegistry, opts.global.toNamespace,
+				image, tagToPush)
 			if _, err := copyImage(from, to); err != nil {
-                msg := fmt.Sprintf("Failed to copy container %s: %v", image, err)
+				msg := fmt.Sprintf("Failed to copy container %s: %v", image, err)
 				logrus.Errorln(msg)
 			}
 		}
@@ -59,8 +61,8 @@ func (opts *copyOptions) run(cmd *cobra.Command, args []string) error {
 		res := parseLog(data)
 		repositories, err := listRepositories(opts.global.toNamespace)
 
-		failed_push := make([]string, 0)
-		success_pushed := make([]string, 0)
+		failedPush := make([]string, 0)
+		successPushed := make([]string, 0)
 
 		if err != nil {
 			logrus.Error("Failed to fetch list of repositories ", err)
@@ -68,12 +70,12 @@ func (opts *copyOptions) run(cmd *cobra.Command, args []string) error {
 		tagToPush := ""
 		for _, res := range res {
 			tagToPull := res[1]
-			if(opts.global.hash != "") {
+			if opts.global.hash != "" {
 				tagToPull = opts.global.hash
 			}
 			tagToPush = tagToPull
 			logrus.Debugln("Tag is: ", opts.global.pushHash)
-			if(opts.global.pushHash != "") {
+			if opts.global.pushHash != "" {
 				tagToPush = opts.global.pushHash
 				logrus.Debugln("Tag to push: ", tagToPush)
 			}
@@ -82,23 +84,24 @@ func (opts *copyOptions) run(cmd *cobra.Command, args []string) error {
 				_, err := createNewRepository(opts.global.toNamespace, res[0])
 				if err != nil {
 					logrus.Errorln("Failed to create repository: ", err)
-                    continue
+					continue
 				}
 			}
-			// from := fmt.Sprintf("docker://%s/%s/%s:current-tripleo", opts.global.pullRegistry, opts.global.fromNamespace, res[0])
+			// from := fmt.Sprintf("docker://%s/%s/%s:current-tripleo", opts.global.pullRegistry,
+			// opts.global.fromNamespace, res[0])
 			from := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pullRegistry, opts.global.fromNamespace, res[0], tagToPull)
 			to := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pushRegistry, opts.global.toNamespace, res[0], tagToPush)
 			_, err := copyImage(from, to)
 			if err != nil {
-				failed_push = append(failed_push, res[0])
+				failedPush = append(failedPush, res[0])
 				logrus.Errorln("Failed to copy container image: ", err)
 			} else {
-				success_pushed = append(success_pushed, res[0])
+				successPushed = append(successPushed, res[0])
 			}
 		}
 
-		if(opts.htmlOutput != "") {
-			writeHTLMReport(success_pushed, failed_push, tagToPush, opts.htmlOutput)
+		if opts.htmlOutput != "" {
+			writeHTLMReport(successPushed, failedPush, tagToPush, opts.htmlOutput)
 		}
 	}
 
