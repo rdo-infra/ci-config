@@ -1,0 +1,125 @@
+- project:
+    name: rdo_trunk-promote-jobs-stein-centos8-current-tripleo
+    jobs:
+        - 'rdo_trunk-promote-stein-centos8-current-tripleo'
+
+- job-template:
+    name: rdo_trunk-promote-stein-centos8-current-tripleo
+    project-type: multijob
+    defaults: parent-promote-defaults
+    builders:
+        - phase-get-hash-stein-centos8-current-tripleo
+        - phase-test-import-stein-centos8-current-tripleo
+    properties:
+        - ownership:
+            owner: TBD
+
+- builder:
+    name: phase-get-hash-stein-centos8-current-tripleo
+    builders:
+        - multijob:
+            name: "GET THE LATEST DELOREAN YUM REPOSITORY HASH"
+            condition: SUCCESSFUL
+            projects:
+              - name: rdo-promote-get-hash-stein-centos8-current-tripleo
+
+- project:
+    name: rdo-promote-get-hash-stein-centos8-current-tripleo
+    jobs:
+        - 'rdo-promote-get-hash-stein-centos8-current-tripleo'
+
+- job-template:
+    name: 'rdo-promote-get-hash-stein-centos8-current-tripleo'
+    defaults: script-defaults
+    builders:
+        - shell:
+            !include-raw-escape:
+                - scripts/centos8-stein-current-tripleo.sh
+                - scripts/promote-get-hash.sh
+    publishers:
+        - tripleo-quickstart-archive-hash-stein-centos8-current-tripleo
+    properties:
+        - ownership:
+            owner: TBD
+
+- publisher:
+    name: 'tripleo-quickstart-archive-hash-stein-centos8-current-tripleo'
+    publishers:
+        - archive:
+            artifacts: 'delorean_stein_centos8_current_tripleo_hash'
+
+- builder:
+    name: phase-test-import-stein-centos8-current-tripleo
+    builders:
+        - multijob:
+            name: "INSTALL / TEST (IMPORT IMAGES)"
+            condition: UNSTABLE
+            projects:
+                - name: tripleo-quickstart-promote-stein-current-tripleo-delorean-minimal
+                  kill-phase-on: NEVER
+                - name: weirdo-stein-centos8-promote-packstack-scenario001
+                  kill-phase-on: NEVER
+                - name: weirdo-stein-centos8-promote-packstack-scenario002
+                  kill-phase-on: NEVER
+                - name: weirdo-stein-centos8-promote-packstack-scenario003
+                  kill-phase-on: NEVER
+                - name: weirdo-stein-centos8-promote-puppet-openstack-scenario001
+                  kill-phase-on: NEVER
+                - name: weirdo-stein-centos8-promote-puppet-openstack-scenario002
+                  kill-phase-on: NEVER
+                - name: weirdo-stein-centos8-promote-puppet-openstack-scenario003
+                  kill-phase-on: NEVER
+                - name: weirdo-stein-centos8-promote-puppet-openstack-scenario004
+                  kill-phase-on: NEVER
+
+- project:
+    name: 'tripleo-quickstart-promote-stein-current-tripleo-jobs'
+    test: 'full-deploy'
+    job_type: 'promote'
+    release: 'stein'
+    build_system: 'delorean'
+    topology: 'minimal'
+    distro: 'centos8'
+    jobs:
+        - 'tripleo-quickstart-promote-stein-current-tripleo-{build_system}-{topology}'
+
+- job-template:
+    name: 'tripleo-quickstart-promote-stein-current-tripleo-{build_system}-{topology}'
+    defaults: 'tripleo-quickstart-promote-defaults'
+    scm:
+        - repo-tripleo-quickstart
+    builders:
+        - tripleo-quickstart-builder:
+            test: '{test}'
+            job_type: '{job_type}'
+            release: '{release}'
+            build_system: '{build_system}'
+            topology: '{topology}'
+            distro: '{distro}'
+    publishers:
+        - tripleo-quickstart-cleanup:
+            topology: '{topology}'
+            job_type: '{job_type}'
+        - tripleo-quickstart-full-logs-link
+        - tripleo-quickstart-report-dlrn-api-stein-centos8-current-tripleo
+
+- publisher:
+    name: 'tripleo-quickstart-report-dlrn-api-stein-centos8-current-tripleo'
+    publishers:
+        - post-tasks:
+            - matches:
+                - log-text: marked build as failure
+              script:
+                !include-raw:
+                    - scripts/centos8-stein-current-tripleo.sh
+                    - scripts/export-success-false.sh
+                    - scripts/dlrn-api-report.sh
+        - post-tasks:
+            - matches:
+                - log-text: Virtual Environment Setup Complete
+              run-if-job-successful: true
+              script:
+                !include-raw:
+                    - scripts/centos8-stein-current-tripleo.sh
+                    - scripts/export-success-true.sh
+                    - scripts/dlrn-api-report.sh
