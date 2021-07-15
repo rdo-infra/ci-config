@@ -22,19 +22,19 @@ type Build struct {
 }
 
 func getJobPerRelease(release string) string {
-    var jobList = map[string]string {
-        "master":    "periodic-tripleo-ci-build-containers-ubi-8-push",
-        "queens":    "https://trunk.rdoproject.org/api-centos-queens",
-        "rocky":     "periodic-tripleo-centos-7-rocky-containers-build-push",
-        "stein":     "periodic-tripleo-centos-7-stein-containers-build-push",
-        "train":     "periodic-tripleo-centos-7-train-containers-build-push",
-        "train8":    "periodic-tripleo-ci-build-containers-ubi-8-push-train",
-        "ussuri":    "periodic-tripleo-ci-build-containers-ubi-8-push-ussuri",
-        "victoria":  "periodic-tripleo-ci-build-containers-ubi-8-push-victoria",
-        "wallaby":   "periodic-tripleo-ci-build-containers-ubi-8-push-wallaby",
-    }
+	var jobList = map[string]string{
+		"master":   "periodic-tripleo-ci-build-containers-ubi-8-push",
+		"queens":   "https://trunk.rdoproject.org/api-centos-queens",
+		"rocky":    "periodic-tripleo-centos-7-rocky-containers-build-push",
+		"stein":    "periodic-tripleo-centos-7-stein-containers-build-push",
+		"train":    "periodic-tripleo-centos-7-train-containers-build-push",
+		"train8":   "periodic-tripleo-ci-build-containers-ubi-8-push-train",
+		"ussuri":   "periodic-tripleo-ci-build-containers-ubi-8-push-ussuri",
+		"victoria": "periodic-tripleo-ci-build-containers-ubi-8-push-victoria",
+		"wallaby":  "periodic-tripleo-ci-build-containers-ubi-8-push-wallaby",
+	}
 
-    return jobList[release]
+	return jobList[release]
 }
 
 func writeHTLMReport(success []string, failed []string, hash string, output string) {
@@ -83,14 +83,14 @@ func writeHTLMReport(success []string, failed []string, hash string, output stri
 	`))
 
 	type Containers struct {
-		ContainerName string
+		ContainerName   string
 		ContainerStatus string
 	}
 
 	type Data struct {
-		Items []*Containers
-		Hash string
-		Today time.Time
+		Items   []*Containers
+		Hash    string
+		Today   time.Time
 		Passing int
 		Failing int
 	}
@@ -101,13 +101,13 @@ func writeHTLMReport(success []string, failed []string, hash string, output stri
 	data.Passing = len(success)
 	data.Failing = len(failed)
 
-	for _, container := range(success) {
+	for _, container := range success {
 		item := new(Containers)
 		item.ContainerName = container
 		item.ContainerStatus = "SUCCESS"
 		data.Items = append(data.Items, item)
 	}
-	for _, container := range(failed) {
+	for _, container := range failed {
 		item := new(Containers)
 		item.ContainerName = container
 		item.ContainerStatus = "FAILURE"
@@ -130,6 +130,7 @@ func getLatestGoodBuildURL(jobName string, opts *globalOptions) string {
 
 	url := fmt.Sprintf("%sbuilds?job_name=%s", opts.zuulAPI, jobName)
 	response, err := http.Get(url)
+	defer response.Body.Close()
 	var builds []Build
 
 	if err != nil {
@@ -148,41 +149,15 @@ func getLatestGoodBuildURL(jobName string, opts *globalOptions) string {
 	return ""
 }
 
-func _fetch_(URL string) (string, error) {
-    request, err := http.NewRequest(http.MethodGet, URL, nil)
-    if err != nil {
-        logrus.Errorln("The HTTP request failed with error ", err)
-        return "", err
-    }
-
-    client := &http.Client{}
-    response, err := client.Do(request)
-    if err != nil {
-        logrus.Errorln("Failed to get response from the HTTP request")
-        return "", err
-    }
-    if response.StatusCode == 404 {
-        msg := fmt.Sprintf("URL %s not found", URL)
-        logrus.Errorln(msg)
-        return "", fmt.Errorf(msg)
-    }
-
-	data, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		logrus.Errorln("Failed to read Body content")
-		return "", err
-	}
-	return string(data), nil
-}
-
-func _fetch(URL string) (string, error) {
-	response, err := http.Get(URL)
+func _fetch(url string) (string, error) {
+	response, err := http.Get(url)
+	defer response.Body.Close()
 	if err != nil {
 		logrus.Errorln("The HTTP request failed with error ", err)
 		return "", err
 	}
 	if response.StatusCode == 404 {
-        msg := fmt.Sprintf("URL not found: %s", URL)
+		msg := fmt.Sprintf("URL not found: %s", url)
 		logrus.Errorln(msg)
 		return "", fmt.Errorf(msg)
 	}
@@ -194,22 +169,22 @@ func _fetch(URL string) (string, error) {
 	return string(data), nil
 }
 
-func fetchLogs(URL string) string {
-    // There are three different places where we can get the list of
-    // containers...
-	path := fmt.Sprintf("%slogs/containers-successfully-built.log", URL)
+func fetchLogs(url string) string {
+	// There are three different places where we can get the list of
+	// containers...
+	path := fmt.Sprintf("%slogs/containers-successfully-built.log", url)
 	data, _ := _fetch(path)
 
-    if data == "" {
-        path := fmt.Sprintf("%slogs/containers-built.log", URL)
-        data , _ = _fetch(path)
-    }
-
 	if data == "" {
-		path := fmt.Sprintf("%sjob-output.txt", URL)
+		path := fmt.Sprintf("%slogs/containers-built.log", url)
 		data, _ = _fetch(path)
 	}
-    logrus.Info("Fetching logs in ", path)
+
+	if data == "" {
+		path := fmt.Sprintf("%sjob-output.txt", url)
+		data, _ = _fetch(path)
+	}
+	logrus.Info("Fetching logs in ", path)
 	return data
 }
 
@@ -224,36 +199,36 @@ func repoExists(repoName string, repositories []Container) bool {
 
 func getCurrentTripleoRepo(api string) string {
 
-    type DlrnApiResponse struct {
-        PromoteName   string `json:"promote_name"`
-        RepoHash      string `json:"repo_hash"`
-        AggregateHash string `json:"aggregate_hash"`
-        CommitHash    string `json:"commit_hash"`
-    }
+	type DlrnAPIResponse struct {
+		PromoteName   string `json:"promote_name"`
+		RepoHash      string `json:"repo_hash"`
+		AggregateHash string `json:"aggregate_hash"`
+		CommitHash    string `json:"commit_hash"`
+	}
 
-    var returnApi []DlrnApiResponse
+	var returnAPI []DlrnAPIResponse
 
-    apiEndpoint := "api/promotions?promote_name=current-tripleo&limit=1"
-    apiUrl := fmt.Sprintf("%s/%s", api, apiEndpoint)
+	apiEndpoint := "api/promotions?promote_name=current-tripleo&limit=1"
+	apiURL := fmt.Sprintf("%s/%s", api, apiEndpoint)
 
-	response, err := http.Get(apiUrl)
-
+	response, err := http.Get(apiURL)
+	defer response.Body.Close()
 	if err != nil {
 		logrus.Errorln("The HTTP request failed with error ", err)
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
-		if err := json.Unmarshal(data, &returnApi); err != nil {
+		if err := json.Unmarshal(data, &returnAPI); err != nil {
 			logrus.Errorln("The unmarshal failed with error ", err)
 		}
 	}
-    if len(returnApi) > 0 {
-        if returnApi[0].AggregateHash != "" {
-            return returnApi[0].AggregateHash
-        }
-        return returnApi[0].RepoHash
-    }
+	if len(returnAPI) > 0 {
+		if returnAPI[0].AggregateHash != "" {
+			return returnAPI[0].AggregateHash
+		}
+		return returnAPI[0].RepoHash
+	}
 
-    return ""
+	return ""
 }
 
 func parseLog(data string) [][2]string {
@@ -265,7 +240,7 @@ func parseLog(data string) [][2]string {
 		if strings.Contains(matches[1], "x86_64") {
 			result = append(result, [2]string{matches[2], matches[1][:len(matches[1])-7]})
 		}
-        // result = append(result, [2]string{matches[2], matches[1]})
+		// result = append(result, [2]string{matches[2], matches[1]})
 	}
 	if len(result) == 0 {
 		r, _ := regexp.Compile(`(?m)\/([\w-]+)\s+([\w_]+)`)

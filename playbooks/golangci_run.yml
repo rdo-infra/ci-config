@@ -1,0 +1,24 @@
+---
+- hosts: all
+  vars:
+    zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}/ci-scripts/infra-setup/roles/copy_container/files/copy-quay/"
+  tasks:
+    - name: "Ensure go"
+      include_role:
+        name: ensure-go
+
+    - name: "Ensure golangci-lint"
+      include_role:
+        name: ensure-golangci-lint
+
+    - name: "Get go packages"
+      command: go get
+      args:
+        chdir: "~/{{ zuul_work_dir }}"
+      changed_when: false
+
+    - name: "Run golangci-lint role"
+      include_role:
+        name: golangci-lint
+      vars:
+        golangci_lint_options: "-c ~/{{ zuul_work_dir }}/.golangci.yml"
