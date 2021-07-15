@@ -21,7 +21,7 @@ type globalOptions struct {
 	forceTag      string
 	job           string
 	token         string
-    release       string
+	release       string
 	debug         bool
 }
 
@@ -49,9 +49,9 @@ func createApp() (*cobra.Command, *globalOptions) {
 	rootCommand.PersistentFlags().StringVar(&opts.token, "token", "", "Token to use with quay api")
 	rootCommand.PersistentFlags().BoolVar(&opts.debug, "debug", false, "Enable debug output")
 	rootCommand.PersistentFlags().StringVar(&opts.job, "job", "", "Job to collect the list of containers")
-    rootCommand.PersistentFlags().StringVar(&opts.release, "release", "master", "Release")
+	rootCommand.PersistentFlags().StringVar(&opts.release, "release", "master", "Release")
 	rootCommand.AddCommand(copyCmd(opts))
-    rootCommand.AddCommand(tagCmd(opts))
+	rootCommand.AddCommand(tagCmd(opts))
 	return rootCommand, opts
 }
 
@@ -61,6 +61,7 @@ func (opts *globalOptions) before(cmd *cobra.Command) error {
 	}
 	return nil
 }
+
 func (opts *globalOptions) newImageDestSystemContext() *types.SystemContext {
 	ctx := opts.newSystemContext()
 	ctx.DirForceCompress = false

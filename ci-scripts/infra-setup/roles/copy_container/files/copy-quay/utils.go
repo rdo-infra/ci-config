@@ -236,16 +236,16 @@ func getCurrentTripleoRepo(api string) string {
     apiEndpoint := "api/promotions?promote_name=current-tripleo&limit=1"
     apiUrl := fmt.Sprintf("%s/%s", api, apiEndpoint)
 
-	response, err := http.Get(apiUrl)
+    response, err := http.Get(apiUrl)
 
-	if err != nil {
-		logrus.Errorln("The HTTP request failed with error ", err)
-	} else {
-		data, _ := ioutil.ReadAll(response.Body)
-		if err := json.Unmarshal(data, &returnApi); err != nil {
-			logrus.Errorln("The unmarshal failed with error ", err)
-		}
+    if err != nil {
+        logrus.Errorln("The HTTP request failed with error ", err)
+    } else {
+        data, _ := ioutil.ReadAll(response.Body)
+	if err := json.Unmarshal(data, &returnApi); err != nil {
+	   logrus.Errorln("The unmarshal failed with error ", err)
 	}
+    }
     if len(returnApi) > 0 {
         if returnApi[0].AggregateHash != "" {
             return returnApi[0].AggregateHash
