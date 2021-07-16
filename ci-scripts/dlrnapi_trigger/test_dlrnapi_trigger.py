@@ -42,7 +42,7 @@ api_repo_status_get = [
         commit_hash='49998bd3356842923fef5029443ecae6b2555535',
         distro_hash='2970104410bf047570f50b218d828c73f95f27d3',
         in_progress=False,
-        job_id=('periodic-tripleo-ci-centos-7-multinode-1ctlr-featureset030'
+        job_id=('periodic-tripleo-ci-centos-7-scenario007-multinode-oooq-container'
                 '-master'),
         notes='',
         success=True,
@@ -50,7 +50,7 @@ api_repo_status_get = [
         url=(
             'https://logs.rdoproject.org/openstack-periodic/git.openstack.org/'
             'openstack/tripleo-ci/master/'
-            'periodic-tripleo-ci-centos-7-multinode-1ctlr-featureset030-master/'
+            'periodic-tripleo-ci-centos-7-scenario007-multinode-oooq-container-master/'
             '8ed900e')),
     # This simulates a complete failed job using the old TOCI_JOBTYPE id report
     models.CIVote(
