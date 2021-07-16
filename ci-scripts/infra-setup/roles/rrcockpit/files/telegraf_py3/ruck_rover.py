@@ -4,6 +4,7 @@ import csv
 import json
 import os
 import re
+import sys
 import time
 from datetime import datetime
 from io import StringIO
@@ -20,9 +21,6 @@ from rich.table import Table
 from urllib3.exceptions import InsecureRequestWarning
 
 console = Console()
-
-# ZUUL_BUILDS_API
-ZB_UPSTREAM = "https://zuul.openstack.org/api/builds"
 
 
 def date_diff_in_seconds(dt2, dt1):
@@ -201,18 +199,14 @@ def get_consistent(url, component=None):
     return consistent_date
 
 
-def get_dlrn_versions_csv(base_url, distro, release, component, tag):
+def get_dlrn_versions_csv(base_url, component, tag):
     if component:
-        control_tag = "{}/{}-{}/component/{}/{}/versions.csv".format(base_url,
-                                                                     distro,
-                                                                     release,
-                                                                     component,
-                                                                     tag)
+        control_tag = "{}/component/{}/{}/versions.csv".format(base_url,
+                                                               component,
+                                                               tag)
     else:
-        control_tag = "{}/{}-{}/{}/versions.csv".format(base_url,
-                                                        distro,
-                                                        release,
-                                                        tag)
+        control_tag = "{}/{}/versions.csv".format(base_url,
+                                                  tag)
     return control_tag
 
 
@@ -367,7 +361,7 @@ def print_a_set_in_table(input_set, header="Job name"):
 
 
 def print_failed_in_criteria(input_set,
-                             zb_periodic,
+                             config,
                              compare_upstream,
                              header="Job name",
                              component=None):
@@ -382,10 +376,14 @@ def print_failed_in_criteria(input_set,
         table.add_column("Upstream FAILURE History", width=10)
         table.add_column("Upstream Other History", width=10)
     for job in input_set:
-        int_history = get_job_history(job, zb_periodic, component)
-
+        int_history = get_job_history(job,
+                                      config['upstream']['periodic_builds_url'],
+                                      component)
         if compare_upstream:
-            up_history = get_job_history(job, ZB_UPSTREAM, component)
+            upstream_builds_url = config['upstream']['upstream_builds_url']
+            up_history = get_job_history(job,
+                                         upstream_builds_url,
+                                         component)
             table.add_row(job,
                           str(int_history[job]['SUCCESS']),
                           str(int_history[job]['FAILURE']),
@@ -402,14 +400,10 @@ def print_failed_in_criteria(input_set,
 
 
 def load_conf_file(config_file, key):
+    config = {}
     with open(config_file, "r") as file:
         config = yaml.safe_load(file)
-        zuul_url = config['urls'][key]["zuul_url"]
-        dlrnapi_url = config['urls'][key]["dlrnapi_url"]
-        promoter_url = config['urls'][key]["promoter_url"]
-        git_url = config['urls'][key]["git_url"]
-
-    return zuul_url, dlrnapi_url, promoter_url, git_url
+    return config
 
 
 def influxdb_jobs(jobs_result):
@@ -469,53 +463,27 @@ def influxdb_promo(promotion):
     return promotion_influxdb_line.format(**promotion)
 
 
-def track_integration_promotion(release,
-                                distro,
-                                dlrn_server,
-                                promoter_base_url,
-                                zb_periodic,
-                                aggregate_hash='tripleo-ci-testing',
-                                promotion="current-tripleo",
-                                compare_upstream=False,
-                                influx=False):
-    if distro == "centos-8":
-        promoter_path = "/config/CentOS-8/"
-        dlrn_api_path = "api-centos8-"
-        release_criteria = release
-        dlrn_url_distro = "centos8"
-    elif distro == "centos-7":
-        promoter_path = "/config/CentOS-7/"
-        dlrn_api_path = "api-centos-"
-        release_criteria = release
-        dlrn_url_distro = "centos7"
-    elif distro == "rhel-8":
-        promoter_path = "/config/RedHat-8/"
-        dlrn_api_path = "api-rhel8-"
-        dlrn_url_distro = "rhel8"
-        if release == "osp16-2":
-            release_criteria = "rhos-16.2"
-        elif release == "osp17":
-            release_criteria = "rhos-17"
-    elif distro == "rhel-9":
-        promoter_path = "/config/RedHat-9/"
-        dlrn_api_path = "api-rhel9-"
-        release_criteria = "rhos-17"
-        dlrn_url_distro = "rhel9"
+def track_integration_promotion(args, config):
 
-    promoter_url = promoter_base_url + promoter_path
-    url = promoter_url + release_criteria + '.yaml'
-    api_url, base_url = gather_basic_info_from_criteria(url)
-    promotions = get_dlrn_promotions(api_url, "current-tripleo")
+    distro = args['distro']
+    release = args['release']
+    aggregate_hash = args['aggregate_hash']
+    influx = args['influx']
+    stream = args['stream']
+
+    url = config[stream]['criteria'][distro][release]['int_url']
+    dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
+    promotions = get_dlrn_promotions(dlrn_api_url, "current-tripleo")
     if distro != "centos-7":
-        md5sum_url = base_url + aggregate_hash + '/delorean.repo.md5'
+        md5sum_url = dlrn_trunk_url + aggregate_hash + '/delorean.repo.md5'
         test_hash = web_scrape(md5sum_url)
-        api_response = find_results_from_dlrn_agg(api_url, test_hash)
+        api_response = find_results_from_dlrn_agg(dlrn_api_url, test_hash)
 
     else:
-        commit_url = base_url + aggregate_hash + '/commit.yaml'
+        commit_url = dlrn_trunk_url + aggregate_hash + '/commit.yaml'
         commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
                                                     commit_url)
-        api_response = find_results_from_dlrn_repo_status(api_url,
+        api_response = find_results_from_dlrn_repo_status(dlrn_api_url,
                                                           commit_hash,
                                                           distro_hash,
                                                           extended_hash)
@@ -529,34 +497,29 @@ def track_integration_promotion(release,
     all_jobs = all_jobs_result_available.union(jobs_with_no_result)
 
     # get the dlrn details, hash under test ( hut ) and promoted hash ( ph )
-    dlrn_api = dlrn_api_path + release
     if distro != "centos-7":
-        if release == "master":
-            dlrn_api = dlrn_api + "-uc"
         dlrn_api_suffix = "api/civotes_agg_detail.html?ref_hash="
         # hash under test
-        hut = "{}/{}/{}{}".format(dlrn_server,
-                                  dlrn_api,
-                                  dlrn_api_suffix,
-                                  test_hash)
-        ph = "{}/{}/{}{}".format(dlrn_server,
-                                 dlrn_api,
-                                 dlrn_api_suffix,
-                                 promotions['aggregate_hash'])
+        hut = "{}/{}{}".format(dlrn_api_url,
+                               dlrn_api_suffix,
+                               test_hash)
+        # promoted hash
+        ph = "{}/{}{}".format(dlrn_api_url,
+                              dlrn_api_suffix,
+                              promotions['aggregate_hash'])
 
     else:
         dlrn_api_suffix = "api/civotes_detail.html?commit_hash="
         # hash under test
-        hut = "{}/{}/{}{}&distro_hash={}".format(dlrn_server,
-                                                 dlrn_api,
-                                                 dlrn_api_suffix,
-                                                 commit_hash,
-                                                 distro_hash)
-        ph = "{}/{}/{}{}&distro_hash={}".format(dlrn_server,
-                                                dlrn_api,
-                                                dlrn_api_suffix,
-                                                promotions['commit_hash'],
-                                                promotions['distro_hash'])
+        hut = "{}/{}{}&distro_hash={}".format(dlrn_api_url,
+                                              dlrn_api_suffix,
+                                              commit_hash,
+                                              distro_hash)
+        # promoted hash
+        ph = "{}/{}{}&distro_hash={}".format(dlrn_api_url,
+                                             dlrn_api_suffix,
+                                             promotions['commit_hash'],
+                                             promotions['distro_hash'])
 
     if influx:
         # print out jobs in influxdb format
@@ -576,7 +539,7 @@ def track_integration_promotion(release,
                 failure_reason = "N/A"
             jobs_result = {}
             jobs_result['release'] = release
-            jobs_result['promote_name'] = promotion
+            jobs_result['promote_name'] = "current-tripleo"
             jobs_result['job'] = job
             jobs_result['test_hash'] = test_hash
             jobs_result['component'] = None
@@ -603,9 +566,10 @@ def track_integration_promotion(release,
                              "Pending running jobs")
         needed_txt = ("Jobs which are in promotion criteria and need "
                       "pass to promote the Hash:")
+
         print_failed_in_criteria(jobs_which_need_pass_to_promote,
-                                 zb_periodic,
-                                 compare_upstream,
+                                 config['upstream']['periodic_builds_url'],
+                                 args['compare_upstream'],
                                  needed_txt)
         console.print("Logs of jobs which are failing:-")
         log_urls = latest_job_results_url(
@@ -615,15 +579,11 @@ def track_integration_promotion(release,
 
         # get package diff for the integration test
         # control_url
-        c_url = get_dlrn_versions_csv(dlrn_server,
-                                      dlrn_url_distro,
-                                      release,
+        c_url = get_dlrn_versions_csv(dlrn_trunk_url,
                                       None,
                                       "current-tripleo")
         # test_url, what is currently getting tested
-        t_url = get_dlrn_versions_csv(dlrn_server,
-                                      dlrn_url_distro,
-                                      release,
+        t_url = get_dlrn_versions_csv(dlrn_trunk_url,
                                       None,
                                       "tripleo-ci-testing")
         c_csv = get_csv(c_url)
@@ -638,39 +598,22 @@ def track_integration_promotion(release,
             rich_print(pkg_diff)
 
 
-def track_component_promotion(release,
-                              distro,
-                              test_component,
-                              git_base_url,
-                              zb_periodic,
-                              dlrn_server,
-                              promotion="promoted-components",
-                              compare_upstream=False,
-                              influx=False):
+def track_component_promotion(cargs, config):
     """ Find the failing jobs which are blocking promotion of a component.
     :param release: The OpenStack release e.g. wallaby
     :param component:
     """
+    distro = cargs['distro']
+    release = cargs['release']
+    influx = cargs['influx']
+    test_component = cargs['component']
+    stream = cargs['stream']
+
+    url = config[stream]['criteria'][distro][release]['comp_url']
+    dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
 
     if distro == "centos-7":
         raise Exception("centos-7 components do not exist")
-
-    if distro == "centos-8":
-        component_path = "CentOS-8/component/"
-        dlrn_api_path = "api-centos8-"
-        release_criteria = release
-        dlrn_url_distro = "centos8"
-    elif distro == "rhel-8":
-        component_path = "RedHat-8/component/"
-        if release == "osp16-2":
-            release_criteria = "rhos-16.2"
-            dlrn_api_path = "api-rhel8-"
-            dlrn_url_distro = "rhel8"
-        elif release == "osp17":
-            release_criteria = "rhos-17"
-            dlrn_api_path = "api-rhel8-"
-    # elif distro == "rhel-9":
-    #     component_path = "RedHat-9/component/"
 
     if test_component == "all":
         all_components = ["baremetal", "cinder", "clients", "cloudops",
@@ -682,15 +625,11 @@ def track_component_promotion(release,
         all_components = [test_component]
         # get package diff for the component
         # control_url
-        c_url = get_dlrn_versions_csv(dlrn_server,
-                                      dlrn_url_distro,
-                                      release,
+        c_url = get_dlrn_versions_csv(dlrn_trunk_url,
                                       all_components[0],
                                       "current-tripleo")
         # test_url, what is currently getting tested
-        t_url = get_dlrn_versions_csv(dlrn_server,
-                                      dlrn_url_distro,
-                                      release,
+        t_url = get_dlrn_versions_csv(dlrn_trunk_url,
                                       all_components[0],
                                       "component-ci-testing")
         c_csv = get_csv(c_url)
@@ -701,40 +640,31 @@ def track_component_promotion(release,
                             "component-ci-testing",
                             t_csv)
 
-    git_url = git_base_url + component_path
-    url = git_url + release_criteria + '.yaml'
-    api_url, base_url = gather_basic_info_from_criteria(url)
     for component in all_components:
         commit_url = '{}component/{}/component-ci-testing/commit.yaml'.format(
-                          base_url, component)
+                          dlrn_trunk_url, component)
         commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
                                                     commit_url)
-        api_response = find_results_from_dlrn_repo_status(api_url,
+        api_response = find_results_from_dlrn_repo_status(dlrn_api_url,
                                                           commit_hash,
                                                           distro_hash,
                                                           extended_hash)
 
         # component promotion details
-        promotions = get_dlrn_promotions(api_url,
+        promotions = get_dlrn_promotions(dlrn_api_url,
                                          "promoted-components",
                                          component=component)
 
-        dlrn_api = dlrn_api_path + release
-        if distro != "centos-7":
-            if release == "master":
-                dlrn_api = dlrn_api + "-uc"
         dlrn_api_suffix = "api/civotes_detail.html?commit_hash="
         # hash under test
-        hut = "{}/{}/{}{}&distro_hash={}".format(dlrn_server,
-                                                 dlrn_api,
-                                                 dlrn_api_suffix,
-                                                 commit_hash,
-                                                 distro_hash)
-        ph = "{}/{}/{}{}&distro_hash={}".format(dlrn_server,
-                                                dlrn_api,
-                                                dlrn_api_suffix,
-                                                promotions['commit_hash'],
-                                                promotions['distro_hash'])
+        hut = "{}/{}{}&distro_hash={}".format(dlrn_api_url,
+                                              dlrn_api_suffix,
+                                              commit_hash,
+                                              distro_hash)
+        ph = "{}/{}{}&distro_hash={}".format(dlrn_api_url,
+                                             dlrn_api_suffix,
+                                             promotions['commit_hash'],
+                                             promotions['distro_hash'])
         (all_jobs_result_available,
          passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
         if 'consistent' in all_jobs_result_available:
@@ -766,7 +696,7 @@ def track_component_promotion(release,
                     failure_reason = "N/A"
                 jobs_result = {}
                 jobs_result['release'] = release
-                jobs_result['promote_name'] = promotion
+                jobs_result['promote_name'] = "promoted-components"
                 jobs_result['job'] = job
                 jobs_result['test_hash'] = commit_hash + '_' + distro_hash[0:8]
                 jobs_result['component'] = component
@@ -807,8 +737,8 @@ def track_component_promotion(release,
                 print_a_set_in_table(jobs_with_no_result,
                                      "Pending running jobs")
                 print_failed_in_criteria(jobs_which_need_pass_to_promote,
-                                         zb_periodic,
-                                         compare_upstream,
+                                         config,
+                                         cargs['compare_upstream'],
                                          header,
                                          component)
                 if component_status == "Red":
@@ -820,10 +750,6 @@ def track_component_promotion(release,
                 console.print("\nPackages Tested: {}".format(all_components[0]))
                 rich_print(pkg_diff)
             print('\n')
-
-
-full_path = os.path.dirname(os.path.abspath(__file__))
-default_config_file = full_path + '/conf_ruck_rover.yaml'
 
 
 @ click.command()
@@ -848,55 +774,52 @@ default_config_file = full_path + '/conf_ruck_rover.yaml'
                # TO-DO w/ tripleo-get-hash
                help=("default:tripleo-ci-testing"
                      "\nexample:tripleo-ci-testing/e6/ad/e6ad..."))
-@ click.option("--config_file", default=default_config_file)
+@ click.option("--config_file", default=os.path.dirname(__file__)
+               + '/conf_ruck_rover.yaml')
 def main(release,
          distro,
+         config_file,
          influx=False,
          component=None,
          compare_upstream=False,
-         aggregate_hash="tripleo-ci-testing",
-         config_file=default_config_file):
+         aggregate_hash="tripleo-ci-testing"):
 
     if release in ('osp16-2', 'osp17'):
-        downstream_urls = 'https://url.corp.redhat.com/ruck-rover-0'
-        downstream_config_file = download_file(downstream_urls)
-        (zuul_url, dlrnapi_url, promoter_url,
-         git_url) = load_conf_file(downstream_config_file, "downstream")
-        delete_file(downstream_config_file)
+        stream = 'downstream'
+        if config_file != os.path.dirname(__file__) + '/conf_ruck_rover.yaml':
+            print('using custom config file: {}'.format(config_file))
+        else:
+            downstream_urls = 'https://url.corp.redhat.com/ruck-rover-0'
+            config_file = download_file(downstream_urls)
+        config = load_conf_file(config_file, "downstream")
     else:
-        (zuul_url, dlrnapi_url, promoter_url,
-         git_url) = load_conf_file(config_file, "upstream")
+        config = load_conf_file(config_file, "upstream")
+        stream = 'upstream'
+
+    # come on click, not sure how to get click params.
+    c_args = {}
+    for i in dir():
+        # fix-me eval
+        c_args[i] = eval(i)  # pylint: disable=eval-used
+        c_args["stream"] = stream
 
     if release in ('stein', 'queens'):
-        distro = "centos-7"
+        config['distro'] = "centos-7"
 
     if release == 'osp16-2':
-        distro = "rhel-8"
+        config['distro'] = "rhel-8"
+        c_args['distro'] = "rhel-8"
 
     # prompt user: #osp-17 can be rhel-8 or rhel-9
     if release == 'osp17' and distro == 'centos-8':
-        print("please set the distro option on the cli")
+        print("\nOSP-17 can be either --distro rhel-8 or --distro rhel-9")
+        print("ERROR: please set the distro option on the cli")
+        sys.exit(1)
 
     if component:
-        track_component_promotion(release,
-                                  distro,
-                                  dlrn_server=dlrnapi_url,
-                                  test_component=component,
-                                  git_base_url=git_url,
-                                  zb_periodic=zuul_url,
-                                  promotion="promoted-components",
-                                  compare_upstream=compare_upstream,
-                                  influx=influx)
+        track_component_promotion(c_args, config)
     else:
-        track_integration_promotion(release,
-                                    distro,
-                                    dlrn_server=dlrnapi_url,
-                                    promoter_base_url=promoter_url,
-                                    zb_periodic=zuul_url,
-                                    promotion="current-tripleo",
-                                    compare_upstream=compare_upstream,
-                                    influx=influx,
-                                    aggregate_hash=aggregate_hash)
+        track_integration_promotion(c_args, config)
 
 
 if __name__ == '__main__':
