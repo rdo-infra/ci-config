@@ -22,6 +22,30 @@
       "revId": "3cd8186a214cbd64ee43d9fbaf38e07393602603",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5753ac01_02e7db20",
+        "filename": "ci-scripts/container-push/roles/containers-promote/tasks/check_set_ppc_manifests.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 670
+      },
+      "writtenOn": "2021-07-16T13:03:15Z",
+      "side": 1,
+      "message": "Reason:\n\nFirst of all we are getting the ppc containers build from this job https://ci.centos.org/job/tripleo-upstream-containers-build-master-ppc64le/ and that get copied into our source registry right?\n\n1. We are setting ppc_manifest to false at line number 39 Reson below:\nSuppose for example the ppc_containers_list \u003d 10 and if we have only 7 containers available on our source registry then in that case we will say 3 containers are missing (after doing the manifest inspect through the script https://review.rdoproject.org/r/c/rdo-infra/ci-config/+/33815/39/ci-scripts/container-push/roles/containers-promote/templates/generate_ppc_containers_list.sh.j2#41)\n\n2. We are setting ppc_manifest to false at line number 49 Reason below:\nSuppose for example the ppc_containers_list \u003d 10 and if we don\u0027t have any container available in our source registry (may be this job have some problem https://ci.centos.org/job/tripleo-upstream-containers-build-master-ppc64le/ or it failed then it will unable to push the ppc containers on our source registry right? )  then in that case it \"ppc_manifests\" value should false , that why it\u0027s set as false.",
+      "parentUuid": "f28312c4_c8f5d9a8",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 47
+      },
+      "revId": "3cd8186a214cbd64ee43d9fbaf38e07393602603",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": true
     }
   ]
 }
