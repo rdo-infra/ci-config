@@ -153,7 +153,10 @@ class TestRuckRover(unittest.TestCase):
         full_path = os.path.dirname(os.path.abspath(__file__))
         my_file = full_path + '/data/test_conf_ruck_rover.yaml'
         obtained = ruck_rover.load_conf_file(my_file, "upstream")
-        expected = ('abc', 'def', 'ghi', 'jkl')
+        expected = {'upstream': {'zuul_url': 'abc',
+                                 'dlrnapi_url': 'def',
+                                 'promoter_url': 'ghi',
+                                 'git_url': 'jkl'}}
         self.assertEqual(expected, obtained)
 
 

@@ -1,7 +1,30 @@
 ---
-urls:
-  upstream:
-    zuul_url: https://review.rdoproject.org/zuul/api/builds
-    dlrnapi_url: https://trunk.rdoproject.org
-    promoter_url: http://promoter.rdoproject.org/
-    git_url: https://raw.githubusercontent.com/rdo-infra/ci-config/master/ci-scripts/dlrnapi_promoter/config/
+upstream:
+  periodic_builds_url: https://review.rdoproject.org/zuul/api/builds
+  upstream_builds_url: https://zuul.openstack.org/api/builds
+  dlrnapi_url: https://trunk.rdoproject.org
+  promoter_url: http://promoter.rdoproject.org/
+  criteria:
+    centos-8:
+      master:
+        comp_url: https://raw.githubusercontent.com/rdo-infra/ci-config/master/ci-scripts/dlrnapi_promoter/config/CentOS-8/component/master.yaml
+        int_url: https://raw.githubusercontent.com/rdo-infra/ci-config/master/ci-scripts/dlrnapi_promoter/config_environments/rdo/CentOS-8/master.yaml
+      wallaby:
+        comp_url: https://raw.githubusercontent.com/rdo-infra/ci-config/master/ci-scripts/dlrnapi_promoter/config/CentOS-8/component/wallaby.yaml
+        int_url: https://raw.githubusercontent.com/rdo-infra/ci-config/master/ci-scripts/dlrnapi_promoter/config_environments/rdo/CentOS-8/wallaby.yaml
+      victoria:
+        comp_url: https://raw.githubusercontent.com/rdo-infra/ci-config/master/ci-scripts/dlrnapi_promoter/config/CentOS-8/component/victoria.yaml
+        int_url: https://raw.githubusercontent.com/rdo-infra/ci-config/master/ci-scripts/dlrnapi_promoter/config_environments/rdo/CentOS-8/victoria.yaml
+      ussuri:
+        comp_url: https://raw.githubusercontent.com/rdo-infra/ci-config/master/ci-scripts/dlrnapi_promoter/config/CentOS-8/component/ussuri.yaml
+        int_url: https://raw.githubusercontent.com/rdo-infra/ci-config/master/ci-scripts/dlrnapi_promoter/config_environments/rdo/CentOS-8/ussuri.yaml
+      train:
+        comp_url: https://raw.githubusercontent.com/rdo-infra/ci-config/master/ci-scripts/dlrnapi_promoter/config/CentOS-8/component/train.yaml
+        int_url: https://raw.githubusercontent.com/rdo-infra/ci-config/master/ci-scripts/dlrnapi_promoter/config_environments/rdo/CentOS-8/train.yaml
+    centos-7:
+      train:
+        int_url: https://raw.githubusercontent.com/rdo-infra/ci-config/master/ci-scripts/dlrnapi_promoter/config_environments/rdo/CentOS-7/train.yaml
+  dlrn_api_path:
+    centos-8:
+      master: /api-centos8-master-uc
+      wallaby: https://trunk.rdoproject.org/api-centos8-wallaby
