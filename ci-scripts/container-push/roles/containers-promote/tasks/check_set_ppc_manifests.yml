@@ -40,13 +40,11 @@
     cacheable: yes
   when: missing_ppc_containers_stat.stat.size > 0
 
-- name: "Pull ppc containers from {{ source_registry.host }}"
-  when:
-    - ppc_manifests | bool
-  docker_image:
-    name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ item }}"
-    tag: "{{ full_hash }}_{{ ppc_tag }}"
-    source: pull
-  loop: "{{ built_images.stdout_lines }}"
-  retries: 3
-  register: pulled_ppc
+- name: extract file stats
+  stat:
+    path: "{{ tmp_file_root }}/{{ ppc_containers_file }}"
+  register: ppc_containers_file_stat
+- name: Set ppc_manifests value if containers list contains no images
+  set_fact:
+    ppc_manifests: false
+  when: ppc_containers_file_stat.stat.size == 0
