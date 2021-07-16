@@ -80,6 +80,11 @@
         - quaydotio_push
         - remove_local_containers
 
+    - name: Retrieve list of ppc built images
+      shell: >
+        cat {{ tmp_file_root }}/{{ ppc_containers_file }}
+      register: ppc_built_images
+
     - name: Login to source registry
       docker_login:
         registry_url: "{{ source_registry.auth_url }}"
