@@ -54,6 +54,7 @@
 
 # Nested loop order here is on purpose, so we push first all the images with the full hash, then we tag with the named label.
 - name: Tag and push images to registry
+  no_log: true
   docker_image:
     name: "{{ source_registry.host }}/{{ source_registry.namespace }}/{{ item[1] }}"
     tag: "{{ item[0] }}"
@@ -98,6 +99,7 @@
   when: "missing_containers_stat.stat.size > 0"
 
 - name: Add pushed containers to the cleanup list
+  no_log: true
   set_fact:
     pushed_containers: "{{ pushed_containers + [item.invocation.module_args.repository + ':' + item.invocation.module_args.tag] }}"
   loop: "{{ pushed.results }}"
