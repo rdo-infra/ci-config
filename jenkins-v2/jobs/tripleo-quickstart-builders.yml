@@ -51,3 +51,49 @@
                 {job_type}
 
               popd
+
+- builder:
+    name: 'tripleo-quickstart-gate-builder'
+    builders:
+        - shell: |
+              for DIR in /usr/sbin /sbin /usr/local/bin /usr/local/sbin ~/.local/bin ; do
+                if [[ ! ":$PATH:" == *":$DIR:"* ]] && [ -d "$DIR" ]; then
+                  export PATH=$DIR:$PATH
+                fi
+              done
+
+              # Copy cico node access key to .ssh/id_rsa as tripleo jobs
+              # Uses ANSIBLE_SSH_ARGS and for key relies on default path
+              mkdir -p $HOME/.ssh
+              cp /duffy-ssh-key/ssh-privatekey $HOME/.ssh/id_rsa
+              chmod 600 $HOME/.ssh/id_rsa
+              export USER=default
+
+              if [[ "$RDO_VERSION" == *"centos8"* ]] || [[ '{centos_release|7}' == '8'* ]]; then
+                  export CENTOS_RELEASE=8-stream
+              else
+                  export CENTOS_RELEASE=7
+              fi
+
+              # Promotion jobs uses tripleo-quickstart centosci release files
+              if [[ "$RDO_VERSION" == *"centos"* ]]; then
+                  export CI_ENV=centosci
+              fi
+
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/get-node.sh -r $CENTOS_RELEASE
+              export VIRTHOST=$(head -n1 $WORKSPACE/virthost)
+              echo $VIRTHOST
+              export OPT_ENVIRONMENT=$WORKSPACE/tripleo-quickstart/config/environments/ci_centos_libvirt.yml
+              echo $OPT_ENVIRONMENT
+              export OPT_ADDITIONAL_PARAMETERS=' -e deploy_timeout=120 '
+              echo $OPT_ADDITIONAL_PARAMETERS
+
+              pushd $WORKSPACE/tripleo-quickstart
+
+              bash $WORKSPACE/tripleo-quickstart/ci-scripts/{test}.sh \
+                {release} \
+                {build_system} \
+                {topology} \
+                {job_type}
+
+              popd

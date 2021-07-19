@@ -1,0 +1,53 @@
+- trigger:
+    name: 'trigger-tripleo-quickstart-gate'
+    triggers:
+        - gerrit:
+            server-name: 'rdo-ci-openstack.org'
+            trigger-on:
+                - patchset-created-event
+                - comment-added-contains-event:
+                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck|check-ci-centos)'
+            projects:
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'openstack/tripleo-quickstart'
+                  branches:
+                      - branch-compare-type: 'ANT'
+                        branch-pattern: '**'
+            skip-vote:
+                successful: false
+                failed: false
+                unstable: false
+                notbuilt: false
+            failure-message: 'FAILURE'
+            successful-message: 'SUCCESS'
+            unstable-message: 'UNSTABLE'
+            custom-url: '* $JOB_NAME https://jenkins-cloudsig-ci.apps.ocp.ci.centos.org/job/$JOB_NAME/$BUILD_ID/'
+            silent: false
+            silent-start: false
+
+- trigger:
+    name: 'trigger-tripleo-quickstart-extras-gate'
+    triggers:
+        - gerrit:
+            server-name: 'rdo-ci-openstack.org'
+            trigger-on:
+                - patchset-created-event
+                - comment-added-contains-event:
+                    comment-contains-value:  '(?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck|check-ci-centos)'
+            projects:
+                - project-compare-type: 'PLAIN'
+                  project-pattern: 'openstack/tripleo-quickstart-extras'
+                  branches:
+                      - branch-compare-type: 'ANT'
+                        branch-pattern: '**'
+            skip-vote:
+                successful: false
+                failed: false
+                unstable: false
+                notbuilt: false
+            failure-message: 'FAILURE'
+            successful-message: 'SUCCESS'
+            unstable-message: 'UNSTABLE'
+            custom-url: '* $JOB_NAME https://jenkins-cloudsig-ci.apps.ocp.ci.centos.org/job/$JOB_NAME/$BUILD_ID/'
+            silent: false
+            silent-start: false
