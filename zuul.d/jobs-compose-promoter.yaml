@@ -1,0 +1,14 @@
+- job:
+    name: tripleo-ci-compose-promote-latest-compose-to-tripleo-ci-testing
+    parent: base
+    nodeset: rdo-centos-8
+    timeout: 3000
+    run: playbooks/tripleo-ci-promote-latest-compose/run.yaml
+    required-projects:
+      - rdo-infra/ci-config
+    roles:
+      - zuul: rdo-infra/ci-config
+    vars:
+      compose_promoter_working_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
+      compose_promoter_candidate_label: "latest-compose"
+      compose_promoter_target_label: "tripleo-ci-testing"

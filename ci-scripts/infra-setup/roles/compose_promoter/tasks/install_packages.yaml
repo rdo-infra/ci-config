@@ -1,0 +1,18 @@
+- name: Configure epel repository
+  become: true
+  block:
+    - name:  Install epel-release
+      package:
+        name: epel-release
+        state: present
+
+    - name: Enable epel repository
+      command: yum-config-manager --enable epel
+      args:
+        warn: false
+
+- name: Install required packages
+  become: true
+  package:
+    name: python3-paramiko
+    state: present
