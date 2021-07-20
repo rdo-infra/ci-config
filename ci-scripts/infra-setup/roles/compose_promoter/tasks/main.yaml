@@ -1,0 +1,22 @@
+---
+# Install compose promoter dependencies
+  - name: Configure repo and install dependencies
+    include_tasks: install_packages.yaml
+
+# Promote a compose-id label
+  - name: Promote compose-id info
+    debug:
+        msg: >-
+            Promoting compose-id label {{ compose_promoter_candidate_label }} to {{ compose_promoter_target_label }}
+
+  - name: Promote compose-id
+    compose_promoter:
+        server: "{{ compose_promoter_server }}"
+        port: "{{ compose_promoter_port | default(omit) }}"
+        user: "{{ compose_promoter_user | default(omit) }}"
+        private_key_path: "{{ compose_promoter_key_path | default(omit) }}"
+        working_dir: "{{ compose_promoter_working_dir }}"
+        distro: "{{ compose_promoter_distro | default(omit) }}"
+        compose_url: "{{ compose_promoter_url | default(omit) }}"
+        candidate_label: "{{ compose_promoter_candidate_label }}"
+        target_label: "{{ compose_promoter_target_label }}"
