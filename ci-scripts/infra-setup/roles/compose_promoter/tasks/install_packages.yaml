@@ -1,0 +1,30 @@
+- name: Configure epel repository
+  become: true
+  block:
+    - name:  Install epel-release
+      package:
+        name: epel-release
+        state: present
+
+    - name: Enable epel repository
+      command: dnf config-manager --enable epel
+      args:
+        warn: false
+
+- name: Install required packages
+  become: true
+  package:
+    name: python3-paramiko
+    state: present
+
+- name: Remove epel repository
+  become: true
+  block:
+    - name: Disable epel repository
+      command: dnf config-manager --disable epel
+      args:
+        warn: false
+    - name:  Remove epel-release
+      package:
+        name: epel-release
+        state: absent
