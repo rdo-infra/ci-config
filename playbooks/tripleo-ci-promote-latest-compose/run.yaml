@@ -1,0 +1,11 @@
+- hosts: all
+  tasks:
+    - name: Testing promote latest compose-id on control node
+      import_role:
+        name: compose_promoter
+      vars:
+        compose_promoter_candidate_label: "latest-compose"
+        compose_promoter_target_label: "tripleo-ci-testing"
+        compose_promoter_working_dir: "{{ zuul.executor.work_root }}"
+        compose_promoter_user: "{{ ansible_user }}"
+        compose_promoter_key_path: "{{ ansible_user_dir }}/.ssh/id_rsa"

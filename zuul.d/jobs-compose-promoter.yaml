@@ -1,0 +1,11 @@
+- job:
+    name: tripleo-ci-compose-promote-latest-compose-to-tripleo-ci-testing
+    parent: base
+    nodeset: rdo-centos-8
+    timeout: 3000
+#    voting: false
+    run: playbooks/tripleo-ci-promote-latest-compose/run.yaml
+    required-projects:
+      - rdo-infra/ci-config
+    roles:
+      - zuul: rdo-infra/ci-config
