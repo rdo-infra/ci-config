@@ -301,7 +301,7 @@ def influx(build):
     add_rdopkg_change(build)
 
     if build['end_time'] is None:
-        build['end_time'] = datetime.datetime.fromtimestamp(
+        build['end_time'] = datetime.fromtimestamp(
             time.time()).strftime(TIMESTAMP_PATTERN)
 
     if build['start_time'] is None:
