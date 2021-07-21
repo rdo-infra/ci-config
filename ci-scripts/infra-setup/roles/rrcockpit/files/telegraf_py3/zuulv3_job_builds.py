@@ -114,7 +114,7 @@ def get_builds_info(url, query, pages, offset):
             time.sleep(2)
         else:
             query['skip'] = offset
-        builds_api = url + "builds"
+        builds_api = url + "builds" + '?complete=true'
         response = get(builds_api, True, query)
         if response is not None:
             builds += response
@@ -365,10 +365,9 @@ def influx(build):
 def print_influx(build_type, builds):
     if builds:
         for build in builds:
-            build['type'] = build_type
-            for ara_json in ARA_JSONS:
-                print_influx_ara_tasks(build, ara_json)
-            print(influx(build))
+            if build['result'] is not None:
+                build['type'] = build_type
+                print(influx(build))
 
 
 def main():
