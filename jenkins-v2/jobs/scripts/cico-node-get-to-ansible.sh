@@ -5,7 +5,7 @@ ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
 SSID_FILE=${SSID_FILE:-$WORKSPACE/cico-ssid}
 
 CPU_ARCH=${CPU_ARCH:-x86_64}
-#CICO_FLAVOR=${CICO_FLAVOR:-small}
+CICO_FLAVOR=${CICO_FLAVOR:-small}
 CICO_OS_RELEASE=${CICO_OS_RELEASE:-7}
 LOGSERVER="logserver.rdoproject.org ansible_user=loguser"
 
@@ -18,7 +18,11 @@ ${LOGSERVER}
 EOF
 
 # Get nodes
-nodes=$(cico -q node get --arch $CPU_ARCH --release $CICO_OS_RELEASE --retry-count 6 --retry-interval 60  --count ${NODE_COUNT} --column hostname --column ip_address --column comment -f value)
+if [ $CPU_ARCH == "ppc64le" ]; then
+    nodes=$(cico -q node get --arch $CPU_ARCH --flavor $CICO_FLAVOR --release $CICO_OS_RELEASE --retry-count 6 --retry-interval 60  --count ${NODE_COUNT} --column hostname --column ip_address --column comment -f value)
+else
+    nodes=$(cico -q node get --arch $CPU_ARCH --release $CICO_OS_RELEASE --retry-count 6 --retry-interval 60  --count ${NODE_COUNT} --column hostname --column ip_address --column comment -f value)
+fi
 
 # Write nodes to inventory file and persist the SSID separately for simplicity
 touch ${SSID_FILE}
