@@ -1,0 +1,26 @@
+- defaults:
+    name: 'tripleo-upstream-defaults'
+    description: |
+        Managed by Jenkins Job Builder. Do not edit via web.
+    concurrent: false
+    node: 'cico-workspace-rdo'
+    logrotate:
+        daysToKeep: 31
+        artifactDaysToKeep: 31
+    properties:
+      - inject:
+          properties-content: |
+            ANSIBLE_FORCE_COLOR=1
+            ANSIBLE_STDOUT_CALLBACK=debug
+    wrappers:
+        - ansicolor
+        - timestamps
+        - workspace-cleanup
+        - timeout:
+            type: absolute
+            timeout: 240
+            fail: true
+        - credentials-binding:
+          - text:
+             credential-id: d31fc651-105c-4af6-a2a5-ed486a5897ca
+             variable: DLRNAPI_PASSWD
