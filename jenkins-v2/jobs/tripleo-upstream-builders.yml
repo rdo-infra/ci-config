@@ -1,0 +1,438 @@
+- builder:
+    name: 'tripleo-upstream-setup-roles'
+    builders:
+        - shell: |
+            WORKSPACE="${WORKSPACE:-/tmp}"
+            CICO_USER_DIR="${CICO_USER_DIR:-/root}"
+
+            # Place roles for the tripleo-ci container build playbooks in the proper directory
+            mkdir ${WORKSPACE}/roles
+            cp -r ${WORKSPACE}/tripleo-ci/roles/* ${WORKSPACE}/roles
+            cp -r ${WORKSPACE}/tripleo-ansible/roles/* ${WORKSPACE}/roles
+            cp -r ${WORKSPACE}/ci-config/ci-scripts/infra-setup/roles/* ${WORKSPACE}/roles
+            git clone https://github.com/openstack/ansible-role-bindep \
+                ${WORKSPACE}/roles/bindep
+            git clone https://github.com/openstack/ansible-role-container-registry \
+                ${WORKSPACE}/roles/ansible-role-container-registry
+
+            # Copy over any zuul roles needed
+            cp -r ${WORKSPACE}/zuul-jobs/roles/ensure-pip ${WORKSPACE}/roles
+
+            # Workaround for missing opstools repo on ppc64le
+             sed -i 's/opstools//' ${WORKSPACE}/roles/tripleo-repos/tasks/main.yml
+
+            # Skip tempest and ironic-pxe containers
+            # TODO(mjturek): Reenable ironic-pxe container once centos-8.4 releases as syslinux-tftpboot
+            #                package will be available for ppc64le in that release.
+            sed -i '/.*influxdb/a \ \ \ \ - tempest\n\ \ \ \ - ironic-pxe' ${WORKSPACE}/roles/build-containers/vars/main.yaml
+
+            # Install greenlet from source to workaround https://github.com/pypa/manylinux/issues/687
+            # greenlet is cloned in the build-containers builder below
+            # TODO(mjturek): Remove workaround once fix is available
+            sed -i "/source_items:/a \ \ - \"file://${CICO_USER_DIR}/src/python-greenlet/greenlet\"" ${WORKSPACE}/roles/build-containers/vars/centos-8.yml
+            sed -i "/tripleo_pip_projects:/a \ \ - \"file://${CICO_USER_DIR}/src/python-greenlet/greenlet\"" ${WORKSPACE}/roles/oooci-build-images/defaults/main.yaml
+
+            # Mock prerequisite zuul vars so the container image build playbooks can run on jenkins
+            cat <<EOF >> ${WORKSPACE}/roles/build-containers/vars/main.yaml
+
+            zuul:
+              projects:
+                opendev.org/openstack/tripleo-repos:
+                  src_dir: "src/opendev.org/openstack/tripleo-repos"
+                opendev.org/openstack/python-tripleoclient:
+                  src_dir: "src/opendev.org/openstack/python-tripleoclient"
+
+              branch: "master"
+              pipeline: "periodic"
+
+            push_containers: true
+            push_registry: trunk.registry.rdoproject.org
+            use_buildah: true
+            use_kolla: false
+            build_timeout: 7200
+            EOF
+
+            # Mock prerequisite zuul vars so the image build playbooks can run on jenkins
+            cat <<EOF >> ${WORKSPACE}/roles/oooci-build-images/defaults/main.yaml
+
+            zuul:
+              projects:
+                opendev.org/openstack/tripleo-repos:
+                  src_dir: "src/opendev.org/openstack/tripleo-repos"
+                opendev.org/openstack/python-tripleoclient:
+                  src_dir: "src/opendev.org/openstack/python-tripleoclient"
+
+              branch: "master"
+              pipeline: "periodic"
+            EOF
+
+            cat <<EOF >> ${WORKSPACE}/roles/tripleo-repos/vars/main.yml
+
+            zuul:
+              branch: master
+              projects:
+                opendev.org/openstack/tripleo-repos:
+                  src_dir: "src/opendev.org/openstack/tripleo-repos"
+                opendev.org/openstack/python-tripleoclient:
+                  src_dir: "src/opendev.org/openstack/python-tripleoclient"
+            EOF
+
+- builder:
+    name: 'tripleo-upstream-build-containers'
+    builders:
+         - shell: |
+            WORKSPACE="${WORKSPACE:-/tmp}"
+            CICO_USER_DIR="${CICO_USER_DIR:-/root}"
+            VENV="${WORKSPACE}/venv"
+            OPENSTACK_GIT_URL="https://opendev.org/openstack"
+            RELEASE="${RELEASE:-master}"
+            RDO_CONFIG_DIR="${RDO_CONFIG_DIR:-src/rdo-infra/ci-config}"
+            RDO_CONFIG_DIR_PROTECTED="${RDO_CONFIG_DIR_PROTECTED:-src/rdo-infra/review.rdoproject.org-config}"
+
+            [[ ! -d "${VENV}" ]] && virtualenv "${VENV}"
+            source "${VENV}/bin/activate"
+
+            # Install requirements.
+            # Pin to version used by tripleo-quickstart as of this commit.
+            pip install ansible==2.8.0
+
+            # We keep connecting onto the same hosts that are continuously reinstalled
+            export ANSIBLE_HOST_KEY_CHECKING=False
+
+            # cat the playbook for building containers to the workspace
+            cat << EOF > ${WORKSPACE}/containers-build.yml
+            ---
+            - name: 'Setup CICO node for container builds'
+              hosts: openstack_nodes
+              become: yes
+              tasks:
+                - name: 'Switch to centos stream'
+                  shell: 'dnf swap -y centos-linux-repos centos-stream-repos && dnf -y distrosync'
+
+                - name: 'Install dependencies with dnf'
+                  package:
+                    name:
+                      - 'buildah'
+                      - 'cargo'
+                      - 'git'
+                      - 'iptables'
+                      - 'libffi'
+                      - 'libffi-devel'
+                      - 'openssl'
+                      - 'openssl-devel'
+                      - 'podman'
+                      - 'python3-pip'
+                      - 'python3-virtualenv'
+                      - 'rsync'
+                      - 'rust'
+                      - '@Development Tools'
+                    state: present
+
+                - name: 'Upgrade pip to latest version'
+                  pip:
+                    name: 'pip'
+                    state: 'latest'
+
+                - name: 'Install python requirements'
+                  pip:
+                    name:
+                      - 'ansible==2.9.13'
+                      - 'psutil'
+
+                - name: 'Install decorator - Deliberately clobber decorator system site package with working version'
+                  pip:
+                    name: 'decorator'
+                    extra_args: '-I'
+
+                - name: 'Create openstack iptables chain and jump rule'
+                  shell: |
+                    iptables -N openstack-INPUT
+                    iptables -I INPUT 1 -j openstack-INPUT
+
+                - name: 'Remove all container registries except for docker.io, which serves power containers'
+                  shell: |
+                    sed -i "s/.*registry.centos.org.*/unqualified-search-registries = ['docker.io']/g" /etc/containers/registries.conf
+
+            - name: 'Clone OpenStack git dependencies'
+              hosts: openstack_nodes
+              tasks:
+                - name: 'Clone git dependency'
+                  git:
+                    repo: '${OPENSTACK_GIT_URL}/{{ item }}.git'
+                    dest: '${CICO_USER_DIR}/src/opendev.org/openstack/{{ item }}'
+                  with_items:
+                    - 'ansible-role-container-registry'
+                    - 'kolla'
+                    - 'python-tripleoclient'
+                    - 'requirements'
+                    - 'tripleo-ansible'
+                    - 'tripleo-common'
+                    - 'tripleo-repos'
+
+            - name: 'Clone RDO git dependencies, protected repo'
+              hosts: openstack_nodes
+              tasks:
+                - name: 'Clone rdo-infra/review.rdoproject.org-config'
+                  git:
+                     repo: 'https://github.com/rdo-infra/review.rdoproject.org-config.git'
+                     dest: '${CICO_USER_DIR}/${RDO_CONFIG_DIR_PROTECTED}'
+
+            - name: 'Clone RDO git dependencies'
+              hosts: openstack_nodes
+              tasks:
+                - name: 'Clone rdo-infra/ci-config'
+                  git:
+                     repo: 'https://github.com/rdo-infra/ci-config.git'
+                     dest: '${CICO_USER_DIR}/${RDO_CONFIG_DIR}'
+
+            - name: 'Clone other dependencies'
+              hosts: openstack_nodes
+              tasks:
+                - name: 'Clone greenlet 1.0.0 to workaround https://github.com/pypa/manylinux/issues/687'
+                  git:
+                     repo: 'https://github.com/python-greenlet/greenlet.git'
+                     dest: '${CICO_USER_DIR}/src/python-greenlet/greenlet'
+                     version: '1.0.0'
+
+            - name: 'Get hash and create hash.info for delorean reporting'
+              hosts: openstack_nodes
+              vars:
+                workspace: "{{ ansible_user_dir }}/workspace"
+                rdo_infra_ci_config: '${CICO_USER_DIR}/${RDO_CONFIG_DIR}'
+                promote_source: 'tripleo-ci-testing'
+              tasks:
+                - name: Create hash_info file with hashes from {{ promote_source }}
+                  include_role:
+                    name: get_hash
+                    tasks_from: get_hash.yaml
+
+            - name: 'Login to RDO registry'
+              hosts: openstack_nodes
+              tasks:
+                - when: push_containers|default(true)|bool
+                  block:
+                    - shell: |-
+                        buildah login --username=tripleo.service \
+                                     --password="${RDO_REGISTRY_TOKEN}" \
+                                     "https://trunk.registry.rdoproject.org"
+                    - shell: |-
+                        sudo buildah login --username=tripleo.service \
+                                     --password="${RDO_REGISTRY_TOKEN}" \
+                                     "https://trunk.registry.rdoproject.org"
+                  no_log: true
+
+
+            - name: 'Get hash and create hash.info for delorean reporting'
+              hosts: openstack_nodes
+              vars:
+                workspace: "{{ ansible_user_dir }}/workspace"
+                rdo_infra_ci_config: '${CICO_USER_DIR}/${RDO_CONFIG_DIR}'
+                promote_source: 'tripleo-ci-testing'
+              tasks:
+                - name: Create hash_info file with hashes from {{ promote_source }}
+                  include_role:
+                    name: get_hash
+                    tasks_from: get_hash.yaml
+
+                - name: Ensure legacy logs directory
+                  file:
+                    path: '{{ ansible_user_dir }}/workspace/logs'
+                    state: directory
+
+            - name: 'Setup TripleO Container Registry and repos mirror'
+              hosts: openstack_nodes
+              roles:
+                - role: tripleo-repos
+                  override_repos: "tripleo-ci-testing"
+                  tripleo_repos_repository: "${CICO_USER_DIR}/{{ zuul.projects['opendev.org/openstack/tripleo-repos'].src_dir }}"
+                - role: bindep
+                  bindep_dir: "${CICO_USER_DIR}/{{ zuul.projects['opendev.org/openstack/python-tripleoclient'].src_dir }}"
+              tasks:
+                - name: Run build containers pre tasks
+                  include_role:
+                    name: build-containers
+                    tasks_from: pre
+
+            - name: 'Build TripleO Containers'
+              hosts: openstack_nodes
+              tasks:
+                - block:
+                    - name: Run build containers tasks
+                      include_role:
+                        name: build-containers
+                    - name: Report success
+                      debug:
+                        msg: Container build and upload succeeded
+                  rescue:
+                    - name: Report failure
+                      fail:
+                        msg: Container build and upload failed
+            EOF
+
+            # cico-get-node requests a duffy node and generates an ansible-compatible
+            # inventory at $WORKSPACE/hosts
+            ansible-playbook --ssh-extra-args="-o UserKnownHostsFile=/dev/null" -vvv -i "${WORKSPACE}/hosts" "${WORKSPACE}/containers-build.yml"
+
+- builder:
+    name: 'tripleo-upstream-build-images'
+    builders:
+         - shell: |
+            WORKSPACE="${WORKSPACE:-/tmp}"
+            CICO_USER_DIR="${CICO_USER_DIR:-/root}"
+            VENV="${WORKSPACE}/venv"
+            OPENSTACK_GIT_URL="https://opendev.org/openstack"
+            RELEASE="${RELEASE:-master}"
+            RDO_CONFIG_DIR="${RDO_CONFIG_DIR:-src/rdo-infra/ci-config}"
+            RDO_CONFIG_DIR_PROTECTED="${RDO_CONFIG_DIR_PROTECTED:-src/rdo-infra/review.rdoproject.org-config}"
+
+            [[ ! -d "${VENV}" ]] && virtualenv "${VENV}"
+            source "${VENV}/bin/activate"
+
+            # Install requirements.
+            # Pin to version used by tripleo-quickstart as of this commit.
+            pip install ansible==2.8.0
+
+            # We keep connecting onto the same hosts that are continuously reinstalled
+            export ANSIBLE_HOST_KEY_CHECKING=False
+
+            # Mock some zuul vars so the playbooks can run on jenkins
+            cat <<EOF >> ${WORKSPACE}/roles/oooci-build-images/vars/main.yaml
+            tripleo_image_type: "overcloud-full"
+            image_sanity: true
+            tripleo_image_source: https://cloud.centos.org/centos/8-stream/ppc64le/images/CentOS-Stream-GenericCloud-8-20210210.0.ppc64le.qcow2
+            build_all_images: true
+            EOF
+
+            # cat the playbook for building images to the workspace
+            cat << EOF > ${WORKSPACE}/images-build.yml
+            ---
+            - name: 'Setup CICO node for disk image builds'
+              hosts: openstack_nodes
+              become: yes
+              tasks:
+                - name: 'Switch to centos stream'
+                  shell: 'dnf swap -y centos-linux-repos centos-stream-repos && dnf -y distrosync'
+
+                - name: 'Install dependencies with dnf'
+                  package:
+                    name:
+                      - 'cargo'
+                      - 'git'
+                      - 'libffi'
+                      - 'libffi-devel'
+                      - 'openssl'
+                      - 'openssl-devel'
+                      - 'python3-pip'
+                      - 'python3-virtualenv'
+                      - 'rsync'
+                      - 'rust'
+                      - '@Development Tools'
+                    state: present
+
+                - name: 'Upgrade pip to latest version'
+                  pip:
+                    name: 'pip'
+                    state: 'latest'
+
+                - name: 'Install pip requirement'
+                  pip:
+                    name: 'ansible==2.8.0'
+
+                - name: 'Install decorator - Deliberately clobber decorator system site package with working version'
+                  pip:
+                    name: 'decorator'
+                    extra_args: '-I'
+
+            - name: 'Clone OpenStack git dependencies'
+              hosts: openstack_nodes
+              tasks:
+                - name: 'Clone git dependency'
+                  git:
+                    repo: '${OPENSTACK_GIT_URL}/{{ item }}.git'
+                    dest: '${CICO_USER_DIR}/src/opendev.org/openstack/{{ item }}'
+                  with_items:
+                    - 'ansible-role-container-registry'
+                    - 'diskimage-builder'
+                    - 'heat-agents'
+                    - 'ironic-python-agent-builder'
+                    - 'python-tripleoclient'
+                    - 'tripleo-common'
+                    - 'tripleo-image-elements'
+                    - 'tripleo-puppet-elements'
+                    - 'tripleo-repos'
+                    - 'requirements'
+                    - 'tripleo-ansible'
+
+            - name: 'Workaround to avoid biosdevname dependency'
+              hosts: openstack_nodes
+              tasks:
+                - name: 'Glob files'
+                  find:
+                    paths: "${CICO_USER_DIR}/src/opendev.org/openstack/tripleo-common/image-yaml/"
+                    patterns: "*.yaml"
+                  register: image_yaml_files
+                - name: 'Remove any usage of stable-interface-names element'
+                  lineinfile:
+                    path: "{{ item.path }}"
+                    regexp: ".*stable-interface-names.*"
+                    state: absent
+                  loop: "{{ image_yaml_files.files }}"
+
+            - name: 'Clone RDO git dependencies, protected repo'
+              hosts: openstack_nodes
+              tasks:
+                - name: 'Clone rdo-infra/review.rdoproject.org-config'
+                  git:
+                     repo: 'https://github.com/rdo-infra/review.rdoproject.org-config.git'
+                     dest: '${CICO_USER_DIR}/${RDO_CONFIG_DIR_PROTECTED}'
+
+            - name: 'Clone RDO git dependencies'
+              hosts: openstack_nodes
+              tasks:
+                - name: 'Clone rdo-infra/review.rdoproject.org-config'
+                  git:
+                     repo: 'https://github.com/rdo-infra/ci-config.git'
+                     dest: '${CICO_USER_DIR}/${RDO_CONFIG_DIR}'
+
+            - name: 'Clone other dependencies'
+              hosts: openstack_nodes
+              tasks:
+                - name: 'Clone greenlet 1.0.0 to workaround https://github.com/pypa/manylinux/issues/687'
+                  git:
+                     repo: 'https://github.com/python-greenlet/greenlet.git'
+                     dest: '${CICO_USER_DIR}/src/python-greenlet/greenlet'
+                     version: '1.0.0'
+
+            - name: 'Pre-tasks for TripleO image builds'
+              hosts: openstack_nodes
+              roles:
+                - role: tripleo-repos
+                  override_repos: "{{ buildcontainers_override_repos | default('') }}"
+                  tripleo_repos_repository: "${CICO_USER_DIR}/{{ zuul.projects['opendev.org/openstack/tripleo-repos'].src_dir }}"
+                - role: bindep
+                  bindep_dir: "${CICO_USER_DIR}/{{ zuul.projects['opendev.org/openstack/python-tripleoclient'].src_dir }}"
+              tasks:
+                - name: Run build images pre tasks
+                  include_role:
+                    name: oooci-build-images
+                    tasks_from: pre
+
+            - name: 'Build TripleO Images'
+              hosts: openstack_nodes
+              tasks:
+                - block:
+                    - name: Run build images tasks
+                      include_role:
+                        name: oooci-build-images
+                    - name: Report success
+                      debug:
+                        msg: Container build and upload succeeded
+                  rescue:
+                    - name: Report failure
+                      fail:
+                        msg: Container build and upload failed
+            EOF
+
+            # cico-get-node requests a duffy node and generates an ansible-compatible
+            # inventory at $WORKSPACE/hosts
+            ansible-playbook --ssh-extra-args="-o UserKnownHostsFile=/dev/null" -vvv -i "${WORKSPACE}/hosts" "${WORKSPACE}/images-build.yml"
