@@ -1,0 +1,53 @@
+- job-template:
+    name: 'tripleo-upstream-containers-build-{openstack_release}-{cpu_arch}'
+    defaults: 'tripleo-upstream-defaults'
+    properties:
+      - inject:
+          properties-content: |
+            CPU_ARCH={cpu_arch}
+            OPENSTACK_RELEASE={openstack_release}
+            CICO_FLAVOR=medium
+            CICO_OS_RELEASE=8
+    scm:
+        - repo-rdo-infra-ci-config
+        - weirdo-core-master-repository
+        - repo-tripleo-ci
+        - repo-tripleo-ansible
+        - repo-zuul-jobs
+    builders:
+        - weirdo-get-node
+        - tripleo-upstream-setup-roles
+        - tripleo-upstream-build-containers
+    publishers:
+        - tripleo-upstream-collect-logs
+        - tripleo-upstream-dlrn-report
+        - tripleo-upstream-release-node
+    triggers:
+        - timed: '15 0,12,18 * * *'
+
+- job-template:
+    name: 'tripleo-upstream-images-build-{openstack_release}-{cpu_arch}'
+    defaults: 'tripleo-upstream-defaults'
+    properties:
+      - inject:
+          properties-content: |
+            CPU_ARCH={cpu_arch}
+            OPENSTACK_RELEASE={openstack_release}
+            CICO_FLAVOR=medium
+            CICO_OS_RELEASE=8
+    scm:
+        - repo-rdo-infra-ci-config
+        - weirdo-core-master-repository
+        - repo-tripleo-ci
+        - repo-tripleo-ansible
+        - repo-zuul-jobs
+    builders:
+        - weirdo-get-node
+        - tripleo-upstream-setup-roles
+        - tripleo-upstream-build-images
+    publishers:
+        - tripleo-upstream-collect-logs
+        - tripleo-upstream-dlrn-report
+        - tripleo-upstream-release-node
+    triggers:
+        - timed: '15 3,15,21 * * *'
