@@ -16,10 +16,23 @@ while true; do
     # fetch the latest ci-config
     cd ~/ci-config; git reset --hard origin/master && git pull >/dev/null
 
+    {% if promoter_type == "upstream" %}
     # Ensure the latest promotion config is available via httpd
     # TO-DO could use local rsyc, selinux is the root case for using a cp command
     cp -Rv ~/ci-config/ci-scripts/dlrnapi_promoter/config_environments/rdo/* ~/web/config/
     cp -Rv ~/ci-config/ci-scripts/dlrnapi_promoter/config/CentOS-8/* ~/web/config/CentOS-8/
+    {% elif promoter_type == "downstream" %}
+    # fetch the tripleo-environment code
+    cd ~/tripleo-environments; git reset --hard origin/master && git pull >/dev/null
+
+    # Copy the latest downstream config
+    cp -Rv ~/tripleo-environments/ci-scripts/dlrnapi_promoter/config_environments/* ~/ci-config/ci-scripts/dlrnapi_promoter/config_environments/
+    cp -Rv ~/tripleo-environments/ci-scripts/dlrnapi_promoter/config/* ~/ci-config/ci-scripts/dlrnapi_promoter/config/
+
+    # Ensure the latest promotion config is available via httpd
+    cp -Rv ~/ci-config/ci-scripts/dlrnapi_promoter/config_environments/rdo/RedHat-8/* ~/web/config/RedHat-8/
+    cp -Rv ~/ci-config/ci-scripts/dlrnapi_promoter/config/RedHat-8/* ~/web/config/RedHat-8/
+    {% endif %}
 
     # fetch the latest dlrnapi_client and dependencies
     pip install -q -U -r ~/ci-config/ci-scripts/dlrnapi_promoter/requirements.txt
