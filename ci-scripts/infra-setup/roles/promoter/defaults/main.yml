@@ -36,6 +36,13 @@ remote_path_dlrnapi_secret: "~/dlrnapi_secret"
 remote_path_registry_secret: "~/registry_secret"
 remote_path_uploader_key: "~/.ssh/id_rsa"
 
+# Environment Variables
+remote_path_promoter_env: "~/promoter_env"
+# Set config_root for promoter
+promoter_config_root: "{{ (setup_staging | bool) | ternary('staging', 'rdo') }}"
+# Promoter type would be upstream or downstream
+promoter_type: "upstream"
+
 release: master
 distro_name: centos
 distro_version: 7
@@ -49,9 +56,6 @@ container_name_prefix: >-
 
 # This is only to enable the right repo
 distro: "{{ (ansible_distribution == 'CentOS') | ternary('centos', 'rhel') }}"
-
-# Set config_root for promoter
-promoter_config_root: "{{ (setup_staging | bool) | ternary('staging', 'rdo') }}"
 
 # Pachage virtualenv differs from $distro 7 and 8
 python_virtualenv: "{{ (ansible_facts['distribution_major_version'] is version('8', '>=')) | ternary('python3-virtualenv', 'python36-virtualenv') }}"
