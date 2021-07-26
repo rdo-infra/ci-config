@@ -114,9 +114,21 @@
   when: apache_config is changed
 
 #
-# Credentials check
+# Create Promoter Environment file
 #
-- name: Check if secrets are in remote path
+- name: Create promoter Environment file
+  become: true
+  become_user: "{{ promoter_user }}"
+  copy:
+    dest: "{{ remote_path_promoter_env }}"
+    content: |
+      PROMOTER_CONFIG_ROOT: "{{ promoter_config_root }}"
+      PROMOTER_TYPE: "{{ promoter_type }}"
+
+#
+# Credentials/environment file check
+#
+- name: Check if secrets/environments are in remote path
   become: true
   become_user: "{{ promoter_user }}"
   stat:
@@ -125,6 +137,7 @@
     - "{{ remote_path_dlrnapi_secret }}"
     - "{{ remote_path_registry_secret }}"
     - "{{ remote_path_uploader_key }}"
+    - "{{ remote_path_promoter_env }}"
   register: creds
 
 - name: Print available credentials
@@ -155,6 +168,32 @@
         - "--quiet"
 
 #
+# Enable certs for when downstream
+#
+
+- name: Configure rhel certificate
+  become: true
+  shell: |
+    cd /etc/pki/ca-trust/source/anchors
+    curl -O https://password.corp.redhat.com/RH-IT-Root-CA.crt
+    curl -O https://password.corp.redhat.com/pki-ca-chain.crt
+    update-ca-trust extract
+    update-ca-trust enable
+  changed_when: true
+  when: promoter_type == "downstream"
+
+#
+# Clone tripleo environments repo
+#
+
+- name: Clone tripleo environments repo
+  become: true
+  become_user: "{{ promoter_user }}"
+  git:
+    repo: https://code.engineering.redhat.com/gerrit/tripleo-environments
+    dest: /home/{{ promoter_user }}/tripleo-environments
+  when: promoter_type == "downstream"
+#
 # Promoter preparation
 #
 
@@ -181,14 +220,6 @@
     mode: '0755'
     owner: 'root'
     group: 'root'
-  become: true
-
-- name: 'Set env variable for promoter_config_root {{ promoter_config_root }}'
-  lineinfile:
-    dest: /etc/environment
-    state: present
-    regexp: '^PROMOTER_CONFIG_ROOT'
-    line: 'PROMOTER_CONFIG_ROOT={{ promoter_config_root }}'
   become: true
 
 - name: Install promoter service
