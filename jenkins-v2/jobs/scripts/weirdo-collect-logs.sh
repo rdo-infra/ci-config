@@ -8,6 +8,8 @@ export DESTINATION="/var/www/logs/ci.centos.org/${JOB_NAME}/${BUILD_NUMBER}"
 [[ ! -d provision_venv ]] && python3 -m venv provision_venv
 source provision_venv/bin/activate
 pip install -U pip
+# Workaround https://github.com/pypa/pip/issues/7667
+export LANG=en_US.UTF8
 pip install ansible==2.9.16 'Django<2.2' ara[server] shade
 
 export ANSIBLE_HOST_KEY_CHECKING=False
