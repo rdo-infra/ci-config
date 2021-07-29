@@ -24,6 +24,11 @@
 
               pushd $WORKSPACE/tripleo-quickstart
 
+              if [[ '{release}' == 'master-tripleo-ci' ]]; then
+                  # CI_ENV needs to be unset for master-tripleo-ci
+                  unset CI_ENV
+              fi
+
               bash $WORKSPACE/tripleo-quickstart/ci-scripts/{test}.sh \
                 {release} \
                 {build_system} \
