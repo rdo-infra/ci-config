@@ -68,7 +68,7 @@ per-role.
 * Split tasks between: `prepare`, `converge` and `verify` playbooks based on
   their purpose.
 * `prepare` is supposed to bring the host to the expected state before running
-  test, mainly instaling prerequisites, mainly doing some cleanups. In scope
+  test, mainly installing prerequisites, mainly doing some cleanups. In scope,
   it can be seen as mocking phase
 * `converge` must be keep as small as possible, replicating how the tested
   code is expected to be used in production, without mocking and special
@@ -125,7 +125,7 @@ Assuming that we have a job named `mol-foo`, you should run the same test
 locally using either:
 
 ```bash
-molecule -s foo
+molecule test -s foo
 ```
 
 ## Ansible Guidelines
