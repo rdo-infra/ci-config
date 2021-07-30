@@ -1,0 +1,33 @@
+---
+  - name: Create a temporary private key file
+    tempfile:
+      state: file
+    register: tmp_ssh_private_key
+
+  - name: Copy private key content to temporary key
+    copy:
+      content: "{{ ssh_private_key_content }}"
+      dest: "{{ tmp_ssh_private_key.path }}"
+      mode: 0600
+
+  - name: Start a new ssh-agent
+    command: "ssh-agent -s"
+    register: ssh_agent_out
+    changed_when: false
+
+  - name: Filter ssh-agent environment variables
+    set_fact:
+      ssh_agent_environment: "{{ dict(_keys|zip(_values)) }}"
+    vars:
+      _env_list: "{{ ssh_agent_out.stdout.split(';')|map('trim')|select('match', '^(.*?)=(.*)$')|list }}"
+      _keys: "{{ _env_list|map('regex_replace', '^(.*?)=(.*)$', '\\1')|map('trim')|list }}"
+      _values: "{{ _env_list|map('regex_replace', '^(.*?)=(.*)$', '\\2')|map('trim')|list }}"
+
+  - name: Add temporary key to ssh-agent
+    command: "ssh-add {{ tmp_ssh_private_key.path }}"
+    environment: "{{ ssh_agent_environment }}"
+    changed_when: false
+
+  - name: Destroy temporary key
+    command: "shred {{ tmp_ssh_private_key.path }}"
+    changed_when: false
