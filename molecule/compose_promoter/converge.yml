@@ -1,0 +1,18 @@
+---
+- hosts: instance
+  tasks:
+    - name: Manage keys based on provided private_key_content
+      block:
+        - name: Add public key to authorized_keys
+          include_tasks: authorized_keys_update.yml
+
+        - name: Start a new ssh-agent with the provided private key
+          include_role:
+            name: ssh_agent
+      when: ssh_private_key_content is defined
+
+    - name: Compose promoter
+      include_role:
+        name: compose_promoter
+        apply:
+          environment: "{{ ssh_agent_environment | default(omit) }}"
