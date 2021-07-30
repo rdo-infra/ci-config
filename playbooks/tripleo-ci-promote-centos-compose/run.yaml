@@ -1,0 +1,12 @@
+- hosts: all
+  tasks:
+    - name: Start a new ssh-agent with the provided private key
+      include_role:
+        name: ssh_agent
+      when: ssh_private_key_content is defined
+
+    - name: Promote a compose candidate label to a target label
+      include_role:
+        name: compose_promoter
+        apply:
+          environment: "{{ ssh_agent_environment | default(omit) }}"
