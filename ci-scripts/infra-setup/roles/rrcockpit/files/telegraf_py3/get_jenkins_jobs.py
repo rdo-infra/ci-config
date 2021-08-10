@@ -57,11 +57,11 @@ def print_data(data, release, name_filter):
               help="the rdo release, e.g. master,ussuri,train")
 @click.option('--name_filter', default="tripleo-quickstart",
               help="filter out jobs with a keyword")
-@click.option('--jenkins_url', default="https://ci.centos.org/",
+@click.option('--jenkins_url', default="https://jenkins-cloudsig-ci.apps.ocp.ci.centos.org/",
               help="base url of jenkins server")
 def main(release="master",
          name_filter="tripleo-quickstart",
-         jenkins_url="https://ci.centos.org/"):
+         jenkins_url="https://jenkins-cloudsig-ci.apps.ocp.ci.centos.org/"):
 
     print_data(request_data(jenkins_url), release, name_filter)
 
