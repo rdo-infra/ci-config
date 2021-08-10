@@ -23,7 +23,7 @@ class TestJenkinsJobs(unittest.TestCase):
                 row = json.loads(line)
                 self.jenkins_jobs.append(row)
             f.close()
-        self.jenkins_url = "https://ci.centos.org/"
+        self.jenkins_url = "https://jenkins-cloudsig-ci.apps.ocp.ci.centos.org/"
         self.release = "master"
         self.name_filter = "tripleo-quickstart"
         self.response = None
