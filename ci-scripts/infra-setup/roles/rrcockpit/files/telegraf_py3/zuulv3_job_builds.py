@@ -114,7 +114,10 @@ def get_builds_info(url, query, pages, offset):
             time.sleep(2)
         else:
             query['skip'] = offset
-        builds_api = url + "builds" + '?complete=true'
+        if "rdo" in url:
+            builds_api = url + "builds"
+        else:
+            builds_api = url + "builds" + '?complete=true'
         response = get(builds_api, True, query)
         if response is not None:
             builds += response
