@@ -32,6 +32,7 @@ provisioner:
         promoter_virtualenv: promoter_venv
         ci_config_local_src_dir: "{{ playbook_dir }}/../.."
         ci_config_remote_src_dir: "/home/{{ promoter_user }}/ci-config"
+        tmp_file_root: "/var/tmp/promoter_logs"
 
         # container_push_multiarch vars
         release: master
@@ -40,13 +41,17 @@ provisioner:
         script_root: UNUSED
         distro_name: centos
         distro_version: 7
-        containers_file: "/tmp/parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+        containers_file: "parsed_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
+        ppc_containers_file: "parsed_ppc_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
         # Source and target registries are provided by staging environment
         manifest_push: true
         ppc_manifests: true
         # Decrease the chance the ppc_manifests is disabled by our check
         ppc_pull_attempts: 3
         containers_list:
+          - nova-compute
+          - neutron-server
+        ppc_containers_list:
           - nova-compute
           - neutron-server
         container_name_prefix: openstack

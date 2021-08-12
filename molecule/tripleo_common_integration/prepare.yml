@@ -22,26 +22,34 @@
         virtualenv: "~/{{ promoter_virtualenv }}"
       when: zuul is not defined
 
-    - name: Install tripleo projects from zuul
+    - name: "Clone projects tripleo-common, tripleo-ansible, python-tripleoclient"
       become: true
       become_user: "{{ promoter_user }}"
-      vars:
-        ansible_python_interpreter: "/usr/bin/python3"
-      block:
-        - name: use python-tripleoclient from zuul if it's in the correct dir
-          pip:
-            name: "file://{{ zuul.executor.work_root }}/{{ zuul.projects['opendev.org/openstack/python-tripleoclient'].src_dir  }}"
-            virtualenv: "~/{{ promoter_virtualenv }}"
-            state: forcereinstall
-          when: "'opendev.org/openstack/python-tripleoclient' in zuul.projects"
+      git:
+        repo: "{{ item.repo }}"
+        dest: "{{ item.dest }}"
+      with_items:
+        - { repo: "https://opendev.org/openstack/tripleo-common",
+            dest: "/tmp/tripleo-common"}
+        - { repo: "https://opendev.org/openstack/python-tripleoclient",
+            dest: "/tmp/python-tripleoclient"}
+        - { repo: "https://opendev.org/openstack/tripleo-ansible",
+            dest: "/tmp/tripleo-ansible"}
+        - { repo: "https://opendev.org/openstack/tripleo-heat-templates",
+            dest: "/tmp/tripleo-heat-templates"}
 
-        - name: use tripleo-common from zuul if it's in the correct dir
-          pip:
-            name: "file://{{ zuul.executor.work_root }}/{{ zuul.projects['opendev.org/openstack/tripleo-common'].src_dir  }}"
-            virtualenv: "~/{{ promoter_virtualenv }}"
-            state: forcereinstall
-          when: "'opendev.org/openstack/tripleo-common' in zuul.projects"
-      when: zuul is defined
+    - name: "Install projects using pip"
+      become: true
+      become_user: "{{ promoter_user }}"
+      pip:
+        name: "file://{{ item }}"
+        virtualenv: "~/{{ promoter_virtualenv }}"
+      with_items:
+        - "/tmp/tripleo-common"
+        - "/tmp/python-tripleoclient"
+        - "/tmp/tripleo-ansible"
+        - "/tmp/tripleo-heat-templates"
+
 
    # populate the promote_registry
     - name: Include tasks from promote_containers.yml
@@ -102,7 +110,7 @@
     - name: Read containers file
       become: true
       become_user: "{{ promoter_user }}"
-      command: "cat {{ containers_file }}"
+      command: "cat {{ tmp_file_root }}/{{ containers_file }}"
       register: cfile
       changed_when: false
 

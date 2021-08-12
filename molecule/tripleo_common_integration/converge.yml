@@ -10,7 +10,14 @@
         openstack tripleo container image prepare --verbose \
             -e /tmp/staging-containers-prepare-parameter.yaml \
             --output-env-file /tmp/containers-default-parameters.yaml \
+            --roles-file /tmp/tripleo-heat-templates/roles_data.yaml \
             2>&1 > /tmp/tripleo-container-image.prepare.log
       changed_when: true
       environment:
         SUDO_USER: "{{ promoter_user }}"
+        ANSIBLE_PYTHON_INTERPRETER: "~/{{ promoter_virtualenv }}/bin/python3"
+        ANSIBLE_LIBRARY: "~/{{ promoter_virtualenv }}/share/ansible/plugins/modules"
+        ANSIBLE_FILTER_PLUGINS: "~/{{ promoter_virtualenv }}/share/ansible/plugins/filter"
+        ANSIBLE_CALLBACK_PLUGINS: "~/{{ promoter_virtualenv }}/share/ansible/plugins/callback"
+        ANSIBLE_MODULE_UTILS: "~/{{ promoter_virtualenv }}/share/ansible/plugins/module_utils"
+        ANSIBLE_LOG_PATH: "~/ansible.log"
