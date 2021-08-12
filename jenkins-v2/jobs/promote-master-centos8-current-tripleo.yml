@@ -6,6 +6,13 @@
 - job-template:
     name: rdo_trunk-promote-master-centos8-current-tripleo
     project-type: multijob
+    triggers:
+        - pollurl:
+            cron: "H * * * *"
+            urls:
+                - url: https://trunk.rdoproject.org/centos8-master/current-tripleo/delorean.repo
+                  check-content:
+                    - simple: true
     defaults: parent-promote-defaults
     builders:
         - phase-get-hash-master-centos8-current-tripleo
