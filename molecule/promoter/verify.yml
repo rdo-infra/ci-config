@@ -70,6 +70,24 @@
         url: http://localhost/
         dest: "/home/{{ promoter_user }}/staging_promotion_index.html"
 
+    - name: Dry run logrotation
+      become: true
+      command: logrotate -d /etc/logrotate.d/promoter
+      register: logrotate_run
+      changed_when: true
+
+    - name: Ensure log rotation is configured properly
+      assert:
+        that: '"error:" not in logrotate_run.stderr'
+        fail_msg: "Logrotate configuration file contains errors"
+        success_msg: "Logrotate dry run completed successfully"
+
+    - name: Ensure log rotation is taking the correct pattern
+      assert:
+        that: '"rotating pattern: /home/{{ promoter_user }}/{{ promoter_logs }}/*.log in logrotate_run.stderr"'
+        fail_msg: "Rotatting pattern in rotation is wrong"
+        success_msg: "Rotating pattern in rotation is correct"
+
 
     - name: Ensure selinux policy is installed
       shell: |
