@@ -15,7 +15,6 @@ set -x
 
 TIMEOUT=115m
 KILLTIME=120m
-LOG_LEVEL="INFO"
 STAGING_DIR=""
 PROMOTER_CONFIG_ROOT="${PROMOTER_CONFIG_ROOT:=staging}"
 PROMOTER_TYPE="${PROMOTER_TYPE:=upstream}"
@@ -23,8 +22,7 @@ PROMOTER_TYPE="${PROMOTER_TYPE:=upstream}"
 if [[ $PROMOTER_TYPE == "upstream" ]]; then
     DEFAULT_RELEASES=( "CentOS-8/master" "CentOS-8/wallaby" \
                        "CentOS-8/victoria" "CentOS-8/ussuri" \
-                       "CentOS-8/train" "CentOS-7/stein" \
-                       "CentOS-7/queens" "CentOS-7/train" )
+                       "CentOS-8/train" )
 else
     DEFAULT_RELEASES=( "RedHat-8/rhos-16.2" "RedHat-8/rhos-17" )
 fi
@@ -42,9 +40,8 @@ while getopts "t:k:sh" arg; do
         ;;
     s)
         echo "Staging promoter mode enabled"
-        LOG_LEVEL="DEBUG"
+        LOG_LEVEL="${LOG_LEVEL}"
         STAGING_DIR="staging/"
-        export IMAGE_SERVER_USER_HOST="foo@localhost"
         ;;
     h)
         usage
