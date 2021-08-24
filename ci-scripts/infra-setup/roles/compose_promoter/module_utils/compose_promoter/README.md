@@ -8,4 +8,4 @@ their repos based on Centos Composes labels.
 ## Promotions
 
 The current supported promotion is `latest-compose` which
-promotes the latest available compose-id to `tripleo-ci-testing`.
+promotes the latest available compose-id to `centos-ci-testing`.

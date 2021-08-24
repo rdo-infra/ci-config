@@ -107,9 +107,9 @@ class ComposePromoter:
         :return: True if the promotion is supported, False otherwise.
         """
         supported_promotions = [
-            {'candidate': 'latest-compose', 'target': 'tripleo-ci-testing'},
+            {'candidate': 'latest-compose', 'target': 'centos-ci-testing'},
         ]
-        #  {'candidate': 'tripleo-ci-testing', 'target': 'current-tripleo'},
+        #  {'candidate': 'centos-ci-testing', 'target': 'current-centos'},
         for prom in supported_promotions:
             if (candidate_label == prom['candidate']
                     and target_label == prom['target']):

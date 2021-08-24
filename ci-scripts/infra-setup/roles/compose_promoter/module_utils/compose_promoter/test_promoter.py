@@ -112,10 +112,10 @@ class TestComposePromoter(TestComposePromoterBase):
 
     @ddt.data(
         {'candidate': 'latest-compose',
-         'target': 'tripleo-ci-testing',
+         'target': 'centos-ci-testing',
          'exp_result': True},
 
-        {'candidate': 'tripleo-ci-testing',
+        {'candidate': 'centos-ci-testing',
          'target': 'current-tripleo',
          'exp_result': False},
     )

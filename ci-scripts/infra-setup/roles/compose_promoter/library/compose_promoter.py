@@ -72,12 +72,12 @@ options:
           - Compose-ID target label of a promotion.
         required: true
         type: str
-        choices: ['tripleo-ci-testing']
+        choices: ['centos-ci-testing']
 '''
 
 EXAMPLES = r'''
 #
-- name: Promote compose-id to tripleo-ci-testing in a remote server
+- name: Promote compose-id to centos-ci-testing in a remote server
   compose_promoter:
     server: 10.0.0.10
     user: centos
@@ -85,7 +85,7 @@ EXAMPLES = r'''
     private_key_path: ~/.ssh/id_rsa
     working_dir: /var/www/html/centos8
     candidate_label: latest-compose
-    target_label: tripleo-ci-testing
+    target_label: centos-ci-testing
 '''
 
 RETURN = r''' # '''
@@ -93,7 +93,7 @@ RETURN = r''' # '''
 
 def run_module():
     # define available arguments/parameters a user can pass to the module
-    target_label_choices = ['tripleo-ci-testing']
+    target_label_choices = ['centos-ci-testing']
     candidate_label_choices = ['latest-compose']
     distro_choices = ['centos-stream-8']
     module_args = dict(

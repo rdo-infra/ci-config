@@ -11,7 +11,7 @@ Role to promote a CentOs Compose-ID for a given candidate and target label.
 * `compose_promoter_distro`: (String) Target distro used when retrieving latest Compose-ID from URL. Default: 'centos-stream-8'
 * `compose_promoter_latest_compose_url`: (String) URL used by the promoter get latest compose-id value. Default: 'https://composes.centos.org/latest-CentOS-Stream-8/COMPOSE_ID'
 * `compose_promoter_candidate_label`: (String) Candidate label of compose promotion. Default: 'latest-compose'
-* `compose_promoter_target_label`: (String) Target label of compose promotion. Default: 'tripleo-ci-testing
+* `compose_promoter_target_label`: (String) Target label of compose promotion. Default: 'centos-ci-testing
 
 Example:
 ```yaml
@@ -25,5 +25,5 @@ Example:
         compose_promoter_key_path: "~/.ssh/id_rsa"
         compose_promoter_latest_compose_url: "https://composes.centos.org/latest-CentOS-Stream-8/COMPOSE_ID"
         compose_promoter_candidate_label: 'latest-compose'
-        compose_promoter_target_label: 'tripleo-ci-testing'
+        compose_promoter_target_label: 'centos-ci-testing'
 ```
