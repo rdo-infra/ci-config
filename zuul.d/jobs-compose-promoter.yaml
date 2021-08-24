@@ -16,3 +16,12 @@
       compose_promoter_candidate_label: "latest-compose"
       compose_promoter_target_label: "tripleo-ci-testing"
       compose_promoter_working_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
+
+- job:
+    name: periodic-tripleo-centos-8-promote-latest-compose
+    parent: tripleo-ci-compose-promote-base
+    run: playbooks/tripleo-ci-promote-centos-compose/run.yaml
+    required-projects:
+      - rdo-infra/ci-config
+    roles:
+      - zuul: rdo-infra/ci-config
