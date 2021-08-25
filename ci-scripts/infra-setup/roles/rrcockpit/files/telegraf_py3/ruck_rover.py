@@ -290,10 +290,9 @@ def conclude_results_from_dlrn(api_response):
     passed_jobs = set()
     all_jobs_result_available = set()
     for job in api_response:
-        if job.job_id.startswith("periodic"):
-            all_jobs_result_available.add(job.job_id)
-            if job.success:
-                passed_jobs.add(job.job_id)
+        all_jobs_result_available.add(job.job_id)
+        if job.success:
+            passed_jobs.add(job.job_id)
 
     failed_jobs = all_jobs_result_available.difference(passed_jobs)
 
