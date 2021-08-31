@@ -24,6 +24,11 @@ else
     nodes=$(cico -q node get --arch $CPU_ARCH --release $CICO_OS_RELEASE --retry-count 6 --retry-interval 60  --count ${NODE_COUNT} --column hostname --column ip_address --column comment -f value)
 fi
 
+if [[ $(echo "$nodes" | wc -l) -ne ${NODE_COUNT}  ]]; then
+    echo "Unabled to get the right number of nodes requested from CICO infra"
+    exit 1
+fi
+
 # Write nodes to inventory file and persist the SSID separately for simplicity
 touch ${SSID_FILE}
 IFS=$'\n'
