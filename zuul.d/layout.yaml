@@ -1,11 +1,7 @@
 ---
 - job:
-    name: tox-jjb
-    run: playbooks/tox-jjb-run.yml
-
-- job:
     name: tox-jjb-v2
-    parent: tox-jjb
+    run: playbooks/tox-jjb-run.yml
     vars:
       toxenv: jjb-v2
 
@@ -24,12 +20,6 @@
         - mol-container_push_manifests
         - mol-tripleo_common_integration
         - mol-compose_promoter-centos-8
-        - tox-jjb: &jjb
-            files:
-              - ^jenkins/.*
-              - ^requirements.txt
-              - ^test-requirements.txt
-              - ^tox.ini
         - tox-jjb-v2: &jjb-v2
             files:
               - ^jenkins-v2/.*
@@ -59,8 +49,6 @@
               - ^ci-scripts/container-push/roles/containers-promote/*$
     gate:
       jobs:
-        - tox-jjb:
-            <<: *jjb
         - tox-jjb-v2:
             <<: *jjb-v2
         - mol-get_hash-centos-7
