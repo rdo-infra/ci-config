@@ -6,11 +6,19 @@ distro_name: centos
 distro_version: 7
 source_namespace: tripleotrain
 target_namespace: tripleotrain
+container_preffix: "centos-binary-"
 dlrn_api_host: "trunk.rdoproject.org"
 # dlrn_api_endpoint: "centos7-train"
 dlrn_api_scheme: "https"
 dlrn_api_port: ""
 latest_hashes_count: 50
+allowed_clients: registries_client,dlrn_client
+containers:
+  containers_list_base_url: "https://opendev.org/openstack/tripleo-common/raw/commit/"
+  containers_list_path: "container-images/overcloud_containers.yaml"
+  containers_list_exclude_config: "https://opendev.org/openstack/tripleo-ci/raw/branch/master/roles/build-containers/vars/main.yaml"
+  container_preffix: "centos-binary-"
+  build_method: "kolla"
 promotions:
   current-tripleo:
     candidate_label: tripleo-ci-testing
@@ -28,10 +36,10 @@ promotions:
   current-tripleo-rdo:
     candidate_label: current-tripleo
     criteria:
-      - weirdo-train-centos7-promote-packstack-scenario001
-      - weirdo-train-centos7-promote-packstack-scenario002
-      - weirdo-train-centos7-promote-packstack-scenario003
-      - weirdo-train-centos7-promote-puppet-openstack-scenario001
-      - weirdo-train-centos7-promote-puppet-openstack-scenario002
-      - weirdo-train-centos7-promote-puppet-openstack-scenario003
-      - weirdo-train-centos7-promote-puppet-openstack-scenario004
+      - weirdo-train-promote-packstack-scenario001
+      - weirdo-train-promote-packstack-scenario002
+      - weirdo-train-promote-packstack-scenario003
+      - weirdo-train-promote-puppet-openstack-scenario001
+      - weirdo-train-promote-puppet-openstack-scenario002
+      - weirdo-train-promote-puppet-openstack-scenario003
+      - weirdo-train-promote-puppet-openstack-scenario004
