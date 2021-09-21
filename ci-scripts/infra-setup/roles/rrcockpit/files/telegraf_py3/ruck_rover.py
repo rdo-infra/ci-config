@@ -15,6 +15,7 @@ import dlrnapi_client
 import requests
 import yaml
 from dlrnapi_client.rest import ApiException
+from jinja2 import Environment, FileSystemLoader
 from rich import print as rich_print
 from rich.console import Console
 from rich.table import Table
@@ -463,6 +464,15 @@ def influxdb_promo(promotion):
                                "{grafana_timestamp}")
     return promotion_influxdb_line.format(**promotion)
 
+def render_testproject_yaml(jobs, hash, stream, config):
+    jobs_list = jobs
+    file_loader = FileSystemLoader('templates')
+    env = Environment(loader=file_loader)
+    template = env.get_template('.zuul.yaml.j2')
+    output = template.render(jobs=jobs_list, hash=hash)
+    print("\n\n###### testproject to rerun required jobs ######")
+    print(config[stream]['testproject_url'] + "\n")
+    print(output)
 
 def track_integration_promotion(args, config):
 
@@ -599,6 +609,10 @@ def track_integration_promotion(args, config):
         if pkg_diff:
             console.print("\n Packages Tested")
             rich_print(pkg_diff)
+
+        if jobs_which_need_pass_to_promote:
+            jobs = jobs_which_need_pass_to_promote
+            render_testproject_yaml(jobs, test_hash, stream, config)
 
 
 def track_component_promotion(cargs, config):
