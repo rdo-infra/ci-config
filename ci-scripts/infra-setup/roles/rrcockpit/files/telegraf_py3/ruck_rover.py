@@ -773,6 +773,12 @@ def track_component_promotion(cargs, config):
                 rich_print(pkg_diff)
             print('\n')
 
+            # execute if there are failing jobs in criteria and if
+            # you are only looking at one component and not all components
+            if jobs_which_need_pass_to_promote and len(all_components) == 1:
+                jobs = jobs_which_need_pass_to_promote
+                render_testproject_yaml(jobs, commit_hash, stream, config)
+
 
 @ click.command()
 @ click.option("--release", default='master',
