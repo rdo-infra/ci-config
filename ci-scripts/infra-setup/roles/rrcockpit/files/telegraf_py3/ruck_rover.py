@@ -613,9 +613,13 @@ def track_integration_promotion(args, config):
             console.print("\n Packages Tested")
             rich_print(pkg_diff)
 
-        if jobs_which_need_pass_to_promote:
+        # jobs_which_need_pass_to_promote are any job that hasn't registered
+        # success w/ dlrn.  jobs_with_no_result are any jobs in pending.
+        # We only want test project config for jobs that have completed.
+        tp_jobs = jobs_which_need_pass_to_promote - jobs_with_no_result
+        if tp_jobs:
             jobs = jobs_which_need_pass_to_promote
-            render_testproject_yaml(jobs, test_hash, stream, config)
+            render_testproject_yaml(tp_jobs, test_hash, stream, config)
 
 
 def track_component_promotion(cargs, config):
@@ -772,6 +776,15 @@ def track_component_promotion(cargs, config):
                 console.print("\nPackages Tested: {}".format(all_components[0]))
                 rich_print(pkg_diff)
             print('\n')
+
+            # jobs_which_need_pass_to_promote are any job that hasn't registered
+            # success w/ dlrn.  jobs_with_no_result are any jobs in pending.
+            # We only want test project config for jobs that have completed.
+            tp_jobs = jobs_which_need_pass_to_promote - jobs_with_no_result
+            # execute if there are failing jobs in criteria and if
+            # you are only looking at one component and not all components
+            if tp_jobs and len(all_components) == 1:
+                render_testproject_yaml(tp_jobs, commit_hash, stream, config)
 
 
 @ click.command()
