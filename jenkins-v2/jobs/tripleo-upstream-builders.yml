@@ -194,18 +194,6 @@
                      dest: '${CICO_USER_DIR}/src/python-greenlet/greenlet'
                      version: '1.0.0'
 
-            - name: 'Get hash and create hash.info for delorean reporting'
-              hosts: openstack_nodes
-              vars:
-                workspace: "{{ ansible_user_dir }}/workspace"
-                rdo_infra_ci_config: '${CICO_USER_DIR}/${RDO_CONFIG_DIR}'
-                promote_source: 'tripleo-ci-testing'
-              tasks:
-                - name: Create hash_info file with hashes from {{ promote_source }}
-                  include_role:
-                    name: get_hash
-                    tasks_from: get_hash.yaml
-
             - name: 'Login to RDO registry'
               hosts: openstack_nodes
               tasks:
@@ -402,6 +390,18 @@
                      repo: 'https://github.com/python-greenlet/greenlet.git'
                      dest: '${CICO_USER_DIR}/src/python-greenlet/greenlet'
                      version: '1.0.0'
+
+            - name: 'Get hash and create hash.info for delorean reporting'
+              hosts: openstack_nodes
+              vars:
+                workspace: "{{ ansible_user_dir }}/workspace"
+                rdo_infra_ci_config: '${CICO_USER_DIR}/${RDO_CONFIG_DIR}'
+                promote_source: 'tripleo-ci-testing'
+              tasks:
+                - name: Create hash_info file with hashes from {{ promote_source }}
+                  include_role:
+                    name: get_hash
+                    tasks_from: get_hash.yaml
 
             - name: 'Pre-tasks for TripleO image builds'
               hosts: openstack_nodes
