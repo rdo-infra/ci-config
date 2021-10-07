@@ -71,7 +71,17 @@
            dateyesterday
            notifempty
            delaycompress
-           rotate 60
+           rotate 14
+      }
+      /home/{{ promoter_user }}/{{ promoter_logs }}/container-push/*.log {
+           daily
+           missingok
+           su {{ promoter_user }} {{ promoter_user }}
+           dateext
+           dateyesterday
+           notifempty
+           delaycompress
+           rotate 14
       }
     dest: /etc/logrotate.d/promoter
     owner: root
