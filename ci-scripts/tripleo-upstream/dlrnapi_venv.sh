@@ -1,6 +1,10 @@
 function activate_dlrnapi_venv {
     if [ ! -d $WORKSPACE/dlrnapi_venv ]; then
-        virtualenv --system-site-packages $WORKSPACE/dlrnapi_venv
+        if [ ! command -v virtualenv ]; then
+            python3 -m venv  --system-site-packages $WORKSPACE/dlrnapi_venv
+        else
+            virtualenv --system-site-packages $WORKSPACE/dlrnapi_venv
+        fi
     fi
     source $WORKSPACE/dlrnapi_venv/bin/activate
     pip install -U dlrnapi_client shyaml
