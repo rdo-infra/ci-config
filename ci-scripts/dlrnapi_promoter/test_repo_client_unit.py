@@ -4,6 +4,7 @@ import shutil
 import tempfile
 import unittest
 
+import pytest
 import yaml
 
 try:
@@ -21,46 +22,51 @@ from repo_client import RepoClient
 
 log_dir = "~/web/promoter_logs"
 
+assertion = unittest.TestCase('__init__')
 
-class RepoSetup(unittest.TestCase):
 
-    def setUp(self):
+class RepoSetup:
+    @pytest.fixture(scope='class', autouse=True,
+                    params=['release', 'distro'])
+    def setup_fixture(self, request):
+        RepoSetup.param = request.param
         log_d = os.path.expanduser(log_dir)
         if not os.path.isdir(log_d):
             os.makedirs(log_d)
 
-        self.dlrn_hash_commitdistro = DlrnCommitDistroExtendedHash(
+        RepoSetup.dlrn_hash_commitdistro = DlrnCommitDistroExtendedHash(
             commit_hash='26c19986a58560b90bfa4b39bd3bc1ef43ad57f5',
             distro_hash='34d2c7ae120f6c07767c5638f28d4a35515ade67',
             extended_hash='e99c5941564f63e6c2f99592c0c6ff5ac815914a_'
                           '6772f32196d090a6cd303471538fa963727a58e7',
             component="security",
             timestamp=1)
-        self.dlrn_hash_commitdistro2 = DlrnCommitDistroExtendedHash(
+        RepoSetup.dlrn_hash_commitdistro2 = DlrnCommitDistroExtendedHash(
             commit_hash='adce3dce8a017f30c2214df4802dd9b6bd79cce6',
             distro_hash='030bf177f0394ece3dc912dd22ae7ccee8e4af0b',
             extended_hash='3dbc2b82127cdfbbdc5967e57d2acfca2c442978_'
                           '12a790ca4bbf61f2f4c04a9d2fcd1c12b7615925',
             component="octavia",
             timestamp=2)
-        self.dlrn_hash_aggregate = DlrnAggregateHash(
+        RepoSetup.dlrn_hash_aggregate = DlrnAggregateHash(
             commit_hash='28fe6735517a32c6b4d6e73b95ad752ed172d9d3',
             distro_hash='4acaff5b0437c615562fa2860fdd48abd11117d6',
             aggregate_hash='8188496b0d154cf2f22f408851ed418b',
             timestamp=1)
-        self.hashes = [self.dlrn_hash_commitdistro,
-                       self.dlrn_hash_aggregate]
-        self.temp_dir = tempfile.mkdtemp()
-        self.versions_csv_dir = self.temp_dir
+        RepoSetup.hashes = [RepoSetup.dlrn_hash_commitdistro,
+                            RepoSetup.dlrn_hash_aggregate]
+        RepoSetup.temp_dir = tempfile.mkdtemp()
+        RepoSetup.versions_csv_dir = RepoSetup.temp_dir
         config_builder = PromoterConfigFactory()
         config_defaults = config_builder("staging", "CentOS-8/master.yaml")
-        repo_url = "file://{}/".format(self.temp_dir)
-        containers_list_base_url = "file://{}".format(self.temp_dir)
-        containers_list_exclude_config_path = os.path.join(self.temp_dir,
+        repo_url = "file://{}/".format(RepoSetup.temp_dir)
+        containers_list_base_url = "file://{}".format(RepoSetup.temp_dir)
+        containers_list_exclude_config_path = os.path.join(RepoSetup.temp_dir,
                                                            "exclude_file.yaml")
         config = type("Config", (), {
             'repo_url': repo_url,
             'release': 'master',
+            'distro': 'centos8',
             'containers': {
                 'build_method': 'tripleo',
                 'container_preffix': config_defaults.containers[
@@ -72,12 +78,12 @@ class RepoSetup(unittest.TestCase):
                     'containers_list_path'],
             }
         })
-        self.client = RepoClient(config)
+        RepoSetup.client = RepoClient(config)
         fieldnames = ("Project,Source Repo,Source Sha,Dist Repo,Dist Sha,"
                       "Status,Last Success Timestamp,Component,Pkg NVR"
                       "").split(',')
 
-        self.versions_csv_rows = [
+        RepoSetup.versions_csv_rows = [
             {
                 'Project':
                     "python-tripleo-common-tests-tempest",
@@ -121,8 +127,9 @@ class RepoSetup(unittest.TestCase):
         # Create containers files
         containers_file_dirname = os.path.dirname(config_defaults.containers[
                                                       'containers_list_path'])
-        containers_dir = os.path.join(self.temp_dir,
-                                      self.versions_csv_rows[1]['Source Sha'],
+        containers_dir = os.path.join(RepoSetup.temp_dir,
+                                      RepoSetup.versions_csv_rows[1][
+                                          'Source Sha'],
                                       containers_file_dirname)
 
         # containers names coming from tripleo yaml file
@@ -188,20 +195,43 @@ container_images:
         # create exclude config
 
         excluded_containers = ['nonexisting', 'excluded']
-        exclude_config = {
-            'exclude_containers': {
-                'master': excluded_containers,
-                'train': excluded_containers,
-            },
-            'exclude_ppc_containers': {
-                'master': ['nonppc', 'nonexist']
+        if request.param == 'release':
+            exclude_config = {
+                'exclude_containers': {
+                    'master': excluded_containers,
+                    'queens': excluded_containers,
+                    'ussuri': excluded_containers,
+                    'train': excluded_containers,
+                }
             }
+        else:
+            exclude_config = {
+                'exclude_containers': {
+                    'master': {
+                        'centos8': excluded_containers,
+                        'centos9': excluded_containers
+                    },
+                    'queens': {
+                        'centos7': excluded_containers
+                    },
+                    'ussuri': {
+                        'centos8': excluded_containers
+                    },
+                    'train': {
+                        'centos7': excluded_containers,
+                        'centos8': excluded_containers
+                    },
+                }
+            }
+        exclude_config['exclude_ppc_containers'] = {
+            'master': ['nonppc', 'nonexist']
         }
+
         with open(containers_list_exclude_config_path, "w") as exclude_file:
             exclude_file.write(yaml.safe_dump(exclude_config))
 
         # Crate empty containers file
-        empty_containers_dir = os.path.join(self.temp_dir, "abc",
+        empty_containers_dir = os.path.join(RepoSetup.temp_dir, "abc",
                                             containers_file_dirname)
         os.makedirs(empty_containers_dir)
         empty_containers_file_path = \
@@ -212,9 +242,9 @@ container_images:
             pass
 
         # Create versions.csv files
-        for dlrn_hash in self.hashes:
+        for dlrn_hash in RepoSetup.hashes:
             dlrn_hash.label = "tripleo-ci-testing"
-            versions_csv_dir = os.path.join(self.temp_dir,
+            versions_csv_dir = os.path.join(RepoSetup.temp_dir,
                                             dlrn_hash.commit_dir)
             os.makedirs(versions_csv_dir)
             versions_csv_path = os.path.join(versions_csv_dir, "versions.csv")
@@ -222,15 +252,16 @@ container_images:
                 csv_writer = csv.DictWriter(versions_csv_file,
                                             fieldnames=fieldnames)
                 csv_writer.writeheader()
-                for row in self.versions_csv_rows:
+                for row in RepoSetup.versions_csv_rows:
                     csv_writer.writerow(row)
 
-    def tearDown(self):
+        yield
+
         try:
             shutil.rmtree(os.path.expanduser(log_dir))
         except Exception:
             pass
-        shutil.rmtree(self.versions_csv_dir)
+        # shutil.rmtree(RepoSetup.versions_csv_dir)
 
 
 class TestGetVersionsCsv(RepoSetup):
@@ -240,38 +271,36 @@ class TestGetVersionsCsv(RepoSetup):
     def test_get_version_csv_commitdistro_ok(self,
                                              mock_log_debug,
                                              mock_log_error):
-        self.maxDiff = None
         out_versions_csv_reader = \
             self.client.get_versions_csv(self.dlrn_hash_commitdistro,
                                          candidate_label="tripleo-ci-testing")
 
-        self.assertNotEqual(out_versions_csv_reader, None)
-        self.assertIsInstance(out_versions_csv_reader, csv.DictReader)
+        assertion.assertNotEqual(out_versions_csv_reader, None)
+        assertion.assertIsInstance(out_versions_csv_reader, csv.DictReader)
         out_row = next(out_versions_csv_reader)
-        self.assertEqual(out_row, self.versions_csv_rows[0])
+        assertion.assertEqual(out_row, self.versions_csv_rows[0])
         mock_log_debug.assert_has_calls([
             mock.call("Accessing versions at %s", mock.ANY)
         ])
-        self.assertFalse(mock_log_error.called)
+        assertion.assertFalse(mock_log_error.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
     def test_get_version_csv_aggregate_ok(self,
                                           mock_log_debug,
                                           mock_log_error):
-        self.maxDiff = None
         out_versions_csv_reader = \
             self.client.get_versions_csv(self.dlrn_hash_aggregate,
                                          candidate_label="tripleo-ci-testing")
 
-        self.assertNotEqual(out_versions_csv_reader, None)
+        assertion.assertNotEqual(out_versions_csv_reader, None)
         out_row = next(out_versions_csv_reader)
-        self.assertIsInstance(out_versions_csv_reader, csv.DictReader)
-        self.assertEqual(out_row, self.versions_csv_rows[0])
+        assertion.assertIsInstance(out_versions_csv_reader, csv.DictReader)
+        assertion.assertEqual(out_row, self.versions_csv_rows[0])
         mock_log_debug.assert_has_calls([
             mock.call("Accessing versions at %s", mock.ANY)
         ])
-        self.assertFalse(mock_log_error.called)
+        assertion.assertFalse(mock_log_error.called)
 
     @patch('logging.Logger.exception')
     @patch('logging.Logger.error')
@@ -284,14 +313,14 @@ class TestGetVersionsCsv(RepoSetup):
             self.client.get_versions_csv(self.dlrn_hash_commitdistro2,
                                          candidate_label="tripleo-ci-testing")
 
-        self.assertEqual(out_versions_csv_reader, None)
+        assertion.assertEqual(out_versions_csv_reader, None)
         mock_log_debug.assert_has_calls([
             mock.call("Accessing versions at %s", mock.ANY)
         ])
         mock_log_error.assert_has_calls([
             mock.call("Error downloading versions.csv file at %s", mock.ANY)
         ])
-        self.assertTrue(mock_log_exception.called)
+        assertion.assertTrue(mock_log_exception.called)
 
 
 class TestGetContainersList(RepoSetup):
@@ -306,12 +335,13 @@ class TestGetContainersList(RepoSetup):
                                          candidate_label="tripleo-ci-testing")
         tripleo_sha = self.client.get_commit_sha(out_versions_csv_reader,
                                                  "openstack-tripleo-common")
-        self.assertEqual(tripleo_sha, self.versions_csv_rows[1]['Source Sha'])
+        assertion.assertEqual(tripleo_sha, self.versions_csv_rows[1][
+            'Source Sha'])
         mock_log_debug.assert_has_calls([
             mock.call("Looking for sha commit of project %s in %s",
                       "openstack-tripleo-common", mock.ANY)
         ])
-        self.assertFalse(mock_log_error.called)
+        assertion.assertFalse(mock_log_error.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
@@ -323,7 +353,7 @@ class TestGetContainersList(RepoSetup):
                                          candidate_label="tripleo-ci-testing")
         tripleo_sha = self.client.get_commit_sha(out_versions_csv_reader,
                                                  "nonexisting-project")
-        self.assertEqual(tripleo_sha, None)
+        assertion.assertEqual(tripleo_sha, None)
         mock_log_debug.assert_has_calls([
             mock.call("Looking for sha commit of project %s in %s",
                       "nonexisting-project", mock.ANY)
@@ -332,11 +362,13 @@ class TestGetContainersList(RepoSetup):
             mock.call("Unable to find commit sha for project %s", mock.ANY)
         ])
 
-    @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.warning')
     def test_get_containers_list_overcloud(self,
                                            mock_log_debug,
-                                           mock_log_error):
+                                           mock_log_error,
+                                           mock_log_warning):
         self.client.release = "train"
         self.client.container_preffix = "centos-binary-"
         self.client.containers_list_path = (
@@ -344,15 +376,20 @@ class TestGetContainersList(RepoSetup):
         )
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
-
-        self.assertEqual(containers_list,
-                         {'containers_list': ['nova-api',
-                          'neutron-server', 'ovn-controller']})
-        mock_log_debug.assert_has_calls([
-            mock.call("Attempting Download of containers template at %s",
-                      mock.ANY)
-        ])
-        self.assertFalse(mock_log_error.called)
+        if self.param == 'release':
+            assertion.assertEqual(containers_list['containers_list'],
+                                  ['nova-api', 'neutron-server',
+                                   'ovn-controller'])
+            mock_log_debug.assert_has_calls([
+                mock.call("Unable to find ppc container exclude list for %s",
+                          mock.ANY)
+            ])
+            assertion.assertFalse(mock_log_error.called)
+        elif self.param == 'release':
+            mock_log_warning.assert_has_calls([
+                mock.call("Unable to find ppc container exclude list "
+                          "for {}".format(self.client.release))
+            ])
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
@@ -360,14 +397,16 @@ class TestGetContainersList(RepoSetup):
                                          mock_log_debug,
                                          mock_log_error):
         self.client.build_method = "tripleo"
-        self.client.release = "foobar"
+        self.client.release = "master"
         self.client.container_preffix = "openstack-"
         self.client.containers_list_path = (
             'container-images/tripleo_containers.yaml')
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
-        self.assertEqual(containers_list, {'containers_list':
-                                           ['base', 'os', 'aodh-base']})
+        assertion.assertEqual(containers_list,
+                              {'containers_list': ['base', 'os', 'aodh-base'],
+                               'ppc_containers_list': ['base', 'os',
+                                                       'aodh-base']})
         mock_log_debug.assert_has_calls([
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
@@ -387,8 +426,11 @@ class TestGetContainersList(RepoSetup):
         )
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
-        self.assertEqual(containers_list,
-                         {'containers_list': ['base', 'os', 'aodh-base']})
+        assertion.assertEqual(containers_list,
+                              {'containers_list': ['base', 'os', 'aodh-base'],
+                               'ppc_containers_list': ['base', 'os',
+                                                       'aodh-base']
+                               })
         mock_log_debug.assert_has_calls([
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
@@ -408,22 +450,25 @@ class TestGetContainersList(RepoSetup):
         containers_dict = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'], load_excludes=False)
         containers_list = containers_dict.get('containers_list')
-        self.assertEqual(containers_list, ['nova-api', 'neutron-server',
-                                           'excluded', 'ovn-controller'])
+        assertion.assertEqual(containers_list, ['nova-api', 'neutron-server',
+                                                'excluded', 'ovn-controller'])
         mock_log_debug.assert_has_calls([
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
         ])
-        self.assertFalse(mock_log_error.called)
+        assertion.assertFalse(mock_log_error.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
     def test_get_containers_list_fail_no_match(self,
                                                mock_log_debug,
                                                mock_log_error):
+        self.client.containers_list_path = (
+            'container-images/tripleo_containers.yaml'
+        )
         containers_list = self.client.get_containers_list("abc")
-        self.assertEqual(containers_list, {'containers_list': [],
-                                           'ppc_containers_list': []})
+        assertion.assertEqual(containers_list, {'containers_list': [],
+                                                'ppc_containers_list': []})
         mock_log_debug.assert_has_calls([
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
@@ -440,7 +485,7 @@ class TestGetContainersList(RepoSetup):
                                                           mock_log_error,
                                                           mock_log_exception):
         containers_dict = self.client.get_containers_list("def")
-        self.assertEqual(containers_dict['containers_list'], [])
+        assertion.assertEqual(containers_dict['containers_list'], [])
         mock_log_debug.assert_has_calls([
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
@@ -448,7 +493,7 @@ class TestGetContainersList(RepoSetup):
         mock_log_error.assert_has_calls([
             mock.call("Unable to download containers template at %s", mock.ANY)
         ])
-        self.assertTrue(mock_log_exception.called)
+        assertion.assertTrue(mock_log_exception.called)
 
     @patch('logging.Logger.debug')
     @patch('logging.Logger.exception')
@@ -459,12 +504,13 @@ class TestGetContainersList(RepoSetup):
                                    mock_log_error,
                                    mock_log_exception,
                                    mock_log_debug):
+        self.client.release = 'master'
         input_full_list = ['nova-api', 'neutron-server', 'excluded']
         expect_full_list = {'containers_list': ['nova-api',
                                                 'neutron-server']}
         full_list = self.client.load_excludes(input_full_list)
-        self.assertEqual(full_list['containers_list'],
-                         expect_full_list['containers_list'])
+        assertion.assertEqual(full_list['containers_list'],
+                              expect_full_list['containers_list'])
 
         mock_log_info.assert_has_calls([
             mock.call("Excluding %s from the containers list",
@@ -473,8 +519,8 @@ class TestGetContainersList(RepoSetup):
         mock_log_debug.assert_has_calls([
             mock.call("%s not in containers list", 'nonexisting')
         ])
-        self.assertFalse(mock_log_error.called)
-        self.assertFalse(mock_log_exception.called)
+        assertion.assertFalse(mock_log_error.called)
+        assertion.assertFalse(mock_log_exception.called)
 
     @patch('logging.Logger.debug')
     @patch('logging.Logger.exception')
@@ -488,18 +534,18 @@ class TestGetContainersList(RepoSetup):
         input_full_list = ['nova-api', 'rpm-api', 'nonppc']
         expect_full_list = {'ppc_containers_list': ['nova-api', 'rpm-api']}
         full_list = self.client.load_excludes(input_full_list)
-        self.assertEqual(full_list['ppc_containers_list'],
-                         expect_full_list['ppc_containers_list'])
+        assertion.assertEqual(full_list['ppc_containers_list'],
+                              expect_full_list['ppc_containers_list'])
 
         mock_log_info.assert_has_calls([
             mock.call("Excluding %s from the ppc containers list",
                       'nonppc')
         ])
         mock_log_debug.assert_has_calls([
-            mock.call("%s not in containers list", 'nonexisting')
+            mock.call("%s not in containers list", 'nonexist')
         ])
-        self.assertFalse(mock_log_error.called)
-        self.assertFalse(mock_log_exception.called)
+        assertion.assertFalse(mock_log_error.called)
+        assertion.assertFalse(mock_log_exception.called)
 
     @patch('logging.Logger.warning')
     @patch('logging.Logger.debug')
@@ -516,7 +562,7 @@ class TestGetContainersList(RepoSetup):
         input_full_list = ['nova-api', 'neutron-server', 'excluded']
         full_list = self.client.load_excludes(input_full_list)
         full_list = full_list['containers_list']
-        self.assertEqual(full_list, input_full_list)
+        assertion.assertEqual(full_list, input_full_list)
 
         mock_log_warning.assert_has_calls([
             mock.call('Unable to download containers exclude config at %s, '
@@ -524,10 +570,10 @@ class TestGetContainersList(RepoSetup):
                       self.client.containers_list_exclude_config)
         ])
 
-        self.assertTrue(mock_log_exception.called)
-        self.assertFalse(mock_log_error.called)
-        self.assertFalse(mock_log_info.called)
-        self.assertFalse(mock_log_debug.called)
+        assertion.assertTrue(mock_log_exception.called)
+        assertion.assertFalse(mock_log_error.called)
+        assertion.assertFalse(mock_log_info.called)
+        assertion.assertFalse(mock_log_debug.called)
 
     @patch('logging.Logger.warning')
     @patch('logging.Logger.debug')
@@ -540,20 +586,23 @@ class TestGetContainersList(RepoSetup):
                                             mock_log_exception,
                                             mock_log_debug,
                                             mock_log_warning):
-        self.client.release = 'ussuri'
+        self.client.release = 'ussuri1'
+        self.client.containers_list_exclude_config = "file://" + os.path.join(
+            self.temp_dir, 'exclude_file.yaml')
         input_full_list = ['nova-api', 'neutron-server', 'excluded']
         full_list = self.client.load_excludes(input_full_list)
         full_list = full_list['containers_list']
-        self.assertEqual(full_list, input_full_list)
+        assertion.assertEqual(full_list, input_full_list)
 
         mock_log_warning.assert_has_calls([
-            mock.call('Unable to find container exclude list for %s', 'ussuri')
+            mock.call('Unable to find container exclude list for %s',
+                      self.client.release)
         ])
 
-        self.assertFalse(mock_log_error.called)
-        self.assertFalse(mock_log_info.called)
-        self.assertFalse(mock_log_debug.called)
-        self.assertFalse(mock_log_exception.called)
+        assertion.assertFalse(mock_log_error.called)
+        assertion.assertFalse(mock_log_info.called)
+        assertion.assertFalse(mock_log_debug.called)
+        assertion.assertFalse(mock_log_exception.called)
 
     @patch('logging.Logger.error')
     @patch('logging.Logger.debug')
@@ -571,6 +620,9 @@ class TestGetContainersList(RepoSetup):
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
         ])
-        self.assertEqual(containers_list,
-                         {'containers_list': ['base', 'os', 'aodh-base']})
+        assertion.assertEqual(
+            containers_list, {
+                'containers_list': ['base', 'os', 'aodh-base'],
+                'ppc_containers_list': ['base', 'os', 'aodh-base']
+            })
         mock_log_error.assert_not_called()

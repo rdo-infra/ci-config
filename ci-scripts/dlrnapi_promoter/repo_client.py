@@ -20,11 +20,11 @@ class RepoError(Exception):
 
 
 class RepoClient(object):
-
     log = logging.getLogger("promoter")
 
     def __init__(self, config):
         self.config = config
+        self.distro = config.distro
         self.root_url = self.config.repo_url
         self.containers_list_base_url = \
             config.containers['containers_list_base_url']
@@ -218,13 +218,26 @@ class RepoClient(object):
         self.release = get_release_map(self.release)
 
         if exclude_content:
+            found = True
             try:
-                exclude_list = exclude_content['exclude_containers'][
-                    self.release]
+                if self.config.distro in exclude_content[
+                        'exclude_containers'][self.release]:
+                    exclude_list = exclude_content['exclude_containers'][
+                        self.release][self.config.distro]
+                    found = False
             except KeyError:
                 self.log.warning("Unable to find container exclude list for "
-                                 "%s", self.release)
-
+                                 "Release %s, Distro: %s ",
+                                 self.release, self.distro)
+            # TODO (akahat) Remove after merge:
+            #  https://review.opendev.org/c/openstack/tripleo-ci/+/813619
+            if found:
+                try:
+                    exclude_list = exclude_content['exclude_containers'][
+                        self.release]
+                except KeyError:
+                    self.log.warning("Unable to find container exclude list "
+                                     "for %s", self.release)
             try:
                 ppc_exclude_list = exclude_content['exclude_ppc_containers'][
                     self.release]
@@ -241,15 +254,13 @@ class RepoClient(object):
                 self.log.debug("%s not in containers list", name)
 
         containers_dict = {'containers_list': containers_full_list}
-        if ppc_exclude_list:
-            ppc_containers_list = full_list.copy()
-            for name in ppc_exclude_list:
-                try:
-                    ppc_containers_list.remove(name)
-                    self.log.info("Excluding %s from the ppc containers list",
-                                  name)
-                except ValueError:
-                    self.log.debug("%s not in containers list", name)
-            containers_dict['ppc_containers_list'] = ppc_containers_list
-
+        ppc_containers_list = full_list.copy()
+        for name in ppc_exclude_list:
+            try:
+                ppc_containers_list.remove(name)
+                self.log.info("Excluding %s from the ppc containers list",
+                              name)
+            except ValueError:
+                self.log.debug("%s not in containers list", name)
+        containers_dict['ppc_containers_list'] = ppc_containers_list
         return containers_dict
