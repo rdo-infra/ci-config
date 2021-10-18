@@ -25,6 +25,7 @@ class RepoClient(object):
 
     def __init__(self, config):
         self.config = config
+        self.distro = config.distro
         self.root_url = self.config.repo_url
         self.containers_list_base_url = \
             config.containers['containers_list_base_url']
@@ -222,15 +223,27 @@ class RepoClient(object):
                 exclude_list = exclude_content['exclude_containers'][
                     self.release]
             except KeyError:
-                self.log.warning("Unable to find container exclude list for "
-                                 "%s", self.release)
-
+                self.log.warning("Unable to find container exclude list for %s",
+                                 self.release)
+            # TODO (akahat) Remove after merge: https://review.opendev.org/c/openstack/tripleo-ci/+/813619
+            found = True
             try:
-                ppc_exclude_list = exclude_content['exclude_ppc_containers'][
-                    self.release]
+                if self.config.distro in exclude_content['exclude_containers'][
+                        self.release]:
+                    exclude_list = exclude_content['exclude_containers'][
+                        self.release][self.config.distro]
+                    found = False
             except KeyError:
-                self.log.warning("Unable to find ppc container exclude list "
-                                 "for %s", self.release)
+                self.log.warning("Unable to find container exclude list for "
+                                 "Release %s, Distro: %s ",
+                                 self.release, self.distro)
+            if found:
+                try:
+                    ppc_exclude_list = exclude_content['exclude_ppc_containers'][
+                        self.release]
+                except KeyError:
+                    self.log.warning("Unable to find ppc container exclude list "
+                                     "for %s", self.release)
 
         containers_full_list = full_list.copy()
         for name in exclude_list:

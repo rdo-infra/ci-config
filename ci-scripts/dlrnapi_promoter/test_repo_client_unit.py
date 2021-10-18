@@ -61,6 +61,7 @@ class RepoSetup(unittest.TestCase):
         config = type("Config", (), {
             'repo_url': repo_url,
             'release': 'master',
+            'distro': 'centos8',
             'containers': {
                 'build_method': 'tripleo',
                 'container_preffix': config_defaults.containers[
@@ -191,6 +192,8 @@ container_images:
         exclude_config = {
             'exclude_containers': {
                 'master': excluded_containers,
+                'queens': excluded_containers,
+                'ussuri': excluded_containers,
                 'train': excluded_containers,
             },
             'exclude_ppc_containers': {
@@ -360,14 +363,16 @@ class TestGetContainersList(RepoSetup):
                                          mock_log_debug,
                                          mock_log_error):
         self.client.build_method = "tripleo"
-        self.client.release = "foobar"
+        self.client.release = "master"
         self.client.container_preffix = "openstack-"
         self.client.containers_list_path = (
             'container-images/tripleo_containers.yaml')
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
         self.assertEqual(containers_list, {'containers_list':
-                                           ['base', 'os', 'aodh-base']})
+                                           ['base', 'os', 'aodh-base'],
+                                           'ppc_containers_list':
+                                               ['base', 'os', 'aodh-base']})
         mock_log_debug.assert_has_calls([
             mock.call("Attempting Download of containers template at %s",
                       mock.ANY)
@@ -387,6 +392,7 @@ class TestGetContainersList(RepoSetup):
         )
         containers_list = self.client.get_containers_list(
             self.versions_csv_rows[1]['Source Sha'])
+
         self.assertEqual(containers_list,
                          {'containers_list': ['base', 'os', 'aodh-base']})
         mock_log_debug.assert_has_calls([
@@ -496,7 +502,7 @@ class TestGetContainersList(RepoSetup):
                       'nonppc')
         ])
         mock_log_debug.assert_has_calls([
-            mock.call("%s not in containers list", 'nonexisting')
+            mock.call("%s not in containers list", 'nonexist')
         ])
         self.assertFalse(mock_log_error.called)
         self.assertFalse(mock_log_exception.called)
@@ -540,14 +546,15 @@ class TestGetContainersList(RepoSetup):
                                             mock_log_exception,
                                             mock_log_debug,
                                             mock_log_warning):
-        self.client.release = 'ussuri'
+        self.client.release = 'ussuri1'
         input_full_list = ['nova-api', 'neutron-server', 'excluded']
         full_list = self.client.load_excludes(input_full_list)
         full_list = full_list['containers_list']
         self.assertEqual(full_list, input_full_list)
 
         mock_log_warning.assert_has_calls([
-            mock.call('Unable to find container exclude list for %s', 'ussuri')
+            mock.call('Unable to find container exclude list for %s',
+                      self.client.release)
         ])
 
         self.assertFalse(mock_log_error.called)
