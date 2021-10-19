@@ -1,0 +1,25 @@
+---
+release: master
+api_url: https://trunk.rdoproject.org/api-centos9-master-uc
+base_url: https://trunk.rdoproject.org/centos9-master/
+distro_name: centos
+distro_version: 9
+source_namespace: tripleomastercentos9
+target_namespace: tripleomastercentos9
+dlrn_api_host: "trunk.rdoproject.org"
+# dlrn_api_endpoint: "centos9-master"
+dlrn_api_scheme: "https"
+dlrn_api_port: ""
+latest_hashes_count: 100
+manifest_push: false
+ppc_manifests: false
+allowed_clients: dlrn_client,registries_client
+#create_previous: false
+
+promotions:
+  current-tripleo:
+    candidate_label: tripleo-ci-testing
+    criteria:
+      # Jobs to be added as they are defined and qualified
+      - periodic-tripleo-ci-build-containers-centos-9-push-master
+      - periodic-tripleo-centos-9-master-promote-promoted-components-to-tripleo-ci-testing
