@@ -128,10 +128,10 @@ def gather_basic_info_from_criteria(url):
     return api_url, base_url
 
 
-def find_jobs_in_integration_criteria(url):
+def find_jobs_in_integration_criteria(url, promotion_name='current-tripleo'):
     criteria_content = url_response_in_yaml(url)
 
-    return criteria_content['promotions']['current-tripleo']['criteria']
+    return criteria_content['promotions'][promotion_name]['criteria']
 
 
 def find_jobs_in_component_criteria(url, component):
@@ -485,10 +485,11 @@ def track_integration_promotion(args, config):
     influx = args['influx']
     stream = args['stream']
     compare_upstream = args['compare_upstream']
+    promotion_name = args['promotion_name']
 
     url = config[stream]['criteria'][distro][release]['int_url']
     dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
-    promotions = get_dlrn_promotions(dlrn_api_url, "current-tripleo")
+    promotions = get_dlrn_promotions(dlrn_api_url, promotion_name)
     if distro != "centos-7":
         md5sum_url = dlrn_trunk_url + aggregate_hash + '/delorean.repo.md5'
         test_hash = web_scrape(md5sum_url)
@@ -506,7 +507,8 @@ def track_integration_promotion(args, config):
 
     (all_jobs_result_available,
      passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
-    jobs_in_criteria = set(find_jobs_in_integration_criteria(url))
+    jobs_in_criteria = set(find_jobs_in_integration_criteria(
+        url, promotion_name=promotion_name))
     jobs_which_need_pass_to_promote = jobs_in_criteria.difference(passed_jobs)
     jobs_with_no_result = jobs_in_criteria.difference(all_jobs_result_available)
     all_jobs = all_jobs_result_available.union(jobs_with_no_result)
@@ -535,36 +537,38 @@ def track_integration_promotion(args, config):
                                              dlrn_api_suffix,
                                              promotions['commit_hash'],
                                              promotions['distro_hash'])
-
     if influx:
-        # print out jobs in influxdb format
-        log_urls = latest_job_results_url(
-            api_response, all_jobs_result_available)
-        for job in all_jobs:
-            log_url = log_urls.get(job, "N/A")
-            if job in passed_jobs:
-                status = 'passed'
-            elif job in failed_jobs:
-                status = 'failed'
-            else:
-                status = 'pending'
-            if status == 'failed':
-                failure_reason = find_failure_reason(log_url)
-            else:
-                failure_reason = "N/A"
-            jobs_result = {}
-            jobs_result['release'] = release
-            jobs_result['promote_name'] = "current-tripleo"
-            jobs_result['job'] = job
-            jobs_result['test_hash'] = test_hash
-            jobs_result['component'] = None
-            jobs_result['criteria'] = job in jobs_in_criteria
-            jobs_result['status'] = status
-            jobs_result['logs'] = log_url
-            jobs_result['failure_reason'] = failure_reason
-            jobs_result['duration'] = find_job_run_time(
-                log_url)
-            print(influxdb_jobs(jobs_result))
+        # NOTE(dviroel): excluding jobs results from influx when promotion_name
+        #  is "current-tripleo-rdo" since we are not using this info anywhere.
+        if promotion_name != 'current-tripleo-rdo':
+            # print out jobs in influxdb format
+            log_urls = latest_job_results_url(
+                api_response, all_jobs_result_available)
+            for job in all_jobs:
+                log_url = log_urls.get(job, "N/A")
+                if job in passed_jobs:
+                    status = 'passed'
+                elif job in failed_jobs:
+                    status = 'failed'
+                else:
+                    status = 'pending'
+                if status == 'failed':
+                    failure_reason = find_failure_reason(log_url)
+                else:
+                    failure_reason = "N/A"
+                jobs_result = {}
+                jobs_result['release'] = release
+                jobs_result['promote_name'] = promotion_name
+                jobs_result['job'] = job
+                jobs_result['test_hash'] = test_hash
+                jobs_result['component'] = None
+                jobs_result['criteria'] = job in jobs_in_criteria
+                jobs_result['status'] = status
+                jobs_result['logs'] = log_url
+                jobs_result['failure_reason'] = failure_reason
+                jobs_result['duration'] = find_job_run_time(
+                    log_url)
+                print(influxdb_jobs(jobs_result))
 
         # print out last promotions in influxdb format
         promotions['release'] = release
@@ -597,17 +601,17 @@ def track_integration_promotion(args, config):
         # control_url
         c_url = get_dlrn_versions_csv(dlrn_trunk_url,
                                       None,
-                                      "current-tripleo")
+                                      promotion_name)
         # test_url, what is currently getting tested
         t_url = get_dlrn_versions_csv(dlrn_trunk_url,
                                       None,
-                                      "tripleo-ci-testing")
+                                      aggregate_hash)
         c_csv = get_csv(c_url)
         t_csv = get_csv(t_url)
         pkg_diff = get_diff(None,
-                            "current-tripleo",
+                            promotion_name,
                             c_csv,
-                            "tripleo-ci-testing",
+                            aggregate_hash,
                             t_csv)
         if pkg_diff:
             console.print("\n Packages Tested")
@@ -808,6 +812,8 @@ def track_component_promotion(cargs, config):
                # TO-DO w/ tripleo-get-hash
                help=("default:tripleo-ci-testing"
                      "\nexample:tripleo-ci-testing/e6/ad/e6ad..."))
+@ click.option("--promotion_name", required=False, default="current-tripleo",
+               type=click.Choice(["current-tripleo", "current-tripleo-rdo"]))
 @ click.option("--config_file", default=os.path.dirname(__file__)
                + '/conf_ruck_rover.yaml')
 def main(release,
@@ -816,7 +822,8 @@ def main(release,
          influx=False,
          component=None,
          compare_upstream=False,
-         aggregate_hash="tripleo-ci-testing"):
+         aggregate_hash="tripleo-ci-testing",
+         promotion_name="current-tripleo"):
 
     if release in ('osp16-2', 'osp17'):
         stream = 'downstream'
