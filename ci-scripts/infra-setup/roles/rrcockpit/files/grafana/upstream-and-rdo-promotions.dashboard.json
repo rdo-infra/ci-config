@@ -383,13 +383,13 @@
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
-                    "col":0,
+                    "col":null,
                     "desc":false
                 },
                 "styles":[
                     {
                         "$$hashKey":"object:1480",
-                        "alias":"Time",
+                        "alias":"Date of last promotion",
                         "align":"auto",
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "pattern":"Time",
@@ -397,24 +397,8 @@
                         "unit":"dateTimeFromNow"
                     },
                     {
-                        "$$hashKey":"object:1481",
-                        "alias":"",
-                        "align":"auto",
-                        "colorMode":null,
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "decimals":2,
-                        "pattern":"promotion_details",
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
-                    },
-                    {
                         "$$hashKey":"object:1482",
-                        "alias":"promotion details",
+                        "alias":"Promotion Details",
                         "align":"auto",
                         "colorMode":null,
                         "colors":[
@@ -426,12 +410,66 @@
                         "decimals":2,
                         "link":true,
                         "linkTooltip":"link to the results of each job",
-                        "linkUrl":"${__cell_4:raw}",
+                        "linkUrl":"${__cell_5:raw}",
                         "mappingType":1,
                         "pattern":"last",
                         "sanitize":true,
                         "thresholds":[],
                         "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:502",
+                        "alias":"Date of last build",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"latest_build_date",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
+                    },
+                    {
+                        "$$hashKey":"object:513",
+                        "alias":"Promotion Name",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"promo_name",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:1728",
+                        "alias":"",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"promotion_details",
+                        "thresholds":[],
+                        "type":"hidden",
                         "unit":"short"
                     }
                 ],
@@ -490,7 +528,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'victoria' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8' AND \"release\" = 'wallaby') ",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"table",
@@ -527,44 +565,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'ussuri' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
-                        "rawQuery":true,
-                        "refId":"H",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "value"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"mean"
-                                }
-                            ]
-                        ],
-                        "tags":[]
-                    },
-                    {
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "$__interval"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "null"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8' AND \"release\" = 'victoria') ",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"table",
@@ -601,7 +602,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8' AND \"release\" = 'ussuri') ",
                         "rawQuery":true,
                         "refId":"D",
                         "resultFormat":"table",
@@ -638,7 +639,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'stein' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8' AND \"release\" = 'train') ",
                         "rawQuery":true,
                         "refId":"E",
                         "resultFormat":"table",
@@ -675,46 +676,9 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'rocky' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY release, \"name\" fill(0)",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-7' AND \"release\" = 'train') ",
                         "rawQuery":true,
                         "refId":"F",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "value"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"mean"
-                                }
-                            ]
-                        ],
-                        "tags":[]
-                    },
-                    {
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "$__interval"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "null"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT release, distro, promotion_details, last(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'queens' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY release, \"name\" fill(0)",
-                        "rawQuery":true,
-                        "refId":"G",
                         "resultFormat":"table",
                         "select":[
                             [
@@ -1654,7 +1618,8 @@
                 "renderer":"flot",
                 "seriesOverrides":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
+                        "$$hashKey":"object:540",
+                        "alias":"dlrn-promotion.count {name: current-tripleo-rdo}"
                     }
                 ],
                 "spaceLength":10,
@@ -1719,6 +1684,7 @@
                 },
                 "yaxes":[
                     {
+                        "$$hashKey":"object:545",
                         "decimals":0,
                         "format":"short",
                         "label":"Number of Promotions",
@@ -1728,6 +1694,7 @@
                         "show":true
                     },
                     {
+                        "$$hashKey":"object:546",
                         "format":"short",
                         "label":null,
                         "logBase":1,
@@ -2868,7 +2835,8 @@
                 "renderer":"flot",
                 "seriesOverrides":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
+                        "$$hashKey":"object:785",
+                        "alias":"dlrn-promotion.count {name: current-tripleo-rdo}"
                     }
                 ],
                 "spaceLength":10,
@@ -2892,7 +2860,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'wallaby' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'wallaby' AND \"promo_name\" = 'current-tripleo-rdo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -2933,6 +2901,7 @@
                 },
                 "yaxes":[
                     {
+                        "$$hashKey":"object:790",
                         "decimals":0,
                         "format":"short",
                         "label":"Number of Promotions",
@@ -2942,6 +2911,7 @@
                         "show":true
                     },
                     {
+                        "$$hashKey":"object:791",
                         "format":"short",
                         "label":null,
                         "logBase":1,
@@ -4083,7 +4053,8 @@
                 "renderer":"flot",
                 "seriesOverrides":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
+                        "$$hashKey":"object:1502",
+                        "alias":"dlrn-promotion.count {name: current-tripleo-rdo}"
                     }
                 ],
                 "spaceLength":10,
@@ -4107,7 +4078,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'Victoria' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'victoria' AND \"promo_name\" = 'current-tripleo-rdo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -4148,6 +4119,7 @@
                 },
                 "yaxes":[
                     {
+                        "$$hashKey":"object:1507",
                         "decimals":0,
                         "format":"short",
                         "label":"Number of Promotions",
@@ -4157,6 +4129,7 @@
                         "show":true
                     },
                     {
+                        "$$hashKey":"object:1508",
                         "format":"short",
                         "label":null,
                         "logBase":1,
@@ -5297,7 +5270,8 @@
                 "renderer":"flot",
                 "seriesOverrides":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
+                        "$$hashKey":"object:1750",
+                        "alias":"dlrn-promotion.count {name: current-tripleo-rdo}"
                     }
                 ],
                 "spaceLength":10,
@@ -5321,7 +5295,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'ussuri' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'ussuri' AND \"promo_name\" = 'current-tripleo-rdo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -5362,6 +5336,7 @@
                 },
                 "yaxes":[
                     {
+                        "$$hashKey":"object:1755",
                         "decimals":0,
                         "format":"short",
                         "label":"Number of Promotions",
@@ -5371,6 +5346,7 @@
                         "show":true
                     },
                     {
+                        "$$hashKey":"object:1756",
                         "format":"short",
                         "label":null,
                         "logBase":1,
@@ -6525,7 +6501,8 @@
                 "renderer":"flot",
                 "seriesOverrides":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
+                        "$$hashKey":"object:1891",
+                        "alias":"dlrn-promotion.count {name: current-tripleo-rdo}"
                     }
                 ],
                 "spaceLength":10,
@@ -6549,7 +6526,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"promo_name\" = 'current-tripleo-rdo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -6590,6 +6567,7 @@
                 },
                 "yaxes":[
                     {
+                        "$$hashKey":"object:1896",
                         "decimals":0,
                         "format":"short",
                         "label":"Number of Promotions",
@@ -6599,6 +6577,7 @@
                         "show":true
                     },
                     {
+                        "$$hashKey":"object:1897",
                         "format":"short",
                         "label":null,
                         "logBase":1,
@@ -7019,7 +6998,8 @@
                 "renderer":"flot",
                 "seriesOverrides":[
                     {
-                        "alias":"dlrn-promotion.count {name: current-tripleo}"
+                        "$$hashKey":"object:2290",
+                        "alias":"dlrn-promotion.count {name: current-tripleo-rdo}"
                     }
                 ],
                 "spaceLength":10,
@@ -7043,7 +7023,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"repo_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"name\" = 'current-tripleo-rdo' AND \"distro\" = 'CentOS-7') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"promo_name\" = 'current-tripleo-rdo' AND \"distro\" = 'centos-7') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -7084,6 +7064,7 @@
                 },
                 "yaxes":[
                     {
+                        "$$hashKey":"object:2295",
                         "decimals":0,
                         "format":"short",
                         "label":"Number of Promotions",
@@ -7093,6 +7074,7 @@
                         "show":true
                     },
                     {
+                        "$$hashKey":"object:2296",
                         "format":"short",
                         "label":null,
                         "logBase":1,
@@ -7319,6 +7301,7 @@
                 "type":"table-old"
             }
         ],
+        "refresh":false,
         "schemaVersion":26,
         "style":"dark",
         "tags":[],
