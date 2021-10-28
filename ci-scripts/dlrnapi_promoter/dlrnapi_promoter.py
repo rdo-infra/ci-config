@@ -5,8 +5,7 @@ Main file for the promoter
 import argparse
 import logging
 import os
-import shutil
-from datetime import datetime
+from datetime import date, datetime
 
 import common
 from common import LockError, get_log_file
@@ -16,6 +15,20 @@ from logic import Promoter
 
 DEFAULT_CONFIG_RELEASE = "CentOS-8/master.yaml"
 DEFAULT_CONFIG_ROOT = "staging"  # "rdo" for production environment
+
+
+def add_logs(log_file, archival_file):
+    banner1 = "\n\n" + "#" * 10 + datetime.now().isoformat(
+        timespec='minutes') + "#" * 10 + "\n\n"
+    log_data = open(log_file).read()
+    if os.path.isfile(archival_file):
+        with open(archival_file, 'a') as f:
+            f.write(banner1)
+            f.write(log_data)
+    else:
+        with open(archival_file, 'w') as f:
+            f.write(banner1)
+            f.write(log_data)
 
 
 def promote_all(promoter, args):
@@ -136,10 +149,10 @@ def main(cmd_line=None):
     promoter = Promoter(config)
 
     args.handler(promoter, args)
-    c_date_t = datetime.now().isoformat(timespec='minutes')
-    log_file_name = log_file.split(".")[0] + "_" + c_date_t + ".log"
-    shutil.copyfile(log_file, log_file_name)
-    log.info("Log file copied: {}".format(log_file_name))
+    date_today = date.today().isoformat()
+    log_file_name = log_file.split(".")[0] + "_" + date_today + ".log"
+    add_logs(log_file, log_file_name)
+    log.info("Logs appended to: {}".format(log_file_name))
 
 
 if __name__ == '__main__':
