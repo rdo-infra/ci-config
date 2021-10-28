@@ -19,7 +19,8 @@ DEFAULT_CONFIG_ROOT = "staging"  # "rdo" for production environment
 
 
 def promote_all(promoter, args):
-    promoter.promote_all()
+    pairs = promoter.promote_all()
+    return pairs
 
 
 def force_promote(promoter, args):
@@ -30,7 +31,10 @@ def force_promote(promoter, args):
               " provided")
         raise
 
-    promoter.promote(candidate_hash, args.candidate_label, args.target_label)
+    pairs = promoter.promote(candidate_hash,
+                             args.candidate_label,
+                             args.target_label)
+    return pairs
 
 
 def arg_parser(cmd_line=None, config=None):
@@ -135,11 +139,12 @@ def main(cmd_line=None):
                             cli_args=args)
     promoter = Promoter(config)
 
-    args.handler(promoter, args)
-    c_date_t = datetime.now().isoformat(timespec='minutes')
-    log_file_name = log_file.split(".")[0] + "_" + c_date_t + ".log"
-    shutil.copyfile(log_file, log_file_name)
-    log.info("Log file copied: {}".format(log_file_name))
+    paris = args.handler(promoter, args)
+    if paris:
+        c_date_t = datetime.now().isoformat(timespec='minutes')
+        log_file_name = log_file.split(".")[0] + "_" + c_date_t + ".log"
+        shutil.copyfile(log_file, log_file_name)
+        log.info("Log file copied: {}".format(log_file_name))
 
 
 if __name__ == '__main__':
