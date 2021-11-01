@@ -16,6 +16,23 @@ ppc_manifests: false
 allowed_clients: dlrn_client,registries_client
 #create_previous: false
 
+overcloud_images:
+  qcow_servers:
+    promoter:
+      user: "uploader"
+      host: "images.rdoproject.org"
+      root: images/
+      client: "sftp"
+      keypath: "~/.ssh/id_rsa_uploader"
+    qcow_images:
+      - ironic-python-agent.tar
+      - ironic-python-agent.tar.md5
+      - overcloud-full.tar
+      - overcloud-full.tar.md5
+      - overcloud-hardended-uefi-full.qcow2
+      - overcloud-hardended-uefi-full.qcow2.md5
+default_qcow_server: promoter
+
 promotions:
   current-tripleo:
     candidate_label: tripleo-ci-testing
