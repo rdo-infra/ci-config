@@ -7,6 +7,6 @@
     - name: Run dnf update and install python3
       raw: "{{ item }}"
       loop:
-        - sudo dnf -y update
-        - sudo dnf -y install python3
+        - sudo $(command -v dnf || command -v yum) -y update
+        - sudo $(command -v dnf || command -v yum) -y install python3
       changed_when: true
