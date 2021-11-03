@@ -52,7 +52,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Export grafana as json files")
 
-    parser.add_argument('--host', default='http://localhost')
+    parser.add_argument('--host', default='http://localhost:8080')
     parser.add_argument('--key', default='grafana.key')
 
     args = parser.parse_args()
