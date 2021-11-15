@@ -93,7 +93,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--distro',
         default='centos-8',
-        choices=['centos-7', 'centos-8', 'rhel-8', 'rhel-9'],
+        choices=['centos-7', 'centos-8', 'centos-9', 'rhel-8', 'rhel-9'],
         help='Distribution to query.'
     )
     parser.add_argument(
