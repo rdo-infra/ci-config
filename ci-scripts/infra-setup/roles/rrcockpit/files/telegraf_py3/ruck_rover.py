@@ -135,6 +135,7 @@ def find_jobs_in_integration_criteria(url, promotion_name='current-tripleo'):
 
 
 def find_jobs_in_component_criteria(url, component):
+    import pudb; pudb.set_trace()
     criteria_content = url_response_in_yaml(url)
 
     return criteria_content['promoted-components'][component]
