@@ -7,6 +7,18 @@
         docker_device: /dev/loop0
         docker_partition: /dev/mapper/loop0p1
 
+    - name: Modeprobe loop device
+      command: "modprobe loop"
+
+    - name: Check loop is loaded
+      shell: "lsmod | grep loop"
+      register: lsmod_out
+
+    - name: Fail if loop is not loaded
+      fail:
+        msg: "Loop kernel module is not loaded"
+      when: "'loop' not in lsmod_out.stdout"
+
     - name: Create loop device
       command: "mknod -m640 {{ docker_device }} b 7 0"
       args:
