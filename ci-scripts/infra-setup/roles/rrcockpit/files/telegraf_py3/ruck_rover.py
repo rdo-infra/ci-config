@@ -434,7 +434,8 @@ def influxdb_jobs(jobs_result):
                              'logs="{logs}",'
                              'failure_reason="{failure_reason}",'
                              'duration="{duration}",'
-                             'component="{component}"')
+                             'component="{component}",'
+                             'distro="{distro}"')
 
     if jobs_result['component'] is None:
         jobs_result['job_type'] = "integration"
@@ -568,6 +569,7 @@ def track_integration_promotion(args, config):
                 jobs_result['failure_reason'] = failure_reason
                 jobs_result['duration'] = find_job_run_time(
                     log_url)
+                jobs_result['distro'] = distro
                 print(influxdb_jobs(jobs_result))
 
         # print out last promotions in influxdb format
@@ -734,6 +736,7 @@ def track_component_promotion(cargs, config):
                 jobs_result['failure_reason'] = failure_reason
                 jobs_result['duration'] = find_job_run_time(
                     log_url)
+                jobs_result['distro'] = distro
                 # print out jobs in influxdb format
                 print(influxdb_jobs(jobs_result))
 
