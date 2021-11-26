@@ -6,6 +6,7 @@ usage()
     echo "usage: simple script to setup the cockpit"
     echo " -s, --start, fire it up "
     echo " -c, --clean, to stop and clean up containers"
+    echo " -C, --clean-dev, to stop and clean up containers that hold code of this repo"
     echo " -h, --help, usage"
 }
 
@@ -23,17 +24,23 @@ start()
     docker-compose up
 }
 
-clean()
+function clean()
 {
   # clean
     docker system prune -f
-    running_containers=`docker ps -a --format="{{.ID}}"`
+    running_containers=`docker ps -a $@ --format="{{.ID}}"`
     for i in $running_containers; do
         echo $i;
         docker rm -f $i
     done
     sudo docker rmi -f $(sudo docker images -q)\n
 }
+
+clean_dev()
+{
+    clean --filter "name=sidecar" --filter "name=telegraf_py3" --filter "name=compare_rpm"
+}
+
 
 if [ -z "$1" ]; then
     usage
@@ -51,6 +58,8 @@ while [ "$1" != "" ]; do
                                 start
                                 ;;
         -c | --clean )          clean
+                                ;;
+        -C | --clean-dev )      clean_dev
                                 ;;
         -h | --help )           usage
                                 exit
