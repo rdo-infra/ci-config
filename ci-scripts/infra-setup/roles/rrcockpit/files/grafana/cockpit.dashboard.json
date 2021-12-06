@@ -805,7 +805,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'CANCELED' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"type\" = 'upstream') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -855,7 +855,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"result\" != 'CANCELED' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"result\" !~ /SKIPPED|NODE_FAILURE|TIMED_OUT|CANCELED|ABORTED|RETRY|RETRY_LIMIT|LOST|ERROR/) AND $timeFilter",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -911,7 +911,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"result\" != 'CANCELED' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"result\" = 'TIMED_OUT') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -960,6 +960,44 @@
                                 "value":"TIMED_OUT"
                             }
                         ]
+                    },
+                    {
+                        "alias":"DISK_FULL",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"type\" = 'upstream' AND \"result\" = 'DISK_FULL') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"D",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
                     }
                 ],
                 "timeFrom":null,
@@ -1014,7 +1052,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic'  AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"type\" = 'upstream' AND \"pipeline\"='periodic') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -1064,7 +1102,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"select count(\"result_num\") from \"build\" where ( \"passed\" = 'False' and \"type\" = 'upstream' and \"pipeline\" = 'periodic' and result !~ /SKIPPED|NODE_FAILURE|TIMED_OUT|CANCELED|ABORTED|RETRY|RETRY_LIMIT|LOST|ERROR/ ) and $timeFilter\n",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -1120,7 +1158,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"result\" = 'TIMED_OUT') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -1169,6 +1207,44 @@
                                 "value":"TIMED_OUT"
                             }
                         ]
+                    },
+                    {
+                        "alias":"DISK_FULL",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"type\" = 'upstream' AND \"type\" = 'upstream' AND \"pipeline\" = 'periodic' AND \"result\" = 'DISK_FULL') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"D",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
                     }
                 ],
                 "timeFrom":null,
@@ -1223,7 +1299,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"type\" = 'rdo') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -1267,7 +1343,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'rdo' AND result !~ /SKIPPED|NODE_FAILURE|TIMED_OUT|CANCELED|ABORTED|RETRY|RETRY_LIMIT|LOST|ERROR/ ) and $timeFilter",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -1323,7 +1399,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'rdo' AND \"result\" = 'TIMED_OUT') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -1372,6 +1448,44 @@
                                 "value":"TIMED_OUT"
                             }
                         ]
+                    },
+                    {
+                        "alias":"DISK_FULL",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"type\" = 'rdo' AND \"result\" = 'DISK_FULL') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"D",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
                     }
                 ],
                 "timeFrom":null,
@@ -1878,7 +1992,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND  \"branch\"='master' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND  \"branch\"='master') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -1928,7 +2042,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic'  AND  \"branch\"='master' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"pipeline\"='periodic'  AND  \"branch\"='master' AND result !~ /SKIPPED|NODE_FAILURE|TIMED_OUT|CANCELED|ABORTED|RETRY|RETRY_LIMIT|LOST|ERROR/ ) and $timeFilter\n",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -1984,7 +2098,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND  \"branch\"='master'  AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND  \"branch\"='master'  AND  \"result\" = 'TIMED_OUT') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -2033,6 +2147,44 @@
                                 "value":"TIMED_OUT"
                             }
                         ]
+                    },
+                    {
+                        "alias":"DISK_FULL",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"type\" = 'upstream' AND \"pipeline\" = 'periodic' AND \"branch\" = 'master' AND \"result\" = 'DISK_FULL') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"D",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
                     }
                 ],
                 "timeFrom":null,
@@ -2087,7 +2239,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-wallaby.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True'  AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-wallaby.*/) AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -2137,7 +2289,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-wallaby.*/ AND  \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-wallaby.*/ AND  result !~ /SKIPPED|NODE_FAILURE|TIMED_OUT|CANCELED|ABORTED|RETRY|RETRY_LIMIT|LOST|ERROR/ ) and $timeFilter",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -2193,7 +2345,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-wallaby.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-wallaby.*/ AND \"result\" = 'TIMED_OUT') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -2242,6 +2394,44 @@
                                 "value":"TIMED_OUT"
                             }
                         ]
+                    },
+                    {
+                        "alias":"DISK_FULL",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"type\" = 'upstream' AND \"pipeline\" = 'periodic' and \"job_name\" =~ /tripleo-ci.*-wallaby.*/ AND \"result\" = 'DISK_FULL') AND $timeFilter\n",
+                        "rawQuery":true,
+                        "refId":"D",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
                     }
                 ],
                 "timeFrom":null,
@@ -2296,7 +2486,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-victoria.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True'  AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-victoria.*/) AND $timeFilter\n",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -2346,7 +2536,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-victoria.*/ AND  \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-victoria.*/ AND  result !~ /SKIPPED|NODE_FAILURE|TIMED_OUT|CANCELED|ABORTED|RETRY|RETRY_LIMIT|LOST|ERROR/ ) and $timeFilter\n",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -2402,7 +2592,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-victoria.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-victoria.*/ AND \"result\" = 'TIMED_OUT') AND $timeFilter\n",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -2451,6 +2641,44 @@
                                 "value":"TIMED_OUT"
                             }
                         ]
+                    },
+                    {
+                        "alias":"DISK_FULL",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"type\" = 'upstream' AND \"pipeline\" = 'periodic' and \"job_name\" =~ /tripleo-ci.*-victoria.*/ AND \"result\" = 'DISK_FULL') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"D",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
                     }
                 ],
                 "timeFrom":null,
@@ -2505,7 +2733,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-ussuri.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True'  AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-ussuri.*/) AND $timeFilter\n",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -2555,7 +2783,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-ussuri.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-ussuri.*/ AND  result !~ /SKIPPED|NODE_FAILURE|TIMED_OUT|CANCELED|ABORTED|RETRY|RETRY_LIMIT|LOST|ERROR/ ) and $timeFilter\n",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -2611,7 +2839,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-ussuri.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-ussuri.*/ AND \"result\" = 'TIMED_OUT') AND $timeFilter\n",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -2660,6 +2888,44 @@
                                 "value":"TIMED_OUT"
                             }
                         ]
+                    },
+                    {
+                        "alias":"DISK_FULL",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"type\" = 'upstream' AND \"pipeline\" = 'periodic' and \"job_name\" =~ /tripleo-ci.*-ussuri.*/ AND \"result\" = 'DISK_FULL') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"D",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
                     }
                 ],
                 "timeFrom":null,
@@ -2714,7 +2980,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-train.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True'  AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-train.*/) AND $timeFilter\n",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -2764,7 +3030,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-train.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-train.*/ AND  result !~ /SKIPPED|NODE_FAILURE|TIMED_OUT|CANCELED|ABORTED|RETRY|RETRY_LIMIT|LOST|ERROR/ ) and $timeFilter\n",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -2820,7 +3086,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-train.*/ AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-train.*/ AND \"result\" = 'TIMED_OUT') AND $timeFilter\n",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -2869,6 +3135,44 @@
                                 "value":"TIMED_OUT"
                             }
                         ]
+                    },
+                    {
+                        "alias":"DISK_FULL",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"type\" = 'upstream' AND \"pipeline\" = 'periodic' and \"job_name\" =~ /tripleo-ci.*-train.*/ AND \"result\" = 'DISK_FULL') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"D",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
                     }
                 ],
                 "timeFrom":null,
