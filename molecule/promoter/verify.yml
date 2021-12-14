@@ -70,6 +70,27 @@
         url: http://localhost/
         dest: "/home/{{ promoter_user }}/staging_promotion_index.html"
 
+    # Log rotation is very difficult to check. Even when configuration works and a forced run completes
+    # successfully, a lot of time was spent in selinux policy configuaration, and the only way to check was
+    # just "wait for it to fail"
+    # Unless there's a way to run logorate with the exect selinux context, this is the only test we can launch right now
+    - name: Dry run log rotation
+      become: true
+      command: logrotate -d /etc/logrotate.d/promoter
+      register: logrotate_run
+      changed_when: true
+
+    - name: Ensure Log rotation is configured properly
+      assert:
+        that: '"error:" not in logrotate_run.stderr'
+        fail_msg: "Logrotate configuration file contains errors"
+        success_msg: "Logrotate dry run completed successfully"
+
+    - name: Ensure Log rotation is taking the correct pattern
+      assert:
+        that: '"rotating pattern: /home/{{ promoter_user }}/{{ promoter_logs }}/*.log" in logrotate_run.stderr'
+        fail_msg: "Rotating pattern in rotation is wrong"
+        success_msg: "Rotating pattern in rotation is correct"
 
     - name: Ensure selinux policy is installed
       shell: |

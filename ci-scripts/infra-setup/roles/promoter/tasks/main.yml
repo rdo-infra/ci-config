@@ -60,6 +60,25 @@
       rm -f /tmp/logrotate-promoter.pp /tmp/logrotate-promoter.mod
   when: policy is changed
 
+- name: add configuration for the log rotation
+  copy:
+    content: |
+        /home/{{ promoter_user }}/{{ promoter_logs }}/*.log {
+            daily
+            missingok
+            su {{ promoter_user }} {{ promoter_user }}
+            dateext
+            dateyesterday
+            notifempty
+            delaycompress
+            rotate 60
+        }
+    dest: /etc/logrotate.d/promoter
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+
 #
 # Apache setup (expose log)
 #
