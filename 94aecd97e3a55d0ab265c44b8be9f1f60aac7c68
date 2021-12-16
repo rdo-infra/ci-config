@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "631e9ca5_af4b6d49",
+        "filename": "ci-scripts/node_holder/README.md",
+        "patchSetId": 8
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2021-12-16T16:13:43Z",
+      "side": 1,
+      "message": "So, this will work even if file name is different for example: projects.yaml - the only assumption we are making here is that file name contains a `.yaml` extension.\n\n~~~\n$ ./ci-scripts/node_holder/node_holder.py -a https://review.rdoproject.org/r/c/rdo-jobs/+/37139/1/zuul.d/projects.yaml\n\nPatch: https://review.rdoproject.org/r/c/rdo-jobs/+/37139/1/zuul.d/projects.yaml contains more than 1 job, please pass --job_name \u003cname of job\u003e which job you want to hold\n~~~",
+      "parentUuid": "33192d4a_f41a5a58",
+      "range": {
+        "startLine": 55,
+        "startChar": 77,
+        "endLine": 55,
+        "endChar": 87
+      },
+      "revId": "94aecd97e3a55d0ab265c44b8be9f1f60aac7c68",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "aa607d56_7a3c0878",
         "filename": "ci-scripts/node_holder/README.md",
         "patchSetId": 8
@@ -36,6 +60,30 @@
       "writtenOn": "2021-12-16T10:03:32Z",
       "side": 1,
       "message": "Is this actually deleting an autohold request? Deleting a node requires access to nodepool\u0027s admin CLI.",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 16
+      },
+      "revId": "94aecd97e3a55d0ab265c44b8be9f1f60aac7c68",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "79207968_2a8c3f67",
+        "filename": "ci-scripts/node_holder/README.md",
+        "patchSetId": 8
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2021-12-16T16:13:43Z",
+      "side": 1,
+      "message": "Hey Matthieu,\n\n\nI didn\u0027t understand your comment completely:-\n\nWith delete I mean the task, corresponding to the below command:-\n~~~\npodman run --rm --name zc_container -v $HOME/.config/zuul/:/config:Z zuul/zuul-client:latest -c /config/client.conf --use-config rdoproject.org autohold-delete \u003cid\u003e\n~~~\n\n\n* Do you mean we should reframe the wordings here - Remove a node from autohold?\n* Or are you asking if this removing a node from autohold is working?",
+      "parentUuid": "aa607d56_7a3c0878",
       "range": {
         "startLine": 122,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "212e4ea4_fb57fd26",
+        "filename": "ci-scripts/node_holder/node_holder.py",
+        "patchSetId": 8
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2021-12-16T16:13:43Z",
+      "side": 1,
+      "message": "Good point, I will remove disable SSL in the next patchset.\n\nI added that originally because I was getting warnings I guess I don\u0027t have correct local certificates in my local system(need to dig deeper)",
+      "parentUuid": "909ff029_149c265e",
+      "range": {
+        "startLine": 119,
+        "startChar": 33,
+        "endLine": 119,
+        "endChar": 45
+      },
+      "revId": "94aecd97e3a55d0ab265c44b8be9f1f60aac7c68",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "99421674_ddd81776",
         "filename": "ci-scripts/node_holder/node_holder.py",
         "patchSetId": 8
@@ -82,6 +154,30 @@
       "writtenOn": "2021-12-16T10:03:32Z",
       "side": 1,
       "message": "same remark about SSL",
+      "range": {
+        "startLine": 194,
+        "startChar": 13,
+        "endLine": 194,
+        "endChar": 59
+      },
+      "revId": "94aecd97e3a55d0ab265c44b8be9f1f60aac7c68",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5b207369_06331615",
+        "filename": "ci-scripts/node_holder/node_holder.py",
+        "patchSetId": 8
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2021-12-16T16:13:43Z",
+      "side": 1,
+      "message": "thanks, I will remove disable SSL in the next patchset.",
+      "parentUuid": "99421674_ddd81776",
       "range": {
         "startLine": 194,
         "startChar": 13,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "f3e44540_1f067dab",
+        "filename": "ci-scripts/node_holder/node_holder.py",
+        "patchSetId": 8
+      },
+      "lineNbr": 263,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2021-12-16T16:13:43Z",
+      "side": 1,
+      "message": "Correct,  I have not added a variable for this because I want to keep cli options to minimum.\n\nI have documented in L#417 about the assumption that we expect a file at $HOME/.config/zuul/client.conf.\n\n~~~\n./ci-scripts/node_holder/node_holder.py --help\n\nScript to add a node on hold for debug, this script assumes you have a config file(containing: url/tenant/auth_token) at $HOME/.config/zuul/client.conf. You need to request someone from infra to create a token for you.\n~~~",
+      "parentUuid": "3054c29e_85bcc11b",
+      "range": {
+        "startLine": 263,
+        "startChar": 35,
+        "endLine": 263,
+        "endChar": 60
+      },
+      "revId": "94aecd97e3a55d0ab265c44b8be9f1f60aac7c68",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "144b0522_2efdb2df",
         "filename": "ci-scripts/node_holder/node_holder.py",
         "patchSetId": 8
@@ -128,6 +248,30 @@
       "writtenOn": "2021-12-16T10:05:45Z",
       "side": 1,
       "message": "This assumes the config files has entries named \u0027rdoproject.org\u0027 and \u0027tripleo-ci-internal\u0027",
+      "range": {
+        "startLine": 396,
+        "startChar": 1,
+        "endLine": 399,
+        "endChar": 38
+      },
+      "revId": "94aecd97e3a55d0ab265c44b8be9f1f60aac7c68",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b7d93fed_eef87671",
+        "filename": "ci-scripts/node_holder/node_holder.py",
+        "patchSetId": 8
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2021-12-16T16:13:43Z",
+      "side": 1,
+      "message": "Yes, I made that assumption to pass cli option easier: \u0027--config rdo\u0027, I will try to document this better in next patchset.",
+      "parentUuid": "144b0522_2efdb2df",
       "range": {
         "startLine": 396,
         "startChar": 1,
