@@ -32,7 +32,7 @@ clean()
         echo $i;
         docker rm -f $i
     done
-    sudo docker rmi -f $(sudo docker images -q)\n
+    sudo docker rmi -f $(sudo docker images -q)
 }
 
 if [ -z "$1" ]; then
