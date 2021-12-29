@@ -63,7 +63,7 @@ export DISTRO_HASH=$DISTRO_HASH
 export COMPONENT_NAME=$COMPONENT_NAME
 EOF
 
-if [ "$EXTENDED_HASH" != 'None']; then
+if [ "$EXTENDED_HASH" != 'None' ]; then
 cat >> $WORKSPACE/hash_info.sh << EOF
 export EXTENDED_HASH=$EXTENDED_HASH
 EOF
