@@ -3,6 +3,11 @@ quiet: false
 skip_list:
     # TODO: fix temporary skips
     - 106  # Role name ... does not match ``^[a-z][a-z0-9_]+$`` pattern
+    - risky-file-permissions
+    - ignore-errors
+    - unnamed-task
+    - role-name
+    - no-handler
 verbosity: 1
 exclude_paths:
     - jenkins
@@ -10,3 +15,7 @@ exclude_paths:
     # temporary due to zuul_return module
     # https://github.com/ansible/ansible-lint/issues/372
     - playbooks/post-run.yml
+    - molecule/container_push/promote_containers.yml
+    - molecule/compose_promoter/authorized_keys_update.yml
+mock_roles:
+  - tox
