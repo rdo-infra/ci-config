@@ -1,28 +1,28 @@
 ---
-  - name: Create a temporary private key file
-    tempfile:
-      state: file
-    register: tmp_ssh_private_key
+- name: Create a temporary private key file
+  tempfile:
+    state: file
+  register: tmp_ssh_private_key
 
-  - name: Copy private key content to temporary key
-    copy:
-      content: "{{ ssh_private_key_content }}"
-      dest: "{{ tmp_ssh_private_key.path }}"
-      mode: 0600
+- name: Copy private key content to temporary key
+  copy:
+    content: "{{ ssh_private_key_content }}"
+    dest: "{{ tmp_ssh_private_key.path }}"
+    mode: 0600
 
-  - name: Generate public key from private key for uploader user
-    shell: >
-      ssh-keygen -y -t rsa -q -C '' -N '' -f {{ tmp_ssh_private_key.path }}
-    register: tmp_ssh_public_key
-    changed_when: false
+- name: Generate public key from private key for uploader user
+  shell: >
+    ssh-keygen -y -t rsa -q -C '' -N '' -f {{ tmp_ssh_private_key.path }}
+  register: tmp_ssh_public_key
+  changed_when: false
 
-  - name: Set authorized key took from file
-    authorized_key:
-      state: present
-      user: "{{ lookup('env', 'USER') }}"
-      key: "{{ tmp_ssh_public_key.stdout }}"
+- name: Set authorized key took from file
+  authorized_key:
+    state: present
+    user: "{{ lookup('env', 'USER') }}"
+    key: "{{ tmp_ssh_public_key.stdout }}"
 
-  - name: Remove the temporary files
-    file:
-      path: "{{ tmp_ssh_private_key.path }}"
-      state: absent
+- name: Remove the temporary files
+  file:
+    path: "{{ tmp_ssh_private_key.path }}"
+    state: absent
