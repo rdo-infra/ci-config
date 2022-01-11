@@ -23,7 +23,7 @@ if [[ $PROMOTER_TYPE == "upstream" ]]; then
     DEFAULT_RELEASES=( "CentOS-8/master" "CentOS-8/wallaby" \
                        "CentOS-8/ussuri" \
                        "CentOS-8/train" "CentOS-7/train" \
-                       "CentOS-9/master" )
+                       "CentOS-9/master" "CentOS-9/wallaby" )
 else
     DEFAULT_RELEASES=( "RedHat-8/rhos-16.2" "RedHat-8/rhos-17" )
 fi
