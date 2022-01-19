@@ -76,7 +76,10 @@
 
             # Use variables provided by a job earlier in the pipeline, if available
             delorean_hash=${{delorean_current_hash:-current}}
-            if [[ "${{RDO_VERSION}}" == *"centos8"* ]]; then
+            if [[ "${{RDO_VERSION}}" == *"centos9"* ]]; then
+                delorean_url="http://trunk.rdoproject.org/centos9-{openstack_release}/${{LOCATION}}/${{delorean_hash}}/delorean.repo"
+                delorean_deps_url="http://trunk.rdoproject.org/centos9-{openstack_release}/delorean-deps.repo"
+            elif [[ "${{RDO_VERSION}}" == *"centos8"* ]]; then
                 delorean_url="http://trunk.rdoproject.org/centos8-{openstack_release}/${{LOCATION}}/${{delorean_hash}}/delorean.repo"
                 delorean_deps_url="http://trunk.rdoproject.org/centos8-{openstack_release}/delorean-deps.repo"
             else

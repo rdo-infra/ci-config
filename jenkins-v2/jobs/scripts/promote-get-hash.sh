@@ -1,4 +1,4 @@
-if [[ "${RDO_VERSION}" == *"centos8"* ]]; then
+if [[ "${RDO_VERSION}" == *"centos8"* ]] || [[ "${RDO_VERSION}" == *"centos9"* ]]; then
     export NEW_HASH=`curl -L ${DELOREAN_URL}.md5`
     export OLD_HASH=`curl -L ${LAST_PROMOTED_URL}.md5`
 
