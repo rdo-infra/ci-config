@@ -19,9 +19,9 @@ EOF
 
 # Get nodes
 if [ $CPU_ARCH == "ppc64le" ]; then
-    nodes=$(cico -q node get --arch $CPU_ARCH --flavor $CICO_FLAVOR --release $CICO_OS_RELEASE --retry-count 6 --retry-interval 60  --count ${NODE_COUNT} --column hostname --column ip_address --column comment -f value)
+    nodes=$(cico -q node get --arch $CPU_ARCH --flavor $CICO_FLAVOR --release $CICO_OS_RELEASE --retry-count 10 --retry-interval 180  --count ${NODE_COUNT} --column hostname --column ip_address --column comment -f value)
 else
-    nodes=$(cico -q node get --arch $CPU_ARCH --release $CICO_OS_RELEASE --retry-count 6 --retry-interval 60  --count ${NODE_COUNT} --column hostname --column ip_address --column comment -f value)
+    nodes=$(cico -q node get --arch $CPU_ARCH --release $CICO_OS_RELEASE --retry-count 10 --retry-interval 180  --count ${NODE_COUNT} --column hostname --column ip_address --column comment -f value)
 fi
 
 if [[ $(echo "$nodes" | wc -l) -ne ${NODE_COUNT}  ]]; then
