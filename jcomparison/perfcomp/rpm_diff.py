@@ -1,9 +1,10 @@
 import os
 import re
 
-from perfcomp.config import NAME_TO_PROJECT, RPM_LOC
+from perfcomp.utils import get_file, red, green
 from perfcomp.filediff import make_diff
-from perfcomp.utils import get_file, green, red
+from perfcomp.config import RPM_LOC, NAME_TO_PROJECT
+
 
 PKG_NAME = re.compile(r'(^[a-z0-9-]+)-[0-9]+\.')
 COMMIT_HASH = re.compile(r'\.20\d+\.([a-z0-9]{7})\.')
@@ -31,6 +32,8 @@ def check_packages(inline, uniq1, uniq2):
 def rpms(good, bad):
     g = get_file(good, RPM_LOC, json_file=False)
     b = get_file(bad, RPM_LOC, json_file=False)
+    if g is None or b is None:
+        raise Exception("No RPMs files are found")
     files_diff = make_diff(fromstr=g, tostr=b)
     return files_diff
 

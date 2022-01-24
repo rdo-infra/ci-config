@@ -3,8 +3,9 @@ import argparse
 import datetime
 import re
 
+from perfcomp.utils import log, get_file, json_from_sql, save_to_file
 from perfcomp.config import DATA, SQLITE_FILES
-from perfcomp.utils import get_file, json_from_sql, log, save_to_file
+
 
 TASK_NAME = re.compile('^[^:]+ : ')
 

@@ -1,5 +1,5 @@
+from perfcomp.utils import get_file, red, green
 from perfcomp.config import PIP_LOC
-from perfcomp.utils import get_file, green, red
 
 
 def get_pip_modules_names(file_content):

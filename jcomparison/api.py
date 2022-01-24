@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, abort, render_template, request
+from flask import Flask, render_template, request, abort
 from perfcomp.jobdiff import JobDiff
+
 
 app = Flask(__name__)
 
@@ -17,8 +18,8 @@ def compare():
         abort(404)
     data = JobDiff(good, bad,
                    ansible_playbooks_diff=ansible_playbooks_diff,
-                   rpm_diff=rpm_diff,
-                   pip_diff=pip_diff
+                   rpm_diff_b=rpm_diff,
+                   pip_diff_b=pip_diff
                    ).generate()
     return render_template('full.html.j2', **data)
 
