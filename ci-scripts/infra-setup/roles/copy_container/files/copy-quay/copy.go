@@ -50,11 +50,7 @@ func (opts *copyOptions) run(cmd *cobra.Command, args []string) error {
 			}
 		}
 	} else {
-		var job = opts.global.job
-		if opts.global.job == "" {
-			job = getJobPerRelease(opts.global.release)
-		}
-		image := getLatestGoodBuildURL(job, opts.global)
+		image := getLatestGoodBuildURL(opts.global.job, opts.global)
 		data := fetchLogs(image)
 		res := parseLog(data)
 		repositories, err := listRepositories(opts.global.toNamespace)
@@ -86,9 +82,9 @@ func (opts *copyOptions) run(cmd *cobra.Command, args []string) error {
 				}
 			}
 			// from := fmt.Sprintf("docker://%s/%s/%s:current-tripleo", opts.global.pullRegistry, opts.global.fromNamespace, res[0])
-			from := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pullRegistry, opts.global.fromNamespace, res[0], tagToPull)
-			to := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pushRegistry, opts.global.toNamespace, res[0], tagToPush)
-			_, err := copyImage(from, to)
+			//from := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pullRegistry, opts.global.fromNamespace, res[0], tagToPull)
+			//to := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pushRegistry, opts.global.toNamespace, res[0], tagToPush)
+			//_, err := copyImage(from, to)
 			if err != nil {
 				failed_push = append(failed_push, res[0])
 				logrus.Errorln("Failed to copy container image: ", err)
