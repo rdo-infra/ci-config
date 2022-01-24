@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"log"
 
 	"github.com/containers/image/v5/signature"
 	"github.com/containers/image/v5/types"
@@ -22,7 +24,9 @@ type globalOptions struct {
 	job           string
 	token         string
     release       string
+    configFile    string
 	debug         bool
+    Entry         ConfigEntry
 }
 
 var opts = &globalOptions{}
@@ -39,19 +43,21 @@ func createApp() (*cobra.Command, *globalOptions) {
 		SilenceErrors: true,
 	}
 
-	rootCommand.PersistentFlags().StringVar(&opts.zuulAPI, "zuul-api", "https://review.rdoproject.org/zuul/api/", "Zuul api endpoint")
-	rootCommand.PersistentFlags().StringVar(&opts.pullRegistry, "pull-registry", "trunk.registry.rdoproject.org", "Registry to pull images from")
-	rootCommand.PersistentFlags().StringVar(&opts.pushRegistry, "push-registry", "quay.io", "Registry to push images to")
-	rootCommand.PersistentFlags().StringVar(&opts.fromNamespace, "from-namespace", "tripleomaster", "Namespace of pushed image")
-	rootCommand.PersistentFlags().StringVar(&opts.toNamespace, "to-namespace", "tripleomaster", "Namespace of pushed image")
+	rootCommand.PersistentFlags().StringVar(&opts.zuulAPI, "zuul-api", "", "Zuul api endpoint")
+	rootCommand.PersistentFlags().StringVar(&opts.pullRegistry, "pull-registry", "", "Registry to pull images from")
+	rootCommand.PersistentFlags().StringVar(&opts.pushRegistry, "push-registry", "", "Registry to push images to")
+	rootCommand.PersistentFlags().StringVar(&opts.fromNamespace, "from-namespace", "", "Namespace of pushed image")
+	rootCommand.PersistentFlags().StringVar(&opts.toNamespace, "to-namespace", "", "Namespace of pushed image")
 	rootCommand.PersistentFlags().StringVar(&opts.hash, "hash", "", "Hash to be pulled/pushed")
 	rootCommand.PersistentFlags().StringVar(&opts.pushHash, "push-hash", "", "Hash to be pulled/pushed")
 	rootCommand.PersistentFlags().StringVar(&opts.token, "token", "", "Token to use with quay api")
 	rootCommand.PersistentFlags().BoolVar(&opts.debug, "debug", false, "Enable debug output")
 	rootCommand.PersistentFlags().StringVar(&opts.job, "job", "", "Job to collect the list of containers")
-    rootCommand.PersistentFlags().StringVar(&opts.release, "release", "master", "Release")
+    rootCommand.PersistentFlags().StringVar(&opts.release, "release", "", "Release")
+    rootCommand.PersistentFlags().StringVar(&opts.configFile, "config", "config.yaml", "Copy-quay config file")
 	rootCommand.AddCommand(copyCmd(opts))
     rootCommand.AddCommand(tagCmd(opts))
+
 	return rootCommand, opts
 }
 
@@ -59,8 +65,42 @@ func (opts *globalOptions) before(cmd *cobra.Command) error {
 	if opts.debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
-	return nil
+    if err := ValidateConfigPath(opts.configFile); err != nil {
+        return err
+    }
+    config, err := NewConfig(opts.configFile)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    if opts.zuulAPI == "" {
+        opts.zuulAPI = config.ZuulAPI
+    }
+    if opts.pullRegistry == "" {
+        opts.pullRegistry = config.PullRegistry
+    }
+    if opts.pushRegistry == "" {
+        opts.pushRegistry = config.PushRegistry
+    }
+
+    for _, entry := range config.Entries {
+        if entry.Name == opts.release {
+            opts.Entry = entry
+            if opts.fromNamespace == "" {
+                opts.fromNamespace = entry.FromNamespace
+            }
+            if opts.toNamespace == "" {
+                opts.toNamespace = entry.ToNamespace
+            }
+            if opts.job == "" {
+                opts.job = entry.Job
+            }
+            return nil
+        }
+    }
+    return fmt.Errorf("no entry found for release %s", opts.release)
 }
+
 func (opts *globalOptions) newImageDestSystemContext() *types.SystemContext {
 	ctx := opts.newSystemContext()
 	ctx.DirForceCompress = false

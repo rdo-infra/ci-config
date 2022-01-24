@@ -50,11 +50,7 @@ func (opts *copyOptions) run(cmd *cobra.Command, args []string) error {
 			}
 		}
 	} else {
-		var job = opts.global.job
-		if opts.global.job == "" {
-			job = getJobPerRelease(opts.global.release)
-		}
-		image := getLatestGoodBuildURL(job, opts.global)
+		image := getLatestGoodBuildURL(opts.global.job, opts.global)
 		data := fetchLogs(image)
 		res := parseLog(data)
 		repositories, err := listRepositories(opts.global.toNamespace)
