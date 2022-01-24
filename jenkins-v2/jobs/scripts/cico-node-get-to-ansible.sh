@@ -3,6 +3,7 @@
 NODE_COUNT=${NODE_COUNT:-1}
 ANSIBLE_HOSTS=${ANSIBLE_HOSTS:-$WORKSPACE/hosts}
 SSID_FILE=${SSID_FILE:-$WORKSPACE/cico-ssid}
+CICO_NODE_REQUEST_POSITION=${CICO_NODE_REQUEST_POSITION:-0}
 
 CPU_ARCH=${CPU_ARCH:-x86_64}
 CICO_FLAVOR=${CICO_FLAVOR:-small}
@@ -18,6 +19,9 @@ ${LOGSERVER}
 EOF
 
 # Get nodes
+# Requesting CICO nodes can be done sequentially by incrementing
+# CICO_NODE_REQUEST_POSITION variable.
+sleep $(($CICO_NODE_REQUEST_POSITION*300))
 if [ $CPU_ARCH == "ppc64le" ]; then
     nodes=$(cico -q node get --arch $CPU_ARCH --flavor $CICO_FLAVOR --release $CICO_OS_RELEASE --retry-count 10 --retry-interval 180  --count ${NODE_COUNT} --column hostname --column ip_address --column comment -f value)
 else
