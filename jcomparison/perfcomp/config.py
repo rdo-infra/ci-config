@@ -12,22 +12,33 @@ SQLITE_FILES = {
     'undercloud': 'ara_oooq_root/ara-report/ansible.sqlite',
     'overcloud': 'ara_oooq_overcloud/ara-report/ansible.sqlite'
 }
-RPM_LOC = 'undercloud/var/log/extra/rpm-list.txt.gz'
-PIP_LOC = 'undercloud/var/log/extra/pip.txt.gz'
+RPM_LOC = 'undercloud/var/log/extra/rpm-list.txt'
+PIP_LOC = 'undercloud/var/log/extra/pip.txt'
 NAME_TO_PROJECT = {
     # Openstack packages
     'openstack-tripleo-common': 'openstack/tripleo-common',
     'python2-tripleo-common': 'openstack/tripleo-common',
     'openstack-tripleo-common-containers': 'openstack/tripleo-common',
     'openstack-tripleo-heat-templates': 'openstack/tripleo-heat-templates',
+    'openstack-heat-api': 'openstack/heat',
+    'openstack-heat-monolith': 'openstack/heat',
+    'openstack-heat-common': 'openstack/heat',
+    'openstack-heat-engine': 'openstack/heat',
     'ansible-role-tripleo-modify-image': (
         'openstack/ansible-role-tripleo-modify-image'),
     'openstack-tripleo-image-elements': 'openstack/tripleo-image-elements',
     'openstack-tripleo-validations': 'openstack/tripleo-validations',
     'tripleo-ansible': 'openstack/tripleo-ansible',
+    'diskimage-builder': 'openstack/diskimage-builder',
     'paunch-services': 'openstack/paunch',
     'python2-paunch': 'openstack/paunch',
     'python3-paunch': 'openstack/paunch',
+    'ironic-python-agent-builder': 'openstack/ironic-python-agent-builder',
+    'python3-neutron-lib': 'openstack/neutron-lib',
+    'python-neutron-lib': 'openstack/neutron-lib',
+    'openstack-tempest': 'openstack/tempest',
+    'python3-tempest': 'openstack/tempest',
+    'python-tempest': 'openstack/tempest',
     # Openstack puppet modules
     'puppet-aodh': 'openstack/puppet-aodh',
     'puppet-barbican': 'openstack/puppet-barbican',
@@ -73,6 +84,8 @@ NAME_TO_PROJECT = {
     'puppet-stdlib': 'puppetlabs/puppetlabs-stdlib',
     'puppet-tomcat': 'puppetlabs/puppetlabs-tomcat',
     'puppet-vcsrepo': 'puppetlabs/puppetlabs-vcsrepo',
+    'puppet-certmonger':'saltedsignal/puppet-certmonger',
     # Related packages
     'buildah': 'containers/buildah',
+    'ansible-role-lunasa-hsm': 'openstack/ansible-role-lunasa-hsm',
 }

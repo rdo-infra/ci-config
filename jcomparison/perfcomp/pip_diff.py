@@ -1,5 +1,5 @@
+from perfcomp.utils import get_file, red, green
 from perfcomp.config import PIP_LOC
-from perfcomp.utils import get_file, green, red
 
 
 def get_pip_modules_names(file_content):
@@ -32,10 +32,10 @@ def pip_modules(good, bad):
     uniq_dict2 = {i[0]: i[1] for i in uniq_set2}
     common_names = list(set([i[0] for i in uniq_set1]).intersection(
         [i[0] for i in uniq_set2]))
-    uniq1_list = list(set([i[0] for i in uniq_set1])
-                      - set([i[0] for i in uniq_set2]))
-    uniq2_list = list(set([i[0] for i in uniq_set2])
-                      - set([i[0] for i in uniq_set1]))
+    uniq1_list = list(set([i[0] for i in uniq_set1]) -
+                      set([i[0] for i in uniq_set2]))
+    uniq2_list = list(set([i[0] for i in uniq_set2]) -
+                      set([i[0] for i in uniq_set1]))
     uniq1 = ["-".join([i, uniq_dict1[i]]) for i in uniq1_list]
     uniq2 = ["-".join([i, uniq_dict2[i]]) for i in uniq2_list]
     inline = [
