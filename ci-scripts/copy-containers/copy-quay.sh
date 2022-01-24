@@ -9,33 +9,25 @@ if [ "$?" -gt "0" ]; then
 fi
 
 # Master
-/usr/local/bin/copy-quay --token $TOKEN --from-namespace tripleomaster \
-                    --to-namespace tripleomaster copy &>>/root/logs/master.txt
+/usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token $TOKEN --release master --html /root/logs/master-report.html copy &>>/root/logs/master.txt
+
+# Master centos 9
+/usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token $TOKEN --release mastercentos9 --html /root/logs/master-centos9-report.html copy &>>/root/logs/mastercentos9.txt
 
 # Wallaby
-/usr/local/bin/copy-quay --token $TOKEN --from-namespace tripleowallaby \
-                    --to-namespace tripleowallaby --job periodic-tripleo-ci-build-containers-ubi-8-push-wallaby \
-                    --html /root/logs/wallaby-report.html copy &>>/root/logs/wallaby.txt
+/usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token $TOKEN --release wallaby --html /root/logs/wallaby-report.html copy &>>/root/logs/wallaby.txt
+
+# Wallaby centos 9
+/usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token $TOKEN --release wallabycentos9 --html /root/logs/wallaby-centos9-report.html copy &>>/root/logs/wallabycentos9.txt
+
 # Victoria
-/usr/local/bin/copy-quay --token $TOKEN --from-namespace tripleovictoria \
-                    --to-namespace tripleovictoria --job periodic-tripleo-ci-build-containers-ubi-8-push-victoria \
-                    --html /root/logs/victoria-report.html copy &>>/root/logs/victoria.txt
+/usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token $TOKEN --release victoria --html /root/logs/victoria-report.html copy &>>/root/logs/victoria.txt
 
 # Ussuri
-/usr/local/bin/copy-quay --token $TOKEN --from-namespace tripleoussuri \
-                    --to-namespace tripleoussuri --job periodic-tripleo-ci-build-containers-ubi-8-push-ussuri \
-                    --html /root/logs/ussuri-report.html copy &>>/root/logs/ussuri.txt
+/usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token $TOKEN --release ussuri --html /root/logs/ussuri-report.html copy &>>/root/logs/ussuri.txt
+
 # Train 7
-/usr/local/bin/copy-quay --token $TOKEN --from-namespace tripleotrain \
-                    --to-namespace tripleotrain --job periodic-tripleo-centos-7-train-containers-build-push \
-                    --html /root/logs/train-report.html copy &>>/root/logs/train.txt
+/usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token $TOKEN --release train7 --html /root/logs/train-report.html copy &>>/root/logs/train.txt
 
 # Train 8
-/usr/local/bin/copy-quay --token $TOKEN --from-namespace tripleotraincentos8 \
-                    --to-namespace tripleotraincentos8 --job periodic-tripleo-ci-build-containers-ubi-8-push-train \
-                    --html /root/logs/train8-report.html copy &>>/root/logs/train8.txt
-
-# Stein
-/usr/local/bin/copy-quay --token $TOKEN --from-namespace tripleostein \
-                    --to-namespace tripleostein --job periodic-tripleo-centos-7-stein-containers-build-push \
-                    --html /root/logs/stein-report.html copy &>>/root/logs/stein.txt
+/usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token $TOKEN --release train8 --html /root/logs/train8-report.html copy &>>/root/logs/train8.txt
