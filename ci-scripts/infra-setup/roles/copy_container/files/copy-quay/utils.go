@@ -21,22 +21,6 @@ type Build struct {
 	URL    string `json:"log_url"`
 }
 
-func getJobPerRelease(release string) string {
-    var jobList = map[string]string {
-        "master":    "periodic-tripleo-ci-build-containers-ubi-8-push",
-        "queens":    "https://trunk.rdoproject.org/api-centos-queens",
-        "rocky":     "periodic-tripleo-centos-7-rocky-containers-build-push",
-        "stein":     "periodic-tripleo-centos-7-stein-containers-build-push",
-        "train":     "periodic-tripleo-centos-7-train-containers-build-push",
-        "train8":    "periodic-tripleo-ci-build-containers-ubi-8-push-train",
-        "ussuri":    "periodic-tripleo-ci-build-containers-ubi-8-push-ussuri",
-        "victoria":  "periodic-tripleo-ci-build-containers-ubi-8-push-victoria",
-        "wallaby":   "periodic-tripleo-ci-build-containers-ubi-8-push-wallaby",
-    }
-
-    return jobList[release]
-}
-
 func writeHTLMReport(success []string, failed []string, hash string, output string) {
 
 	var reportTemplate = template.Must(template.New("report").Parse(`
