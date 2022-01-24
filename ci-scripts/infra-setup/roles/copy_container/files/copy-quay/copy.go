@@ -34,7 +34,7 @@ func copyCmd(global *globalOptions) *cobra.Command {
 func (opts *copyOptions) run(cmd *cobra.Command, args []string) error {
 	if len(args) > 0 {
         if opts.global.hash == "" {
-            return fmt.Errorf("You must specify a hash if you are copying specific images")
+            return fmt.Errorf("you must specify a hash if you are copying specific images")
         }
 
 		tagToPush := opts.global.hash
@@ -42,6 +42,7 @@ func (opts *copyOptions) run(cmd *cobra.Command, args []string) error {
 			if(opts.global.pushHash != "") {
 				tagToPush = opts.global.pushHash
 			}
+
 			from := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pullRegistry, opts.global.fromNamespace, image, opts.global.hash)
 			to := fmt.Sprintf("docker://%s/%s/%s:%s", opts.global.pushRegistry, opts.global.toNamespace, image, tagToPush)
 			if _, err := copyImage(from, to); err != nil {
@@ -50,11 +51,7 @@ func (opts *copyOptions) run(cmd *cobra.Command, args []string) error {
 			}
 		}
 	} else {
-		var job = opts.global.job
-		if opts.global.job == "" {
-			job = getJobPerRelease(opts.global.release)
-		}
-		image := getLatestGoodBuildURL(job, opts.global)
+		image := getLatestGoodBuildURL(opts.global.job, opts.global)
 		data := fetchLogs(image)
 		res := parseLog(data)
 		repositories, err := listRepositories(opts.global.toNamespace)
