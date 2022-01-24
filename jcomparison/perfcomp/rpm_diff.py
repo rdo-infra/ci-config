@@ -31,6 +31,8 @@ def check_packages(inline, uniq1, uniq2):
 def rpms(good, bad):
     g = get_file(good, RPM_LOC, json_file=False)
     b = get_file(bad, RPM_LOC, json_file=False)
+    if g is None or b is None:
+        raise Exception("No RPMs files are found")
     files_diff = make_diff(fromstr=g, tostr=b)
     return files_diff
 
