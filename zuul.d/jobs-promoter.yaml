@@ -22,12 +22,9 @@
     name: tripleo-ci-promotion-staging-base
     parent: base
     ansible-version: 2.8
-    nodeset: rdo-centos-8
+    nodeset: rdo-centos-8-stream
     run: playbooks/staging.yml
     post-run: playbooks/staging-post.yml
-    host-vars:
-      primary:
-        ansible_user: root
     vars:
       test_release: CentOS-8/master
       zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
@@ -52,9 +49,6 @@
     nodeset: rdo-centos-7
     run: playbooks/staging.yml
     post-run: playbooks/staging-post.yml
-    host-vars:
-      primary:
-        ansible_user: root
     vars:
       pipeline_type: single
       test_release: CentOS-7/master
@@ -68,9 +62,6 @@
     nodeset: rdo-centos-7
     run: playbooks/staging.yml
     post-run: playbooks/staging-post.yml
-    host-vars:
-      primary:
-        ansible_user: root
     vars:
       pipeline_type: integration
       test_release: CentOS-8/master
