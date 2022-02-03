@@ -114,3 +114,9 @@ $ python3 dlrnapi_promoter.py --release-confing CentOS-8/master.yaml \
 $ python3 dlrnapi_promoter --release-config CentOS-8/master.yaml \
   force-promote --allowed-client qcow_client
 ```
+
+## Automated jobs validation
+- Automated jobs validation can be performed using `validate_config_jobs.py` file.
+```shell
+python3 validate_config_jobs.py -c config_environments/rdo
+```
