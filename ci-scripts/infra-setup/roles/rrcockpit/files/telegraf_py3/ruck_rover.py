@@ -23,6 +23,11 @@ from urllib3.exceptions import InsecureRequestWarning
 
 console = Console()
 
+# Use system-provided CA bundle instead of the one installed with pip
+# in certifi.
+dlrnapi_client.configuration.ssl_ca_cert = ('/etc/pki/ca-trust/extracted/'
+                                            'openssl/ca-bundle.trust.crt')
+
 
 def date_diff_in_seconds(dt2, dt1):
     timedelta = dt2 - dt1
