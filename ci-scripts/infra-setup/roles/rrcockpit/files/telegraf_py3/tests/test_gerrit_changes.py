@@ -22,7 +22,7 @@ class TestGerritChanges(unittest.TestCase):
         expected_keys = set().union(*(d.keys() for d in self.data))
         actual_keys = set().union(*(d.keys() for d in obtained))
 
-        assert (expected_keys == actual_keys)
+        assert expected_keys.issubset(actual_keys)
         assert (self.data[0]['project'] == obtained[0]['project'])
 
     def test_gerrit_changes_with_invalid_project(self):
