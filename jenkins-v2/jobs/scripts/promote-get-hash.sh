@@ -1,11 +1,11 @@
 if [[ "${RDO_VERSION}" == *"centos8"* ]] || [[ "${RDO_VERSION}" == *"centos9"* ]]; then
-    export NEW_HASH=`curl -L ${DELOREAN_URL}.md5`
+    export NEW_HASH=`curl -L ${CANDIDATE_URL}.md5`
     export OLD_HASH=`curl -L ${LAST_PROMOTED_URL}.md5`
 
     NEW_HASH=${NEW_HASH:0:2}/${NEW_HASH:2:2}/${NEW_HASH}
     OLD_HASH=${OLD_HASH:0:2}/${OLD_HASH:2:2}/${OLD_HASH}
 else
-    export NEW_HASH=`curl -L $DELOREAN_URL | grep baseurl | awk -F '/' '{ print $5"/"$6"/"$7 }'`
+    export NEW_HASH=`curl -L $CANDIDATE_URL | grep baseurl | awk -F '/' '{ print $5"/"$6"/"$7 }'`
     export OLD_HASH=`curl -L $LAST_PROMOTED_URL | grep baseurl | awk -F '/' '{ print $5"/"$6"/"$7 }'`
 fi
 
@@ -26,3 +26,4 @@ echo "CICO_OS_RELEASE = ${CICO_OS_RELEASE:-8-stream}" >> $HASH_FILE
 echo "ANSIBLE_PYTHON_INTERPRETER = ${ANSIBLE_PYTHON_INTERPRETER:-/usr/bin/python}" >> $HASH_FILE
 echo "tempest_version = $TEMPEST_VERSION" >> $HASH_FILE
 echo "enable_puppet_modules_rpm = $ENABLE_PUPPET_MODULES_RPM" >> $HASH_FILE
+echo "DELOREAN_URL = https://$DELOREAN_PUBLIC_HOST/$DELOREAN_REPO/$NEW_HASH/delorean.repo" >> $HASH_FILE
