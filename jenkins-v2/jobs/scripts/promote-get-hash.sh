@@ -26,3 +26,4 @@ echo "CICO_OS_RELEASE = ${CICO_OS_RELEASE:-8-stream}" >> $HASH_FILE
 echo "ANSIBLE_PYTHON_INTERPRETER = ${ANSIBLE_PYTHON_INTERPRETER:-/usr/bin/python}" >> $HASH_FILE
 echo "tempest_version = $TEMPEST_VERSION" >> $HASH_FILE
 echo "enable_puppet_modules_rpm = $ENABLE_PUPPET_MODULES_RPM" >> $HASH_FILE
+echo "DELOREAN_URL = https://$DELOREAN_PUBLIC_HOST/$RDO_LOCATION/$NEW_HASH/delorean.repo" >> $HASH_FILE

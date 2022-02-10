@@ -1,7 +1,7 @@
 set -e
 export RDO_VERSION='centos8-ussuri'
 export DELOREAN_PUBLIC_HOST='trunk.rdoproject.org'
-export DELOREAN_URL="https://$DELOREAN_PUBLIC_HOST/centos8-ussuri/current-tripleo/delorean.repo"
+export DELOREAN_REPO=$RDO_VERSION
 # The softlinks used in promotion should be cumulative. This job starts w/ current-tripleo
 # If the job passes at the rdo level, rdo is appended to the new softlink name.
 # End result would be two seperate softlinks e.g. current-tripleo, and current-tripleo-rdo
