@@ -1,12 +1,12 @@
 set -e
 export RDO_VERSION='centos8-victoria'
 export DELOREAN_PUBLIC_HOST='trunk.rdoproject.org'
-export DELOREAN_URL="https://$DELOREAN_PUBLIC_HOST/centos8-victoria/current-tripleo/delorean.repo"
+export DELOREAN_REPO=$RDO_VERSION
 # The softlinks used in promotion should be cumulative. This job starts w/ current-tripleo
 # If the job passes at the rdo level, rdo is appended to the new softlink name.
 # End result would be two seperate softlinks e.g. current-tripleo, and current-tripleo-rdo
-export LINKNAME='current-tripleo-rdo'
-export LAST_PROMOTED_URL="https://$DELOREAN_PUBLIC_HOST/centos8-victoria/$LINKNAME/delorean.repo"
+export CANDIDATE_LINKNAME='current-tripleo'
+export PROMOTED_LINKNAME='current-tripleo-rdo'
 export RDO_VERSION_DIR='victoria'
 # The LOCATION var is handed off to the ansible-role-tripleo-image build (atrib) role to define where testing/staged images are uploaded
 export LOCATION='current-tripleo'
