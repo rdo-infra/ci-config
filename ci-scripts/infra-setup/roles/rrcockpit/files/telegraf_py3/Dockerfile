@@ -1,4 +1,4 @@
-FROM centos:8
+FROM quay.io/centos/centos:stream8
 
 RUN dnf clean all && dnf update -y  && dnf install -y \
                         python3 \
