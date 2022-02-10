@@ -1,6 +1,6 @@
 function activate_dlrnapi_venv {
     if [ ! -d $WORKSPACE/dlrnapi_venv ]; then
-        if [ $(command -v virtualenv) ]; then
+        if [ $(command -v virtualenv) ] && [ -z ${GET_HASH_USE_PY3_VENV+x} ]; then
             virtualenv --system-site-packages $WORKSPACE/dlrnapi_venv
         else
             python3 -m venv  --system-site-packages $WORKSPACE/dlrnapi_venv
