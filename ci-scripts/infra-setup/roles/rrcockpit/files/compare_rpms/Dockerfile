@@ -1,4 +1,4 @@
-FROM inveniosoftware/centos8-python:3.8
+FROM quay.io/centos/centos:stream8
 
 RUN dnf install -y \
                         python3 \
@@ -19,7 +19,6 @@ RUN pip3 install --upgrade pip
 COPY requirements.txt /
 RUN pip3 install -r /requirements.txt
 
-RUN mkdir app
 COPY . /app
 WORKDIR /app
 
