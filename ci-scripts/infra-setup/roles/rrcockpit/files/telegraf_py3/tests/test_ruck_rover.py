@@ -163,35 +163,41 @@ class TestRuckRover(unittest.TestCase):
     @patch('ruck_rover.requests.get')
     def test_get_consistent_centos9_no_component(self, m_get):
         m_get.return_value.ok = None
+        cert_path = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
 
         url = ('https://trunk.rdoproject.org/centos9-master/component/network/'
                '39/40/3940e9eb4a6e0652517c4f2c429e601332ad1bd9_48ca9c7b')
         ruck_rover.get_consistent(url, component=None)
         expected = ('https://trunk.rdoproject.org/centos9-master/'
                     'promoted-components/delorean.repo')
-        m_get.assert_called_with(expected, verify=False)
+        m_get.assert_called_with(expected,
+                                 verify=cert_path)
 
     @patch('ruck_rover.requests.get')
     def test_get_consistent_centos8_with_component(self, m_get):
         m_get.return_value.ok = None
+        cert_path = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
 
         url = ('https://trunk.rdoproject.org/centos8-wallaby/component/cinder/'
                '0a/6d/0a6d43a7c2ef65be748690a00ee4c294add0c87c_cc0b2aef')
         ruck_rover.get_consistent(url, component="cinder")
         expected = ('https://trunk.rdoproject.org/centos8-wallaby/component/'
                     'cinder/consistent/delorean.repo')
-        m_get.assert_called_with(expected, verify=False)
+        m_get.assert_called_with(expected,
+                                 verify=cert_path)
 
     @patch('ruck_rover.requests.get')
     def test_get_consistent_centos7_no_component(self, m_get):
         m_get.return_value.ok = None
+        cert_path = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
 
         url = ('https://trunk.rdoproject.org/centos7-train/08/bb/'
                '08bbadedb04d45353b3228bc21cd930adeef3348_0ad01be2')
         ruck_rover.get_consistent(url, component=None)
         expected = ("https://trunk.rdoproject.org/centos7-train/"
                     "consistent/delorean.repo")
-        m_get.assert_called_with(expected, verify=False)
+        m_get.assert_called_with(expected,
+                                 verify=cert_path)
 
     def test_get_dlrn_versions_csv_no_component(self):
         base_url = "base_url"
@@ -200,7 +206,7 @@ class TestRuckRover(unittest.TestCase):
 
         output = ruck_rover.get_dlrn_versions_csv(base_url, component, tag)
         expected = f"{base_url}/{tag}/versions.csv"
-        self.assertEquals(expected, output)
+        self.assertEqual(expected, output)
 
     def test_get_dlrn_versions_csv_component(self):
         base_url = "base_url"
@@ -209,7 +215,7 @@ class TestRuckRover(unittest.TestCase):
 
         output = ruck_rover.get_dlrn_versions_csv(base_url, component, tag)
         expected = f"{base_url}/component/{component}/{tag}/versions.csv"
-        self.assertEquals(expected, output)
+        self.assertEqual(expected, output)
 
     def test_get_diff_the_same(self):
         file_content = ["file1", ([], [0, 0, 0, 0, 0, 0, 0, 0, 0, "abc"], [])]
