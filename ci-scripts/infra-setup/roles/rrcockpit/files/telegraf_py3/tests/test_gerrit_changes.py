@@ -10,13 +10,13 @@ class TestGerritChanges(unittest.TestCase):
 
     def setUp(self):
         full_path = os.path.dirname(os.path.abspath(__file__))
-        with open(full_path + '/data/gerrit-test-data.json') as f:
+        with open(full_path + '/data/gerrit-test-data-minimal.json') as f:
             self.data = json.load(f)
         self.host = 'https://review.opendev.org'
         self.project = 'openstack/ansible-collections-openstack'
         self.pages = 1
 
-    def rework_test_gerrit_changes(self):
+    def test_gerrit_changes(self):
         obtained = gerrit_changes.get_gerrit_data(
                 self.host, self.project, self.pages)
         expected_keys = set().union(*(d.keys() for d in self.data))
