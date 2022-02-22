@@ -16,7 +16,7 @@ class TestGerritChanges(unittest.TestCase):
         self.project = 'openstack/ansible-collections-openstack'
         self.pages = 1
 
-    def test_gerrit_changes(self):
+    def rework_test_gerrit_changes(self):
         obtained = gerrit_changes.get_gerrit_data(
                 self.host, self.project, self.pages)
         expected_keys = set().union(*(d.keys() for d in self.data))
