@@ -19,12 +19,13 @@ from jinja2 import Environment, FileSystemLoader
 from rich import print as rich_print
 from rich.console import Console
 from rich.table import Table
-from urllib3.exceptions import InsecureRequestWarning
 
 console = Console()
 
-# skip verifying SSL certificate when calling API from https server.
-dlrnapi_client.configuration.verify_ssl = False
+# Use system-provided CA bundle instead of the one installed with pip
+# in certifi.
+CERT_PATH = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
+dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
 
 MATRIX = {
     "centos-7": ["train"],
@@ -66,9 +67,7 @@ def convert_string_date_object(date_string):
 
 
 def download_file(url):
-    requests.packages.urllib3.disable_warnings(
-        category=InsecureRequestWarning)
-    response = requests.get(url, stream=True, verify=False)
+    response = requests.get(url, stream=True, verify=CERT_PATH)
     response.raise_for_status()
     file_descriptor, path = mkstemp(prefix="job-output-")
     with open(path, "wb") as file:
@@ -119,9 +118,7 @@ def find_failure_reason(url):
 
 def web_scrape(url):
     try:
-        requests.packages.urllib3.disable_warnings(
-            category=InsecureRequestWarning)
-        response = requests.get(url, verify=False)
+        response = requests.get(url, verify=CERT_PATH)
         response.raise_for_status()
     except requests.exceptions.HTTPError as err:
         raise SystemExit(err)
@@ -207,9 +204,7 @@ def get_consistent(url, component=None):
         # TO-DO normalize component and intergration config
         url = f'{short_url}/component/{component}/consistent/{repo}'
 
-    requests.packages.urllib3.disable_warnings(
-        category=InsecureRequestWarning)
-    response = requests.get(url, verify=False)
+    response = requests.get(url, verify=CERT_PATH)
     if not response.ok:
         return None
 
@@ -230,9 +225,7 @@ def get_dlrn_versions_csv(base_url, component, tag):
 
 
 def get_csv(url):
-    requests.packages.urllib3.disable_warnings(
-        category=InsecureRequestWarning)
-    response = requests.get(url, verify=False)
+    response = requests.get(url, verify=CERT_PATH)
     if response.ok:
         content = response.content.decode('utf-8')
         f = StringIO(content)
