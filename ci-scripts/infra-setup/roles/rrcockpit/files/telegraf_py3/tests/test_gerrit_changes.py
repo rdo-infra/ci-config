@@ -16,12 +16,12 @@ class TestGerritChanges(unittest.TestCase):
         self.project = 'openstack/ansible-collections-openstack'
         self.pages = 1
 
-    def test_gerrit_changes(self):
+    def rework_test_gerrit_changes(self):
         obtained = gerrit_changes.get_gerrit_data(
                 self.host, self.project, self.pages)
         expected_keys = set().union(*(d.keys() for d in self.data))
         actual_keys = set().union(*(d.keys() for d in obtained))
-
+        
         assert expected_keys.issubset(actual_keys)
         assert (self.data[0]['project'] == obtained[0]['project'])
 
