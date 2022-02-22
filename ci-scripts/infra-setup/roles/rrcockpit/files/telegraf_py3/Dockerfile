@@ -20,6 +20,9 @@ COPY *.py /usr/local/bin/
 COPY *.yaml /usr/local/bin/
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
+COPY /etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt:/etc/pki/ca-trust/extracted/openssl/
+RUN update-ca-certificates
+
 RUN systemctl enable --now telegraf
 
 #ENTRYPOINT ["/entrypoint.sh"]
