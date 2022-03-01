@@ -20,10 +20,10 @@
   - name: Set authorized keys
     authorized_key:
       exclusive: yes
-      user: "{{ item.name }}"
+      user: "{{ item.0.name }}"
       state: present
-      key: "{{ item.key }}"
-    with_items: "{{ users }}"
+      key: "{{ item.1 }}"
+    loop: "{{ users|subelements('keys') }}"
 
   - name: Allow 'tripleo' group to have passwordless sudo
     lineinfile:

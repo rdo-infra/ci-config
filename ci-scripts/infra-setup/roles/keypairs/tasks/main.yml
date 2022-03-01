@@ -6,8 +6,8 @@
 
 - name: generate file with public keys from users
   shell: |
-    echo {{ item.key }} >> {{ keyfile.path }}
-  with_items: "{{ users }}"
+    echo {{ item.1 }} >> {{ keyfile.path }}
+  loop: "{{ users|subelements('keys') }}"
   changed_when: true
 
 - name: Create Keypair from generated public key
