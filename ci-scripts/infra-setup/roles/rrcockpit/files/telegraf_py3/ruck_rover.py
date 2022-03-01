@@ -26,6 +26,21 @@ console = Console()
 # skip verifying SSL certificate when calling API from https server.
 dlrnapi_client.configuration.verify_ssl = False
 
+MATRIX = {
+    "centos-7": ["train", "stein", "queens"],
+    "centos-8": ["wallaby", "victoria", "ussuri"],
+    "centos-9": ["master", "wallaby"],
+    "rhel-8": ["osp17", "osp16-2"],
+    "rhel-9": ["osp17"]
+}
+REVERSED_MATRIX = {}
+for key, values in MATRIX.items():
+    for value in values:
+        REVERSED_MATRIX.setdefault(value, []).append(key)
+
+DISTROS = list(MATRIX.keys())
+RELEASES = list(REVERSED_MATRIX.keys())
+
 
 def date_diff_in_seconds(dt2, dt1):
     timedelta = dt2 - dt1
@@ -499,6 +514,7 @@ def track_integration_promotion(args, config):
     promotion_name = args['promotion_name']
 
     url = config[stream]['criteria'][distro][release]['int_url']
+
     dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
     promotions = get_dlrn_promotions(dlrn_api_url, promotion_name)
     if distro != "centos-7":
@@ -650,6 +666,7 @@ def track_component_promotion(cargs, config):
     compare_upstream = cargs['compare_upstream']
 
     url = config[stream]['criteria'][distro][release]['comp_url']
+
     dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
 
     if distro == "centos-7":
@@ -804,13 +821,8 @@ def track_component_promotion(cargs, config):
 
 
 @ click.command()
-@ click.option("--release", default='master',
-               type=click.Choice(['master', 'wallaby', 'victoria', 'ussuri',
-                                  'train', 'stein', 'queens', 'osp17',
-                                  'osp16-2']))
-@ click.option("--distro", default='centos-8',
-               type=click.Choice(['centos-8', 'centos-9', 'centos-7',
-                                  'rhel-8', 'rhel-9']))
+@ click.option("--release", type=click.Choice(RELEASES))
+@ click.option("--distro", type=click.Choice(DISTROS))
 @ click.option("--component",
                type=click.Choice(["all", "baremetal", "cinder", "clients",
                                   "cloudops", "common", "compute",
@@ -857,18 +869,26 @@ def main(release,
         c_args[i] = eval(i)  # pylint: disable=eval-used
         c_args["stream"] = stream
 
-    if release in ('stein', 'queens'):
-        config['distro'] = "centos-7"
+    if release:
+        distros = REVERSED_MATRIX[release]
+        if distro not in distros:
+            print(f'Distro {distro} is not supported for {release}. '
+                  f'Selecting {distros[0]} instead.')
+            distro = distros[0]
+        config['distro'] = distro
+        c_args['distro'] = distro
 
-    if release == 'osp16-2':
-        config['distro'] = "rhel-8"
-        c_args['distro'] = "rhel-8"
+    if distro:
+        releases = MATRIX[distro]
+        if release not in releases:
+            print(f'Release {release} is not supported for {distro}. '
+                  f'Selecting {releases[0]} instead.')
+            release = releases[0]
+        config['release'] = release
+        c_args['release'] = release
 
-    # prompt user: #osp-17 can be rhel-8 or rhel-9
-    if release == 'osp17' and distro == 'centos-8':
-        print("\nOSP-17 can be either --distro rhel-8 or --distro rhel-9")
-        print("ERROR: please set the distro option on the cli")
-        sys.exit(1)
+    if not (distro and release):
+        sys.exit("Please provide either distro or release")
 
     if component:
         track_component_promotion(c_args, config)
