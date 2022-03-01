@@ -15,13 +15,15 @@
       shell: /bin/bash
       groups: tripleo
       append: yes
+      expires: "{{ item.expires|default(None) }}"
+      password_lock: "{{ item.password_lock|default(None) }}"
     with_items: "{{ users }}"
 
   - name: Set authorized keys
     authorized_key:
       user: "{{ item.0.name }}"
-      state: present
-      key: "{{ item.1 }}"
+      state: "{{ item.1.state|default('present') }}"
+      key: "{{ item.1.key }}"
     loop: "{{ users|subelements('keys') }}"
 
   - name: Allow 'tripleo' group to have passwordless sudo

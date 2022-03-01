@@ -6,7 +6,8 @@
 
 - name: generate file with public keys from users
   shell: |
-    echo {{ item.1 }} >> {{ keyfile.path }}
+    echo {{ item.1.key }} >> {{ keyfile.path }}
+  when: item.1.state|default('present') == 'present'
   loop: "{{ users|subelements('keys') }}"
   changed_when: true
 
