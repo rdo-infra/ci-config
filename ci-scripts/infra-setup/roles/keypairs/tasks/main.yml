@@ -1,17 +1,5 @@
-- name: Create temporary key file
-  tempfile:
-    state: file
-    prefix: infra-setup-
-  register: keyfile
-
-- name: generate file with public keys from users
-  shell: |
-    echo {{ item.1 }} >> {{ keyfile.path }}
-  loop: "{{ users|subelements('keys') }}"
-  changed_when: true
-
 - name: Create Keypair from generated public key
   os_keypair:
     state: present
     name: "{{ default_keypair_name }}"
-    public_key_file: "{{ keyfile.path }}"
+    public_key: "{{ users|map(attribute='keys', default='')|join('\n') }}"

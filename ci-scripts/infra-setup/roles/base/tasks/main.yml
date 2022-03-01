@@ -15,14 +15,17 @@
       shell: /bin/bash
       groups: tripleo
       append: yes
+      expires: "{{ item.expires|default(None) }}"
+      password_lock: "{{ item.password_lock|default(None) }}"
     with_items: "{{ users }}"
 
   - name: Set authorized keys
     authorized_key:
-      user: "{{ item.0.name }}"
+      exclusive: yes
+      user: "{{ item.name }}"
       state: present
-      key: "{{ item.1 }}"
-    loop: "{{ users|subelements('keys') }}"
+      key: "{{ item.keys if item.keys is defined and item.keys != None else '' }}"
+    loop: "{{ users }}"
 
   - name: Allow 'tripleo' group to have passwordless sudo
     lineinfile:
