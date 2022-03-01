@@ -1,34 +1,5 @@
 servers:
 
-    - name: dns
-      image: "{{ centos8_image }}"
-      flavor: "{{ default_flavor }}"
-      key_name: "{{ default_keypair_name }}"
-      security_groups:
-        - default
-        - sec_group_nameserver
-      ports:
-        - name: dns-port
-          network: "{{ servers_internal_network_name  }}"
-          fixed_ip_address: "{{ dns_internal_network_ip }}"
-      nics:
-        - port-name: dns-port
-      floating_ips:
-        - "{{ dns_external_network_ip }}"
-      userdata: |
-        #cloud-config
-        packages:
-            - ansible
-            - git
-        package_upgrade: true
-        runcmd:
-          - dnf install -y epel-release
-          - dnf install -y python3 ansible vim git
-          - mkdir -p /etc/ansible/
-          - echo 'dns ansible_connection=local' >  /etc/ansible/hosts
-          - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
-          - reboot
-
     - name: promoter
       image: "{{ default_image }}"
       flavor: "{{ promoter_flavor }}"
