@@ -4,7 +4,6 @@ import csv
 import json
 import os
 import re
-import sys
 import time
 from datetime import datetime
 from io import StringIO
@@ -14,6 +13,7 @@ import click
 import dlrnapi_client
 import requests
 import yaml
+from click.exceptions import BadParameter
 from dlrnapi_client.rest import ApiException
 from jinja2 import Environment, FileSystemLoader
 from rich import print as rich_print
@@ -25,6 +25,21 @@ console = Console()
 
 # skip verifying SSL certificate when calling API from https server.
 dlrnapi_client.configuration.verify_ssl = False
+
+MATRIX = {
+    "centos-7": ["train"],
+    "centos-8": ["wallaby", "victoria", "ussuri", "train"],
+    "centos-9": ["master", "wallaby"],
+    "rhel-8": ["osp17", "osp16-2"],
+    "rhel-9": ["osp17"]
+}
+REVERSED_MATRIX = {}
+for key, values in MATRIX.items():
+    for value in values:
+        REVERSED_MATRIX.setdefault(value, []).append(key)
+
+DISTROS = list(MATRIX.keys())
+RELEASES = list(REVERSED_MATRIX.keys())
 
 
 def date_diff_in_seconds(dt2, dt1):
@@ -785,12 +800,9 @@ def track_component_promotion(
 
 @ click.command()
 @ click.option("--release", default='master',
-               type=click.Choice(['master', 'wallaby', 'victoria', 'ussuri',
-                                  'train', 'osp17',
-                                  'osp16-2']))
-@ click.option("--distro", default='centos-8',
-               type=click.Choice(['centos-8', 'centos-9', 'centos-7',
-                                  'rhel-8', 'rhel-9']))
+               type=click.Choice(RELEASES))
+@ click.option("--distro", default='centos-9',
+               type=click.Choice(DISTROS))
 @ click.option("--component",
                type=click.Choice(["all", "baremetal", "cinder", "clients",
                                   "cloudops", "common", "compute",
@@ -828,11 +840,11 @@ def main(release,
             config_file = download_file(downstream_urls)
     config = load_conf_file(config_file)
 
-    # prompt user: #osp-17 can be rhel-8 or rhel-9
-    if release == 'osp17' and distro == 'centos-8':
-        print("\nOSP-17 can be either --distro rhel-8 or --distro rhel-9")
-        print("ERROR: please set the distro option on the cli")
-        sys.exit(1)
+    distros = REVERSED_MATRIX[release]
+    releases = MATRIX[distro]
+    if distro not in distros or release not in releases:
+        msg = f'Release {release} is not supported for {distro}.'
+        raise BadParameter(msg)
 
     if component:
         track_component_promotion(
