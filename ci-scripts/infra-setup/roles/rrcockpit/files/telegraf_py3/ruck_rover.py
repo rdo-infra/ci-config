@@ -498,7 +498,15 @@ def track_integration_promotion(args, config):
     compare_upstream = args['compare_upstream']
     promotion_name = args['promotion_name']
 
-    url = config[stream]['criteria'][distro][release]['int_url']
+    release_name = config[stream]['criteria'][distro].get(release)
+    if not release_name:
+        sys.exit(
+            f'Release {release} for distro {distro} not found in '
+            'the config file.'
+        )
+
+    url = release_name['int_url']
+
     dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
     promotions = get_dlrn_promotions(dlrn_api_url, promotion_name)
     if distro != "centos-7":
@@ -649,7 +657,14 @@ def track_component_promotion(cargs, config):
     stream = cargs['stream']
     compare_upstream = cargs['compare_upstream']
 
-    url = config[stream]['criteria'][distro][release]['comp_url']
+    release_name = config[stream]['criteria'][distro].get(release)
+    if not release_name:
+        sys.exit(
+            f'Release {release} for distro {distro} not found in '
+            'the config file.'
+        )
+    url = release_name['comp_url']
+
     dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
 
     if distro == "centos-7":
@@ -808,7 +823,7 @@ def track_component_promotion(cargs, config):
                type=click.Choice(['master', 'wallaby', 'victoria', 'ussuri',
                                   'train', 'stein', 'queens', 'osp17',
                                   'osp16-2']))
-@ click.option("--distro", default='centos-8',
+@ click.option("--distro", default='centos-9',
                type=click.Choice(['centos-8', 'centos-9', 'centos-7',
                                   'rhel-8', 'rhel-9']))
 @ click.option("--component",
