@@ -24,7 +24,7 @@
       exclusive: yes
       user: "{{ item.name }}"
       state: present
-      key: "{{ item.keys if item.keys is defined and item.keys != None else '' }}"
+      key: "{{ item.authorized_keys if item.authorized_keys is defined and item.authorized_keys != None else '' }}"
     loop: "{{ users }}"
 
   - name: Allow 'tripleo' group to have passwordless sudo
