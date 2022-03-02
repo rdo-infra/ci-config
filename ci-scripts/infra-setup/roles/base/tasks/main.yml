@@ -15,8 +15,8 @@
       shell: /bin/bash
       groups: tripleo
       append: yes
-      expires: "{{ item.expires|default(None) }}"
-      password_lock: "{{ item.password_lock|default(None) }}"
+      expires: "{{ item.expires|default(omit) }}"
+      password_lock: "{{ item.password_lock|default(omit) }}"
     with_items: "{{ users }}"
 
   - name: Set authorized keys
