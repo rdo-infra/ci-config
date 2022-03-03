@@ -411,7 +411,7 @@ def print_failed_in_criteria(input_set,
     console.print(table)
 
 
-def load_conf_file(config_file, key):
+def load_conf_file(config_file):
     config = {}
     with open(config_file, "r") as file:
         config = yaml.safe_load(file)
@@ -838,6 +838,7 @@ def main(release,
          aggregate_hash="tripleo-ci-testing",
          promotion_name="current-tripleo"):
 
+    stream = 'upstream'
     if release in ('osp16-2', 'osp17'):
         stream = 'downstream'
         if config_file != os.path.dirname(__file__) + '/conf_ruck_rover.yaml':
@@ -845,10 +846,7 @@ def main(release,
         else:
             downstream_urls = 'https://url.corp.redhat.com/ruck-rover-0'
             config_file = download_file(downstream_urls)
-        config = load_conf_file(config_file, "downstream")
-    else:
-        config = load_conf_file(config_file, "upstream")
-        stream = 'upstream'
+    config = load_conf_file(config_file)
 
     # come on click, not sure how to get click params.
     c_args = {}
