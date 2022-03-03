@@ -25,6 +25,8 @@ console = Console()
 
 # skip verifying SSL certificate when calling API from https server.
 dlrnapi_client.configuration.verify_ssl = False
+requests.packages.urllib3.disable_warnings(
+    category=InsecureRequestWarning)
 
 
 def date_diff_in_seconds(dt2, dt1):
@@ -51,8 +53,6 @@ def convert_string_date_object(date_string):
 
 
 def download_file(url):
-    requests.packages.urllib3.disable_warnings(
-        category=InsecureRequestWarning)
     response = requests.get(url, stream=True, verify=False)
     response.raise_for_status()
     file_descriptor, path = mkstemp(prefix="job-output-")
@@ -104,8 +104,6 @@ def find_failure_reason(url):
 
 def web_scrape(url):
     try:
-        requests.packages.urllib3.disable_warnings(
-            category=InsecureRequestWarning)
         response = requests.get(url, verify=False)
         response.raise_for_status()
     except requests.exceptions.HTTPError as err:
@@ -183,8 +181,6 @@ def get_consistent(url, component=None):
 
     if component is None:
         # integration build, use last promoted_components date
-        requests.packages.urllib3.disable_warnings(
-            category=InsecureRequestWarning)
         response = requests.get(
             short_url + dlrn_tag + '/delorean.repo', verify=False)
         if response.ok:
@@ -196,8 +192,6 @@ def get_consistent(url, component=None):
         # TO-DO normalize component and intergration config
         short_url = (short_url + '/component/'
                      + component + '/consistent/delorean.repo')
-        requests.packages.urllib3.disable_warnings(
-            category=InsecureRequestWarning)
         response = requests.get(short_url, verify=False)
         if response.ok:
             cd = response.headers['Last-Modified']
@@ -220,8 +214,6 @@ def get_dlrn_versions_csv(base_url, component, tag):
 
 
 def get_csv(url):
-    requests.packages.urllib3.disable_warnings(
-        category=InsecureRequestWarning)
     response = requests.get(url, verify=False)
     if response.ok:
         content = response.content.decode('utf-8')
