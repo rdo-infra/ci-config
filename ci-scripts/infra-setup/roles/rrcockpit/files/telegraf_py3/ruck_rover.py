@@ -806,7 +806,7 @@ def track_component_promotion(cargs, config):
 @ click.command()
 @ click.option("--release", default='master',
                type=click.Choice(['master', 'wallaby', 'victoria', 'ussuri',
-                                  'train', 'stein', 'queens', 'osp17',
+                                  'train', 'osp17',
                                   'osp16-2']))
 @ click.option("--distro", default='centos-8',
                type=click.Choice(['centos-8', 'centos-9', 'centos-7',
@@ -856,9 +856,6 @@ def main(release,
         # fix-me eval
         c_args[i] = eval(i)  # pylint: disable=eval-used
         c_args["stream"] = stream
-
-    if release in ('stein', 'queens'):
-        config['distro'] = "centos-7"
 
     if release == 'osp16-2':
         config['distro'] = "rhel-8"
