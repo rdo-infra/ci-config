@@ -152,7 +152,7 @@ class TestRuckRover(unittest.TestCase):
     def test_load_conf_file(self):
         full_path = os.path.dirname(os.path.abspath(__file__))
         my_file = full_path + '/data/test_conf_ruck_rover.yaml'
-        obtained = ruck_rover.load_conf_file(my_file, "upstream")
+        obtained = ruck_rover.load_conf_file(my_file)
         expected = {'upstream': {'zuul_url': 'abc',
                                  'dlrnapi_url': 'def',
                                  'promoter_url': 'ghi',
