@@ -488,15 +488,9 @@ def render_testproject_yaml(jobs, hash, stream, config):
     print(output)
 
 
-def track_integration_promotion(args, config):
-
-    distro = args['distro']
-    release = args['release']
-    aggregate_hash = args['aggregate_hash']
-    influx = args['influx']
-    stream = args['stream']
-    compare_upstream = args['compare_upstream']
-    promotion_name = args['promotion_name']
+def track_integration_promotion(
+        config, distro, release, influx, stream, compare_upstream,
+        promotion_name, aggregate_hash):
 
     url = config[stream]['criteria'][distro][release]['int_url']
     dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
@@ -637,18 +631,13 @@ def track_integration_promotion(args, config):
             render_testproject_yaml(tp_jobs, test_hash, stream, config)
 
 
-def track_component_promotion(cargs, config):
+def track_component_promotion(
+        config, distro, release, influx, stream, compare_upstream,
+        test_component):
     """ Find the failing jobs which are blocking promotion of a component.
     :param release: The OpenStack release e.g. wallaby
     :param component:
     """
-    distro = cargs['distro']
-    release = cargs['release']
-    influx = cargs['influx']
-    test_component = cargs['component']
-    stream = cargs['stream']
-    compare_upstream = cargs['compare_upstream']
-
     url = config[stream]['criteria'][distro][release]['comp_url']
     dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
 
@@ -850,17 +839,6 @@ def main(release,
         config = load_conf_file(config_file, "upstream")
         stream = 'upstream'
 
-    # come on click, not sure how to get click params.
-    c_args = {}
-    for i in dir():
-        # fix-me eval
-        c_args[i] = eval(i)  # pylint: disable=eval-used
-        c_args["stream"] = stream
-
-    if release == 'osp16-2':
-        config['distro'] = "rhel-8"
-        c_args['distro'] = "rhel-8"
-
     # prompt user: #osp-17 can be rhel-8 or rhel-9
     if release == 'osp17' and distro == 'centos-8':
         print("\nOSP-17 can be either --distro rhel-8 or --distro rhel-9")
@@ -868,9 +846,13 @@ def main(release,
         sys.exit(1)
 
     if component:
-        track_component_promotion(c_args, config)
+        track_component_promotion(
+            config, distro, release, influx, stream, compare_upstream,
+            component)
     else:
-        track_integration_promotion(c_args, config)
+        track_integration_promotion(
+            config, distro, release, influx, stream, compare_upstream,
+            promotion_name, aggregate_hash)
 
 
 if __name__ == '__main__':
