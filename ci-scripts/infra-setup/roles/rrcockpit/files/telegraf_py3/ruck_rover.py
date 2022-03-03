@@ -476,13 +476,13 @@ def influxdb_promo(promotion):
     return promotion_influxdb_line.format(**promotion)
 
 
-def render_testproject_yaml(jobs, hash, stream, config):
+def render_testproject_yaml(jobs, test_hash, stream, config):
     jobs_list = jobs
     path = os.path.dirname(__file__)
     file_loader = FileSystemLoader(path + '/templates')
     env = Environment(loader=file_loader)
     template = env.get_template('.zuul.yaml.j2')
-    output = template.render(jobs=jobs_list, hash=hash)
+    output = template.render(jobs=jobs_list, hash=test_hash)
     print("\n\n###### testproject to rerun required jobs ######")
     print(config[stream]['testproject_url'] + "\n")
     print(output)
