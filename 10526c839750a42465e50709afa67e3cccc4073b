@@ -43,6 +43,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "10dcc948_f9de7bee",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-03-04T14:54:03Z",
+      "side": 1,
+      "message": "Ack. I noticed that later in another patch.\nI left it here based on existing configuration of the code.\n\nShould I remove it now?",
+      "parentUuid": "cd42ecb2_54ee9c79",
+      "range": {
+        "startLine": 30,
+        "startChar": 26,
+        "endLine": 30,
+        "endChar": 43
+      },
+      "revId": "10526c839750a42465e50709afa67e3cccc4073b",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "b46cf8c6_827c1790",
         "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py",
         "patchSetId": 6
@@ -54,6 +78,30 @@
       "writtenOn": "2022-03-04T12:06:40Z",
       "side": 1,
       "message": "We can discuss more on this/ this vary on people preference too.\n\nBut personally in my humble opinion, we should either of two:-\n\n1) Both distro and release should be needed parameters\n2) For release which are supported on two distro - we just notify the user and exit. Just like we had for OSP17.  (I like this more)\n\n\n\nFor ex:- \n\nafter this patch behavior is below:-\n\n\n~~~\npython3 ruck_rover.py \nPlease provide either distro or release\n.\n.\n$ python3 ruck_rover.py --release wallaby\nDistro None is not supported for wallaby. Selecting centos-8 instead\n.\n.\npython3 ruck_rover.py --distro centos-8\nRelease None is not supported for centos-8. Selecting wallaby instead.\n~~~\n\nI am not happy with auto selection.\n\n\nIn my option, we should do below instead:-\n\n~~~\n$ python3 ruck_rover.py --release wallaby\nWallaby can can be either --distro centos-8 or --distro centos-9\nERROR: please set the distro option on the cli\n~~~\n\n\nAbove is my opinion, and I am not blocking this patch - we can decide based on the majority votes.",
+      "range": {
+        "startLine": 873,
+        "startChar": 0,
+        "endLine": 874,
+        "endChar": 53
+      },
+      "revId": "10526c839750a42465e50709afa67e3cccc4073b",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0963b8ea_e5f9f875",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py",
+        "patchSetId": 6
+      },
+      "lineNbr": 874,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-03-04T14:54:03Z",
+      "side": 1,
+      "message": "I\u0027m more inclined towards forcing user to provide both distro and release by user. But I didn\u0027t want to change existing muscle memory. I\u0027m planning to continue changes in this area to only make it possible to provide \"valid\" set of mappings, and not \"autoselect\".\n\nI intended that as a stop-gap before working on that more.",
+      "parentUuid": "b46cf8c6_827c1790",
       "range": {
         "startLine": 873,
         "startChar": 0,
