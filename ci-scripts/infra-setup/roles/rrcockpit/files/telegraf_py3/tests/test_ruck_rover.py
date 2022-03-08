@@ -159,6 +159,39 @@ class TestRuckRover(unittest.TestCase):
                                  'git_url': 'jkl'}}
         self.assertEqual(expected, obtained)
 
+    @patch('ruck_rover.requests.get')
+    def test_get_consistent_centos9_no_component(self, m_get):
+        m_get.return_value.ok = None
+
+        url = ('https://trunk.rdoproject.org/centos9-master/component/network/'
+               '39/40/3940e9eb4a6e0652517c4f2c429e601332ad1bd9_48ca9c7b')
+        ruck_rover.get_consistent(url, component=None)
+        expected = ('https://trunk.rdoproject.org/centos9-master/'
+                    'promoted-components/delorean.repo')
+        m_get.assert_called_with(expected, verify=False)
+
+    @patch('ruck_rover.requests.get')
+    def test_get_consistent_centos8_with_component(self, m_get):
+        m_get.return_value.ok = None
+
+        url = ('https://trunk.rdoproject.org/centos8-wallaby/component/cinder/'
+               '0a/6d/0a6d43a7c2ef65be748690a00ee4c294add0c87c_cc0b2aef')
+        ruck_rover.get_consistent(url, component="cinder")
+        expected = ('https://trunk.rdoproject.org/centos8-wallaby/component/'
+                    'cinder/consistent/delorean.repo')
+        m_get.assert_called_with(expected, verify=False)
+
+    @patch('ruck_rover.requests.get')
+    def test_get_consistent_centos7_no_component(self, m_get):
+        m_get.return_value.ok = None
+
+        url = ('https://trunk.rdoproject.org/centos7-train/08/bb/'
+               '08bbadedb04d45353b3228bc21cd930adeef3348_0ad01be2')
+        ruck_rover.get_consistent(url, component=None)
+        expected = ("https://trunk.rdoproject.org/centos7-train/"
+                    "consistent/delorean.repo")
+        m_get.assert_called_with(expected, verify=False)
+
 
 class TestRuckRoverWithCommonSetup(unittest.TestCase):
     def setUp(self):

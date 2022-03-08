@@ -171,40 +171,35 @@ def format_ts_from_last_modified(ts, pattern='%a, %d %b %Y %H:%M:%S %Z'):
     return int(time.mktime(ts.timetuple()))
 
 
-# get the date of the consistent link in dlrn
 def get_consistent(url, component=None):
-    if "centos7" not in url:
-        dlrn_tag = "/promoted-components"
-        short_url = url.split("/")[:-5]
-    else:
-        dlrn_tag = "/consistent"
+    """Get the date of the consistent link in dlrn.
+    """
+
+    if "centos7" in url:
+        dlrn_tag = "consistent"
         short_url = url.split("/")[:-3]
+    else:
+        dlrn_tag = "promoted-components"
+        short_url = url.split("/")[:-5]
+
+    repo = "delorean.repo"
     short_url = "/".join(short_url)
 
     if component is None:
         # integration build, use last promoted_components date
-        requests.packages.urllib3.disable_warnings(
-            category=InsecureRequestWarning)
-        response = requests.get(
-            short_url + dlrn_tag + '/delorean.repo', verify=False)
-        if response.ok:
-            cd = response.headers['Last-Modified']
-            consistent_date = format_ts_from_last_modified(cd)
-        else:
-            return None
+        url = f'{short_url}/{dlrn_tag}/{repo}'
     else:
         # TO-DO normalize component and intergration config
-        short_url = (short_url + '/component/'
-                     + component + '/consistent/delorean.repo')
-        requests.packages.urllib3.disable_warnings(
-            category=InsecureRequestWarning)
-        response = requests.get(short_url, verify=False)
-        if response.ok:
-            cd = response.headers['Last-Modified']
-            consistent_date = format_ts_from_last_modified(cd)
-        else:
-            return None
+        url = f'{short_url}/component/{component}/consistent/{repo}'
 
+    requests.packages.urllib3.disable_warnings(
+        category=InsecureRequestWarning)
+    response = requests.get(url, verify=False)
+    if not response.ok:
+        return None
+
+    cd = response.headers['Last-Modified']
+    consistent_date = format_ts_from_last_modified(cd)
     return consistent_date
 
 
