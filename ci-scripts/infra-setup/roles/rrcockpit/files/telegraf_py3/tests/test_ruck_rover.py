@@ -159,6 +159,26 @@ class TestRuckRover(unittest.TestCase):
                                  'git_url': 'jkl'}}
         self.assertEqual(expected, obtained)
 
+    @patch('ruck_rover.requests.get')
+    def test_get_consistent_centos9_no_component(self, m_get):
+        m_get.return_value.ok = None
+
+        url = ("centos9-master/component/cinder/a4/34/"
+               "a43427ef57c10b2ba9286216d7c8dde575d48acf_6d341149")
+        ruck_rover.get_consistent(url, component=None)
+        expected = "centos9-master/promoted-components/delorean.repo"
+        m_get.assert_called_with(expected, verify=False)
+
+    @patch('ruck_rover.requests.get')
+    def test_get_consistent_centos9_with_component(self, m_get):
+        m_get.return_value.ok = None
+
+        url = ("centos9-master/component/cinder/a4/34/"
+               "a43427ef57c10b2ba9286216d7c8dde575d48acf_6d341149")
+        ruck_rover.get_consistent(url, component="cinder")
+        expected = "centos9-master/component/cinder/consistent/delorean.repo"
+        m_get.assert_called_with(expected, verify=False)
+
 
 class TestRuckRoverWithCommonSetup(unittest.TestCase):
     def setUp(self):
