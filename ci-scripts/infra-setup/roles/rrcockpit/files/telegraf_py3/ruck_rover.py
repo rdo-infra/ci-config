@@ -230,7 +230,7 @@ def get_csv(url):
         return [content, reader]
 
 
-def get_diff(component, control_tag, file1, test_tag, file2):
+def get_diff(control_tag, file1, test_tag, file2):
     # compare the raw string
     if file1[0] == file2[0]:
         return False
@@ -247,9 +247,6 @@ def get_diff(component, control_tag, file1, test_tag, file2):
 
 def get_dlrn_promotions(api_url,
                         promotion_name,
-                        aggregate_hash=None,
-                        commit_hash=None,
-                        distro_hash=None,
                         component=None):
     api_client = dlrnapi_client.ApiClient(host=api_url)
     api_instance = dlrnapi_client.DefaultApi(api_client)
@@ -620,8 +617,7 @@ def track_integration_promotion(args, config):
                                       aggregate_hash)
         c_csv = get_csv(c_url)
         t_csv = get_csv(t_url)
-        pkg_diff = get_diff(None,
-                            promotion_name,
+        pkg_diff = get_diff(promotion_name,
                             c_csv,
                             aggregate_hash,
                             t_csv)
@@ -674,8 +670,7 @@ def track_component_promotion(cargs, config):
                                       "component-ci-testing")
         c_csv = get_csv(c_url)
         t_csv = get_csv(t_url)
-        pkg_diff = get_diff(all_components[0],
-                            "current-tripleo",
+        pkg_diff = get_diff("current-tripleo",
                             c_csv,
                             "component-ci-testing",
                             t_csv)
