@@ -16,3 +16,12 @@
     job: >-
       source /etc/quayrc &&
       bash /opt/stack/ci-config/ci-scripts/copy-containers/tag-quay.sh
+
+- name: Create cron job to copy containers to rdo registry
+  cron:
+    name: 'Copy containers to rdo'
+    minute: 0
+    hour: 0
+    job:
+      source /etc/quayrc &&
+      bash /opt/stack/ci-config/ci-scripts/copy-containers/copy-rdo.sh
