@@ -34,6 +34,11 @@
   become: true
   when: go_build.rc == 0
 
+- name: Delete temporary directory
+  file:
+    path: "{{ temporary_copy_container_dir.path }}"
+    state: absent
+
 - name: Install cron jobs
   include_tasks: cron.yml
   # become: true
