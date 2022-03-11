@@ -2,12 +2,13 @@ import os
 import unittest
 from datetime import datetime
 from unittest import mock
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import ruck_rover
 
 
 class TestRuckRover(unittest.TestCase):
+    # pylint: disable=too-many-public-methods
 
     def test_date_diff_in_seconds(self):
         date1 = datetime(2020, 5, 17)
@@ -191,6 +192,82 @@ class TestRuckRover(unittest.TestCase):
         expected = ("https://trunk.rdoproject.org/centos7-train/"
                     "consistent/delorean.repo")
         m_get.assert_called_with(expected, verify=False)
+
+    def test_get_dlrn_versions_csv_no_component(self):
+        base_url = "base_url"
+        component = None
+        tag = "tag"
+
+        output = ruck_rover.get_dlrn_versions_csv(base_url, component, tag)
+        expected = f"{base_url}/{tag}/versions.csv"
+        self.assertEquals(expected, output)
+
+    def test_get_dlrn_versions_csv_component(self):
+        base_url = "base_url"
+        component = "component"
+        tag = "tag"
+
+        output = ruck_rover.get_dlrn_versions_csv(base_url, component, tag)
+        expected = f"{base_url}/component/{component}/{tag}/versions.csv"
+        self.assertEquals(expected, output)
+
+    def test_get_diff_the_same(self):
+        file_content = ["file1", ([], [0, 0, 0, 0, 0, 0, 0, 0, 0, "abc"], [])]
+        output = ruck_rover.get_diff("", file_content, "", file_content)
+        self.assertFalse(output)
+
+    @patch("ruck_rover.Table.add_row")
+    @patch("ruck_rover.Table.add_column")
+    def test_get_diff_different(self, m_column, m_row):
+        file1 = ["file1", ([], [0, 0, 0, 0, 0, 0, 0, 0, 0, "abc"], [])]
+        file2 = ["file2", ([], [0, 0, 0, 0, 0, 0, 0, 0, 0, "xyz"], [])]
+        ruck_rover.get_diff("Control", file1, "Test", file2)
+
+        m_column.assert_has_calls([
+            call("Control", style="dim", width=85),
+            call("Test", style="dim", width=85)
+        ])
+        m_row.assert_called_with(str("abc"), str("xyz"))
+
+    @mock.patch('requests.get')
+    def test_get_csv_not_ok(self, m_get):
+        m_response = mock.MagicMock(ok=False)
+        m_get.return_value = m_response
+        output = ruck_rover.get_csv("")
+        self.assertIsNone(output)
+
+    @mock.patch('csv.reader')
+    @mock.patch('requests.get')
+    def test_get_csv(self, m_get, m_reader):
+        m_response = mock.MagicMock(ok=True, content=b"")
+        m_get.return_value = m_response
+        output = ruck_rover.get_csv("")
+        self.assertEqual(output, ['', m_reader()])
+
+    def test_track_component_promotion_centos7(self):
+        config = {
+            'upstream': {
+                'criteria': {
+                    'centos-8': {
+                        'wallaby': {
+                            'comp_url': 'http://component_url',
+                            'int_url': 'http://int_url'
+                                   }
+                               }
+                           }
+                       }
+                   }
+        distro = 'centos-7'
+        release = 'master'
+        influx = False
+        stream = 'upstream'
+        compare_upstream = False
+        component = 'cinder'
+
+        with self.assertRaises(KeyError):
+            ruck_rover.track_component_promotion(
+                config, distro, release, influx, stream,
+                compare_upstream, component)
 
 
 class TestRuckRoverWithCommonSetup(unittest.TestCase):
