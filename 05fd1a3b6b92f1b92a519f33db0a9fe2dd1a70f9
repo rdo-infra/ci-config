@@ -33,6 +33,23 @@
       "message": "For future improvements, we should test if HASH is not null in case curl fails here. I supposed that copy-quay will fail with a null hash, but we can fail earlier.",
       "revId": "05fd1a3b6b92f1b92a519f33db0a9fe2dd1a70f9",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1c2a4a3d_5ae879ba",
+        "filename": "ci-scripts/copy-containers/copy-rdo.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-03-15T12:01:22Z",
+      "side": 1,
+      "message": "That could be written in a much more manageable way:\n\n```\ncopy_quay() {\nHASH\u003d`curl \u0027https://trunk.rdoproject.org/api-$1/api/promotions?promote_name\u003dcurrent-tripleo\u0026limit\u003d1\u0027 2\u003e/dev/null | jq -r \u0027.[0].aggregate_hash\u0027`\n/usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --pull-registry quay.io --push-registry trunk.registry.rdoproject.org --token $TOKEN --push-hash $HASH --hash $HASH --release $2 copy\n}\n\ncopy_quay centos9-master-uc mastercentos9\ncopy_quay centos8-wallaby wallaby\ncopy_quay centos9-wallaby wallabycentos9\ncopy_quay centos8-victoria victoria\ncopy_quay centos8-ussuri ussuri\ncopy_quay centos8-train train\n```",
+      "revId": "05fd1a3b6b92f1b92a519f33db0a9fe2dd1a70f9",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
