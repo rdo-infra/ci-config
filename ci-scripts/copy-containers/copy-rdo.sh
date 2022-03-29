@@ -1,7 +1,7 @@
 #!/bin/bash
 
 copy_quay() {
-    HASH=`curl 'https://trunk.rdoproject.org/api-$1/api/promotions?promote_name=current-tripleo&limit=1' 2>/dev/null | jq -r '.[0].aggregate_hash'`
+    HASH=`curl "https://trunk.rdoproject.org/api-$1/api/promotions?promote_name=current-tripleo&limit=1" 2>/dev/null | jq -r '.[0].aggregate_hash'`
     /usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --pull-registry quay.io --push-registry trunk.registry.rdoproject.org --token $TOKEN --push-hash $HASH --hash $HASH --release $2 copy
 }
 # Check if podman is logged
