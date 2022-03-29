@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "48a2904a_da1dc3db",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-03-29T07:35:14Z",
+      "side": 1,
+      "message": "Looks good to me as per local test.",
+      "revId": "42c5d5feee1e0f3e0b4d0442e9442c52da132220",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6061c344_f7e665bb",
+        "filename": "ci-scripts/copy-containers/copy-rdo.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-03-29T07:35:14Z",
+      "side": 1,
+      "message": "Did a quick test to reproduce the behavior.\n\n~~~\n[sandeepyadav@localhost tmp]$ cat test.sh \n#!/bin/bash\nHASH\u003d`curl \u0027https://trunk.rdoproject.org/api-$1/api/promotions?promote_name\u003dcurrent-tripleo\u0026limit\u003d1\u0027 2\u003e/dev/null | jq -r \u0027.[0].aggregate_hash\u0027`\necho $HASH\n\n\n[sandeepyadav@localhost tmp]$ bash test.sh centos9-master-uc\nparse error: Invalid numeric literal at line 1, column 10\n~~~\n\nfixed with double quotes:-\n~~~\n[sandeepyadav@localhost tmp]$ cat test.sh \n#!/bin/bash\nHASH\u003d`curl \"https://trunk.rdoproject.org/api-$1/api/promotions?promote_name\u003dcurrent-tripleo\u0026limit\u003d1\" 2\u003e/dev/null | jq -r \u0027.[0].aggregate_hash\u0027`\necho $HASH\n[sandeepyadav@localhost tmp]$ bash test.sh centos9-master-uc\n9ebaa119447230d658c9299d0de5b2a6\n~~~",
+      "revId": "42c5d5feee1e0f3e0b4d0442e9442c52da132220",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    }
+  ]
+}
