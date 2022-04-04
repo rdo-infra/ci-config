@@ -637,38 +637,42 @@ def track_integration_promotion(
             render_testproject_yaml(tp_jobs, test_hash, stream, config)
 
 
-def track_component_promotion(
-        config, distro, release, influx, stream, compare_upstream,
-        test_component):
-    url = config[stream]['criteria'][distro][release]['comp_url']
-    dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
-
-    if distro == "centos-7":
-        raise Exception("centos-7 components do not exist")
-
+def get_components_diff(dlrn_trunk_url, test_component):
     if test_component == "all":
         all_components = ["baremetal", "cinder", "clients", "cloudops",
                           "common", "compute", "glance", "manila",
                           "network", "octavia", "security", "swift",
                           "tempest", "tripleo", "ui", "validation"]
         pkg_diff = None
+
     else:
-        all_components = [test_component]
-        # get package diff for the component
-        # control_url
-        c_url = get_dlrn_versions_csv(dlrn_trunk_url,
-                                      all_components[0],
-                                      "current-tripleo")
+        # get package diff for the component # control_url
+        control_url = get_dlrn_versions_csv(
+            dlrn_trunk_url, test_component, "current-tripleo")
+        control_csv = get_csv(control_url)
+
         # test_url, what is currently getting tested
-        t_url = get_dlrn_versions_csv(dlrn_trunk_url,
-                                      all_components[0],
-                                      "component-ci-testing")
-        c_csv = get_csv(c_url)
-        t_csv = get_csv(t_url)
-        pkg_diff = get_diff("current-tripleo",
-                            c_csv,
-                            "component-ci-testing",
-                            t_csv)
+        test_url = get_dlrn_versions_csv(
+            dlrn_trunk_url, test_component, "component-ci-testing")
+        test_csv = get_csv(test_url)
+
+        all_components = [test_component]
+        pkg_diff = get_diff(
+            "current-tripleo", control_csv, "component-ci-testing", test_csv)
+
+    return all_components, pkg_diff
+
+
+def track_component_promotion(
+        config, distro, release, influx, stream, compare_upstream,
+        test_component):
+
+    if distro == "centos-7":
+        raise Exception("centos-7 components do not exist")
+
+    url = config[stream]['criteria'][distro][release]['comp_url']
+    dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
+    all_components, pkg_diff = get_components_diff(dlrn_trunk_url, test_component)
 
     for component in all_components:
         commit_url = '{}component/{}/component-ci-testing/commit.yaml'.format(
