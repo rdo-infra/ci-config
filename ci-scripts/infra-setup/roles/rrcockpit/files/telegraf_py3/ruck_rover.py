@@ -214,14 +214,8 @@ def get_consistent(url, component=None):
 
 
 def get_dlrn_versions_csv(base_url, component, tag):
-    if component:
-        control_tag = "{}/component/{}/{}/versions.csv".format(base_url,
-                                                               component,
-                                                               tag)
-    else:
-        control_tag = "{}/{}/versions.csv".format(base_url,
-                                                  tag)
-    return control_tag
+    component_part = f"/component/{component}" if component else ""
+    return f"{base_url}{component_part}/{tag}/versions.csv"
 
 
 def get_csv(url):
