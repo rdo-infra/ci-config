@@ -482,9 +482,9 @@ def render_testproject_yaml(jobs, test_hash, stream, config):
     file_loader = FileSystemLoader(path + '/templates')
     env = Environment(loader=file_loader)
     template = env.get_template('.zuul.yaml.j2')
-    output = template.render(jobs=jobs_list, hash=test_hash)
-    print("\n\n###### testproject to rerun required jobs ######")
-    print(config[stream]['testproject_url'] + "\n")
+    testproject_url = config[stream]['testproject_url']
+    output = template.render(
+        jobs=jobs_list, hash=test_hash, testproject_url=testproject_url)
     print(output)
 
 
