@@ -637,14 +637,9 @@ def track_integration_promotion(
             render_testproject_yaml(tp_jobs, test_hash, stream, config)
 
 
-def track_component_promotion(
-        config, distro, release, influx, stream, compare_upstream,
-        test_component):
+def get_components(config, stream, distro, release, test_component):
     url = config[stream]['criteria'][distro][release]['comp_url']
     dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
-
-    if distro == "centos-7":
-        raise Exception("centos-7 components do not exist")
 
     if test_component == "all":
         all_components = ["baremetal", "cinder", "clients", "cloudops",
@@ -669,6 +664,21 @@ def track_component_promotion(
                             c_csv,
                             "component-ci-testing",
                             t_csv)
+
+    return all_components, pkg_diff
+
+
+def track_component_promotion(
+        config, distro, release, influx, stream, compare_upstream,
+        test_component):
+
+    if distro == "centos-7":
+        raise Exception("centos-7 components do not exist")
+
+    all_components, pkg_diff = get_components(config, stream, distro, release, test_component)
+
+    url = config[stream]['criteria'][distro][release]['comp_url']
+    dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
 
     for component in all_components:
         commit_url = '{}component/{}/component-ci-testing/commit.yaml'.format(
