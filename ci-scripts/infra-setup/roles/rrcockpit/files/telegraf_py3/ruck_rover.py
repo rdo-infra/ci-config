@@ -41,6 +41,11 @@ for key, values in MATRIX.items():
 
 DISTROS = list(MATRIX.keys())
 RELEASES = list(REVERSED_MATRIX.keys())
+ALL_COMPONENTS = set([
+    "all", "baremetal", "cinder", "clients", "cloudops",
+    "common", "compute", "glance", "manila",
+    "network", "octavia", "security", "swift",
+    "tempest", "tripleo", "ui", "validation"])
 
 
 def date_diff_in_seconds(dt2, dt1):
@@ -152,7 +157,7 @@ def find_jobs_in_integration_criteria(url, promotion_name='current-tripleo'):
 def find_jobs_in_component_criteria(url, component):
     criteria_content = url_response_in_yaml(url)
 
-    return criteria_content['promoted-components'][component]
+    return set(criteria_content['promoted-components'][component])
 
 
 def fetch_hashes_from_commit_yaml(url):
@@ -630,44 +635,44 @@ def track_integration_promotion(
             render_testproject_yaml(tp_jobs, test_hash, stream, config)
 
 
+def get_components_diff(dlrn_trunk_url, test_component):
+    all_components = sorted(ALL_COMPONENTS.difference(["all"]))
+    pkg_diff = None
+
+    if test_component != "all":
+        # get package diff for the component # control_url
+        control_url = get_dlrn_versions_csv(
+            dlrn_trunk_url, test_component, "current-tripleo")
+        control_csv = get_csv(control_url)
+
+        # test_url, what is currently getting tested
+        test_url = get_dlrn_versions_csv(
+            dlrn_trunk_url, test_component, "component-ci-testing")
+        test_csv = get_csv(test_url)
+
+        all_components = [test_component]
+        pkg_diff = get_diff(
+            "current-tripleo", control_csv, "component-ci-testing", test_csv)
+
+    return all_components, pkg_diff
+
+
 def track_component_promotion(
         config, distro, release, influx, stream, compare_upstream,
         test_component):
-    url = config[stream]['criteria'][distro][release]['comp_url']
-    dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
 
     if distro == "centos-7":
         raise Exception("centos-7 components do not exist")
 
-    if test_component == "all":
-        all_components = ["baremetal", "cinder", "clients", "cloudops",
-                          "common", "compute", "glance", "manila",
-                          "network", "octavia", "security", "swift",
-                          "tempest", "tripleo", "ui", "validation"]
-        pkg_diff = None
-    else:
-        all_components = [test_component]
-        # get package diff for the component
-        # control_url
-        c_url = get_dlrn_versions_csv(dlrn_trunk_url,
-                                      all_components[0],
-                                      "current-tripleo")
-        # test_url, what is currently getting tested
-        t_url = get_dlrn_versions_csv(dlrn_trunk_url,
-                                      all_components[0],
-                                      "component-ci-testing")
-        c_csv = get_csv(c_url)
-        t_csv = get_csv(t_url)
-        pkg_diff = get_diff("current-tripleo",
-                            c_csv,
-                            "component-ci-testing",
-                            t_csv)
+    url = config[stream]['criteria'][distro][release]['comp_url']
+    dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
+    all_components, pkg_diff = get_components_diff(
+        dlrn_trunk_url, test_component)
 
     for component in all_components:
-        commit_url = '{}component/{}/component-ci-testing/commit.yaml'.format(
-                          dlrn_trunk_url, component)
         commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
-                                                    commit_url)
+            f"{dlrn_trunk_url}component/{component}/"
+            "component-ci-testing/commit.yaml")
         api_response = find_results_from_dlrn_repo_status(dlrn_api_url,
                                                           commit_hash,
                                                           distro_hash,
@@ -696,7 +701,7 @@ def track_component_promotion(
             passed_jobs.remove('consistent')
         if 'consistent' in failed_jobs:
             failed_jobs.remove('consistent')
-        jobs_in_criteria = set(find_jobs_in_component_criteria(url, component))
+        jobs_in_criteria = find_jobs_in_component_criteria(url, component)
         jobs_which_need_pass_to_promote = jobs_in_criteria.difference(
                                             passed_jobs)
         jobs_with_no_result = jobs_in_criteria.difference(
@@ -792,11 +797,7 @@ def track_component_promotion(
 @ click.option("--distro", default='centos-9',
                type=click.Choice(DISTROS))
 @ click.option("--component",
-               type=click.Choice(["all", "baremetal", "cinder", "clients",
-                                  "cloudops", "common", "compute",
-                                  "glance", "manila", "network", "octavia",
-                                  "security", "swift", "tempest", "tripleo",
-                                  "ui", "validation"]))
+               type=click.Choice(sorted(ALL_COMPONENTS)))
 @ click.option("--influx", is_flag=True, default=False)
 @ click.option("--compare_upstream", is_flag=True, default=False)
 @ click.option("--aggregate_hash",
