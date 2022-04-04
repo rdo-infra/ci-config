@@ -244,30 +244,115 @@ class TestRuckRover(unittest.TestCase):
         output = ruck_rover.get_csv("")
         self.assertEqual(output, ['', m_reader()])
 
-    def test_track_component_promotion_centos7(self):
-        config = {
+class TestRuckRoverComponent(unittest.TestCase):
+    def setUp(self):
+        self.config = {
             'upstream': {
                 'criteria': {
                     'centos-8': {
                         'wallaby': {
-                            'comp_url': 'http://component_url',
+                            'comp_url': 'http://wallaby_comp',
+                            'int_url': 'http://int_url'
+                                   }
+                               },
+                    'centos-7': {
+                        'train': {
                             'int_url': 'http://int_url'
                                    }
                                }
                            }
                        }
                    }
+
+    def test_track_component_promotion_centos7(self):
         distro = 'centos-7'
-        release = 'master'
+        release = 'train'
         influx = False
         stream = 'upstream'
         compare_upstream = False
         component = 'cinder'
 
-        with self.assertRaises(KeyError):
+        with self.assertRaises(Exception):
             ruck_rover.track_component_promotion(
-                config, distro, release, influx, stream,
+                self.config, distro, release, influx, stream,
                 compare_upstream, component)
+
+    @mock.patch('ruck_rover.find_jobs_in_component_criteria')
+    @mock.patch('ruck_rover.conclude_results_from_dlrn')
+    @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
+    @mock.patch('ruck_rover.fetch_hashes_from_commit_yaml')
+    @mock.patch('ruck_rover.get_dlrn_promotions')
+    @mock.patch('ruck_rover.get_diff')
+    @mock.patch('ruck_rover.get_csv')
+    @mock.patch('ruck_rover.get_dlrn_versions_csv')
+    @mock.patch('ruck_rover.gather_basic_info_from_criteria')
+    def test_all_components(self, m_gather, m_dlrn, m_csv, m_diff, m_promo, m_fetch, _m_results, m_conclude, _m_jobs):
+        m_gather.return_value = ('dlrn_api_url', 'dlrn_trunk_url')
+        m_fetch.return_value = ('c6', '03', 'None')
+        m_dlrn.side_effect = ['control_url', 'test_url']
+        m_csv.side_effect = ["first", "second"]
+        m_conclude.return_value = set(), set(), set()
+
+        ruck_rover.track_component_promotion(
+            self.config, 'centos-8', 'wallaby', 'influx',
+            'upstream', compare_upstream=False, test_component='all')
+
+        m_gather.assert_called_with("http://wallaby_comp")
+        m_dlrn.assert_not_called()
+        m_csv.assert_not_called()
+        m_diff.assert_not_called()
+
+    @mock.patch('ruck_rover.find_jobs_in_component_criteria')
+    @mock.patch('ruck_rover.conclude_results_from_dlrn')
+    @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
+    @mock.patch('ruck_rover.fetch_hashes_from_commit_yaml')
+    @mock.patch('ruck_rover.get_dlrn_promotions')
+    @mock.patch('ruck_rover.get_components_diff')
+    @mock.patch('ruck_rover.gather_basic_info_from_criteria')
+    def test_given_component(
+            self, m_gather, m_comp_diff, m_promo,
+            m_fetch, _m_results, m_conclude, _m_jobs):
+        m_gather.return_value = ('dlrn_api_url', 'dlrn_trunk_url')
+        m_comp_diff.return_value = (["cinder"], None)
+        m_fetch.return_value = ('c6', '03', 'None')
+        m_conclude.return_value = set(), set(), set()
+
+        ruck_rover.track_component_promotion(
+            self.config, 'centos-8', 'wallaby', 'influx',
+            'upstream', compare_upstream=False, test_component='component')
+
+        m_gather.assert_called_with("http://wallaby_comp")
+
+    def test_get_components_diff_all(self):
+        result = ruck_rover.get_components_diff("dlrn_trunk_url", "all")
+        all_components = ["baremetal", "cinder", "clients", "cloudops",
+                          "common", "compute", "glance", "manila",
+                          "network", "octavia", "security", "swift",
+                          "tempest", "tripleo", "ui", "validation"]
+        expected = (all_components, None)
+        self.assertEqual(result, expected)
+
+    @mock.patch('ruck_rover.get_diff')
+    @mock.patch('ruck_rover.get_csv')
+    @mock.patch('ruck_rover.get_dlrn_versions_csv')
+    def test_get_components_single(self, m_dlrn, m_csv, m_diff):
+
+        m_dlrn.side_effect = ['control_url', 'test_url']
+        m_csv.side_effect = ["first", "second"]
+        m_diff.return_value = "pkg_diff"
+
+        result = ruck_rover.get_components_diff("dlrn_trunk_url", "cinder")
+
+        m_dlrn.assert_has_calls([
+                call('dlrn_trunk_url', 'cinder', 'current-tripleo'),
+                call('dlrn_trunk_url', 'cinder', 'component-ci-testing')
+            ])
+        m_csv.assert_has_calls([call('control_url'), call('test_url')])
+        m_diff.assert_called_with(
+            "current-tripleo", "first", "component-ci-testing", "second")
+
+        expected = (['cinder'], "pkg_diff")
+        self.assertEqual(result, expected)
 
 
 class TestRuckRoverWithCommonSetup(unittest.TestCase):
