@@ -333,7 +333,9 @@ class TestRuckRoverComponent(unittest.TestCase):
         m_results.return_value = "api_response"
         m_promo.return_value = {
             'commit_hash': commit_hash,
-            'distro_hash': distro_hash
+            'distro_hash': distro_hash,
+            'timestamp': 1,
+            'latest_build': 1
         }
         m_conclude.return_value = set(), set(), set()
 
@@ -398,7 +400,7 @@ class TestRuckRoverComponent(unittest.TestCase):
         m_api_client.assert_called_with(host="api_url")
         m_promo_query.assert_called_with(limit=1, promote_name="promotion")
 
-        expected = {'abc': 'def', 'lastest_build': 'consistent'}
+        expected = {'abc': 'def', 'latest_build': 'consistent'}
 
         self.assertEqual(result, expected)
 
@@ -446,6 +448,163 @@ class TestRuckRoverWithCommonSetup(unittest.TestCase):
         self.assertEqual(history[job]['SUCCESS'], 3)
         self.assertEqual(history[job]['FAILURE'], 2)
         self.assertEqual(history[job]['OTHER'], 0)
+
+
+@mock.patch('builtins.print')
+@mock.patch('ruck_rover.latest_job_results_url')
+@mock.patch('ruck_rover.find_jobs_in_integration_criteria')
+@mock.patch('ruck_rover.find_results_from_dlrn_agg')
+@mock.patch('ruck_rover.web_scrape')
+@mock.patch('ruck_rover.find_jobs_in_component_criteria')
+@mock.patch('ruck_rover.conclude_results_from_dlrn')
+@mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
+@mock.patch('ruck_rover.fetch_hashes_from_commit_yaml')
+@mock.patch('ruck_rover.get_dlrn_promotions')
+@mock.patch('ruck_rover.get_components_diff')
+@mock.patch('ruck_rover.gather_basic_info_from_criteria')
+class TestInfluxDBMeasurements(unittest.TestCase):
+    def setUp(self):
+        self.config = {
+            'upstream': {
+                'criteria': {
+                    'centos-8': {
+                        'wallaby': {
+                            'comp_url': 'http://wallaby_comp',
+                            'int_url': 'http://int_url'
+                                   }
+                               },
+                    'centos-7': {
+                        'train': {
+                            'int_url': 'http://int_url'
+                                   }
+                               }
+                           }
+                       }
+                   }
+        self.distro = "centos-8"
+        self.release = "wallaby"
+        self.influx = True
+        self.stream = "upstream"
+        self.compare_upstream = False
+
+    def test_component(
+            self, m_gather, m_get_comp, m_get_promo, m_fetch_hash,
+            m_find_results, m_conclude, m_find_jobs_comp, m_web_scrape,
+            m_find_result_aggr, _m_find_jobs_int, m_latest_job, m_print):
+        component = "all"
+
+        component = "cinder"
+        commit_hash = "c6"
+        distro_hash = "03"
+        extended_hash = 'None'
+
+        m_gather.return_value = ('dlrn_api_url', 'dlrn_trunk_url')
+        m_get_comp.return_value = ([component], None)
+        m_get_promo.return_value = {
+            'commit_hash': commit_hash,
+            'distro_hash': distro_hash,
+            'timestamp': 1,
+            'latest_build': 1,
+            'aggregate_hash': 'hash',
+            'promote_name': 'promo',
+            'repo_hash': 'repo_hash',
+            'repo_url': 'repo_url',
+            'component': component,
+            'extended_hash': extended_hash,
+        }
+        m_fetch_hash.return_value = (commit_hash, distro_hash, extended_hash)
+        m_find_results.return_value = "api_response"
+        m_conclude.return_value = (
+            set(["passed", "failed"]), set(["passed"]), set(["failed"]))
+        m_web_scrape.return_value = "test_hash"
+        m_find_jobs_comp.return_value = set(["passed", "failed", "2nd_passed"])
+        m_latest_job.return_value = {}
+
+        ruck_rover.track_component_promotion(
+            self.config, self.distro, self.release, self.influx,
+            self.stream, self.compare_upstream, component)
+
+        job1 = ('jobs_result,job_type=component,job_name=2nd_passed'
+                ',release=wallaby name="promoted-components",test_hash="c6_03"'
+                ',criteria="True",status="5",logs="N/A",failure_reason="N/A"'
+                ',duration="N/A",component="cinder",distro="centos-8"')
+        job2 = ('jobs_result,job_type=component,job_name=failed'
+                ',release=wallaby name="promoted-components",test_hash="c6_03"'
+                ',criteria="True",status="0",logs="N/A",failure_reason="N/A"'
+                ',duration="N/A",component="cinder",distro="centos-8"')
+        job3 = ('jobs_result,job_type=component,job_name=passed'
+                ',release=wallaby name="promoted-components",test_hash="c6_03"'
+                ',criteria="True",status="9",logs="N/A",failure_reason="N/A"'
+                ',duration="N/A",component="cinder",distro="centos-8"')
+        dlrn = ('dlrn-promotion,release=wallaby,distro=centos-8'
+                ',promo_name=promo commit_hash="c6",distro_hash="03"'
+                ',aggregate_hash="hash",repo_hash="repo_hash"'
+                ',repo_url="repo_url",latest_build_date=1000'
+                ',component="cinder",promotion_details="dlrn_api_url/api/'
+                'civotes_detail.html?commit_hash=c6&distro_hash=03"'
+                ',extended_hash="None" 1000000000')
+
+        output = '\n'.join([job1, job2, job3, dlrn])
+        m_print.assert_called_once_with(output)
+
+    def test_integration(
+            self, m_gather, _m_get_comp, m_get_promo, m_fetch_hash,
+            m_find_results, m_conclude, _m_find_jobs_comp, m_web_scrape,
+            _m_find_result_aggr, m_find_jobs_int, m_latest_job, m_print):
+        promotion_name = "promote_name"
+        aggregate_hash = "aggregate_hash"
+
+        commit_hash = "c6"
+        distro_hash = "03"
+        extended_hash = 'None'
+
+        m_gather.return_value = ('dlrn_api_url', 'dlrn_trunk_url')
+        m_get_promo.return_value = {
+            'commit_hash': commit_hash,
+            'distro_hash': distro_hash,
+            'timestamp': 1,
+            'latest_build': 1,
+            'aggregate_hash': 'hash',
+            'promote_name': 'promo',
+            'repo_hash': 'repo_hash',
+            'repo_url': 'repo_url',
+            'component': None,
+            'extended_hash': extended_hash,
+        }
+        m_fetch_hash.return_value = (commit_hash, distro_hash, extended_hash)
+        m_find_results.return_value = "api_response"
+        m_conclude.return_value = (
+            set(["passed", "failed"]), set(["passed"]), set(["failed"]))
+        m_web_scrape.return_value = "test_hash"
+        m_find_jobs_int.return_value = set(["passed", "failed", "2nd_passed"])
+        m_latest_job.return_value = {}
+
+        ruck_rover.track_integration_promotion(
+            self.config, self.distro, self.release, self.influx,
+            self.stream, self.compare_upstream, promotion_name,
+            aggregate_hash)
+
+        job1 = ('jobs_result,job_type=integration,job_name=2nd_passed'
+                ',release=wallaby name="promote_name",test_hash="test_hash"'
+                ',criteria="True",status="5",logs="N/A",failure_reason="N/A"'
+                ',duration="N/A",component="None",distro="centos-8"')
+        job2 = ('jobs_result,job_type=integration,job_name=failed'
+                ',release=wallaby name="promote_name",test_hash="test_hash"'
+                ',criteria="True",status="0",logs="N/A",failure_reason="N/A"'
+                ',duration="N/A",component="None",distro="centos-8"')
+        job3 = ('jobs_result,job_type=integration,job_name=passed'
+                ',release=wallaby name="promote_name",test_hash="test_hash"'
+                ',criteria="True",status="9",logs="N/A",failure_reason="N/A"'
+                ',duration="N/A",component="None",distro="centos-8"')
+        dlrn = ('dlrn-promotion,release=wallaby,distro=centos-8'
+                ',promo_name=promo commit_hash="c6",distro_hash="03"'
+                ',aggregate_hash="hash",repo_hash="repo_hash"'
+                ',repo_url="repo_url",latest_build_date=1000,component="None"'
+                ',promotion_details="dlrn_api_url/api/civotes_agg_detail.html'
+                '?ref_hash=hash",extended_hash="None" 1000000000')
+
+        output = '\n'.join([job1, job2, job3, dlrn])
+        m_print.assert_called_once_with(output)
 
 
 if __name__ == '__main__':
