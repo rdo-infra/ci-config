@@ -333,7 +333,9 @@ class TestRuckRoverComponent(unittest.TestCase):
         m_results.return_value = "api_response"
         m_promo.return_value = {
             'commit_hash': commit_hash,
-            'distro_hash': distro_hash
+            'distro_hash': distro_hash,
+            'timestamp': 1,
+            'lastest_build': 1
         }
         m_conclude.return_value = set(), set(), set()
 

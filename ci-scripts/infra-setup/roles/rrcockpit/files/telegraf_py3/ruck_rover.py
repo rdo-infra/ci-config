@@ -47,6 +47,10 @@ ALL_COMPONENTS = set([
     "network", "octavia", "security", "swift",
     "tempest", "tripleo", "ui", "validation"])
 
+INFLUX_PASSED = 9
+INFLUX_PENDING = 5
+INFLUX_FAILED = 0
+
 
 def date_diff_in_seconds(dt2, dt1):
     timedelta = dt2 - dt1
@@ -417,73 +421,63 @@ def load_conf_file(config_file):
     return config
 
 
-def influxdb_jobs(jobs_result):
-    # https://docs.influxdata.com/influxdb/v2.0/reference/syntax/line-protocol/
-    # jobs_result = the measurement
-    # job_type is a tag, note the space
-    # rest of the values are fields in a row of data
+def print_influxdb(
+        job_info, log_urls, all_jobs, passed_jobs, failed_jobs,
+        jobs_in_criteria, promotions):
+    """
+    https://docs.influxdata.com/influxdb/v2.0/reference/syntax/line-protocol/
+    jobs_result = the measurement
+    job_type is a tag, note the space
+    rest of the values are fields in a row of data
 
-    # grafana can only color code w/ numbers, not text
-    # 0 = failed, 5 = pending, 9 = success # grafana thresholds.
-    if jobs_result['status'] == "failed":
-        jobs_result['status'] = 0
-    elif jobs_result['status'] == "pending":
-        jobs_result['status'] = 5
-    elif jobs_result['status'] == "passed":
-        jobs_result['status'] = 9
+    grafana can only color code w/ numbers, not text
+    0 = failed, 5 = pending, 9 = success # grafana thresholds.
+    grafana renders epoch only w/ * 1000
+    """
+    job_result_list = []
+    for job_name in all_jobs:
+        if job_name in passed_jobs:
+            status = INFLUX_PASSED
+        elif job_name in failed_jobs:
+            status = INFLUX_FAILED
+        else:
+            status = INFLUX_PENDING
 
-    results_influxdb_line = ('jobs_result,'
-                             'job_type={job_type},'
-                             'job_name={job},'
-                             'release={release} '
-                             'name="{promote_name}",'
-                             'test_hash="{test_hash}",'
-                             'criteria="{criteria}",'
-                             'status="{status}",'
-                             'logs="{logs}",'
-                             'failure_reason="{failure_reason}",'
-                             'duration="{duration}",'
-                             'component="{component}",'
-                             'distro="{distro}"')
+        log_url = log_urls.get(job_name, "N/A")
+        job_result = {
+            'job_name': job_name,
+            'criteria': job_name in jobs_in_criteria,
+            'logs': log_url,
+            'duration': find_job_run_time(log_url),
+            'status': status,
+            'failure_reason': (find_failure_reason(log_url)
+                               if status == INFLUX_FAILED else "N/A"),
+        }
+        job_result.update(job_info)
+        job_result_list.append(job_result)
 
-    if jobs_result['component'] is None:
-        jobs_result['job_type'] = "integration"
-    else:
-        jobs_result['job_type'] = "component"
-    return results_influxdb_line.format(**jobs_result)
-
-
-def influxdb_promo(promotion):
-    # grafana renders epoch only w/ * 1000
-    gr_promotion_date = str(int(promotion['timestamp']) * 1000000000)
-    gr_latest_build = str(int(promotion['lastest_build']) * 1000)
-    promotion['grafana_timestamp'] = gr_promotion_date
-    promotion['grafana_latest_build'] = gr_latest_build
-    promotion_influxdb_line = ("dlrn-promotion,"
-                               "release={release},distro={distro},"
-                               "promo_name={promote_name} "
-                               "commit_hash=\"{commit_hash}\","
-                               "distro_hash=\"{distro_hash}\","
-                               "aggregate_hash=\"{aggregate_hash}\","
-                               "repo_hash=\"{repo_hash}\","
-                               "repo_url=\"{repo_url}\","
-                               "latest_build_date={grafana_latest_build},"
-                               "component=\"{component}\","
-                               "promotion_details=\"{dlrn_details}\","
-                               "extended_hash=\"{extended_hash}\" "
-                               "{grafana_timestamp}")
-    return promotion_influxdb_line.format(**promotion)
+    render_influxdb(job_result_list, promotions)
 
 
-def render_testproject_yaml(jobs, test_hash, stream, config):
-    jobs_list = jobs
+def prepare_render_template(filename):
     path = os.path.dirname(__file__)
     file_loader = FileSystemLoader(path + '/templates')
     env = Environment(loader=file_loader)
-    template = env.get_template('.zuul.yaml.j2')
+    template = env.get_template(filename)
+    return template
+
+
+def render_testproject_yaml(jobs, test_hash, stream, config):
+    template = prepare_render_template('.zuul.yaml.j2')
     testproject_url = config[stream]['testproject_url']
     output = template.render(
-        jobs=jobs_list, hash=test_hash, testproject_url=testproject_url)
+        jobs=jobs, hash=test_hash, testproject_url=testproject_url)
+    print(output)
+
+
+def render_influxdb(jobs, promotion):
+    template = prepare_render_template('influx.j2')
+    output = template.render(jobs=jobs, promotion=promotion)
     print(output)
 
 
@@ -494,20 +488,35 @@ def track_integration_promotion(
     url = config[stream]['criteria'][distro][release]['int_url']
     dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
     promotions = get_dlrn_promotions(dlrn_api_url, promotion_name)
-    if distro != "centos-7":
+    promotions['release'] = release
+    promotions['distro'] = distro
+
+    if distro == "centos-7":
+        commit_url = dlrn_trunk_url + aggregate_hash + '/commit.yaml'
+        commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
+                                                    commit_url)
+
+        test_hash = commit_hash
+        api_response = find_results_from_dlrn_repo_status(
+            dlrn_api_url, commit_hash, distro_hash, extended_hash)
+
+        dlrn_api_suffix = "api/civotes_detail.html?commit_hash="
+        hash_under_test = "{}/{}{}&distro_hash={}".format(
+            dlrn_api_url, dlrn_api_suffix, commit_hash, distro_hash)
+        promoted_hash = "{}/{}{}&distro_hash={}".format(
+            dlrn_api_url, dlrn_api_suffix, promotions['commit_hash'],
+            promotions['distro_hash'])
+    else:
         md5sum_url = dlrn_trunk_url + aggregate_hash + '/delorean.repo.md5'
         test_hash = web_scrape(md5sum_url)
         api_response = find_results_from_dlrn_agg(dlrn_api_url, test_hash)
 
-    else:
-        commit_url = dlrn_trunk_url + aggregate_hash + '/commit.yaml'
-        commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
-                                                    commit_url)
-        api_response = find_results_from_dlrn_repo_status(dlrn_api_url,
-                                                          commit_hash,
-                                                          distro_hash,
-                                                          extended_hash)
-        test_hash = commit_hash
+        dlrn_api_suffix = "api/civotes_agg_detail.html?ref_hash="
+        hash_under_test = f"{dlrn_api_url}/{dlrn_api_suffix}{test_hash}"
+        promoted_hash = (
+            f"{dlrn_api_url}/{dlrn_api_suffix}{promotions['aggregate_hash']}")
+
+    promotions['dlrn_details'] = promoted_hash
 
     (all_jobs_result_available,
      passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
@@ -517,30 +526,15 @@ def track_integration_promotion(
     jobs_with_no_result = jobs_in_criteria.difference(all_jobs_result_available)
     all_jobs = all_jobs_result_available.union(jobs_with_no_result)
 
-    # get the dlrn details, hash under test ( hut ) and promoted hash ( ph )
-    if distro != "centos-7":
-        dlrn_api_suffix = "api/civotes_agg_detail.html?ref_hash="
-        # hash under test
-        hut = "{}/{}{}".format(dlrn_api_url,
-                               dlrn_api_suffix,
-                               test_hash)
-        # promoted hash
-        ph = "{}/{}{}".format(dlrn_api_url,
-                              dlrn_api_suffix,
-                              promotions['aggregate_hash'])
-
-    else:
-        dlrn_api_suffix = "api/civotes_detail.html?commit_hash="
-        # hash under test
-        hut = "{}/{}{}&distro_hash={}".format(dlrn_api_url,
-                                              dlrn_api_suffix,
-                                              commit_hash,
-                                              distro_hash)
-        # promoted hash
-        ph = "{}/{}{}&distro_hash={}".format(dlrn_api_url,
-                                             dlrn_api_suffix,
-                                             promotions['commit_hash'],
-                                             promotions['distro_hash'])
+    component = None
+    job_info = {
+        'distro': distro,
+        'release': release,
+        'component': component,
+        'job_type': "component" if component else "integration",
+        'promote_name': promotion_name,
+        'test_hash': test_hash
+    }
     if influx:
         # NOTE(dviroel): excluding jobs results from influx when promotion_name
         #  is "current-tripleo-rdo" since we are not using this info anywhere.
@@ -548,41 +542,12 @@ def track_integration_promotion(
             # print out jobs in influxdb format
             log_urls = latest_job_results_url(
                 api_response, all_jobs_result_available)
-            for job in all_jobs:
-                log_url = log_urls.get(job, "N/A")
-                if job in passed_jobs:
-                    status = 'passed'
-                elif job in failed_jobs:
-                    status = 'failed'
-                else:
-                    status = 'pending'
-                if status == 'failed':
-                    failure_reason = find_failure_reason(log_url)
-                else:
-                    failure_reason = "N/A"
-                jobs_result = {}
-                jobs_result['release'] = release
-                jobs_result['promote_name'] = promotion_name
-                jobs_result['job'] = job
-                jobs_result['test_hash'] = test_hash
-                jobs_result['component'] = None
-                jobs_result['criteria'] = job in jobs_in_criteria
-                jobs_result['status'] = status
-                jobs_result['logs'] = log_url
-                jobs_result['failure_reason'] = failure_reason
-                jobs_result['duration'] = find_job_run_time(
-                    log_url)
-                jobs_result['distro'] = distro
-                print(influxdb_jobs(jobs_result))
-
-        # print out last promotions in influxdb format
-        promotions['release'] = release
-        promotions['distro'] = distro
-        promotions['dlrn_details'] = ph
-        print(influxdb_promo(promotions))
+            print_influxdb(
+                job_info, log_urls, all_jobs, passed_jobs,
+                failed_jobs, jobs_in_criteria, promotions)
     else:
         last_p = datetime.utcfromtimestamp(promotions['timestamp'])
-        console.print(f"Hash under test: {hut}",
+        console.print(f"Hash under test: {hash_under_test}",
                       f"\nlast_promotion={last_p}")
         print_a_set_in_table(passed_jobs, "Jobs which passed:")
         print_a_set_in_table(failed_jobs, "Jobs which failed:")
@@ -630,7 +595,7 @@ def track_integration_promotion(
 
 
 def get_components_diff(dlrn_trunk_url, test_component):
-    all_components = sorted(ALL_COMPONENTS.difference(["all"]))
+    components = sorted(ALL_COMPONENTS.difference(["all"]))
     pkg_diff = None
 
     if test_component != "all":
@@ -644,49 +609,37 @@ def get_components_diff(dlrn_trunk_url, test_component):
             dlrn_trunk_url, test_component, "component-ci-testing")
         test_csv = get_csv(test_url)
 
-        all_components = [test_component]
+        components = [test_component]
         pkg_diff = get_diff(
             "current-tripleo", control_csv, "component-ci-testing", test_csv)
 
-    return all_components, pkg_diff
+    return components, pkg_diff
 
 
 def track_component_promotion(
         config, distro, release, influx, stream, compare_upstream,
         test_component):
-
-    if distro == "centos-7":
-        raise Exception("centos-7 components do not exist")
-
     url = config[stream]['criteria'][distro][release]['comp_url']
     dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
-    all_components, pkg_diff = get_components_diff(
-        dlrn_trunk_url, test_component)
-
-    for component in all_components:
+    dlrn_api_suffix = "api/civotes_detail.html?commit_hash="
+    components, pkg_diff = get_components_diff(dlrn_trunk_url, test_component)
+    for component in components:
         commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
             f"{dlrn_trunk_url}component/{component}/"
             "component-ci-testing/commit.yaml")
-        api_response = find_results_from_dlrn_repo_status(dlrn_api_url,
-                                                          commit_hash,
-                                                          distro_hash,
-                                                          extended_hash)
+        api_response = find_results_from_dlrn_repo_status(
+            dlrn_api_url, commit_hash, distro_hash, extended_hash)
 
-        # component promotion details
-        promotions = get_dlrn_promotions(dlrn_api_url,
-                                         "promoted-components",
-                                         component=component)
+        promotions = get_dlrn_promotions(
+            dlrn_api_url, "promoted-components", component=component)
+        promotions['release'] = release
+        promotions['distro'] = distro
 
-        dlrn_api_suffix = "api/civotes_detail.html?commit_hash="
-        # hash under test
-        hut = "{}/{}{}&distro_hash={}".format(dlrn_api_url,
-                                              dlrn_api_suffix,
-                                              commit_hash,
-                                              distro_hash)
-        ph = "{}/{}{}&distro_hash={}".format(dlrn_api_url,
-                                             dlrn_api_suffix,
-                                             promotions['commit_hash'],
-                                             promotions['distro_hash'])
+        promoted_hash = "{}/{}{}&distro_hash={}".format(
+            dlrn_api_url, dlrn_api_suffix,
+            promotions['commit_hash'], promotions['distro_hash'])
+        promotions['dlrn_details'] = promoted_hash
+
         (all_jobs_result_available,
          passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
         if 'consistent' in all_jobs_result_available:
@@ -701,42 +654,22 @@ def track_component_promotion(
         jobs_with_no_result = jobs_in_criteria.difference(
             all_jobs_result_available)
         all_jobs = all_jobs_result_available.union(jobs_with_no_result)
+
+        job_info = {
+            'distro': distro,
+            'release': release,
+            'component': component,
+            'job_type': "component" if component else "integration",
+            'promote_name': 'promoted-components',
+            'test_hash': f"{commit_hash}_{distro_hash[:8]}",
+        }
         if influx:
             log_urls = latest_job_results_url(
                 api_response, all_jobs_result_available)
-            for job in all_jobs:
-                log_url = log_urls.get(job, "N/A")
-                if job in passed_jobs:
-                    status = 'passed'
-                elif job in failed_jobs:
-                    status = 'failed'
-                else:
-                    status = 'pending'
-                if status == 'failed':
-                    failure_reason = find_failure_reason(log_url)
-                else:
-                    failure_reason = "N/A"
-                jobs_result = {}
-                jobs_result['release'] = release
-                jobs_result['promote_name'] = "promoted-components"
-                jobs_result['job'] = job
-                jobs_result['test_hash'] = commit_hash + '_' + distro_hash[0:8]
-                jobs_result['component'] = component
-                jobs_result['criteria'] = job in jobs_in_criteria
-                jobs_result['status'] = status
-                jobs_result['logs'] = log_url
-                jobs_result['failure_reason'] = failure_reason
-                jobs_result['duration'] = find_job_run_time(
-                    log_url)
-                jobs_result['distro'] = distro
-                # print out jobs in influxdb format
-                print(influxdb_jobs(jobs_result))
+            print_influxdb(
+                job_info, log_urls, all_jobs, passed_jobs,
+                failed_jobs, jobs_in_criteria, promotions)
 
-                # print out promtions in influxdb format
-                promotions['release'] = release
-                promotions['distro'] = distro
-                promotions['dlrn_details'] = ph
-                print(influxdb_promo(promotions))
         else:
             log_urls = latest_job_results_url(
                 api_response, failed_jobs)
@@ -749,10 +682,13 @@ def track_component_promotion(
             else:
                 component_status = "Yellow"
             last_p = datetime.utcfromtimestamp(promotions['timestamp'])
+
+            hash_under_test = "{}/{}{}&distro_hash={}".format(
+                dlrn_api_url, dlrn_api_suffix, commit_hash, distro_hash)
             console.print(f"{component} component",
                           f"status={component_status}",
                           f"last_promotion={last_p}",
-                          f"\nHash_under_test={hut}")
+                          f"\nHash_under_test={hash_under_test}")
 
             print_a_set_in_table(passed_jobs, "Jobs which passed:")
             if component_status != "Green":
@@ -771,7 +707,7 @@ def track_component_promotion(
                         console.print(value)
 
             if pkg_diff:
-                console.print("\nPackages Tested: {}".format(all_components[0]))
+                console.print("\nPackages Tested: {}".format(components[0]))
                 rich_print(pkg_diff)
             print('\n')
 
@@ -781,7 +717,7 @@ def track_component_promotion(
             tp_jobs = jobs_which_need_pass_to_promote - jobs_with_no_result
             # execute if there are failing jobs in criteria and if
             # you are only looking at one component and not all components
-            if tp_jobs and len(all_components) == 1:
+            if tp_jobs and len(components) == 1:
                 render_testproject_yaml(tp_jobs, commit_hash, stream, config)
 
 
@@ -830,6 +766,9 @@ def main(release,
         raise BadParameter(msg)
 
     if component:
+        if distro == "centos-7":
+            raise Exception("centos-7 components do not exist")
+
         track_component_promotion(
             config, distro, release, influx, stream, compare_upstream,
             component)
