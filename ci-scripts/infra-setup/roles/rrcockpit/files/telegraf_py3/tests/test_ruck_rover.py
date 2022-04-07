@@ -352,7 +352,7 @@ class TestRuckRoverComponent(unittest.TestCase):
             "dlrn_api_url", "promoted-components", component="cinder")
 
     def test_get_components_diff_all(self):
-        result = ruck_rover.get_components_diff("dlrn_trunk_url", "all")
+        result = ruck_rover.get_components_diff("dlrn_trunk_url", "all", "", "")
         all_components = ["baremetal", "cinder", "clients", "cloudops",
                           "common", "compute", "glance", "manila",
                           "network", "octavia", "security", "swift",
@@ -369,15 +369,16 @@ class TestRuckRoverComponent(unittest.TestCase):
         m_csv.side_effect = ["first", "second"]
         m_diff.return_value = "pkg_diff"
 
-        result = ruck_rover.get_components_diff("dlrn_trunk_url", "cinder")
+        result = ruck_rover.get_components_diff(
+            "dlrn_trunk_url", "cinder", "1", "2")
 
         m_dlrn.assert_has_calls([
-            call('dlrn_trunk_url', 'cinder', 'current-tripleo'),
-            call('dlrn_trunk_url', 'cinder', 'component-ci-testing')
+            call('dlrn_trunk_url', 'cinder', '1'),
+            call('dlrn_trunk_url', 'cinder', '2')
         ])
         m_csv.assert_has_calls([call('control_url'), call('test_url')])
         m_diff.assert_called_with(
-            "current-tripleo", "first", "component-ci-testing", "second")
+            "1", "first", "2", "second")
 
         expected = (['cinder'], "pkg_diff")
         self.assertEqual(result, expected)

@@ -581,21 +581,8 @@ def track_integration_promotion(
         for value in log_urls.values():
             console.print(value)
 
-        # get package diff for the integration test
-        # control_url
-        c_url = get_dlrn_versions_csv(dlrn_trunk_url,
-                                      None,
-                                      promotion_name)
-        # test_url, what is currently getting tested
-        t_url = get_dlrn_versions_csv(dlrn_trunk_url,
-                                      None,
-                                      aggregate_hash)
-        c_csv = get_csv(c_url)
-        t_csv = get_csv(t_url)
-        pkg_diff = get_diff(promotion_name,
-                            c_csv,
-                            aggregate_hash,
-                            t_csv)
+        _, pkg_diff = get_components_diff(
+            dlrn_trunk_url, None, promotion_name, aggregate_hash)
         if pkg_diff:
             console.print("\n Packages Tested")
             rich_print(pkg_diff)
@@ -608,24 +595,25 @@ def track_integration_promotion(
             render_testproject_yaml(tp_jobs, test_hash, stream, config)
 
 
-def get_components_diff(dlrn_trunk_url, test_component):
+def get_components_diff(
+        dlrn_trunk_url, component, promotion_name, aggregate_hash):
     components = sorted(ALL_COMPONENTS.difference(["all"]))
     pkg_diff = None
 
-    if test_component != "all":
+    if component != "all":
         # get package diff for the component # control_url
         control_url = get_dlrn_versions_csv(
-            dlrn_trunk_url, test_component, "current-tripleo")
+            dlrn_trunk_url, component, promotion_name)
         control_csv = get_csv(control_url)
 
         # test_url, what is currently getting tested
         test_url = get_dlrn_versions_csv(
-            dlrn_trunk_url, test_component, "component-ci-testing")
+            dlrn_trunk_url, component, aggregate_hash)
         test_csv = get_csv(test_url)
 
-        components = [test_component]
+        components = [component]
         pkg_diff = get_diff(
-            "current-tripleo", control_csv, "component-ci-testing", test_csv)
+            promotion_name, control_csv, aggregate_hash, test_csv)
 
     return components, pkg_diff
 
@@ -636,7 +624,12 @@ def track_component_promotion(
     url = config[stream]['criteria'][distro][release]['comp_url']
     dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
     dlrn_api_suffix = "api/civotes_detail.html?commit_hash="
-    components, pkg_diff = get_components_diff(dlrn_trunk_url, test_component)
+
+    promotion_name = "current-tripleo"
+    aggregate_hash = "component-ci-testing"
+    components, pkg_diff = get_components_diff(
+        dlrn_trunk_url, test_component, promotion_name, aggregate_hash)
+
     for component in components:
         commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
             f"{dlrn_trunk_url}component/{component}/"
