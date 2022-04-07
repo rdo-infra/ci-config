@@ -1,10 +1,17 @@
 - project:
     check:
       jobs:
-{%- for item in jobs %}
-        - {{ item }}:
+{%- for item in jobs -%}
+    	{% if loop.index == 1 %}
+        - {{ item }}: &vars
             vars:
               force_periodic: true
               featureset_override:
                 dlrn_hash_tag: {{ hash }}
-{% endfor %}
+	{%- endif -%}
+{%- endfor -%}
+{%- for item in jobs -%}
+    	{% if loop.index > 1 %}
+        - {{ item }}: *vars
+	{%- endif -%}
+{%- endfor -%}
