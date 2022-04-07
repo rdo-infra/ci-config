@@ -352,7 +352,7 @@ class TestRuckRoverComponent(unittest.TestCase):
             "dlrn_api_url", "promoted-components", component="cinder")
 
     def test_get_components_diff_all(self):
-        result = ruck_rover.get_components_diff("dlrn_trunk_url", "all")
+        result = ruck_rover.get_components_diff("dlrn_trunk_url", "all", "", "")
         all_components = ["baremetal", "cinder", "clients", "cloudops",
                           "common", "compute", "glance", "manila",
                           "network", "octavia", "security", "swift",
@@ -369,7 +369,9 @@ class TestRuckRoverComponent(unittest.TestCase):
         m_csv.side_effect = ["first", "second"]
         m_diff.return_value = "pkg_diff"
 
-        result = ruck_rover.get_components_diff("dlrn_trunk_url", "cinder")
+        result = ruck_rover.get_components_diff(
+            "dlrn_trunk_url", "cinder", "current-tripleo",
+            "component-ci-testing")
 
         m_dlrn.assert_has_calls([
             call('dlrn_trunk_url', 'cinder', 'current-tripleo'),
