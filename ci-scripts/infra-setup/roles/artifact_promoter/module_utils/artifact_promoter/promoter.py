@@ -1,21 +1,20 @@
 """
-Main compose promoter file
+Generic artifact promotion classes
 """
 import logging
 import os
-import urllib.request
 
 import paramiko
 
 
-class ComposePromoterError(Exception):
-    """Generic error raised at compose promoter operations."""
+class PromoterError(Exception):
+    """Generic error raised at artifact promoter operations."""
 
     def __init__(self, details=None):
         if not details:
             details = "unexpected error"
-        error_msg = ("Compose promoter error: %s" % details)
-        super(ComposePromoterError, self).__init__(error_msg)
+        error_msg = ("Artifact promotion error: %s" % details)
+        super(PromoterError, self).__init__(error_msg)
 
 
 class SftpClient:
@@ -61,43 +60,22 @@ class SftpClient:
         self._sftp_client.close()
 
 
-class ComposePromoter:
+class FileArtifactPromoter:
     """
-    This class interacts with an artifact server to promote centos compose ids.
+    This class interacts with an remote server to promote generic artifacts.
     """
-    log = logging.getLogger("compose_promoter")
+    log = logging.getLogger("artifact_promoter")
 
-    def __init__(self, client, working_dir, distro, compose_url):
-        """Instantiate a new compose promoter.
+    def __init__(self, client, working_dir):
+        """Instantiate a new artifact promoter.
 
-        :param client: client to be used for file operations
+        :param client: sftp client to be used for file operations
         :param working_dir: working directory to perform file operations
-        :param distro: distro being used for promotion
-        :param compose_url: url used to fetch latest compose-id for an
-          specific distro.
         """
-        self.distro = distro
         self.working_dir = os.path.expanduser(os.path.expandvars(working_dir))
-        self.compose_url = compose_url
+        self.supported_promotions = []
         # Set sftp client
         self.client = client
-
-    def retrieve_latest_compose(self):
-        """Retrieves the latest compose from centos url.
-
-        :return: String with the latest compose id.
-        """
-        try:
-            latest_compose_id = urllib.request.urlopen(
-                self.compose_url).readline().decode('utf-8')
-        except Exception:
-            msg = ("Failed to retrieve latest compose from url: %s"
-                   % self.compose_url)
-            self.log.error(msg)
-            raise ComposePromoterError(details=msg)
-
-        self.log.info("Retrieved latest compose-id: %s", latest_compose_id)
-        return latest_compose_id
 
     def validate(self, target_label, candidate_label=None):
         """Validates if the requested label promotion is supported.
@@ -106,11 +84,11 @@ class ComposePromoter:
         :param candidate_label: candidate label of a promotion.
         :return: True if the promotion is supported, False otherwise.
         """
-        supported_promotions = [
-            {'candidate': 'latest-compose', 'target': 'centos-ci-testing'},
-        ]
-        #  {'candidate': 'centos-ci-testing', 'target': 'current-centos'},
-        for prom in supported_promotions:
+        if not self.supported_promotions:
+            # No restrictions means any promotion is supported.
+            return True
+
+        for prom in self.supported_promotions:
             if (candidate_label == prom['candidate']
                     and target_label == prom['target']):
                 return True
@@ -144,19 +122,37 @@ class ComposePromoter:
                 self.log.debug("Rollback: failed to rollback to previous link"
                                "%s -> %s. Details: %s", label, file, str(ex))
 
-    def promote(self, target_label, candidate_label="latest-compose"):
-        """Promote a compose artifact.
-
-        This method can fetch information about the latest compose from
-        previous configured url and update symbolic links.
+    def get_promotion_content(self, target_label, candidate_label=None):
+        """Returns promotion file name and content based on provided labels.
 
         :param target_label: target label of a promotion.
         :param candidate_label: candidate label for promotion.
+        :returns: file name and file content
+        """
+        raise NotImplementedError
+
+    def promote(self,
+                target_label,
+                candidate_label=None,
+                artifact_name=None,
+                artifact_content=None):
+        """Promote an artifact to target label.
+
+        This method promotes an artifact (file). It creates a new file in the
+          destination server and links to a target label.
+
+        :param target_label: target label of a promotion.
+        :param candidate_label: candidate label for promotion. Useful for
+          classes that need to retrieve promotion content.
+        :param artifact_name: artifact name (file) to be created in the
+          destination server.
+        :param artifact_content: optional content to be written in the
+          artifact (file).
         :return: None
         """
         if not self.validate(target_label, candidate_label=candidate_label):
             msg = "The provided promotion labels are not valid."
-            raise ComposePromoterError(details=msg)
+            raise PromoterError(details=msg)
 
         self.client.connect()
 
@@ -169,13 +165,17 @@ class ComposePromoter:
             msg = ("Artifact destination dir '%s' does not exist "
                    "in the server, or is not accessible" % self.working_dir)
             self.client.close()
-            raise ComposePromoterError(details=msg)
+            raise PromoterError(details=msg)
 
-        # NOTE(dviroel): this is the only compose promotion available so far.
-        #   We'll need to add logic for future promotions.
         try:
-            self.promote_latest_compose(target_label)
-        except ComposePromoterError:
+            if artifact_name is None:
+                # NOTE: artifact_content is optional
+                artifact_name, artifact_content = self.get_promotion_content(
+                    target_label, candidate_label=candidate_label)
+            # Promote label by creating a new file and updating target label
+            self.promote_file_artifact(target_label, artifact_name,
+                                       file_content=artifact_content)
+        except PromoterError:
             msg = ("Failed to promote %s to %s", candidate_label, target_label)
             self.log.error(msg)
             self.client.close()
@@ -187,50 +187,51 @@ class ComposePromoter:
         # close connection
         self.client.close()
 
-    def promote_latest_compose(self, target_label):
-        """Promotes a compose artifact based on centos latest compose id.
+    def promote_file_artifact(
+            self, target_label, file_name, file_content=None):
+        """Promotes a file artifact with an optional content.
 
-        :param target_label: target label of a promotion
+        :param target_label: target label of a promotion.
+        :param file_name: name of the file to be created.
+        :param file_content: content to be written in the new file.
         :return: None
         """
-        # Retrieve latest compose-id from composes.centos.org
-        latest_compose_id = self.retrieve_latest_compose()
-
-        server_compose_file = None
+        existing_server_file = None
         try:
-            server_compose_file = self.client.stat(latest_compose_id)
+            existing_server_file = self.client.stat(file_name)
         except FileNotFoundError:
             # Continue and create a new compose file in the remote server
-            self.log.debug("The latest compose file doesn't exists in the "
+            self.log.debug("The expected promotion file doesn't exists in the "
                            "remote server.")
         except Exception:
-            msg = ("An exception occurred while searching for compose "
-                   "files in the remove server. Promotion failed.")
+            msg = ("An exception occurred while searching for target file "
+                   "in the remove server. Promotion failed.")
             self.log.error(msg)
-            raise ComposePromoterError(details=msg)
+            raise PromoterError(details=msg)
 
         rollback_files = []
-        if not server_compose_file:
+        if not existing_server_file:
             # create a new file to represent the latest compose
             try:
-                new_compose_file = self.client.file(latest_compose_id,
-                                                    mode="w")
+                new_file = self.client.file(file_name, mode="w")
                 # mark file to be deleted in a rollback action
-                rollback_files.append(latest_compose_id)
-                new_compose_file.write(latest_compose_id.encode('utf-8'))
+                rollback_files.append(file_name)
+                if file_content:
+                    new_file.write(file_content.encode('utf-8'))
                 self.log.debug("%s file was successfully created in the "
-                               "remote server.", latest_compose_id)
-                new_compose_file.close()
+                               "remote server.", file_name)
+                new_file.close()
             except EnvironmentError as ex:
+                # TODO rollback
                 self.log.exception(ex)
-                msg = ("Unable to create a new compose file in the "
-                       "remote server. Promotion failed.")
+                msg = ("Unable to create a new file artifact in the "
+                       "remote server. Artifact promotion failed.")
                 self.log.error(msg)
-                raise ComposePromoterError(details=msg)
+                raise PromoterError(details=msg)
 
-        previous_compose = None
+        previous_file_name = None
         try:
-            previous_compose = self.client.readlink(target_label)
+            previous_file_name = self.client.readlink(target_label)
             self.log.debug("Checking target label link: %s", target_label)
         except EnvironmentError:
             self.log.debug("No link named %s exists. Will attempt to create a "
@@ -238,13 +239,13 @@ class ComposePromoter:
 
         # Unlink if exists and different from expected
         rollback_previous_links = {}
-        if previous_compose:
-            if previous_compose == latest_compose_id:
+        if previous_file_name:
+            if previous_file_name == file_name:
                 self.log.debug("The target label already points to the "
                                "latest compose id.")
                 return
 
-            rollback_previous_links[target_label] = previous_compose
+            rollback_previous_links[target_label] = previous_file_name
             try:
                 self.client.unlink(target_label)
                 self.log.debug("Removing label link for %s", target_label)
@@ -253,18 +254,18 @@ class ComposePromoter:
                        target_label)
                 self.log.error(msg)
                 self.rollback(remove_files=rollback_files)
-                raise ComposePromoterError(details=msg)
+                raise PromoterError(details=msg)
 
         try:
-            self.client.symlink(latest_compose_id, target_label)
+            self.client.symlink(file_name, target_label)
             self.log.debug("Created symlink: %s -> %s",
-                           target_label, latest_compose_id)
+                           target_label, file_name)
         except EnvironmentError:
             msg = ("Failed to link %(dest)s to %(src)s" % {
                 'dest': target_label,
-                'src': latest_compose_id
+                'src': file_name
             })
             self.log.error(msg)
             self.rollback(remove_files=rollback_files,
                           previous_links=rollback_previous_links)
-            raise ComposePromoterError(details=msg)
+            raise PromoterError(details=msg)
