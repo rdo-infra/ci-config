@@ -1,0 +1,19 @@
+- job:
+    name: tripleo-ci-artifact-promoter
+    parent: base
+    nodeset: rdo-centos-8-stream
+    timeout: 3000
+    run: playbooks/tripleo-ci-artifact-promotion/run.yaml
+    required-projects:
+      - rdo-infra/ci-config
+    roles:
+      - zuul: rdo-infra/ci-config
+
+- job:
+    name: tripleo-ci-compose-promote-latest-to-centos-ci-testing
+    parent: tripleo-ci-artifact-promoter
+    vars:
+      promotion_type: "centos-compose"
+      promotion_candidate_label: "latest-compose"
+      promotion_target_label: "centos-ci-testing"
+      remote_working_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
