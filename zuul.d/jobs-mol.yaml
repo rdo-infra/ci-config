@@ -128,18 +128,18 @@
 - job:
     name: mol-get_hash-centos-8
     parent: mol-get_hash-centos-7
-    nodeset: rdo-centos-8
+    nodeset: rdo-centos-8-stream
 
 - job:
-    name: mol-compose_promoter-centos-8
+    name: mol-compose_promoter-centos-9
     parent: mol
-    nodeset: rdo-centos-8
+    nodeset: rdo-centos-9-stream
     vars:
       mol_scenario: compose_promoter
     files:
       - .*molecule.*
       - ^ci-scripts/infra-setup/roles/ssh_agent/.*$
-      - ^ci-scripts/infra-setup/roles/compose_promoter/.*$
+      - ^ci-scripts/infra-setup/roles/artifact_promoter/.*$
       - ^requirements.txt
       - ^test-requirements.txt
       - ^tox.ini$
