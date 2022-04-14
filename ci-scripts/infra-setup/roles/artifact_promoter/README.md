@@ -19,7 +19,7 @@ Example:
   tasks:
     - name: Promote latest compose-id
       import_role:
-        name: compose_promoter
+        name: artifact_promoter
       vars:
         compose_promoter_server: "127.0.0.1"
         compose_promoter_key_path: "~/.ssh/id_rsa"
