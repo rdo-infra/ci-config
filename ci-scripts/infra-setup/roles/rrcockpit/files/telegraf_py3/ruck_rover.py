@@ -364,21 +364,27 @@ def latest_job_results_url(api_response, all_jobs):
     return logs_job
 
 
-def print_a_set_in_table(input_set, header="Job name"):
+def print_a_set_in_table(jobs, header="Job name"):
+    if not jobs:
+        return
+
     table = Table(show_header=True, header_style="bold")
     table.add_column(header, style="dim", width=80)
-    for job in input_set:
+    for job in jobs:
         table.add_row(job)
     console.print(table)
 
 
-def print_failed_in_criteria(input_set,
+def print_failed_in_criteria(jobs,
                              config,
                              stream,
                              compare_upstream,
-                             header="Job name",
                              component=None):
 
+    if not jobs:
+        return
+
+    header = "Jobs in promotion criteria required to promo the hash: "
     table = Table(show_header=True, header_style="bold")
     table.add_column(header, width=80)
     table.add_column("Integration PASSED History", width=15)
@@ -388,7 +394,7 @@ def print_failed_in_criteria(input_set,
         table.add_column("Upstream PASSED History", width=10)
         table.add_column("Upstream FAILURE History", width=10)
         table.add_column("Upstream Other History", width=10)
-    for job in input_set:
+    for job in jobs:
         int_history = get_job_history(job,
                                       config[stream]['periodic_builds_url'],
                                       component)
@@ -495,6 +501,60 @@ def render_influxdb(jobs, promotion):
     print(output)
 
 
+def print_tables(
+        promotions, hut, passed, failed, no_result, to_promote,
+        config, stream, compare_upstream, component, components,
+        api_response, pkg_diff, test_hash):
+    """
+    jobs_which_need_pass_to_promote are any job that hasn't registered
+    success w/ dlrn. jobs_with_no_result are any jobs in pending.
+    We only want test project config for jobs that have completed.
+    execute if there are failing jobs in criteria and if
+    you are only looking at one component and not all components
+    """
+    ts = datetime.utcfromtimestamp(promotions['timestamp'])
+    if failed:
+        status = "Red"
+    elif not to_promote:
+        status = "Green"
+    else:
+        status = "Yellow"
+
+    component_ui = f"{component} component" if component else ""
+    status_ui = f"status={status}"
+    promotion_ui = f"last_promotion={ts}"
+    hash_ui = f"Hash_under_test={hut}"
+    header_ui = " ".join([component_ui, status_ui, promotion_ui])
+
+    console.print(header_ui)
+    console.print(hash_ui)
+
+    print_a_set_in_table(passed, "Jobs which passed:")
+    print_a_set_in_table(failed, "Jobs which failed:")
+    print_a_set_in_table(no_result, "Pending running jobs")
+    print_failed_in_criteria(to_promote,
+                             config,
+                             stream,
+                             compare_upstream,
+                             component)
+    log_urls = latest_job_results_url(api_response, failed)
+    if log_urls:
+        console.print("Logs of failing jobs:")
+    for value in log_urls.values():
+        console.print(value)
+
+    if pkg_diff:
+        console.print("\n Packages Tested")
+        rich_print(pkg_diff)
+
+    # NOTE: Print new line to separate results
+    console.print("\n")
+
+    tp_jobs = to_promote - no_result
+    if tp_jobs and len(components) == 1:
+        render_testproject_yaml(tp_jobs, test_hash, stream, config)
+
+
 def track_integration_promotion(
         config, distro, release, influx, stream, compare_upstream,
         promotion_name, aggregate_hash):
@@ -549,50 +609,20 @@ def track_integration_promotion(
         'promote_name': promotion_name,
         'test_hash': test_hash
     }
+    components, pkg_diff = get_components_diff(
+        dlrn_trunk_url, component, promotion_name, aggregate_hash)
     if influx:
-        # NOTE(dviroel): excluding jobs results from influx when promotion_name
-        #  is "current-tripleo-rdo" since we are not using this info anywhere.
-        if promotion_name != 'current-tripleo-rdo':
-            # print out jobs in influxdb format
-            log_urls = latest_job_results_url(
-                api_response, all_jobs_result_available)
-            print_influxdb(
-                job_info, log_urls, all_jobs, passed_jobs,
-                failed_jobs, jobs_in_criteria, promotions)
-    else:
-        last_p = datetime.utcfromtimestamp(promotions['timestamp'])
-        console.print(f"Hash under test: {hash_under_test}",
-                      f"\nlast_promotion={last_p}")
-        print_a_set_in_table(passed_jobs, "Jobs which passed:")
-        print_a_set_in_table(failed_jobs, "Jobs which failed:")
-        print_a_set_in_table(jobs_with_no_result,
-                             "Pending running jobs")
-        needed_txt = ("Jobs which are in promotion criteria and need "
-                      "pass to promote the Hash:")
-
-        print_failed_in_criteria(jobs_which_need_pass_to_promote,
-                                 config,
-                                 stream,
-                                 compare_upstream,
-                                 needed_txt)
-        console.print("Logs of jobs which are failing:-")
         log_urls = latest_job_results_url(
-            api_response, failed_jobs)
-        for value in log_urls.values():
-            console.print(value)
-
-        _, pkg_diff = get_components_diff(
-            dlrn_trunk_url, None, promotion_name, aggregate_hash)
-        if pkg_diff:
-            console.print("\n Packages Tested")
-            rich_print(pkg_diff)
-
-        # jobs_which_need_pass_to_promote are any job that hasn't registered
-        # success w/ dlrn.  jobs_with_no_result are any jobs in pending.
-        # We only want test project config for jobs that have completed.
-        tp_jobs = jobs_which_need_pass_to_promote - jobs_with_no_result
-        if tp_jobs:
-            render_testproject_yaml(tp_jobs, test_hash, stream, config)
+            api_response, all_jobs_result_available)
+        print_influxdb(
+            job_info, log_urls, all_jobs, passed_jobs,
+            failed_jobs, jobs_in_criteria, promotions)
+    else:
+        print_tables(
+            promotions, hash_under_test, passed_jobs, failed_jobs,
+            jobs_with_no_result, jobs_which_need_pass_to_promote,
+            config, stream, compare_upstream, component, components,
+            api_response, pkg_diff, test_hash)
 
 
 def get_components_diff(
@@ -670,6 +700,9 @@ def track_component_promotion(
             'promote_name': 'promoted-components',
             'test_hash': f"{commit_hash}_{distro_hash[:8]}",
         }
+        test_hash = commit_hash
+        hash_under_test = "{}/{}{}&distro_hash={}".format(
+            dlrn_api_url, dlrn_api_suffix, commit_hash, distro_hash)
         if influx:
             log_urls = latest_job_results_url(
                 api_response, all_jobs_result_available)
@@ -678,54 +711,11 @@ def track_component_promotion(
                 failed_jobs, jobs_in_criteria, promotions)
 
         else:
-            log_urls = latest_job_results_url(
-                api_response, failed_jobs)
-            header = ("{} component jobs which need pass to promote "
-                      "the hash: ").format(component)
-            if failed_jobs:
-                component_status = "Red"
-            elif not jobs_which_need_pass_to_promote:
-                component_status = "Green"
-            else:
-                component_status = "Yellow"
-            last_p = datetime.utcfromtimestamp(promotions['timestamp'])
-
-            hash_under_test = "{}/{}{}&distro_hash={}".format(
-                dlrn_api_url, dlrn_api_suffix, commit_hash, distro_hash)
-            console.print(f"{component} component",
-                          f"status={component_status}",
-                          f"last_promotion={last_p}",
-                          f"\nHash_under_test={hash_under_test}")
-
-            print_a_set_in_table(passed_jobs, "Jobs which passed:")
-            if component_status != "Green":
-                print_a_set_in_table(failed_jobs, "Jobs which failed:")
-                print_a_set_in_table(jobs_with_no_result,
-                                     "Pending running jobs")
-                print_failed_in_criteria(jobs_which_need_pass_to_promote,
-                                         config,
-                                         stream,
-                                         compare_upstream,
-                                         header,
-                                         component)
-                if component_status == "Red":
-                    console.print("Logs of failing jobs:")
-                    for value in log_urls.values():
-                        console.print(value)
-
-            if pkg_diff:
-                console.print("\nPackages Tested: {}".format(components[0]))
-                rich_print(pkg_diff)
-            print('\n')
-
-            # jobs_which_need_pass_to_promote are any job that hasn't registered
-            # success w/ dlrn.  jobs_with_no_result are any jobs in pending.
-            # We only want test project config for jobs that have completed.
-            tp_jobs = jobs_which_need_pass_to_promote - jobs_with_no_result
-            # execute if there are failing jobs in criteria and if
-            # you are only looking at one component and not all components
-            if tp_jobs and len(components) == 1:
-                render_testproject_yaml(tp_jobs, commit_hash, stream, config)
+            print_tables(
+                promotions, hash_under_test, passed_jobs, failed_jobs,
+                jobs_with_no_result, jobs_which_need_pass_to_promote,
+                config, stream, compare_upstream, component, components,
+                api_response, pkg_diff, test_hash)
 
 
 @ click.command()
