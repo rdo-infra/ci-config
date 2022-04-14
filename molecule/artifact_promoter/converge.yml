@@ -1,0 +1,34 @@
+---
+- hosts: instance
+  tasks:
+    - name: Manage keys based on provided private_key_content
+      block:
+        - name: Add public key to authorized_keys
+          include_tasks: authorized_keys_update.yml
+
+        - name: Start a new ssh-agent with the provided private key
+          include_role:
+            name: ssh_agent
+      when: ssh_private_key_content is defined
+
+    - name: Promote generic file artifact
+      include_role:
+        name: artifact_promoter
+        apply:
+          environment: "{{ ssh_agent_environment | default(omit) }}"
+      vars:
+        promotion_type: "file"
+        promotion_target_label: "ceph-ci-testing"
+        promotion_file_name: "test-file"
+        promotion_file_content: "test-content"
+
+    - name: Promote CentOS-8 latest compose-id
+      include_role:
+        name: artifact_promoter
+        apply:
+          environment: "{{ ssh_agent_environment | default(omit) }}"
+      vars:
+        promotion_type: "centos-compose"
+        promotion_candidate_label: "latest-compose"
+        promotion_target_label: "centos-ci-testing"
+        compose_promoter_latest_compose_url: "https://composes.centos.org/latest-CentOS-Stream-8/COMPOSE_ID"
