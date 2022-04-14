@@ -550,7 +550,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         m_print.assert_called_once_with(output)
 
     def test_integration(
-            self, m_gather, _m_get_comp, m_get_promo, m_fetch_hash,
+            self, m_gather, m_get_comp, m_get_promo, m_fetch_hash,
             m_find_results, m_conclude, _m_find_jobs_comp, m_web_scrape,
             _m_find_result_aggr, m_find_jobs_int, m_latest_job, m_print):
         promotion_name = "promote_name"
@@ -561,6 +561,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         extended_hash = 'None'
 
         m_gather.return_value = ('dlrn_api_url', 'dlrn_trunk_url')
+        m_get_comp.return_value = ([None], None)
         m_get_promo.return_value = {
             'commit_hash': commit_hash,
             'distro_hash': distro_hash,
