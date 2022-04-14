@@ -13,19 +13,19 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 
+from ansible.module_utils.artifact_promoter import compose_promoter, artifact_promoter
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.compose_promoter import promoter
 
 DOCUMENTATION = r'''
 ---
-module: compose_promoter
+module: artifact_promoter
 
-short_description: Promote CentOS Compose-ID.
+short_description: Promotes generic file artifacts.
 version_added: "1.0.0"
 author: Douglas Viroel (@viroel)
 
 description:
-    - Promote CentOS Compose-ID from candidate label to target label,
+    - Promote file artifacts from candidate label to target label,
       given an destination server and working directory.
 
 options:
@@ -52,36 +52,53 @@ options:
             be created.
         required: true
         type: path
-    distro:
+    promotion_type:
         description:
-          - Distro used when retrieving Compose-ID from source URL.
+          - Type of artifact promotion to be made.
+        required: true
         type: str
-        choices: ['centos-stream-8']
+        choices: ['file', 'centos-compose']
+    candidate_label:
+        description:
+          - Candidate label of a promotion.
+        type: str
+    target_label:
+        description:
+          - Target label of a promotion.
+        required: true
+        type: str
+    file_name:
+        description:
+          - Filename to be created at destination server
+        type: str
+    file_content:
+        description:
+          - Content to be added into the file created at destination server.
+        type: str
     latest_compose_url:
         description:
           - Full URL to be used by the promoter to get the latest compose-id.
         type: str
-    candidate_label:
-        description:
-          - Compose-ID candidate label of a promotion.
-        required: true
-        type: str
-        choices: ['latest-compose']
-    target_label:
-        description:
-          - Compose-ID target label of a promotion.
-        required: true
-        type: str
-        choices: ['centos-ci-testing']
 '''
 
 EXAMPLES = r'''
 #
-- name: Promote compose-id to centos-ci-testing in a remote server
-  compose_promoter:
+- name: Promote a file content to target label in a remote server
+  artifact_promoter:
+    promotion_type: 'file'
     server: 10.0.0.10
     user: centos
-    distro: centos-stream-8
+    private_key_path: ~/.ssh/id_rsa
+    working_dir: /var/www/html/latest
+    target_label: current-centos
+    file_name: 'fake_file_name'
+    file_content: 'fake_file_content'
+
+- name: Promote compose-id to centos-ci-testing in a remote server
+  artifact_promoter:
+    promotion_type: 'centos-compose'
+    server: 10.0.0.10
+    user: centos
     private_key_path: ~/.ssh/id_rsa
     working_dir: /var/www/html/centos8
     candidate_label: latest-compose
@@ -93,22 +110,20 @@ RETURN = r''' # '''
 
 def run_module():
     # define available arguments/parameters a user can pass to the module
-    target_label_choices = ['centos-ci-testing']
-    candidate_label_choices = ['latest-compose']
-    distro_choices = ['centos-stream-8']
+    promotion_types = ['file', 'centos-compose']
     module_args = dict(
         server=dict(type='str', required=True),
         port=dict(type='str', default='22'),
         user=dict(type='str'),
         private_key_path=dict(type='str'),
         working_dir=dict(type='str', required=True),
-        distro=dict(type='str', choices=distro_choices,
-                    default='centos-stream-8'),
+        promotion_type=dict(type='str', required=True,
+                            choices=promotion_types),
+        candidate_label=dict(type='str', required=True),
+        target_label=dict(type='str'),
         latest_compose_url=dict(type='str'),
-        candidate_label=dict(type='str', choices=candidate_label_choices,
-                             required=True),
-        target_label=dict(type='str', choices=target_label_choices,
-                          required=True),
+        file_name=dict(type='str'),
+        file_content=dict(type='str'),
     )
 
     result = dict(
@@ -116,37 +131,50 @@ def run_module():
         msg=''
     )
 
+    required_if_params = [
+        ["candidate_label", "latest-compose", ["latest_compose_url"]],
+        ["promotion_type", "file", ["file_name"]]
+    ]
+
     module = AnsibleModule(
         argument_spec=module_args,
+        required_if=required_if_params,
         supports_check_mode=False
     )
 
-    try:
-        # 1. Create SFTP client
-        _port = int(module.params['port']) if module.params['port'] else None
-        sftp_client = promoter.SftpClient(
-            hostname=module.params['server'],
-            port=_port,
-            user=module.params['user'],
-            pkey_path=module.params['private_key_path']
-        )
+    # 1. Create SFTP client
+    _port = int(module.params['port']) if module.params['port'] else None
+    sftp_client = artifact_promoter.SftpClient(
+        hostname=module.params['server'],
+        port=_port,
+        user=module.params['user'],
+        pkey_path=module.params['private_key_path']
+    )
 
-        # 2. Create promoter
-        prom_obj = promoter.ComposePromoter(
+    # 2. Create promoter
+    if module.params['promotion_type'] == 'centos-compose':
+        prom_obj = compose_promoter.ComposePromoter(
             sftp_client,
-            working_dir=module.params['working_dir'],
-            distro=module.params['distro'],
+            module.params['working_dir'],
             compose_url=module.params['latest_compose_url'],
         )
 
-        # 3. Promote
         prom_obj.promote(
             module.params['target_label'],
             candidate_label=module.params['candidate_label'],
         )
-    except Exception as exc:
-        result['msg'] = str(exc)
-        module.fail_json(**result)
+    else:
+        prom_obj = artifact_promoter.FileArtifactPromoter(
+            sftp_client,
+            module.params['working_dir'],
+        )
+
+        prom_obj.promote(
+            module.params['target_label'],
+            candidate_label=module.params['candidate_label'],
+            artifact_name=module.params['file_name'],
+            artifact_content=module.params['file_content'],
+        )
 
     # Successful module execution
     result['changed'] = True
