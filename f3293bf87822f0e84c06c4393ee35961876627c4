@@ -22,6 +22,30 @@
       },
       "revId": "f3293bf87822f0e84c06c4393ee35961876627c4",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "24cb76b5_f89e3d70",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 690,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-04-18T07:48:47Z",
+      "side": 0,
+      "message": "Hey Dariusz,\n\nThank for you working on this.\n\nFew cents from my side:-\n\nImho.. we should keep status, just looking at status(Red/Green/Yellow) in output quickly tells the status of the component and whether something needs to be done for a particular component or not.\n\nAlso, I like the previous output more - Taking the following case under consideration - if there are no failed jobs in that case we were not printing \"Jobs which failed\"/ \"Pending running jobs\" / \"Jobs in promotion criteria required to promo the hash\"\n\n\nEarlier we were following this approach - Why to show an extra row if we have nothing to show.\n\nEarlier behaviour:-\n\n$ rr --release master --component ui\nui component status\u003dGreen last_promotion\u003d2022-04-13 22:05:47 \nHash_under_test\u003dhttps://trunk.rdoproject.org/api-centos9-master-uc/api/civotes_detail.html?commit_hash\u003dbdfde968cb7ffa\n51d30a7587e4bd9de4d185b10f\u0026distro_hash\u003d4b9d33361cf4f695220dee405cfb95cb596b8f1e\n\n\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ Jobs which passed:                                                               ┃\n┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩\n│ periodic-tripleo-ci-centos-9-standalone-ui-master                                │\n└──────────────────────────────────────────────────────────────────────────────────┘\n\nPackages Tested: ui\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ current-tripleo                                         ┃ component-ci-testing                                    ┃\n┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩\n│ python-django-horizon-22.1.0-0.20220408205906.11a331c.… │ python-django-horizon-22.1.0-0.20220412110349.fcf3ae9.… │\n│ openstack-manila-ui-7.1.0-0.20220321094445.ced2f55.el9  │ openstack-manila-ui-7.1.0-0.20220413195912.bdfde96.el9  │\n└─────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────┘\n\n\n\n\nNow:-\n\nui component\nHash_under_test\u003dhttps://trunk.rdoproject.org/api-centos9-master-uc/api/civotes_detail.html?commit_hash\u003dbdfde968cb7ffa51d30a7587e4bd9de\n4d185b10f\u0026distro_hash\u003d4b9d33361cf4f695220dee405cfb95cb596b8f1e last_promotion\u003d2022-04-13 22:05:47\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ Jobs which passed:                                                               ┃\n┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩\n│ periodic-tripleo-ci-centos-9-standalone-ui-master                                │\n└──────────────────────────────────────────────────────────────────────────────────┘\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ Jobs which failed:                                                               ┃\n┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩\n└──────────────────────────────────────────────────────────────────────────────────┘\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ Pending running jobs                                                             ┃\n┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩\n└──────────────────────────────────────────────────────────────────────────────────┘\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┓\n┃ Jobs in promotion criteria required to promo the hash:                          ┃ Integration    ┃ Integration    ┃ Integration    ┃\n┃                                                                                 ┃ PASSED History ┃ FAILURE        ┃ Other History  ┃\n┃                                                                                 ┃                ┃ History        ┃                ┃\n┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━┩\n└─────────────────────────────────────────────────────────────────────────────────┴────────────────┴────────────────┴────────────────┘\nLogs of failing jobs:\n\n Packages Tested\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ current-tripleo                                                 ┃ component-ci-testing                                             ┃\n┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩\n│ python-django-horizon-22.1.0-0.20220408205906.11a331c.el9       │ python-django-horizon-22.1.0-0.20220412110349.fcf3ae9.el9        │\n│ openstack-manila-ui-7.1.0-0.20220321094445.ced2f55.el9          │ openstack-manila-ui-7.1.0-0.20220413195912.bdfde96.el9           │\n└─────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────────┘",
+      "parentUuid": "3e9cda3d_d874f57d",
+      "range": {
+        "startLine": 690,
+        "startChar": 33,
+        "endLine": 690,
+        "endChar": 39
+      },
+      "revId": "f3293bf87822f0e84c06c4393ee35961876627c4",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
