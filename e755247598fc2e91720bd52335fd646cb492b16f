@@ -33,6 +33,29 @@
       "message": "thanks.. since last visit looks like you addressed Sandeep comments about not printing the empty tables and re-instated the Red/Green/Yellow\n\nlgtm",
       "revId": "e755247598fc2e91720bd52335fd646cb492b16f",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "42c3b41c_82d4cf60",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 526,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-04-20T06:56:20Z",
+      "side": 1,
+      "message": "Hey Dariusz,\n\nThank you for the updates.\n\nMinor nit from Ui side.\n\n\n2) Add an extra line:-\n\nWhen running with  --component all, output is getting clumsy.. next component starts without any extra line.\n\n~~~\n$ rr --release master --component all\nbaremetal component\nstatus\u003dRed\nHash_under_test\u003dhttps://trunk.rdoproject.org/api-centos9-master-uc/api/civotes_detail.html?commit_hash\u003daac2509f7b35b0a922f19165c61e71478616e75c\u0026distro_hash\u003d8a3ed12b361ce7c1a5d7249ed00fab462b80e434 last_promotion\u003d2022-04-19 04:06:10\n.\n.\nhttps://logserver.rdoproject.org/openstack-component-baremetal/opendev.org/openstack/tripleo-ci/master/periodic-tripleo-ci-centos-9-ovb-3ctlr_1comp-featureset001-baremetal-master/8023138\ncinder component   \u003e\u003e\u003e\u003e\u003e\u003e\u003e\u003e\u003e\u003e\u003e\u003e\u003e\u003e\u003e An extra line before here, same as old behavior\nstatus\u003dRed\nHash_under_test\u003dhttps://trunk.rdoproject.org/api-centos9-master-uc/api/civotes_detail.html?commit_hash\u003da805804774c17ae551edc9559d99d119b47ff0e7\u0026distro_hash\u003d9790981c8d1fe6009ac98d5d5ccab15a009370c3 last_promotion\u003d2022-04-12 04:06:19\n~~~\n\n2) Last promotion after hash_under_test seems off to me.\nCould we keep the consistency with old behavior. \"component, status and last promotion\" in one line - it was looking better, imho...\n\n\nold behavior:-\n~~~\nbaremetal component status\u003dRed last_promotion\u003d2022-04-19 04:06:10 \nHash_under_test\u003dhttps://trunk.rdoproject.org/api-centos9-master-uc/api/civotes_detail.html?commit_hash\u003daac2509f7b35b0a922f19165c61e71478616e75c\u0026distro_hash\u003d8a3ed12b361ce7c1a5d7249ed00fab462b80e434\n~~~\n\nnew behavior:-\n\n~~~\nbaremetal component\nstatus\u003dRed\nHash_under_test\u003dhttps://trunk.rdoproject.org/api-centos9-master-uc/api/civotes_detail.html?commit_hash\u003daac2509f7b35b0a922f19165c61e71478616e75c\u0026distro_hash\u003d8a3ed12b361ce7c1a5d7249ed00fab462b80e434 last_promotion\u003d2022-04-19 04:06:10\n~~~",
+      "range": {
+        "startLine": 523,
+        "startChar": 0,
+        "endLine": 526,
+        "endChar": 41
+      },
+      "revId": "e755247598fc2e91720bd52335fd646cb492b16f",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
