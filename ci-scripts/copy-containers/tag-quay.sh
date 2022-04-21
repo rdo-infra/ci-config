@@ -23,9 +23,6 @@ fi
 # Victoria
 /usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token $TOKEN --release victoria --html /root/logs/tag/victoria-report.html tag &>>/root/logs/tag/victoria.txt
 
-# Ussuri
-/usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token $TOKEN --release ussuri --html /root/logs/tag/ussuri-report.html tag &>>/root/logs/tag/ussuri.txt
-
 # Train 7
 /usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token $TOKEN --release train7 --html /root/logs/tag/train-report.html tag &>>/root/logs/tag/train.txt
 

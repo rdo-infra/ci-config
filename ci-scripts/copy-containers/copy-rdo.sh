@@ -23,8 +23,5 @@ copy_quay centos9-wallaby wallabycentos9
 # Victoria Centos 8
 copy_quay centos8-victoria victoria
 
-# Ussuri Centos 8
-copy_quay centos8-ussuri ussuri
-
 # Train Centos 8
 copy_quay centos8-train train8
