@@ -192,33 +192,26 @@ def format_ts_from_last_modified(ts, pattern='%a, %d %b %Y %H:%M:%S %Z'):
     return int(time.mktime(ts.timetuple()))
 
 
-def get_consistent(url, component=None):
+def get_last_modified_date(base_url, component=None):
     """Get the date of the consistent link in dlrn.
     """
 
-    if "centos7" in url:
-        dlrn_tag = "consistent"
-        short_url = url.split("/")[:-3]
-    else:
-        dlrn_tag = "promoted-components"
-        short_url = url.split("/")[:-5]
-
+    dlrn_tag = "consistent" if "centos7" in base_url else "promoted-components"
     repo = "delorean.repo"
-    short_url = "/".join(short_url)
 
     if component is None:
         # integration build, use last promoted_components date
-        url = f'{short_url}/{dlrn_tag}/{repo}'
+        url = f'{base_url}{dlrn_tag}/{repo}'
     else:
         # TO-DO normalize component and intergration config
-        url = f'{short_url}/component/{component}/consistent/{repo}'
+        url = f'{base_url}component/{component}/consistent/{repo}'
 
     response = requests.get(url, verify=CERT_PATH)
     if not response.ok:
         return None
 
-    cd = response.headers['Last-Modified']
-    consistent_date = format_ts_from_last_modified(cd)
+    last_modified = response.headers['Last-Modified']
+    consistent_date = format_ts_from_last_modified(last_modified)
     return consistent_date
 
 
@@ -254,6 +247,21 @@ def get_diff(control_tag, file1, test_tag, file2):
 def get_dlrn_promotions(api_url,
                         promotion_name,
                         component=None):
+    """
+    https://dlrn.readthedocs.io/en/latest/api.html#get-api-promotions
+    'aggregate_hash': '07de61e27b4e499da58b393bb5e98313',
+    'commit_hash': '4d8e55c5fe0cddaa62008c105d37c5349323f366',
+    'component': 'common',
+    'distro_hash': 'bb0ff4fd97cda359c6947e38a54a7fa5b16d0176',
+    'extended_hash': None,
+    'promote_name': 'current-tripleo',
+    'repo_hash': '4d8e55c5fe0cddaa62008c105d37c5349323f366_bb0ff4fd',
+    'repo_url': 'https://trunk.rdoproject.org/centos9-master/component
+    /common/4d/8e/4d8e55c5fe0cddaa62008c105d37c5349323f366_bb0ff4fd',
+    'timestamp': 1650363176,
+    'user': 'ciuser'
+
+    """
     api_client = dlrnapi_client.ApiClient(host=api_url)
     api_instance = dlrnapi_client.DefaultApi(api_client)
     query = dlrnapi_client.PromotionQuery(limit=1,
@@ -261,11 +269,7 @@ def get_dlrn_promotions(api_url,
     if component:
         query.component = component
     pr = api_instance.api_promotions_get_with_http_info(query)[0][0]
-    consistent = get_consistent(pr.repo_url, component)
-    promotion = {}
-    promotion = pr.to_dict()
-    promotion['latest_build'] = consistent
-    return promotion
+    return pr.to_dict()
 
 
 def find_results_from_dlrn_repo_status(api_url, commit_hash,
@@ -427,9 +431,9 @@ def load_conf_file(config_file):
     return config
 
 
-def print_influxdb(
-        job_info, log_urls, all_jobs, passed_jobs, failed_jobs,
-        jobs_in_criteria, promotions):
+def prepare_jobs_influxdb(
+        log_urls, all_jobs, passed_jobs, failed_jobs,
+        jobs_in_criteria):
     """
     InfluxDB follows line protocol [1]
 
@@ -473,10 +477,8 @@ def print_influxdb(
             'failure_reason': (find_failure_reason(log_url)
                                if status == INFLUX_FAILED else "N/A"),
         }
-        job_result.update(job_info)
         job_result_list.append(job_result)
-
-    render_influxdb(job_result_list, promotions)
+    return job_result_list
 
 
 def prepare_render_template(filename):
@@ -495,9 +497,10 @@ def render_testproject_yaml(jobs, test_hash, stream, config):
     print(output)
 
 
-def render_influxdb(jobs, promotion):
+def render_influxdb(jobs, job_extra, promotion, promotion_extra):
     template = prepare_render_template('influx.j2')
-    output = template.render(jobs=jobs, promotion=promotion)
+    output = template.render(jobs=jobs, job_extra=job_extra,
+                             promotion=promotion, promotion_extra=promotion_extra)
     print(output)
 
 
@@ -560,37 +563,43 @@ def track_integration_promotion(
         promotion_name, aggregate_hash):
 
     url = config[stream]['criteria'][distro][release]['int_url']
-    dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
-    promotions = get_dlrn_promotions(dlrn_api_url, promotion_name)
-    promotions['release'] = release
-    promotions['distro'] = distro
+    api_url, base_url = gather_basic_info_from_criteria(url)
+
+    promotions = get_dlrn_promotions(api_url, promotion_name)
 
     if distro == "centos-7":
-        commit_url = dlrn_trunk_url + aggregate_hash + '/commit.yaml'
+        commit_url = base_url + aggregate_hash + '/commit.yaml'
         commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
                                                     commit_url)
 
         test_hash = commit_hash
         api_response = find_results_from_dlrn_repo_status(
-            dlrn_api_url, commit_hash, distro_hash, extended_hash)
+            api_url, commit_hash, distro_hash, extended_hash)
 
         dlrn_api_suffix = "api/civotes_detail.html?commit_hash="
         hash_under_test = "{}/{}{}&distro_hash={}".format(
-            dlrn_api_url, dlrn_api_suffix, commit_hash, distro_hash)
+            api_url, dlrn_api_suffix, commit_hash, distro_hash)
         promoted_hash = "{}/{}{}&distro_hash={}".format(
-            dlrn_api_url, dlrn_api_suffix, promotions['commit_hash'],
+            api_url, dlrn_api_suffix, promotions['commit_hash'],
             promotions['distro_hash'])
     else:
-        md5sum_url = dlrn_trunk_url + aggregate_hash + '/delorean.repo.md5'
+        md5sum_url = base_url + aggregate_hash + '/delorean.repo.md5'
         test_hash = web_scrape(md5sum_url)
-        api_response = find_results_from_dlrn_agg(dlrn_api_url, test_hash)
+        api_response = find_results_from_dlrn_agg(api_url, test_hash)
 
         dlrn_api_suffix = "api/civotes_agg_detail.html?ref_hash="
-        hash_under_test = f"{dlrn_api_url}/{dlrn_api_suffix}{test_hash}"
+        hash_under_test = f"{api_url}/{dlrn_api_suffix}{test_hash}"
         promoted_hash = (
-            f"{dlrn_api_url}/{dlrn_api_suffix}{promotions['aggregate_hash']}")
+            f"{api_url}/{dlrn_api_suffix}{promotions['aggregate_hash']}")
 
-    promotions['dlrn_details'] = promoted_hash
+    component = None
+    last_modified = get_last_modified_date(base_url, component)
+    promotion_extra = {
+        'release': release,
+        'distro': distro,
+        'dlrn_details': promoted_hash,
+        'last_modified': last_modified,
+    }
 
     (all_jobs_result_available,
      passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
@@ -600,8 +609,7 @@ def track_integration_promotion(
     jobs_with_no_result = jobs_in_criteria.difference(all_jobs_result_available)
     all_jobs = all_jobs_result_available.union(jobs_with_no_result)
 
-    component = None
-    job_info = {
+    job_extra = {
         'distro': distro,
         'release': release,
         'component': component,
@@ -610,13 +618,14 @@ def track_integration_promotion(
         'test_hash': test_hash
     }
     components, pkg_diff = get_components_diff(
-        dlrn_trunk_url, component, promotion_name, aggregate_hash)
+        base_url, component, promotion_name, aggregate_hash)
     if influx:
         log_urls = latest_job_results_url(
             api_response, all_jobs_result_available)
-        print_influxdb(
-            job_info, log_urls, all_jobs, passed_jobs,
-            failed_jobs, jobs_in_criteria, promotions)
+        jobs = prepare_jobs_influxdb(
+            log_urls, all_jobs, passed_jobs,
+            failed_jobs, jobs_in_criteria)
+        render_influxdb(jobs, job_extra, promotions, promotion_extra)
     else:
         print_tables(
             promotions, hash_under_test, passed_jobs, failed_jobs,
@@ -626,19 +635,19 @@ def track_integration_promotion(
 
 
 def get_components_diff(
-        dlrn_trunk_url, component, promotion_name, aggregate_hash):
+        base_url, component, promotion_name, aggregate_hash):
     components = sorted(ALL_COMPONENTS.difference(["all"]))
     pkg_diff = None
 
     if component != "all":
         # get package diff for the component # control_url
         control_url = get_dlrn_versions_csv(
-            dlrn_trunk_url, component, promotion_name)
+            base_url, component, promotion_name)
         control_csv = get_csv(control_url)
 
         # test_url, what is currently getting tested
         test_url = get_dlrn_versions_csv(
-            dlrn_trunk_url, component, aggregate_hash)
+            base_url, component, aggregate_hash)
         test_csv = get_csv(test_url)
 
         components = [component]
@@ -652,30 +661,35 @@ def track_component_promotion(
         config, distro, release, influx, stream, compare_upstream,
         test_component):
     url = config[stream]['criteria'][distro][release]['comp_url']
-    dlrn_api_url, dlrn_trunk_url = gather_basic_info_from_criteria(url)
+    api_url, base_url = gather_basic_info_from_criteria(url)
     dlrn_api_suffix = "api/civotes_detail.html?commit_hash="
 
     promotion_name = "current-tripleo"
     aggregate_hash = "component-ci-testing"
     components, pkg_diff = get_components_diff(
-        dlrn_trunk_url, test_component, promotion_name, aggregate_hash)
+        base_url, test_component, promotion_name, aggregate_hash)
 
     for component in components:
         commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
-            f"{dlrn_trunk_url}component/{component}/"
+            f"{base_url}component/{component}/"
             "component-ci-testing/commit.yaml")
         api_response = find_results_from_dlrn_repo_status(
-            dlrn_api_url, commit_hash, distro_hash, extended_hash)
+            api_url, commit_hash, distro_hash, extended_hash)
 
         promotions = get_dlrn_promotions(
-            dlrn_api_url, "promoted-components", component=component)
-        promotions['release'] = release
-        promotions['distro'] = distro
+            api_url, "promoted-components", component=component)
 
         promoted_hash = "{}/{}{}&distro_hash={}".format(
-            dlrn_api_url, dlrn_api_suffix,
+            api_url, dlrn_api_suffix,
             promotions['commit_hash'], promotions['distro_hash'])
-        promotions['dlrn_details'] = promoted_hash
+
+        last_modified = get_last_modified_date(base_url, component)
+        promotion_extra = {
+            'release': release,
+            'distro': distro,
+            'dlrn_details': promoted_hash,
+            'last_modified': last_modified,
+        }
 
         (all_jobs_result_available,
          passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
@@ -692,7 +706,7 @@ def track_component_promotion(
             all_jobs_result_available)
         all_jobs = all_jobs_result_available.union(jobs_with_no_result)
 
-        job_info = {
+        job_extra = {
             'distro': distro,
             'release': release,
             'component': component,
@@ -702,13 +716,14 @@ def track_component_promotion(
         }
         test_hash = commit_hash
         hash_under_test = "{}/{}{}&distro_hash={}".format(
-            dlrn_api_url, dlrn_api_suffix, commit_hash, distro_hash)
+            api_url, dlrn_api_suffix, commit_hash, distro_hash)
         if influx:
             log_urls = latest_job_results_url(
                 api_response, all_jobs_result_available)
-            print_influxdb(
-                job_info, log_urls, all_jobs, passed_jobs,
-                failed_jobs, jobs_in_criteria, promotions)
+            jobs = prepare_jobs_influxdb(
+                log_urls, all_jobs, passed_jobs,
+                failed_jobs, jobs_in_criteria)
+            render_influxdb(jobs, job_extra, promotions, promotion_extra)
 
         else:
             print_tables(
