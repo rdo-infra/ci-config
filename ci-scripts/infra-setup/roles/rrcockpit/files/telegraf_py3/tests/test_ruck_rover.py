@@ -161,39 +161,36 @@ class TestRuckRover(unittest.TestCase):
         self.assertEqual(expected, obtained)
 
     @patch('ruck_rover.requests.get')
-    def test_get_consistent_centos9_no_component(self, m_get):
+    def test_get_last_modified_date_centos9_no_component(self, m_get):
         m_get.return_value.ok = None
         cert_path = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
 
-        url = ('https://trunk.rdoproject.org/centos9-master/component/network/'
-               '39/40/3940e9eb4a6e0652517c4f2c429e601332ad1bd9_48ca9c7b')
-        ruck_rover.get_consistent(url, component=None)
+        url = 'https://trunk.rdoproject.org/centos9-master/'
+        ruck_rover.get_last_modified_date(url, component=None)
         expected = ('https://trunk.rdoproject.org/centos9-master/'
                     'promoted-components/delorean.repo')
         m_get.assert_called_with(expected,
                                  verify=cert_path)
 
     @patch('ruck_rover.requests.get')
-    def test_get_consistent_centos8_with_component(self, m_get):
+    def test_get_last_modified_date_centos8_with_component(self, m_get):
         m_get.return_value.ok = None
         cert_path = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
 
-        url = ('https://trunk.rdoproject.org/centos8-wallaby/component/cinder/'
-               '0a/6d/0a6d43a7c2ef65be748690a00ee4c294add0c87c_cc0b2aef')
-        ruck_rover.get_consistent(url, component="cinder")
+        url = 'https://trunk.rdoproject.org/centos8-wallaby/'
+        ruck_rover.get_last_modified_date(url, component="cinder")
         expected = ('https://trunk.rdoproject.org/centos8-wallaby/component/'
                     'cinder/consistent/delorean.repo')
         m_get.assert_called_with(expected,
                                  verify=cert_path)
 
     @patch('ruck_rover.requests.get')
-    def test_get_consistent_centos7_no_component(self, m_get):
+    def test_get_last_modified_date_centos7_no_component(self, m_get):
         m_get.return_value.ok = None
         cert_path = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
 
-        url = ('https://trunk.rdoproject.org/centos7-train/08/bb/'
-               '08bbadedb04d45353b3228bc21cd930adeef3348_0ad01be2')
-        ruck_rover.get_consistent(url, component=None)
+        url = 'https://trunk.rdoproject.org/centos7-train/'
+        ruck_rover.get_last_modified_date(url, component=None)
         expected = ("https://trunk.rdoproject.org/centos7-train/"
                     "consistent/delorean.repo")
         m_get.assert_called_with(expected,
@@ -288,15 +285,16 @@ class TestRuckRoverComponent(unittest.TestCase):
     @mock.patch('ruck_rover.conclude_results_from_dlrn')
     @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
     @mock.patch('ruck_rover.fetch_hashes_from_commit_yaml')
+    @mock.patch('ruck_rover.get_last_modified_date')
     @mock.patch('ruck_rover.get_dlrn_promotions')
     @mock.patch('ruck_rover.get_diff')
     @mock.patch('ruck_rover.get_csv')
     @mock.patch('ruck_rover.get_dlrn_versions_csv')
     @mock.patch('ruck_rover.gather_basic_info_from_criteria')
     def test_all_components(
-            self, m_gather, m_dlrn, m_csv, m_diff,
-            m_promo, m_fetch, _m_results, m_conclude, _m_jobs):
-        m_gather.return_value = ('dlrn_api_url', 'dlrn_trunk_url')
+            self, m_gather, m_dlrn, m_csv, m_diff, m_promo,
+            m_consistent, m_fetch, _m_results, m_conclude, _m_jobs):
+        m_gather.return_value = ('api_url', 'base_url')
         m_fetch.return_value = ('c6', '03', 'None')
         m_dlrn.side_effect = ['control_url', 'test_url']
         m_csv.side_effect = ["first", "second"]
@@ -314,20 +312,21 @@ class TestRuckRoverComponent(unittest.TestCase):
     @mock.patch('ruck_rover.find_jobs_in_component_criteria')
     @mock.patch('ruck_rover.conclude_results_from_dlrn')
     @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
+    @mock.patch('ruck_rover.get_last_modified_date')
     @mock.patch('ruck_rover.get_dlrn_promotions')
     @mock.patch('ruck_rover.fetch_hashes_from_commit_yaml')
     @mock.patch('ruck_rover.get_components_diff')
     @mock.patch('ruck_rover.gather_basic_info_from_criteria')
     def test_given_component(
             self, m_gather, m_comp_diff, m_fetch, m_promo,
-            m_results, m_conclude, _m_jobs):
+            m_consistent, m_results, m_conclude, _m_jobs):
 
         component = "cinder"
         commit_hash = "c6"
         distro_hash = "03"
         extended_hash = 'None'
 
-        m_gather.return_value = ('dlrn_api_url', 'dlrn_trunk_url/')
+        m_gather.return_value = ('api_url', 'base_url/')
         m_comp_diff.return_value = ([component], None)
         m_fetch.return_value = (commit_hash, distro_hash, extended_hash)
         m_results.return_value = "api_response"
@@ -335,7 +334,8 @@ class TestRuckRoverComponent(unittest.TestCase):
             'commit_hash': commit_hash,
             'distro_hash': distro_hash,
             'timestamp': 1,
-            'latest_build': 1
+            'latest_build': 1,
+            'repo_url': 'repo_url',
         }
         m_conclude.return_value = set(), set(), set()
 
@@ -345,14 +345,14 @@ class TestRuckRoverComponent(unittest.TestCase):
 
         m_gather.assert_called_with("http://wallaby_comp")
         m_fetch.assert_called_with(
-            "dlrn_trunk_url/component/cinder/component-ci-testing/commit.yaml")
+            "base_url/component/cinder/component-ci-testing/commit.yaml")
         m_results.assert_called_with(
-            "dlrn_api_url", commit_hash, distro_hash, extended_hash)
+            "api_url", commit_hash, distro_hash, extended_hash)
         m_promo.assert_called_with(
-            "dlrn_api_url", "promoted-components", component="cinder")
+            "api_url", "promoted-components", component="cinder")
 
     def test_get_components_diff_all(self):
-        result = ruck_rover.get_components_diff("dlrn_trunk_url", "all", "", "")
+        result = ruck_rover.get_components_diff("base_url", "all", "", "")
         all_components = ["baremetal", "cinder", "clients", "cloudops",
                           "common", "compute", "glance", "manila",
                           "network", "octavia", "security", "swift",
@@ -370,12 +370,12 @@ class TestRuckRoverComponent(unittest.TestCase):
         m_diff.return_value = "pkg_diff"
 
         result = ruck_rover.get_components_diff(
-            "dlrn_trunk_url", "cinder", "current-tripleo",
+            "base_url", "cinder", "current-tripleo",
             "component-ci-testing")
 
         m_dlrn.assert_has_calls([
-            call('dlrn_trunk_url', 'cinder', 'current-tripleo'),
-            call('dlrn_trunk_url', 'cinder', 'component-ci-testing')
+            call('base_url', 'cinder', 'current-tripleo'),
+            call('base_url', 'cinder', 'component-ci-testing')
         ])
         m_csv.assert_has_calls([call('control_url'), call('test_url')])
         m_diff.assert_called_with(
@@ -384,7 +384,7 @@ class TestRuckRoverComponent(unittest.TestCase):
         expected = (['cinder'], "pkg_diff")
         self.assertEqual(result, expected)
 
-    @mock.patch('ruck_rover.get_consistent')
+    @mock.patch('ruck_rover.get_last_modified_date')
     @mock.patch('ruck_rover.dlrnapi_client.PromotionQuery')
     @mock.patch('ruck_rover.dlrnapi_client.DefaultApi')
     @mock.patch('ruck_rover.dlrnapi_client.ApiClient')
@@ -402,7 +402,7 @@ class TestRuckRoverComponent(unittest.TestCase):
         m_api_client.assert_called_with(host="api_url")
         m_promo_query.assert_called_with(limit=1, promote_name="promotion")
 
-        expected = {'abc': 'def', 'latest_build': 'consistent'}
+        expected = {'abc': 'def'}
 
         self.assertEqual(result, expected)
 
@@ -461,6 +461,7 @@ class TestRuckRoverWithCommonSetup(unittest.TestCase):
 @mock.patch('ruck_rover.conclude_results_from_dlrn')
 @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
 @mock.patch('ruck_rover.fetch_hashes_from_commit_yaml')
+@mock.patch('ruck_rover.get_last_modified_date')
 @mock.patch('ruck_rover.get_dlrn_promotions')
 @mock.patch('ruck_rover.get_components_diff')
 @mock.patch('ruck_rover.gather_basic_info_from_criteria')
@@ -490,7 +491,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         self.compare_upstream = False
 
     def test_component(
-            self, m_gather, m_get_comp, m_get_promo, m_fetch_hash,
+            self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
             m_find_results, m_conclude, m_find_jobs_comp, m_web_scrape,
             m_find_result_aggr, _m_find_jobs_int, m_latest_job, m_print):
         component = "all"
@@ -500,7 +501,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         distro_hash = "03"
         extended_hash = 'None'
 
-        m_gather.return_value = ('dlrn_api_url', 'dlrn_trunk_url')
+        m_gather.return_value = ('api_url', 'base_url')
         m_get_comp.return_value = ([component], None)
         m_get_promo.return_value = {
             'commit_hash': commit_hash,
@@ -542,7 +543,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
                 ',promo_name=promo commit_hash="c6",distro_hash="03"'
                 ',aggregate_hash="hash",repo_hash="repo_hash"'
                 ',repo_url="repo_url",latest_build_date=1000'
-                ',component="cinder",promotion_details="dlrn_api_url/api/'
+                ',component="cinder",promotion_details="api_url/api/'
                 'civotes_detail.html?commit_hash=c6&distro_hash=03"'
                 ',extended_hash="None" 1000000000')
 
@@ -550,7 +551,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         m_print.assert_called_once_with(output)
 
     def test_integration(
-            self, m_gather, m_get_comp, m_get_promo, m_fetch_hash,
+            self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
             m_find_results, m_conclude, _m_find_jobs_comp, m_web_scrape,
             _m_find_result_aggr, m_find_jobs_int, m_latest_job, m_print):
         promotion_name = "promote_name"
@@ -560,7 +561,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         distro_hash = "03"
         extended_hash = 'None'
 
-        m_gather.return_value = ('dlrn_api_url', 'dlrn_trunk_url')
+        m_gather.return_value = ('api_url', 'base_url')
         m_get_comp.return_value = ([None], None)
         m_get_promo.return_value = {
             'commit_hash': commit_hash,
@@ -603,7 +604,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
                 ',promo_name=promo commit_hash="c6",distro_hash="03"'
                 ',aggregate_hash="hash",repo_hash="repo_hash"'
                 ',repo_url="repo_url",latest_build_date=1000,component="None"'
-                ',promotion_details="dlrn_api_url/api/civotes_agg_detail.html'
+                ',promotion_details="api_url/api/civotes_agg_detail.html'
                 '?ref_hash=hash",extended_hash="None" 1000000000')
 
         output = '\n'.join([job1, job2, job3, dlrn])
