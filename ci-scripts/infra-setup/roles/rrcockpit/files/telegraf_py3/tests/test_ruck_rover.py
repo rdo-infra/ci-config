@@ -252,6 +252,11 @@ class TestRuckRoverComponent(unittest.TestCase):
     def setUp(self):
         self.config = {
             'upstream': {
+                'testproject_url':
+                'https://review.rdoproject.org/r/q/project:testproject',
+                'periodic_builds_url':
+                'https://review.rdoproject.org/zuul/api/builds',
+                'upstream_builds_url': 'https://zuul.openstack.org/api/builds',
                 'criteria': {
                     'centos-8': {
                         'wallaby': {
@@ -469,6 +474,11 @@ class TestInfluxDBMeasurements(unittest.TestCase):
     def setUp(self):
         self.config = {
             'upstream': {
+                'testproject_url':
+                'https://review.rdoproject.org/r/q/project:testproject',
+                'periodic_builds_url':
+                'https://review.rdoproject.org/zuul/api/builds',
+                'upstream_builds_url': 'https://zuul.openstack.org/api/builds',
                 'criteria': {
                     'centos-8': {
                         'wallaby': {
