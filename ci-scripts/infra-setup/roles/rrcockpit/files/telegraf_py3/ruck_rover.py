@@ -380,8 +380,8 @@ def print_a_set_in_table(jobs, header="Job name"):
 
 
 def print_failed_in_criteria(jobs,
-                             config,
-                             stream,
+                             periodic_builds_url,
+                             upstream_builds_url,
                              compare_upstream,
                              component=None):
 
@@ -400,10 +400,9 @@ def print_failed_in_criteria(jobs,
         table.add_column("Upstream Other History", width=10)
     for job in jobs:
         int_history = get_job_history(job,
-                                      config[stream]['periodic_builds_url'],
+                                      periodic_builds_url,
                                       component)
         if compare_upstream:
-            upstream_builds_url = config[stream]['upstream_builds_url']
             # do not look for ovb jobs in upstream
             if "featureset" not in job:
                 up_history = get_job_history(job,
@@ -489,9 +488,8 @@ def prepare_render_template(filename):
     return template
 
 
-def render_testproject_yaml(jobs, test_hash, stream, config):
+def render_testproject_yaml(jobs, test_hash, testproject_url):
     template = prepare_render_template('.zuul.yaml.j2')
-    testproject_url = config[stream]['testproject_url']
     output = template.render(
         jobs=jobs, hash=test_hash, testproject_url=testproject_url)
     print(output)
@@ -499,15 +497,17 @@ def render_testproject_yaml(jobs, test_hash, stream, config):
 
 def render_influxdb(jobs, job_extra, promotion, promotion_extra):
     template = prepare_render_template('influx.j2')
-    output = template.render(jobs=jobs, job_extra=job_extra,
-                             promotion=promotion, promotion_extra=promotion_extra)
+    output = template.render(
+        jobs=jobs, job_extra=job_extra, promotion=promotion,
+        promotion_extra=promotion_extra)
     print(output)
 
 
 def print_tables(
-        promotions, hut, passed, failed, no_result, to_promote,
-        config, stream, compare_upstream, component, components,
-        api_response, pkg_diff, test_hash):
+        timestamp, hut, passed, failed, no_result, to_promote,
+        compare_upstream, component, components,
+        api_response, pkg_diff, test_hash, periodic_builds_url,
+        upstream_builds_url, testproject_url):
     """
     jobs_which_need_pass_to_promote are any job that hasn't registered
     success w/ dlrn. jobs_with_no_result are any jobs in pending.
@@ -515,7 +515,6 @@ def print_tables(
     execute if there are failing jobs in criteria and if
     you are only looking at one component and not all components
     """
-    ts = datetime.utcfromtimestamp(promotions['timestamp'])
     if failed:
         status = "Red"
     elif not to_promote:
@@ -525,7 +524,7 @@ def print_tables(
 
     component_ui = f"{component} component" if component else ""
     status_ui = f"status={status}"
-    promotion_ui = f"last_promotion={ts}"
+    promotion_ui = f"last_promotion={timestamp}"
     hash_ui = f"Hash_under_test={hut}"
     header_ui = " ".join([component_ui, status_ui, promotion_ui])
 
@@ -536,8 +535,8 @@ def print_tables(
     print_a_set_in_table(failed, "Jobs which failed:")
     print_a_set_in_table(no_result, "Pending running jobs")
     print_failed_in_criteria(to_promote,
-                             config,
-                             stream,
+                             periodic_builds_url,
+                             upstream_builds_url,
                              compare_upstream,
                              component)
     log_urls = latest_job_results_url(api_response, failed)
@@ -555,7 +554,7 @@ def print_tables(
 
     tp_jobs = to_promote - no_result
     if tp_jobs and len(components) == 1:
-        render_testproject_yaml(tp_jobs, test_hash, stream, config)
+        render_testproject_yaml(tp_jobs, test_hash, testproject_url)
 
 
 def track_integration_promotion(
@@ -617,6 +616,11 @@ def track_integration_promotion(
         'promote_name': promotion_name,
         'test_hash': test_hash
     }
+    periodic_builds_url = config[stream]['periodic_builds_url']
+    upstream_builds_url = config[stream]['upstream_builds_url']
+    testproject_url = config[stream]['testproject_url']
+    timestamp = datetime.utcfromtimestamp(promotions['timestamp'])
+
     components, pkg_diff = get_components_diff(
         base_url, component, promotion_name, aggregate_hash)
     if influx:
@@ -628,10 +632,11 @@ def track_integration_promotion(
         render_influxdb(jobs, job_extra, promotions, promotion_extra)
     else:
         print_tables(
-            promotions, hash_under_test, passed_jobs, failed_jobs,
+            timestamp, hash_under_test, passed_jobs, failed_jobs,
             jobs_with_no_result, jobs_which_need_pass_to_promote,
-            config, stream, compare_upstream, component, components,
-            api_response, pkg_diff, test_hash)
+            compare_upstream, component, components,
+            api_response, pkg_diff, test_hash, periodic_builds_url,
+            upstream_builds_url, testproject_url)
 
 
 def get_components_diff(
@@ -669,6 +674,10 @@ def track_component_promotion(
     components, pkg_diff = get_components_diff(
         base_url, test_component, promotion_name, aggregate_hash)
 
+    periodic_builds_url = config[stream]['periodic_builds_url']
+    upstream_builds_url = config[stream]['upstream_builds_url']
+    testproject_url = config[stream]['testproject_url']
+
     for component in components:
         commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
             f"{base_url}component/{component}/"
@@ -678,6 +687,7 @@ def track_component_promotion(
 
         promotions = get_dlrn_promotions(
             api_url, "promoted-components", component=component)
+        timestamp = datetime.utcfromtimestamp(promotions['timestamp'])
 
         promoted_hash = "{}/{}{}&distro_hash={}".format(
             api_url, dlrn_api_suffix,
@@ -727,10 +737,11 @@ def track_component_promotion(
 
         else:
             print_tables(
-                promotions, hash_under_test, passed_jobs, failed_jobs,
+                timestamp, hash_under_test, passed_jobs, failed_jobs,
                 jobs_with_no_result, jobs_which_need_pass_to_promote,
-                config, stream, compare_upstream, component, components,
-                api_response, pkg_diff, test_hash)
+                compare_upstream, component, components,
+                api_response, pkg_diff, test_hash, periodic_builds_url,
+                upstream_builds_url, testproject_url)
 
 
 @ click.command()
