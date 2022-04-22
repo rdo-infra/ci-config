@@ -380,8 +380,8 @@ def print_a_set_in_table(jobs, header="Job name"):
 
 
 def print_failed_in_criteria(jobs,
-                             config,
-                             stream,
+                             periodic_builds_url,
+                             upstream_builds_url,
                              compare_upstream,
                              component=None):
 
@@ -400,10 +400,9 @@ def print_failed_in_criteria(jobs,
         table.add_column("Upstream Other History", width=10)
     for job in jobs:
         int_history = get_job_history(job,
-                                      config[stream]['periodic_builds_url'],
+                                      periodic_builds_url,
                                       component)
         if compare_upstream:
-            upstream_builds_url = config[stream]['upstream_builds_url']
             # do not look for ovb jobs in upstream
             if "featureset" not in job:
                 up_history = get_job_history(job,
@@ -489,9 +488,8 @@ def prepare_render_template(filename):
     return template
 
 
-def render_testproject_yaml(jobs, test_hash, stream, config):
+def render_testproject_yaml(jobs, test_hash, testproject_url):
     template = prepare_render_template('.zuul.yaml.j2')
-    testproject_url = config[stream]['testproject_url']
     output = template.render(
         jobs=jobs, hash=test_hash, testproject_url=testproject_url)
     print(output)
@@ -532,12 +530,14 @@ def print_tables(
     console.print(header_ui)
     console.print(hash_ui)
 
+    periodic_builds_url = config[stream]['periodic_builds_url']
+    upstream_builds_url = config[stream]['upstream_builds_url']
     print_a_set_in_table(passed, "Jobs which passed:")
     print_a_set_in_table(failed, "Jobs which failed:")
     print_a_set_in_table(no_result, "Pending running jobs")
     print_failed_in_criteria(to_promote,
-                             config,
-                             stream,
+                             periodic_builds_url,
+                             upstream_builds_url,
                              compare_upstream,
                              component)
     log_urls = latest_job_results_url(api_response, failed)
@@ -555,7 +555,8 @@ def print_tables(
 
     tp_jobs = to_promote - no_result
     if tp_jobs and len(components) == 1:
-        render_testproject_yaml(tp_jobs, test_hash, stream, config)
+        testproject_url = config[stream]['testproject_url']
+        render_testproject_yaml(tp_jobs, test_hash, testproject_url)
 
 
 def track_integration_promotion(
