@@ -8,6 +8,7 @@ import time
 from datetime import datetime
 from io import StringIO
 from tempfile import mkstemp
+from urllib.parse import urlencode
 
 import click
 import dlrnapi_client
@@ -557,6 +558,53 @@ def print_tables(
         render_testproject_yaml(tp_jobs, test_hash, testproject_url)
 
 
+def centos7_integration(
+        api_url, base_url, aggregate_hash, promo_commit_hash,
+        promo_distro_hash, _promo_aggregate_hash):
+
+    commit_url = f"{base_url}{aggregate_hash}/commit.yaml"
+    commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
+        commit_url)
+
+    api_response = find_results_from_dlrn_repo_status(
+        api_url, commit_hash, distro_hash, extended_hash)
+
+    test_data = urlencode(
+        {'commit_hash': commit_hash, 'distro_hash': distro_hash}
+    )
+    under_test_url = f"{api_url}/api/civotes_detail.html?{test_data}"
+
+    promoted_data = urlencode(
+        {'commit_hash': promo_commit_hash, 'distro_hash': promo_distro_hash}
+    )
+    promoted_url = f"{api_url}/api/civotes_detail.html?{promoted_data}"
+    return api_response, commit_hash, under_test_url, promoted_url
+
+
+def centos_integration(
+        api_url, base_url, aggregate_hash, _promo_commit_hash,
+        _promo_distro_hash, promo_aggregate_hash):
+
+    commit_url = f"{base_url}{aggregate_hash}/delorean.repo.md5"
+    ref_hash = web_scrape(commit_url)
+    api_response = find_results_from_dlrn_agg(api_url, ref_hash)
+
+    under_test_url = (f"{api_url}/api/civotes_agg_detail.html?"
+                      f"ref_hash={ref_hash}")
+    promoted_url = (f"{api_url}/api/civotes_agg_detail.html?"
+                    f"ref_hash={promo_aggregate_hash}")
+    return api_response, ref_hash, under_test_url, promoted_url
+
+
+CENTOS_INTEGRATION = {
+    'centos-7': centos7_integration,
+    'centos-8': centos_integration,
+    'centos-9': centos_integration,
+    'rhel-8': centos_integration,
+    'rhel-9': centos_integration,
+}
+
+
 def track_integration_promotion(
         config, distro, release, influx, stream, compare_upstream,
         promotion_name, aggregate_hash):
@@ -566,37 +614,17 @@ def track_integration_promotion(
 
     promotions = get_dlrn_promotions(api_url, promotion_name)
 
-    if distro == "centos-7":
-        commit_url = base_url + aggregate_hash + '/commit.yaml'
-        commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
-                                                    commit_url)
-
-        test_hash = commit_hash
-        api_response = find_results_from_dlrn_repo_status(
-            api_url, commit_hash, distro_hash, extended_hash)
-
-        dlrn_api_suffix = "api/civotes_detail.html?commit_hash="
-        hash_under_test = "{}/{}{}&distro_hash={}".format(
-            api_url, dlrn_api_suffix, commit_hash, distro_hash)
-        promoted_hash = "{}/{}{}&distro_hash={}".format(
-            api_url, dlrn_api_suffix, promotions['commit_hash'],
-            promotions['distro_hash'])
-    else:
-        md5sum_url = base_url + aggregate_hash + '/delorean.repo.md5'
-        test_hash = web_scrape(md5sum_url)
-        api_response = find_results_from_dlrn_agg(api_url, test_hash)
-
-        dlrn_api_suffix = "api/civotes_agg_detail.html?ref_hash="
-        hash_under_test = f"{api_url}/{dlrn_api_suffix}{test_hash}"
-        promoted_hash = (
-            f"{api_url}/{dlrn_api_suffix}{promotions['aggregate_hash']}")
+    integration_func = CENTOS_INTEGRATION[distro]
+    api_response, test_hash, under_test_url, promoted_url = integration_func(
+        api_url, base_url, aggregate_hash, promotions['commit_hash'],
+        promotions['distro_hash'], promotions['aggregate_hash'])
 
     component = None
     last_modified = get_last_modified_date(base_url, component)
     promotion_extra = {
         'release': release,
         'distro': distro,
-        'dlrn_details': promoted_hash,
+        'dlrn_details': promoted_url,
         'last_modified': last_modified,
     }
 
@@ -632,7 +660,7 @@ def track_integration_promotion(
         render_influxdb(jobs, job_extra, promotions, promotion_extra)
     else:
         print_tables(
-            timestamp, hash_under_test, passed_jobs, failed_jobs,
+            timestamp, under_test_url, passed_jobs, failed_jobs,
             jobs_with_no_result, jobs_which_need_pass_to_promote,
             compare_upstream, component, components,
             api_response, pkg_diff, test_hash, periodic_builds_url,
