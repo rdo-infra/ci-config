@@ -3,6 +3,52 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "64d9f0be_96958b43",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 584,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-04-28T05:51:49Z",
+      "side": 1,
+      "message": "Can we also rename centos_integration to something generic and not have centos prefix as we also use in rhel.",
+      "range": {
+        "startLine": 584,
+        "startChar": 4,
+        "endLine": 584,
+        "endChar": 23
+      },
+      "revId": "44c2c2d8894f131ce34df6e353513d3577513be5",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8bec04df_bfa307a9",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 606,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-04-28T05:51:49Z",
+      "side": 1,
+      "message": "+1 to Rafael\u0027s comment below:-\n\nWe can use .get and also give default function name.(this way we only have to add value for each distro)\n\n\nI am thinking something like below\n\n~~~\ndef integration():\n...     pass\n... \n\n\n\u003e\u003e\u003e def centos7_integration():\n...     pass\n... \n\n\n\u003e\u003e\u003e INTEGRATION_FUNC_MAP \u003d {\u0027centos7\u0027: centos7_integration}\n\n\n\u003e\u003e INTEGRATION_FUNC_MAP.get(\u0027centos7\u0027, integration)\n\u003cfunction centos7_integration at 0x7f68bf09c1f0\u003e\n\n\u003e\u003e\u003e INTEGRATION_FUNC_MAP.get(\u0027centos8\u0027, integration)\n\u003cfunction integration at 0x7f68bf09c160\u003e\n~~~",
+      "range": {
+        "startLine": 599,
+        "startChar": 0,
+        "endLine": 606,
+        "endChar": 0
+      },
+      "revId": "44c2c2d8894f131ce34df6e353513d3577513be5",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "2f38af21_cd004880",
         "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py",
         "patchSetId": 2
@@ -14,6 +60,29 @@
       "writtenOn": "2022-04-26T20:02:46Z",
       "side": 1,
       "message": "could be CENTOS_INTEGRATION.get(distro, centos_integration)\n\nthat way we don\u0027t need to worry about updating this bit when c10 arrives",
+      "revId": "44c2c2d8894f131ce34df6e353513d3577513be5",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5c4a9ed4_f7e17604",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 617,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-04-28T05:51:49Z",
+      "side": 1,
+      "message": "Other possible alternative:-\n\n\nuse something like below:-\n\n~~~\ncentos7_integration() if distro \u003d\u003d \u0027centos7\u0027 else integration()\n~~~\n\n\u003e\u003e\u003e def centos7_integration():\n...     print(\u0027c7\u0027)\n\n\n\u003e\u003e\u003e def integration():\n...     print(\u0027integration\u0027)\n\n\u003e\u003e\u003e distro\n\u0027centos7\u0027\n\u003e\u003e\u003e centos7_integration() if distro \u003d\u003d \u0027centos7\u0027 else integration()\nc7\n\n\n\u003e\u003e\u003e centos7_integration() if distro \u003d\u003d \u0027centos7\u0027 else integration()\nintegration",
+      "range": {
+        "startLine": 617,
+        "startChar": 3,
+        "endLine": 617,
+        "endChar": 49
+      },
       "revId": "44c2c2d8894f131ce34df6e353513d3577513be5",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
