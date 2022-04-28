@@ -33,6 +33,24 @@
       "message": "Originally all the functions were implemented this way and in [1] we moved to using config dictionary because each of these function had multiple arguments and there were feedback that time to group these multiple variable using dictionary.\n\nCurrently, Because we are not modifying the config dictionary in our functions - its looks okay to pass config dict (even without creating dict copy[2])as argument as it reduce number of arguments we pass.\n\nI don\u0027t have strong objection either way and this comes down to personal style preferences[3]. If more contributor thinks having more variable instead of one big dict makes each function more readable than we should go with this.\n\nI have also tested this patch manually and it works.\n\nThanks dariusz.\n\n\n[1] https://review.rdoproject.org/r/c/rdo-infra/ci-config/+/34576/8/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py#379\n[2] https://www.dataquest.io/blog/tutorial-functions-modify-lists-dictionaries-python/\n[3] https://stackoverflow.com/questions/23445663/should-i-use-multiple-variables-or-one-dictionary",
       "revId": "bd67abc95671212ce7366ff110ccdc9dd261a6ad",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c4e9adb2_b59bffaf",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-04-28T13:57:42Z",
+      "side": 1,
+      "message": "Passing dict makes perfect sense. I\u0027m doing something similar in few places.\nI might even add few new ones.\n\nI\u0027m trying to resolve this complex problem of nested functions. I found out that outer function might use few variables and inner can use different variables. Rest of vars is completely ignored.\n\nBy slowly decoupling complexity I\u0027m trying to make functions self-contained units.\nOverall picture is to make functions smaller, independent unit, which later on should pay back on maintenance. It should allow us also to parallelize fetching info from dlrn.",
+      "parentUuid": "14c4114c_49350de2",
+      "revId": "bd67abc95671212ce7366ff110ccdc9dd261a6ad",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
