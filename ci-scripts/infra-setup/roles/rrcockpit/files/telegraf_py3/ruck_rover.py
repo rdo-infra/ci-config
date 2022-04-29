@@ -505,7 +505,7 @@ def prepare_render_template(filename):
 
 
 def render_testproject_yaml(jobs, test_hash, testproject_url):
-    template = prepare_render_template('.zuul.yaml.j2')
+    template = prepare_render_template('zuul.yaml.j2')
     output = template.render(
         jobs=jobs, hash=test_hash, testproject_url=testproject_url)
     print(output)
@@ -751,15 +751,15 @@ def track_component_promotion(
             all_jobs_result_available)
         all_jobs = all_jobs_result_available.union(jobs_with_no_result)
 
+        test_hash = f"{commit_hash}_{distro_hash[:8]}"
         job_extra = {
             'distro': distro,
             'release': release,
             'component': component,
             'job_type': "component" if component else "integration",
             'promote_name': 'promoted-components',
-            'test_hash': f"{commit_hash}_{distro_hash[:8]}",
+            'test_hash': test_hash,
         }
-        test_hash = commit_hash
         hash_under_test = "{}/{}{}&distro_hash={}".format(
             api_url, api_suffix, commit_hash, distro_hash)
         if influx:
