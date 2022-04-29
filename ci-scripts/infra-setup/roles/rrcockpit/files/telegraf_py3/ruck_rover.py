@@ -320,6 +320,10 @@ def conclude_results_from_dlrn(api_response):
     passed_jobs = set()
     all_jobs_result_available = set()
     for job in api_response:
+        if not job.job_id.startswith("periodic"):
+            # NOTE: Use only periodic jobs
+            continue
+
         all_jobs_result_available.add(job.job_id)
         if job.success:
             passed_jobs.add(job.job_id)
