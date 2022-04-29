@@ -156,7 +156,7 @@ def gather_basic_info_from_criteria(url):
 def find_jobs_in_integration_criteria(url, promotion_name='current-tripleo'):
     criteria_content = url_response_in_yaml(url)
 
-    return criteria_content['promotions'][promotion_name]['criteria']
+    return set(criteria_content['promotions'][promotion_name]['criteria'])
 
 
 def find_jobs_in_component_criteria(url, component):
@@ -320,6 +320,10 @@ def conclude_results_from_dlrn(api_response):
     passed_jobs = set()
     all_jobs_result_available = set()
     for job in api_response:
+        if not job.job_id.startswith("periodic"):
+            # NOTE: Use only periodic jobs
+            continue
+
         all_jobs_result_available.add(job.job_id)
         if job.success:
             passed_jobs.add(job.job_id)
@@ -633,8 +637,8 @@ def track_integration_promotion(
 
     (all_jobs_result_available,
      passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
-    jobs_in_criteria = set(find_jobs_in_integration_criteria(
-        url, promotion_name=promotion_name))
+    jobs_in_criteria = find_jobs_in_integration_criteria(
+        url, promotion_name=promotion_name)
     jobs_which_need_pass_to_promote = jobs_in_criteria.difference(passed_jobs)
     jobs_with_no_result = jobs_in_criteria.difference(all_jobs_result_available)
     all_jobs = all_jobs_result_available.union(jobs_with_no_result)
@@ -734,12 +738,6 @@ def track_component_promotion(
 
         (all_jobs_result_available,
          passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
-        if 'consistent' in all_jobs_result_available:
-            all_jobs_result_available.remove('consistent')
-        if 'consistent' in passed_jobs:
-            passed_jobs.remove('consistent')
-        if 'consistent' in failed_jobs:
-            failed_jobs.remove('consistent')
         jobs_in_criteria = find_jobs_in_component_criteria(url, component)
         jobs_which_need_pass_to_promote = jobs_in_criteria.difference(
                                             passed_jobs)
