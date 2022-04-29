@@ -107,9 +107,9 @@ class TestRuckRover(unittest.TestCase):
             m_get.return_value = yaml_data
             obtained = ruck_rover.find_jobs_in_integration_criteria(
                             'www.demoourl.com')
-            expected = [
+            expected = set([
                 'periodic-tripleo-ci-build-containers-ubi-8-push',
-                'periodic-tripleo-centos-8-buildimage-overcloud-full']
+                'periodic-tripleo-centos-8-buildimage-overcloud-full'])
             self.assertEqual(
                 expected, obtained)
 
