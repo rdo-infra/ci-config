@@ -1,3 +1,4 @@
+#!/bin/bash
 set -ex
 CICO_USER_DIR=${CICO_USER_DIR:-/root}
 WORKSPACE=${WORKSPACE:-/tmp}
@@ -17,16 +18,16 @@ source "${VENV}/bin/activate"
 pip install ansible==2.8.0
 
 # Add logserver to the ansible_hosts file
-cat << EOF >> ${ANSIBLE_HOSTS}
+cat << EOF >> "${ANSIBLE_HOSTS}"
 [logserver]
 ${LOGSERVER}
 EOF
 
-pushd $WORKSPACE
-mkdir -p $WORKSPACE/logs
+pushd "$WORKSPACE"
+mkdir -p "$WORKSPACE"/logs
 
 # Collect terminal output from centos-ci job regardless of job/cico status
-curl -o $WORKSPACE/logs/consoleText.txt ${CI_CENTOS_URL}/consoleText || true
+curl -o "$WORKSPACE"/logs/consoleText.txt "${CI_CENTOS_URL}"/consoleText || true
 
 cat << EOF > collect-logs.yaml
 # Create a playbook to pull the logs down from our cico node
