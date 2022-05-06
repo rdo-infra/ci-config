@@ -1,4 +1,4 @@
-#!/usr/bin/env /bin/bash
+#!/bin/bash
 
 # test
 
@@ -42,12 +42,15 @@ while getopts "t:k:sh" arg; do
         ;;
     s)
         echo "Staging promoter mode enabled"
-        LOG_LEVEL="${LOG_LEVEL}"
         STAGING_DIR="staging/"
         ;;
     h)
         usage
         exit 0
+        ;;
+    *)
+        usage
+        exit 1
         ;;
     esac
 done
@@ -55,14 +58,14 @@ done
 RELEASES=("${TEST_RELEASE:-${DEFAULT_RELEASES[@]}}")
 declare -p RELEASES
 
-DIR=$(dirname $0)
+DIR=$(dirname "$0")
 
-source ~/${PROMOTER_VENV:-promoter_venv}/bin/activate
+source ~/"${PROMOTER_VENV:-promoter_venv}"/bin/activate
 
 for r in "${RELEASES[@]}"; do
-    /usr/bin/timeout --preserve-status -k $KILLTIME $TIMEOUT \
-        python3 $DIR/dlrnapi_promoter.py --log-level ${LOG_LEVEL} --config-root $PROMOTER_CONFIG_ROOT \
-            --release-config ${r}.yaml promote-all
+    /usr/bin/timeout --preserve-status -k "$KILLTIME" "$TIMEOUT" \
+        python3 "$DIR"/dlrnapi_promoter.py --log-level "${LOG_LEVEL}" --config-root "$PROMOTER_CONFIG_ROOT" \
+            --release-config "${r}".yaml promote-all
     # After the promoter has cycled through each release
     # run an exhaustive cleanup of the local containers.
     # This will prevent the systems from running out of space

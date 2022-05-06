@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2236
 #
 # All Rights Reserved.
 #
@@ -18,14 +19,14 @@
 # instances, networks, and ports, in a tenant.
 # Use the nuclear option with caution. All non-marked ports will be deleted.
 
-: ${LONG_RUNNING:1}
-: ${TIME_EXPIRED:=300}
-: ${STACK_LIST:=""}
-: ${NUCLEAR:=0}
-: ${DRY_RUN:=0}
-: ${PREFIX:="baremetal_"}
-: ${SUFFIX:=""}
-: ${SLEEP_TIME:=5}
+: "${LONG_RUNNING:1}"
+: "${TIME_EXPIRED:=300}"
+: "${STACK_LIST:=""}"
+: "${NUCLEAR:=0}"
+: "${DRY_RUN:=0}"
+: "${PREFIX:=\"baremetal_\"}"
+: "${SUFFIX:=""}"
+: "${SLEEP_TIME:=5}"
 
 usage () {
     echo "Usage: $0 [options]"
@@ -156,23 +157,23 @@ elif [[ "$NUCLEAR" == "1" ]]; then
     STACK_LIST=$(openstack stack list -f json | jq -r '.[]| .["ID"]')
 else
     echo "INFO: Getting a list of all stacks running longer than $TIME_EXPIRED minutes ..." >&2
-    DATE_TIME_EXPIRED=$(`which gdate date|head -n1` -d " $TIME_EXPIRED minutes ago" -u  "+%Y-%m-%dT%H:%M:%SZ")
+    DATE_TIME_EXPIRED=$($(which gdate date|head -n1) -d " $TIME_EXPIRED minutes ago" -u  "+%Y-%m-%dT%H:%M:%SZ")
     STACK_LIST=$(openstack stack list -f json | jq --arg date_time_expired "$DATE_TIME_EXPIRED" -r '.[]| select(.["Creation Time"] <= $date_time_expired)  | .["ID"]')
 fi
 
 # DOWN port cleanup
 PORT_TIME_EXPIRED=300
-DATE_TIME_EXPIRED=$(`which gdate date|head -n1` -d " $PORT_TIME_EXPIRED minutes ago" -u  "+%Y-%m-%dT%H:%M:%SZ")
+DATE_TIME_EXPIRED=$($(which gdate date|head -n1) -d " $PORT_TIME_EXPIRED minutes ago" -u  "+%Y-%m-%dT%H:%M:%SZ")
 # Get a list of ports which are DOWN
 echo "INFO: Getting a list of ports which are DOWN"
 DOWN_PORT_LIST=$(openstack port list -f json | jq -r '.[]| select(.["Status"] == "DOWN") | .["ID"]')
 # Get a list of ports which are down for 5 hours
 for PORT in $DOWN_PORT_LIST; do
-    DOWN_PORT=$(openstack port show $PORT -f json | jq --arg date_time_expired "$DATE_TIME_EXPIRED" -r '. |select(.updated_at <= $date_time_expired)| .id')
+    DOWN_PORT=$(openstack port show "$PORT" -f json | jq --arg date_time_expired "$DATE_TIME_EXPIRED" -r '. |select(.updated_at <= $date_time_expired)| .id')
     if [[ -n "$DOWN_PORT" && "$DOWN_PORT" != "null" ]]; then
         echo "INFO: Deleting Down Port $DOWN_PORT"
         if [[ "$DRY_RUN" == "0" ]]; then
-            openstack port delete $DOWN_PORT
+            openstack port delete "$DOWN_PORT"
         fi
     fi
 done
@@ -183,9 +184,9 @@ if [[ "$DRY_RUN" == "1" ]]; then
 else
     for STACK in $STACK_LIST; do
         echo "INFO: Deleting stack id $STACK ..." >&2
-        openstack stack delete -y $STACK || echo "WARN: stack $STACK failed to clean up" >&2
+        openstack stack delete -y "$STACK" || echo "WARN: stack $STACK failed to clean up" >&2
         # don't overwhelm the tenant with mass delete
-        sleep $SLEEP_TIME
+        sleep "$SLEEP_TIME"
     done
 fi
 
@@ -208,7 +209,7 @@ else
         else
             for PORT in $PORT_LIST_EMPTY_ID; do
                 echo "INFO: Deleting port with empty name, ID $PORT ..." >&2
-                openstack port delete $PORT
+                openstack port delete "$PORT"
             done
         fi
     fi
@@ -219,8 +220,8 @@ else
     for STACK in $STACK_LIST_STATUS; do
 
         # Extract identfier for associated resources
-        IDENTIFIER=${STACK#$PREFIX}
-        IDENTIFIER=${IDENTIFIER%$SUFFIX}
+        IDENTIFIER=${STACK#"$PREFIX"}
+        IDENTIFIER=${IDENTIFIER%"$SUFFIX"}
         echo "INFO: Identifier is $IDENTIFIER" >&2
 
         # Delete associated instances/servers
@@ -231,7 +232,7 @@ else
         else
             for SERVER in $SERVER_IDS; do
                 echo "INFO: Deleting server ID $SERVER ..." >&2
-                openstack server delete $SERVER
+                openstack server delete "$SERVER"
             done
         fi
 
@@ -243,7 +244,7 @@ else
         else
             for PORT in $PORT_IDS; do
                 echo "INFO: Deleting port ID $PORT ..." >&2
-                openstack port delete $PORT
+                openstack port delete "$PORT"
             done
         fi
 
@@ -257,7 +258,7 @@ else
             else
                 for PORT_SUBNET_ID in $PORT_SUBNET_IDS; do
                     echo "INFO: Deleting port ID $PORT_SUBNET_ID ..." >&2
-                    openstack port delete $PORT_SUBNET_ID
+                    openstack port delete "$PORT_SUBNET_ID"
                 done
             fi
         done
@@ -269,7 +270,7 @@ else
         else
             for NETWORK_ID in $NETWORK_IDS; do
                 echo "INFO: Deleting network ID $NETWORK_ID ..." >&2
-                openstack network delete $NETWORK_ID
+                openstack network delete "$NETWORK_ID"
             done
         fi
 
@@ -279,12 +280,12 @@ else
             $STACK"
         else
             for (( DELETE_TIMES=0; DELETE_TIMES <= 4; DELETE_TIMES++ )); do
-                openstack stack show $STACK || break
-                if [[ "$(openstack stack show $STACK -f json | jq -r '.["stack_status"] | test("(CREATE|DELETE)_FAILED")')" == "true" ]]; then
+                openstack stack show "$STACK" || break
+                if [[ "$(openstack stack show "$STACK" -f json | jq -r '.["stack_status"] | test("(CREATE|DELETE)_FAILED")')" == "true" ]]; then
                     echo "INFO: Deleting stack id $STACK..." >&2
-                    openstack stack delete -y $STACK
+                    openstack stack delete -y "$STACK"
                     # don't overwhelm the tenant with mass delete
-                    sleep $SLEEP_TIME
+                    sleep "$SLEEP_TIME"
                 fi
             done
         fi
@@ -293,8 +294,8 @@ else
 
 fi
 
-SERVER_NAMES=$(openstack server list -f json | jq -r '.[] | select(.["Status"] |test("ERROR")) | .["Name"]')
-SERVER_IDS=$(openstack server list -f json | jq -r '.[] | select(.["Status"] |test("ERROR")) | .["ID"]')
+SERVER_NAMES="$(openstack server list -f json | jq -r '.[] | select(.["Status"] |test("ERROR")) | .["Name"]')"
+SERVER_IDS="$(openstack server list -f json | jq -r '.[] | select(.["Status"] |test("ERROR")) | .["ID"]')"
 if [[  -z $SERVER_NAMES ]]; then
     echo "INFO: There are no servers to delete" >&2
 else
@@ -306,7 +307,7 @@ else
     else
         for SERVER in $SERVER_IDS; do
             echo "INFO: Deleting server ID $SERVER ..." >&2
-            openstack server delete $SERVER
+            openstack server delete "$SERVER"
         done
     fi
 fi
