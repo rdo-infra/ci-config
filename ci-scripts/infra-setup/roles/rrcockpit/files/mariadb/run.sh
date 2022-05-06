@@ -143,7 +143,7 @@ read_noop(){
     types="upstream rdo tempest"
     for release in $releases; do
         for type in $types; do
-            noop_build.py --release $release --type $type
+            noop_build.py --release "$release" --type "$type"
         done
     done
 
@@ -151,8 +151,8 @@ read_noop(){
 
 load_mariadb(){
 
-    read_$1 > /tmp/$1.csv
-    mysql -h mariadb -P 3306 -u root < /tmp/load_$1_mysql.sql
+    read_"$1" > /tmp/"$1".csv
+    mysql -h mariadb -P 3306 -u root < /tmp/load_"$1"_mysql.sql
 
 }
 
