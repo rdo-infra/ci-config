@@ -18,7 +18,7 @@
 set -eux
 
 RELEASE=$1
-BUILD_SYS=$2
+# BUILD_SYS=$2
 CONFIG=$3
 JOB_TYPE=$4
 MAJOR_UPGRADE=$5
@@ -81,18 +81,18 @@ export ANSIBLE_SSH_CONTROL_PATH=$socketdir/%%h-%%r
 # TODO: Add dlrn gate check
 
 bash quickstart.sh \
-    --working-dir $WORKSPACE/ \
+    --working-dir "$WORKSPACE"/ \
     --no-clone \
     --bootstrap \
     --tags all \
     --teardown all \
-    --config $WORKSPACE/$HW_ENV_DIR/network_configs/$NETWORK_ISOLATION/config_files/$CONFIG \
-    --extra-vars @$OVB_SETTINGS_FILE \
-    --extra-vars @$OVB_CREDS_FILE \
-    --extra-vars @$WORKSPACE/$HW_ENV_DIR/network_configs/$NETWORK_ISOLATION/env_settings.yml \
-    --playbook $PLAYBOOK \
-    --release ${CI_ENV:+$CI_ENV/}$RELEASE${REL_TYPE:+-$REL_TYPE} \
-    --extra-vars upgrade_delorean_hash=$UPGRADE_DELOREAN_HASH \
-    --extra-vars major_upgrade=$MAJOR_UPGRADE \
-    --extra-vars target_upgrade_version=$TARGET_VERSION \
+    --config "$WORKSPACE"/"$HW_ENV_DIR"/network_configs/"$NETWORK_ISOLATION"/config_files/"$CONFIG" \
+    --extra-vars @"$OVB_SETTINGS_FILE" \
+    --extra-vars @"$OVB_CREDS_FILE" \
+    --extra-vars @"$WORKSPACE"/"$HW_ENV_DIR"/network_configs/"$NETWORK_ISOLATION"/env_settings.yml \
+    --playbook "$PLAYBOOK" \
+    --release "${CI_ENV:+$CI_ENV/}$RELEASE${REL_TYPE:+-$REL_TYPE}" \
+    --extra-vars upgrade_delorean_hash="$UPGRADE_DELOREAN_HASH" \
+    --extra-vars major_upgrade="$MAJOR_UPGRADE" \
+    --extra-vars target_upgrade_version="$TARGET_VERSION" \
 localhost
