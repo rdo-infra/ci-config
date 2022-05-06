@@ -24,8 +24,8 @@ else
     exit 1
 fi
 
-mkdir -p $WORKSPACE
-pushd $WORKSPACE
+mkdir -p "$WORKSPACE"
+pushd "$WORKSPACE"
 
 # (trown) This is so that we ensure separate ssh sockets for
 # concurrent jobs. Without this, two jobs running in parallel
@@ -35,23 +35,23 @@ export ANSIBLE_SSH_CONTROL_PATH=$socketdir/%%h-%%r
 
 bash tripleo-quickstart/quickstart.sh \
     --tags all \
-    --config $WORKSPACE/.quickstart/config/general_config/$CONFIG.yml \
-    -e dlrn_hash=$dlrn_hash \
-    --working-dir $WORKSPACE \
+    --config "$WORKSPACE"/.quickstart/config/general_config/"$CONFIG".yml \
+    -e dlrn_hash="$dlrn_hash" \
+    --working-dir "$WORKSPACE" \
     -e images_working_dir=/var/lib/oooq-images \
     -e overcloud_as_undercloud=true \
     --playbook build-images-v2.yml \
     --no-clone \
-    --release ${CI_ENV:+$CI_ENV/}$RELEASE \
-    $VIRTHOST
+    --release ${CI_ENV:+$CI_ENV/}"$RELEASE" \
+    "$VIRTHOST"
 
 if [ "$JOB_TYPE" = "gate" ] || [ "$JOB_TYPE" = "periodic" ]; then
     bash tripleo-quickstart/quickstart.sh \
         --tags all \
         --no-clone \
-        --config $WORKSPACE/config/general_config/$CONFIG.yml \
-        --working-dir $WORKSPACE \
-        --release ${CI_ENV:+$CI_ENV/}$RELEASE \
+        --config "$WORKSPACE"/config/general_config/"$CONFIG".yml \
+        --working-dir "$WORKSPACE" \
+        --release ${CI_ENV:+$CI_ENV/}"$RELEASE" \
         --extra-vars undercloud_image_url="file:///var/lib/oooq-images/undercloud.qcow2" \
-        $VIRTHOST
+        "$VIRTHOST"
 fi
