@@ -1,3 +1,5 @@
+#!/bin/bash
+
 set -ex
 CICO_USER_DIR=${CICO_USER_DIR:-/root}
 WORKSPACE=${WORKSPACE:-/tmp}
@@ -11,7 +13,7 @@ source "${VENV}/bin/activate"
 # Ensure that ansible is installed.
 pip install ansible==2.8.0
 
-pushd $WORKSPACE
+pushd "$WORKSPACE"
 
 cat << EOF > delorean-report.yaml
 # Create a playbook to report results to delorean

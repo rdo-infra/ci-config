@@ -29,10 +29,10 @@ clean()
     docker system prune -f
     running_containers=`docker ps -a --format="{{.ID}}"`
     for i in $running_containers; do
-        echo $i;
-        docker rm -f $i
+        echo "$i";
+        docker rm -f "$i"
     done
-    sudo docker rmi -f $(sudo docker images -q)
+    sudo docker rmi -f "$(sudo docker images -q)"
 }
 
 if [ -z "$1" ]; then

@@ -1,3 +1,5 @@
+#!/usr/bin/bash
+
 set -e
 export RDO_VERSION='centos8-ussuri'
 export DELOREAN_PUBLIC_HOST='trunk.rdoproject.org'
