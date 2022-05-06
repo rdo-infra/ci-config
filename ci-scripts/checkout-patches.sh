@@ -5,22 +5,22 @@
 # the quickstart venv
 set -eux
 
-pushd $WORKSPACE/tripleo-quickstart
+pushd "$WORKSPACE"/tripleo-quickstart
 # Add git checkouts for tripleo-quickstart here
 popd
 
-pushd $WORKSPACE/tripleo-quickstart-extras
+pushd "$WORKSPACE"/tripleo-quickstart-extras
 # Add git checkouts for tripleo-quickstart-extras here
 popd
 
-cp $WORKSPACE/tripleo-quickstart/requirements.txt $WORKSPACE/local-requires.txt
-echo "file://$WORKSPACE/tripleo-quickstart-extras/#egg=tripleo-quickstart-extras" >> $WORKSPACE/local-requires.txt
+cp "$WORKSPACE"/tripleo-quickstart/requirements.txt "$WORKSPACE"/local-requires.txt
+echo "file://$WORKSPACE/tripleo-quickstart-extras/#egg=tripleo-quickstart-extras" >> "$WORKSPACE"/local-requires.txt
 
-bash $WORKSPACE/tripleo-quickstart/quickstart.sh \
-    --working-dir $WORKSPACE/.quickstart \
+bash "$WORKSPACE"/tripleo-quickstart/quickstart.sh \
+    --working-dir "$WORKSPACE"/.quickstart \
     --no-clone \
     --clean \
     --bootstrap \
-    --requirements $WORKSPACE/local-requires.txt \
+    --requirements "$WORKSPACE"/local-requires.txt \
     --playbook noop.yml \
     localhost
