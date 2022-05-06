@@ -30,7 +30,7 @@ else
     echo "INFO: There are stacks in FAILED state - $STACK_NAMES" >&2
         for STACK in $STACK_IDS; do
             echo "INFO: Deleting stack ID $STACK ..." >&2
-            openstack stack delete -y $STACK
+            openstack stack delete -y "$STACK"
             sleep 10
         done
 fi

@@ -1,3 +1,4 @@
+#!/bin/bash
 set -e
 export RDO_VERSION='centos9-master-uc'
 export DELOREAN_PUBLIC_HOST='trunk.rdoproject.org'
