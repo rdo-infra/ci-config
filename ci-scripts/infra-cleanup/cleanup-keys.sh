@@ -29,7 +29,7 @@ if [[  -z $KEYS ]]; then
 else
     for KEY in $KEYS; do
         echo "INFO: Deleting keypair $KEY ..." >&2
-        openstack keypair delete $KEY
+        openstack keypair delete "$KEY"
         sleep 10
     done
 fi
