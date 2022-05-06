@@ -2,11 +2,11 @@
 set -euo pipefail
 
 # defaults used for backwards compatibility
-: ${OPT_DISTRO:=centos}
-: ${OPT_DISTRO_VERSION:=8}
-: ${OPT_WEBROOT:=/var/www/html/images}
-: ${OPT_WEBSITE:=https://images.rdoproject.org}
-: ${IMAGE_SERVER_USER_HOST:=uploader@images.rdoproject.org}
+: "${OPT_DISTRO:=centos}"
+: "${OPT_DISTRO_VERSION:=8}"
+: "${OPT_WEBROOT:=/var/www/html/images}"
+: "${OPT_WEBSITE:=https://images.rdoproject.org}"
+: "${IMAGE_SERVER_USER_HOST:=uploader@images.rdoproject.org}"
 
 function usage {
     cat <<-EOF
@@ -17,8 +17,8 @@ EOF
 }
 
 function finish {
-    rc=$?
-    if [[ $rc -eq 0 ]]; then
+    rc="$?"
+    if [[ "$rc" -eq 0 ]]; then
         echo "INFO: $0 succeded updating ${TARGET_URL:-} to point to ${SOURCE_URL:-} " >&2
     else
         echo "ERROR: $0 failed with $rc exit code" >&2
@@ -31,7 +31,7 @@ while [ "x${1:-}" != "x" ]; do
     case "$1" in
         --distro)
             # we lowercase distro string, to avoid accidents
-            OPT_DISTRO=$(echo $2| tr '[:upper:]' '[:lower:]')
+            OPT_DISTRO=$(echo "$2"| tr '[:upper:]' '[:lower:]')
             shift
             ;;
         --distro-version)
@@ -87,8 +87,8 @@ if [[ -f /tmp/stage-info.yaml ]]; then
 fi
 
 # check if target url exists and fail-fast if it doesn't
-SOURCE_URL=${OPT_WEBSITE}/$DISTRO_AND_VERSION/$RELEASE/rdo_trunk/$PROMOTED_HASH
-curl -L --silent --head --fail $SOURCE_URL >/dev/null || {
+SOURCE_URL="${OPT_WEBSITE}"/"$DISTRO_AND_VERSION"/"$RELEASE"/rdo_trunk/"$PROMOTED_HASH"
+curl -L --silent --head --fail "$SOURCE_URL" >/dev/null || {
     echo "ERROR: The promoted hash was not found: $SOURCE_URL" >&2
     exit 3
 }
@@ -109,8 +109,8 @@ sftp_command "-rename ${OPT_WEBROOT}/$DISTRO_AND_VERSION/$RELEASE/rdo_trunk/$LIN
 # promote new hash with link
 sftp_command "ln -s ${OPT_WEBROOT}/$DISTRO_AND_VERSION/$RELEASE/rdo_trunk/$PROMOTED_HASH ${OPT_WEBROOT}/$DISTRO_AND_VERSION/$RELEASE/rdo_trunk/$LINK_NAME"
 
-TARGET_URL=${OPT_WEBSITE}/$DISTRO_AND_VERSION/$RELEASE/rdo_trunk/$LINK_NAME
-curl -L --silent --head --fail $TARGET_URL >/dev/null || {
+TARGET_URL="${OPT_WEBSITE}"/"$DISTRO_AND_VERSION"/"$RELEASE"/rdo_trunk/"$LINK_NAME"
+curl -L --silent --head --fail "$TARGET_URL" >/dev/null || {
     echo "ERROR: The target is invalid: $TARGET_URL" >&2
     exit 3
 }
