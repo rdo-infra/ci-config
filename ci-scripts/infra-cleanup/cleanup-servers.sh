@@ -30,7 +30,7 @@ else
     echo "INFO: There are servers in ERROR state - $SERVER_NAMES" >&2
         for SERVER in $SERVER_IDS; do
             echo "INFO: Deleting server ID $SERVER ..." >&2
-            openstack server delete $SERVER
+            openstack server delete "$SERVER"
             sleep 10
         done
 fi
