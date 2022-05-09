@@ -184,18 +184,6 @@ class TestRuckRover(unittest.TestCase):
         m_get.assert_called_with(expected,
                                  verify=cert_path)
 
-    @patch('ruck_rover.requests.get')
-    def test_get_last_modified_date_centos7_no_component(self, m_get):
-        m_get.return_value.ok = None
-        cert_path = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
-
-        url = 'https://trunk.rdoproject.org/centos7-train/'
-        ruck_rover.get_last_modified_date(url, component=None)
-        expected = ("https://trunk.rdoproject.org/centos7-train/"
-                    "consistent/delorean.repo")
-        m_get.assert_called_with(expected,
-                                 verify=cert_path)
-
     def test_get_dlrn_versions_csv_no_component(self):
         base_url = "base_url"
         component = None
@@ -264,27 +252,9 @@ class TestRuckRoverComponent(unittest.TestCase):
                             'int_url': 'http://int_url'
                                    }
                                },
-                    'centos-7': {
-                        'train': {
-                            'int_url': 'http://int_url'
-                                   }
-                               }
-                           }
-                       }
                    }
-
-    def test_track_component_promotion_centos7(self):
-        distro = 'centos-7'
-        release = 'train'
-        influx = False
-        stream = 'upstream'
-        compare_upstream = False
-        component = 'cinder'
-
-        with self.assertRaises(Exception):
-            ruck_rover.track_component_promotion(
-                self.config, distro, release, influx, stream,
-                compare_upstream, component)
+            }
+        }
 
     @mock.patch('ruck_rover.find_jobs_in_component_criteria')
     @mock.patch('ruck_rover.conclude_results_from_dlrn')
@@ -484,14 +454,9 @@ class TestInfluxDBMeasurements(unittest.TestCase):
                             'int_url': 'http://int_url'
                                    }
                                },
-                    'centos-7': {
-                        'train': {
-                            'int_url': 'http://int_url'
-                                   }
-                               }
-                           }
-                       }
                    }
+                }
+            }
         self.distro = "centos-8"
         self.release = "wallaby"
         self.influx = True
