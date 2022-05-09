@@ -1,23 +1,4 @@
 ---
-- project-template:
-    name: jobs-promoter-centos-7-jobs
-    check: &jobs
-      jobs:
-        - tripleo-ci-promotion-staging-single-pipeline-centos-8:
-            files: &promoter_files
-              - ^ci-scripts/dlrnapi_promoter/.*
-              - ^ci-scripts/container-push/.*
-              - ^ci-scripts/promote-images.sh
-              - ^ci-scripts/infra-setup/roles/promoter/.*
-              - ^playbooks/staging.*
-              - ^requirements.txt
-              - ^test-requirements.txt
-              - ^ci-scripts/infra-setup/roles/promoter/molecule/.*
-              - ^playbooks/molecule.*.yml
-        - tripleo-ci-promotion-staging-integration-pipeline-centos-8:
-            files: *promoter_files
-    gate: *jobs
-
 - job:
     name: tripleo-ci-promotion-staging-base
     parent: base
@@ -43,38 +24,6 @@
     parent: tripleo-ci-promotion-staging-base
     vars:
       pipeline_type: integration
-
-# Remove when ci-config and rdo-jobs switch to centos-8 version of this job
-- job:
-    name: tripleo-ci-promotion-staging-single-pipeline-centos-7
-    parent: base
-    ansible-version: 2.8
-    nodeset: rdo-centos-7
-    run: playbooks/staging.yml
-    post-run: playbooks/staging-post.yml
-    host-vars:
-      primary:
-        ansible_user: root
-    vars:
-      pipeline_type: single
-      test_release: CentOS-7/master
-      zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
-
-# Remove when ci-config and rdo-jobs switch to centos-8 version of this job
-- job:
-    name: tripleo-ci-promotion-staging-integration-pipeline-centos-7
-    parent: base
-    ansible-version: 2.8
-    nodeset: rdo-centos-7
-    run: playbooks/staging.yml
-    post-run: playbooks/staging-post.yml
-    host-vars:
-      primary:
-        ansible_user: root
-    vars:
-      pipeline_type: integration
-      test_release: CentOS-8/master
-      zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
 
 - job:
     name: tox-py36-ci-config

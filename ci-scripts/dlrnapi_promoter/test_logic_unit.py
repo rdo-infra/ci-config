@@ -177,7 +177,7 @@ class TestPromoteLabelToLabel(ConfigSetup):
         ci_votes = "http://host.to/detailspage.html"
         mock_civotes.return_value = ci_votes
         successful_jobs = [
-            'periodic-tripleo-centos-7-master-containers-build-push',
+            'periodic-tripleo-centos-8-master-containers-build-push',
         ]
         mock_fetch_jobs.return_value = successful_jobs
         candidate_hash = DlrnCommitDistroExtendedHash(commit_hash='a',
