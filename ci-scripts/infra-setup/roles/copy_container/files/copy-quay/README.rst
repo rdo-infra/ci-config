@@ -40,7 +40,7 @@ Copying only one single container, for example from another registry::
 
     copy-quay --debug --pull-registry quay.ceph.io --token $TOKEN \
               --from-namespace ceph-ci --to-namespace ceph-ci \
-              --tag v4.0.13-stable-4.0-nautilus-centos-7-x86_64 copy daemon
+              --tag current-ceph copy daemon
 
-In the example above, it will copy the daemon tagged with v4.0.13-stable-4.0-nautilus-centos-7-x86_64 container
+In the example above, it will copy the daemon tagged with current-ceph container
 from quay.ceph.io and push it to quay.io/ceph-ci

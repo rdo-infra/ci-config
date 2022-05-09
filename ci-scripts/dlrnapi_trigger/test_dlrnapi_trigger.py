@@ -43,7 +43,7 @@ api_repo_status_get = [
         distro_hash='2970104410bf047570f50b218d828c73f95f27d3',
         in_progress=False,
         job_id=(
-            'periodic-tripleo-ci-centos-7-scenario007-multinode-oooq-container'
+            'periodic-tripleo-ci-centos-8-scenario007-multinode-oooq-container'
             '-master'),
         notes='',
         success=True,
@@ -51,7 +51,7 @@ api_repo_status_get = [
         url=(
             'https://logs.rdoproject.org/openstack-periodic/git.openstack.org/'
             'openstack/tripleo-ci/master/'
-            'periodic-tripleo-ci-centos-7-scenario007-multinode-oooq-container'
+            'periodic-tripleo-ci-centos-8-scenario007-multinode-oooq-container'
             '-master/8ed900e')),
     # This simulates a complete failed job using the old TOCI_JOBTYPE id report
     models.CIVote(
@@ -65,14 +65,14 @@ api_repo_status_get = [
         url=(
             'https://logs.rdoproject.org/openstack-periodic/git.openstack.org/'
             'openstack/tripleo-ci/master/'
-            'periodic-tripleo-ci-centos-7-ovb-3ctlr_1comp_1supp-'
+            'periodic-tripleo-ci-centos-8-ovb-3ctlr_1comp_1supp-'
             'featureset039-master/2791714')),
     # This simulates a complete failed job using the new zuul.job id report
     models.CIVote(
         commit_hash='49998bd3356842923fef5029443ecae6b2555535',
         distro_hash='2970104410bf047570f50b218d828c73f95f27d3',
         in_progress=False,
-        job_id=('periodic-tripleo-ci-centos-7-ovb-3ctlr_1comp_1supp-'
+        job_id=('periodic-tripleo-ci-centos-8-ovb-3ctlr_1comp_1supp-'
                 'featureset039-master'),
         notes='',
         success=False,
@@ -80,7 +80,7 @@ api_repo_status_get = [
         url=(
             'https://logs.rdoproject.org/openstack-periodic/git.openstack.org/'
             'openstack/tripleo-ci/master/'
-            'periodic-tripleo-ci-centos-7-ovb-3ctlr_1comp_1supp-'
+            'periodic-tripleo-ci-centos-8-ovb-3ctlr_1comp_1supp-'
             'featureset039-master/2791714'))
 ]
 
@@ -100,7 +100,7 @@ wait_job_success = models.CIVote(
     commit_hash='49998bd3356842923fef5029443ecae6b2555535',
     distro_hash='2970104410bf047570f50b218d828c73f95f27d3',
     in_progress=False,
-    job_id='periodic-tripleo-centos-7-master-containers-build',
+    job_id='periodic-tripleo-centos-8-master-containers-build-push',
     notes='',
     success=True,
     timestamp=1551437024,
@@ -111,7 +111,7 @@ wait_job_failure = models.CIVote(
     commit_hash='49998bd3356842923fef5029443ecae6b2555535',
     distro_hash='2970104410bf047570f50b218d828c73f95f27d3',
     in_progress=False,
-    job_id='periodic-tripleo-centos-7-master-containers-build',
+    job_id='periodic-tripleo-centos-8-master-containers-build-push',
     notes='',
     success=False,
     timestamp=1551437024,
@@ -125,7 +125,7 @@ def test_trigger_on_wait_job_sucess_and_no_launch_job(dlrn_mock):
         wait_job_success
     ]
     promotion_name = 'tripleo-ci-testing'
-    wait_job_name = 'periodic-tripleo-centos-7-master-containers-build'
+    wait_job_name = 'periodic-tripleo-centos-8-master-containers-build-push'
     launch_job_name = 'periodic-baremetal-featureset666'
     assert (dlrnapi_trigger.check_trigger_condition(
         dlrn_mock, promotion_name,
@@ -140,7 +140,7 @@ def test_trigger_on_first_wait_job_sucess_and_no_launch_job(dlrn_mock):
         wait_job_success, wait_job_failure
     ]
     promotion_name = 'tripleo-ci-testing'
-    wait_job_name = 'periodic-tripleo-centos-7-master-containers-build'
+    wait_job_name = 'periodic-tripleo-centos-8-master-containers-build-push'
     launch_job_name = 'periodic-baremetal-featureset666'
     assert (dlrnapi_trigger.check_trigger_condition(
         dlrn_mock, promotion_name, wait_job_name,
@@ -154,7 +154,7 @@ def test_dont_trigger_on_wait_job_failure(dlrn_mock):
         wait_job_failure
     ]
     promotion_name = 'tripleo-ci-testing'
-    wait_job_name = 'periodic-tripleo-centos-7-master-containers-build'
+    wait_job_name = 'periodic-tripleo-centos-8-master-containers-build-push'
     launch_job_name = 'periodic-baremetal-featureset666'
     assert (not dlrnapi_trigger.check_trigger_condition(
         dlrn_mock, promotion_name,
@@ -168,7 +168,7 @@ def test_dont_trigger_on_first_wait_job_failure(dlrn_mock):
         wait_job_failure, wait_job_success
     ]
     promotion_name = 'tripleo-ci-testing'
-    wait_job_name = 'periodic-tripleo-centos-7-master-containers-build'
+    wait_job_name = 'periodic-tripleo-centos-8-master-containers-build-push'
     launch_job_name = 'periodic-baremetal-featureset666'
     assert (not dlrnapi_trigger.check_trigger_condition(
         dlrn_mock, promotion_name,
@@ -182,7 +182,7 @@ def test_dont_trigger_on_launch_job_already_run(dlrn_mock):
         launch_job_success
     ]
     promotion_name = 'tripleo-ci-testing'
-    wait_job_name = 'periodic-tripleo-centos-7-master-containers-build'
+    wait_job_name = 'periodic-tripleo-centos-8-master-containers-build-push'
     launch_job_name = 'periodic-baremetal-featureset666'
     assert (not dlrnapi_trigger.check_trigger_condition(
         dlrn_mock, promotion_name,

@@ -33,8 +33,8 @@ def main():
         description='This will get the tempest file for fs021.')
     parser.add_argument(
         '--job_name',
-        default='periodic-tripleo-ci-centos-7-ovb-1ctlr_2comp-'
-        'featureset021-master',
+        default='periodic-tripleo-ci-centos-8-ovb-1ctlr_2comp-'
+        'featureset020-master',
         help="(default: %(default)s)")
     parser.add_argument(
         '--log_file',

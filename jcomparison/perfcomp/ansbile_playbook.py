@@ -112,12 +112,12 @@ def main():
 
     parser.add_argument('-g', '--good-job', dest="good",
                         default=("https://logs.rdoproject.org/96/15896/35/"
-                                 "check/legacy-tripleo-ci-centos-7-ovb-3ctlr_"
+                                 "check/periodic-tripleo-ci-centos-8-ovb-3ctlr_"
                                  "1comp-featureset001-master/3cf4a97/"),
                         help='Link to good job')
     parser.add_argument('-b', '--bad-job', dest="bad",
                         default=("https://logs.rdoproject.org/96/15896/35/"
-                                 "check/legacy-tripleo-ci-centos-7-ovb-3ctlr_"
+                                 "check/legacy-tripleo-ci-centos-8-ovb-3ctlr_"
                                  "1comp-featureset001-master-vexxhost/"
                                  "2b2cbf3/"),
                         help='Link to bad job')
