@@ -78,7 +78,7 @@ if __name__ == '__main__':
     parser.add_argument('--promotion-name', default="tripleo-ci-testing")
     parser.add_argument(
         '--wait-job',
-        default="periodic-tripleo-centos-7-master-containers-build")
+        default="periodic-tripleo-centos-8-master-containers-build")
     parser.add_argument('--launch-job', default="test-connection-to-hardware")
     args = parser.parse_args()
 
