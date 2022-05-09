@@ -49,10 +49,10 @@ def run_server_check():
     d['undercloud'] = len([
         i for i in out
         if i['Flavor Name'] == 'ci.m1.nodepool'
-        and "upstream-centos-7-rdo-cloud" in i['Name']
+        and "upstream-centos-8-rdo-cloud" in i['Name']
     ])
     d['multinode'] = len(
-        [i for i in out if "upstream-centos-7-2-node-rdo-cloud" in i['Name']])
+        [i for i in out if "upstream-centos-8-2-node-rdo-cloud" in i['Name']])
     d['bmc'] = len([i for i in out if i['Image Name'] == 'bmc-template'])
     d['ovb-node'] = len([i for i in out if i['Image Name'] == 'ipxe-boot'])
     d['total'] = len(out)

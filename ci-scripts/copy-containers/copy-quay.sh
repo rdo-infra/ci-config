@@ -23,8 +23,5 @@ fi
 # Victoria
 /usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token $TOKEN --release victoria --html /root/logs/victoria-report.html copy &>>/root/logs/victoria.txt
 
-# Train 7
-/usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token $TOKEN --release train7 --html /root/logs/train-report.html copy &>>/root/logs/train.txt
-
 # Train 8
 /usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token $TOKEN --release train8 --html /root/logs/train8-report.html copy &>>/root/logs/train8.txt
