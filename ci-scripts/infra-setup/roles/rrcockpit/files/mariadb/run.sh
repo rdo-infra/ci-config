@@ -86,7 +86,6 @@ read_skipped(){
         -job periodic-tripleo-ci-centos-8-standalone-scenario004-skipped-tempest-master \
         -job periodic-tripleo-ci-centos-8-standalone-scenario007-skipped-tempest-master \
         -job periodic-tripleo-ci-centos-8-standalone-scenario010-skipped-tempest-master \
-        -job periodic-tripleo-ci-centos-7-ovb-1ctlr_2comp-featureset021-master
 
     skiplist -csv -release wallaby \
         -job periodic-tripleo-ci-centos-8-standalone-skipped-tempest-wallaby \
@@ -123,16 +122,7 @@ read_skipped(){
         -job periodic-tripleo-ci-centos-8-standalone-scenario004-skipped-tempest-train \
         -job periodic-tripleo-ci-centos-8-standalone-scenario007-skipped-tempest-train \
         -job periodic-tripleo-ci-centos-8-standalone-scenario010-skipped-tempest-train \
-        -job periodic-tripleo-ci-centos-7-ovb-1ctlr_2comp-featureset021-train
 
-    skiplist -csv -release stein \
-        -job periodic-tripleo-ci-centos-7-ovb-1ctlr_2comp-featureset021-stein
-
-    skiplist -csv -release rocky \
-        -job periodic-tripleo-ci-centos-7-ovb-1ctlr_2comp-featureset021-queens
-
-    skiplist -csv -release queens \
-        -job periodic-tripleo-ci-centos-7-ovb-1ctlr_2comp-featureset021-queens
 }
 
 read_pass(){
