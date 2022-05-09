@@ -8,7 +8,6 @@ import time
 from datetime import datetime
 from io import StringIO
 from tempfile import mkstemp
-from urllib.parse import urlencode
 
 import click
 import dlrnapi_client
@@ -29,7 +28,6 @@ CERT_PATH = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
 dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
 
 MATRIX = {
-    "centos-7": ["train"],
     "centos-8": ["wallaby", "victoria", "ussuri", "train"],
     "centos-9": ["master", "wallaby"],
     "rhel-8": ["osp17", "osp16-2"],
@@ -197,12 +195,11 @@ def get_last_modified_date(base_url, component=None):
     """Get the date of the consistent link in dlrn.
     """
 
-    dlrn_tag = "consistent" if "centos7" in base_url else "promoted-components"
     repo = "delorean.repo"
 
     if component is None:
         # integration build, use last promoted_components date
-        url = f'{base_url}{dlrn_tag}/{repo}'
+        url = f'{base_url}promoted-components/{repo}'
     else:
         # TO-DO normalize component and intergration config
         url = f'{base_url}component/{component}/consistent/{repo}'
@@ -573,29 +570,6 @@ def print_tables(
         render_testproject_yaml(tp_jobs, test_hash, testproject_url)
 
 
-def centos7_integration(
-        api_url, base_url, aggregate_hash, promo_commit_hash,
-        promo_distro_hash, _promo_aggregate_hash):
-
-    commit_url = f"{base_url}{aggregate_hash}/commit.yaml"
-    commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
-        commit_url)
-
-    api_response = find_results_from_dlrn_repo_status(
-        api_url, commit_hash, distro_hash, extended_hash)
-
-    test_data = urlencode(
-        {'commit_hash': commit_hash, 'distro_hash': distro_hash}
-    )
-    under_test_url = f"{api_url}/api/civotes_detail.html?{test_data}"
-
-    promoted_data = urlencode(
-        {'commit_hash': promo_commit_hash, 'distro_hash': promo_distro_hash}
-    )
-    promoted_url = f"{api_url}/api/civotes_detail.html?{promoted_data}"
-    return api_response, commit_hash, under_test_url, promoted_url
-
-
 def integration(
         api_url, base_url, aggregate_hash, _promo_commit_hash,
         _promo_distro_hash, promo_aggregate_hash):
@@ -620,9 +594,7 @@ def track_integration_promotion(
 
     promotion = get_dlrn_promotions(api_url, promotion_name)
 
-    integration_func = (
-        centos7_integration if distro == "centos-7" else integration)
-    api_response, test_hash, under_test_url, promoted_url = integration_func(
+    api_response, test_hash, under_test_url, promoted_url = integration(
         api_url, base_url, aggregate_hash, promotion.commit_hash,
         promotion.distro_hash, promotion.aggregate_hash)
 
@@ -818,9 +790,6 @@ def main(release,
         raise BadParameter(msg)
 
     if component:
-        if distro == "centos-7":
-            raise Exception("centos-7 components do not exist")
-
         track_component_promotion(
             config, distro, release, influx, stream, compare_upstream,
             component)
