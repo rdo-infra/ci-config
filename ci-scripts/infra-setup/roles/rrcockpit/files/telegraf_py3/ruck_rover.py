@@ -320,8 +320,8 @@ def conclude_results_from_dlrn(api_response):
     passed_jobs = set()
     all_jobs_result_available = set()
     for job in api_response:
-        if not job.job_id.startswith("periodic"):
-            # NOTE: Use only periodic jobs
+        if not job.job_id.startswith(("periodic", "pipeline_")):
+            # NOTE: Use only periodic jobs and pipeline_ (downstream jenkins)
             continue
 
         all_jobs_result_available.add(job.job_id)
