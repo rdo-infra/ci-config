@@ -78,3 +78,15 @@
       tox_environment:
         PYTEST_REQPASS: 188
       zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
+
+- job:
+    name: shellcheck
+    parent: base
+    ansible-version: 2.8
+    pre-run: playbooks/pre-run-docker.yml
+    run: playbooks/shellcheck_run.yml
+    post-run: playbooks/post-run.yml
+    nodeset: rdo-centos-9-stream
+    timeout: 3400
+    vars:
+      zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"

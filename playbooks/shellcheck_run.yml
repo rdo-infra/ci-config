@@ -1,0 +1,55 @@
+---
+- hosts: all
+  tasks:
+    - name: "Import epel release key"
+      rpm_key:
+        key: "http://mirror.alwyzon.net/epel/RPM-GPG-KEY-EPEL-9"
+        state: present
+
+    - name: "Install shellcheck"
+      become: true
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - epel-release
+        - snapd
+
+    - name: "Start snapd Service"
+      service:
+        name: snapd
+        state: started
+
+    - name: "Linking snap dir"
+      file:
+        src: "/var/lib/snapd/snap"
+        dest: "/snap"
+        state: link
+
+    - name: "Install shellcheck using snapd"
+      shell: |
+        set -o pipefail
+        sudo snap install shellcheck
+      register: shellcheck_install
+      changed_when: false
+      args:
+        executable: /bin/bash
+
+    - name: "Check shellcheck is installed"
+      debug:
+        msg: "ShellCheck failed to install"
+      failed_when: shellcheck_install.rc > 0
+
+    - name: "Run shellcheck"
+      shell: |
+        set -o pipefail
+        find . -name "*.sh" -print0 | xargs -n 1 -0 shellcheck
+      register: shellcheck_output
+      changed_when: false
+      args:
+        executable: /bin/bash
+
+    - name: "Check shellcheck is passed"
+      debug:
+        msg: "Shellcheck run failed"
+      failed_when: shellcheck_output.rc > 0
