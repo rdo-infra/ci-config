@@ -1,0 +1,31 @@
+---
+- hosts: vm
+  tasks:
+    - name: "Install tar"
+      become: true
+      package:
+        name: tar
+        state: present
+
+    - name: "Get shellcheck tar"
+      get_url:
+        url: https://github.com/koalaman/shellcheck/releases/download/v0.8.0/shellcheck-v0.8.0.linux.x86_64.tar.xz
+        dest: "{{ ansible_env.HOME }}/shellcheck-v0.8.0.linux.x86_64.tar.xz"
+        checksum: sha256:ab6ee1b178f014d1b86d1e24da20d1139656c8b0ed34d2867fbb834dad02bf0a
+
+    - name: "Install shellcheck" # noqa command-instead-of-module
+      become: true
+      shell: |
+        tar -C /usr/local/bin/ -xf {{ ansible_env.HOME }}/shellcheck-v0.8.0.linux.x86_64.tar.xz --no-anchored 'shellcheck'
+      changed_when: false
+      register: shellcheck_install
+
+    - name: "Run shellchek help"
+      shell: |
+        shellcheck --help
+      register: shellcheck_help
+      changed_when: false
+
+    - name: "Print output"
+      debug:
+        var: shellcheck_help.stdout
