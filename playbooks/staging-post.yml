@@ -20,3 +20,19 @@
           - --include=*.yaml
           - --include=*.log
           - --exclude=*
+
+    - name: Copy shellcheck files on node
+      when:
+        - shellcheck is defined
+        - shellcheck
+      failed_when: false
+      synchronize:
+        src: '/var/tmp/shellcheck_logs'
+        dest: '{{ zuul.executor.log_root }}/logs'
+        mode: pull
+        copy_links: true
+        verify_host: true
+        rsync_opts:
+          - --include=shellcheck_logs**
+          - --include=*.log
+          - --exclude=*
