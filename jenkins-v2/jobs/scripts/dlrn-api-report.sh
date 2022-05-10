@@ -1,4 +1,7 @@
 #!/usr/bin/bash
+# shellcheck disable=SC2154
+# SC2154: delorean_current_hash is referenced but not assigned.
+
 
 python3 -m venv "$WORKSPACE/venv_dlrnapi"
 source "$WORKSPACE/venv_dlrnapi/bin/activate"

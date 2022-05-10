@@ -1,0 +1,22 @@
+---
+- hosts: all
+  tasks:
+    - name: "Create log directory"
+      file:
+        path: /var/tmp/shellcheck_logs
+        state: directory
+
+    - name: "Run shellcheck"
+      shell:
+        cmd: |
+            set -o pipefail
+            find . -name "*.sh" -exec shellcheck '{}' \; > /var/tmp/shellcheck_logs/shellcheck.log 2>&1
+        creates: /var/tmp/shellcheck_logs/shellcheck.log
+      register: shellcheck_output
+      args:
+        executable: /bin/bash
+
+    - name: "Check shellcheck is passed"
+      debug:
+        msg: "Shellcheck run passed"
+      failed_when: shellcheck_output.rc != 0
