@@ -19,6 +19,20 @@
         - mol-container_push_manifests
         - mol-tripleo_common_integration
         - mol-artifact_promoter-centos-8
+        - tripleo-ci-shellcheck: &shellcheck_files
+             files:
+              - .*\.sh
+              - ^ci-scripts/.*\.sh
+              - ^ci-scripts/container-push/.*\.sh
+              - ^ci-scripts/copy-containers/.*\.sh
+              - ^ci-scripts/dlrnapi_promoter/.*\.sh
+              - ^ci-scripts/infra-cleanup/.*\.sh
+              - ^ci-scripts/infra-setup/roles/rrcockpit/files/.*\.sh
+              - ^ci-scripts/infra-setup/roles/rrcockpit/files/grafana/.*\.sh
+              - ^ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/.*\.sh
+              - ^ci-scripts/infra-setup/tests/.*\.sh
+              - ^ci-scripts/tripleo-upstream/.*\.sh
+              - ^jenkins-v2/jobs/scripts/.*\.sh
         - tox-jjb-v2: &jjb-v2
             files:
               - ^jenkins-v2/.*
@@ -58,6 +72,8 @@
         - mol-container_push_multiarch
         - mol-container_push_manifests
         - mol-tripleo_common_integration
+        - tripleo-ci-shellcheck:
+            <<: *shellcheck_files
         - tox-py36-ci-config:
             <<: *py36
     periodic:
