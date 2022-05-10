@@ -1,0 +1,22 @@
+---
+- hosts: all
+  tasks:
+    - name: "Install shellcheck"
+      become: true
+      package:
+        name: ShellCheck
+        state: present
+
+    - name: "Run shellcheck"
+      shell: |
+        set -o pipefail
+        find . -name "*.sh" -print0 | xargs -n 1 -0 shellcheck
+      register: shellcheck_output
+      changed_when: false
+      args:
+        executable: /bin/bash
+
+    - name: "Check shellcheck is passed"
+      debug:
+        msg: "Shellcheck run failed"
+      failed_when: shellcheck_output.rc > 0
