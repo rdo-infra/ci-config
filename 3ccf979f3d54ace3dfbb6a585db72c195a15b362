@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f0304120_1f04919c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-05-10T08:46:47Z",
+      "side": 1,
+      "message": "Turns out not all the jobs have \"periodic\" in naming convention, In downstream 16.2 the script is giving the wrong output after the merge of patch[1], it showing `pipeline_component-baremetal-pcci-16.2_dlrn-rhel-8.4-virthost-3cont_2comp_3ceph-ipv4-geneve-ceph_rcj` as pending even though the job already reported success.\n\n$ rr --release osp16-2 --distro rhel-8 --component baremetal\nbaremetal component status\u003dYellow last_promotion\u003d2022-04-14 06:07:17\n\n\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ Jobs which passed:                                                               ┃\n┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩\n│ periodic-tripleo-ci-rhel-8-standalone-baremetal-rhos-16.2                        │\n│ periodic-tripleo-ci-rhel-8-ovb-3ctlr_1comp-metalsmith-provisioned-featureset001… │\n│ periodic-tripleo-ci-rhel-8-scenario012-standalone-baremetal-rhos-16.2            │\n│ periodic-tripleo-ci-rhel-8-ovb-3ctlr_1comp-featureset001-internal-baremetal-rho… │\n└──────────────────────────────────────────────────────────────────────────────────┘\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ Pending running jobs                                                             ┃\n┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩\n│ pipeline_component-baremetal-pcci-16.2_dlrn-rhel-8.4-virthost-3cont_2comp_3ceph… │\n└──────────────────────────────────────────────────────────────────────────────────┘\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┓\n┃ Jobs in promotion criteria required to promo the hash:                           ┃ Integration     ┃ Integration     ┃ Integration     ┃\n┃                                                                                  ┃ PASSED History  ┃ FAILURE History ┃ Other History   ┃\n┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━┩\n│ pipeline_component-baremetal-pcci-16.2_dlrn-rhel-8.4-virthost-3cont_2comp_3ceph… │ 0               │ 0               │ 0               │\n└──────────────────────────────────────────────────────────────────────────────────┴─────────────────┴─────────────────┴─────────────────┘\n\nIf I revert to previous version of rr script \"git checkout 989be3b718e88e9a592a84dbc2ea3960ead9e8a\" it fixes the issue.\n\n\n$ rr --release osp16-2 --distro rhel-8 --component baremetal\nbaremetal component status\u003dGreen last_promotion\u003d2022-04-14 06:07:17\n\n\n┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n┃ Jobs which passed:                                                               ┃\n┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩\n│ periodic-tripleo-ci-rhel-8-scenario012-standalone-baremetal-rhos-16.2            │\n│ periodic-tripleo-ci-rhel-8-ovb-3ctlr_1comp-metalsmith-provisioned-featureset001… │\n│ periodic-tripleo-ci-rhel-8-standalone-baremetal-rhos-16.2                        │\n│ periodic-tripleo-ci-rhel-8-ovb-3ctlr_1comp-featureset001-internal-baremetal-rho… │\n│ pipeline_component-baremetal-pcci-16.2_dlrn-rhel-8.4-virthost-3cont_2comp_3ceph… │\n└──────────────────────────────────────────────────────────────────────────────────┘\n\n[1] https://review.rdoproject.org/r/c/rdo-infra/ci-config/+/42375\n\n\nWith this patch, including jenkins job(pipeline_) as well for valid prefix.\n",
+      "revId": "3ccf979f3d54ace3dfbb6a585db72c195a15b362",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    }
+  ]
+}
