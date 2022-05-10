@@ -1,0 +1,26 @@
+---
+- hosts: all
+  tasks:
+    - name: "Get shellcheck tar"
+      get_url:
+        url: https://github.com/koalaman/shellcheck/releases/download/v0.8.0/shellcheck-v0.8.0.linux.x86_64.tar.xz
+        dest: /tmp/shellcheck-v0.8.0.linux.x86_64.tar.xz
+        checksum: sha256:ab6ee1b178f014d1b86d1e24da20d1139656c8b0ed34d2867fbb834dad02bf0a
+
+    - name: "Install shellcheck"
+      become: true
+      unarchive:
+        src: /tmp/shellcheck-v0.8.0.linux.x86_64.tar.xz
+        dest: /usr/local/bin/
+        extra_opts:
+          - --no-anchored 'shellcheck'
+
+    - name: "Run shellchek help"
+      shell: |
+        shellcheck --help
+      register: shellcheck_help
+      changed_when: false
+
+    - name: "Print output"
+      debug:
+        var: shellcheck_help.stdout
