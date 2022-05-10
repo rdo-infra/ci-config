@@ -52,3 +52,16 @@
       tox_environment:
         PYTEST_REQPASS: 188
       zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
+
+- job:
+    name: tripleo-ci-shellcheck
+    parent: base
+    ansible-version: 2.9
+    pre-run: playbooks/shellcheck_install.yml
+    run: playbooks/shellcheck_run.yml
+    post-run: playbooks/staging-post.yml
+    nodeset: rdo-centos-9-stream
+    timeout: 1200
+    vars:
+      shellcheck: true
+      zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
