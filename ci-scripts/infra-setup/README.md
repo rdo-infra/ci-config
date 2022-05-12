@@ -1,10 +1,54 @@
+Infra Playbooks
+===============
+
+Playbooks in this directory are used to setup infrastracture around
+tripleo-ci. These playbooks have different tasks for setup and teardown
+infra.
+
+To setup infrastructure you can use `full-run.yml` playbooks, it will
+teardown if there are any other instances running in openstack. And provision
+new instances.
+
+WARNING: `full-run.yml` will destory all vms in the openstack instance.
+
+
+Infra playbooks uses different roles which are defined in the `roles/` directory. Each
+VM is has one role in `roles/` dir.
+
+Those roles have different tasks to perform.
+  - _ensure_credentials: It will export credentials for promoter server.
+  - _ensure_staging: Setup promoter staging environments for promoter.
+  - base: This role will setup all basic requirements for servers like users, groups etc.
+  - general_teardown: To remove all networks/keypairs/images from openstack.
+  - keypair: Create new openstack keypair.
+  - promoter: To setup promoter server.
+  - promote_artifact: Role to promote ile artifacts for a given candidate and target label.
+  - servers_provision: To provision machine in openstack.
+  - servers_teardown: To delete machine in openstack.
+  - ssh_agent: To setup new key with ssh agent.
+  - setup_docker_compose: Setup docker compose on remote host
+  - tenant_networks: To create networks and subnet in openstack.
+
+User SSH Keys
+=============
+
+To login to deployed servers you need to add your ssh key in `tenant_vars/common.yaml`
+
+Default Infra metadata
+======================
+
+Openstack needs to pass name and values while provisioning network, keypairs security groups
+etc. All those server configuration metadata is stored in `tenant_vars/infra-tripleo`. This is only for setup infra on Vexxhost.
+
+You can add infra credentials in `tenant_vars/infra-tripleo/secrets_example.yml`.
+
 To prepare the environment for deployment:
 
     cd /tmp/
     git clone https://review.rdoproject.org/r/p/rdo-infra/ci-config.git
     virtualenv deploy
     source deploy/bin/activate
-    pip install ansible shade
+    pip install ansible openstacksdk
     cd ci-config/ci-scripts/infra-setup
     export ANSIBLE_ROLES_PATH=$PWD/roles
     source <cloud-credentials>
