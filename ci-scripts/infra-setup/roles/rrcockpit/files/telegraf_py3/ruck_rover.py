@@ -571,8 +571,7 @@ def print_tables(
 
 
 def integration(
-        api_url, base_url, aggregate_hash, _promo_commit_hash,
-        _promo_distro_hash, promo_aggregate_hash):
+        api_url, base_url, aggregate_hash, promo_aggregate_hash):
 
     commit_url = f"{base_url}{aggregate_hash}/delorean.repo.md5"
     ref_hash = web_scrape(commit_url)
@@ -595,8 +594,7 @@ def track_integration_promotion(
     promotion = get_dlrn_promotions(api_url, promotion_name)
 
     api_response, test_hash, under_test_url, promoted_url = integration(
-        api_url, base_url, aggregate_hash, promotion.commit_hash,
-        promotion.distro_hash, promotion.aggregate_hash)
+        api_url, base_url, aggregate_hash, promotion.aggregate_hash)
 
     component = None
     last_modified = get_last_modified_date(base_url, component)
