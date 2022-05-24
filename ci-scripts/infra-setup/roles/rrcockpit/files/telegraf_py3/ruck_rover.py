@@ -341,8 +341,7 @@ def get_dlrn_results(api_response):
     return jobs
 
 
-def conclude_results_from_dlrn(api_response):
-    jobs = get_dlrn_results(api_response)
+def conclude_results_from_dlrn(jobs):
     succeeded = set(k for k, v in jobs.items() if v['success'])
     failed = set(k for k, v in jobs.items() if not v['success'])
 
@@ -624,8 +623,9 @@ def track_integration_promotion(
         'last_modified': last_modified,
     }
 
+    jobs = get_dlrn_results(api_response)
     (all_jobs_result_available,
-     passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
+     passed_jobs, failed_jobs) = conclude_results_from_dlrn(jobs)
     jobs_in_criteria = find_jobs_in_integration_criteria(
         url, promotion_name=promotion_name)
     jobs_which_need_pass_to_promote = jobs_in_criteria.difference(passed_jobs)
@@ -725,8 +725,9 @@ def track_component_promotion(
             'last_modified': last_modified,
         }
 
+        jobs = get_dlrn_results(api_response)
         (all_jobs_result_available,
-         passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
+         passed_jobs, failed_jobs) = conclude_results_from_dlrn(jobs)
         jobs_in_criteria = find_jobs_in_component_criteria(url, component)
         jobs_which_need_pass_to_promote = jobs_in_criteria.difference(
                                             passed_jobs)
