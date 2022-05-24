@@ -9,6 +9,8 @@ import ruck_rover
 
 class TestRuckRover(unittest.TestCase):
     # pylint: disable=too-many-public-methods
+    def setUp(self):
+        self.maxDiff = None
 
     def test_date_diff_in_seconds(self):
         date1 = datetime(2020, 5, 17)
@@ -235,6 +237,123 @@ class TestRuckRover(unittest.TestCase):
         output = ruck_rover.get_csv("")
         self.assertEqual(output, ['', m_reader()])
 
+    def test_get_dlrn_results(self):
+        periodic_passed = mock.MagicMock(
+            job_id="periodic_passed",
+            success=True,
+            timestamp=1,
+            url="https://periodic_passed_url"
+        )
+        periodic_failed = mock.MagicMock(
+            job_id="periodic_failed",
+            success=False,
+            timestamp=2,
+            url="https://periodic_failed_url"
+        )
+        pipeline_passed = mock.MagicMock(
+            job_id="pipeline_passed",
+            success=True,
+            timestamp=3,
+            url="https://pipeline_passed_url"
+        )
+        pipeline_failed = mock.MagicMock(
+            job_id="pipeline_failed",
+            success=False,
+            timestamp=4,
+            url="https://pipeline_failed_url"
+        )
+        ignored_passed = mock.MagicMock(
+            job_id="ignored_passed",
+            success=True,
+            timestamp=5,
+            url="https://ignored_passed_url"
+        )
+        ignored_failed = mock.MagicMock(
+            job_id="ignored_failed",
+            success=False,
+            timestamp=6,
+            url="https://ignored_failed_url"
+        )
+        periodic_failed_newer = mock.MagicMock(
+            job_id="periodic_failed",
+            success=False,
+            timestamp=7,
+            url="https://periodic_failed_newer_url"
+        )
+        pipeline_passed_newer = mock.MagicMock(
+            job_id="pipeline_passed",
+            success=True,
+            timestamp=8,
+            url="https://pipeline_passed_newer_url"
+        )
+        api_response = [
+            periodic_passed,
+            periodic_failed,
+            pipeline_passed,
+            pipeline_failed,
+            ignored_passed,
+            ignored_failed,
+            periodic_failed_newer,
+            pipeline_passed_newer,
+        ]
+        results = ruck_rover.get_dlrn_results(api_response)
+        expected = {
+            'periodic_passed': periodic_passed,
+            'periodic_failed': periodic_failed_newer,
+            'pipeline_passed': pipeline_passed_newer,
+            'pipeline_failed': pipeline_failed,
+        }
+        self.assertEqual(expected, results)
+
+    def test_conclude_results_from_dlrn(self):
+        periodic_passed = mock.MagicMock(
+            job_id="periodic_passed",
+            success=True,
+            timestamp=1,
+            url="https://periodic_passed_url"
+        )
+        pipeline_failed = mock.MagicMock(
+            job_id="pipeline_failed",
+            success=False,
+            timestamp=4,
+            url="https://pipeline_failed_url"
+        )
+        periodic_failed_newer = mock.MagicMock(
+            job_id="periodic_failed",
+            success=False,
+            timestamp=7,
+            url="https://periodic_failed_newer_url"
+        )
+        pipeline_passed_newer = mock.MagicMock(
+            job_id="pipeline_passed",
+            success=True,
+            timestamp=8,
+            url="https://pipeline_passed_newer_url"
+        )
+        dlrn_results = {
+            'periodic_passed': periodic_passed,
+            'periodic_failed': periodic_failed_newer,
+            'pipeline_passed': pipeline_passed_newer,
+            'pipeline_failed': pipeline_failed,
+        }
+        jobs = ruck_rover.conclude_results_from_dlrn(dlrn_results)
+
+        all_jobs, passed, failed = jobs
+        self.assertEqual(all_jobs, set([
+            "periodic_passed",
+            "periodic_failed",
+            "pipeline_passed",
+            "pipeline_failed",
+        ]))
+        self.assertEqual(passed, set([
+            "periodic_passed",
+            "pipeline_passed",
+        ]))
+        self.assertEqual(failed, set([
+            "periodic_failed",
+            "pipeline_failed",
+        ]))
+
 
 class TestRuckRoverComponent(unittest.TestCase):
     def setUp(self):
@@ -286,6 +405,7 @@ class TestRuckRoverComponent(unittest.TestCase):
 
     @mock.patch('ruck_rover.find_jobs_in_component_criteria')
     @mock.patch('ruck_rover.conclude_results_from_dlrn')
+    @mock.patch('ruck_rover.get_dlrn_results')
     @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
     @mock.patch('ruck_rover.get_last_modified_date')
     @mock.patch('ruck_rover.get_dlrn_promotions')
@@ -294,7 +414,7 @@ class TestRuckRoverComponent(unittest.TestCase):
     @mock.patch('ruck_rover.gather_basic_info_from_criteria')
     def test_given_component(
             self, m_gather, m_comp_diff, m_fetch, m_promo,
-            m_consistent, m_results, m_conclude, _m_jobs):
+            m_consistent, m_results, _m_dlrn_results, m_conclude, _m_jobs):
 
         component = "cinder"
         commit_hash = "c6"
@@ -432,6 +552,7 @@ class TestRuckRoverWithCommonSetup(unittest.TestCase):
 @mock.patch('ruck_rover.web_scrape')
 @mock.patch('ruck_rover.find_jobs_in_component_criteria')
 @mock.patch('ruck_rover.conclude_results_from_dlrn')
+@mock.patch('ruck_rover.get_dlrn_results')
 @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
 @mock.patch('ruck_rover.fetch_hashes_from_commit_yaml')
 @mock.patch('ruck_rover.get_last_modified_date')
@@ -465,7 +586,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
     def test_component(
             self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
-            m_find_results, m_conclude, m_find_jobs_comp, m_web_scrape,
+            m_find_results, _m_dlrn, m_conclude, m_find_jobs_comp, m_web_scrape,
             m_find_result_aggr, _m_find_jobs_int, m_latest_job, m_print):
         component = "all"
 
@@ -527,8 +648,9 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
     def test_integration(
             self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
-            m_find_results, m_conclude, _m_find_jobs_comp, m_web_scrape,
-            _m_find_result_aggr, m_find_jobs_int, m_latest_job, m_print):
+            m_find_results, _m_dlrn, m_conclude, _m_find_jobs_comp,
+            m_web_scrape, _m_find_result_aggr, m_find_jobs_int, m_latest_job,
+            m_print):
         promotion_name = "promote_name"
         aggregate_hash = "aggregate_hash"
 
