@@ -7,6 +7,68 @@ from unittest.mock import call, patch
 import ruck_rover
 
 
+def helper_api_response():
+    periodic_passed = mock.MagicMock(
+        job_id="periodic_passed",
+        success=True,
+        timestamp=1,
+        url="https://periodic_passed_url"
+    )
+    periodic_failed = mock.MagicMock(
+        job_id="periodic_failed",
+        success=False,
+        timestamp=2,
+        url="https://periodic_failed_url"
+    )
+    pipeline_passed = mock.MagicMock(
+        job_id="pipeline_passed",
+        success=True,
+        timestamp=3,
+        url="https://pipeline_passed_url"
+    )
+    pipeline_failed = mock.MagicMock(
+        job_id="pipeline_failed",
+        success=False,
+        timestamp=4,
+        url="https://pipeline_failed_url"
+    )
+    ignored_passed = mock.MagicMock(
+        job_id="ignored_passed",
+        success=True,
+        timestamp=5,
+        url="https://ignored_passed_url"
+    )
+    ignored_failed = mock.MagicMock(
+        job_id="ignored_failed",
+        success=False,
+        timestamp=6,
+        url="https://ignored_failed_url"
+    )
+    periodic_failed_newer = mock.MagicMock(
+        job_id="periodic_failed",
+        success=False,
+        timestamp=7,
+        url="https://periodic_failed_newer_url"
+    )
+    pipeline_passed_newer = mock.MagicMock(
+        job_id="pipeline_passed",
+        success=True,
+        timestamp=8,
+        url="https://pipeline_passed_newer_url"
+    )
+    api_response = [
+        periodic_passed,
+        periodic_failed,
+        pipeline_passed,
+        pipeline_failed,
+        ignored_passed,
+        ignored_failed,
+        periodic_failed_newer,
+        pipeline_passed_newer,
+    ]
+    return api_response
+
+
 class TestRuckRover(unittest.TestCase):
     # pylint: disable=too-many-public-methods
 
@@ -234,6 +296,54 @@ class TestRuckRover(unittest.TestCase):
         m_get.return_value = m_response
         output = ruck_rover.get_csv("")
         self.assertEqual(output, ['', m_reader()])
+
+    def test_get_dlrn_results(self):
+        api_response = helper_api_response()
+        results = ruck_rover.get_dlrn_results(api_response)
+        expected = {
+            'periodic_passed': {
+                'success': True,
+                'timestamp': 1,
+                'url': 'https://periodic_passed_url'
+            },
+            'periodic_failed': {
+                'success': False,
+                'timestamp': 7,
+                'url': 'https://periodic_failed_newer_url'
+            },
+            'pipeline_passed': {
+                'success': True,
+                'timestamp': 8,
+                'url': 'https://pipeline_passed_newer_url'
+            },
+            'pipeline_failed': {
+                'success': False,
+                'timestamp': 4,
+                'url': 'https://pipeline_failed_url'
+            },
+        }
+        self.assertEqual(expected, results)
+
+    def test_conclude_results_from_dlrn(self):
+        api_response = helper_api_response()
+        jobs = ruck_rover.conclude_results_from_dlrn(
+            api_response)
+
+        all_jobs, passed, failed = jobs
+        self.assertEqual(all_jobs, set([
+            "periodic_passed",
+            "periodic_failed",
+            "pipeline_passed",
+            "pipeline_failed",
+        ]))
+        self.assertEqual(passed, set([
+            "periodic_passed",
+            "pipeline_passed",
+        ]))
+        self.assertEqual(failed, set([
+            "periodic_failed",
+            "pipeline_failed",
+        ]))
 
 
 class TestRuckRoverComponent(unittest.TestCase):

@@ -312,21 +312,41 @@ def find_results_from_dlrn_repo_status(api_url, commit_hash,
     return api_response
 
 
-def conclude_results_from_dlrn(api_response):
-    passed_jobs = set()
-    all_jobs_result_available = set()
+def get_dlrn_results(api_response):
+    """DLRN tests results.
+
+    DLRN stores tests results in its internal DB.
+    We use it to inform applications about current state of promotions.
+    The only important information to us is latest test result from
+    select api_response.
+
+        :param api_response (object): Response from API.
+        :return jobs (dict): It contains all last jobs from response with
+            their appropriate status, timestamp and URL to test result.
+    """
+    jobs = {}
     for job in api_response:
         if not job.job_id.startswith(("periodic", "pipeline_")):
             # NOTE: Use only periodic jobs and pipeline_ (downstream jenkins)
             continue
 
-        all_jobs_result_available.add(job.job_id)
-        if job.success:
-            passed_jobs.add(job.job_id)
+        job_values = {
+            'success': job.success,
+            'timestamp': job.timestamp,
+            'url': job.url,
+        }
+        if (job.job_id not in jobs
+                or job.timestamp > jobs[job.job_id]['timestamp']):
+            jobs[job.job_id] = job_values
+    return jobs
 
-    failed_jobs = all_jobs_result_available.difference(passed_jobs)
 
-    return all_jobs_result_available, passed_jobs, failed_jobs
+def conclude_results_from_dlrn(api_response):
+    jobs = get_dlrn_results(api_response)
+    succeeded = set(k for k, v in jobs.items() if v['success'])
+    failed = set(k for k, v in jobs.items() if not v['success'])
+
+    return set(jobs.keys()), succeeded, failed
 
 
 def get_job_history(job_name, zuul, component=None):
