@@ -168,10 +168,10 @@ def fetch_hashes_from_commit_yaml(url):
     :param url for commit.yaml
     :returns values for commit_hash, distro_hash, extended_hash
     """
-    commit_yaml_content = url_response_in_yaml(url)
-    commit_hash = commit_yaml_content['commits'][0]['commit_hash']
-    distro_hash = commit_yaml_content['commits'][0]['distro_hash']
-    extended_hash = commit_yaml_content['commits'][0]['extended_hash']
+    criteria_content = url_response_in_yaml(url)
+    commit_hash = criteria_content['commits'][0]['commit_hash']
+    distro_hash = criteria_content['commits'][0]['distro_hash']
+    extended_hash = criteria_content['commits'][0]['extended_hash']
     if extended_hash == "None":
         extended_hash = None
 
