@@ -128,10 +128,9 @@ def web_scrape(url):
     try:
         response = requests.get(url, verify=CERT_PATH)
         response.raise_for_status()
-    except requests.exceptions.HTTPError as err:
+    except (requests.exceptions.HTTPError,
+            requests.exceptions.RequestException) as err:
         raise SystemExit(err)
-    except requests.exceptions.RequestException as error:
-        raise SystemExit(error)
 
     return response.text
 
