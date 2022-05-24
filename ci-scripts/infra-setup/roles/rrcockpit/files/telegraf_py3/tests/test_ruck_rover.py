@@ -147,7 +147,7 @@ class TestRuckRover(unittest.TestCase):
             m_get.return_value = yaml_data
             obtained = ruck_rover.fetch_hashes_from_commit_yaml(
                             'www.demoourl.com')
-            expected = ('c6', '03', 'None')
+            expected = ('c6', '03', None)
             self.assertEqual(expected, obtained)
 
     def test_load_conf_file(self):

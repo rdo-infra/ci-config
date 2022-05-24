@@ -167,12 +167,14 @@ def fetch_hashes_from_commit_yaml(url):
     """
     This function finds commit hash, distro hash, extended_hash from commit.yaml
     :param url for commit.yaml
-    :returns strings for commit_hash, distro_hash, extended_hash
+    :returns values for commit_hash, distro_hash, extended_hash
     """
     commit_yaml_content = url_response_in_yaml(url)
     commit_hash = commit_yaml_content['commits'][0]['commit_hash']
     distro_hash = commit_yaml_content['commits'][0]['distro_hash']
     extended_hash = commit_yaml_content['commits'][0]['extended_hash']
+    if extended_hash == "None":
+        extended_hash = None
 
     return commit_hash, distro_hash, extended_hash
 
@@ -298,8 +300,6 @@ def find_results_from_dlrn_repo_status(api_url, commit_hash,
         :return api_response: from dlrnapi server containing result of
          passing/failing jobs
     """
-    if extended_hash == "None":
-        extended_hash = None
     api_client = dlrnapi_client.ApiClient(host=api_url)
     api_instance = dlrnapi_client.DefaultApi(api_client)
     params = dlrnapi_client.Params2(commit_hash=commit_hash,
