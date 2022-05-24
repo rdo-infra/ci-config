@@ -312,21 +312,44 @@ def find_results_from_dlrn_repo_status(api_url, commit_hash,
     return api_response
 
 
-def conclude_results_from_dlrn(api_response):
-    passed_jobs = set()
-    all_jobs_result_available = set()
+def get_dlrn_results(api_response):
+    """DLRN tests results.
+
+    DLRN stores tests results in its internal DB.
+    We use it to inform applications about current state of promotions.
+    The only important information to us is latest successful test result
+    from select api_response.
+
+        :param api_response (object): Response from API.
+        :return jobs (dict): It contains all last jobs from response with
+            their appropriate status, timestamp and URL to test result.
+    """
+    jobs = {}
     for job in api_response:
         if not job.job_id.startswith(("periodic", "pipeline_")):
             # NOTE: Use only periodic jobs and pipeline_ (downstream jenkins)
             continue
 
-        all_jobs_result_available.add(job.job_id)
-        if job.success:
-            passed_jobs.add(job.job_id)
+        existing_job = jobs.get(job.job_id)
+        if not existing_job:
+            jobs[job.job_id] = job
+            continue
 
-    failed_jobs = all_jobs_result_available.difference(passed_jobs)
+        if job.timestamp > existing_job.timestamp:
+            if existing_job.success and not job.success:
+                continue
 
-    return all_jobs_result_available, passed_jobs, failed_jobs
+            # NOTE(dasm): Overwrite *only* when recent job succeeded.
+            jobs[job.job_id] = job
+
+    return jobs
+
+
+def conclude_results_from_dlrn(jobs):
+    succeeded = set(k for k, v in jobs.items() if v.success)
+    failed = set(k for k, v in jobs.items() if not v.success)
+
+    return set(jobs.keys()), succeeded, failed
 
 
 def get_job_history(job_name, zuul, component=None):
@@ -604,8 +627,9 @@ def track_integration_promotion(
         'last_modified': last_modified,
     }
 
+    dlrn_jobs = get_dlrn_results(api_response)
     (all_jobs_result_available,
-     passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
+     passed_jobs, failed_jobs) = conclude_results_from_dlrn(dlrn_jobs)
     jobs_in_criteria = find_jobs_in_integration_criteria(
         url, promotion_name=promotion_name)
     jobs_which_need_pass_to_promote = jobs_in_criteria.difference(passed_jobs)
@@ -705,8 +729,9 @@ def track_component_promotion(
             'last_modified': last_modified,
         }
 
+        dlrn_jobs = get_dlrn_results(api_response)
         (all_jobs_result_available,
-         passed_jobs, failed_jobs) = conclude_results_from_dlrn(api_response)
+         passed_jobs, failed_jobs) = conclude_results_from_dlrn(dlrn_jobs)
         jobs_in_criteria = find_jobs_in_component_criteria(url, component)
         jobs_which_need_pass_to_promote = jobs_in_criteria.difference(
                                             passed_jobs)
