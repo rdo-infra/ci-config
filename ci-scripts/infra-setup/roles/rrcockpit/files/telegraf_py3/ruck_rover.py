@@ -549,8 +549,8 @@ def print_tables(
         api_response, pkg_diff, test_hash, periodic_builds_url,
         upstream_builds_url, testproject_url):
     """
-    jobs_which_need_pass_to_promote are any job that hasn't registered
-    success w/ dlrn. jobs_with_no_result are any jobs in pending.
+    jobs_to_promote are any job that hasn't registered
+    success w/ dlrn. jobs_pending are any jobs in pending.
     We only want test project config for jobs that have completed.
     execute if there are failing jobs in criteria and if
     you are only looking at one component and not all components
@@ -633,13 +633,15 @@ def track_integration_promotion(
     }
 
     dlrn_jobs = get_dlrn_results(api_response)
-    (all_jobs_result_available,
-     passed_jobs, failed_jobs) = conclude_results_from_dlrn(dlrn_jobs)
+    (jobs_results,
+     jobs_passed, jobs_failed) = conclude_results_from_dlrn(dlrn_jobs)
+
     jobs_in_criteria = find_jobs_in_integration_criteria(
         url, promotion_name=promotion_name)
-    jobs_which_need_pass_to_promote = jobs_in_criteria.difference(passed_jobs)
-    jobs_with_no_result = jobs_in_criteria.difference(all_jobs_result_available)
-    all_jobs = all_jobs_result_available.union(jobs_with_no_result)
+    jobs_to_promote = jobs_in_criteria.difference(jobs_passed)
+    jobs_pending = jobs_in_criteria.difference(jobs_results)
+
+    all_jobs = jobs_results.union(jobs_in_criteria)
 
     job_extra = {
         'distro': distro,
@@ -661,8 +663,8 @@ def track_integration_promotion(
         render_influxdb(jobs, job_extra, promotion, promotion_extra)
     else:
         print_tables(
-            timestamp, under_test_url, passed_jobs, failed_jobs,
-            jobs_with_no_result, jobs_which_need_pass_to_promote,
+            timestamp, under_test_url, jobs_passed, jobs_failed,
+            jobs_pending, jobs_to_promote,
             compare_upstream, component, components,
             api_response, pkg_diff, test_hash, periodic_builds_url,
             upstream_builds_url, testproject_url)
@@ -731,14 +733,13 @@ def track_component_promotion(
         }
 
         dlrn_jobs = get_dlrn_results(api_response)
-        (all_jobs_result_available,
-         passed_jobs, failed_jobs) = conclude_results_from_dlrn(dlrn_jobs)
+        (jobs_results,
+         jobs_passed, jobs_failed) = conclude_results_from_dlrn(dlrn_jobs)
         jobs_in_criteria = find_jobs_in_component_criteria(url, component)
-        jobs_which_need_pass_to_promote = jobs_in_criteria.difference(
-                                            passed_jobs)
-        jobs_with_no_result = jobs_in_criteria.difference(
-            all_jobs_result_available)
-        all_jobs = all_jobs_result_available.union(jobs_with_no_result)
+        jobs_to_promote = jobs_in_criteria.difference(jobs_passed)
+        jobs_pending = jobs_in_criteria.difference(jobs_results)
+
+        all_jobs = jobs_results.union(jobs_in_criteria)
 
         job_extra = {
             'distro': distro,
@@ -757,8 +758,8 @@ def track_component_promotion(
 
         else:
             print_tables(
-                timestamp, hash_under_test, passed_jobs, failed_jobs,
-                jobs_with_no_result, jobs_which_need_pass_to_promote,
+                timestamp, hash_under_test, jobs_passed, jobs_failed,
+                jobs_pending, jobs_to_promote,
                 compare_upstream, component, components,
                 api_response, pkg_diff, test_hash, periodic_builds_url,
                 upstream_builds_url, testproject_url)
