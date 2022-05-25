@@ -356,10 +356,7 @@ def get_dlrn_results(api_response):
 
 
 def conclude_results_from_dlrn(jobs):
-    succeeded = set(k for k, v in jobs.items() if v.success)
-    failed = set(k for k, v in jobs.items() if not v.success)
-
-    return set(jobs.keys()), succeeded, failed
+    return set(jobs.keys())
 
 
 def get_job_history(job_name, zuul, component=None):
@@ -660,8 +657,7 @@ def track_integration_promotion(
     }
 
     dlrn_jobs = get_dlrn_results(api_response)
-    (jobs_results,
-     jobs_passed, jobs_failed) = conclude_results_from_dlrn(dlrn_jobs)
+    jobs_results = set(dlrn_jobs.keys())
 
     jobs_in_criteria = find_jobs_in_integration_criteria(
         url, promotion_name=promotion_name)
@@ -761,8 +757,8 @@ def track_component_promotion(
         }
 
         dlrn_jobs = get_dlrn_results(api_response)
-        (jobs_results,
-         jobs_passed, jobs_failed) = conclude_results_from_dlrn(dlrn_jobs)
+        jobs_results = set(dlrn_jobs.keys())
+
         jobs_in_criteria = find_jobs_in_component_criteria(url, component)
         jobs_pending = jobs_in_criteria.difference(jobs_results)
 
