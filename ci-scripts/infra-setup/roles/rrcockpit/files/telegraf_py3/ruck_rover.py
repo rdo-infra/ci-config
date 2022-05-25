@@ -76,6 +76,7 @@ def convert_string_date_object(date_string):
 
 
 def download_file(url):
+    logging.debug("Downloading URL: %s", url)
     response = requests.get(url, stream=True, verify=CERT_PATH)
     response.raise_for_status()
     file_descriptor, path = mkstemp(prefix="job-output-")
@@ -499,8 +500,10 @@ def prepare_jobs_influxdb(all_jobs, jobs_in_criteria, jobs):
     Epoch is rendered only with *1000
     """
 
+    logging.info("Preparing InfluxDB jobs")
     job_result_list = []
-    for job_name in sorted(all_jobs):
+    for idx, job_name in enumerate(sorted(all_jobs)):
+        logging.info("Fetching job: %d: %s", idx, job_name)
         job = jobs.get(job_name)
         if job and job.success is True:
             status = INFLUX_PASSED
@@ -547,10 +550,10 @@ def render_influxdb(jobs, job_extra, promotion, promotion_extra):
 
 
 def print_tables(
-        timestamp, hut, passed, failed, no_result, to_promote,
+        timestamp, hut, no_result,
         compare_upstream, component, components,
-        api_response, pkg_diff, test_hash, periodic_builds_url,
-        upstream_builds_url, testproject_url):
+        pkg_diff, test_hash, periodic_builds_url,
+        upstream_builds_url, testproject_url, jobs=None):
     """
     jobs_to_promote are any job that hasn't registered
     success w/ dlrn. jobs_pending are any jobs in pending.
@@ -558,6 +561,28 @@ def print_tables(
     execute if there are failing jobs in criteria and if
     you are only looking at one component and not all components
     """
+    passed = set()
+    jobs_passed = {}
+    failed = set()
+    jobs_failed = {}
+    to_promote = set()
+    jobs_to_promote = {}
+    for job in jobs:
+        if job['criteria'] and job['status'] == INFLUX_PASSED:
+            passed.add(job['job_name'])
+            jobs_passed[job['job_name']] = job
+        elif job['status'] == INFLUX_FAILED:
+            failed.add(job['job_name'])
+            jobs_failed[job['job_name']] = job
+            if job['criteria']:
+                to_promote.add(job['job_name'])
+                jobs_to_promote[job['job_name']] = job
+        elif job['criteria']:
+            to_promote.add(job['job_name'])
+        else:
+            # NOTE(dasm): Job outside of promotion criteria
+            continue
+
     if failed:
         status = "Red"
     elif not to_promote:
@@ -582,11 +607,10 @@ def print_tables(
                              upstream_builds_url,
                              compare_upstream,
                              component)
-    log_urls = latest_job_results_url(api_response, failed)
-    if log_urls:
+    if jobs_failed:
         console.print("Logs of failing jobs:")
-    for value in log_urls.values():
-        console.print(value)
+    for job_name, job_values in jobs_failed.items():
+        console.print(job_values['logs'])
 
     if pkg_diff:
         console.print("\n Packages Tested")
@@ -641,7 +665,6 @@ def track_integration_promotion(
 
     jobs_in_criteria = find_jobs_in_integration_criteria(
         url, promotion_name=promotion_name)
-    jobs_to_promote = jobs_in_criteria.difference(jobs_passed)
     jobs_pending = jobs_in_criteria.difference(jobs_results)
 
     all_jobs = jobs_results.union(jobs_in_criteria)
@@ -661,16 +684,16 @@ def track_integration_promotion(
 
     components, pkg_diff = get_components_diff(
         base_url, component, promotion_name, aggregate_hash)
+    jobs = prepare_jobs_influxdb(all_jobs, jobs_in_criteria, dlrn_jobs)
     if influx:
-        jobs = prepare_jobs_influxdb(all_jobs, jobs_in_criteria, dlrn_jobs)
         render_influxdb(jobs, job_extra, promotion, promotion_extra)
     else:
         print_tables(
-            timestamp, under_test_url, jobs_passed, jobs_failed,
-            jobs_pending, jobs_to_promote,
+            timestamp, under_test_url,
+            jobs_pending,
             compare_upstream, component, components,
-            api_response, pkg_diff, test_hash, periodic_builds_url,
-            upstream_builds_url, testproject_url)
+            pkg_diff, test_hash, periodic_builds_url,
+            upstream_builds_url, testproject_url, jobs)
 
 
 def get_components_diff(
@@ -741,7 +764,6 @@ def track_component_promotion(
         (jobs_results,
          jobs_passed, jobs_failed) = conclude_results_from_dlrn(dlrn_jobs)
         jobs_in_criteria = find_jobs_in_component_criteria(url, component)
-        jobs_to_promote = jobs_in_criteria.difference(jobs_passed)
         jobs_pending = jobs_in_criteria.difference(jobs_results)
 
         all_jobs = jobs_results.union(jobs_in_criteria)
@@ -757,17 +779,17 @@ def track_component_promotion(
         test_hash = commit_hash
         hash_under_test = "{}/{}{}&distro_hash={}".format(
             api_url, api_suffix, commit_hash, distro_hash)
-        if influx:
-            jobs = prepare_jobs_influxdb(all_jobs, jobs_in_criteria, dlrn_jobs)
-            render_influxdb(jobs, job_extra, promotion, promotion_extra)
 
+        jobs = prepare_jobs_influxdb(all_jobs, jobs_in_criteria, dlrn_jobs)
+        if influx:
+            render_influxdb(jobs, job_extra, promotion, promotion_extra)
         else:
             print_tables(
-                timestamp, hash_under_test, jobs_passed, jobs_failed,
-                jobs_pending, jobs_to_promote,
+                timestamp, hash_under_test,
+                jobs_pending,
                 compare_upstream, component, components,
-                api_response, pkg_diff, test_hash, periodic_builds_url,
-                upstream_builds_url, testproject_url)
+                pkg_diff, test_hash, periodic_builds_url,
+                upstream_builds_url, testproject_url, jobs)
 
 
 @ click.command()
