@@ -462,8 +462,7 @@ def load_conf_file(config_file):
 
 
 def prepare_jobs_influxdb(
-        log_urls, all_jobs, passed_jobs, failed_jobs,
-        jobs_in_criteria):
+        all_jobs, passed_jobs, failed_jobs, jobs_in_criteria, jobs):
     """
     InfluxDB follows line protocol [1]
 
@@ -497,7 +496,7 @@ def prepare_jobs_influxdb(
         else:
             status = INFLUX_PENDING
 
-        log_url = log_urls.get(job_name, "N/A")
+        log_url = jobs.get(job_name, {}).get('url', 'N/A')
         job_result = {
             'job_name': job_name,
             'criteria': job_name in jobs_in_criteria,
@@ -648,11 +647,9 @@ def track_integration_promotion(
     components, pkg_diff = get_components_diff(
         base_url, component, promotion_name, aggregate_hash)
     if influx:
-        log_urls = latest_job_results_url(
-            api_response, all_jobs_result_available)
         jobs = prepare_jobs_influxdb(
-            log_urls, all_jobs, passed_jobs,
-            failed_jobs, jobs_in_criteria)
+            all_jobs, passed_jobs,
+            failed_jobs, jobs_in_criteria, jobs)
         render_influxdb(jobs, job_extra, promotion, promotion_extra)
     else:
         print_tables(
@@ -747,11 +744,9 @@ def track_component_promotion(
         hash_under_test = "{}/{}{}&distro_hash={}".format(
             api_url, api_suffix, commit_hash, distro_hash)
         if influx:
-            log_urls = latest_job_results_url(
-                api_response, all_jobs_result_available)
             jobs = prepare_jobs_influxdb(
-                log_urls, all_jobs, passed_jobs,
-                failed_jobs, jobs_in_criteria)
+                all_jobs, passed_jobs,
+                failed_jobs, jobs_in_criteria, jobs)
             render_influxdb(jobs, job_extra, promotion, promotion_extra)
 
         else:

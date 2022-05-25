@@ -597,7 +597,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
     def test_component(
             self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
-            m_find_results, _m_dlrn, m_conclude, m_find_jobs_comp, m_web_scrape,
+            m_find_results, m_dlrn, m_conclude, m_find_jobs_comp, m_web_scrape,
             m_find_result_aggr, _m_find_jobs_int, m_latest_job, m_print):
         component = "all"
 
@@ -624,6 +624,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         m_get_promo.return_value = promotion
         m_fetch_hash.return_value = (commit_hash, distro_hash, extended_hash)
         m_find_results.return_value = "api_response"
+        m_dlrn.return_value = {}
         m_conclude.return_value = (
             set(["passed", "failed"]), set(["passed"]), set(["failed"]))
         m_web_scrape.return_value = "test_hash"
@@ -659,7 +660,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
     def test_integration(
             self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
-            m_find_results, _m_dlrn, m_conclude, _m_find_jobs_comp,
+            m_find_results, m_dlrn, m_conclude, _m_find_jobs_comp,
             m_web_scrape, _m_find_result_aggr, m_find_jobs_int, m_latest_job,
             m_print):
         promotion_name = "promote_name"
@@ -687,6 +688,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         m_get_promo.return_value = promotion
         m_fetch_hash.return_value = (commit_hash, distro_hash, extended_hash)
         m_find_results.return_value = "api_response"
+        m_dlrn.return_value = {}
         m_conclude.return_value = (
             set(["passed", "failed"]), set(["passed"]), set(["failed"]))
         m_web_scrape.return_value = "test_hash"
@@ -719,6 +721,75 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
         output = '\n'.join([job1, job2, job3, dlrn])
         m_print.assert_called_once_with(output)
+
+
+class TestRuckRoverInflux(unittest.TestCase):
+    def setUp(self):
+        self.maxDiff = None
+
+    def test_empty_prepare_jobs_influx(self):
+        jobs = {}
+        all_jobs = set()
+        passed_jobs = set()
+        failed_jobs = set()
+        jobs_in_criteria = set()
+
+        result = ruck_rover.prepare_jobs_influxdb(
+            all_jobs, passed_jobs, failed_jobs, jobs_in_criteria, jobs)
+        self.assertEqual([], result)
+
+    @mock.patch('ruck_rover.find_failure_reason')
+    @mock.patch('ruck_rover.find_job_run_time')
+    def test_prepare_jobs_influx(self, m_find_time, m_failure_reason):
+        m_find_time.side_effect = [0, 0, 0, 0]
+        m_failure_reason.return_value = 'failure_reason'
+
+        jobs = {
+            'job_a': {'url': 'https://job_a_url'},
+            'job_c': {'url': 'https://job_c_url'},
+        }
+        all_jobs = set(['job_a', 'job_b', 'job_c', 'job_d'])
+        passed_jobs = set(['job_a', 'job_c'])
+        failed_jobs = set(['job_d'])
+        jobs_in_criteria = set(['job_b', 'job_c', 'job_d'])
+
+        result = ruck_rover.prepare_jobs_influxdb(
+            all_jobs, passed_jobs, failed_jobs, jobs_in_criteria, jobs)
+        expected = [
+            {
+                'job_name': 'job_a',
+                'criteria': False,
+                'logs': 'https://job_a_url',
+                'duration': 0,
+                'status': ruck_rover.INFLUX_PASSED,
+                'failure_reason': 'N/A'
+            },
+            {
+                'job_name': 'job_b',
+                'criteria': True,
+                'logs': 'N/A',
+                'duration': 0,
+                'status': ruck_rover.INFLUX_PENDING,
+                'failure_reason': 'N/A'
+            },
+            {
+                'job_name': 'job_c',
+                'criteria': True,
+                'logs': 'https://job_c_url',
+                'duration': 0,
+                'status': ruck_rover.INFLUX_PASSED,
+                'failure_reason': 'N/A'
+            },
+            {
+                'job_name': 'job_d',
+                'criteria': True,
+                'logs': 'N/A',
+                'duration': 0,
+                'status': ruck_rover.INFLUX_FAILED,
+                'failure_reason': 'failure_reason',
+            }
+        ]
+        self.assertEqual(expected, result)
 
 
 if __name__ == '__main__':
