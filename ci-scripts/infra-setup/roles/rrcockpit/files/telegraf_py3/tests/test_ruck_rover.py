@@ -614,7 +614,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
     def test_component(
             self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
-            m_find_results, _m_dlrn, m_conclude, m_find_jobs_comp, m_web_scrape,
+            m_find_results, m_dlrn, m_conclude, m_find_jobs_comp, m_web_scrape,
             m_find_result_aggr, _m_find_jobs_int, m_latest_job, m_print):
         component = "all"
 
@@ -640,28 +640,46 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
         m_get_promo.return_value = promotion
         m_fetch_hash.return_value = (commit_hash, distro_hash, extended_hash)
-        m_find_results.return_value = "api_response"
+        m_dlrn.return_value = {
+            'passed': mock.MagicMock(
+                job_id="passed",
+                success=True,
+                timestamp=1,
+                url="N/A",
+            ),
+            'failed': mock.MagicMock(
+                job_id="failed",
+                success=False,
+                timestamp=7,
+                url="N/A",
+            ),
+            'pending': mock.MagicMock(
+                job_id='pending',
+                timestamp=8,
+                url="N/A",
+            )
+        }
         m_conclude.return_value = (
             set(["passed", "failed"]), set(["passed"]), set(["failed"]))
         m_web_scrape.return_value = "test_hash"
-        m_find_jobs_comp.return_value = set(["passed", "failed", "2nd_passed"])
+        m_find_jobs_comp.return_value = set(["passed", "failed", "pending"])
         m_latest_job.return_value = {}
 
         ruck_rover.track_component_promotion(
             self.config, self.distro, self.release, self.influx,
             self.stream, self.compare_upstream, component)
 
-        job1 = ('jobs_result,job_type=component,job_name=2nd_passed'
-                ',release=wallaby name="promoted-components",test_hash="c6_03"'
-                ',criteria="True",status="5",logs="N/A",failure_reason="N/A"'
-                ',duration="N/A",component="cinder",distro="centos-8"')
-        job2 = ('jobs_result,job_type=component,job_name=failed'
+        job1 = ('jobs_result,job_type=component,job_name=failed'
                 ',release=wallaby name="promoted-components",test_hash="c6_03"'
                 ',criteria="True",status="0",logs="N/A",failure_reason="N/A"'
                 ',duration="N/A",component="cinder",distro="centos-8"')
-        job3 = ('jobs_result,job_type=component,job_name=passed'
+        job2 = ('jobs_result,job_type=component,job_name=passed'
                 ',release=wallaby name="promoted-components",test_hash="c6_03"'
                 ',criteria="True",status="9",logs="N/A",failure_reason="N/A"'
+                ',duration="N/A",component="cinder",distro="centos-8"')
+        job3 = ('jobs_result,job_type=component,job_name=pending'
+                ',release=wallaby name="promoted-components",test_hash="c6_03"'
+                ',criteria="True",status="5",logs="N/A",failure_reason="N/A"'
                 ',duration="N/A",component="cinder",distro="centos-8"')
         dlrn = ('dlrn-promotion,release=wallaby,distro=centos-8'
                 ',promo_name=promo commit_hash="c6",distro_hash="03"'
@@ -676,7 +694,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
     def test_integration(
             self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
-            m_find_results, _m_dlrn, m_conclude, _m_find_jobs_comp,
+            m_find_results, m_dlrn, m_conclude, _m_find_jobs_comp,
             m_web_scrape, _m_find_result_aggr, m_find_jobs_int, m_latest_job,
             m_print):
         promotion_name = "promote_name"
@@ -704,10 +722,29 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         m_get_promo.return_value = promotion
         m_fetch_hash.return_value = (commit_hash, distro_hash, extended_hash)
         m_find_results.return_value = "api_response"
+        m_dlrn.return_value = {
+            'passed': mock.MagicMock(
+                job_id="passed",
+                success=True,
+                timestamp=1,
+                url="N/A",
+            ),
+            'failed': mock.MagicMock(
+                job_id="failed",
+                success=False,
+                timestamp=7,
+                url="N/A",
+            ),
+            'pending': mock.MagicMock(
+                job_id='pending',
+                timestamp=8,
+                url="N/A",
+            )
+        }
         m_conclude.return_value = (
             set(["passed", "failed"]), set(["passed"]), set(["failed"]))
         m_web_scrape.return_value = "test_hash"
-        m_find_jobs_int.return_value = set(["passed", "failed", "2nd_passed"])
+        m_find_jobs_int.return_value = set(["passed", "failed", "pending"])
         m_latest_job.return_value = {}
 
         ruck_rover.track_integration_promotion(
@@ -715,17 +752,17 @@ class TestInfluxDBMeasurements(unittest.TestCase):
             self.stream, self.compare_upstream, promotion_name,
             aggregate_hash)
 
-        job1 = ('jobs_result,job_type=integration,job_name=2nd_passed'
-                ',release=wallaby name="promote_name",test_hash="test_hash"'
-                ',criteria="True",status="5",logs="N/A",failure_reason="N/A"'
-                ',duration="N/A",component="None",distro="centos-8"')
-        job2 = ('jobs_result,job_type=integration,job_name=failed'
+        job1 = ('jobs_result,job_type=integration,job_name=failed'
                 ',release=wallaby name="promote_name",test_hash="test_hash"'
                 ',criteria="True",status="0",logs="N/A",failure_reason="N/A"'
                 ',duration="N/A",component="None",distro="centos-8"')
-        job3 = ('jobs_result,job_type=integration,job_name=passed'
+        job2 = ('jobs_result,job_type=integration,job_name=passed'
                 ',release=wallaby name="promote_name",test_hash="test_hash"'
                 ',criteria="True",status="9",logs="N/A",failure_reason="N/A"'
+                ',duration="N/A",component="None",distro="centos-8"')
+        job3 = ('jobs_result,job_type=integration,job_name=pending'
+                ',release=wallaby name="promote_name",test_hash="test_hash"'
+                ',criteria="True",status="5",logs="N/A",failure_reason="N/A"'
                 ',duration="N/A",component="None",distro="centos-8"')
         dlrn = ('dlrn-promotion,release=wallaby,distro=centos-8'
                 ',promo_name=promo commit_hash="c6",distro_hash="03"'
@@ -736,6 +773,87 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
         output = '\n'.join([job1, job2, job3, dlrn])
         m_print.assert_called_once_with(output)
+
+
+class TestRuckRoverInflux(unittest.TestCase):
+    def setUp(self):
+        self.maxDiff = None
+
+    def test_empty_prepare_jobs_influx(self):
+        jobs = {}
+        all_jobs = set()
+        jobs_in_criteria = set()
+
+        result = ruck_rover.prepare_jobs_influxdb(
+            all_jobs, jobs_in_criteria, jobs)
+        self.assertEqual([], result)
+
+    @mock.patch('ruck_rover.find_failure_reason')
+    @mock.patch('ruck_rover.find_job_run_time')
+    def test_prepare_jobs_influx(self, m_find_time, m_failure_reason):
+        m_find_time.side_effect = [0, 0, 0, 0]
+        m_failure_reason.return_value = 'failure_reason'
+
+        job_a = mock.MagicMock(
+            job_id="job_a",
+            success=True,
+            url="https://job_a_url"
+        )
+        job_c = mock.MagicMock(
+            job_id="job_c",
+            success=True,
+            url="https://job_c_url"
+        )
+        job_d = mock.MagicMock(
+            job_id="job_d",
+            success=False,
+            url="https://job_d_url"
+        )
+        jobs = {
+            'job_a': job_a,
+            'job_c': job_c,
+            'job_d': job_d
+        }
+        all_jobs = set(['job_a', 'job_b', 'job_c', 'job_d'])
+        jobs_in_criteria = set(['job_b', 'job_c', 'job_d'])
+
+        result = ruck_rover.prepare_jobs_influxdb(
+            all_jobs, jobs_in_criteria, jobs)
+        expected = [
+            {
+                'job_name': 'job_a',
+                'criteria': False,
+                'logs': 'https://job_a_url',
+                'duration': 0,
+                'status': ruck_rover.INFLUX_PASSED,
+                'failure_reason': 'N/A'
+            },
+            {
+                'job_name': 'job_b',
+                'criteria': True,
+                'logs': 'N/A',
+                'duration': 0,
+                'status': ruck_rover.INFLUX_PENDING,
+                'failure_reason': 'N/A'
+            },
+            {
+                'job_name': 'job_c',
+                'criteria': True,
+                'logs': 'https://job_c_url',
+                'duration': 0,
+                'status': ruck_rover.INFLUX_PASSED,
+                'failure_reason': 'N/A'
+            },
+            {
+                'job_name': 'job_d',
+                'criteria': True,
+                'logs': 'https://job_d_url',
+                'duration': 0,
+                'status': ruck_rover.INFLUX_FAILED,
+                'failure_reason': 'failure_reason',
+            }
+        ]
+        self.assertEqual(expected, result)
 
 
 if __name__ == '__main__':

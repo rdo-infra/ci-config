@@ -321,8 +321,9 @@ def get_dlrn_results(api_response):
     from select api_response.
 
         :param api_response (object): Response from API.
-        :return jobs (dict): It contains all last jobs from response with
-            their appropriate status, timestamp and URL to test result.
+        :return jobs (list of objects): It contains all last jobs from
+            response with their appropriate status, timestamp and URL to
+            test result.
     """
     jobs = {}
     for job in api_response:
@@ -465,9 +466,7 @@ def load_conf_file(config_file):
     return config
 
 
-def prepare_jobs_influxdb(
-        log_urls, all_jobs, passed_jobs, failed_jobs,
-        jobs_in_criteria):
+def prepare_jobs_influxdb(all_jobs, jobs_in_criteria, jobs):
     """
     InfluxDB follows line protocol [1]
 
@@ -490,18 +489,24 @@ def prepare_jobs_influxdb(
     * 9 - success
 
     Epoch is rendered only with *1000
+
+    :param all_jobs (set): All jobs, no matter test result.
+    :param jobs_in_criteria (set): Jobs whick are required for promotion.
+    :param jobs (set): Jobs, registered by DLRN, containing useful information.
+    :return job_result_list (list of dicts): List of parsed jobs.
     """
 
     job_result_list = []
     for job_name in sorted(all_jobs):
-        if job_name in passed_jobs:
+        job = jobs.get(job_name)
+        if job and job.success is True:
             status = INFLUX_PASSED
-        elif job_name in failed_jobs:
+        elif job and job.success is False:
             status = INFLUX_FAILED
         else:
             status = INFLUX_PENDING
 
-        log_url = log_urls.get(job_name, "N/A")
+        log_url = job.url if job else "N/A"
         job_result = {
             'job_name': job_name,
             'criteria': job_name in jobs_in_criteria,
@@ -652,11 +657,7 @@ def track_integration_promotion(
     components, pkg_diff = get_components_diff(
         base_url, component, promotion_name, aggregate_hash)
     if influx:
-        log_urls = latest_job_results_url(
-            api_response, all_jobs_result_available)
-        jobs = prepare_jobs_influxdb(
-            log_urls, all_jobs, passed_jobs,
-            failed_jobs, jobs_in_criteria)
+        jobs = prepare_jobs_influxdb(all_jobs, jobs_in_criteria, dlrn_jobs)
         render_influxdb(jobs, job_extra, promotion, promotion_extra)
     else:
         print_tables(
@@ -751,11 +752,7 @@ def track_component_promotion(
         hash_under_test = "{}/{}{}&distro_hash={}".format(
             api_url, api_suffix, commit_hash, distro_hash)
         if influx:
-            log_urls = latest_job_results_url(
-                api_response, all_jobs_result_available)
-            jobs = prepare_jobs_influxdb(
-                log_urls, all_jobs, passed_jobs,
-                failed_jobs, jobs_in_criteria)
+            jobs = prepare_jobs_influxdb(all_jobs, jobs_in_criteria, dlrn_jobs)
             render_influxdb(jobs, job_extra, promotion, promotion_extra)
 
         else:
