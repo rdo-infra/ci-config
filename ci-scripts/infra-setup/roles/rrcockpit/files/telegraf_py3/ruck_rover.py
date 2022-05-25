@@ -456,9 +456,7 @@ def load_conf_file(config_file):
     return config
 
 
-def prepare_jobs_influxdb(
-        log_urls, all_jobs, passed_jobs, failed_jobs,
-        jobs_in_criteria):
+def prepare_jobs_influxdb(all_jobs, jobs_in_criteria, jobs):
     """
     InfluxDB follows line protocol [1]
 
@@ -485,14 +483,15 @@ def prepare_jobs_influxdb(
 
     job_result_list = []
     for job_name in sorted(all_jobs):
-        if job_name in passed_jobs:
+        job_status = jobs.get(job_name, {}).get('success')
+        if job_status is True:
             status = INFLUX_PASSED
-        elif job_name in failed_jobs:
+        elif job_status is False:
             status = INFLUX_FAILED
         else:
             status = INFLUX_PENDING
 
-        log_url = log_urls.get(job_name, "N/A")
+        log_url = jobs.get(job_name, {}).get('url', 'N/A')
         job_result = {
             'job_name': job_name,
             'criteria': job_name in jobs_in_criteria,
@@ -643,11 +642,7 @@ def track_integration_promotion(
     components, pkg_diff = get_components_diff(
         base_url, component, promotion_name, aggregate_hash)
     if influx:
-        log_urls = latest_job_results_url(
-            api_response, all_jobs_result_available)
-        jobs = prepare_jobs_influxdb(
-            log_urls, all_jobs, passed_jobs,
-            failed_jobs, jobs_in_criteria)
+        jobs = prepare_jobs_influxdb(all_jobs, jobs_in_criteria, dlrn_jobs)
         render_influxdb(jobs, job_extra, promotion, promotion_extra)
     else:
         print_tables(
@@ -742,11 +737,7 @@ def track_component_promotion(
         hash_under_test = "{}/{}{}&distro_hash={}".format(
             api_url, api_suffix, commit_hash, distro_hash)
         if influx:
-            log_urls = latest_job_results_url(
-                api_response, all_jobs_result_available)
-            jobs = prepare_jobs_influxdb(
-                log_urls, all_jobs, passed_jobs,
-                failed_jobs, jobs_in_criteria)
+            jobs = prepare_jobs_influxdb(all_jobs, jobs_in_criteria, dlrn_jobs)
             render_influxdb(jobs, job_extra, promotion, promotion_extra)
 
         else:
