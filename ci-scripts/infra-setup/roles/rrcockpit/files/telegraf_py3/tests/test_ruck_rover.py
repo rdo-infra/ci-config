@@ -41,6 +41,10 @@ class TestRuckRover(unittest.TestCase):
         with patch('os.remove'):
             ruck_rover.delete_file('foo')
 
+    def test_short_find_job_run_time(self):
+        obtained = ruck_rover.find_job_run_time('N/A')
+        self.assertEqual("N/A", obtained)
+
     @patch('ruck_rover.delete_file')
     @patch('ruck_rover.download_file')
     def test_find_job_run_time(self, m_download, m_delete):
@@ -51,6 +55,10 @@ class TestRuckRover(unittest.TestCase):
         expected = "1 hr 32 mins 34 secs"
         obtained = ruck_rover.find_job_run_time('www.demoourl.com')
         self.assertEqual(expected, obtained)
+
+    def test_short_find_failure_reason(self):
+        obtained = ruck_rover.find_failure_reason('N/A')
+        self.assertEqual("N/A", obtained)
 
     @patch('ruck_rover.delete_file')
     @patch('ruck_rover.download_file')
