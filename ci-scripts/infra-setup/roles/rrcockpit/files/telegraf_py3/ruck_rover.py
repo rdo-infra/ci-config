@@ -365,13 +365,6 @@ def get_dlrn_results(api_response):
     return jobs
 
 
-def conclude_results_from_dlrn(jobs):
-    succeeded = set(k for k, v in jobs.items() if v.success)
-    failed = set(k for k, v in jobs.items() if not v.success)
-
-    return set(jobs.keys()), succeeded, failed
-
-
 def get_job_history(job_name, zuul, component=None):
     if 'rdo' in zuul or 'redhat' in zuul:
         url = zuul + "?job_name={}".format(job_name)
@@ -409,18 +402,6 @@ def get_job_history(job_name, zuul, component=None):
             job_history[job_name]['OTHER'] += 1
 
     return job_history
-
-
-def latest_job_results_url(api_response, all_jobs):
-    logs_job = {}
-    for particular_job in all_jobs:
-        latest_log = {}
-        for job in api_response:
-            if job.job_id == particular_job:
-                latest_log[job.timestamp] = job.url
-        logs_job[particular_job] = latest_log[max(latest_log.keys())]
-
-    return logs_job
 
 
 def print_a_set_in_table(jobs, header="Job name"):
@@ -671,8 +652,7 @@ def track_integration_promotion(
     }
 
     dlrn_jobs = get_dlrn_results(api_response)
-    (jobs_results,
-     jobs_passed, jobs_failed) = conclude_results_from_dlrn(dlrn_jobs)
+    jobs_results = set(dlrn_jobs.keys())
 
     jobs_in_criteria = find_jobs_in_integration_criteria(
         url, promotion_name=promotion_name)
@@ -772,8 +752,8 @@ def track_component_promotion(
         }
 
         dlrn_jobs = get_dlrn_results(api_response)
-        (jobs_results,
-         jobs_passed, jobs_failed) = conclude_results_from_dlrn(dlrn_jobs)
+        jobs_results = set(dlrn_jobs.keys())
+
         jobs_in_criteria = find_jobs_in_component_criteria(url, component)
         jobs_pending = jobs_in_criteria.difference(jobs_results)
 
