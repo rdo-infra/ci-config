@@ -92,6 +92,9 @@ def delete_file(path):
 
 
 def find_job_run_time(url):
+    if url == "N/A":
+        return "N/A"
+
     try:
         path = download_file(url + "/job-output.txt")
     except requests.exceptions.RequestException:
@@ -113,6 +116,9 @@ def find_job_run_time(url):
 
 
 def find_failure_reason(url):
+    if url == "N/A":
+        return "N/A"
+
     try:
         path = download_file(url + "/logs/failures_file")
     except requests.exceptions.RequestException:
