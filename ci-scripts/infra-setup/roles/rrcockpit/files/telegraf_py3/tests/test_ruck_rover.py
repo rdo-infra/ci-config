@@ -313,55 +313,6 @@ class TestRuckRover(unittest.TestCase):
         }
         self.assertEqual(expected, results)
 
-    def test_conclude_results_from_dlrn(self):
-        periodic_passed = mock.MagicMock(
-            job_id="periodic_passed",
-            success=True,
-            timestamp=1,
-            url="https://periodic_passed_url"
-        )
-        pipeline_failed = mock.MagicMock(
-            job_id="pipeline_failed",
-            success=False,
-            timestamp=4,
-            url="https://pipeline_failed_url"
-        )
-        periodic_failed_newer = mock.MagicMock(
-            job_id="periodic_failed",
-            success=False,
-            timestamp=7,
-            url="https://periodic_failed_newer_url"
-        )
-        pipeline_passed_newer = mock.MagicMock(
-            job_id="pipeline_passed",
-            success=True,
-            timestamp=8,
-            url="https://pipeline_passed_newer_url"
-        )
-        dlrn_results = {
-            'periodic_passed': periodic_passed,
-            'periodic_failed': periodic_failed_newer,
-            'pipeline_passed': pipeline_passed_newer,
-            'pipeline_failed': pipeline_failed,
-        }
-        jobs = ruck_rover.conclude_results_from_dlrn(dlrn_results)
-
-        all_jobs, passed, failed = jobs
-        self.assertEqual(all_jobs, set([
-            "periodic_passed",
-            "periodic_failed",
-            "pipeline_passed",
-            "pipeline_failed",
-        ]))
-        self.assertEqual(passed, set([
-            "periodic_passed",
-            "pipeline_passed",
-        ]))
-        self.assertEqual(failed, set([
-            "periodic_failed",
-            "pipeline_failed",
-        ]))
-
 
 class TestRuckRoverComponent(unittest.TestCase):
     def setUp(self):
@@ -384,7 +335,6 @@ class TestRuckRoverComponent(unittest.TestCase):
         }
 
     @mock.patch('ruck_rover.find_jobs_in_component_criteria')
-    @mock.patch('ruck_rover.conclude_results_from_dlrn')
     @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
     @mock.patch('ruck_rover.fetch_hashes_from_commit_yaml')
     @mock.patch('ruck_rover.get_last_modified_date')
@@ -395,12 +345,11 @@ class TestRuckRoverComponent(unittest.TestCase):
     @mock.patch('ruck_rover.gather_basic_info_from_criteria')
     def test_all_components(
             self, m_gather, m_dlrn, m_csv, m_diff, m_promo,
-            m_consistent, m_fetch, _m_results, m_conclude, _m_jobs):
+            m_consistent, m_fetch, _m_results, _m_jobs):
         m_gather.return_value = ('api_url', 'base_url')
         m_fetch.return_value = ('c6', '03', 'None')
         m_dlrn.side_effect = ['control_url', 'test_url']
         m_csv.side_effect = ["first", "second"]
-        m_conclude.return_value = set(), set(), set()
 
         ruck_rover.track_component_promotion(
             self.config, 'centos-8', 'wallaby', 'influx',
@@ -412,7 +361,6 @@ class TestRuckRoverComponent(unittest.TestCase):
         m_diff.assert_not_called()
 
     @mock.patch('ruck_rover.find_jobs_in_component_criteria')
-    @mock.patch('ruck_rover.conclude_results_from_dlrn')
     @mock.patch('ruck_rover.get_dlrn_results')
     @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
     @mock.patch('ruck_rover.get_last_modified_date')
@@ -422,7 +370,7 @@ class TestRuckRoverComponent(unittest.TestCase):
     @mock.patch('ruck_rover.gather_basic_info_from_criteria')
     def test_given_component(
             self, m_gather, m_comp_diff, m_fetch, m_promo,
-            m_consistent, m_results, _m_dlrn_results, m_conclude, _m_jobs):
+            m_consistent, m_results, _m_dlrn_results, _m_jobs):
 
         component = "cinder"
         commit_hash = "c6"
@@ -441,7 +389,6 @@ class TestRuckRoverComponent(unittest.TestCase):
             repo_url='repo_url',
         )
         m_promo.return_value = promotion
-        m_conclude.return_value = set(), set(), set()
 
         ruck_rover.track_component_promotion(
             self.config, 'centos-8', 'wallaby', 'influx',
@@ -554,12 +501,10 @@ class TestRuckRoverWithCommonSetup(unittest.TestCase):
 
 
 @mock.patch('builtins.print')
-@mock.patch('ruck_rover.latest_job_results_url')
 @mock.patch('ruck_rover.find_jobs_in_integration_criteria')
 @mock.patch('ruck_rover.find_results_from_dlrn_agg')
 @mock.patch('ruck_rover.web_scrape')
 @mock.patch('ruck_rover.find_jobs_in_component_criteria')
-@mock.patch('ruck_rover.conclude_results_from_dlrn')
 @mock.patch('ruck_rover.get_dlrn_results')
 @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
 @mock.patch('ruck_rover.fetch_hashes_from_commit_yaml')
@@ -594,8 +539,8 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
     def test_component(
             self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
-            m_find_results, m_dlrn, m_conclude, m_find_jobs_comp, m_web_scrape,
-            m_find_result_aggr, _m_find_jobs_int, m_latest_job, m_print):
+            m_find_results, m_dlrn, m_find_jobs_comp, m_web_scrape,
+            m_find_result_aggr, _m_find_jobs_int, m_print):
         component = "all"
 
         component = "cinder"
@@ -639,11 +584,8 @@ class TestInfluxDBMeasurements(unittest.TestCase):
                 url="N/A",
             )
         }
-        m_conclude.return_value = (
-            set(["passed", "failed"]), set(["passed"]), set(["failed"]))
         m_web_scrape.return_value = "test_hash"
         m_find_jobs_comp.return_value = set(["passed", "failed", "pending"])
-        m_latest_job.return_value = {}
 
         ruck_rover.track_component_promotion(
             self.config, self.distro, self.release, self.influx,
@@ -674,9 +616,8 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
     def test_integration(
             self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
-            m_find_results, m_dlrn, m_conclude, _m_find_jobs_comp,
-            m_web_scrape, _m_find_result_aggr, m_find_jobs_int, m_latest_job,
-            m_print):
+            m_find_results, m_dlrn, _m_find_jobs_comp,
+            m_web_scrape, _m_find_result_aggr, m_find_jobs_int, m_print):
         promotion_name = "promote_name"
         aggregate_hash = "aggregate_hash"
 
@@ -721,11 +662,8 @@ class TestInfluxDBMeasurements(unittest.TestCase):
                 url="N/A",
             )
         }
-        m_conclude.return_value = (
-            set(["passed", "failed"]), set(["passed"]), set(["failed"]))
         m_web_scrape.return_value = "test_hash"
         m_find_jobs_int.return_value = set(["passed", "failed", "pending"])
-        m_latest_job.return_value = {}
 
         ruck_rover.track_integration_promotion(
             self.config, self.distro, self.release, self.influx,
