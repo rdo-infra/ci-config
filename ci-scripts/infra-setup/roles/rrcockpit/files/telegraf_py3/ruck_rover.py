@@ -2,6 +2,7 @@
 
 import csv
 import json
+import logging
 import os
 import re
 import time
@@ -142,9 +143,11 @@ def web_scrape(url):
 
 
 def url_response_in_yaml(url):
+    logging.debug("Fetching URL: %s", url)
     text_response = web_scrape(url)
     processed_data = yaml.safe_load(text_response)
 
+    logging.debug("Return processed data")
     return processed_data
 
 
@@ -202,6 +205,7 @@ def get_last_modified_date(base_url, component=None):
     """Get the date of the consistent link in dlrn.
     """
 
+    logging.debug("Get last modified date")
     repo = "delorean.repo"
 
     if component is None:
@@ -217,6 +221,7 @@ def get_last_modified_date(base_url, component=None):
 
     last_modified = response.headers['Last-Modified']
     consistent_date = format_ts_from_last_modified(last_modified)
+    logging.debug("Last modified date: %s", last_modified)
     return consistent_date
 
 
@@ -226,6 +231,7 @@ def get_dlrn_versions_csv(base_url, component, tag):
 
 
 def get_csv(url):
+    logging.debug("Fetching CSV from %s", url)
     response = requests.get(url, verify=CERT_PATH)
     if response.ok:
         content = response.content.decode('utf-8')
@@ -278,6 +284,8 @@ def get_dlrn_promotions(api_url,
     [1]: https://github.com/softwarefactory-project/dlrnapi_client/
          blob/master/docs/DefaultApi.md#api_promotions_get
     """
+    logging.debug("Getting promotion %s for %s", promotion_name, api_url)
+
     api_client = dlrnapi_client.ApiClient(host=api_url)
     api_instance = dlrnapi_client.DefaultApi(api_client)
     query = dlrnapi_client.PromotionQuery(limit=1,
@@ -331,14 +339,17 @@ def get_dlrn_results(api_response):
             response with their appropriate status, timestamp and URL to
             test result.
     """
+    logging.debug("Fetching DLRN results")
     jobs = {}
     for job in api_response:
         if not job.job_id.startswith(("periodic", "pipeline_")):
             # NOTE: Use only periodic jobs and pipeline_ (downstream jenkins)
+            logging.debug("Skipping %s", job.job_id)
             continue
 
         if (job.job_id not in jobs
                 or job.timestamp > jobs[job.job_id].timestamp):
+            logging.debug("Updating %s: %d", job.job_id, job.timestamp)
             jobs[job.job_id] = job
     return jobs
 
@@ -664,10 +675,12 @@ def track_integration_promotion(
 
 def get_components_diff(
         base_url, component, promotion_name, aggregate_hash):
+    logging.debug("Get components diff")
     components = sorted(ALL_COMPONENTS.difference(["all"]))
     pkg_diff = None
 
     if component != "all":
+        logging.debug("Getting component diff for %s", component)
         # get package diff for the component # control_url
         control_url = get_dlrn_versions_csv(
             base_url, component, promotion_name)
@@ -758,6 +771,7 @@ def track_component_promotion(
 
 
 @ click.command()
+@click.option("--debug", is_flag=True, default=False)
 @ click.option("--release", default='master',
                type=click.Choice(RELEASES))
 @ click.option("--distro", default='centos-9',
@@ -783,7 +797,12 @@ def main(release,
          component=None,
          compare_upstream=False,
          aggregate_hash="tripleo-ci-testing",
-         promotion_name="current-tripleo"):
+         promotion_name="current-tripleo",
+         debug=False):
+
+    if debug:
+        fmt = '%(asctime)s:%(levelname)s - %(funcName)s:%(lineno)s %(message)s'
+        logging.basicConfig(format=fmt, encoding='utf-8', level=logging.DEBUG)
 
     stream = 'upstream'
     if release in ('osp16-2', 'osp17'):
