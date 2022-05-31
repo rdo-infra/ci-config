@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import csv
-import json
 import logging
 import os
+import re
 import time
 from datetime import datetime
 from io import StringIO
@@ -49,6 +49,12 @@ ALL_COMPONENTS = set([
 INFLUX_PASSED = 9
 INFLUX_PENDING = 5
 INFLUX_FAILED = 0
+
+ZUUL_JOBS_LIMIT = 1000
+ZUUL_JOB_HISTORY_THRESHOLD = 5
+
+ZUUL_JOB_REGEX = re.compile(
+    "periodic-(?P<job_name>.*)-(master|wallaby|victoria|ussuri|train)")
 
 
 def download_file(url):
@@ -298,45 +304,6 @@ def get_dlrn_results(api_response):
     return jobs
 
 
-def get_job_history(job_name, zuul, component=None):
-    if 'rdo' in zuul or 'redhat' in zuul:
-        url = zuul + "?job_name={}".format(job_name)
-
-    else:
-        # upstream
-        upstream_job = job_name.split("-")
-        # remove periodic-
-        del upstream_job[0]
-        # remove -branch
-        del upstream_job[-1]
-        if component:
-            # component jobs remove both -master and -component
-            del upstream_job[-1]
-
-        upstream_job = '-'.join([str(elem) for elem in upstream_job])
-        url = zuul + "?job_name={}".format(upstream_job)
-
-    out = json.loads(web_scrape(url))
-
-    # key job_name, value = { SUCCESS: count,
-    #                         FAILURE: count,
-    #                         OTHER: count}
-    job_history = {}
-    job_history[job_name] = {'SUCCESS': 0, 'FAILURE': 0, 'OTHER': 0}
-    limit = 5
-    for index, execution in enumerate(out):
-        if index == limit:
-            break
-        if execution['result'] == "SUCCESS":
-            job_history[job_name]['SUCCESS'] += 1
-        elif execution['result'] == "FAILURE":
-            job_history[job_name]['FAILURE'] += 1
-        else:
-            job_history[job_name]['OTHER'] += 1
-
-    return job_history
-
-
 def print_a_set_in_table(jobs, header="Job name"):
     if not jobs:
         return
@@ -348,47 +315,38 @@ def print_a_set_in_table(jobs, header="Job name"):
     console.print(table)
 
 
-def print_failed_in_criteria(jobs,
-                             periodic_builds_url,
-                             upstream_builds_url,
-                             compare_upstream,
-                             component=None):
+def print_failed_in_criteria(jobs, periodic_builds_url, upstream_builds_url):
 
     if not jobs:
         return
 
     header = "Jobs in promotion criteria required to promo the hash: "
     table = Table(show_header=True, header_style="bold")
+
     table.add_column(header, width=80)
     table.add_column("Integration PASSED History", width=15)
     table.add_column("Integration FAILURE History", width=15)
     table.add_column("Integration Other History", width=15)
-    if compare_upstream:
-        table.add_column("Upstream PASSED History", width=10)
-        table.add_column("Upstream FAILURE History", width=10)
-        table.add_column("Upstream Other History", width=10)
+    table.add_column("Upstream PASSED History", width=10)
+    table.add_column("Upstream FAILURE History", width=10)
+    table.add_column("Upstream Other History", width=10)
+
+    rdo_history = query_zuul_job_history(jobs, url=periodic_builds_url)
+    upstream_history = query_zuul_job_history(jobs, url=upstream_builds_url)
+
     for job in jobs:
-        int_history = get_job_history(job,
-                                      periodic_builds_url,
-                                      component)
-        if compare_upstream:
-            # do not look for ovb jobs in upstream
-            if "featureset" not in job:
-                up_history = get_job_history(job,
-                                             upstream_builds_url,
-                                             component)
-                table.add_row(job,
-                              str(int_history[job]['SUCCESS']),
-                              str(int_history[job]['FAILURE']),
-                              str(int_history[job]['OTHER']),
-                              str(up_history[job]['SUCCESS']),
-                              str(up_history[job]['FAILURE']),
-                              str(up_history[job]['OTHER']))
-        else:
-            table.add_row(job,
-                          str(int_history[job]['SUCCESS']),
-                          str(int_history[job]['FAILURE']),
-                          str(int_history[job]['OTHER']))
+        rdo_job = rdo_history.get(job, {})
+        upstream_job = upstream_history.get(job, {})
+
+        table.add_row(
+            job,
+            str(rdo_job.get("SUCCESS", 0)),
+            str(rdo_job.get("FAILURE", 0)),
+            str(rdo_job.get("OTHER", 0)),
+            str(upstream_job.get("SUCCESS", 0)),
+            str(upstream_job.get("FAILURE", 0)),
+            str(upstream_job.get("OTHER", 0))
+        )
     console.print(table)
 
 
@@ -399,23 +357,79 @@ def load_conf_file(config_file):
     return config
 
 
-def query_zuul_job_details(
-        job_names, limit=1000,
-        url="https://review.rdoproject.org/zuul/api/builds"):
-
+def query_zuul(job_names, limit, url):
+    logging.debug("Querying zuul %s for jobs: %s", url, job_names)
     response = requests.get(
         url,
         params={'job_name': job_names, 'limit': limit},
         headers={'Accept': 'application/json'}
     )
+    logging.debug("Return zuul response")
+    return response.json()
+
+
+def query_zuul_job_details(
+        job_names, limit=ZUUL_JOBS_LIMIT,
+        url="https://review.rdoproject.org/zuul/api/builds"):
+
+    logging.debug("Parsing jobs details")
+    zuul_jobs = query_zuul(job_names, limit, url)
 
     jobs = {}
-    for job in response.json():
+    for job in zuul_jobs:
         log_url = job['log_url']
         if not log_url:
             continue
 
         jobs[log_url] = job
+    logging.debug("Done parsing jobs details")
+    return jobs
+
+
+def query_zuul_job_history(
+        job_names, limit=ZUUL_JOBS_LIMIT,
+        url="https://review.rdoproject.org/zuul/api/builds"):
+    logging.debug("Parsing jobs history")
+
+    if not ("rdo" in url or "redhat" in url):
+        logging.debug("Preparing upstream jobs")
+        # NOTE(dasm): Upstream job
+
+        job_names_upstream = set()
+        for job_name in job_names:
+            if 'featureset' in job_name:
+                # NOTE(dasm): Featureset jobs do not exist upstream
+                continue
+
+            job_matched = ZUUL_JOB_REGEX.match(job_name)
+            if job_matched:
+                job_names_upstream.add(job_matched.group('job_name'))
+        job_names = job_names_upstream
+
+    zuul_jobs = query_zuul(job_names, limit, url)
+
+    jobs = {}
+    for job in zuul_jobs:
+        job_name = job.get('job_name')
+        result = job.get('result')
+
+        existing_job = jobs.get(job_name)
+        if not existing_job:
+            logging.debug("Adding %s", job_name)
+            jobs[job_name] = {'SUCCESS': 0, 'FAILURE': 0, 'OTHER': 0}
+
+        if (jobs[job_name]['SUCCESS'] + jobs[job_name]['FAILURE']
+                + jobs[job_name]['OTHER']) >= ZUUL_JOB_HISTORY_THRESHOLD:
+            continue
+
+        if result == "SUCCESS":
+            jobs[job_name]['SUCCESS'] += 1
+        elif result == "FAILURE":
+            jobs[job_name]['FAILURE'] += 1
+        else:
+            jobs[job_name]['OTHER'] += 1
+
+    logging.debug("Done parsing jobs history")
     return jobs
 
 
@@ -558,9 +572,7 @@ def print_tables(
     print_a_set_in_table(no_result, "Pending running jobs")
     print_failed_in_criteria(to_promote,
                              periodic_builds_url,
-                             upstream_builds_url,
-                             compare_upstream,
-                             component)
+                             upstream_builds_url)
     if jobs_failed:
         console.print("Logs of failing jobs:")
     for job_name, job_values in jobs_failed.items():
