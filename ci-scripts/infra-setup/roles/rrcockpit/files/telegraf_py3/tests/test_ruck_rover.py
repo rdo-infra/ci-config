@@ -1,6 +1,5 @@
 import os
 import unittest
-from datetime import datetime
 from unittest import mock
 from unittest.mock import call, patch
 
@@ -11,65 +10,6 @@ class TestRuckRover(unittest.TestCase):
     # pylint: disable=too-many-public-methods
     def setUp(self):
         self.maxDiff = None
-
-    def test_date_diff_in_seconds(self):
-        date1 = datetime(2020, 5, 17)
-        date2 = datetime(2020, 5, 18)
-        self.assertEqual(
-            ruck_rover.date_diff_in_seconds(date2, date1), 86400)
-
-    def test_dhms_from_seconds(self):
-        self.assertEqual(
-            ruck_rover.dhms_from_seconds(0), (0, 0, 0))
-        self.assertEqual(
-            ruck_rover.dhms_from_seconds(5402), (1, 30, 2))
-
-    def test_strip_date_time_from_string(self):
-        input_string = "2021-05-31 13:06:07.428188 | Job console starting..."
-        self.assertEqual(
-            ruck_rover.strip_date_time_from_string(
-                input_string), "2021-05-31 13:06:07")
-
-    def test_convert_string_date_object(self):
-        input_date = '2021-05-31 13:06:07'
-        expected_output = datetime(2021, 5, 31, 13, 6, 7)
-        self.assertEqual(
-            ruck_rover.convert_string_date_object(
-                input_date), expected_output)
-
-    def test_delete_file(self):
-        with patch('os.remove'):
-            ruck_rover.delete_file('foo')
-
-    def test_short_find_job_run_time(self):
-        obtained = ruck_rover.find_job_run_time('N/A')
-        self.assertEqual("N/A", obtained)
-
-    @patch('ruck_rover.delete_file')
-    @patch('ruck_rover.download_file')
-    def test_find_job_run_time(self, m_download, m_delete):
-        full_path = os.path.dirname(os.path.abspath(__file__))
-        # to-do correct path when move test file to correct place
-        m_download.return_value = full_path + "/data/job-output.txt"
-        m_delete.return_value = None
-        expected = "1 hr 32 mins 34 secs"
-        obtained = ruck_rover.find_job_run_time('www.demoourl.com')
-        self.assertEqual(expected, obtained)
-
-    def test_short_find_failure_reason(self):
-        obtained = ruck_rover.find_failure_reason('N/A')
-        self.assertEqual("N/A", obtained)
-
-    @patch('ruck_rover.delete_file')
-    @patch('ruck_rover.download_file')
-    def test_find_failure_reason(self, m_download, m_delete):
-        full_path = os.path.dirname(os.path.abspath(__file__))
-        # to-do correct path when move test file to correct place
-        m_download.return_value = full_path + "/data/failures_file"
-        m_delete.return_value = None
-        expected = "Tempest tests failed."
-        obtained = ruck_rover.find_failure_reason('www.demoourl.com')
-        self.assertEqual(expected, obtained)
 
     @patch('ruck_rover.requests.get')
     def test_web_scrape(self, m_get):
@@ -362,6 +302,7 @@ class TestRuckRoverComponent(unittest.TestCase):
             }
         }
 
+    @mock.patch('ruck_rover.query_zuul_job_details')
     @mock.patch('ruck_rover.find_jobs_in_component_criteria')
     @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
     @mock.patch('ruck_rover.fetch_hashes_from_commit_yaml')
@@ -373,7 +314,7 @@ class TestRuckRoverComponent(unittest.TestCase):
     @mock.patch('ruck_rover.gather_basic_info_from_criteria')
     def test_all_components(
             self, m_gather, m_dlrn, m_csv, m_diff, m_promo,
-            m_consistent, m_fetch, _m_results, _m_jobs):
+            m_consistent, m_fetch, _m_results, _m_jobs, _m_zuul):
         m_gather.return_value = ('api_url', 'base_url')
         m_fetch.return_value = ('c6', '03', 'None')
         m_dlrn.side_effect = ['control_url', 'test_url']
@@ -388,6 +329,7 @@ class TestRuckRoverComponent(unittest.TestCase):
         m_csv.assert_not_called()
         m_diff.assert_not_called()
 
+    @mock.patch('ruck_rover.query_zuul_job_details')
     @mock.patch('ruck_rover.find_jobs_in_component_criteria')
     @mock.patch('ruck_rover.get_dlrn_results')
     @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
@@ -398,7 +340,7 @@ class TestRuckRoverComponent(unittest.TestCase):
     @mock.patch('ruck_rover.gather_basic_info_from_criteria')
     def test_given_component(
             self, m_gather, m_comp_diff, m_fetch, m_promo,
-            m_consistent, m_results, _m_dlrn_results, _m_jobs):
+            m_consistent, m_results, _m_dlrn_results, _m_jobs, _m_zuul):
 
         component = "cinder"
         commit_hash = "c6"
@@ -529,6 +471,7 @@ class TestRuckRoverWithCommonSetup(unittest.TestCase):
 
 
 @mock.patch('builtins.print')
+@mock.patch('ruck_rover.query_zuul_job_details')
 @mock.patch('ruck_rover.find_jobs_in_integration_criteria')
 @mock.patch('ruck_rover.find_results_from_dlrn_agg')
 @mock.patch('ruck_rover.web_scrape')
@@ -568,7 +511,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
     def test_component(
             self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
             m_find_results, m_dlrn, m_find_jobs_comp, m_web_scrape,
-            m_find_result_aggr, _m_find_jobs_int, m_print):
+            m_find_result_aggr, _m_find_jobs_int, m_zuul, m_print):
         component = "all"
 
         component = "cinder"
@@ -598,22 +541,23 @@ class TestInfluxDBMeasurements(unittest.TestCase):
                 job_id="passed",
                 success=True,
                 timestamp=1,
-                url="N/A",
+                url="url",
             ),
             'failed': mock.MagicMock(
                 job_id="failed",
                 success=False,
                 timestamp=7,
-                url="N/A",
+                url="url",
             ),
             'pending': mock.MagicMock(
                 job_id='pending',
                 timestamp=8,
-                url="N/A",
+                url="url",
             )
         }
         m_web_scrape.return_value = "test_hash"
         m_find_jobs_comp.return_value = set(["passed", "failed", "pending"])
+        m_zuul.return_value = {}
 
         ruck_rover.track_component_promotion(
             self.config, self.distro, self.release, self.influx,
@@ -621,16 +565,16 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
         job1 = ('jobs_result,job_type=component,job_name=failed'
                 ',release=wallaby name="promoted-components",test_hash="c6_03"'
-                ',criteria="True",status="0",logs="N/A",failure_reason="N/A"'
-                ',duration="N/A",component="cinder",distro="centos-8"')
+                ',criteria="True",status="0",logs="url/",failure_reason="N/A"'
+                ',duration="0",component="cinder",distro="centos-8"')
         job2 = ('jobs_result,job_type=component,job_name=passed'
                 ',release=wallaby name="promoted-components",test_hash="c6_03"'
-                ',criteria="True",status="9",logs="N/A",failure_reason="N/A"'
-                ',duration="N/A",component="cinder",distro="centos-8"')
+                ',criteria="True",status="9",logs="url/",failure_reason="N/A"'
+                ',duration="0",component="cinder",distro="centos-8"')
         job3 = ('jobs_result,job_type=component,job_name=pending'
                 ',release=wallaby name="promoted-components",test_hash="c6_03"'
-                ',criteria="True",status="5",logs="N/A",failure_reason="N/A"'
-                ',duration="N/A",component="cinder",distro="centos-8"')
+                ',criteria="True",status="5",logs="url/",failure_reason="N/A"'
+                ',duration="0",component="cinder",distro="centos-8"')
         dlrn = ('dlrn-promotion,release=wallaby,distro=centos-8'
                 ',promo_name=promo commit_hash="c6",distro_hash="03"'
                 ',aggregate_hash="hash",repo_hash="repo_hash"'
@@ -644,8 +588,8 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
     def test_integration(
             self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
-            m_find_results, m_dlrn, _m_find_jobs_comp,
-            m_web_scrape, _m_find_result_aggr, m_find_jobs_int, m_print):
+            m_find_results, m_dlrn, _m_find_jobs_comp, m_web_scrape,
+            _m_find_result_aggr, m_find_jobs_int, m_zuul, m_print):
         promotion_name = "promote_name"
         aggregate_hash = "aggregate_hash"
 
@@ -676,22 +620,23 @@ class TestInfluxDBMeasurements(unittest.TestCase):
                 job_id="passed",
                 success=True,
                 timestamp=1,
-                url="N/A",
+                url="url",
             ),
             'failed': mock.MagicMock(
                 job_id="failed",
                 success=False,
                 timestamp=7,
-                url="N/A",
+                url="url",
             ),
             'pending': mock.MagicMock(
                 job_id='pending',
                 timestamp=8,
-                url="N/A",
+                url="url",
             )
         }
         m_web_scrape.return_value = "test_hash"
         m_find_jobs_int.return_value = set(["passed", "failed", "pending"])
+        m_zuul.return_value = {}
 
         ruck_rover.track_integration_promotion(
             self.config, self.distro, self.release, self.influx,
@@ -700,16 +645,16 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
         job1 = ('jobs_result,job_type=integration,job_name=failed'
                 ',release=wallaby name="promote_name",test_hash="test_hash"'
-                ',criteria="True",status="0",logs="N/A",failure_reason="N/A"'
-                ',duration="N/A",component="None",distro="centos-8"')
+                ',criteria="True",status="0",logs="url/",failure_reason="N/A"'
+                ',duration="0",component="None",distro="centos-8"')
         job2 = ('jobs_result,job_type=integration,job_name=passed'
                 ',release=wallaby name="promote_name",test_hash="test_hash"'
-                ',criteria="True",status="9",logs="N/A",failure_reason="N/A"'
-                ',duration="N/A",component="None",distro="centos-8"')
+                ',criteria="True",status="9",logs="url/",failure_reason="N/A"'
+                ',duration="0",component="None",distro="centos-8"')
         job3 = ('jobs_result,job_type=integration,job_name=pending'
                 ',release=wallaby name="promote_name",test_hash="test_hash"'
-                ',criteria="True",status="5",logs="N/A",failure_reason="N/A"'
-                ',duration="N/A",component="None",distro="centos-8"')
+                ',criteria="True",status="5",logs="url/",failure_reason="N/A"'
+                ',duration="0",component="None",distro="centos-8"')
         dlrn = ('dlrn-promotion,release=wallaby,distro=centos-8'
                 ',promo_name=promo commit_hash="c6",distro_hash="03"'
                 ',aggregate_hash="hash",repo_hash="repo_hash"'
@@ -725,21 +670,16 @@ class TestRuckRoverInflux(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
 
-    def test_empty_prepare_jobs_influx(self):
+    def test_empty_prepare_jobs(self):
         jobs = {}
         all_jobs = set()
         jobs_in_criteria = set()
 
-        result = ruck_rover.prepare_jobs_influxdb(
-            all_jobs, jobs_in_criteria, jobs)
+        result = ruck_rover.prepare_jobs(
+            all_jobs, jobs_in_criteria, jobs, {})
         self.assertEqual([], result)
 
-    @mock.patch('ruck_rover.find_failure_reason')
-    @mock.patch('ruck_rover.find_job_run_time')
-    def test_prepare_jobs_influx(self, m_find_time, m_failure_reason):
-        m_find_time.side_effect = [0, 0, 0, 0]
-        m_failure_reason.return_value = 'failure_reason'
-
+    def test_prepare_jobs(self):
         job_a = mock.MagicMock(
             job_id="job_a",
             success=True,
@@ -763,13 +703,13 @@ class TestRuckRoverInflux(unittest.TestCase):
         all_jobs = set(['job_a', 'job_b', 'job_c', 'job_d'])
         jobs_in_criteria = set(['job_b', 'job_c', 'job_d'])
 
-        result = ruck_rover.prepare_jobs_influxdb(
-            all_jobs, jobs_in_criteria, jobs)
+        result = ruck_rover.prepare_jobs(
+            all_jobs, jobs_in_criteria, jobs, {})
         expected = [
             {
                 'job_name': 'job_a',
                 'criteria': False,
-                'logs': 'https://job_a_url',
+                'logs': 'https://job_a_url/',
                 'duration': 0,
                 'status': ruck_rover.INFLUX_PASSED,
                 'failure_reason': 'N/A'
@@ -785,7 +725,7 @@ class TestRuckRoverInflux(unittest.TestCase):
             {
                 'job_name': 'job_c',
                 'criteria': True,
-                'logs': 'https://job_c_url',
+                'logs': 'https://job_c_url/',
                 'duration': 0,
                 'status': ruck_rover.INFLUX_PASSED,
                 'failure_reason': 'N/A'
@@ -793,10 +733,10 @@ class TestRuckRoverInflux(unittest.TestCase):
             {
                 'job_name': 'job_d',
                 'criteria': True,
-                'logs': 'https://job_d_url',
+                'logs': 'https://job_d_url/',
                 'duration': 0,
                 'status': ruck_rover.INFLUX_FAILED,
-                'failure_reason': 'failure_reason',
+                'failure_reason': 'N/A',
             }
         ]
         self.assertEqual(expected, result)

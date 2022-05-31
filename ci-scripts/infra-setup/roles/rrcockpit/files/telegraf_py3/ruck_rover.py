@@ -4,7 +4,6 @@ import csv
 import json
 import logging
 import os
-import re
 import time
 from datetime import datetime
 from io import StringIO
@@ -52,29 +51,6 @@ INFLUX_PENDING = 5
 INFLUX_FAILED = 0
 
 
-def date_diff_in_seconds(dt2, dt1):
-    timedelta = dt2 - dt1
-
-    return timedelta.days * 24 * 3600 + timedelta.seconds
-
-
-def dhms_from_seconds(seconds):
-    minutes, seconds = divmod(seconds, 60)
-    hours, minutes = divmod(minutes, 60)
-
-    return (hours, minutes, seconds)
-
-
-def strip_date_time_from_string(input_string):
-    regex_object = re.compile(r'[\d*-]*\d* [\d*:]*')
-
-    return regex_object.search(input_string).group()
-
-
-def convert_string_date_object(date_string):
-    return datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
-
-
 def download_file(url):
     logging.debug("Downloading URL: %s", url)
     response = requests.get(url, stream=True, verify=CERT_PATH)
@@ -87,49 +63,6 @@ def download_file(url):
     os.close(file_descriptor)
 
     return path
-
-
-def delete_file(path):
-    os.remove(path)
-
-
-def find_job_run_time(url):
-    if url == "N/A":
-        return "N/A"
-
-    try:
-        path = download_file(url + "/job-output.txt")
-    except requests.exceptions.RequestException:
-        return "N/A"
-    with open(path, "r") as file:
-        first_line = file.readline()
-        for last_line in file:
-            pass
-    start_time = strip_date_time_from_string(first_line)
-    start_time_ob = convert_string_date_object(start_time)
-    end_time = strip_date_time_from_string(last_line)
-    end_time_ob = convert_string_date_object(end_time)
-
-    hours, minutes, seconds = dhms_from_seconds(
-        date_diff_in_seconds(end_time_ob, start_time_ob))
-    delete_file(path)
-
-    return f"{hours} hr {minutes} mins {seconds} secs"
-
-
-def find_failure_reason(url):
-    if url == "N/A":
-        return "N/A"
-
-    try:
-        path = download_file(url + "/logs/failures_file")
-    except requests.exceptions.RequestException:
-        return "N/A"
-    with open(path, "r") as file:
-        first_line = file.readline()
-    delete_file(path)
-
-    return first_line.rstrip()
 
 
 def web_scrape(url):
@@ -466,7 +399,27 @@ def load_conf_file(config_file):
     return config
 
 
-def prepare_jobs_influxdb(all_jobs, jobs_in_criteria, jobs):
+def query_zuul_job_details(
+        job_names, limit=1000,
+        url="https://review.rdoproject.org/zuul/api/builds"):
+
+    response = requests.get(
+        url,
+        params={'job_name': job_names, 'limit': limit},
+        headers={'Accept': 'application/json'}
+    )
+
+    jobs = {}
+    for job in response.json():
+        log_url = job['log_url']
+        if not log_url:
+            continue
+
+        jobs[log_url] = job
+    return jobs
+
+
+def prepare_jobs(all_jobs, jobs_in_criteria, dlrn_jobs, zuul_jobs):
     """
     InfluxDB follows line protocol [1]
 
@@ -493,9 +446,20 @@ def prepare_jobs_influxdb(all_jobs, jobs_in_criteria, jobs):
 
     logging.info("Preparing InfluxDB jobs")
     job_result_list = []
+
     for idx, job_name in enumerate(sorted(all_jobs)):
         logging.info("Fetching job: %d: %s", idx, job_name)
-        job = jobs.get(job_name)
+        job = dlrn_jobs.get(job_name)
+
+        # NOTE(dasm):
+        # DLRN returns job.url without trailing '/'
+        log_url = job.url + '/' if job else "N/A"
+
+        zuul_job = zuul_jobs.get(log_url)
+        if not zuul_job:
+            logging.error('Missing job %s', log_url)
+            zuul_job = {}
+
         if job and job.success is True:
             status = INFLUX_PASSED
         elif job and job.success is False:
@@ -503,15 +467,13 @@ def prepare_jobs_influxdb(all_jobs, jobs_in_criteria, jobs):
         else:
             status = INFLUX_PENDING
 
-        log_url = job.url if job else "N/A"
         job_result = {
             'job_name': job_name,
             'criteria': job_name in jobs_in_criteria,
             'logs': log_url,
-            'duration': find_job_run_time(log_url),
+            'duration': zuul_job.get('duration', 0),
             'status': status,
-            'failure_reason': (find_failure_reason(log_url)
-                               if status == INFLUX_FAILED else "N/A"),
+            'failure_reason': zuul_job.get('error_detail', 'N/A'),
         }
         job_result_list.append(job_result)
     return job_result_list
@@ -670,7 +632,9 @@ def track_integration_promotion(
 
     components, pkg_diff = get_components_diff(
         base_url, component, promotion_name, aggregate_hash)
-    jobs = prepare_jobs_influxdb(all_jobs, jobs_in_criteria, dlrn_jobs)
+
+    zuul_jobs = query_zuul_job_details(all_jobs)
+    jobs = prepare_jobs(all_jobs, jobs_in_criteria, dlrn_jobs, zuul_jobs)
     if influx:
         render_influxdb(jobs, job_extra, promotion, promotion_extra)
     else:
@@ -766,7 +730,8 @@ def track_component_promotion(
         hash_under_test = "{}/{}{}&distro_hash={}".format(
             api_url, api_suffix, commit_hash, distro_hash)
 
-        jobs = prepare_jobs_influxdb(all_jobs, jobs_in_criteria, dlrn_jobs)
+        zuul_jobs = query_zuul_job_details(all_jobs)
+        jobs = prepare_jobs(all_jobs, jobs_in_criteria, dlrn_jobs, zuul_jobs)
         if influx:
             render_influxdb(jobs, job_extra, promotion, promotion_extra)
         else:
