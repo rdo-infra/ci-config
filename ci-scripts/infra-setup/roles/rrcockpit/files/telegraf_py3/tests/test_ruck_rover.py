@@ -458,12 +458,36 @@ class TestRuckRoverWithCommonSetup(unittest.TestCase):
         return mock_resp
 
     @mock.patch('requests.get')
-    def test_get_job_history(self, mock_get):
-        mock_resp = self._mock_response(text=self.data, raise_for_status=None)
+    def test_query_zuul_job_history(self, mock_get):
+        json_data = [
+            {
+                'job_name': 'periodic-tripleo-ci-centos-8-standalone-master',
+                'result': "SUCCESS"
+            },
+            {
+                'job_name': 'periodic-tripleo-ci-centos-8-standalone-master',
+                'result': "SUCCESS"
+            },
+            {
+                'job_name': 'periodic-tripleo-ci-centos-8-standalone-master',
+                'result': "SUCCESS"
+            },
+            {
+                'job_name': 'periodic-tripleo-ci-centos-8-standalone-master',
+                'result': "FAILURE"
+            },
+            {
+                'job_name': 'periodic-tripleo-ci-centos-8-standalone-master',
+                'result': "FAILURE"
+            },
+        ]
+
+        mock_resp = self._mock_response(
+            text=self.data, raise_for_status=None, json_data=json_data)
         mock_get.return_value = mock_resp
         job = "periodic-tripleo-ci-centos-8-standalone-master"
         zb_periodic = "https://review.rdoproject.org/zuul/api/builds"
-        history = ruck_rover.get_job_history(job, zb_periodic)
+        history = ruck_rover.query_zuul_job_history(job, zb_periodic)
         self.assertIn(job, history.keys())
         self.assertEqual(history[job]['SUCCESS'], 3)
         self.assertEqual(history[job]['FAILURE'], 2)
