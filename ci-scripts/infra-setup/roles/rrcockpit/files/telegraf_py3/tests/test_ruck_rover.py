@@ -322,7 +322,7 @@ class TestRuckRoverComponent(unittest.TestCase):
 
         ruck_rover.track_component_promotion(
             self.config, 'centos-8', 'wallaby', 'influx',
-            'upstream', compare_upstream=False, test_component='all')
+            'upstream', test_component='all')
 
         m_gather.assert_called_with("http://wallaby_comp")
         m_dlrn.assert_not_called()
@@ -362,7 +362,7 @@ class TestRuckRoverComponent(unittest.TestCase):
 
         ruck_rover.track_component_promotion(
             self.config, 'centos-8', 'wallaby', 'influx',
-            'upstream', compare_upstream=False, test_component=component)
+            'upstream', test_component=component)
 
         m_gather.assert_called_with("http://wallaby_comp")
         m_fetch.assert_called_with(
@@ -530,7 +530,6 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         self.release = "wallaby"
         self.influx = True
         self.stream = "upstream"
-        self.compare_upstream = False
 
     def test_component(
             self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
@@ -585,7 +584,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
         ruck_rover.track_component_promotion(
             self.config, self.distro, self.release, self.influx,
-            self.stream, self.compare_upstream, component)
+            self.stream, component)
 
         job1 = ('jobs_result,job_type=component,job_name=failed'
                 ',release=wallaby name="promoted-components",test_hash="c6_03"'
@@ -664,7 +663,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
         ruck_rover.track_integration_promotion(
             self.config, self.distro, self.release, self.influx,
-            self.stream, self.compare_upstream, promotion_name,
+            self.stream, promotion_name,
             aggregate_hash)
 
         job1 = ('jobs_result,job_type=integration,job_name=failed'

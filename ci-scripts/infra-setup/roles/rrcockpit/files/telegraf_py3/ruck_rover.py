@@ -476,7 +476,7 @@ def prepare_jobs(all_jobs, jobs_in_criteria, dlrn_jobs, zuul_jobs):
 
         zuul_job = zuul_jobs.get(log_url)
         if not zuul_job:
-            logging.error('Missing job %s', log_url)
+            logging.warning('Missing job %s', log_url)
             zuul_job = {}
 
         if job and job.success is True:
@@ -523,7 +523,7 @@ def render_influxdb(jobs, job_extra, promotion, promotion_extra):
 
 def print_tables(
         timestamp, hut, no_result,
-        compare_upstream, component, components,
+        component, components,
         pkg_diff, test_hash, periodic_builds_url,
         upstream_builds_url, testproject_url, jobs=None):
     """
@@ -605,7 +605,7 @@ def integration(
 
 
 def track_integration_promotion(
-        config, distro, release, influx, stream, compare_upstream,
+        config, distro, release, influx, stream,
         promotion_name, aggregate_hash):
 
     url = config[stream]['criteria'][distro][release]['int_url']
@@ -658,7 +658,7 @@ def track_integration_promotion(
         print_tables(
             timestamp, under_test_url,
             jobs_pending,
-            compare_upstream, component, components,
+            component, components,
             pkg_diff, test_hash, periodic_builds_url,
             upstream_builds_url, testproject_url, jobs)
 
@@ -689,7 +689,7 @@ def get_components_diff(
 
 
 def track_component_promotion(
-        config, distro, release, influx, stream, compare_upstream,
+        config, distro, release, influx, stream,
         test_component):
     url = config[stream]['criteria'][distro][release]['comp_url']
     api_url, base_url = gather_basic_info_from_criteria(url)
@@ -755,7 +755,7 @@ def track_component_promotion(
             print_tables(
                 timestamp, hash_under_test,
                 jobs_pending,
-                compare_upstream, component, components,
+                component, components,
                 pkg_diff, test_hash, periodic_builds_url,
                 upstream_builds_url, testproject_url, jobs)
 
@@ -769,7 +769,6 @@ def track_component_promotion(
 @ click.option("--component",
                type=click.Choice(sorted(ALL_COMPONENTS)))
 @ click.option("--influx", is_flag=True, default=False)
-@ click.option("--compare_upstream", is_flag=True, default=False)
 @ click.option("--aggregate_hash",
                required=False,
                default="tripleo-ci-testing",
@@ -785,7 +784,6 @@ def main(release,
          config_file,
          influx=False,
          component=None,
-         compare_upstream=False,
          aggregate_hash="tripleo-ci-testing",
          promotion_name="current-tripleo",
          verbose=False):
@@ -813,11 +811,10 @@ def main(release,
     logging.info("Starting script: %s - %s", distro, release)
     if component:
         track_component_promotion(
-            config, distro, release, influx, stream, compare_upstream,
-            component)
+            config, distro, release, influx, stream, component)
     else:
         track_integration_promotion(
-            config, distro, release, influx, stream, compare_upstream,
+            config, distro, release, influx, stream,
             promotion_name, aggregate_hash)
 
 
