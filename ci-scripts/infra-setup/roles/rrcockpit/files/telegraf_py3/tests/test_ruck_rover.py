@@ -30,21 +30,27 @@ class TestRuckRover(unittest.TestCase):
         self.assertTrue(isinstance(obtained, dict))
         self.assertEqual('master', obtained['release'])
 
-    @patch('ruck_rover.requests.get')
-    def test_gather_basic_info_from_criteria(self, m_get):
-        full_path = os.path.dirname(os.path.abspath(__file__))
-        with open(full_path + "/data/master.yaml") as file:
-            data = file.read()
-        m_get.return_value.text = data
-        a_url = 'https://trunk.rdoproject.org/api-centos8-master-uc'
-        b_url = 'https://trunk.rdoproject.org/centos8-master/'
-        expected = (a_url, b_url)
-        obtained = ruck_rover.gather_basic_info_from_criteria(
-            'www.demooourl.com')
+    def test_gather_basic_info_from_criteria(self):
+        criteria = {
+            'release': 'master',
+            'api_url': 'https://trunk.rdoproject.org/api-centos8-master-uc',
+            'base_url': 'https://trunk.rdoproject.org/centos8-master/',
+            'promotions': {
+                'current-tripleo': {
+                    'candidate_label': 'tripleo-ci-testing',
+                    'criteria': [
+                        'periodic-tripleo-ci-build-containers-ubi-8-push',
+                        'periodic-tripleo-centos-8-buildimage-overcloud-full']
+                            }}}
+        expected = (
+            'https://trunk.rdoproject.org/api-centos8-master-uc',
+            'https://trunk.rdoproject.org/centos8-master/',
+        )
+        obtained = ruck_rover.gather_basic_info_from_criteria(criteria)
         self.assertEqual(obtained, expected)
 
     def test_find_jobs_in_integration_criteria(self):
-        yaml_data = {
+        criteria = {
             'release': 'master',
             'promotions': {
                 'current-tripleo': {
@@ -53,15 +59,11 @@ class TestRuckRover(unittest.TestCase):
                         'periodic-tripleo-ci-build-containers-ubi-8-push',
                         'periodic-tripleo-centos-8-buildimage-overcloud-full']
                             }}}
-        with patch('ruck_rover.url_response_in_yaml') as m_get:
-            m_get.return_value = yaml_data
-            obtained = ruck_rover.find_jobs_in_integration_criteria(
-                            'www.demoourl.com')
-            expected = set([
-                'periodic-tripleo-ci-build-containers-ubi-8-push',
-                'periodic-tripleo-centos-8-buildimage-overcloud-full'])
-            self.assertEqual(
-                expected, obtained)
+        obtained = ruck_rover.find_jobs_in_integration_criteria(criteria)
+        expected = set([
+            'periodic-tripleo-ci-build-containers-ubi-8-push',
+            'periodic-tripleo-centos-8-buildimage-overcloud-full'])
+        self.assertEqual(expected, obtained)
 
     def test_find_jobs_in_component_criteria(self):
         yaml_data = {
