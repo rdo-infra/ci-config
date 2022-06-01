@@ -30,21 +30,27 @@ class TestRuckRover(unittest.TestCase):
         self.assertTrue(isinstance(obtained, dict))
         self.assertEqual('master', obtained['release'])
 
-    @patch('ruck_rover.requests.get')
-    def test_gather_basic_info_from_criteria(self, m_get):
-        full_path = os.path.dirname(os.path.abspath(__file__))
-        with open(full_path + "/data/master.yaml") as file:
-            data = file.read()
-        m_get.return_value.text = data
-        a_url = 'https://trunk.rdoproject.org/api-centos8-master-uc'
-        b_url = 'https://trunk.rdoproject.org/centos8-master/'
-        expected = (a_url, b_url)
-        obtained = ruck_rover.gather_basic_info_from_criteria(
-            'www.demooourl.com')
+    def test_gather_basic_info_from_criteria(self):
+        criteria = {
+            'release': 'master',
+            'api_url': 'https://trunk.rdoproject.org/api-centos8-master-uc',
+            'base_url': 'https://trunk.rdoproject.org/centos8-master/',
+            'promotions': {
+                'current-tripleo': {
+                    'candidate_label': 'tripleo-ci-testing',
+                    'criteria': [
+                        'periodic-tripleo-ci-build-containers-ubi-8-push',
+                        'periodic-tripleo-centos-8-buildimage-overcloud-full']
+                            }}}
+        expected = (
+            'https://trunk.rdoproject.org/api-centos8-master-uc',
+            'https://trunk.rdoproject.org/centos8-master/',
+        )
+        obtained = ruck_rover.gather_basic_info_from_criteria(criteria)
         self.assertEqual(obtained, expected)
 
     def test_find_jobs_in_integration_criteria(self):
-        yaml_data = {
+        criteria = {
             'release': 'master',
             'promotions': {
                 'current-tripleo': {
@@ -53,18 +59,14 @@ class TestRuckRover(unittest.TestCase):
                         'periodic-tripleo-ci-build-containers-ubi-8-push',
                         'periodic-tripleo-centos-8-buildimage-overcloud-full']
                             }}}
-        with patch('ruck_rover.url_response_in_yaml') as m_get:
-            m_get.return_value = yaml_data
-            obtained = ruck_rover.find_jobs_in_integration_criteria(
-                            'www.demoourl.com')
-            expected = set([
-                'periodic-tripleo-ci-build-containers-ubi-8-push',
-                'periodic-tripleo-centos-8-buildimage-overcloud-full'])
-            self.assertEqual(
-                expected, obtained)
+        obtained = ruck_rover.find_jobs_in_integration_criteria(criteria)
+        expected = set([
+            'periodic-tripleo-ci-build-containers-ubi-8-push',
+            'periodic-tripleo-centos-8-buildimage-overcloud-full'])
+        self.assertEqual(expected, obtained)
 
     def test_find_jobs_in_component_criteria(self):
-        yaml_data = {
+        criteria_content = {
             'promoted-components': {
                 'baremetal': [
                     'periodic-tripleo-baremetal-master',
@@ -73,19 +75,17 @@ class TestRuckRover(unittest.TestCase):
                     'periodic-tripleo-cinder-master',
                     'periodic-tripleo-sc01-cinder-master']
                         }}
-        with patch('ruck_rover.url_response_in_yaml') as m_get:
-            m_get.return_value = yaml_data
-            obtained = ruck_rover.find_jobs_in_component_criteria(
-                            'www.demoourl.com', 'baremetal')
-            expected = set([
-                'periodic-tripleo-baremetal-master',
-                'periodic-tripleo-sc012-baremetal-master'])
-            self.assertEqual(
-                expected, obtained)
+        obtained = ruck_rover.find_jobs_in_component_criteria(
+                criteria_content, 'baremetal')
+        expected = set([
+            'periodic-tripleo-baremetal-master',
+            'periodic-tripleo-sc012-baremetal-master'])
+        self.assertEqual(
+            expected, obtained)
 
-            with self.assertRaises(KeyError):
-                ruck_rover.find_jobs_in_component_criteria(
-                    'www.demoourl.com', 'xyz')
+        with self.assertRaises(KeyError):
+            ruck_rover.find_jobs_in_component_criteria(
+                criteria_content, 'xyz')
 
     def test_fetch_hashes_from_commit_yaml(self):
         yaml_data = {
@@ -303,6 +303,7 @@ class TestRuckRoverComponent(unittest.TestCase):
         }
 
     @mock.patch('ruck_rover.query_zuul_job_details')
+    @mock.patch('ruck_rover.url_response_in_yaml')
     @mock.patch('ruck_rover.find_jobs_in_component_criteria')
     @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
     @mock.patch('ruck_rover.fetch_hashes_from_commit_yaml')
@@ -313,8 +314,8 @@ class TestRuckRoverComponent(unittest.TestCase):
     @mock.patch('ruck_rover.get_dlrn_versions_csv')
     @mock.patch('ruck_rover.gather_basic_info_from_criteria')
     def test_all_components(
-            self, m_gather, m_dlrn, m_csv, m_diff, m_promo,
-            m_consistent, m_fetch, _m_results, _m_jobs, _m_zuul):
+            self, m_gather, m_dlrn, m_csv, m_diff, m_promo, m_consistent,
+            m_fetch, _m_results, _m_jobs, m_yaml, _m_zuul):
         m_gather.return_value = ('api_url', 'base_url')
         m_fetch.return_value = ('c6', '03', 'None')
         m_dlrn.side_effect = ['control_url', 'test_url']
@@ -324,12 +325,13 @@ class TestRuckRoverComponent(unittest.TestCase):
             self.config, 'centos-8', 'wallaby', 'influx',
             'upstream', test_component='all')
 
-        m_gather.assert_called_with("http://wallaby_comp")
+        m_yaml.assert_called_with("http://wallaby_comp")
         m_dlrn.assert_not_called()
         m_csv.assert_not_called()
         m_diff.assert_not_called()
 
     @mock.patch('ruck_rover.query_zuul_job_details')
+    @mock.patch('ruck_rover.url_response_in_yaml')
     @mock.patch('ruck_rover.find_jobs_in_component_criteria')
     @mock.patch('ruck_rover.get_dlrn_results')
     @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
@@ -339,8 +341,8 @@ class TestRuckRoverComponent(unittest.TestCase):
     @mock.patch('ruck_rover.get_components_diff')
     @mock.patch('ruck_rover.gather_basic_info_from_criteria')
     def test_given_component(
-            self, m_gather, m_comp_diff, m_fetch, m_promo,
-            m_consistent, m_results, _m_dlrn_results, _m_jobs, _m_zuul):
+            self, m_gather, m_comp_diff, m_fetch, m_promo, m_consistent,
+            m_results, _m_dlrn_results, _m_jobs, m_yaml, _m_zuul):
 
         component = "cinder"
         commit_hash = "c6"
@@ -364,7 +366,7 @@ class TestRuckRoverComponent(unittest.TestCase):
             self.config, 'centos-8', 'wallaby', 'influx',
             'upstream', test_component=component)
 
-        m_gather.assert_called_with("http://wallaby_comp")
+        m_yaml.assert_called_with("http://wallaby_comp")
         m_fetch.assert_called_with(
             "base_url/component/cinder/component-ci-testing/commit.yaml")
         m_results.assert_called_with(
