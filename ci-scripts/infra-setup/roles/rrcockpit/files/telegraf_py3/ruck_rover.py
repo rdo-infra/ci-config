@@ -91,23 +91,18 @@ def url_response_in_yaml(url):
     return processed_data
 
 
-def gather_basic_info_from_criteria(url):
-    criteria_content = url_response_in_yaml(url)
+def gather_basic_info_from_criteria(criteria_content):
     api_url = criteria_content['api_url']
     base_url = criteria_content['base_url']
-
     return api_url, base_url
 
 
-def find_jobs_in_integration_criteria(url, promotion_name='current-tripleo'):
-    criteria_content = url_response_in_yaml(url)
-
+def find_jobs_in_integration_criteria(
+        criteria_content, promotion_name='current-tripleo'):
     return set(criteria_content['promotions'][promotion_name]['criteria'])
 
 
-def find_jobs_in_component_criteria(url, component):
-    criteria_content = url_response_in_yaml(url)
-
+def find_jobs_in_component_criteria(criteria_content, component):
     return set(criteria_content['promoted-components'][component])
 
 
@@ -609,7 +604,10 @@ def track_integration_promotion(
         promotion_name, aggregate_hash):
 
     url = config[stream]['criteria'][distro][release]['int_url']
-    api_url, base_url = gather_basic_info_from_criteria(url)
+    criteria_content = url_response_in_yaml(url)
+    api_url, base_url = gather_basic_info_from_criteria(criteria_content)
+    jobs_in_criteria = find_jobs_in_integration_criteria(
+        criteria_content, promotion_name=promotion_name)
 
     promotion = get_dlrn_promotions(api_url, promotion_name)
 
@@ -628,8 +626,6 @@ def track_integration_promotion(
     dlrn_jobs = get_dlrn_results(api_response)
     jobs_results = set(dlrn_jobs.keys())
 
-    jobs_in_criteria = find_jobs_in_integration_criteria(
-        url, promotion_name=promotion_name)
     jobs_pending = jobs_in_criteria.difference(jobs_results)
 
     all_jobs = jobs_results.union(jobs_in_criteria)
@@ -692,7 +688,8 @@ def track_component_promotion(
         config, distro, release, influx, stream,
         test_component):
     url = config[stream]['criteria'][distro][release]['comp_url']
-    api_url, base_url = gather_basic_info_from_criteria(url)
+    criteria_content = url_response_in_yaml(url)
+    api_url, base_url = gather_basic_info_from_criteria(criteria_content)
     api_suffix = "api/civotes_detail.html?commit_hash="
 
     promotion_name = "current-tripleo"
@@ -730,7 +727,8 @@ def track_component_promotion(
         dlrn_jobs = get_dlrn_results(api_response)
         jobs_results = set(dlrn_jobs.keys())
 
-        jobs_in_criteria = find_jobs_in_component_criteria(url, component)
+        jobs_in_criteria = find_jobs_in_component_criteria(
+            criteria_content, component)
         jobs_pending = jobs_in_criteria.difference(jobs_results)
 
         all_jobs = jobs_results.union(jobs_in_criteria)
