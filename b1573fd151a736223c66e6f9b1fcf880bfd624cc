@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2da53bde_3c6a6989",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py",
+        "patchSetId": 9
+      },
+      "lineNbr": 789,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-06-06T07:27:27Z",
+      "side": 1,
+      "message": "In prepare_jobs_influxdb function we find reason of job failure for which we need to download the job logs, We only use this in dashboard (for dashboard we include --influx flag) currently we don\u0027t download each results when ruck_rover.py is triggered in a manual run by real users.(without --influx flag)\n\n~~~~\n        job_result \u003d {\n            \u0027job_name\u0027: job_name,\n            \u0027criteria\u0027: job_name in jobs_in_criteria,\n            \u0027logs\u0027: log_url,\n            \u0027duration\u0027: find_job_run_time(log_url),\n            \u0027status\u0027: status,\n            \u0027failure_reason\u0027: (find_failure_reason(log_url)\n                               if status \u003d\u003d INFLUX_FAILED else \"N/A\"),\n        }\n\n~~~\n\n\nWith this change we increased the ruck_rover.py script (manual) user run time from few(10 - 15) seconds to minutes(2 to 4 mins)\n\nIn my laptop:-\n~~~\nreal\t0m11.781s\n~~~\nto:-\n\n~~~\nreal\t2m22.885s\n~~~\n\n\nhttps://paste.openstack.org/show/bERdlAYBqXpNcB8820Cy/\n\n\nI think it would be good to optimize this change so that it doesn\u0027t affect user experience.",
+      "range": {
+        "startLine": 789,
+        "startChar": 0,
+        "endLine": 789,
+        "endChar": 75
+      },
+      "revId": "b1573fd151a736223c66e6f9b1fcf880bfd624cc",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    }
+  ]
+}
