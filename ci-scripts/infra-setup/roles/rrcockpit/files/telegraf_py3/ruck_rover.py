@@ -500,10 +500,17 @@ def prepare_render_template(filename):
     return template
 
 
-def render_testproject_yaml(jobs, test_hash, testproject_url):
-    template = prepare_render_template('.zuul.yaml.j2')
+def render_integration_yaml(jobs, test_hash, testproject_url):
+    template = prepare_render_template('integration.yaml.j2')
     output = template.render(
         jobs=jobs, hash=test_hash, testproject_url=testproject_url)
+    print(output)
+
+
+def render_component_yaml(jobs, testproject_url):
+    template = prepare_render_template('component.yaml.j2')
+    output = template.render(
+        jobs=jobs, testproject_url=testproject_url)
     print(output)
 
 
@@ -565,8 +572,11 @@ def print_tables(
     console.print("\n")
 
     tp_jobs = to_promote - no_result
-    if tp_jobs and len(components) == 1:
-        render_testproject_yaml(tp_jobs, test_hash, testproject_url)
+    if tp_jobs:
+        if len(components) == 1 and components[0] is not None:
+            render_component_yaml(tp_jobs, testproject_url)
+        else:
+            render_integration_yaml(tp_jobs, test_hash, testproject_url)
 
 
 def integration(
