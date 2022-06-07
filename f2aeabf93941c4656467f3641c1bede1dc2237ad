@@ -63,6 +63,30 @@
       },
       "revId": "f2aeabf93941c4656467f3641c1bede1dc2237ad",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cd1776f7_77d9df00",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py",
+        "patchSetId": 7
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-06-07T07:01:03Z",
+      "side": 1,
+      "message": "Imho.. we are not only interested in the successful result, yes if we have green run it wins but incase there are no green run - we want to capture latest failed run.\n\n\nThe latest failed run(Incase of no green run) is what we want to show to user in \"Logs of failing jobs\"\n~~~\nLogs of failing jobs:\nhttps://logserver.rdoproject.org/66/43466/3/check/periodic-tripleo-ci-centos-9-ovb-3ctlr_1comp-featureset001-tripleo-wallaby/ef2209f\nhttps://logserver.rdoproject.org/66/43466/3/check/periodic-tripleo-ci-centos-9-containers-multinode-tripleo-wallaby-validation/d39b479\nhttps://logserver.rdoproject.org/openstack-component-tripleo/opendev.org/openstack/tripleo-ci/master/periodic-tripleo-ci-centos-9-standalone-tripleo-wallaby-validation/97e55c6\n~~~\n\nCase 1) Lets\u0027s assume there are three run of a particular job for a particular hash - XYZ\n\nrun 1 - passed (1st june)\nrun 2 - passed (2nd june)\nrun 3 - failed (3rd june - latest run)\n\nIn this case second run wins - (run 2 - passed (2nd june) ) as its green and also latest than 1st june run(which is also green).\n\nCase 2) Lets\u0027s assume there are three run of a particular job for a particular hash - ABC and all of them failed.\n\nrun 1 - failed\nrun 2 - failed\nrun 3 - failed (latest run)\n\n\nIn this case we want to capture (run 3) - to understand what\u0027s the latest failure in a particular job is. So we do capture failed (non successful) test results as well.",
+      "parentUuid": "2880ebf1_fdf97c9b",
+      "range": {
+        "startLine": 320,
+        "startChar": 51,
+        "endLine": 320,
+        "endChar": 61
+      },
+      "revId": "f2aeabf93941c4656467f3641c1bede1dc2237ad",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
