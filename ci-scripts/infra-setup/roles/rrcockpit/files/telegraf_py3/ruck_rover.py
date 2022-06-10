@@ -151,36 +151,31 @@ def url_response_in_yaml(url):
     return processed_data
 
 
-def gather_basic_info_from_criteria(url):
-    criteria_content = url_response_in_yaml(url)
-    api_url = criteria_content['api_url']
-    base_url = criteria_content['base_url']
+def gather_basic_info_from_criteria(criteria):
+    api_url = criteria['api_url']
+    base_url = criteria['base_url']
 
     return api_url, base_url
 
 
-def find_jobs_in_integration_criteria(url, promotion_name='current-tripleo'):
-    criteria_content = url_response_in_yaml(url)
-
-    return set(criteria_content['promotions'][promotion_name]['criteria'])
-
-
-def find_jobs_in_component_criteria(url, component):
-    criteria_content = url_response_in_yaml(url)
-
-    return set(criteria_content['promoted-components'][component])
+def find_jobs_in_integration_criteria(
+        criteria, promotion_name='current-tripleo'):
+    return set(criteria['promotions'][promotion_name]['criteria'])
 
 
-def fetch_hashes_from_commit_yaml(url):
+def find_jobs_in_component_criteria(criteria, component):
+    return set(criteria['promoted-components'][component])
+
+
+def fetch_hashes_from_commit_yaml(criteria):
     """
     This function finds commit hash, distro hash, extended_hash from commit.yaml
     :param url for commit.yaml
     :returns values for commit_hash, distro_hash, extended_hash
     """
-    criteria_content = url_response_in_yaml(url)
-    commit_hash = criteria_content['commits'][0]['commit_hash']
-    distro_hash = criteria_content['commits'][0]['distro_hash']
-    extended_hash = criteria_content['commits'][0]['extended_hash']
+    commit_hash = criteria['commits'][0]['commit_hash']
+    distro_hash = criteria['commits'][0]['distro_hash']
+    extended_hash = criteria['commits'][0]['extended_hash']
     if extended_hash == "None":
         extended_hash = None
 
@@ -634,7 +629,8 @@ def track_integration_promotion(
         promotion_name, aggregate_hash):
 
     url = config[stream]['criteria'][distro][release]['int_url']
-    api_url, base_url = gather_basic_info_from_criteria(url)
+    criteria = url_response_in_yaml(url)
+    api_url, base_url = gather_basic_info_from_criteria(criteria)
 
     promotion = get_dlrn_promotions(api_url, promotion_name)
 
@@ -655,7 +651,7 @@ def track_integration_promotion(
      jobs_passed, jobs_failed) = conclude_results_from_dlrn(dlrn_jobs)
 
     jobs_in_criteria = find_jobs_in_integration_criteria(
-        url, promotion_name=promotion_name)
+        criteria, promotion_name=promotion_name)
     jobs_to_promote = jobs_in_criteria.difference(jobs_passed)
     jobs_pending = jobs_in_criteria.difference(jobs_results)
 
@@ -717,7 +713,8 @@ def track_component_promotion(
         config, distro, release, influx, stream, compare_upstream,
         test_component):
     url = config[stream]['criteria'][distro][release]['comp_url']
-    api_url, base_url = gather_basic_info_from_criteria(url)
+    criteria = url_response_in_yaml(url)
+    api_url, base_url = gather_basic_info_from_criteria(criteria)
     api_suffix = "api/civotes_detail.html?commit_hash="
 
     promotion_name = "current-tripleo"
@@ -730,9 +727,11 @@ def track_component_promotion(
     testproject_url = config[stream]['testproject_url']
 
     for component in components:
+        component_url = (f"{base_url}component/{component}/"
+                         "component-ci-testing/commit.yaml")
+        component_criteria = url_response_in_yaml(component_url)
         commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
-            f"{base_url}component/{component}/"
-            "component-ci-testing/commit.yaml")
+            component_criteria)
         api_response = find_results_from_dlrn_repo_status(
             api_url, commit_hash, distro_hash, extended_hash)
 
@@ -755,7 +754,7 @@ def track_component_promotion(
         dlrn_jobs = get_dlrn_results(api_response)
         (jobs_results,
          jobs_passed, jobs_failed) = conclude_results_from_dlrn(dlrn_jobs)
-        jobs_in_criteria = find_jobs_in_component_criteria(url, component)
+        jobs_in_criteria = find_jobs_in_component_criteria(criteria, component)
         jobs_to_promote = jobs_in_criteria.difference(jobs_passed)
         jobs_pending = jobs_in_criteria.difference(jobs_results)
 
