@@ -76,6 +76,7 @@ def convert_string_date_object(date_string):
 
 
 def download_file(url):
+    logging.debug("Download a file: %s", url)
     response = requests.get(url, stream=True, verify=CERT_PATH)
     response.raise_for_status()
     file_descriptor, path = mkstemp(prefix="job-output-")
@@ -85,10 +86,12 @@ def download_file(url):
                 file.write(chunk)
     os.close(file_descriptor)
 
+    logging.debug("Downloaded a file: %s", path)
     return path
 
 
 def delete_file(path):
+    logging.debug("Remove a file: %s", path)
     os.remove(path)
 
 
@@ -132,6 +135,7 @@ def find_failure_reason(url):
 
 
 def web_scrape(url):
+    logging.debug("Fetching url: %s", url)
     try:
         response = requests.get(url, verify=CERT_PATH)
         response.raise_for_status()
@@ -139,6 +143,7 @@ def web_scrape(url):
             requests.exceptions.RequestException) as err:
         raise SystemExit(err)
 
+    logging.debug("Fetched url: %s", url)
     return response.text
 
 
@@ -232,6 +237,7 @@ def get_csv(url):
         content = response.content.decode('utf-8')
         f = StringIO(content)
         reader = csv.reader(f, delimiter=',')
+        logging.debug("Fetched CSV from %s", url)
         return [content, reader]
 
 
@@ -244,9 +250,11 @@ def get_diff(control_tag, file1, test_tag, file2):
         table = Table(show_header=True, header_style="bold")
         table.add_column(control_tag, style="dim", width=85)
         table.add_column(test_tag, style="dim", width=85)
+        logging.debug("Compare files")
         for f1, f2 in zip(file1[1], file2[1]):
             if f1 != f2:
                 table.add_row(str(f1[9]), str(f2[9]))
+        logging.debug("Files compared")
         return table
 
 
@@ -356,6 +364,7 @@ def get_dlrn_results(api_response):
             logging.debug("Updating %s: %d", job.job_id, job.timestamp)
             jobs[job.job_id] = job
 
+    logging.debug("Fetched DLRN jobs")
     return jobs
 
 
@@ -367,6 +376,7 @@ def conclude_results_from_dlrn(jobs):
 
 
 def get_job_history(job_name, zuul, component=None):
+    logging.debug("Get job history: %s", job_name)
     if 'rdo' in zuul or 'redhat' in zuul:
         url = zuul + "?job_name={}".format(job_name)
 
@@ -402,10 +412,12 @@ def get_job_history(job_name, zuul, component=None):
         else:
             job_history[job_name]['OTHER'] += 1
 
+    logging.debug("Job history: %s, %s", job_name, job_history)
     return job_history
 
 
 def latest_job_results_url(api_response, all_jobs):
+    logging.debug("Get latest job url")
     logs_job = {}
     for particular_job in all_jobs:
         latest_log = {}
@@ -414,6 +426,7 @@ def latest_job_results_url(api_response, all_jobs):
                 latest_log[job.timestamp] = job.url
         logs_job[particular_job] = latest_log[max(latest_log.keys())]
 
+    logging.debug("Return latest jobs: %s", logs_job)
     return logs_job
 
 
@@ -509,6 +522,8 @@ def prepare_jobs_influxdb(all_jobs, jobs_in_criteria, jobs):
     :return job_result_list (list of dicts): List of parsed jobs.
     """
 
+    logging.debug("Preparing influxdb")
+
     job_result_list = []
     for job_name in sorted(all_jobs):
         job = jobs.get(job_name)
@@ -530,6 +545,7 @@ def prepare_jobs_influxdb(all_jobs, jobs_in_criteria, jobs):
                                if status == INFLUX_FAILED else "N/A"),
         }
         job_result_list.append(job_result)
+    logging.debug("Prepared influxdb: %s", job_result_list)
     return job_result_list
 
 
@@ -638,6 +654,7 @@ def track_integration_promotion(
         config, distro, release, influx, stream, compare_upstream,
         promotion_name, aggregate_hash):
 
+    logging.debug("Starting integration track")
     url = config[stream]['criteria'][distro][release]['int_url']
     criteria = url_response_in_yaml(url)
     api_url, base_url = gather_basic_info_from_criteria(criteria)
@@ -692,6 +709,7 @@ def track_integration_promotion(
             compare_upstream, component, components,
             api_response, pkg_diff, test_hash, periodic_builds_url,
             upstream_builds_url, testproject_url)
+    logging.debug("Finished integration track")
 
 
 def get_components_diff(
@@ -722,6 +740,8 @@ def get_components_diff(
 def track_component_promotion(
         config, distro, release, influx, stream, compare_upstream,
         test_component):
+    logging.debug("Starting component track")
+
     url = config[stream]['criteria'][distro][release]['comp_url']
     criteria = url_response_in_yaml(url)
     api_url, base_url = gather_basic_info_from_criteria(criteria)
@@ -737,6 +757,7 @@ def track_component_promotion(
     testproject_url = config[stream]['testproject_url']
 
     for component in components:
+        logging.debug("Fetching component: %s data", component)
         component_url = (f"{base_url}component/{component}/"
                          "component-ci-testing/commit.yaml")
         component_criteria = url_response_in_yaml(component_url)
@@ -792,6 +813,9 @@ def track_component_promotion(
                 compare_upstream, component, components,
                 api_response, pkg_diff, test_hash, periodic_builds_url,
                 upstream_builds_url, testproject_url)
+        logging.debug("Finished component: %s data", component)
+
+    logging.debug("Finshed component track")
 
 
 @ click.command()
