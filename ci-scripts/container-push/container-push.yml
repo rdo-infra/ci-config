@@ -23,6 +23,13 @@
         password: "{{ lookup('env','DOCKERHUB_PASSWORD') }}"
         auth_url: "https://index.{{ registry_host }}/v1/"
         schema: "v2_s2"
+      quay_rdoproject:
+        host: "{{ registry_host }}"
+        namespace: "{{ target_namespace }}"
+        username: "{{ target_namespace }}+cirobot"
+        password: "{{ lookup('env', target_namespace + '_PASSWORD') }}"
+        auth_url: "https://index.{{ registry_host }}/v1/"
+        schema: "v2_s2"
       quay:
         host: "quay.io"
         namespace: "{{ target_namespace }}"
@@ -40,8 +47,12 @@
         schema: "v2_s1"
     # Add the list of registries we want to enable from
     # target_registries_group
-    target_registries_to_enable:
-      - docker
+    target_registries_to_enable: >-
+      {%- if (release not in ["victoria"] and distro_name in ["centos"]) -%}
+      quay_rdoproject
+      {%- else -%}
+      docker
+      {%- endif -%}
 
   tasks:
 
