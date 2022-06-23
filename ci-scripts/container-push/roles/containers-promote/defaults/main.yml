@@ -21,9 +21,9 @@ target_namespace: "tripleo{{ release }}"
 source_registry:
   host: "{{ registry_hostname }}"
   namespace: "{{ source_namespace }}"
-  username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
-  password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
-  auth_url: "https://{{ registry_hostname }}/v2/"
+  username: "{{ source_namespace }}+cirobot"
+  password: "{{ lookup('env', source_namespace + '_PASSWORD') }}"
+  auth_url: "https://index.{{ registry_hostname }}/v1/"
 default_dlrn_host: https://trunk.rdoproject.org
 pattern_file: /tmp/images_pattern_file
 ppc_tag: ppc64le
