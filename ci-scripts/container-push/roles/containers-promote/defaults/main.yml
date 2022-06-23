@@ -16,14 +16,24 @@ ppc_containers_file: "parsed_ppc_containers-{{ distro_name }}-{{ distro_version 
 missing_ppc_containers_file: "missing_parsed_ppc_containers-{{ distro_name }}-{{ distro_version }}-{{ release }}.txt"
 registry_hostname: quay.rdoproject.org
 registry_api: "https://{{ registry_hostname }}:8443/oapi/v1/namespaces/tripleo{{ release }}/imagestreamtags"
-source_namespace: "tripleo{{ release }}"
-target_namespace: "tripleo{{ release }}"
+source_namespace: >
+      {%- if (release not in ["victoria"] and distro_name in ["centos"]) -%}
+      "tripleo{{ release }}{{ ansible_distribution|lower }}{{ ansible_distribution_major_version }}"
+      {%- else -%}
+      "tripleo{{ release }}"
+      {%- endif -%}
+target_namespace: >
+      {%- if (release not in ["victoria"] and distro_name in ["centos"]) -%}
+      "tripleo{{ release }}{{ ansible_distribution|lower }}{{ ansible_distribution_major_version }}"
+      {%- else -%}
+      "tripleo{{ release }}"
+      {%- endif -%}
 source_registry:
   host: "{{ registry_hostname }}"
   namespace: "{{ source_namespace }}"
-  username: "{{ lookup('env','RDOPROJECT_USERNAME') }}"
-  password: "{{ lookup('env','RDOPROJECT_PASSWORD') }}"
-  auth_url: "https://{{ registry_hostname }}/v2/"
+  username: "{{ source_namespace }}+cirobot"
+  password: "{{ lookup('env', source_namespace + '_PASSWORD') }}"
+  auth_url: "https://index.{{ registry_hostname }}/v1/"
 default_dlrn_host: https://trunk.rdoproject.org
 pattern_file: /tmp/images_pattern_file
 ppc_tag: ppc64le
