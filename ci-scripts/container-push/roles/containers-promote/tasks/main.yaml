@@ -86,11 +86,8 @@
       register: ppc_built_images
 
     - name: Login to source registry
-      docker_login:
-        registry_url: "{{ source_registry.auth_url }}"
-        username: "{{ source_registry.username }}"
-        password: "{{ source_registry.password }}"
-        reauthorize: "yes"
+      shell: |
+        docker login -u {{ source_registry.username }} -p {{ source_registry.password }} {{ source_registry.host }}
       no_log: "yes"
       tags:
         - rdoproject_push

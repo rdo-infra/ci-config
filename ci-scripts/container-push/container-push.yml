@@ -24,7 +24,7 @@
         auth_url: "https://index.{{ registry_host }}/v1/"
         schema: "v2_s2"
       quay_rdoproject:
-        host: "{{ registry_host }}"
+        host: "quay.rdoproject.org"
         namespace: "{{ target_namespace }}"
         username: "{{ target_namespace }}+cirobot"
         password: "{{ lookup('env', target_namespace + '_PASSWORD') }}"
@@ -49,7 +49,7 @@
     # target_registries_group
     target_registries_to_enable: >-
       {%- if (release not in ["victoria"] and distro_name in ["centos"]) -%}
-      quay_rdoproject
+      quay
       {%- else -%}
       docker
       {%- endif -%}
