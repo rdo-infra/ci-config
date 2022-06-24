@@ -23,9 +23,14 @@ from rich.table import Table
 
 console = Console()
 
-# Use system-provided CA bundle instead of the one installed with pip
-# in certifi.
-CERT_PATH = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
+# Use user-provided CA bundle or fallback to system-provided CA bundle.
+# Ensure that your CA bundle includes Red Hat's certificate authority,
+# because downstream uses self-signed certificates in certificate chain.
+# Requests uses certificates from the package certifi by default which
+# is missing Red Hat's certificate authority.
+# Ref.: https://password.corp.redhat.com/RH-IT-Root-CA.crt
+CERT_PATH = os.environ.get('CURL_CA_BUNDLE',
+            '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt')
 dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
 
 MATRIX = {
