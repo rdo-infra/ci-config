@@ -1,10 +1,7 @@
 ---
 - name: Login to registry
-  docker_login:
-    registry_url: "{{ registry.auth_url }}"
-    username: "{{ registry.username }}"
-    password: "{{ registry.password }}"
-    reauthorize: "yes"
+  shell: |
+    docker login -u {{ registry.username }} -p {{ registry.password }} {{ registry.host }}
   no_log: true
   when: "registry.auth_url is defined and registry.auth_url != 'unused'"
 

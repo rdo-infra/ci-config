@@ -28,7 +28,7 @@ username: >-
   {%- endif -%}
 password: >-
   {% if release not in ["victoria"] -%}
-  {{ source_namespace }}_PASSWORD
+  {{ lookup('env' source_namespace + '_PASSWORD') }}
   {%- else -%}
   {{ lookup('env', 'RDOPROJECT_PASSWORD') }}
   {%- endif -%}
