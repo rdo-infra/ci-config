@@ -78,51 +78,7 @@ read_bz(){
 }
 
 read_skipped(){
-    skiplist -csv -release master \
-        -job periodic-tripleo-ci-centos-8-standalone-skipped-tempest-master \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario001-skipped-tempest-master \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario002-skipped-tempest-master \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario003-skipped-tempest-master \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario004-skipped-tempest-master \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario007-skipped-tempest-master \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario010-skipped-tempest-master \
-
-    skiplist -csv -release wallaby \
-        -job periodic-tripleo-ci-centos-8-standalone-skipped-tempest-wallaby \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario001-skipped-tempest-wallaby \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario002-skipped-tempest-wallaby \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario003-skipped-tempest-wallaby \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario004-skipped-tempest-wallaby \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario007-skipped-tempest-wallaby \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario010-skipped-tempest-wallaby
-
-    skiplist -csv -release victoria \
-        -job periodic-tripleo-ci-centos-8-standalone-skipped-tempest-victoria \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario001-skipped-tempest-victoria \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario002-skipped-tempest-victoria \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario003-skipped-tempest-victoria \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario004-skipped-tempest-victoria \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario007-skipped-tempest-victoria \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario010-skipped-tempest-victoria
-
-    skiplist -csv -release ussuri \
-        -job periodic-tripleo-ci-centos-8-standalone-skipped-tempest-ussuri \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario001-skipped-tempest-ussuri \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario002-skipped-tempest-ussuri \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario003-skipped-tempest-ussuri \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario004-skipped-tempest-ussuri \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario007-skipped-tempest-ussuri \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario010-skipped-tempest-ussuri
-
-    skiplist -csv -release train \
-        -job periodic-tripleo-ci-centos-8-standalone-skipped-tempest-train \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario001-skipped-tempest-train \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario002-skipped-tempest-train \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario003-skipped-tempest-train \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario004-skipped-tempest-train \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario007-skipped-tempest-train \
-        -job periodic-tripleo-ci-centos-8-standalone-scenario010-skipped-tempest-train \
-
+    skiplist -csv
 }
 
 read_pass(){
