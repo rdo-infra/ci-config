@@ -125,12 +125,6 @@ read_skipped(){
 
 }
 
-read_pass(){
-
-    skiplist.py
-
-}
-
 read_drop(){
 
     echo "ignore: drop does not execute python, just sql"
@@ -166,7 +160,6 @@ while true; do
     # load_mariadb noop 2>&1 | tee /tmp/run.log
     load_mariadb drop 2>&1 | tee -a /tmp/run.log
     sleep 5;
-    load_mariadb pass 2>&1 | tee -a /tmp/run.log
     load_mariadb lp 2>&1 | tee -a /tmp/run.log
     load_mariadb bz 2>&1 | tee -a /tmp/run.log
     load_mariadb skipped 2>&1 | tee -a /tmp/run.log
