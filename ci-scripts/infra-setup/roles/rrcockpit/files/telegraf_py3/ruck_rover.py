@@ -34,7 +34,7 @@ CERT_PATH = os.environ.get(
 dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
 
 MATRIX = {
-    "centos-8": ["wallaby", "victoria", "ussuri", "train"],
+    "centos-8": ["wallaby", "train"],
     "centos-9": ["master", "wallaby"],
     "rhel-8": ["osp17", "osp16-2"],
     "rhel-9": ["osp17"]

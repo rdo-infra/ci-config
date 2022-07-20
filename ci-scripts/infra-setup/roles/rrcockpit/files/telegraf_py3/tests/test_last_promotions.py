@@ -29,7 +29,7 @@ class TestLastPromotions(unittest.TestCase):
         master_agg_path = '/data/aggregate_master_promo.yaml'
         self.url = last_promotions.DEFAULT_PROMOTER_BASE_URL
         self.upstream_releases = [
-            'master', 'victoria', 'ussuri', 'train']
+            'master', 'train']
         with open(full_path + master_agg_path, 'r') as stream:
             self.master_agg = yaml.safe_load(stream)
         with open(full_path + '/data/all_master_promo', 'r') as f:
