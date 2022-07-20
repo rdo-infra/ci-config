@@ -635,7 +635,7 @@ def print_tables(
 
     tp_jobs = to_promote - no_result
     if tp_jobs:
-        if len(components) == 1 and components[0] is not None:
+        if len(components) != 0 and components[0] is not None:
             render_component_yaml(tp_jobs, testproject_url)
         else:
             render_integration_yaml(tp_jobs, test_hash, testproject_url)
