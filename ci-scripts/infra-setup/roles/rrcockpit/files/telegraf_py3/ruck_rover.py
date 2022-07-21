@@ -596,10 +596,10 @@ def print_tables(
     execute if there are failing jobs in criteria and if
     you are only looking at one component and not all components
     """
-    if failed:
-        status = "Red"
-    elif not to_promote:
+    if not to_promote:
         status = "Green"
+    elif failed:
+        status = "Red"
     else:
         status = "Yellow"
 
