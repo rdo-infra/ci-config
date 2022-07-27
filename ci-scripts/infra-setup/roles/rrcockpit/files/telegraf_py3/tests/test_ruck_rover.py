@@ -1,3 +1,4 @@
+import json
 import os
 import unittest
 from unittest import mock
@@ -332,7 +333,7 @@ class TestRuckRoverComponent(unittest.TestCase):
 
         ruck_rover.track_component_promotion(
             self.config, 'centos-8', 'wallaby', False,
-            'upstream', compare_upstream=False, test_component='all')
+            'upstream', test_component='all')
 
         m_yaml.assert_any_call("http://wallaby_comp")
         m_dlrn.assert_not_called()
@@ -373,7 +374,7 @@ class TestRuckRoverComponent(unittest.TestCase):
 
         ruck_rover.track_component_promotion(
             self.config, 'centos-8', 'wallaby', False,
-            'upstream', compare_upstream=False, test_component=component)
+            'upstream', test_component=component)
 
         m_yaml.assert_any_call("http://wallaby_comp")
         m_results.assert_called_with(
@@ -469,11 +470,12 @@ class TestRuckRoverWithCommonSetup(unittest.TestCase):
 
     @mock.patch('requests.get')
     def test_get_job_history(self, mock_get):
-        mock_resp = self._mock_response(text=self.data, raise_for_status=None)
+        mock_resp = self._mock_response(json_data=json.loads(self.data))
         mock_get.return_value = mock_resp
-        job = "periodic-tripleo-ci-centos-8-standalone-master"
+        job = ("periodic-tripleo-ci-centos-8-standalone-full-tempest-"
+               "scenario-master")
         zb_periodic = "https://review.rdoproject.org/zuul/api/builds"
-        history = ruck_rover.get_job_history(job, zb_periodic)
+        history = ruck_rover.get_job_history([job], zb_periodic)
         self.assertIn(job, history.keys())
         self.assertEqual(history[job]['SUCCESS'], 3)
         self.assertEqual(history[job]['FAILURE'], 2)
@@ -518,7 +520,6 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         self.release = "wallaby"
         self.influx = True
         self.stream = "upstream"
-        self.compare_upstream = False
 
     def test_component(
             self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
@@ -576,7 +577,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
         ruck_rover.track_component_promotion(
             self.config, self.distro, self.release, self.influx,
-            self.stream, self.compare_upstream, component)
+            self.stream, component)
 
         job1 = ('jobs_result,job_type=component,job_name=failed'
                 ',release=wallaby name="promoted-components",test_hash="c6_03"'
@@ -661,7 +662,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
         ruck_rover.track_integration_promotion(
             self.config, self.distro, self.release, self.influx,
-            self.stream, self.compare_upstream, promotion_name,
+            self.stream, promotion_name,
             aggregate_hash)
 
         job1 = ('jobs_result,job_type=integration,job_name=failed'
