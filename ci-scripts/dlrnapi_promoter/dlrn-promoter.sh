@@ -24,7 +24,7 @@ if [[ $PROMOTER_TYPE == "upstream" ]]; then
                        "CentOS-9/master" "CentOS-9/wallaby" )
 else
     DEFAULT_RELEASES=( "RedHat-8/rhos-16.2" "RedHat-8/rhos-17" \
-                       "RedHat-9/rhos-17" )
+                       "RedHat-9/rhos-17" "RedHat-9/rhos-17.1" )
 fi
 
 declare -p DEFAULT_RELEASES

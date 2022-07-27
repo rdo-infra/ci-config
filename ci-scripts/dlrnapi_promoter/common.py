@@ -227,7 +227,8 @@ def get_log_file(env, release_config, log=None):
 
 def get_release_map(release):
     downstream_release_map = {'osp16-2': 'rhos-16.2',
-                              'osp17': 'rhos-17'}
+                              'osp17': 'rhos-17',
+                              'osp17-1': 'rhos-17.1'}
     if release.startswith("osp"):
         return downstream_release_map[release]
     else:
