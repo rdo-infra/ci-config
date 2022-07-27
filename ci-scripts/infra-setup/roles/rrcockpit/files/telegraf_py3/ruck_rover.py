@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import csv
-import json
 import logging
 import os
+import re
 import time
 from datetime import datetime
 from io import StringIO
@@ -54,6 +54,10 @@ ALL_COMPONENTS = set([
 INFLUX_PASSED = 9
 INFLUX_PENDING = 5
 INFLUX_FAILED = 0
+
+ZUUL_JOBS_LIMIT = 1000
+ZUUL_JOB_HISTORY_THRESHOLD = 5
+ZUUL_JOB_REGEX = re.compile("periodic-(?P<job_name>.*)-(master|wallaby|train)")
 
 
 def download_file(url):
@@ -325,45 +329,56 @@ def get_dlrn_results(api_response):
     return jobs
 
 
-def get_job_history(job_name, zuul, component=None):
-    logging.debug("Get job history: %s", job_name)
-    if 'rdo' in zuul or 'redhat' in zuul:
-        url = zuul + "?job_name={}".format(job_name)
+def get_upstream_jobs(jobs):
+    job_names_upstream = set()
+    for job_name in jobs:
+        if 'featureset' in job_name:
+            # NOTE(dasm): Featureset jobs do not exist upstream
+            continue
 
-    else:
-        # upstream
-        upstream_job = job_name.split("-")
-        # remove periodic-
-        del upstream_job[0]
-        # remove -branch
-        del upstream_job[-1]
-        if component:
-            # component jobs remove both -master and -component
-            del upstream_job[-1]
+        job_matched = ZUUL_JOB_REGEX.match(job_name)
+        if job_matched:
+            name_matched = job_matched.group('job_name')
+            logging.debug("Matched name: %s -> %s", job_name, name_matched)
+            job_names_upstream.add(name_matched)
 
-        upstream_job = '-'.join([str(elem) for elem in upstream_job])
-        url = zuul + "?job_name={}".format(upstream_job)
+    return job_names_upstream
 
-    out = json.loads(web_scrape(url))
 
-    # key job_name, value = { SUCCESS: count,
-    #                         FAILURE: count,
-    #                         OTHER: count}
-    job_history = {}
-    job_history[job_name] = {'SUCCESS': 0, 'FAILURE': 0, 'OTHER': 0}
-    limit = 5
-    for index, execution in enumerate(out):
-        if index == limit:
-            break
-        if execution['result'] == "SUCCESS":
-            job_history[job_name]['SUCCESS'] += 1
-        elif execution['result'] == "FAILURE":
-            job_history[job_name]['FAILURE'] += 1
+def get_job_history(jobs, url):
+    logging.debug("Fetching jobs history")
+    response = requests.get(
+        url,
+        params={
+            'job_name': jobs,
+            'limit': ZUUL_JOBS_LIMIT,
+            'project': 'openstack/tripleo-ci'
+        },
+        headers={'Accept': 'application/json'}
+    )
+    logging.debug(response.url)
+
+    history = {}
+    for index, job in enumerate(response.json()):
+        job_name = job['job_name']
+        result = job['result']
+
+        job_history = history.setdefault(
+            job_name, {'SUCCESS': 0, 'FAILURE': 0, 'OTHER': 0})
+
+        if (job_history['SUCCESS'] + job_history['FAILURE']
+                + job_history['OTHER']) >= ZUUL_JOB_HISTORY_THRESHOLD:
+            continue
+
+        if result == "SUCCESS":
+            job_history['SUCCESS'] += 1
+        elif result == "FAILURE":
+            job_history['FAILURE'] += 1
         else:
-            job_history[job_name]['OTHER'] += 1
+            job_history['OTHER'] += 1
 
-    logging.debug("Job history: %s, %s", job_name, job_history)
-    return job_history
+    logging.debug("Return jobs history")
+    return history
 
 
 def latest_job_results_url(api_response, all_jobs):
@@ -394,7 +409,6 @@ def print_a_set_in_table(jobs, header="Job name"):
 def print_failed_in_criteria(jobs,
                              periodic_builds_url,
                              upstream_builds_url,
-                             compare_upstream,
                              component=None):
 
     if not jobs:
@@ -406,32 +420,18 @@ def print_failed_in_criteria(jobs,
     table.add_column("Integration PASSED History", width=15)
     table.add_column("Integration FAILURE History", width=15)
     table.add_column("Integration Other History", width=15)
-    if compare_upstream:
-        table.add_column("Upstream PASSED History", width=10)
-        table.add_column("Upstream FAILURE History", width=10)
-        table.add_column("Upstream Other History", width=10)
-    for job in jobs:
-        int_history = get_job_history(job,
-                                      periodic_builds_url,
-                                      component)
-        if compare_upstream:
-            # do not look for ovb jobs in upstream
-            if "featureset" not in job:
-                up_history = get_job_history(job,
-                                             upstream_builds_url,
-                                             component)
-                table.add_row(job,
-                              str(int_history[job]['SUCCESS']),
-                              str(int_history[job]['FAILURE']),
-                              str(int_history[job]['OTHER']),
-                              str(up_history[job]['SUCCESS']),
-                              str(up_history[job]['FAILURE']),
-                              str(up_history[job]['OTHER']))
-        else:
-            table.add_row(job,
-                          str(int_history[job]['SUCCESS']),
-                          str(int_history[job]['FAILURE']),
-                          str(int_history[job]['OTHER']))
+
+    upstream_jobs = get_upstream_jobs(jobs)
+    internal_history = get_job_history(jobs, periodic_builds_url)
+    upstream_history = get_job_history(upstream_jobs, upstream_builds_url)
+
+    internal_history.update(upstream_history)
+    for job_name, job_stats in sorted(internal_history.items()):
+        table.add_row(
+            job_name,
+            str(job_stats['SUCCESS']),
+            str(job_stats['FAILURE']),
+            str(job_stats['OTHER']))
     console.print(table)
 
 
@@ -443,12 +443,12 @@ def load_conf_file(config_file):
 
 
 def query_zuul_job_details(
-        job_names, limit=1000,
+        job_names,
         url="https://review.rdoproject.org/zuul/api/builds"):
 
     response = requests.get(
         url,
-        params={'job_name': job_names, 'limit': limit},
+        params={'job_name': job_names, 'limit': ZUUL_JOBS_LIMIT},
         headers={'Accept': 'application/json'}
     )
 
@@ -564,7 +564,7 @@ def render_influxdb(jobs, job_extra, promotion, promotion_extra):
     print(output)
 
 
-def render_tables(jobs, timestamp, under_test_url, compare_upstream, component,
+def render_tables(jobs, timestamp, under_test_url, component,
                   components, api_response, pkg_diff, test_hash,
                   periodic_builds_url, upstream_builds_url, testproject_url):
     """
@@ -602,7 +602,6 @@ def render_tables(jobs, timestamp, under_test_url, compare_upstream, component,
     print_failed_in_criteria(to_promote,
                              periodic_builds_url,
                              upstream_builds_url,
-                             compare_upstream,
                              component)
     log_urls = latest_job_results_url(api_response, failed)
     if log_urls:
@@ -640,8 +639,8 @@ def integration(
 
 
 def track_integration_promotion(
-        config, distro, release, influx, stream, compare_upstream,
-        promotion_name, aggregate_hash):
+        config, distro, release, influx, stream, promotion_name,
+        aggregate_hash):
 
     logging.debug("Starting integration track")
     url = config[stream]['criteria'][distro][release]['int_url']
@@ -687,7 +686,7 @@ def track_integration_promotion(
         render_influxdb(jobs, job_extra, promotion, promotion_extra)
     else:
         render_tables(
-            jobs, timestamp, under_test_url, compare_upstream, component,
+            jobs, timestamp, under_test_url, component,
             components, api_response, pkg_diff, test_hash,
             periodic_builds_url, upstream_builds_url, testproject_url)
 
@@ -720,8 +719,7 @@ def get_components_diff(
 
 
 def track_component_promotion(
-        config, distro, release, influx, stream, compare_upstream,
-        test_component):
+        config, distro, release, influx, stream, test_component):
     logging.debug("Starting component track")
 
     url = config[stream]['criteria'][distro][release]['comp_url']
@@ -785,7 +783,7 @@ def track_component_promotion(
 
         else:
             render_tables(
-                jobs, timestamp, under_test_url, compare_upstream, component,
+                jobs, timestamp, under_test_url, component,
                 components, api_response, pkg_diff, test_hash,
                 periodic_builds_url, upstream_builds_url, testproject_url)
         logging.debug("Finished component: %s data", component)
@@ -802,7 +800,6 @@ def track_component_promotion(
 @ click.option("--component",
                type=click.Choice(sorted(ALL_COMPONENTS)))
 @ click.option("--influx", is_flag=True, default=False)
-@ click.option("--compare_upstream", is_flag=True, default=False)
 @ click.option("--aggregate_hash",
                required=False,
                default="tripleo-ci-testing",
@@ -818,7 +815,6 @@ def main(release,
          config_file,
          influx=False,
          component=None,
-         compare_upstream=False,
          aggregate_hash="tripleo-ci-testing",
          promotion_name="current-tripleo",
          verbose=False):
@@ -846,12 +842,11 @@ def main(release,
     logging.info("Starting script: %s - %s", distro, release)
     if component:
         track_component_promotion(
-            config, distro, release, influx, stream, compare_upstream,
-            component)
+            config, distro, release, influx, stream, component)
     else:
         track_integration_promotion(
-            config, distro, release, influx, stream, compare_upstream,
-            promotion_name, aggregate_hash)
+            config, distro, release, influx, stream, promotion_name,
+            aggregate_hash)
 
 
 if __name__ == '__main__':
