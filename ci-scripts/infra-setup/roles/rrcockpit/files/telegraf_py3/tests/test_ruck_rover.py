@@ -425,13 +425,14 @@ class TestRuckRoverComponent(unittest.TestCase):
         m_consistent.return_value = "consistent"
         m_api = mock.MagicMock()
         m_pr = mock.MagicMock()
-        m_api.api_promotions_get_with_http_info.return_value = [[m_pr]]
+        m_api.api_promotions_get.return_value = [m_pr]
         m_def_api.return_value = m_api
 
         result = ruck_rover.get_dlrn_promotions("api_url", "promotion", None)
 
         m_api_client.assert_called_with(host="api_url")
-        m_promo_query.assert_called_with(limit=1, promote_name="promotion")
+        m_promo_query.assert_called_with(
+            promote_name="promotion", component=None)
 
         self.assertEqual(result, m_pr)
 
