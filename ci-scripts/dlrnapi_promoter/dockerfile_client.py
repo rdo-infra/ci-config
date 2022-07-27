@@ -6,7 +6,7 @@ import logging
 import os
 
 import paramiko
-from common import PromotionError
+from common import PromotionError, get_release_map
 
 
 class DockerfileConnectionClient(object):
@@ -61,7 +61,7 @@ class DockerfileClient(object):
 
     def __init__(self, config):
         self.config = config
-        self.release = config.release
+        self.release = get_release_map(self.release)
         self.git_root = self.config.git_root
         self.distro_name = self.config.distro_name
         self.distro_version = self.config.distro_version
@@ -71,10 +71,6 @@ class DockerfileClient(object):
         self.user = server_conf[qcow_server]['user']
         self.root = self.config.dockerfile_root
         self.host = server_conf[qcow_server]['host']
-        downstream_release_map = {'osp16-2': 'rhos-16.2',
-                                  'osp17': 'rhos-17'}
-        if self.config.release.startswith('osp'):
-            self.release = downstream_release_map[self.release]
 
         self.client = DockerfileConnectionClient(server_conf[qcow_server])
         self.images_dir = os.path.join(
