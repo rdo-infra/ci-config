@@ -785,33 +785,23 @@ def track_component_promotion(
     logging.debug("Finshed component track")
 
 
-@ click.command()
 @click.option("--verbose", is_flag=True, default=False)
-@ click.option("--release", default='master',
-               type=click.Choice(RELEASES))
-@ click.option("--distro", default='centos-9',
-               type=click.Choice(DISTROS))
-@ click.option("--component",
-               type=click.Choice(sorted(ALL_COMPONENTS)))
-@ click.option("--influx", is_flag=True, default=False)
-@ click.option("--aggregate_hash",
-               required=False,
-               default="tripleo-ci-testing",
-               # TO-DO w/ tripleo-get-hash
-               help=("default:tripleo-ci-testing"
-                     "\nexample:tripleo-ci-testing/e6/ad/e6ad..."))
-@ click.option("--promotion_name", required=False, default="current-tripleo",
-               type=click.Choice(["current-tripleo", "current-tripleo-rdo"]))
-@ click.option("--config_file", default=os.path.dirname(__file__)
-               + '/conf_ruck_rover.yaml')
-def main(release,
-         distro,
-         config_file,
-         influx=False,
-         component=None,
-         aggregate_hash="tripleo-ci-testing",
-         promotion_name="current-tripleo",
-         verbose=False):
+@click.option("--influx", is_flag=True, default=False)
+@click.option("--component", default=None,
+              type=click.Choice(sorted(ALL_COMPONENTS)))
+@click.option("--aggregate_hash", default="tripleo-ci-testing",
+              # TO-DO w/ tripleo-get-hash
+              help=("default:tripleo-ci-testing"
+                    "\nexample:tripleo-ci-testing/e6/ad/e6ad..."))
+@click.option("--promotion_name", default="current-tripleo",
+              type=click.Choice(["current-tripleo", "current-tripleo-rdo"]))
+@click.option("--config_file", default=os.path.dirname(__file__)
+              + '/conf_ruck_rover.yaml')
+@click.option("--distro", default='centos-9', type=click.Choice(DISTROS))
+@click.option("--release", default='master', type=click.Choice(RELEASES))
+@click.command()
+def main(release, distro, config_file, aggregate_hash, promotion_name,
+         component, influx, verbose):
 
     if verbose:
         fmt = '%(asctime)s:%(levelname)s - %(funcName)s:%(lineno)s %(message)s'
