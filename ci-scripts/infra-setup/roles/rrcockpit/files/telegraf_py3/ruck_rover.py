@@ -224,15 +224,12 @@ def get_diff(control_tag, file1, test_tag, file2):
         return table
 
 
-def get_dlrn_promotions(api_url,
-                        promotion_name,
-                        component=None):
+def get_dlrn_promotions(api_url, promotion_name, component=None):
     """
-    This function gets latest promotion line details [1].
+    This function gets latest promotion line details [1][2].
 
     Example response:
 
-    https://dlrn.readthedocs.io/en/latest/api.html#get-api-promotions
     'aggregate_hash': '07de61e27b4e499da58b393bb5e98313',
     'commit_hash': '4d8e55c5fe0cddaa62008c105d37c5349323f366',
     'component': 'common',
@@ -252,17 +249,18 @@ def get_dlrn_promotions(api_url,
 
     [1]: https://github.com/softwarefactory-project/dlrnapi_client/
          blob/master/docs/DefaultApi.md#api_promotions_get
+    [2]: https://dlrn.readthedocs.io/en/latest/api.html#get-api-promotions
     """
     logging.debug("Getting promotion %s for %s", promotion_name, api_url)
 
     api_client = dlrnapi_client.ApiClient(host=api_url)
     api_instance = dlrnapi_client.DefaultApi(api_client)
-    query = dlrnapi_client.PromotionQuery(limit=1,
-                                          promote_name=promotion_name)
-    if component:
-        query.component = component
-    pr = api_instance.api_promotions_get_with_http_info(query)[0][0]
-    return pr
+    query = dlrnapi_client.PromotionQuery(
+        promote_name=promotion_name,
+        component=component
+    )
+    pr = api_instance.api_promotions_get(query)
+    return pr[0]
 
 
 def find_results_from_dlrn_repo_status(api_url, commit_hash,
