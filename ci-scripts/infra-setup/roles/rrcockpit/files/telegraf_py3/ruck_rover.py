@@ -405,10 +405,8 @@ def print_a_set_in_table(jobs, header="Job name"):
     console.print(table)
 
 
-def print_failed_in_criteria(jobs,
-                             periodic_builds_url,
-                             upstream_builds_url,
-                             component=None):
+def print_failed_in_criteria(
+        jobs, periodic_builds_url, upstream_builds_url):
 
     if not jobs:
         return
@@ -596,10 +594,8 @@ def render_tables(jobs, timestamp, under_test_url, component,
     print_a_set_in_table(passed, "Jobs which passed:")
     print_a_set_in_table(failed, "Jobs which failed:")
     print_a_set_in_table(no_result, "Pending running jobs")
-    print_failed_in_criteria(to_promote,
-                             periodic_builds_url,
-                             upstream_builds_url,
-                             component)
+    print_failed_in_criteria(
+        to_promote, periodic_builds_url, upstream_builds_url)
     log_urls = latest_job_results_url(api_response, failed)
     if log_urls:
         console.print("Logs of failing jobs:")
