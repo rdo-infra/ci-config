@@ -20,6 +20,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "1751251c_10020af8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 13
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-07-28T09:28:07Z",
+      "side": 1,
+      "message": "I meant something like below:-\n\n\n~~~\n-def prepare_jobs(jobs_in_criteria, dlrn_jobs):\n+def prepare_jobs(jobs_in_criteria, dlrn_jobs, influx\u003dFalse):\n     \"\"\"\n     InfluxDB follows line protocol [1]\n \n@@ -490,7 +490,6 @@ def prepare_jobs(jobs_in_criteria, dlrn_jobs):\n     :param dlrn_jobs (set): Jobs, registered by DLRN.\n     :return job_result_list (list of dicts): List of parsed jobs.\n     \"\"\"\n-\n     logging.debug(\"Preparing influxdb\")\n \n     all_jobs \u003d set(dlrn_jobs).union(jobs_in_criteria)\n@@ -508,21 +507,24 @@ def prepare_jobs(jobs_in_criteria, dlrn_jobs):\n \n         # NOTE(dasm): DLRN returns job.url without trailing \u0027/\u0027\n         log_url \u003d job.url + \u0027/\u0027 if job else \"N/A\"\n-        zuul_job \u003d zuul_jobs.get(log_url)\n-        if not zuul_job:\n-            logging.error(\"Missing job %s\", log_url)\n-            zuul_job \u003d {}\n-\n-        d \u003d zuul_job.get(\u0027duration\u0027, 0)\n-        duration \u003d time.strftime(\"%H hr %M mins %S secs\", time.gmtime(d))\n+        if influx:\n+            zuul_job \u003d zuul_jobs.get(log_url)\n+            if not zuul_job:\n+                logging.error(\"Missing job %s\", log_url)\n+                zuul_job \u003d {}\n+            d \u003d zuul_job.get(\u0027duration\u0027, 0)\n+            duration \u003d time.strftime(\"%H hr %M mins %S secs\", time.gmtime(d))\n+            reason \u003d (find_failure_reason(log_url) if status \u003d\u003d INFLUX_FAILED else \"N/A\")\n+        else:\n+            duration \u003d \"N/A\"\n+            reason \u003d \"N/A\"\n         job_result \u003d {\n             \u0027job_name\u0027: job_name,\n             \u0027criteria\u0027: job_name in jobs_in_criteria,\n             \u0027logs\u0027: log_url,\n             \u0027duration\u0027: duration,\n             \u0027status\u0027: status,\n-            \u0027failure_reason\u0027: (find_failure_reason(log_url)\n-                               if status \u003d\u003d INFLUX_FAILED else \"N/A\"),\n+            \u0027failure_reason\u0027: reason\n         }\n         job_result_list.append(job_result)\n     logging.debug(\"Prepared influxdb: %s\", job_result_list)\n\n~~~",
+      "parentUuid": "37942f39_6eabc90c",
+      "revId": "c9de5d85bc782e858a25d0eee29fab0e43f2e738",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "c357b940_3da33b3e",
         "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py",
         "patchSetId": 13
