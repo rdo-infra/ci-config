@@ -1,6 +1,69 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "37942f39_6eabc90c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 13
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-07-28T09:13:31Z",
+      "side": 1,
+      "message": "I have raised this in one of my previous comments[0] that these changes degrade the user experience of CLI users(thank you for patch[1] that improves the situation and now that we don\u0027t have to download job-output.txt). But on average this change still increases the time to get results from 3 times to 10 times. Please check pastebin[2] with the new code it took 10x time on my local machine.\n\nold code: ~30 s on average\nnew code: 1 to 4 mins on average\n\nThe increase in time is mostly because now we are doing more things which we only utilize for the dashboard and don\u0027t utilize at all for the client users, ex:-\n\n* We download the failure file download (find_failure_reason).\n* We find the duration for which the job ran.\n\nThese changes have a lot of future improvement potential for example We can start showing failure_reason/duration for which failing job ran on CLI, But Imho. We should not do that by default as that is expensive in terms of the time it takes. So maybe as a possible solution, we skip check duration/find_failure_reason when we run the script without --influx flag.\n\n\n[0] https://review.rdoproject.org/r/c/rdo-infra/ci-config/+/43161/13#message-f778aa5106137ac38da038cecea919bde7f2fbc9\n[1] https://review.rdoproject.org/r/c/rdo-infra/ci-config/+/43303/\n[2] https://paste.openstack.org/show/bXEcPNwh4VIILjqBymXK/",
+      "revId": "c9de5d85bc782e858a25d0eee29fab0e43f2e738",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c357b940_3da33b3e",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py",
+        "patchSetId": 13
+      },
+      "lineNbr": 522,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-07-28T09:13:31Z",
+      "side": 1,
+      "message": "Same comment as below for this.. We don\u0027t show duration on CLI(without --influx) - so we can skip adding this extra step.",
+      "range": {
+        "startLine": 522,
+        "startChar": 0,
+        "endLine": 522,
+        "endChar": 33
+      },
+      "revId": "c9de5d85bc782e858a25d0eee29fab0e43f2e738",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6e0c0a57_e6be99ac",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py",
+        "patchSetId": 13
+      },
+      "lineNbr": 525,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-07-28T09:13:31Z",
+      "side": 1,
+      "message": "Maybe we can add a toggle here to not call find_failure_reason(log_url) (when we run via without --influx flag)",
+      "range": {
+        "startLine": 524,
+        "startChar": 0,
+        "endLine": 525,
+        "endChar": 70
+      },
+      "revId": "c9de5d85bc782e858a25d0eee29fab0e43f2e738",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f920daee_afb9ee61",
