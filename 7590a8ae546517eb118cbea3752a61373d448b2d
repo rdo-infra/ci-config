@@ -41,6 +41,30 @@
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5dea7350_c16d1d20",
+        "filename": "ci-scripts/infra-setup/roles/toolbox/tasks/main.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 111
+      },
+      "writtenOn": "2022-08-08T11:38:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "186cd09d_deda9ab1",
+      "range": {
+        "startLine": 91,
+        "startChar": 64,
+        "endLine": 91,
+        "endChar": 72
+      },
+      "revId": "7590a8ae546517eb118cbea3752a61373d448b2d",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a952d8f0_9a43f6e9",
@@ -54,6 +78,30 @@
       "writtenOn": "2022-08-08T11:02:50Z",
       "side": 1,
       "message": "I just did a quick test and it is not working as expected, its replacing the vexxhost cronjob entry.\n\n\nI think you need a unique job name as well.\n\n\n\nhttps://docs.ansible.com/ansible/latest/collections/ansible/builtin/cron_module.html\n\nThe “name” parameter should be unique, and changing the “name” value will result in a new cron task being created (or a different one being removed).\n\n\nYou might want to read https://stackoverflow.com/questions/64483720/ansible-comment-multiple-cron-jobs which gives us clue how we can acheive two different entries here.\n\n~~~\n    loop:\n      - { job: \u0027job1\u0027, name: \"job1 name\" }\n~~~\n\n\n[zuul@undercloud ~]$ cat test.yaml \n---\n- hosts: localhost\n  vars:\n    web_directory: /var/html\n  tasks:\n    - name: Create cron job to clean OVB old and failed stacks on vexxhost\n      cron:\n        name: \u0027Cleaning old OVB stacks on vexxhost\u0027\n        minute: 30\n        job: \u003e-\n          python3 /opt/stack/ci-config/ci-scripts/infra-cleanup/tenant_cleanup/ovb_tenant_cleanup.py\n          -c \"{{ item }}\" -l \"{{ web_directory }}/clean_stacks_{{ item }}.log.txt\"\n      with_items:\n        - vexx_cloud\n        - ibm-bm2-nodepool\n\n\n[zuul@undercloud ~]$ ansible-playbook test.yaml\n\n[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match \u0027all\u0027\n\nPLAY [localhost] ****************************************************************************************************************************************************************************************************************************\n\nTASK [Gathering Facts] **********************************************************************************************************************************************************************************************************************\nok: [localhost]\n\nTASK [Create cron job to clean OVB old and failed stacks on vexxhost] ***********************************************************************************************************************************************************************\nchanged: [localhost] \u003d\u003e (item\u003dvexx_cloud)\nchanged: [localhost] \u003d\u003e (item\u003dibm-bm2-nodepool)\n\nPLAY RECAP **********************************************************************************************************************************************************************************************************************************\nlocalhost                  : ok\u003d2    changed\u003d1    unreachable\u003d0    failed\u003d0    skipped\u003d0    rescued\u003d0    ignored\u003d0   \n\n\n\n\n[zuul@undercloud ~]$ crontab -l\n#Ansible: Cleaning old OVB stacks on vexxhost\n30 * * * * python3 /opt/stack/ci-config/ci-scripts/infra-cleanup/tenant_cleanup/ovb_tenant_cleanup.py -c \"ibm-bm2-nodepool\" -l \"/var/html/clean_stacks_ibm-bm2-nodepool.log.txt\"",
+      "range": {
+        "startLine": 93,
+        "startChar": 6,
+        "endLine": 93,
+        "endChar": 49
+      },
+      "revId": "7590a8ae546517eb118cbea3752a61373d448b2d",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "97273703_92c3dbfa",
+        "filename": "ci-scripts/infra-setup/roles/toolbox/tasks/main.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 111
+      },
+      "writtenOn": "2022-08-08T11:38:52Z",
+      "side": 1,
+      "message": "Thank you for the useful link, it will make the cron task for more nicer.",
+      "parentUuid": "a952d8f0_9a43f6e9",
       "range": {
         "startLine": 93,
         "startChar": 6,
