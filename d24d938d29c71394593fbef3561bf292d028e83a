@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1fd43d25_d5ae769d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-08-08T11:58:49Z",
+      "side": 1,
+      "message": "Looks good now:-\n\nTested locally\n\n$ ansible-playbook test2.yaml\n[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match \u0027all\u0027\n[WARNING]: While constructing a mapping from /home/zuul/test2.yaml, line 8, column 9, found a duplicate dict key (name). Using last defined value only.\n\nPLAY [localhost] ****************************************************************************************************************************************************************************************************************************\n\nTASK [Gathering Facts] **********************************************************************************************************************************************************************************************************************\nok: [localhost]\n\nTASK [Create cron job to clean OVB old and failed stacks on different clouds] ***************************************************************************************************************************************************************\nchanged: [localhost] \u003d\u003e (item\u003d{\u0027job\u0027: \u0027vexx_cloud\u0027, \u0027name\u0027: \u0027Vexxhost\u0027})\nchanged: [localhost] \u003d\u003e (item\u003d{\u0027job\u0027: \u0027ibm-bm2-nodepool\u0027, \u0027name\u0027: \u0027IBM\u0027})\n\nPLAY RECAP **********************************************************************************************************************************************************************************************************************************\nlocalhost                  : ok\u003d2    changed\u003d1    unreachable\u003d0    failed\u003d0    skipped\u003d0    rescued\u003d0    ignored\u003d0   \n\n\n[zuul@undercloud ~]$ crontab -l\n#Ansible: Cleaning old OVB stacks on Vexxhost Cloud\n30 * * * * python3 /opt/stack/ci-config/ci-scripts/infra-cleanup/tenant_cleanup/ovb_tenant_cleanup.py -c \"vexx_cloud\" -l \"/var/html/clean_stacks_vexx_cloud.log.txt\"\n#Ansible: Cleaning old OVB stacks on IBM Cloud\n30 * * * * python3 /opt/stack/ci-config/ci-scripts/infra-cleanup/tenant_cleanup/ovb_tenant_cleanup.py -c \"ibm-bm2-nodepool\" -l \"/var/html/clean_stacks_ibm-bm2-nodepool.log.txt",
+      "revId": "d24d938d29c71394593fbef3561bf292d028e83a",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    }
+  ]
+}
