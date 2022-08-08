@@ -94,7 +94,10 @@
       minute: 30
       job: >-
         python3 /opt/stack/ci-config/ci-scripts/infra-cleanup/tenant_cleanup/ovb_tenant_cleanup.py
-        -c vexx_cloud -l "{{ web_directory }}/clean_stacks_vexx.log.txt"
+        -c "{{ item }}" -l "{{ web_directory }}/clean_stacks_{{ item }}.log.txt"
+    with_items:
+      - vexx_cloud
+      - ibm-bm2-nodepool
 
   - name: Create cron job to get influxdb stats on vexxhost
     cron:
