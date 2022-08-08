@@ -88,13 +88,17 @@
         bash /opt/stack/ci-config/ci-scripts/infra-cleanup/cleanup-keys.sh
         &>> "{{ web_directory }}/clean_keypairs.log.txt"
 
-  - name: Create cron job to clean OVB old and failed stacks on vexxhost
+  - name: Create cron job to clean OVB old and failed stacks on different clouds
     cron:
-      name: 'Cleaning old OVB stacks on vexxhost'
+      name: 'Cleaning old OVB stacks'
       minute: 30
+      name: "Cleaning old OVB stacks on {{ item.name }} Cloud"
       job: >-
         python3 /opt/stack/ci-config/ci-scripts/infra-cleanup/tenant_cleanup/ovb_tenant_cleanup.py
-        -c vexx_cloud -l "{{ web_directory }}/clean_stacks_vexx.log.txt"
+        -c "{{ item.job }}" -l "{{ web_directory }}/clean_stacks_{{ item.job }}.log.txt"
+    with_items:
+      - { job: 'vexx_cloud', name: "Vexxhost" }
+      - { job: 'ibm-bm2-nodepool', name: "IBM" }
 
   - name: Create cron job to get influxdb stats on vexxhost
     cron:
