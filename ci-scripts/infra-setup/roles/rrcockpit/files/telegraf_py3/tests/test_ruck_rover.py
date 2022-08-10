@@ -11,22 +11,19 @@ class TestRuckRover(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
 
-    def test_delete_file(self):
-        with patch('os.remove'):
-            ruck_rover.delete_file('foo')
-
     def test_short_find_failure_reason(self):
         obtained = ruck_rover.find_failure_reason('N/A')
         self.assertEqual("N/A", obtained)
 
-    @patch('ruck_rover.delete_file')
-    @patch('ruck_rover.download_file')
-    def test_find_failure_reason(self, m_download, m_delete):
+    @patch('ruck_rover.requests.get')
+    def test_find_failure_reason(self, m_get):
         full_path = os.path.dirname(os.path.abspath(__file__))
         # to-do correct path when move test file to correct place
-        m_download.return_value = full_path + "/data/failures_file"
-        m_delete.return_value = None
-        expected = "Tempest tests failed."
+        with open(full_path + "/data/failures_file") as file:
+            data = file.read()
+        m_get.return_value.text = data
+        m_get.return_value.ok = True
+        expected = "Tempest tests failed.\nReason: code\n"
         obtained = ruck_rover.find_failure_reason('www.demoourl.com')
         self.assertEqual(expected, obtained)
 
@@ -293,55 +290,6 @@ class TestRuckRover(unittest.TestCase):
         }
         self.assertEqual(expected, results)
 
-    def test_conclude_results_from_dlrn(self):
-        periodic_passed = mock.MagicMock(
-            job_id="periodic_passed",
-            success=True,
-            timestamp=1,
-            url="https://periodic_passed_url"
-        )
-        pipeline_failed = mock.MagicMock(
-            job_id="pipeline_failed",
-            success=False,
-            timestamp=4,
-            url="https://pipeline_failed_url"
-        )
-        periodic_failed_newer = mock.MagicMock(
-            job_id="periodic_failed",
-            success=False,
-            timestamp=7,
-            url="https://periodic_failed_newer_url"
-        )
-        pipeline_passed_newer = mock.MagicMock(
-            job_id="pipeline_passed",
-            success=True,
-            timestamp=8,
-            url="https://pipeline_passed_newer_url"
-        )
-        dlrn_results = {
-            'periodic_passed': periodic_passed,
-            'periodic_failed': periodic_failed_newer,
-            'pipeline_passed': pipeline_passed_newer,
-            'pipeline_failed': pipeline_failed,
-        }
-        jobs = ruck_rover.conclude_results_from_dlrn(dlrn_results)
-
-        all_jobs, passed, failed = jobs
-        self.assertEqual(all_jobs, set([
-            "periodic_passed",
-            "periodic_failed",
-            "pipeline_passed",
-            "pipeline_failed",
-        ]))
-        self.assertEqual(passed, set([
-            "periodic_passed",
-            "pipeline_passed",
-        ]))
-        self.assertEqual(failed, set([
-            "periodic_failed",
-            "pipeline_failed",
-        ]))
-
 
 class TestRuckRoverComponent(unittest.TestCase):
     def setUp(self):
@@ -363,8 +311,8 @@ class TestRuckRoverComponent(unittest.TestCase):
             }
         }
 
+    @mock.patch('ruck_rover.prepare_jobs')
     @mock.patch('ruck_rover.find_jobs_in_component_criteria')
-    @mock.patch('ruck_rover.conclude_results_from_dlrn')
     @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
     @mock.patch('ruck_rover.fetch_hashes_from_commit_yaml')
     @mock.patch('ruck_rover.get_last_modified_date')
@@ -376,12 +324,11 @@ class TestRuckRoverComponent(unittest.TestCase):
     @mock.patch('ruck_rover.url_response_in_yaml')
     def test_all_components(
             self, m_yaml, m_gather, m_dlrn, m_csv, m_diff, m_promo,
-            m_consistent, m_fetch, _m_results, m_conclude, _m_jobs):
+            m_consistent, m_fetch, _m_results, _m_jobs, _m_prepare):
         m_gather.return_value = ('api_url', 'base_url')
         m_fetch.return_value = ('c6', '03', 'None')
         m_dlrn.side_effect = ['control_url', 'test_url']
         m_csv.side_effect = ["first", "second"]
-        m_conclude.return_value = set(), set(), set()
 
         ruck_rover.track_component_promotion(
             self.config, 'centos-8', 'wallaby', False,
@@ -392,8 +339,8 @@ class TestRuckRoverComponent(unittest.TestCase):
         m_csv.assert_not_called()
         m_diff.assert_not_called()
 
+    @mock.patch('ruck_rover.prepare_jobs')
     @mock.patch('ruck_rover.find_jobs_in_component_criteria')
-    @mock.patch('ruck_rover.conclude_results_from_dlrn')
     @mock.patch('ruck_rover.get_dlrn_results')
     @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
     @mock.patch('ruck_rover.get_last_modified_date')
@@ -404,7 +351,7 @@ class TestRuckRoverComponent(unittest.TestCase):
     @mock.patch('ruck_rover.url_response_in_yaml')
     def test_given_component(
             self, m_yaml, m_gather, m_comp_diff, m_fetch, m_promo,
-            m_consistent, m_results, _m_dlrn_results, m_conclude, _m_jobs):
+            m_consistent, m_results, _m_dlrn_results, _m_jobs, _m_prepare):
 
         component = "cinder"
         commit_hash = "c6"
@@ -423,7 +370,6 @@ class TestRuckRoverComponent(unittest.TestCase):
             repo_url='repo_url',
         )
         m_promo.return_value = promotion
-        m_conclude.return_value = set(), set(), set()
 
         ruck_rover.track_component_promotion(
             self.config, 'centos-8', 'wallaby', False,
@@ -539,8 +485,8 @@ class TestRuckRoverWithCommonSetup(unittest.TestCase):
 @mock.patch('ruck_rover.find_jobs_in_integration_criteria')
 @mock.patch('ruck_rover.find_results_from_dlrn_agg')
 @mock.patch('ruck_rover.web_scrape')
+@mock.patch('ruck_rover.find_failure_reason')
 @mock.patch('ruck_rover.find_jobs_in_component_criteria')
-@mock.patch('ruck_rover.conclude_results_from_dlrn')
 @mock.patch('ruck_rover.get_dlrn_results')
 @mock.patch('ruck_rover.find_results_from_dlrn_repo_status')
 @mock.patch('ruck_rover.fetch_hashes_from_commit_yaml')
@@ -575,7 +521,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
     def test_component(
             self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
-            m_find_results, m_dlrn, m_conclude, m_find_jobs_comp, m_web_scrape,
+            m_find_results, m_dlrn, m_find_jobs_comp, m_reason, m_web_scrape,
             m_find_result_aggr, _m_find_jobs_int, m_latest_job, m_zuul,
             m_print):
         component = "all"
@@ -621,8 +567,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
                 url="logs",
             )
         }
-        m_conclude.return_value = (
-            set(["passed", "failed"]), set(["passed"]), set(["failed"]))
+        m_reason.return_value = "N/A"
         m_web_scrape.return_value = "test_hash"
         m_find_jobs_comp.return_value = set(["passed", "failed", "pending"])
         m_zuul.return_value = {}
@@ -660,7 +605,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
 
     def test_integration(
             self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
-            m_find_results, m_dlrn, m_conclude, _m_find_jobs_comp,
+            m_find_results, m_dlrn, _m_find_jobs_comp, m_reason,
             m_web_scrape, _m_find_result_aggr, m_find_jobs_int, m_latest_job,
             m_zuul, m_print):
         promotion_name = "promote_name"
@@ -707,8 +652,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
                 url="logs",
             )
         }
-        m_conclude.return_value = (
-            set(["passed", "failed"]), set(["passed"]), set(["failed"]))
+        m_reason.return_value = "N/A"
         m_web_scrape.return_value = "test_hash"
         m_find_jobs_int.return_value = set(["passed", "failed", "pending"])
         m_zuul.return_value = {}
@@ -749,18 +693,20 @@ class TestRuckRoverInflux(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
 
-    def test_empty_prepare_jobs_influx(self):
+    @mock.patch('ruck_rover.find_failure_reason')
+    @mock.patch('ruck_rover.query_zuul_job_details')
+    def test_empty_prepare_jobs(self, m_zuul, m_failure_reason):
         jobs = {}
-        all_jobs = set()
         jobs_in_criteria = set()
 
-        result = ruck_rover.prepare_jobs_influxdb(
-            all_jobs, jobs_in_criteria, jobs, {})
+        result = ruck_rover.prepare_jobs(jobs_in_criteria, jobs)
         self.assertEqual([], result)
 
     @mock.patch('ruck_rover.find_failure_reason')
-    def test_prepare_jobs_influx(self, m_failure_reason):
+    @mock.patch('ruck_rover.query_zuul_job_details')
+    def test_prepare_jobs(self, m_zuul, m_failure_reason):
         m_failure_reason.return_value = 'failure_reason'
+        m_zuul.return_value = {'duration': 0}
 
         job_a = mock.MagicMock(
             job_id="job_a",
@@ -782,11 +728,9 @@ class TestRuckRoverInflux(unittest.TestCase):
             'job_c': job_c,
             'job_d': job_d
         }
-        all_jobs = set(['job_a', 'job_b', 'job_c', 'job_d'])
         jobs_in_criteria = set(['job_b', 'job_c', 'job_d'])
 
-        result = ruck_rover.prepare_jobs_influxdb(
-            all_jobs, jobs_in_criteria, jobs, {})
+        result = ruck_rover.prepare_jobs(jobs_in_criteria, jobs)
         expected = [
             {
                 'job_name': 'job_a',
@@ -794,7 +738,7 @@ class TestRuckRoverInflux(unittest.TestCase):
                 'logs': 'https://job_a_url/',
                 'duration': '00 hr 00 mins 00 secs',
                 'status': ruck_rover.INFLUX_PASSED,
-                'failure_reason': 'N/A'
+                'failure_reason': 'N/A',
             },
             {
                 'job_name': 'job_b',
@@ -802,7 +746,7 @@ class TestRuckRoverInflux(unittest.TestCase):
                 'logs': 'N/A',
                 'duration': '00 hr 00 mins 00 secs',
                 'status': ruck_rover.INFLUX_PENDING,
-                'failure_reason': 'N/A'
+                'failure_reason': 'N/A',
             },
             {
                 'job_name': 'job_c',
@@ -810,7 +754,7 @@ class TestRuckRoverInflux(unittest.TestCase):
                 'logs': 'https://job_c_url/',
                 'duration': '00 hr 00 mins 00 secs',
                 'status': ruck_rover.INFLUX_PASSED,
-                'failure_reason': 'N/A'
+                'failure_reason': 'N/A',
             },
             {
                 'job_name': 'job_d',

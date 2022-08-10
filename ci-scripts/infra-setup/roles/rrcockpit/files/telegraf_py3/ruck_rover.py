@@ -71,24 +71,24 @@ def download_file(url):
     return path
 
 
-def delete_file(path):
-    logging.debug("Remove a file: %s", path)
-    os.remove(path)
-
-
 def find_failure_reason(url):
     if url == "N/A":
         return "N/A"
 
+    url = f'{url}logs/failures_file'
+    logging.debug("Fetch failure reason: %s", url)
     try:
-        path = download_file(url + "/logs/failures_file")
+        response = requests.get(url)
     except requests.exceptions.RequestException:
+        logging.warning("Cannot connect to the url")
         return "N/A"
-    with open(path, "r") as file:
-        first_line = file.readline()
-    delete_file(path)
 
-    return first_line.rstrip()
+    if response.ok:
+        logging.debug("Fetched failure reason")
+        return response.text
+
+    logging.debug("Failed fetching reason")
+    return "N/A"
 
 
 def web_scrape(url):
@@ -323,13 +323,6 @@ def get_dlrn_results(api_response):
     return jobs
 
 
-def conclude_results_from_dlrn(jobs):
-    succeeded = set(k for k, v in jobs.items() if v.success)
-    failed = set(k for k, v in jobs.items() if not v.success)
-
-    return set(jobs.keys()), succeeded, failed
-
-
 def get_job_history(job_name, zuul, component=None):
     logging.debug("Get job history: %s", job_name)
     if 'rdo' in zuul or 'redhat' in zuul:
@@ -467,7 +460,7 @@ def query_zuul_job_details(
     return jobs
 
 
-def prepare_jobs_influxdb(all_jobs, jobs_in_criteria, dlrn_jobs, zuul_jobs):
+def prepare_jobs(jobs_in_criteria, dlrn_jobs):
     """
     InfluxDB follows line protocol [1]
 
@@ -491,14 +484,19 @@ def prepare_jobs_influxdb(all_jobs, jobs_in_criteria, dlrn_jobs, zuul_jobs):
 
     Epoch is rendered only with *1000
 
-    :param all_jobs (set): All jobs, no matter test result.
     :param jobs_in_criteria (set): Jobs whick are required for promotion.
-    :param jobs (set): Jobs, registered by DLRN, containing useful information.
+    :param dlrn_jobs (set): Jobs, registered by DLRN.
     :return job_result_list (list of dicts): List of parsed jobs.
     """
 
     logging.debug("Preparing influxdb")
 
+    all_jobs = set(dlrn_jobs).union(jobs_in_criteria)
+
+    logging.debug("Fetch jobs details")
+    zuul_jobs = query_zuul_job_details(all_jobs)
+
+    logging.debug("Parsing jobs")
     job_result_list = []
     for job_name in sorted(all_jobs):
         job = dlrn_jobs.get(job_name)
@@ -529,6 +527,7 @@ def prepare_jobs_influxdb(all_jobs, jobs_in_criteria, dlrn_jobs, zuul_jobs):
         }
         job_result_list.append(job_result)
     logging.debug("Prepared influxdb: %s", job_result_list)
+
     return job_result_list
 
 
@@ -562,11 +561,9 @@ def render_influxdb(jobs, job_extra, promotion, promotion_extra):
     print(output)
 
 
-def print_tables(
-        timestamp, hut, passed, failed, no_result, to_promote,
-        compare_upstream, component, components,
-        api_response, pkg_diff, test_hash, periodic_builds_url,
-        upstream_builds_url, testproject_url):
+def render_tables(jobs, timestamp, under_test_url, compare_upstream, component,
+                  components, api_response, pkg_diff, test_hash,
+                  periodic_builds_url, upstream_builds_url, testproject_url):
     """
     jobs_to_promote are any job that hasn't registered
     success w/ dlrn. jobs_pending are any jobs in pending.
@@ -574,6 +571,14 @@ def print_tables(
     execute if there are failing jobs in criteria and if
     you are only looking at one component and not all components
     """
+
+    passed = set(k['job_name'] for k in jobs if k['status'] == INFLUX_PASSED)
+    failed = set(k['job_name'] for k in jobs if k['status'] == INFLUX_FAILED)
+    no_result = set(
+        k['job_name'] for k in jobs if k['status'] == INFLUX_PENDING)
+    in_criteria = set(k['job_name'] for k in jobs if k['criteria'] is True)
+    to_promote = in_criteria.difference(passed)
+
     if failed:
         status = "Red"
     elif not to_promote:
@@ -584,7 +589,7 @@ def print_tables(
     component_ui = f"{component} component" if component else ""
     status_ui = f"status={status}"
     promotion_ui = f"last_promotion={timestamp}"
-    hash_ui = f"Hash_under_test={hut}"
+    hash_ui = f"Hash_under_test={under_test_url}"
     header_ui = " ".join([component_ui, status_ui, promotion_ui])
 
     console.print(header_ui)
@@ -656,17 +661,6 @@ def track_integration_promotion(
         'last_modified': last_modified,
     }
 
-    dlrn_jobs = get_dlrn_results(api_response)
-    (jobs_results,
-     jobs_passed, jobs_failed) = conclude_results_from_dlrn(dlrn_jobs)
-
-    jobs_in_criteria = find_jobs_in_integration_criteria(
-        criteria, promotion_name=promotion_name)
-    jobs_to_promote = jobs_in_criteria.difference(jobs_passed)
-    jobs_pending = jobs_in_criteria.difference(jobs_results)
-
-    all_jobs = jobs_results.union(jobs_in_criteria)
-
     job_extra = {
         'distro': distro,
         'release': release,
@@ -682,18 +676,20 @@ def track_integration_promotion(
 
     components, pkg_diff = get_components_diff(
         base_url, component, promotion_name, aggregate_hash)
+
+    jobs_in_criteria = find_jobs_in_integration_criteria(
+        criteria, promotion_name)
+    dlrn_jobs = get_dlrn_results(api_response)
+    jobs = prepare_jobs(jobs_in_criteria, dlrn_jobs)
+
     if influx:
-        zuul_jobs = query_zuul_job_details(all_jobs)
-        jobs = prepare_jobs_influxdb(
-            all_jobs, jobs_in_criteria, dlrn_jobs, zuul_jobs)
         render_influxdb(jobs, job_extra, promotion, promotion_extra)
     else:
-        print_tables(
-            timestamp, under_test_url, jobs_passed, jobs_failed,
-            jobs_pending, jobs_to_promote,
-            compare_upstream, component, components,
-            api_response, pkg_diff, test_hash, periodic_builds_url,
-            upstream_builds_url, testproject_url)
+        render_tables(
+            jobs, timestamp, under_test_url, compare_upstream, component,
+            components, api_response, pkg_diff, test_hash,
+            periodic_builds_url, upstream_builds_url, testproject_url)
+
     logging.debug("Finished integration track")
 
 
@@ -767,15 +763,6 @@ def track_component_promotion(
             'last_modified': last_modified,
         }
 
-        dlrn_jobs = get_dlrn_results(api_response)
-        (jobs_results,
-         jobs_passed, jobs_failed) = conclude_results_from_dlrn(dlrn_jobs)
-        jobs_in_criteria = find_jobs_in_component_criteria(criteria, component)
-        jobs_to_promote = jobs_in_criteria.difference(jobs_passed)
-        jobs_pending = jobs_in_criteria.difference(jobs_results)
-
-        all_jobs = jobs_results.union(jobs_in_criteria)
-
         job_extra = {
             'distro': distro,
             'release': release,
@@ -785,21 +772,21 @@ def track_component_promotion(
             'test_hash': f"{commit_hash}_{distro_hash[:8]}",
         }
         test_hash = commit_hash
-        hash_under_test = "{}/{}{}&distro_hash={}".format(
+        under_test_url = "{}/{}{}&distro_hash={}".format(
             api_url, api_suffix, commit_hash, distro_hash)
+
+        jobs_in_criteria = find_jobs_in_component_criteria(criteria, component)
+        dlrn_jobs = get_dlrn_results(api_response)
+        jobs = prepare_jobs(jobs_in_criteria, dlrn_jobs)
+
         if influx:
-            zuul_jobs = query_zuul_job_details(all_jobs)
-            jobs = prepare_jobs_influxdb(
-                all_jobs, jobs_in_criteria, dlrn_jobs, zuul_jobs)
             render_influxdb(jobs, job_extra, promotion, promotion_extra)
 
         else:
-            print_tables(
-                timestamp, hash_under_test, jobs_passed, jobs_failed,
-                jobs_pending, jobs_to_promote,
-                compare_upstream, component, components,
-                api_response, pkg_diff, test_hash, periodic_builds_url,
-                upstream_builds_url, testproject_url)
+            render_tables(
+                jobs, timestamp, under_test_url, compare_upstream, component,
+                components, api_response, pkg_diff, test_hash,
+                periodic_builds_url, upstream_builds_url, testproject_url)
         logging.debug("Finished component: %s data", component)
 
     logging.debug("Finshed component track")
