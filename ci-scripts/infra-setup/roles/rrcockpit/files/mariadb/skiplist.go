@@ -10,30 +10,30 @@ import (
     "os"
     "regexp"
     "strconv"
-    "strings"
+	//    "strings"
+	"time"
+	"flag"
 )
 
 const limit int = 10
 
 type strslice string
-func (ss *strslice) UnmarshalJSON(data []byte) error {
-    var s string
-    if err := json.Unmarshal(data, &s); err != nil {
-        return err
-    }
-    // NOTE(dasm): Get last element from job_name, which
-    // represents release.
-    // Explicitly convert string to strslice (string)
-    *ss = strslice(s[strings.LastIndex(s, "-")+1:])
-    return nil
+type Timestamp time.Time
+
+func (t *Timestamp) String() string{
+	return time.Time(*t).String()
 }
+
+
+
 
 // Job - Basic struct returned by zuul api in json format
 // Release of job, Status (PASSED|FAILED|SKIPPED), URL to logs
 type Job struct {
-    Release strslice `json:"job_name"`
-    Status string `json:"result"`
-    URL    string `json:"log_url"`
+    Release     strslice `json:"job_name"`
+    Status      string `json:"result"`
+    URL         string `json:"log_url"`
+    Timestamp   string `json:"event_timestamp"`
 }
 
 type Channel struct {
@@ -48,11 +48,21 @@ type Result struct {
 }
 
 func main() {
-    jobs := getJobs()
-    tests := make(map[string]map[string][]int)
+	var skiplist, skip_stats bool
 
-    collectData(jobs, tests)
-    reportCSV(tests)
+	flag.BoolVar(&skip_stats, "Stats", false, "Print skiplist stats")
+	flag.BoolVar(&skiplist, "Skiplist", false, "Print skiplist")
+
+	flag.Parse()
+	if (skip_stats) {
+		jobs := getJobs("")
+		tests := make(map[string]map[string][]int)
+		collectData(jobs, tests)
+		reportCSV(tests)
+	}
+	if (skiplist) {
+		fmt.Println(getSkiplistTests()[0])
+	}
 }
 
 func collectData(jobs []Job, tests map[string]map[string][]int) {
@@ -167,8 +177,10 @@ func fetchLogs(release strslice, url string, ch chan Channel) {
     ch <- channel
 }
 
-func getJobs() []Job {
-    var url = "https://review.rdoproject.org/zuul/api/builds?pipeline=openstack-periodic-weekend&limit=150"
+func getJobs(url string) []Job {
+	if url == "" {
+		url = "https://review.rdoproject.org/zuul/api/builds?pipeline=openstack-periodic-weekend&limit=150"
+	}
     var builds []Job
     response, err := http.Get(url)
     if err != nil {
