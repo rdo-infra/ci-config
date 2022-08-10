@@ -78,7 +78,7 @@ read_bz(){
 }
 
 read_skipped(){
-    skiplist
+    skiplist -Stats
 }
 
 read_drop(){
