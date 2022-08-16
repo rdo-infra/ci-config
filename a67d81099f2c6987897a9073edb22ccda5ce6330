@@ -18,6 +18,74 @@
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9e262b17_05c126a5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "Hey Amol!\nThanks for your work. That\u0027s nice starting point.\nAfter initial screening, I have some feedback. I\u0027m planning to continue reviewing it too. It\u0027s just too much to comprehend.",
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2337e51f_c2a94296",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/clean_skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "This is not needed.",
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "91eb055b_eb31ed65",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/clean_skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "This can be changed to:\n```\n  Jobs  []string\n```\nand this type [1] can be removed.\n\n\n[1]: https://review.rdoproject.org/r/c/rdo-infra/ci-config/+/44497/4/ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/clean_skiplist.go#18",
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "867693d7_bb910304",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/clean_skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "This is never used.",
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b792a6dd_f860b853",
@@ -61,6 +129,210 @@
         "endLine": 64,
         "endChar": 27
       },
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "30fb25f5_afbffbd4",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/clean_skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "Why are you reassigning `url` to `zuul_weekend_pipeline` and later doing it one more time?\n\nWouldn\u0027t it be easier to:\n```\nfunc getWeekendPipeline(url string) zuul_job_list []Job {\n    return getJobs(url)\n}\n```\n\nEDIT:\nNow, I\u0027m even wondering, why are you doing so? Cannot you use `getJobs` directly?\nIt unnecessary overcomplicates things.",
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "68eabc48_858c8d65",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/clean_skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "I think relying on only successful test runs is not viable way of deciding if test can be removed from skiplist. If the test one time passed, it doesn\u0027t mean it\u0027s stable.\n\n```\n0,periodic-tripleo-ci-centos-9-skipped-scenario001-standalone-wallaby,tempest.scenario.test_snapshot_pattern.TestSnapshotPattern.test_snapshot_pattern,3,1,3,1\n0,periodic-tripleo-ci-centos-9-skipped-scenario001-standalone-wallaby,tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_volume_boot_pattern,3,1,3,1\n```\n\nBoth tests are mentioned as ready to be removed.\n\n```\n(venv) [dasm@fedora mariadb]$ curl https://review.rdoproject.org/zuul/api/builds?job_name\u003dperiodic-tripleo-ci-centos-9-skipped-scenario001-standalone-wallaby | jq .[].\u0027result\u0027\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n100 31069  100 31069    0     0   9085      0  0:00:03  0:00:03 --:--:--  9087\n\"NODE_FAILURE\"\n\"SUCCESS\"\n\"RETRY\"\n\"SUCCESS\"\n\"SUCCESS\"\n\"FAILURE\"\n\"FAILURE\"\n\"SUCCESS\"\n\"ERROR\"\n\"FAILURE\"\n```",
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "30552d6f_3c64104a",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/clean_skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "Why are you doing that? You\u0027re repeating the same thing like in original `skiplist.go` file.\n\nEDIT:\nInstead of writing new function, you can just:\n```\njobs :\u003d getJobs(\"https://review.rdoproject.org/zuul/api/builds?pipeline\u003dopenstack-periodic-weekend\u0026result\u003dsuccess\")\n```",
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7b64acd7_a7bb1464",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/clean_skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "We need to be cautious with that. Not all passed tests might be removed. It\u0027s especially about all `keystone` tests, which need to run to preconfigure entire environment.",
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a3efe81d_771e8283",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "Why are you introducing this type? You don\u0027t seem to be using it anywhere.",
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4a40d9c2_187eceed",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "The same with this function. It\u0027s not used.",
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5b4ebff8_8c08f6a4",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "This Timestamp is never used, anywhere.",
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bcaaa00b_63612572",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "Please keep consistent indentation.\nI know it\u0027s not Python, but that was intent of original author.",
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "06b14abf_a497d5fe",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "When running without any argument, it doesn\u0027t return any values. It won\u0027t produce any output [1].\n\n\u003e (venv) [dasm@fedora mariadb]$ ./skiplist\n\nPlease preserve default behavior of printing list of all tests, if no `-Skiplist` argument is present.\n\n[1]: https://github.com/rdo-infra/ci-config/blob/master/ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/run.sh#L81",
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a5e2cbc6_dbdc5f57",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "Why are you doing that? Instead of passing empty string, you could define\n\n```\nvar url \u003d \"https://review.rdoproject.org/zuul/api/builds?pipeline\u003dopenstack-periodic-weekend\u0026limit\u003d150\"\n```\n\nand pass it as:\n```\njobs :\u003d getJobs(url)\n```\n\nKeeping it verbose allows other developers to understand the purpose of that.\nAdditionally, by keeping it local, there is no need to check inside of `getJobs` function what\u0027s going on there.",
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ced662c1_d95d56c4",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "Default [1] build happens via:\n\u003e RUN go build -o /usr/local/bin/skiplist skiplist.go\n\nIt means, that your change won\u0027t work due to:\n\n\u003e (venv) [dasm@fedora mariadb]$ go build skiplist.go \n\u003e # command-line-arguments\n\u003e ./skiplist.go:60:5: undefined: checkPassedTests\n\n[1]: https://github.com/rdo-infra/ci-config/blob/master/ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/Dockerfile#L11",
+      "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7b94ed83_ee8e19d3",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 1,
+      "message": "Please fix indentation here.",
       "revId": "a67d81099f2c6987897a9073edb22ccda5ce6330",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     },

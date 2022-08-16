@@ -34,6 +34,41 @@
       "parentUuid": "f11201f8_bb71091b",
       "revId": "d3f37dcdee5341bcbd383a19d50aba66851ba8e8",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0bf056db_a2e4f23d",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/clean_skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 0,
+      "message": "I think Marios is right here. We should avoid adding more golang code, because there is not enough expertise in our team to understand and review this code.\n\nI think, you should move required pieces of this code/file to the `skiplist.go` and keep it minimum.\n\nThe problem with Python vs. Golang is not speed. Golang uses coroutines, which allows for async. Python needs to be forced to use async.\n\nIf we\u0027re gonna reduce nested loops, it should significantly improve time execution of the code.",
+      "parentUuid": "11d41770_148e5faf",
+      "revId": "d3f37dcdee5341bcbd383a19d50aba66851ba8e8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "66ffcce6_535d7d48",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/mariadb/skiplist.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-16T20:12:53Z",
+      "side": 0,
+      "message": "Why did you remove this function? It changes the way how tests are represented and fed to DB.\n\nnew:\n\u003e 0,periodic-tripleo-ci-centos-9-skipped-scenario003-standalone-master,designate_tempest_plugin.tests.api.v2.test_recordset.RecordsetsTest.test_update_recordset,3,0,3,0\n\nvs. old:\n\u003e 0,master,designate_tempest_plugin.tests.api.v2.test_recordset.RecordsetsTest.test_update_recordset_one_field,3,0,3,0",
+      "revId": "d3f37dcdee5341bcbd383a19d50aba66851ba8e8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
