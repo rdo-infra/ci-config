@@ -17,7 +17,7 @@ COPY telegraf.d/* /etc/telegraf/telegraf.d/
 COPY *.py /usr/local/bin/
 COPY *.yaml /usr/local/bin/
 RUN mkdir -p /usr/local/bin/templates
-COPY templates/influx.j2 /usr/local/bin/templates/
+COPY templates/* /usr/local/bin/templates/
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
 CMD ["telegraf", "--debug", "--config-directory","/etc/telegraf/telegraf.d/","--input-filter", "exec"]
