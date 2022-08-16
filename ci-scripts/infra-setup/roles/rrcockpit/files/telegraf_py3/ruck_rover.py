@@ -80,7 +80,7 @@ def find_failure_reason(url):
     try:
         response = requests.get(url)
     except requests.exceptions.RequestException:
-        logging.warning("Cannot connect to the url")
+        logging.info("Cannot connect to the url")
         return "N/A"
 
     if response.ok:
@@ -513,7 +513,7 @@ def prepare_jobs(jobs_in_criteria, dlrn_jobs, influx):
         log_url = job.url + '/' if job else "N/A"
         zuul_job = zuul_jobs.get(log_url)
         if not zuul_job:
-            logging.error("Missing job %s", log_url)
+            logging.info("Missing job %s", log_url)
             zuul_job = {}
 
         d = zuul_job.get('duration', 0)
