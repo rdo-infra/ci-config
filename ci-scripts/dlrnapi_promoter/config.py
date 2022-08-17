@@ -300,6 +300,13 @@ class PromoterConfig(ConfigCore):
         """
         return os.environ.get('DLRNAPI_PASSWORD', None)
 
+    def _constructor_dlrnauth_username(self):
+        """
+        Returns the username, stored as environment variable.
+        :return: A string with the username.
+        """
+        return os.environ.get('DLRNAPI_USERNAME', None)
+
     def _constructor_qcow_server(self):
         """
         Extract the server dict from the options

@@ -292,6 +292,18 @@ class TestPromoterConfig(ConfigTestCases):
             pass
         self.assertIsNone(self.config_empty.dlrnauth_password)
 
+    def test_constructor_dlrnauth_username_present(self):
+        os.environ["DLRNAPI_USERNAME"] = "testuser"
+        self.assertEqual(self.config_empty.dlrnauth_username, "testuser")
+        del(os.environ["DLRNAPI_USERNAME"])
+
+    def test_constructor_dlrnauth_username_absent(self):
+        try:
+            del(os.environ["DLRNAPI_USERNAME"])
+        except KeyError:
+            pass
+        self.assertIsNone(self.config_empty.dlrnauth_username)
+
     def test_constructor_qcow_server_default(self):
         server_info = self.config_master.qcow_server
         self.assertIsInstance(server_info, dict)
