@@ -33,6 +33,24 @@
       "message": "Hello Dariusz,\n\nI am ruck/rovering this week and I didn\u0027t get a chance to look at the code. (I will review the code once I am off ruck/rovering)\n\nJust looking at the usage I don\u0027t understand the actual purpose of this patch, I mean patch is about \"Fetch jobs history at once\" and then we are also clubbing the removal of `--compare_upstream` flag. IMHO.. it would be good to write more details in the commit msg and list everything you are doing here.\n\nBased on the previous comment[1], I thought you want to compare with upstream always but based on testing [2] I don\u0027t see the upstream results by default. \n\nCould you please check [2] and see if that\u0027s what you intended to do here by removing `--compare_upstream`? \n\nMaybe we should discuss this patch may be in community/scrum/Separate mtg as attending the same review time is difficult because of the TZ difference.\n\n[1] https://review.rdoproject.org/r/c/rdo-infra/ci-config/+/43307/21#message-2c8bf6a9e56e904d9e6fb52763dc8e024fd0e3b1\n[2] https://paste.openstack.org/show/bQfWci4lCX8TQWHWdbHJ/",
       "revId": "e3532c1b90c6976d98d62064b82cd3406a23fdf3",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "21af56cf_4cead9a1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 21
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-08-18T18:54:20Z",
+      "side": 1,
+      "message": "Hey Sandeep,\nI\u0027m removing `--compare_upstream` option because I\u0027m pulling all data from both: upstream and midstream [2] at once.\nBecause there are differences between job names between those two environments, I need to retrieve \"upstream\" job name based on some assumptions [3].\nWhen you check your paste [4], there is no more separate column with \"upstream-only\" results, because they\u0027re added below \"periodic-*\" jobs in the same table (lines 67-69).\nThis is done due to the way how jobs info is fetched: in bulk, not per job. There is significant gain in time execution, because we don\u0027t query zuul every time, for a single job.\n\n[1]: https://review.rdoproject.org/r/c/rdo-infra/ci-config/+/43307/21/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py#419\n[2]: https://review.rdoproject.org/r/c/rdo-infra/ci-config/+/43307/21/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py#418\n[3]: https://review.rdoproject.org/r/c/rdo-infra/ci-config/+/43307/21/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py#60\n[4]: https://paste.openstack.org/show/bQfWci4lCX8TQWHWdbHJ/#67",
+      "parentUuid": "4394863e_6f1fcdff",
+      "revId": "e3532c1b90c6976d98d62064b82cd3406a23fdf3",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
