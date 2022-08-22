@@ -384,7 +384,7 @@ def print_a_set_in_table(jobs, header="Job name"):
 
     table = Table(show_header=True, header_style="bold")
     table.add_column(header, style="dim", width=80)
-    for job in jobs:
+    for job in sorted(jobs):
         table.add_row(job)
     console.print(table)
 
