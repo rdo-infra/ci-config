@@ -54,6 +54,9 @@
       {
       "live-restore": true,
       "group": "{{ docker_group.stdout }}",
+      {% if mtu is defined %}
+      "mtu": {{ mtu }},
+      {% endif %}
       }
     dest: /etc/docker/daemon.json
   register: docker_config
