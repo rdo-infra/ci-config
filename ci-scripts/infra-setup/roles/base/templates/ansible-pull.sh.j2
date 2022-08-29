@@ -1,7 +1,18 @@
 #!/bin/bash
 
-systemd-cat -t ansible-pull \
+# Allow to skip running ansible-pull e.g. from cron
+# which is useful during development and debugging.
+# Use e.g. touch /tmp/skip-ansible-pull before running
+# any ansible-playbook command from /var/lock/ansible-pull.
+# Do NOT forget to remove /tmp/skip-ansible-pull once
+# you are done!
+if [ -e /tmp/skip-ansible-pull ]; then
+    echo "Skipping ansible-pull" >&2
+    exit 1
+fi
+
+flock -n -E 2 /var/lock/ansible-pull \
     ansible-pull -d /var/lib/ansible/local \
         --clean \
-        -U {{ infra_setup_repo }} \
-        {{ infra_setup_servers_playbook }}
+        -U "{{ infra_setup_repo }}" \
+        "{{ infra_setup_servers_playbook }}"
