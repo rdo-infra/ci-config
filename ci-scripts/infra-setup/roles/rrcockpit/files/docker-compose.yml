@@ -53,8 +53,8 @@ services:
       - GF_SMTP_FROM_ADDRESSS=tripleo.ci.ruck.rover@gmail.com
       - GF_SMTP_FROM_NAME="Tripleo CI alerts"
       - GF_SMTP_EHLO_IDENTITY=dashboard-ci.tripleo.org
-      - GF_SMTP_PASSWORD=${GRAFANA_SMTP_PASSWORD:-smtppassword}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_SMTP_PASSWORD=${GRAFANA_SMTP_PASSWORD:?err}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?err}
     env_file:
       - 'grafana/env'
     depends_on:
@@ -67,7 +67,7 @@ services:
     restart: always
     container_name: grafana-sidecar
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?err}
     depends_on:
       - grafana
     volumes:
