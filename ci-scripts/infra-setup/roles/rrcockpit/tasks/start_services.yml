@@ -13,6 +13,7 @@
   environment:
     GRAFANA_ADMIN_PASSWORD: "{{ gf_admin_password['content'] | b64decode }}"
     GRAFANA_SMTP_PASSWORD: "{{ gf_smtp_password['content'] | b64decode }}"
+    MTU: "{{ mtu|default(1500) }}"
   docker_compose:
     project_src: "{{ role_path }}/files/"
     state: present
