@@ -1,7 +1,12 @@
 #!/bin/bash
 
-systemd-cat -t ansible-pull \
+if [ -e /tmp/skip-ansible-pull ]; then
+    echo "Skipping ansible-pull" >&2
+    exit 1
+fi
+
+flock -n -E 2 /var/lock/ansible-pull \
     ansible-pull -d /var/lib/ansible/local \
         --clean \
-        -U {{ infra_setup_repo }} \
-        {{ infra_setup_servers_playbook }}
+        -U "{{ infra_setup_repo }}" \
+        "{{ infra_setup_servers_playbook }}"
