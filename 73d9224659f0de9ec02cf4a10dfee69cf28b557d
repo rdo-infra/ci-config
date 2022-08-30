@@ -34,6 +34,41 @@
       "parentUuid": "c0ed558d_240fb5f6",
       "revId": "73d9224659f0de9ec02cf4a10dfee69cf28b557d",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3734fc8e_62bf3a90",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 27
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-08-30T06:41:51Z",
+      "side": 1,
+      "message": "Took another pass, looks good to me. Thanks Dariusz for working on this.",
+      "revId": "73d9224659f0de9ec02cf4a10dfee69cf28b557d",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ae4e5cde_262391eb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 27
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 671
+      },
+      "writtenOn": "2022-08-30T06:41:51Z",
+      "side": 1,
+      "message": "ad 1.\nNo, we don\u0027t. It\u0027s implemented the same way as in the past -- strip \"periodic\" and \"branch\" from the job name, and query upstream zuul about results.\n\nAck, thanks, looks like a good candidate for future improvement.\n\nex. when periodic-tripleo-ci-centos-9-scenario002-standalone-master fails, we are currently comparing with the upstream job \"tripleo-ci-centos-9-scenario002-standalone\" for all the branches, it would be good to target a particular branch. (which we are testing in periodic)\n\n\n\u003e\u003e I\u0027m not following what you\u0027re saying Sandeep. Do you mean to switch from upstream zuul to rdo zuul for all? Just for featuresets?\n\nYes, I mean just for ovb featuresets, We can compare periodic ovb jobs with ovb jobs that we run in Third party rdo jobs.\n\nad 3.\nAgain, I\u0027m not understanding what you mean here. downstream + rdo? downstream + upstream?\n\nWhen a rdo periodic job fails we currently compare it with an upstream check job.\n\n\u003e\u003e\u003e upstream_job(\"periodic-tripleo-ci-centos-9-scenario001-standalone-wallaby\")\n\u0027tripleo-ci-centos-9-scenario001-standalone\n\nBut let\u0027s take an example when some downstream job fails, for ex. periodic-tripleo-ci-rhel-9-scenario001-standalone-rhos-17\n\n\u003e\u003e\u003e upstream_job(\"periodic-tripleo-ci-rhel-9-scenario001-standalone-rhos-17\")\n\u0027tripleo-ci-rhel-9-scenario001-standalone-rhos\u0027\n\nBased on the current regex, the upstream job name:- \u0027tripleo-ci-rhel-9-scenario001-standalone-rhos\u0027 which doesn\u0027t exist in Upstream and \"Upstream pass/failure other\" will be always blank. So, currently, the Comparision with Upstream results feature for downstream jobs is not working.\n\nFor the downstream case, I can think of two possible cases:-\n\n1) We enhance our tooling to somehow change from downstream job name to Upstream job name and show results in comparison with Upstream.\n\n2) For downstream jobs, Instead of comparing with Upstream we compare with rdo jobs instead. for ex. 17-1 comparison with wallaby and 16-2 comparison with 16.2\n\n\nAgain, these are some possible future improvements that which team can work on and are not related to this patch.",
+      "parentUuid": "62f18283_b74b5c5c",
+      "revId": "73d9224659f0de9ec02cf4a10dfee69cf28b557d",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
