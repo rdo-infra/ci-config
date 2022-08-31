@@ -126,7 +126,13 @@ def find_jobs_in_integration_criteria(
 
 
 def find_jobs_in_component_criteria(criteria, component):
-    return set(criteria['promoted-components'][component])
+    # In component criteria file, when a new pipeline
+    # is developed, We donot add jobs to the criteria file and it will
+    # return empty list. This case needs to be handled to avoid breakage.
+    jobs = criteria['promoted-components'][component]
+    if jobs is None:
+        jobs = []
+    return set(jobs)
 
 
 def fetch_hashes_from_commit_yaml(criteria):
