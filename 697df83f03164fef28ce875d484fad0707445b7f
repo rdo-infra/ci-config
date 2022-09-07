@@ -87,6 +87,24 @@
       "parentUuid": "c026df60_9573d150",
       "revId": "697df83f03164fef28ce875d484fad0707445b7f",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b6c41362_42950e9b",
+        "filename": "ci-scripts/infra-setup/roles/base/tasks/main.yml",
+        "patchSetId": 2
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-09-07T07:56:14Z",
+      "side": 1,
+      "message": "@Douglas: Of course, a staging environment would be the RIGHT™ way to do it. But unless someone steps up to build a staging environment we are stuck to apply our changes in production ;)\n\n@Dariusz, @Douglas: If you want to get a quick feedback from merged patches, it would be better to keep the interval low. This was the original idea for using 5 minutes. Every change to our infra was supposed to be applied via git. Nobody was supposed to do manual changes to vms etc. For that, 5 minutes is good. With 4-6 hours you would have to wait half of your work day until you get a feedback and then you would have to spent your afternoon or evening with fixing your breakage. So i am strongly against 4-6 hours.\n\nMy idea here was to increase it to one day mainly because:\n\nwe do not have a staging environment\n\u003d\u003e we have to test in production\n\u003d\u003e since we test in production, our changes have already been applied\n\u003d\u003e 24h is enough because only other (probably unrelated) machines are affected and 24h gives us (hopefully) enough time to detect breaking changes before they are rolled out to those other machines\n\nWhen we want to introduce a staging environment, we have to split this logic here anyway: We want our staging environment to receive updates as fast as possible, but our production environment should only be updated once we give it a go.\n\nAnyway, I am fine with sticking to the original idea of passing every change through git/gerrit. So leaving it at 5 minutes minutes is better than changing it to an hour or longer. I will abandon this change for now until our preconditions change aka we have a staging environment ;)",
+      "parentUuid": "f58dcd99_cc1a6ad9",
+      "revId": "697df83f03164fef28ce875d484fad0707445b7f",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
