@@ -303,7 +303,7 @@ def get_dlrn_results(api_response):
     from select api_response.
 
         :param api_response (object): Response from API.
-        :return jobs (list of objects): It contains all last jobs from
+        :return jobs (dict of objects): It contains all last jobs from
             response with their appropriate status, timestamp and URL to
             test result.
     """
@@ -480,6 +480,8 @@ def query_zuul_job_details(
         job_names,
         url="https://review.rdoproject.org/zuul/api/builds"):
 
+    logging.debug("Query ZUUL")
+    logging.debug("Job names: %s", job_names)
     response = requests.get(
         url,
         params={'job_name': job_names, 'limit': ZUUL_JOBS_LIMIT},
@@ -493,6 +495,7 @@ def query_zuul_job_details(
             continue
 
         jobs[log_url] = job
+    logging.debug("Return ZUUL details")
     return jobs
 
 
@@ -521,7 +524,7 @@ def prepare_jobs(jobs_in_criteria, dlrn_jobs, influx):
     Epoch is rendered only with *1000
 
     :param jobs_in_criteria (set): Jobs whick are required for promotion.
-    :param dlrn_jobs (set): Jobs, registered by DLRN.
+    :param dlrn_jobs (dict of objects): Jobs, registered by DLRN.
     :return job_result_list (list of dicts): List of parsed jobs.
     """
 
@@ -739,7 +742,7 @@ def get_components_diff(
 
 
 def track_component_promotion(
-        config, distro, release, influx, stream, test_component):
+        config, distro, release, stream, test_component):
     logging.debug("Starting component track")
 
     url = config[stream]['criteria'][distro][release]['comp_url']
@@ -770,42 +773,18 @@ def track_component_promotion(
             api_url, "promoted-components", component)
         timestamp = datetime.utcfromtimestamp(promotion.timestamp)
 
-        promoted_hash = "{}/{}{}&distro_hash={}".format(
-            api_url, api_suffix,
-            promotion.commit_hash, promotion.distro_hash)
-
-        last_modified = get_last_modified_date(base_url, component)
-        promotion_extra = {
-            'release': release,
-            'distro': distro,
-            'dlrn_details': promoted_hash,
-            'last_modified': last_modified,
-        }
-
-        job_extra = {
-            'distro': distro,
-            'release': release,
-            'component': component,
-            'job_type': "component" if component else "integration",
-            'promote_name': 'promoted-components',
-            'test_hash': f"{commit_hash}_{distro_hash[:8]}",
-        }
         test_hash = commit_hash
         under_test_url = "{}/{}{}&distro_hash={}".format(
             api_url, api_suffix, commit_hash, distro_hash)
 
         jobs_in_criteria = find_jobs_in_component_criteria(criteria, component)
         dlrn_jobs = get_dlrn_results(api_response)
-        jobs = prepare_jobs(jobs_in_criteria, dlrn_jobs, influx)
+        jobs = prepare_jobs(jobs_in_criteria, dlrn_jobs, influx=False)
 
-        if influx:
-            render_influxdb(jobs, job_extra, promotion, promotion_extra)
-
-        else:
-            render_tables(
-                jobs, timestamp, under_test_url, component,
-                components, api_response, pkg_diff, test_hash,
-                periodic_builds_url, upstream_builds_url, testproject_url)
+        render_tables(
+            jobs, timestamp, under_test_url, component,
+            components, api_response, pkg_diff, test_hash,
+            periodic_builds_url, upstream_builds_url, testproject_url)
         logging.debug("Finished component: %s data", component)
 
     logging.debug("Finshed component track")
@@ -851,6 +830,86 @@ def integration_influx(config, distro, release, stream, promotion_name):
     render_influxdb(jobs, job_extra, promotion, promotion_extra)
 
 
+def component_influx(config, distro, release, stream, test_component):
+    url = config[stream]['criteria'][distro][release]['comp_url']
+    criteria = url_response_in_yaml(url)
+    api_url, base_url = gather_basic_info_from_criteria(criteria)
+
+    if test_component and test_component != "all":
+        components = [test_component]
+    else:
+        components = sorted(ALL_COMPONENTS.difference(["all"]))
+
+    all_dlrn_jobs = {}
+    all_jobs_in_criteria = set()
+
+    job_response = {}
+    component_response = {}
+    for component in components:
+        promotion = get_dlrn_promotions(
+            api_url, "promoted-components", component)
+        component_url = (
+            f"{base_url}component/{component}/component-ci-testing/commit.yaml"
+        )
+
+        promoted_url = (
+            f"{api_url}/api/civotes_detail.html?"
+            f"commit_hash={promotion.commit_hash}&"
+            f"distro_hash={promotion.distro_hash}"
+        )
+        component_criteria = url_response_in_yaml(component_url)
+        commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
+            component_criteria)
+        api_response = find_results_from_dlrn_repo_status(
+            api_url, commit_hash, distro_hash, extended_hash)
+
+        dlrn_jobs = get_dlrn_results(api_response)
+        jobs_in_criteria = find_jobs_in_component_criteria(criteria, component)
+
+        component_response[component] = {
+            'job_extra': {
+                'distro': distro,
+                'release': release,
+                'component': component,
+                'job_type': "component" if component else "integration",
+                'promote_name': 'promoted-components',
+                'test_hash': f"{commit_hash}_{distro_hash[:8]}",
+            },
+            'promotion_extra': {
+                'distro': distro,
+                'release': release,
+                'dlrn_details': promoted_url,
+                'last_modified': get_last_modified_date(base_url, component),
+            },
+            'promotion': promotion,
+        }
+
+        all_jobs = set(dlrn_jobs).union(jobs_in_criteria)
+        for job_name in all_jobs:
+            job_response[job_name] = {
+                'component': component,
+            }
+
+        all_dlrn_jobs.update(dlrn_jobs)
+        all_jobs_in_criteria.update(jobs_in_criteria)
+
+    components = {}
+
+    jobs = prepare_jobs(all_jobs_in_criteria, all_dlrn_jobs, influx=True)
+    # NOTE(dasm): Map job name to component
+    for job in jobs:
+        job_name = job['job_name']
+        component = job_response[job_name]['component']
+        components.setdefault(component, []).append(job)
+
+    for component, jobs in sorted(components.items()):
+        job_extra = component_response[component]['job_extra']
+        promotion = component_response[component]['promotion']
+        promotion_extra = component_response[component]['promotion_extra']
+
+        render_influxdb(jobs, job_extra, promotion, promotion_extra)
+
+
 @click.option("--verbose", is_flag=True, default=False)
 @click.option("--influx", is_flag=True, default=False)
 @click.option("--component", default=None,
@@ -891,8 +950,11 @@ def main(release, distro, config_file, promotion_name, aggregate_hash,
 
     logging.info("Starting script: %s - %s", distro, release)
     if component:
-        track_component_promotion(
-            config, distro, release, influx, stream, component)
+        if influx:
+            component_influx(config, distro, release, stream, component)
+        else:
+            track_component_promotion(
+                config, distro, release, stream, component)
     else:
         if influx:
             integration_influx(config, distro, release, stream, promotion_name)
