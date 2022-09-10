@@ -673,13 +673,11 @@ def integration(
 
     under_test_url = (f"{api_url}/api/civotes_agg_detail.html?"
                       f"ref_hash={ref_hash}")
-    promoted_url = (f"{api_url}/api/civotes_agg_detail.html?"
-                    f"ref_hash={promo_aggregate_hash}")
-    return api_response, ref_hash, under_test_url, promoted_url
+    return api_response, ref_hash, under_test_url
 
 
 def track_integration_promotion(
-        config, distro, release, influx, stream, promotion_name,
+        config, distro, release, stream, promotion_name,
         aggregate_hash):
 
     logging.debug("Starting integration track")
@@ -689,26 +687,11 @@ def track_integration_promotion(
 
     promotion = get_dlrn_promotions(api_url, promotion_name)
 
-    api_response, test_hash, under_test_url, promoted_url = integration(
+    api_response, test_hash, under_test_url = integration(
         api_url, base_url, aggregate_hash, promotion.aggregate_hash)
 
     component = None
-    last_modified = get_last_modified_date(base_url, component)
-    promotion_extra = {
-        'release': release,
-        'distro': distro,
-        'dlrn_details': promoted_url,
-        'last_modified': last_modified,
-    }
 
-    job_extra = {
-        'distro': distro,
-        'release': release,
-        'component': component,
-        'job_type': "component" if component else "integration",
-        'promote_name': promotion_name,
-        'test_hash': test_hash
-    }
     periodic_builds_url = config[stream]['periodic_builds_url']
     upstream_builds_url = config[stream]['upstream_builds_url']
     testproject_url = config[stream]['testproject_url']
@@ -720,15 +703,12 @@ def track_integration_promotion(
     jobs_in_criteria = find_jobs_in_integration_criteria(
         criteria, promotion_name)
     dlrn_jobs = get_dlrn_results(api_response)
-    jobs = prepare_jobs(jobs_in_criteria, dlrn_jobs, influx)
+    jobs = prepare_jobs(jobs_in_criteria, dlrn_jobs, influx=False)
 
-    if influx:
-        render_influxdb(jobs, job_extra, promotion, promotion_extra)
-    else:
-        render_tables(
-            jobs, timestamp, under_test_url, component,
-            components, api_response, pkg_diff, test_hash,
-            periodic_builds_url, upstream_builds_url, testproject_url)
+    render_tables(
+        jobs, timestamp, under_test_url, component,
+        components, api_response, pkg_diff, test_hash,
+        periodic_builds_url, upstream_builds_url, testproject_url)
 
     logging.debug("Finished integration track")
 
@@ -831,6 +811,46 @@ def track_component_promotion(
     logging.debug("Finshed component track")
 
 
+def integration_influx(config, distro, release, stream, promotion_name):
+    url = config[stream]['criteria'][distro][release]['int_url']
+    criteria = url_response_in_yaml(url)
+    api_url, base_url = gather_basic_info_from_criteria(criteria)
+
+    promotion = get_dlrn_promotions(api_url, promotion_name)
+
+    aggregate_hash = "tripleo-ci-testing"
+    commit_url = f"{base_url}{aggregate_hash}/delorean.repo.md5"
+    test_hash = web_scrape(commit_url)
+    promoted_url = (f"{api_url}/api/civotes_agg_detail.html?"
+                    f"ref_hash={promotion.aggregate_hash}")
+
+    api_response = find_results_from_dlrn_agg(api_url, test_hash)
+
+    component = None
+    last_modified = get_last_modified_date(base_url, component)
+    promotion_extra = {
+        'release': release,
+        'distro': distro,
+        'dlrn_details': promoted_url,
+        'last_modified': last_modified,
+    }
+
+    job_extra = {
+        'distro': distro,
+        'release': release,
+        'component': component,
+        'job_type': "component" if component else "integration",
+        'promote_name': promotion_name,
+        'test_hash': test_hash
+    }
+
+    jobs_in_criteria = find_jobs_in_integration_criteria(
+        criteria, promotion_name)
+    dlrn_jobs = get_dlrn_results(api_response)
+    jobs = prepare_jobs(jobs_in_criteria, dlrn_jobs, influx=True)
+    render_influxdb(jobs, job_extra, promotion, promotion_extra)
+
+
 @click.option("--verbose", is_flag=True, default=False)
 @click.option("--influx", is_flag=True, default=False)
 @click.option("--component", default=None,
@@ -874,9 +894,13 @@ def main(release, distro, config_file, promotion_name, aggregate_hash,
         track_component_promotion(
             config, distro, release, influx, stream, component)
     else:
-        track_integration_promotion(
-            config, distro, release, influx, stream, promotion_name,
-            aggregate_hash)
+        if influx:
+            integration_influx(config, distro, release, stream, promotion_name)
+
+        else:
+            track_integration_promotion(
+                config, distro, release, stream, promotion_name,
+                aggregate_hash)
 
 
 if __name__ == '__main__':
