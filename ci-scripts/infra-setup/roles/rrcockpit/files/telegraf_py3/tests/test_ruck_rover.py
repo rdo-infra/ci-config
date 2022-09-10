@@ -610,7 +610,6 @@ class TestInfluxDBMeasurements(unittest.TestCase):
             m_web_scrape, _m_find_result_aggr, m_find_jobs_int, m_latest_job,
             m_zuul, m_print):
         promotion_name = "promote_name"
-        aggregate_hash = "aggregate_hash"
 
         commit_hash = "c6"
         distro_hash = "03"
@@ -659,10 +658,8 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         m_zuul.return_value = {}
         m_latest_job.return_value = {}
 
-        ruck_rover.track_integration_promotion(
-            self.config, self.distro, self.release, self.influx,
-            self.stream, promotion_name,
-            aggregate_hash)
+        ruck_rover.integration_influx(
+            self.config, self.distro, self.release, self.stream, promotion_name)
 
         job1 = ('jobs_result,job_type=integration,job_name=failed'
                 ',release=wallaby name="promote_name",test_hash="test_hash"'
