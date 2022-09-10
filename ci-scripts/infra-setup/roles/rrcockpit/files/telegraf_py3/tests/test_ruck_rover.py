@@ -331,9 +331,8 @@ class TestRuckRoverComponent(unittest.TestCase):
         m_dlrn.side_effect = ['control_url', 'test_url']
         m_csv.side_effect = ["first", "second"]
 
-        ruck_rover.track_component_promotion(
-            self.config, 'centos-8', 'wallaby', False,
-            'upstream', test_component='all')
+        ruck_rover.component_influx(
+            self.config, 'centos-8', 'wallaby', 'upstream', 'all')
 
         m_yaml.assert_any_call("http://wallaby_comp")
         m_dlrn.assert_not_called()
@@ -372,9 +371,8 @@ class TestRuckRoverComponent(unittest.TestCase):
         )
         m_promo.return_value = promotion
 
-        ruck_rover.track_component_promotion(
-            self.config, 'centos-8', 'wallaby', False,
-            'upstream', test_component=component)
+        ruck_rover.component_influx(
+            self.config, 'centos-8', 'wallaby', 'upstream', component)
 
         m_yaml.assert_any_call("http://wallaby_comp")
         m_results.assert_called_with(
@@ -574,9 +572,8 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         m_zuul.return_value = {}
         m_latest_job.return_value = {}
 
-        ruck_rover.track_component_promotion(
-            self.config, self.distro, self.release, self.influx,
-            self.stream, component)
+        ruck_rover.component_influx(
+            self.config, self.distro, self.release, self.stream, component)
 
         job1 = ('jobs_result,job_type=component,job_name=failed'
                 ',release=wallaby name="promoted-components",test_hash="c6_03"'
