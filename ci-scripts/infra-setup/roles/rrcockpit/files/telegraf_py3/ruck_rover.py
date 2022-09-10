@@ -949,20 +949,18 @@ def main(release, distro, config_file, promotion_name, aggregate_hash,
         raise BadParameter(msg)
 
     logging.info("Starting script: %s - %s", distro, release)
-    if component:
-        if influx:
-            component_influx(config, distro, release, stream, component)
-        else:
-            track_component_promotion(
-                config, distro, release, stream, component)
+    if influx and component:
+        component_influx(config, distro, release, stream, component)
+    elif influx and not component:
+        integration_influx(config, distro, release, stream, promotion_name)
+    elif not influx and component:
+        track_component_promotion(config, distro, release, stream, component)
+    elif not influx and not component:
+        track_integration_promotion(
+            config, distro, release, stream, promotion_name, aggregate_hash)
     else:
-        if influx:
-            integration_influx(config, distro, release, stream, promotion_name)
-
-        else:
-            track_integration_promotion(
-                config, distro, release, stream, promotion_name,
-                aggregate_hash)
+        raise Exception("Unsupported")
+    logging.info("Finished script: %s - %s", distro, release)
 
 
 if __name__ == '__main__':
