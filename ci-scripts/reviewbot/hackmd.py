@@ -31,7 +31,8 @@ def update_note(note_id, content):
         "Accept": "application/json"
     }
     response = requests.patch(
-        headers=headers, url=base_url + "/notes/" + str(note_id),
+        headers=headers,
+        url=base_url + "/teams/rh-openstack-ci/notes/" + str(note_id),
         json={"content": content})
     if response.status_code in range(200, 299):
         return "I have added your review to the Review list"
