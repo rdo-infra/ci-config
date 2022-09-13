@@ -19,6 +19,7 @@ from jinja2 import Environment, FileSystemLoader
 from rich import print as rich_print
 from rich.console import Console
 from rich.table import Table
+from git_utils import fire_testproj
 
 console = Console()
 
@@ -582,6 +583,7 @@ def render_integration_yaml(jobs, test_hash, testproject_url):
     output = template.render(
         jobs=jobs, hash=test_hash, testproject_url=testproject_url)
     print(output)
+    return output
 
 
 def render_component_yaml(jobs, testproject_url):
@@ -589,6 +591,7 @@ def render_component_yaml(jobs, testproject_url):
     output = template.render(
         jobs=jobs, testproject_url=testproject_url)
     print(output)
+    return output
 
 
 def render_influxdb(jobs, job_extra, promotion, promotion_extra):
@@ -601,7 +604,8 @@ def render_influxdb(jobs, job_extra, promotion, promotion_extra):
 
 def render_tables(jobs, timestamp, under_test_url, component,
                   components, api_response, pkg_diff, test_hash,
-                  periodic_builds_url, upstream_builds_url, testproject_url):
+                  periodic_builds_url, upstream_builds_url, testproject_url,
+                  auto, ref):
     """
     jobs_to_promote are any job that hasn't registered
     success w/ dlrn. jobs_pending are any jobs in pending.
@@ -659,10 +663,11 @@ def render_tables(jobs, timestamp, under_test_url, component,
     tp_jobs = to_promote - no_result
     if tp_jobs:
         if len(components) != 0 and components[0] is not None:
-            render_component_yaml(tp_jobs, testproject_url)
+            output = render_component_yaml(tp_jobs, testproject_url)
         else:
-            render_integration_yaml(tp_jobs, test_hash, testproject_url)
-
+            output = render_integration_yaml(tp_jobs, test_hash, testproject_url)
+        if auto:
+            fire_testproj(output, ref)
 
 def integration(
         api_url, base_url, aggregate_hash, promo_aggregate_hash):
@@ -680,7 +685,7 @@ def integration(
 
 def track_integration_promotion(
         config, distro, release, influx, stream, promotion_name,
-        aggregate_hash):
+        aggregate_hash, auto, ref):
 
     logging.debug("Starting integration track")
     url = config[stream]['criteria'][distro][release]['int_url']
@@ -728,7 +733,8 @@ def track_integration_promotion(
         render_tables(
             jobs, timestamp, under_test_url, component,
             components, api_response, pkg_diff, test_hash,
-            periodic_builds_url, upstream_builds_url, testproject_url)
+            periodic_builds_url, upstream_builds_url, testproject_url,
+            auto, ref)
 
     logging.debug("Finished integration track")
 
@@ -759,7 +765,7 @@ def get_components_diff(
 
 
 def track_component_promotion(
-        config, distro, release, influx, stream, test_component):
+        config, distro, release, influx, stream, test_component, auto, ref):
     logging.debug("Starting component track")
 
     url = config[stream]['criteria'][distro][release]['comp_url']
@@ -825,7 +831,8 @@ def track_component_promotion(
             render_tables(
                 jobs, timestamp, under_test_url, component,
                 components, api_response, pkg_diff, test_hash,
-                periodic_builds_url, upstream_builds_url, testproject_url)
+                periodic_builds_url, upstream_builds_url, testproject_url,
+                auto, ref)
         logging.debug("Finished component: %s data", component)
 
     logging.debug("Finshed component track")
@@ -845,9 +852,11 @@ def track_component_promotion(
               + '/conf_ruck_rover.yaml')
 @click.option("--distro", default='centos-9', type=click.Choice(DISTROS))
 @click.option("--release", default='master', type=click.Choice(RELEASES))
+@click.option("--auto", is_flag=True, default=False)
+@click.option("--ref")  # TODO: make ref required if auto is true
 @click.command()
 def main(release, distro, config_file, promotion_name, aggregate_hash,
-         component, influx, verbose):
+         component, influx, verbose, auto, ref):
 
     if verbose:
         fmt = '%(asctime)s:%(levelname)s - %(funcName)s:%(lineno)s %(message)s'
@@ -872,11 +881,11 @@ def main(release, distro, config_file, promotion_name, aggregate_hash,
     logging.info("Starting script: %s - %s", distro, release)
     if component:
         track_component_promotion(
-            config, distro, release, influx, stream, component)
+            config, distro, release, influx, stream, component, auto, ref)
     else:
         track_integration_promotion(
             config, distro, release, influx, stream, promotion_name,
-            aggregate_hash)
+            aggregate_hash, auto, ref)
 
 
 if __name__ == '__main__':
