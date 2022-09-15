@@ -52,6 +52,23 @@
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9f178e90_8c306993",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2022-09-15T19:52:59Z",
+      "side": 1,
+      "message": "$ python3 ruck_rover.py --release master --distro centos-9 --aggregate_hash\u003dtripleo-ci-testing/c3/4c/c34ceaeb547793b3e1d57638ee2c4bff\n status\u003dYellow last_promotion\u003d2022-09-13 16:54:47\nHash_under_test\u003dhttps://trunk.rdoproject.org/api-centos9-master-uc/api/civotes_agg_detail.html?ref_hash\u003dc34ceaeb547793b3e1d57638ee2c4bff\n...\n\nlooks correct, works with and without aggregate_hash.\n\n$ python3 ruck_rover.py --release master --distro centos-9 --aggregate_hash\u003dtripleo-ci-testing/c3/4c/c34ceaeb547793b3e1d57638ee2c4bff --influx\njobs_result,job_type\u003dintegration,job_name\u003dperiodic-tripleo-centos-9-buildimage-ironic-python-agent-master,release\u003dmaster name\u003d\"current-tripleo\",test_hash\u003d\"770b33236810ddbb94a654b3125f99aa\",criteria\u003d\"True\",status\u003d\"9\",logs\u003d\"https://logserver.rdoproject.org/0e/0e7811e2038f9625c15f25973a13cc9bd98021dd/openstack-periodic-integration-main/periodic-tripleo-centos-9-buildimage-ironic-python-agent-master/5370d34/\",failure_reason\u003d\"N/A\",duration\u003d\"00 hr 23 mins 11 secs\",component\u003d\"None\",distro\u003d\"centos-9\"\n\nWhen using --influx, it is hardcoded to tripleo-ci-testing as Sandeep pointed out.\n\nLGTM, thanks",
+      "revId": "640d5be5d5d90cfbaf0a1a1cd8d3e37ac4683819",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5d313edb_3bc2c6f6",
@@ -112,6 +129,24 @@
       "writtenOn": "2022-09-15T10:46:12Z",
       "side": 1,
       "message": "not a blocker but may be add aggregate_hash in params too?\n\nimho.. it will be good to not hardcode this, tripleo-ci-testing is the default anyway @ https://review.rdoproject.org/r/c/rdo-infra/ci-config/+/44887/2/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py#858 , this will allow us to generate influx data for previous hashes.",
+      "revId": "640d5be5d5d90cfbaf0a1a1cd8d3e37ac4683819",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "513cb049_38386645",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/ruck_rover.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 814,
+      "author": {
+        "id": 739
+      },
+      "writtenOn": "2022-09-15T19:52:59Z",
+      "side": 1,
+      "message": "@dasm, please fix this in a follow up patch. Even if we don\u0027t use it, it is good to let those functions simetric.",
+      "parentUuid": "e46d17aa_6c5bf4ca",
       "revId": "640d5be5d5d90cfbaf0a1a1cd8d3e37ac4683819",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     },
