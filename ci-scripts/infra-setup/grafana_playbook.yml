@@ -20,12 +20,20 @@
           - git
           - epel-release
           - gcc
-          - python-devel
 
-    - name: Install pip
+    - name: Install Centos8 packages
       package:
         name:
+          - python3-devel
+          - python3-pip
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version is version("8", "<=")
+
+    - name: Install Centos9 packages
+      package:
+        name:
+          - python-devel
           - python-pip
+      when: ansible_distribution == 'CentOS' and ansible_distribution_major_version is version("9", ">=")
 
     - name: Install python packages
       pip:
@@ -47,22 +55,16 @@
         dest: /etc/ansible/hosts
         content: "{{ cockpit_hostname | default('rrcockpit') }} ansible_connection=local"
 
-    - name: Create files
-      copy:
-        content: "{{ item.content }}"
-        dest: "{{ item.path }}"
-      with_items:
-        - content: "{{ grafana_admin_password }}"
-          path: /root/grafana_admin_password
-        - content: "{{ grafana_smtp_password }}"
-          path: /root/grafana_smtp_password
-
 - hosts: rrcockpit
   tasks:
-
     - name: Include vars from common.yml
       include_vars:
         file: "tenant_vars/common.yml"
+
+    - name: Copy files
+      synchronize:
+        src: ./
+        dest: /tmp/infra-setup/
 
     - name: Run base role
       include_role:
