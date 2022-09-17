@@ -77,7 +77,7 @@
   - name: Forbid SSH login for user centos
     lineinfile:
       path: /etc/ssh/sshd_config
-      line: 'DenyUsers centos'
+      line: 'DenyUsers centos cloud-user'
     notify: ssh-restart
 
   - name: Create continuous delivery script
@@ -94,7 +94,5 @@
 
 - name: Add timestamps to bash history
   lineinfile:
-    path: /home/centos/.bashrc
+    path: ~/.bashrc
     line: "export HISTTIMEFORMAT='%F %T '"
-  become: true
-  become_user: centos
