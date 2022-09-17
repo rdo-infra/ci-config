@@ -33,7 +33,7 @@ Roles
   - servers_provision: To provision machines in openstack.
   - servers_teardown: To delete machines in openstack.
   - ssh_agent: To setup new key with ssh agent.
-  - setup_docker_compose: Setup docker compose on remote host
+  - podman_compose: Setup podman compose on remote host
   - tenant_networks: To create networks and subnets in openstack.
 
 User SSH Keys
@@ -64,3 +64,47 @@ To prepare the environment for deployment:
 To teardown everything:
 
     ./nuke.sh
+
+Deploy Ruck/Rover Cockpit to an existing host
+=============================================
+
+Provision the host
+
+    # CS8
+    os server create --flavor m1.large --network private --security-group cockpit --image CentOS-Stream-8-x86_64-GenericCloud --key-name <key_name> cockpit_cs8
+    # Add Floating IP
+    os server add floating ip cockpit_cs8 <floating_ip_uuid>
+
+    # CS9
+    os server create --flavor m1.large --network private --security-group cockpit --image CentOS-Stream-GenericCloud-9-20220606.0 --key-name <key_name> cockpit_cs9
+    # Add Floating IP
+    os server add floating ip cockpit_cs9 <floating_ip_uuid>
+
+When the host is already provisioned, it can be used as a server for Ruck/Rover Cockpit.
+
+    # Add host to ssh config
+    echo > ~/.ssh/config << EOF
+    Host cockpit_cs8
+      User centos
+      Hostname $IP
+      IdentityFile $PATH_TO_FILE
+
+    Host cockpit_cs9
+      User cloud-user
+      Hostname $IP
+      IdentityFile $PATH_TO_FILE
+    EOF
+
+    # Create a hosts file with server entry
+    echo > hosts << EOF
+    [rrcockpit]
+    cockpit_cs8
+    cockpit_cs9
+    EOF
+
+    # Edit secrets
+    mkdir group_vars
+    cp tenant_vars/infra-tripleo/secrets_example.yml group_vars/all.yml
+
+    # Start deployment on the server
+    ansible-playbook -i hosts grafana_playbook.yml
