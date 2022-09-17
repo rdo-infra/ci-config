@@ -1,20 +1,39 @@
 ---
-- name: Read grafana admin password file
-  slurp:
-    src: /home/centos/grafana_admin_password
-  register: gf_admin_password
+- name: Pull images
+  environment:
+    GRAFANA_ADMIN_PASSWORD: "{{ grafana_admin_password }}"
+    GRAFANA_SMTP_PASSWORD: "{{ grafana_smtp_password }}"
+  ansible.builtin.command:
+    cmd: podman-compose --file /tmp/infra-setup/roles/rrcockpit/files/docker-compose.yml pull
+  register: pull_cmd
+  failed_when: pull_cmd.rc != 0
+  changed_when: pull_cmd.rc == 0
 
-- name: Read grafana smtp password file
-  slurp:
-    src: /home/centos/grafana_smtp_password
-  register: gf_smtp_password
+- name: Build containers
+  environment:
+    GRAFANA_ADMIN_PASSWORD: "{{ grafana_admin_password }}"
+    GRAFANA_SMTP_PASSWORD: "{{ grafana_smtp_password }}"
+  ansible.builtin.command:
+    cmd: podman-compose --file /tmp/infra-setup/roles/rrcockpit/files/docker-compose.yml build
+  register: build_cmd
+  failed_when: build_cmd.rc != 0
+  changed_when: pull_cmd.rc == 0
+
+# NOTE(dasm): During startup, Grafana has problems when pulling plugins, hence ensure DNS
+- name: Add Google DNS if not present
+  become: true
+  lineinfile:
+    dest: /etc/resolv.conf
+    insertbefore: BOF
+    line: "nameserver 8.8.8.8"
+    state: present
 
 - name: Start services
   environment:
-    GRAFANA_ADMIN_PASSWORD: "{{ gf_admin_password['content'] | b64decode }}"
-    GRAFANA_SMTP_PASSWORD: "{{ gf_smtp_password['content'] | b64decode }}"
-    MTU: "{{ mtu }}"
-  docker_compose:
-    project_src: "{{ role_path }}/files/"
-    state: present
-    build: yes
+    GRAFANA_ADMIN_PASSWORD: "{{ grafana_admin_password }}"
+    GRAFANA_SMTP_PASSWORD: "{{ grafana_smtp_password }}"
+  ansible.builtin.command:
+    cmd: podman-compose --file /tmp/infra-setup/roles/rrcockpit/files/docker-compose.yml up --detach
+  register: up_cmd
+  failed_when: up_cmd.rc != 0
+  changed_when: up_cmd.rc == 0

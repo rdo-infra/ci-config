@@ -1,10 +1,16 @@
 ---
-- name: Setup docker compose
+- name: Setup podman
   include_role:
-    name: setup_docker_compose
+    name: podman_compose
 
-- name: Create docker volumes
-  docker_volume:
+- name: Login to Docker.io
+  containers.podman.podman_login:
+    username: "{{ dockerhub_username }}"
+    password: "{{ dockerhub_password }}"
+    registry: docker.io
+
+- name: Create required podman volumes
+  containers.podman.podman_volume:
     name: "{{ item }}"
     state: present
   with_items:
@@ -12,22 +18,10 @@
     - grafana-volume
     - telegraf-volume
 
-- name: Copy password files
-  become: yes
-  copy:
-    remote_src: true
-    src: "/root/{{ item }}"
-    dest: "/home/centos/"
-    owner: centos
-    group: centos
-  with_items:
-    - grafana_admin_password
-    - grafana_smtp_password
-
-- name: Generate custom nginx.conf
+- name: Generate custom nginx.conf to be included into container
   template:
     src: nginx.conf.j2
-    dest: "{{ role_path }}/files/nginx.conf"
+    dest: "/tmp/infra-setup/roles/rrcockpit/files/nginx.conf"
 
 - name: Start services if configured so
   include_tasks: start_services.yml

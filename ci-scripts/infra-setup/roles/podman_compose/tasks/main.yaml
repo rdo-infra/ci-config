@@ -1,0 +1,67 @@
+---
+- name: Install podman required packages
+  become: yes
+  package:
+    name:
+      - podman
+
+- name: Install Centos8 packages
+  become: yes
+  package:
+    name:
+      - python3-pip
+      - podman-plugins
+  when:
+    - ansible_distribution == 'CentOS'
+    - ansible_distribution_major_version is version("8", "<=")
+
+- name: Install Centos9 packages
+  become: yes
+  package:
+    name:
+      - python-pip
+  when:
+    - ansible_distribution == 'CentOS'
+    - ansible_distribution_major_version is version("9", ">=")
+
+- name: Install required CentOS8 pip package
+  ansible.builtin.pip:
+    name: python-dotenv
+    extra_args: --user
+  when:
+    - ansible_distribution == 'CentOS'
+    - ansible_distribution_major_version is version("8", "<=")
+
+- name: Install podman-compose
+  ansible.builtin.pip:
+    # Development version allows to use network_mode: host
+    # https://github.com/containers/podman-compose/issues/530
+    # TODO(dasm): Revert back to 'podman-compose' after new release
+    name: https://github.com/containers/podman-compose/archive/devel.tar.gz
+    extra_args: --user
+
+- name: Allow access to port 80
+  become: true
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: "80"
+    sysctl_set: true
+    state: present
+    reload: yes
+
+- name: Load ip_tables module for podman
+  # NOTE(dasm): To create a network with podman, we need to load iptables module
+  become: true
+  community.general.modprobe:
+    name: ip_tables
+    state: present
+
+- name: Enable linger for the user to prevent containers from being killed
+  # NOTE(dasm):  When running a container with a command like podman run --detach
+  # as a rootless user, the container is closed upon logout and is not kept running.
+  # https://github.com/containers/podman/blob/main/troubleshooting.md#21-a-rootless-container-running-in-detached-mode-is-closed-at-logout
+  ansible.builtin.command:
+    cmd: loginctl enable-linger
+    register: loginctl
+  failed_when: loginctl.rc != 0
+  changed_when: loginctl.rc == 0
