@@ -20,6 +20,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "91bcbadb_fc64dfc0",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/Dockerfile",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-09-22T19:15:01Z",
+      "side": 1,
+      "message": "This container is the only one reaching out to internal redhat resources.\nIn the past certs were installed on a localhost and shared with the container via /etc/pki:/etc/pki,z\n\nPermissions prevent from reaching out to this location.\nDocker ignores them, Podman fails.\n\nTo workaround that, I had to move them inside the container to allow for rr script to fetch data from internal zuul without erroring on certs.",
+      "parentUuid": "b4339c06_4fbeedf2",
+      "revId": "3d0920a6dd5ae762c228aa0abd9890a12278e179",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "aceb64e7_33887690",
         "filename": "ci-scripts/infra-setup/roles/rrcockpit/tasks/main.yml",
         "patchSetId": 2
@@ -31,6 +49,24 @@
       "writtenOn": "2022-09-22T19:00:53Z",
       "side": 1,
       "message": "why did this change to a hardcoded path?",
+      "revId": "3d0920a6dd5ae762c228aa0abd9890a12278e179",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "171c7ee2_c62e408e",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/tasks/main.yml",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-09-22T19:15:01Z",
+      "side": 1,
+      "message": "When running from my localhost, it fetched \"role_path\" as my local location. However, it was logging to remote host, where my location does not exist.\n\nBy running: \"ansible-playbook -i hosts grafana_playbook.yml\" I was ending up with error.",
+      "parentUuid": "aceb64e7_33887690",
       "revId": "3d0920a6dd5ae762c228aa0abd9890a12278e179",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
