@@ -23,5 +23,8 @@ fi
 # Victoria
 /usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token "$TOKEN" --release victoria --html /root/logs/victoria-report.html copy &>>/root/logs/victoria.txt
 
+# Zed centos 9
+/usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token "$TOKEN" --release zedcentos9 --html /root/logs/zed-report.html copy &>>/root/logs/zed.txt
+
 # Train 8
 /usr/local/bin/copy-quay --config /root/copy-quay/config.yaml --token "$TOKEN" --release train8 --html /root/logs/train8-report.html copy &>>/root/logs/train8.txt
