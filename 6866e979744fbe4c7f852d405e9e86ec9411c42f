@@ -70,6 +70,41 @@
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c66b8c36_6d5165ef",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-09-28T19:13:36Z",
+      "side": 1,
+      "message": "Dariusz asked me to remove the \u0027workflow -1\u0027 [1].\n\n[1] https://meetings.opendev.org/irclogs/%23oooq/%23oooq.2022-09-28.log.html#t2022-09-28T15:21:47\n\nThanks for testing docker-compose with podman, Dariusz!\n\nUsing podman-compose seems to have its own issues. It requires a lot of hacks to get it work and has drawbacks such as getting installed on every ansible-pull run, i.e. every 5 minutes.\n\nThe errors of docker-compose with podman cited below do not seem to be related to the combination of docker-compose and podman. But nevertheless it caused some friction for Dariusz, so we might want to continue using docker instead of podman which is well supported on centos (and seems to be part of rhel) and can easily be installed from Docker\u0027s yum repo [2].\n\n[2] https://docs.docker.com/engine/install/centos/\n",
+      "revId": "6866e979744fbe4c7f852d405e9e86ec9411c42f",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a3f423ee_a6868e02",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-09-28T19:13:36Z",
+      "side": 1,
+      "message": "Hi Dariusz,\nthanks for testing docker-compose with podman! The guides did not hint at those issues😞\n\n\u003e [centos@rrcockpit files]$ GRAFANA_SMTP_PASSWORD\u003dtest GRAFANA_ADMIN_PASSWORD\u003dtest docker-compose up\n\u003e Creating network \"files_default\" with driver \"bridge\"\n\u003e ERROR: Volume influxdb-volume declared as external, but could not be found. Please create the volume manually using `docker volume create --name\u003dinfluxdb-volume` and try again.\n\nUnrelated to docker-compose/podman-compose: Docker volumes are created in a separate step in role rrcockpit [1]. *-compose fails because those have not been created on your testsystem. Or maybe you did not run these commands as root?\n\n[1] https://github.com/rdo-infra/ci-config/blob/76c2bec8c58f9fad480462bfb1fabc8a51278f5c/ci-scripts/infra-setup/roles/rrcockpit/tasks/main.yml#L6\n\n\u003e [centos@rrcockpit files]$ docker volume create --name\u003dinfluxdb-volume\n\u003e Error: unknown flag: --name\n\u003e See \u0027podman volume create --help\u0027\n\nThis is the wrong syntax for both docker [1] and podman-docker [2], use e.g. \u0027docker volume create influxdb-volume\u0027.\n\n[1] https://manpages.debian.org/bullseye/docker.io/docker-volume-create.1.en.html\n[2] https://manpages.debian.org/bullseye/podman/podman-volume-create.1.en.html\n\n\u003e [centos@rrcockpit files]$ docker volume create influxdb-volume\n\u003e Error: volume with name influxdb-volume already exists: volume already exists\n\nSomething is broken on your system. Did you really executed the previous commands in a row without other commands in between?\n\n\u003e [centos@rrcockpit files]$ GRAFANA_SMTP_PASSWORD\u003dtest GRAFANA_ADMIN_PASSWORD\u003dtest docker-compose up\n\u003e ERROR: Network \"files_default\" needs to be recreated - option \"isolate\" has changed\n\u003e ```\n\nLeftovers from previous runs?! Better start with a fresh environment:\n\n docker-compose down --remove-orphans \u0026\u0026 docker-compose up -d",
+      "parentUuid": "09b976b7_adea7dbc",
+      "revId": "6866e979744fbe4c7f852d405e9e86ec9411c42f",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "333f9f86_c57f20d9",
@@ -136,6 +171,57 @@
         "endLine": 71,
         "endChar": 15
       },
+      "revId": "6866e979744fbe4c7f852d405e9e86ec9411c42f",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b313587d_1b3d4b9e",
+        "filename": "ci-scripts/infra-setup/roles/podman_compose/tasks/main.yaml",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-09-28T19:13:36Z",
+      "side": 1,
+      "message": "This will download and install podman-compose from github every 5 minutes?!\n\nTest locally with\n\n pip install https://github.com/containers/podman-compose/archive/devel.tar.gz -v -v -v",
+      "revId": "6866e979744fbe4c7f852d405e9e86ec9411c42f",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "54a49554_b2d952d4",
+        "filename": "ci-scripts/infra-setup/roles/podman_compose/tasks/main.yaml",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-09-28T19:13:36Z",
+      "side": 1,
+      "message": "Looks like this role podman_compose, role rrcockpit and its tasks file start_services.yml are still run as root. Podman will be run as root so containers can expose port 80. So why allowing access to port 80 for unprivileged users?",
+      "revId": "6866e979744fbe4c7f852d405e9e86ec9411c42f",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ea5432fc_f7f23a0d",
+        "filename": "ci-scripts/infra-setup/roles/podman_compose/tasks/main.yaml",
+        "patchSetId": 4
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-09-28T19:13:36Z",
+      "side": 1,
+      "message": "But this patch does not run containers as rootless, do they?",
       "revId": "6866e979744fbe4c7f852d405e9e86ec9411c42f",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
