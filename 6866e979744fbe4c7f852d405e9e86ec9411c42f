@@ -52,6 +52,24 @@
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "09b976b7_adea7dbc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-09-28T15:20:40Z",
+      "side": 1,
+      "message": "docker-compose is causing a lot of errors:\n\n```\n[centos@rrcockpit files]$ GRAFANA_SMTP_PASSWORD\u003dtest GRAFANA_ADMIN_PASSWORD\u003dtest docker-compose up\nCreating network \"files_default\" with driver \"bridge\"\nERROR: Volume influxdb-volume declared as external, but could not be found. Please create the volume manually using `docker volume create --name\u003dinfluxdb-volume` and try again.\n[centos@rrcockpit files]$ docker volume create --name\u003dinfluxdb-volume\nError: unknown flag: --name\nSee \u0027podman volume create --help\u0027\n[centos@rrcockpit files]$ docker volume create influxdb-volume\nError: volume with name influxdb-volume already exists: volume already exists\n[centos@rrcockpit files]$ GRAFANA_SMTP_PASSWORD\u003dtest GRAFANA_ADMIN_PASSWORD\u003dtest docker-compose up\nERROR: Network \"files_default\" needs to be recreated - option \"isolate\" has changed\n```\n\nI spent last few days trying to mitigate all errors to no avail.",
+      "parentUuid": "e0128626_c1d3e06e",
+      "revId": "6866e979744fbe4c7f852d405e9e86ec9411c42f",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "333f9f86_c57f20d9",
@@ -88,6 +106,30 @@
       "writtenOn": "2022-09-23T06:08:56Z",
       "side": 1,
       "message": "path changed? i assume this is the replacement for \u0027create files\u0027 task you are removing just above but you are moving them to /tmp where before they were going to /root",
+      "range": {
+        "startLine": 71,
+        "startChar": 14,
+        "endLine": 71,
+        "endChar": 15
+      },
+      "revId": "6866e979744fbe4c7f852d405e9e86ec9411c42f",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b230efdb_003c5b72",
+        "filename": "ci-scripts/infra-setup/grafana_playbook.yml",
+        "patchSetId": 4
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-09-28T15:20:40Z",
+      "side": 1,
+      "message": "\"Create files\" war creating and copying files with passwords. They were later read and used as a part of containers bring up.\nThis \"copy files\" is the way to provide local files from \"infra-setup\" to run on remote host (rrcockpit).\nI haven\u0027t found the way to remotely run docker-compose without copying files.",
+      "parentUuid": "7023928a_b0552d6a",
       "range": {
         "startLine": 71,
         "startChar": 14,
