@@ -302,6 +302,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "fa3212c0_daec6efb",
+        "filename": "ci-scripts/infra-setup/roles/podman_compose/tasks/main.yaml",
+        "patchSetId": 4
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-09-29T07:55:50Z",
+      "side": 1,
+      "message": "\u003e This behavior is on par to docker-compose behavior [0].\n\nNo, it is not. pip behaves differently when you pass it package names rather than urls. I agree though that pip has its limitations. We should install stuff from centos repos because then package installs and updates will be handled automatically, relieving us of any hacks such as manually checking for installed packages 😉",
+      "parentUuid": "5a2e054e_9dec0d41",
+      "revId": "6866e979744fbe4c7f852d405e9e86ec9411c42f",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "54a49554_b2d952d4",
         "filename": "ci-scripts/infra-setup/roles/podman_compose/tasks/main.yaml",
         "patchSetId": 4
@@ -337,6 +355,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "c9b5d773_87930596",
+        "filename": "ci-scripts/infra-setup/roles/podman_compose/tasks/main.yaml",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-09-29T07:55:50Z",
+      "side": 1,
+      "message": "Did i miss something or are these Ansible roles/tasks still run as root [1] via ansible_connection\u003dlocal [2] on rrcockpit?\n\nWhere do you run podman as non-root user? \n\n[1] https://github.com/rdo-infra/ci-config/blob/05763c744defea14e4fc02f44574095fa7b90c39/ci-scripts/infra-setup/roles/base/tasks/main.yml#L89\n[2] https://github.com/rdo-infra/ci-config/blob/05763c744defea14e4fc02f44574095fa7b90c39/ci-scripts/infra-setup/tenant_vars/infra-tripleo/servers.yml#L89",
+      "parentUuid": "bcc62968_5d940949",
+      "revId": "6866e979744fbe4c7f852d405e9e86ec9411c42f",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "ea5432fc_f7f23a0d",
         "filename": "ci-scripts/infra-setup/roles/podman_compose/tasks/main.yaml",
         "patchSetId": 4
@@ -366,6 +402,24 @@
       "side": 1,
       "message": "podman is configured to run rootless. Only centos or cloud-user will have access.",
       "parentUuid": "ea5432fc_f7f23a0d",
+      "revId": "6866e979744fbe4c7f852d405e9e86ec9411c42f",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "43c1a5d6_25e66d7e",
+        "filename": "ci-scripts/infra-setup/roles/podman_compose/tasks/main.yaml",
+        "patchSetId": 4
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-09-29T07:55:50Z",
+      "side": 1,
+      "message": "Besides my comment about non-rootless above, why so focused on rootless containers? \n\nThe only reason i could come up with is increasing security. There are many measures to take though, before we have to worry about rootless containers such as\n\n* removing capabilities from containers which are not required\n* enforcing no-new-privileges\n* enforcing selinux\n* regularly update containers and restart them\n* regularly update host os (which we do already) and reboot to apply kernel updates (which we dont do)\n\nWe only run our own workloads in containers, so you could also run processes inside the containers as non-root users.\n\nI am not against rootless containers. I love and 100% support your attitude to give least required privileges to process. There is just so much more to fix first and rootless containers require more work here.",
+      "parentUuid": "26eba429_028f31f0",
       "revId": "6866e979744fbe4c7f852d405e9e86ec9411c42f",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
