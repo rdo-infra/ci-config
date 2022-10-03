@@ -242,6 +242,25 @@ class Promoter(object):
                 self.log.warning("Candidate hash '%s': NO successful jobs"
                                  "", candidate_hash)
 
+            # Jobs missing based only on committed criteria
+            missing_jobs_direct = set(required_jobs - successful_jobs)
+
+            # Switch out criteria for failing jobs that run and pass
+            # on alternative zuul environments
+            if len(missing_jobs_direct):
+                for missing_job_direct in missing_jobs_direct:
+                    alternative_string = "-internal"
+                    index_dash = missing_job_direct.rfind("-")
+                    missing_job_alternative = \
+                        (missing_job_direct[:index_dash] +
+                        alternative_string +
+                        missing_job_direct[index_dash:])
+                    if missing_job_alternative in successful_jobs:
+                        # successful_jobs = set(successful_jobs + missing_job_direct)
+                        required_jobs.remove(missing_job_direct)
+                        required_jobs.add(missing_job_alternative)
+
+            # Missing jobs - considering also alternative jobs
             missing_jobs = set(required_jobs - successful_jobs)
             print_job_table(self.log, jobs_list, candidate_hash, False,
                             successful_jobs, missing_jobs)
