@@ -230,6 +230,9 @@ class Promoter(object):
                       "promotion criteria for target label '%s'"
                       "", candidate_label, target_label)
         required_jobs = self.config.promotions[target_label]['criteria']
+        alt_criteria = \
+            self.config.promotions[target_label].get('alternative_criteria', {})
+
         for candidate_hash in selected_candidates:
             ci_votes = self.dlrn_client.get_civotes_info(candidate_hash)
             successful_jobs = \
@@ -242,6 +245,20 @@ class Promoter(object):
                 self.log.warning("Candidate hash '%s': NO successful jobs"
                                  "", candidate_hash)
 
+            # Jobs missing based only on committed criteria
+            missing_jobs_direct = set(required_jobs - successful_jobs)
+
+            # Switch out criteria for failing jobs that run and pass
+            # on alternative zuul environments
+            for missing_job_direct in missing_jobs_direct:
+                for alt_job in alt_criteria.get(missing_job_direct, []):
+                    if alt_job in successful_jobs:
+                        # Replace failed job with alt, passing one
+                        required_jobs.remove(missing_job_direct)
+                        required_jobs.add(alt_job)
+                        break
+
+            # Missing jobs - considering also alternative jobs
             missing_jobs = set(required_jobs - successful_jobs)
             print_job_table(self.log, jobs_list, candidate_hash, False,
                             successful_jobs, missing_jobs)
