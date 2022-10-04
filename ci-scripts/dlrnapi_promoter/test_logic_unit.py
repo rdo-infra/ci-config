@@ -315,6 +315,58 @@ class TestPromoteLabelToLabel(ConfigSetup):
         # Ensure that we stop at the first promotion
         self.assertEqual(mock_promote.call_count, 1)
 
+    @patch('logging.Logger.debug')
+    @patch('logging.Logger.error')
+    @patch('logging.Logger.info')
+    @patch('logging.Logger.warning')
+    @patch('logic.Promoter.select_candidates')
+    @patch('logic.Promoter.promote')
+    @patch('dlrn_client.DlrnClient.fetch_jobs')
+    @patch('dlrn_client.DlrnClient.get_civotes_info')
+    def test_promote_with_alterantive_jobs_success(self,
+                                                   mock_civotes,
+                                                   mock_fetch_jobs,
+                                                   mock_promote,
+                                                   mock_select_candidates,
+                                                   mock_log_warning,
+                                                   mock_log_info,
+                                                   mock_log_error,
+                                                   mock_log_debug):
+        ci_votes = "http://host.to/detailspage.html"
+        candidate_hashes = [
+            DlrnCommitDistroExtendedHash(commit_hash='a', distro_hash='b'),
+            DlrnCommitDistroExtendedHash(commit_hash='c', distro_hash='c')
+        ]
+        required_set = {
+            'staging-job-1-second-alternative',
+            'staging-job-2'
+        }
+        pair = (candidate_hashes[0], 'tripleo-ci-staging-promoted')
+        mock_promote.return_value = pair
+        mock_civotes.return_value = ci_votes
+        mock_select_candidates.return_value = candidate_hashes
+        mock_fetch_jobs.return_value = list(required_set)
+        promoted_pair = self.promoter.promote_label_to_label(
+            'tripleo-ci-testing', 'tripleo-ci-staging-promoted')
+
+        mock_log_info.assert_has_calls([
+            mock.call("Candidate label '%s': %d candidates",
+                      'tripleo-ci-testing', 2),
+            mock.call("Candidate label '%s': Checking candidates that meet "
+                      "promotion criteria for target label '%s'",
+                      'tripleo-ci-testing', 'tripleo-ci-staging-promoted'),
+            mock.call("Candidate hash '%s': vote details page - %s",
+                      candidate_hashes[0], ci_votes),
+            mock.call("Candidate hash '%s': criteria met, attempting promotion "
+                      "to %s", candidate_hashes[0],
+                      'tripleo-ci-staging-promoted'),
+        ])
+        self.assertFalse(mock_log_warning.called)
+        self.assertFalse(mock_log_error.called)
+        self.assertEqual(promoted_pair, pair)
+        # Ensure that we stop at the first promotion
+        self.assertEqual(mock_promote.call_count, 1)
+
     @patch('logging.Logger.error')
     @patch('logging.Logger.warning')
     @patch('logic.Promoter.select_candidates')
