@@ -428,7 +428,7 @@ class TestRuckRoverComponent(unittest.TestCase):
 
         m_api_client.assert_called_with(host="api_url")
         m_promo_query.assert_called_with(
-            promote_name="promotion", component=None)
+            promote_name="promotion", limit=1, component=None)
 
         self.assertEqual(result, m_pr)
 
