@@ -82,14 +82,14 @@ def find_failure_reason(url):
     url = f'{url}logs/failures_file'
     logging.debug("Fetch failure reason: %s", url)
     try:
-        response = requests.get(url)
+        response = requests.get(url, verify=CERT_PATH)
     except requests.exceptions.RequestException:
         logging.info("Cannot connect to the url")
         return "N/A"
 
     if response.ok:
         logging.debug("Fetched failure reason")
-        return response.text.replace("\n", " ")
+        return ' '.join(response.text.split('\n'))
 
     logging.debug("Failed fetching reason")
     return "N/A"
@@ -258,7 +258,8 @@ def get_dlrn_promotions(api_url, promotion_name, component=None):
     api_instance = dlrnapi_client.DefaultApi(api_client)
     query = dlrnapi_client.PromotionQuery(
         promote_name=promotion_name,
-        component=component
+        component=component,
+        limit=1
     )
     pr = api_instance.api_promotions_get(query)
     return pr[0]
