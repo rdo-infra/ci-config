@@ -43,6 +43,7 @@ def get_dlrn_client(url, release, distro, component):
 def get_dlrn_promotions(dlrn_client, name, component=None):
     query = dlrnapi_client.PromotionQuery()
     query.promote_name = name
+    query.limit = 1
     if component:
         query.component = component
     promotions = dlrn_client.api_promotions_get(query)
