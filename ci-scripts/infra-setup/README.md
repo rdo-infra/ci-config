@@ -39,7 +39,7 @@ Roles
 User SSH Keys
 =============
 
-To login on deployed servers, add your ssh key in `tenant_vars/common.yaml`
+To login on deployed servers, add your ssh key in `roles/configure_users/defaults/main.yml`
 
 Default Infra metadata
 ======================
