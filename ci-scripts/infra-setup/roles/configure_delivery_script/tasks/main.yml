@@ -1,0 +1,14 @@
+---
+- name: Create continuous delivery script
+  become: yes
+  template:
+    src: ansible-pull.sh.j2
+    dest: "/usr/local/bin/ansible_pull.sh"
+    mode: "u+x"
+
+- name: Add cron job for ansible pull
+  become: yes
+  cron:
+    name: "Run ansible-pull for continuous delivery"
+    minute: "*/5"
+    job: "systemd-cat -t ansible-pull /usr/local/bin/ansible_pull.sh"
