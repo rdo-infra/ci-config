@@ -1,0 +1,13 @@
+- import_playbook: provisioner_prepare.yml
+
+- hosts: provisioner
+  tasks:
+    - include_role:
+        name: servers_teardown
+      when: servers_teardown.include_role|default(false)
+
+- hosts: provisioner
+  tasks:
+    - include_role:
+        name: general_teardown
+      when: general_teardown.include_role|default(false)
