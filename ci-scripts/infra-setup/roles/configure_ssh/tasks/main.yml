@@ -1,0 +1,23 @@
+---
+- name: Remove PasswordAuthentication if exists
+  become: yes
+  lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '^PasswordAuthentication yes'
+      state: absent
+  notify: ssh-restart
+
+- name: Set PasswordAuthentication as no for SSH
+  become: yes
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^[ #]*PasswordAuthentication .*'
+    line: 'PasswordAuthentication no'
+  notify: ssh-restart
+
+- name: Forbid SSH login for default cloud-user
+  become: yes
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    line: 'DenyUsers cloud-user'
+  notify: ssh-restart
