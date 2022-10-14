@@ -10,26 +10,6 @@
       state: present
     with_items: "{{ packages }}"
 
-  - name: Remove PasswordAuthentication if exists
-    lineinfile:
-        path: /etc/ssh/sshd_config
-        regexp: '^PasswordAuthentication yes'
-        state: absent
-    notify: ssh-restart
-
-  - name: Set PasswordAuthentication as no for SSH
-    lineinfile:
-      path: /etc/ssh/sshd_config
-      regexp: '^[ #]*PasswordAuthentication .*'
-      line: 'PasswordAuthentication no'
-    notify: ssh-restart
-
-  - name: Forbid SSH login for user centos
-    lineinfile:
-      path: /etc/ssh/sshd_config
-      line: 'DenyUsers centos'
-    notify: ssh-restart
-
 - name: Add timestamps to bash history
   lineinfile:
     path: /home/centos/.bashrc
