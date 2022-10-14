@@ -1,0 +1,33 @@
+---
+- become: yes
+  block:
+  - name: Create tripleo group
+    ansible.builtin.group:
+      name: tripleo
+      state: present
+
+  - name: Create users
+    ansible.builtin.user:
+      name: "{{ item.name }}"
+      state: present
+      shell: /bin/bash
+      groups: tripleo
+      append: yes
+      expires: "{{ item.expires|default(omit) }}"
+      password_lock: "{{ item.password_lock|default(omit) }}"
+    loop: "{{ users }}"
+
+  - name: Set authorized keys
+    ansible.posix.authorized_key:
+      exclusive: yes
+      user: "{{ item.name }}"
+      state: present
+      key: "{{ item.authorized_keys|default('') }}"
+    loop: "{{ users }}"
+
+  - name: Allow 'tripleo' group to have passwordless sudo
+    ansible.builtin.lineinfile:
+      dest: /etc/sudoers
+      state: present
+      line: '%tripleo ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'
