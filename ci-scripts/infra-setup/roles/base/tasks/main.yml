@@ -4,26 +4,6 @@
 
 - become: true
   block:
-  - name: Create persistent journal
-    file:
-      path: /var/log/journal/
-      state: directory
-
-  - name: Enable journald persistence
-    ini_file:
-      dest: "/etc/systemd/journald.conf"
-      section: Journal
-      option: Storage
-      value: "Persistent"
-      no_extra_spaces: yes
-    register: journal_config
-
-  - name: Restart journald
-    systemd:
-      name: systemd-journald
-      state: restarted
-    when: journal_config is changed
-
   - name: Install required packages
     yum:
       name: "{{ item }}"
