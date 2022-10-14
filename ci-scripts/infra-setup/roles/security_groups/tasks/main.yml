@@ -1,11 +1,11 @@
-- name: sets os_security_group
-  os_security_group:
+- name: sets security group
+  openstack.cloud.security_group:
     name: "{{ item.name }}"
     description: "{{ item.description|default(omit) }}"
   with_items: "{{ security_groups }}"
 
-- name: sets os_security_group_rule
-  os_security_group_rule:
+- name: sets security group rule
+  openstack.cloud.security_group_rule:
     state: present
     security_group: "{{ item.0.name }}"
     protocol: "{{ item.1.protocol|default(omit) }}"
