@@ -1,5 +1,5 @@
 - name: create volumes for server
-  os_volume:
+  openstack.cloud.volume:
     state: present
     display_name: "{{ item.1.display_name }}"
     display_description: "{{ item.1.display_description|default(omit) }}"
@@ -10,7 +10,7 @@
       - skip_missing: True
 
 - name: create named port
-  os_port:
+  openstack.cloud.port:
     state: present
     name: "{{ item.1.name }}"
     network: "{{ item.1.network }}"
@@ -23,7 +23,7 @@
       - skip_missing: True
 
 - name: create the server
-  os_server:
+  openstack.cloud.server:
     state: present
     name: "{{ item.name }}"
     image: "{{ item.image }}"
@@ -40,7 +40,7 @@
     var: created_servers
 
 - name: Associate Floating ip
-  os_floating_ip:
+  openstack.cloud.floating_ip:
     state: present
     server: "{{ item.0.name }}"
     floating_ip_address: "{{ item.1 }}"
@@ -50,7 +50,7 @@
       - skip_missing: True
 
 - name: attach extra volumes
-  os_server_volume:
+  openstack.cloud.server_volume:
     state: present
     server: "{{ item.0.name }}"
     volume: "{{ item.1.display_name }}"
@@ -61,7 +61,7 @@
       - skip_missing: True
 
 - name: Start the servers
-  os_server_action:
+  openstack.cloud.server_action:
     action: start
     server: "{{ item.name }}"
   with_items: "{{ servers }}"

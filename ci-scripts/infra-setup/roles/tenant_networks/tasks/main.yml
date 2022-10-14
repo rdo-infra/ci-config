@@ -1,12 +1,12 @@
 - name: "Create Networks"
-  os_network:
+  openstack.cloud.network:
     state: present
     name: "{{ item.name }}"
     external: false
   with_items: "{{ networks }}"
 
 - name: "Create subnets"
-  os_subnet:
+  openstack.cloud.subnet:
     state: present
     network_name: "{{ item.network_name }}"
     name: "{{ item.name }}"
@@ -15,7 +15,7 @@
   with_items: "{{ subnets }}"
 
 - name: "Create routers"
-  os_router:
+  openstack.cloud.router:
     state: present
     name: "{{ item.name }}"
     network: "{{ item.network }}"
