@@ -30,7 +30,7 @@ Roles
   - keypair: Create new openstack keypair.
   - promoter: To setup promoter server.
   - artifact_promoter: Role to promote file artifacts for a given candidate and target label.
-  - servers_provision: To provision machines in openstack.
+  - server_provision: To provision machines in openstack.
   - servers_teardown: To delete machines in openstack.
   - ssh_agent: To setup new key with ssh agent.
   - setup_docker_compose: Setup docker compose on remote host
@@ -44,7 +44,9 @@ To login on deployed servers, add your ssh key in `roles/configure_users/default
 Default Infra metadata
 ======================
 
-Openstack needs to pass name and values while provisioning network, keypairs, security groups etc. All those server configuration is stored in `tenant_vars/infra-tripleo`, to provision machines on Vexxhost.
+Openstack needs to pass name and values while provisioning network, keypairs, security groups etc.
+All those server configuration is stored in appropriate roles for `tenant_network`, `security_groups`, etc.
+to provision machines on Vexxhost.
 
 Set credentials for server `tenant_vars/infra-tripleo/secrets_example.yml`.
 
