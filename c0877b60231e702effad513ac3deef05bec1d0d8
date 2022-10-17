@@ -69,6 +69,30 @@
       },
       "revId": "c0877b60231e702effad513ac3deef05bec1d0d8",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a02111c6_42321aa9",
+        "filename": "ci-scripts/infra-setup/roles/configure_users/tasks/main.yml",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-10-17T18:22:40Z",
+      "side": 1,
+      "message": "Ansible does not touch what it does not know. So removing a user from our inventory will not disable or remove that user. Instead, we would have to update our inventory which defines a user as absent, then wait for the playbook to run (and delete the user) and finally submit a patch to drop the user from the inventory.\n\nThat is a awful lot of steps to achieve the goal of disallowing a user to login and offers plenty of opportunities to mess up. \n\nInstead we decided to expire a user. The user is still listed in the playbooks and be present on systems but wont be able to login.\n\nI am open to other solutions but please do not misuse \u0027expires\u0027 for that.",
+      "parentUuid": "ae004fd5_3c2317ec",
+      "range": {
+        "startLine": 8,
+        "startChar": 6,
+        "endLine": 8,
+        "endChar": 24
+      },
+      "revId": "c0877b60231e702effad513ac3deef05bec1d0d8",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
