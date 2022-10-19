@@ -25,7 +25,6 @@ Roles
 =====
   - _ensure_credentials: Export credentials for promoter server.
   - _ensure_staging: Setup promoter staging environments for promoter.
-  - base: This role will setup all basic requirements for servers like users, groups etc.
   - general_teardown: To remove all networks/keypairs/images from openstack.
   - keypair: Create new openstack keypair.
   - promoter: To setup promoter server.
