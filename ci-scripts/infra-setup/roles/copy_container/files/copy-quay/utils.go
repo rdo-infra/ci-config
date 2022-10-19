@@ -185,12 +185,12 @@ func fetchLogs(URL string) string {
     data, _ := _fetch(path)
 
     if data == "" {
-        path := fmt.Sprintf("%slogs/containers-built.log", URL)
+        path = fmt.Sprintf("%slogs/containers-built.log", URL)
         data , _ = _fetch(path)
     }
 
     if data == "" {
-        path := fmt.Sprintf("%sjob-output.txt", URL)
+        path = fmt.Sprintf("%sjob-output.txt", URL)
         data, _ = _fetch(path)
     }
     logrus.Info("Fetching logs in ", path)
