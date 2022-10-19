@@ -2,14 +2,6 @@
 - name: Include required variables
   include_vars: ../../../tenant_vars/common.yml
 
-- become: true
-  block:
-  - name: Install required packages
-    yum:
-      name: "{{ item }}"
-      state: present
-    with_items: "{{ packages }}"
-
 - name: Add timestamps to bash history
   lineinfile:
     path: /home/centos/.bashrc
