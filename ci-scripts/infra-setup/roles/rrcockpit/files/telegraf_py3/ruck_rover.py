@@ -34,7 +34,7 @@ dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
 
 MATRIX = {
     "centos-8": ["wallaby", "train"],
-    "centos-9": ["master", "wallaby"],
+    "centos-9": ["master", "zed", "wallaby"],
     "rhel-8": ["osp17-1", "osp16-2"],
     "rhel-9": ["osp17", "osp17-1"]
 }
