@@ -129,6 +129,11 @@ def find_jobs_in_integration_criteria(
     return set(criteria['promotions'][promotion_name]['criteria'])
 
 
+def find_jobs_in_integration_alt_criteria(
+        criteria, promotion_name='current-tripleo'):
+    return set(criteria['promotions'][promotion_name].get('alternative_criteria', {}))
+
+
 def find_jobs_in_component_criteria(criteria, component):
     # In component criteria file, when a new pipeline
     # is developed, We donot add jobs to the criteria file and it will
@@ -500,7 +505,11 @@ def query_zuul_job_details(
     return jobs
 
 
-def prepare_jobs(jobs_in_criteria, dlrn_jobs, influx):
+def prepare_jobs(
+        jobs_in_criteria,
+        jobs_in_alt_criteria,
+        dlrn_jobs,
+        influx):
     """
     InfluxDB follows line protocol [1]
 
@@ -524,7 +533,8 @@ def prepare_jobs(jobs_in_criteria, dlrn_jobs, influx):
 
     Epoch is rendered only with *1000
 
-    :param jobs_in_criteria (set): Jobs whick are required for promotion.
+    :param jobs_in_criteria (set): Jobs which are required for promotion.
+    :param jobs_in_alt_criteria (set): Jobs which can be switched for promotion.
     :param dlrn_jobs (dict of objects): Jobs, registered by DLRN.
     :return job_result_list (list of dicts): List of parsed jobs.
     """
@@ -561,6 +571,7 @@ def prepare_jobs(jobs_in_criteria, dlrn_jobs, influx):
         job_result = {
             'job_name': job_name,
             'criteria': job_name in jobs_in_criteria,
+            'alt_criteria': job_name in jobs_in_alt_criteria,
             'logs': log_url,
             'duration': duration,
             'status': status,
@@ -619,6 +630,14 @@ def render_tables(jobs, timestamp, under_test_url, component,
     no_result = set(
         k['job_name'] for k in jobs if k['status'] == INFLUX_PENDING)
     in_criteria = set(k['job_name'] for k in jobs if k['criteria'] is True)
+    in_alt_criteria = set(k['job_name'] for k in jobs if k['alt_criteria'] is True)
+    to_promote = in_criteria.difference(passed)
+    for job_to_promote in to_promote:
+        for alt_job in in_alt_criteria.get(job_to_promote, []):
+            if alt_job in passed:
+                in_criteria.remove(job_to_promote)
+                in_criteria.add(alt_job)
+                break
     to_promote = in_criteria.difference(passed)
 
     if failed:
@@ -706,8 +725,14 @@ def track_integration_promotion(
 
     jobs_in_criteria = find_jobs_in_integration_criteria(
         criteria, promotion_name)
+    jobs_in_alt_criteria = find_jobs_in_integration_alt_criteria(
+        criteria, promotion_name)
     dlrn_jobs = get_dlrn_results(api_response)
-    jobs = prepare_jobs(jobs_in_criteria, dlrn_jobs, influx=False)
+    jobs = prepare_jobs(
+            jobs_in_criteria,
+            jobs_in_alt_criteria,
+            dlrn_jobs,
+            influx=False)
 
     render_tables(
         jobs, timestamp, under_test_url, component,
