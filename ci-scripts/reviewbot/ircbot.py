@@ -16,7 +16,7 @@ TEXT = (
     "Or simply msg me something lke: 'review list <your_patch>'."
 )
 REVIEW_LIST_REGEXP = (
-    r"(add[\s\S]*(to|in)[\s\S]*review\s*(list|queue)|need[\s\S]review)")
+    r"(add[\s\S]*(to|in)[\s\S]*review|need[\s\S]review)")
 PATCHES_REGEX = r"https?://\S+"
 
 
