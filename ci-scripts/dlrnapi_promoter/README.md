@@ -1,6 +1,8 @@
 Promoter Server
 ===============
 
+TEST
+
 ## Installation
 
 - Requirements:
