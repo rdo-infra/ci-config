@@ -48,11 +48,12 @@
 
 - name: get aggregated hash from md5 file (integration jobs)
   block:
+    # force_fetch_md5 added for bugzilla.redhat.com/2138436
     - name: get md5 file
       get_url:
         url: "{{ md5_url }}"
         dest: "{{ workspace }}/delorean.repo.md5"
-        force: true
+        force: "{{ force_fetch_md5 | default(omit) }}"
     - name: read md5
       command: "cat {{ workspace }}/delorean.repo.md5"
       register: md5_hash
