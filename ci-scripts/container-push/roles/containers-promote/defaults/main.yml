@@ -20,24 +20,9 @@ registry_hostname: >-
   {%- else -%}
   trunk.registry.rdoproject.org
   {%- endif -%}
-username: >-
-  {% if release not in ["victoria"] -%}
-  {{ source_namespace }}+cirobot
-  {%- else -%}
-  {{ lookup('env', 'RDOPROJECT_USERNAME') }}
-  {%- endif -%}
-password: >-
-  {% if release not in ["victoria"] -%}
-  {{ lookup('env', source_namespace + '_PASSWORD') }}
-  {%- else -%}
-  {{ lookup('env', 'RDOPROJECT_PASSWORD') }}
-  {%- endif -%}
-auth_url: >-
-  {% if release not in ["victoria"] -%}
-  https://index.{{ registry_hostname }}/v1/
-  {%- else -%}
-  https://{{ registry_hostname }}/v2/
-  {%- endif -%}
+username: "{{ source_namespace }}+cirobot"
+password: "{{ lookup('env', source_namespace + '_PASSWORD') }}"
+auth_url: "https://index.{{ registry_hostname }}/v1/"
 registry_api: "https://{{ registry_hostname }}:8443/oapi/v1/namespaces/tripleo{{ release }}/imagestreamtags"
 source_namespace: "tripleo{{ release }}"
 target_namespace: "tripleo{{ release }}"
