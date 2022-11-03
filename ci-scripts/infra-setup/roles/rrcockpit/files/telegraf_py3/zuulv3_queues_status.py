@@ -64,8 +64,8 @@ def calculate_minutes_enqueued(enqueue_time):
     return minutes_enqueued
 
 
-def convert_builds_as_influxdb(queues, max_time=False):
-    # Le's express failures as negative numbers, is easier for alarms
+def convert_builds_as_influxdb(queues, is_periodic, max_time=False):
+    # Let's express failures as negative numbers, is easier for alarms
 
     result_mapping = {
         'ONGOING': 0,
@@ -73,11 +73,19 @@ def convert_builds_as_influxdb(queues, max_time=False):
         'SKIPPED': 1,
     }
     influxdb_lines = []
-    influxdb_line = ("zuul-queue-status,url={url},pipeline={pipeline}"
-                     ",queue={queue},job={name},review={review}"
-                     ",patch_set={patch_set} result=\"{result}\""
-                     ",enqueue_time={enqueue_time},"
-                     "enqueued_time={enqueued_time},result_code={result_code}")
+    if not is_periodic:
+        influxdb_line = ("zuul-queue-status,url={url},pipeline={pipeline}"
+                         ",queue={queue},job={name},review={review}"
+                         ",patch_set={patch_set} result=\"{result}\""
+                         ",enqueue_time={enqueue_time},"
+                         "enqueued_time={enqueued_time},result_code={result_code}")
+    else:
+        influxdb_line = ("zuul-queue-status,url={url},pipeline={pipeline}"
+                         ",queue={queue},job={name}"
+                         ",result=\"{result}\""
+                         ",enqueue_time={enqueue_time},"
+                         "enqueued_time={enqueued_time},result_code={result_code}")
+
     lines = []
     for queue in queues:
         for refspec in queue['refspecs']:
@@ -98,9 +106,10 @@ def convert_builds_as_influxdb(queues, max_time=False):
 
                 # influxdb line protocol uses commas to split stuf,
                 # let's escape it
-                id_ = values['id'].split(',')
-                values['review'] = id_[0]
-                values['patch_set'] = id_[1]
+                if not is_periodic:
+                    id_ = values['id'].split(',')
+                    values['review'] = id_[0]
+                    values['patch_set'] = id_[1]
                 lines.append(values)
     if max_time:
         lines = sorted(lines, key=lambda x: x['enqueued_time'])[-1:]
@@ -124,10 +133,15 @@ def main():
 
     args = parser.parse_args()
 
+    if "periodic" in args.pipeline:
+        is_periodic = True
+    else:
+        is_periodic = False
+
     queues = find_zuul_queues(args.url, args.pipeline, args.queue,
                               args.project_regex)
 
-    influxdb_lines = convert_builds_as_influxdb(queues, max_time=args.max_time)
+    influxdb_lines = convert_builds_as_influxdb(queues, is_periodic, max_time=args.max_time)
 
     print('\n'.join(influxdb_lines))
 
