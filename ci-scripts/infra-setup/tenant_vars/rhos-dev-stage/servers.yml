@@ -107,9 +107,12 @@ servers:
       floating_ips:
         - "{{ toolbox_external_network_ip }}"
       userdata: |
+        #cloud-config
         packages:
-            - git
             - epel-release
+            - epel-next-release
+            - git
+            - python3
             - vim
         package_upgrade: true
         write_files:
@@ -122,12 +125,7 @@ servers:
               content: "{{ vexxhost_nodepool_rc | b64encode }}"
               encoding: b64
         runcmd:
-          - sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-Linux-*
-          - sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-*
-          - dnf install -y libmodulemd
-          - dnf install -y epel-release
-          - dnf install -y git vim python3
-          - pip3 install ansible
+          - dnf install -y ansible
           - mkdir -p /etc/ansible/
           - echo 'toolbox ansible_connection=local' >  /etc/ansible/hosts
           - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log

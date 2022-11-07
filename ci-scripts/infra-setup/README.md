@@ -64,3 +64,18 @@ To prepare the environment for deployment:
 To teardown everything:
 
     ./nuke.sh
+
+
+Deployment process
+==================
+
+Deployment process relies on presence of several configuration files in `tenant_vars` directory.
+Subdirectories should be named based on OpenStack cloud where infrastructure is planning to be deployed.
+Currently there are two configurations:
+  - infra_tripleo: configuration for default deployment of TripleO CI Infrastructure
+  - rhos-dev-stage: staging environment to test changes before merging them.
+
+For appropriate RC files, please refer to appropriate cloud environments.
+Deployment can be performed with:
+
+    ansible-playbook -vv -i inventories/inventory.ini provision-all.yml
