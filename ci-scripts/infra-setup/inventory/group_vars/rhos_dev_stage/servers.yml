@@ -68,20 +68,18 @@ servers:
         runcmd:
           - yum install -y ansible
           - >-
-            git clone '{{ infra_setup_repo | default(infra_setup_repo_default) }}' /tmp/ci-config &&
-            cd /tmp/ci-config &&
+            git clone '{{ infra_setup_repo_default }}' /tmp/ci-config && cd /tmp/ci-config &&
         {% if infra_setup_repo_refspec | default(None) != None %}
-            git fetch --force
-                '{{ infra_setup_repo | default(infra_setup_repo_default) }}'
-                '{{ infra_setup_repo_refspec }}' &&
+            git fetch --force '{{ infra_setup_repo }}' '{{ infra_setup_repo_refspec }}' &&
             git checkout --force FETCH_HEAD
         {% else %}
             git checkout --force master
         {% endif %}
           - >-
             cd /tmp/ci-config &&
-            ansible-playbook -c local -vvv
-                -l "localhost,$(hostname --short),$(hostname --fqdn),127.0.0.1"
+            ansible-playbook -c local -vvv \
+                -l "localhost,$(hostname --short),$(hostname --fqdn),127.0.0.1" \
+                -i '{{ infra_setup_inventory }}' \
                 '{{ infra_setup_servers_playbook }}'
           - reboot
 
@@ -140,20 +138,18 @@ servers:
         runcmd:
           - yum install -y ansible
           - >-
-            git clone '{{ infra_setup_repo | default(infra_setup_repo_default) }}' /tmp/ci-config &&
-            cd /tmp/ci-config &&
+            git clone '{{ infra_setup_repo_default }}' /tmp/ci-config && cd /tmp/ci-config &&
         {% if infra_setup_repo_refspec | default(None) != None %}
-            git fetch --force
-                '{{ infra_setup_repo | default(infra_setup_repo_default) }}'
-                '{{ infra_setup_repo_refspec }}' &&
+            git fetch --force '{{ infra_setup_repo }}' '{{ infra_setup_repo_refspec }}' &&
             git checkout --force FETCH_HEAD
         {% else %}
             git checkout --force master
         {% endif %}
           - >-
             cd /tmp/ci-config &&
-            ansible-playbook -c local -vvv
-                -l "localhost,$(hostname --short),$(hostname --fqdn),127.0.0.1"
+            ansible-playbook -c local -vvv \
+                -l "localhost,$(hostname --short),$(hostname --fqdn),127.0.0.1" \
+                -i '{{ infra_setup_inventory }}' \
                 '{{ infra_setup_servers_playbook }}'
           - reboot
 
@@ -215,19 +211,17 @@ servers:
         runcmd:
           - dnf install -y ansible
           - >-
-            git clone '{{ infra_setup_repo | default(infra_setup_repo_default) }}' /tmp/ci-config &&
-            cd /tmp/ci-config &&
+            git clone '{{ infra_setup_repo_default }}' /tmp/ci-config && cd /tmp/ci-config &&
         {% if infra_setup_repo_refspec | default(None) != None %}
-            git fetch --force
-                '{{ infra_setup_repo | default(infra_setup_repo_default) }}'
-                '{{ infra_setup_repo_refspec }}' &&
+            git fetch --force '{{ infra_setup_repo }}' '{{ infra_setup_repo_refspec }}' &&
             git checkout --force FETCH_HEAD
         {% else %}
             git checkout --force master
         {% endif %}
           - >-
             cd /tmp/ci-config &&
-            ansible-playbook -c local -vvv
-                -l "localhost,$(hostname --short),$(hostname --fqdn),127.0.0.1"
+            ansible-playbook -c local -vvv \
+                -l "localhost,$(hostname --short),$(hostname --fqdn),127.0.0.1" \
+                -i '{{ infra_setup_inventory }}' \
                 '{{ infra_setup_servers_playbook }}'
           - reboot
