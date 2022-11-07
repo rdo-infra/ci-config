@@ -33,6 +33,7 @@
     auto_ip: false
     nics: "{{ item.nics|default(omit) }}"
     userdata: "{{ item.userdata }}"
+    timeout: 600
   with_items: "{{ servers }}"
   register: created_servers
 
@@ -44,6 +45,7 @@
     state: present
     server: "{{ item.0.name }}"
     floating_ip_address: "{{ item.1 }}"
+    network: "{{ provider_external_network }}"
   with_subelements:
       - "{{ servers }}"
       - floating_ips

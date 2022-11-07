@@ -62,3 +62,18 @@ To prepare the environment for deployment:
 To teardown everything:
 
     ./nuke.sh
+
+
+Deployment process
+==================
+
+Deployment process relies on presence of several configuration files in `inventory/group_vars/*` subdirectories.
+Subdirectories should be named based on OpenStack cloud where infrastructure is planning to be deployed.
+Currently there are two configurations:
+  - vexxhost: configuration for default deployment of TripleO CI Infrastructure in Vexxhost project `infra_tripleo`
+  - rhos-dev-stage: staging environment in PSI project `rhos-dev-stage` to test changes before merging them.
+
+For appropriate RC files, please refer to appropriate cloud environments.
+Deployment can be performed with:
+
+    ansible-playbook -vvv -i inventory/ -e cloud="rhos-dev-stage" provision-all.yml
