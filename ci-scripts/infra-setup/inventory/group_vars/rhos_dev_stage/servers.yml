@@ -22,7 +22,7 @@ servers:
       userdata: |
         #cloud-config
         packages:
-            - ansible
+            - epel-release
             - git
         package_upgrade: true
         write_files:
@@ -65,7 +65,6 @@ servers:
               content: |
         {{ uploader_ssh_priv_key | indent(10, true) }}
         runcmd:
-          - yum install -y epel-release
           - yum install -y ansible
           - >-
             git clone '{{ infra_setup_repo | default(infra_setup_repo_default) }}' /tmp/ci-config &&
@@ -107,6 +106,7 @@ servers:
             - git
             - epel-release
             - vim
+            - python-pip
         package_upgrade: true
         write_files:
             # TODO: Keep in sync with ci-scripts/infra-setup/roles/base/templates/hosts.j2
@@ -136,8 +136,7 @@ servers:
               permissions: '0600'
               content: "{{ grafana_smtp_password }}"
         runcmd:
-          - yum install -y epel-release
-          - yum install -y ansible python-pip
+          - yum install -y ansible
           - >-
             git clone '{{ infra_setup_repo | default(infra_setup_repo_default) }}' /tmp/ci-config &&
             cd /tmp/ci-config &&
@@ -175,7 +174,6 @@ servers:
       userdata: |
         #cloud-config
         packages:
-            - ansible
             - epel-release
             - epel-next-release
             - git
@@ -212,6 +210,7 @@ servers:
               content: "{{ vexxhost_nodepool_rc | b64encode }}"
               encoding: b64
         runcmd:
+          - yum install -y ansible
           - >-
             git clone '{{ infra_setup_repo | default(infra_setup_repo_default) }}' /tmp/ci-config &&
             cd /tmp/ci-config &&
