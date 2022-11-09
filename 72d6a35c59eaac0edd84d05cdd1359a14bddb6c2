@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8e98da4f_e045ac00",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-11-09T10:56:57Z",
+      "side": 1,
+      "message": "Awesome work, thank you, Dariusz! Good we have some staging env now, really appreciated!\n",
+      "revId": "72d6a35c59eaac0edd84d05cdd1359a14bddb6c2",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5587b19a_c021e445",
+        "filename": "ci-scripts/infra-setup/tenant_vars/common.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-11-09T10:56:57Z",
+      "side": 1,
+      "message": "Could you please add some tiny instructions on how you actually deployed this?\n\nAll deployed servers use ansible-pull to get the latest code from https://github.com/rdo-infra/ci-config.git. But as this patch here has not been merged yet, that code does not have your changes. So your vms in the staging env would use the old code and the old ips. How did you solve that locally?",
+      "revId": "72d6a35c59eaac0edd84d05cdd1359a14bddb6c2",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "748a446d_9bf238aa",
+        "filename": "ci-scripts/infra-setup/tenant_vars/infra-tripleo/servers.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-11-09T10:56:57Z",
+      "side": 1,
+      "message": "Why not use a CentOS 8 Stream image?\n\nThe previously used image \u0027CentOS-8-x86_64-GenericCloud\u0027 is not available anymore on vexxhost. The replacement on vexxhost would be \u0027centos8-stream\u0027 and on psi it would be \u0027CentOS-Stream-8-x86_64-GenericCloud\u0027.\n\nThis would also fix the libmodulemd issues below and allow us to move ansible to the cloud-init \u0027packages\u0027 key instead of using \u0027dnf install\u0027.",
+      "revId": "72d6a35c59eaac0edd84d05cdd1359a14bddb6c2",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4cfab09e_7d92182c",
+        "filename": "ci-scripts/infra-setup/tenant_vars/infra-tripleo/servers.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-11-09T10:56:57Z",
+      "side": 1,
+      "message": "Mixing rpm and pip installations (outside of virtual envs) are a constant source of errors and frustration. Why not use recommended way and install ansible via rpm? [1] For CentOS 8 Stream there is a ansible package in epel-next-release [2].\n\n[1] https://docs.ansible.com/ansible/latest/installation_guide/installation_distros.html\n[2] https://docs.fedoraproject.org/en-US/epel/#_el8",
+      "revId": "72d6a35c59eaac0edd84d05cdd1359a14bddb6c2",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0aa2bcb1_73505438",
+        "filename": "ci-scripts/infra-setup/tenant_vars/rhos-dev-stage/staging.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-11-09T10:56:57Z",
+      "side": 1,
+      "message": "What is the idea of this file?",
+      "revId": "72d6a35c59eaac0edd84d05cdd1359a14bddb6c2",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    }
+  ]
+}
