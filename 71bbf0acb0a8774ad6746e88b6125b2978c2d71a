@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "99745ed7_1a993364",
+        "filename": "ci-scripts/infra-setup/tenant_vars/common.yml",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 753
+      },
+      "writtenOn": "2022-11-09T21:35:02Z",
+      "side": 0,
+      "message": "Moving this code into the tenant_vars/*/*.yml files is good but it requires more work: ansible-pull on VMs will call include_vars() to load this tenant_vars/common.yml and then those values will be used on the VMs. For example, the rrcockpit_mtu value is used on our upstream cockpit to set the right MTU in docker.\n\nSo in the end this means we have to change this patch to not only include tenant_vars/common.yml but also tenant_vars/{{ tenant }}/.\n\nFor that, VMs have to know which tenants they are in. This can be done e.g. by changing\n\n  ... ansible_connection\u003dlocal\u0027 \u003e  /etc/ansible/hosts\n\nto \n\n  ... ansible_connection\u003dlocal tenant\u003d{{ tenant }}\u0027 \u003e  /etc/ansible/hosts\n\nin the cloud-init userdata of all servers.",
+      "revId": "71bbf0acb0a8774ad6746e88b6125b2978c2d71a",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    }
+  ]
+}
