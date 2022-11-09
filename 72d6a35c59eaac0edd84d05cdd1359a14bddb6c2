@@ -18,6 +18,23 @@
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0f2d9bcd_566e44e8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-11-09T14:53:14Z",
+      "side": 1,
+      "message": "Thanks Jakob.\nI\u0027m going to resolve merge conflict and I\u0027ll prepare another patch.",
+      "revId": "72d6a35c59eaac0edd84d05cdd1359a14bddb6c2",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5587b19a_c021e445",
@@ -31,6 +48,24 @@
       "writtenOn": "2022-11-09T10:56:57Z",
       "side": 1,
       "message": "Could you please add some tiny instructions on how you actually deployed this?\n\nAll deployed servers use ansible-pull to get the latest code from https://github.com/rdo-infra/ci-config.git. But as this patch here has not been merged yet, that code does not have your changes. So your vms in the staging env would use the old code and the old ips. How did you solve that locally?",
+      "revId": "72d6a35c59eaac0edd84d05cdd1359a14bddb6c2",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fcebe8af_8a37041b",
+        "filename": "ci-scripts/infra-setup/tenant_vars/common.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-11-09T14:53:14Z",
+      "side": 1,
+      "message": "That\u0027s actually a good question. I\u0027m going to add README entry about that.\nBecause \"deployment\" step does not rely on \"recent\" changes to repository it could be run through ansible-playbook.\nThis is what I used for deploying these changes:\n```\nansible-playbook -vv -i inventories/inventory.ini provision-all.yml\n```",
+      "parentUuid": "5587b19a_c021e445",
       "revId": "72d6a35c59eaac0edd84d05cdd1359a14bddb6c2",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     },
@@ -54,6 +89,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "3c4c8911_35f35610",
+        "filename": "ci-scripts/infra-setup/tenant_vars/infra-tripleo/servers.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-11-09T14:53:14Z",
+      "side": 1,
+      "message": "I\u0027ll give it a try. AFAIR I tried Centos8 Stream but it also failed.",
+      "parentUuid": "748a446d_9bf238aa",
+      "revId": "72d6a35c59eaac0edd84d05cdd1359a14bddb6c2",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "4cfab09e_7d92182c",
         "filename": "ci-scripts/infra-setup/tenant_vars/infra-tripleo/servers.yml",
         "patchSetId": 3
@@ -71,6 +124,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "0fb1da60_994e384c",
+        "filename": "ci-scripts/infra-setup/tenant_vars/infra-tripleo/servers.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-11-09T14:53:14Z",
+      "side": 1,
+      "message": "This is the issue is stumbled upon. I\u0027ll give it a try with Centos 8 stream",
+      "parentUuid": "4cfab09e_7d92182c",
+      "revId": "72d6a35c59eaac0edd84d05cdd1359a14bddb6c2",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "0aa2bcb1_73505438",
         "filename": "ci-scripts/infra-setup/tenant_vars/rhos-dev-stage/staging.yml",
         "patchSetId": 3
@@ -82,6 +153,24 @@
       "writtenOn": "2022-11-09T10:56:57Z",
       "side": 1,
       "message": "What is the idea of this file?",
+      "revId": "72d6a35c59eaac0edd84d05cdd1359a14bddb6c2",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2a7f80a3_245dc096",
+        "filename": "ci-scripts/infra-setup/tenant_vars/rhos-dev-stage/staging.yml",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2022-11-09T14:53:14Z",
+      "side": 1,
+      "message": "It\u0027s a part of YAML syntax [1].\nIn this specific use-case (probably) we will never going to need that, but my old habits add `---` at the top of YAML file.\n\n[1]: https://camel.readthedocs.io/en/latest/yamlref.html#general-syntax\n[2]: https://yaml.org/spec/1.1/#YAML%20directive/",
+      "parentUuid": "0aa2bcb1_73505438",
       "revId": "72d6a35c59eaac0edd84d05cdd1359a14bddb6c2",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
