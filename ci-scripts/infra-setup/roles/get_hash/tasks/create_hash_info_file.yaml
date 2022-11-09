@@ -1,4 +1,17 @@
 ---
+- name: copy any existing hash_info file to .backup
+  copy:
+    remote_src: true
+    src: "{{ workspace }}/{{ hash_info_file_name | default('hash_info.sh') }}"
+    dest: "{{ workspace }}/{{ hash_info_file_name | default('hash_info.sh') }}.backup"
+  failed_when: false
+
+- name: remove any existing hash_info file
+  file:
+    path: "{{ workspace }}/{{ hash_info_file_name | default('hash_info.sh') }}"
+    state: absent
+  failed_when: false
+
 - name: write out the hash_info file
   copy:
     dest: "{{ workspace }}/{{ hash_info_file_name | default('hash_info.sh') }}"
