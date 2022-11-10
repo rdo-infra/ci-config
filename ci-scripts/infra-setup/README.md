@@ -19,8 +19,6 @@ Hosts
 - Toolbox VM: For running Tripleo CI related scripts. Ex. OVB cleanup scripts.
 - RRCockpit VM: For Grafana dashboard.
 
-Note: Modify `tenant_vars/infra-tripleo/servers.yml` to add more VMs.
-
 Roles
 =====
   - _ensure_credentials: Export credentials for promoter server.
@@ -39,14 +37,14 @@ Roles
 User SSH Keys
 =============
 
-To login on deployed servers, add your ssh key in `tenant_vars/common.yaml`
+To login on deployed servers, add your ssh key in `inventory/group_vars/all.yml`
 
 Default Infra metadata
 ======================
 
-Openstack needs to pass name and values while provisioning network, keypairs, security groups etc. All those server configuration is stored in `tenant_vars/infra-tripleo`, to provision machines on Vexxhost.
+Openstack needs to pass name and values while provisioning network, keypairs, security groups etc. All those server configuration is stored in `inventory/group_vars/vexxhost`, to provision machines on Vexxhost.
 
-Set credentials for server `tenant_vars/infra-tripleo/secrets_example.yml`.
+Set credentials for server `inventory/group_vars/vexxhost/secrets_example.yml`.
 
 To prepare the environment for deployment:
 
