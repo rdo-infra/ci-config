@@ -4,6 +4,15 @@
 
 - become: true
   block:
+
+  - name: Create Ansible inventory
+    template:
+      src: hosts.j2
+      dest: "/etc/ansible/hosts"
+      mode: u=rw,g=r,o=r
+      owner: root
+      group: root
+
   - name: Create tripleo group
     group:
       name: tripleo
