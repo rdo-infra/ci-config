@@ -1,3 +1,3 @@
 #!/bin/bash
 
-ansible-playbook -vv -i ../inventories/inventory.ini -e @nuke.yml ../teardown.yml
+ansible-playbook -vv -i ../inventory/ -e cloud="vexxhost" -e @nuke.yml ../teardown.yml
