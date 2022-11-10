@@ -1,0 +1,19 @@
+---
+# {{ ansible_managed }}
+# TODO: Keep in sync with ci-scripts/infra-setup/tenant_vars/*/servers.yml
+all:
+  hosts:
+    - incockpit
+    - promoter
+    - provisioner
+    - rrcockpit
+    - toolbox
+  vars:
+    cloud: "{{ cloud | mandatory }}"
+  children:
+    {{ cloud | mandatory }}:
+      hosts:
+        - incockpit
+        - promoter
+        - rrcockpit
+        - toolbox
