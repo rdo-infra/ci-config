@@ -4,36 +4,29 @@
             "list":[
                 {
                     "builtIn":1,
-                    "datasource":{
-                        "type":"datasource",
-                        "uid":"grafana"
-                    },
+                    "datasource":"-- Grafana --",
                     "enable":true,
                     "hide":true,
                     "iconColor":"rgba(0, 211, 255, 1)",
                     "name":"Annotations & Alerts",
-                    "target":{
-                        "limit":100,
-                        "matchAny":false,
-                        "tags":[],
-                        "type":"dashboard"
-                    },
                     "type":"dashboard"
                 }
             ]
         },
         "description":"Visualization of the Component and Integration Promotion Pipelines",
         "editable":true,
-        "fiscalYearStartMonth":0,
+        "gnetId":null,
         "graphTooltip":0,
         "links":[],
-        "liveNow":false,
         "panels":[
             {
                 "columns":[],
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
+                "datasource":"telegraf",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
                 },
                 "fontSize":"100%",
                 "gridPos":{
@@ -44,9 +37,11 @@
                 },
                 "id":33,
                 "links":[],
+                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
+                    "col":null,
                     "desc":false
                 },
                 "styles":[
@@ -63,6 +58,7 @@
                         "$$hashKey":"object:498",
                         "alias":"Date of last build",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -80,6 +76,7 @@
                         "$$hashKey":"object:643",
                         "alias":"Promotion Name",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -97,6 +94,7 @@
                         "$$hashKey":"object:780",
                         "alias":"Promotion Details",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -118,6 +116,7 @@
                         "$$hashKey":"object:822",
                         "alias":"",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -134,10 +133,6 @@
                 ],
                 "targets":[
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -175,10 +170,6 @@
                         "tags":[]
                     },
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -216,10 +207,6 @@
                         "tags":[]
                     },
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -257,10 +244,43 @@
                         "tags":[]
                     },
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8' AND \"release\" = 'victoria') ",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
                         "groupBy":[
                             {
                                 "params":[
@@ -299,15 +319,19 @@
                     }
                 ],
                 "timeFrom":"30d",
+                "timeShift":null,
                 "title":"TripleO-CI promotions",
                 "transform":"table",
                 "type":"table-old"
             },
             {
                 "columns":[],
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
+                "datasource":"telegraf",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
                 },
                 "fontSize":"100%",
                 "gridPos":{
@@ -318,9 +342,11 @@
                 },
                 "id":34,
                 "links":[],
+                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
+                    "col":null,
                     "desc":false
                 },
                 "styles":[
@@ -337,6 +363,7 @@
                         "$$hashKey":"object:1482",
                         "alias":"Promotion Details",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -358,6 +385,7 @@
                         "$$hashKey":"object:502",
                         "alias":"Date of last build",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -375,6 +403,7 @@
                         "$$hashKey":"object:513",
                         "alias":"Promotion Name",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -392,6 +421,7 @@
                         "$$hashKey":"object:1728",
                         "alias":"",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -408,10 +438,6 @@
                 ],
                 "targets":[
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -449,10 +475,6 @@
                         "tags":[]
                     },
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -490,10 +512,6 @@
                         "tags":[]
                     },
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -531,10 +549,43 @@
                         "tags":[]
                     },
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select release,  promo_name, distro, latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"promo_name\" = 'current-tripleo-rdo' AND \"distro\" = 'centos-8' AND \"release\" = 'victoria') ",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
                         "groupBy":[
                             {
                                 "params":[
@@ -573,6 +624,7 @@
                     }
                 ],
                 "timeFrom":"30d",
+                "timeShift":null,
                 "title":"RDO promotions",
                 "transform":"table",
                 "type":"table-old"
@@ -582,11 +634,14 @@
                 "bars":true,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
-                },
+                "datasource":"telegraf",
                 "description":"Bars represent successful promotions to current-tripleo for master.\n\n",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -622,7 +677,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"9.1.5",
+                "pluginVersion":"7.3.6",
                 "pointradius":2,
                 "points":false,
                 "renderer":"flot",
@@ -637,10 +692,6 @@
                 "steppedLine":false,
                 "targets":[
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -679,7 +730,9 @@
                     }
                 ],
                 "thresholds":[],
+                "timeFrom":null,
                 "timeRegions":[],
+                "timeShift":null,
                 "title":"Promotions for CentOS-9 master tripleo ci ( current-tripleo )",
                 "tooltip":{
                     "shared":true,
@@ -688,7 +741,9 @@
                 },
                 "type":"graph",
                 "xaxis":{
+                    "buckets":null,
                     "mode":"time",
+                    "name":null,
                     "show":true,
                     "values":[]
                 },
@@ -699,24 +754,33 @@
                         "format":"short",
                         "label":"Number of Promotions",
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":true
                     },
                     {
                         "$$hashKey":"object:207",
                         "format":"short",
+                        "label":null,
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":false
                     }
                 ],
                 "yaxis":{
-                    "align":false
+                    "align":false,
+                    "alignLevel":null
                 }
             },
             {
                 "columns":[],
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
+                "datasource":"telegraf",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
                 },
                 "fontSize":"100%",
                 "gridPos":{
@@ -727,6 +791,8 @@
                 },
                 "id":4,
                 "links":[],
+                "pageSize":null,
+                "repeat":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -738,6 +804,7 @@
                         "$$hashKey":"object:2120",
                         "alias":"Time since last build",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -755,6 +822,7 @@
                         "$$hashKey":"object:2136",
                         "alias":"promotion details",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -776,6 +844,7 @@
                         "$$hashKey":"object:2403",
                         "alias":"",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -793,6 +862,7 @@
                         "$$hashKey":"object:2424",
                         "alias":"Date of last promotion",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -810,10 +880,6 @@
                 "targets":[
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -852,10 +918,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -894,10 +956,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -936,10 +994,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -978,10 +1032,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1020,10 +1070,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1062,10 +1108,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1104,10 +1146,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1146,10 +1184,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1188,10 +1222,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1230,10 +1260,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1272,10 +1298,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1314,10 +1336,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1356,10 +1374,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1398,10 +1412,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1440,10 +1450,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1481,6 +1487,8 @@
                         "tags":[]
                     }
                 ],
+                "timeFrom":null,
+                "timeShift":null,
                 "title":"Master Components: Days since last promotion",
                 "transform":"table",
                 "type":"table-old"
@@ -1490,11 +1498,14 @@
                 "bars":true,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
-                },
+                "datasource":"telegraf",
                 "description":"Bars represent successful promotions to current-tripleo-rdo for master. Default time is the last 2 weeks.",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -1530,7 +1541,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"9.1.5",
+                "pluginVersion":"7.3.6",
                 "pointradius":2,
                 "points":false,
                 "renderer":"flot",
@@ -1545,10 +1556,6 @@
                 "steppedLine":false,
                 "targets":[
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1587,7 +1594,9 @@
                     }
                 ],
                 "thresholds":[],
+                "timeFrom":null,
                 "timeRegions":[],
+                "timeShift":null,
                 "title":"Promotions for CentOS-9 master RDO ( current-tripleo-rdo )",
                 "tooltip":{
                     "shared":true,
@@ -1596,7 +1605,9 @@
                 },
                 "type":"graph",
                 "xaxis":{
+                    "buckets":null,
                     "mode":"time",
+                    "name":null,
                     "show":true,
                     "values":[]
                 },
@@ -1607,26 +1618,35 @@
                         "format":"short",
                         "label":"Number of Promotions",
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":true
                     },
                     {
                         "$$hashKey":"object:546",
                         "format":"short",
+                        "label":null,
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":false
                     }
                 ],
                 "yaxis":{
-                    "align":false
+                    "align":false,
+                    "alignLevel":null
                 }
             },
             {
                 "columns":[],
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
-                },
+                "datasource":"telegraf",
                 "description":"List of the latest failing integration / promotion  jobs.",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":8,
@@ -1636,6 +1656,7 @@
                 },
                 "id":14,
                 "links":[],
+                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -1647,6 +1668,7 @@
                         "$$hashKey":"object:280",
                         "alias":"Time",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1664,6 +1686,7 @@
                         "$$hashKey":"object:293",
                         "alias":"job",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1746,6 +1769,7 @@
                         "$$hashKey":"object:1126",
                         "alias":"logs",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1763,6 +1787,7 @@
                         "$$hashKey":"object:1904",
                         "alias":"aggregate_hash",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1783,6 +1808,7 @@
                         "$$hashKey":"object:605",
                         "alias":"",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1799,10 +1825,6 @@
                 ],
                 "targets":[
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1841,6 +1863,7 @@
                     }
                 ],
                 "timeFrom":"12h",
+                "timeShift":null,
                 "title":"Master CentOS-9 Integration periodic jobs",
                 "transform":"table",
                 "type":"table-old"
@@ -1850,11 +1873,14 @@
                 "bars":true,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
-                },
+                "datasource":"telegraf",
                 "description":"Bars represent successful promotions to current-tripleo for master.\n\n",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -1890,7 +1916,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"9.1.5",
+                "pluginVersion":"7.3.6",
                 "pointradius":2,
                 "points":false,
                 "renderer":"flot",
@@ -1904,10 +1930,6 @@
                 "steppedLine":false,
                 "targets":[
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1946,7 +1968,9 @@
                     }
                 ],
                 "thresholds":[],
+                "timeFrom":null,
                 "timeRegions":[],
+                "timeShift":null,
                 "title":"Promotions for CentOS-9 wallaby tripleo ci ( current-tripleo )",
                 "tooltip":{
                     "shared":true,
@@ -1955,7 +1979,9 @@
                 },
                 "type":"graph",
                 "xaxis":{
+                    "buckets":null,
                     "mode":"time",
+                    "name":null,
                     "show":true,
                     "values":[]
                 },
@@ -1966,24 +1992,33 @@
                         "format":"short",
                         "label":"Number of Promotions",
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":true
                     },
                     {
                         "$$hashKey":"object:303",
                         "format":"short",
+                        "label":null,
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":false
                     }
                 ],
                 "yaxis":{
-                    "align":false
+                    "align":false,
+                    "alignLevel":null
                 }
             },
             {
                 "columns":[],
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
+                "datasource":"telegraf",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
                 },
                 "fontSize":"100%",
                 "gridPos":{
@@ -1994,6 +2029,7 @@
                 },
                 "id":56,
                 "links":[],
+                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -2005,6 +2041,7 @@
                         "$$hashKey":"object:2120",
                         "alias":"Time since last build",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2022,6 +2059,7 @@
                         "$$hashKey":"object:2136",
                         "alias":"promotion details",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2043,6 +2081,7 @@
                         "$$hashKey":"object:2403",
                         "alias":"",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2060,6 +2099,7 @@
                         "$$hashKey":"object:2424",
                         "alias":"Date of last promotion",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2077,10 +2117,6 @@
                 "targets":[
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2119,10 +2155,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2161,10 +2193,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2203,10 +2231,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2245,10 +2269,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2287,10 +2307,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2329,10 +2345,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2371,10 +2383,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2413,10 +2421,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2455,10 +2459,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2497,10 +2497,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2539,10 +2535,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2581,10 +2573,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2623,10 +2611,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2665,10 +2649,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2707,10 +2687,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2748,6 +2724,8 @@
                         "tags":[]
                     }
                 ],
+                "timeFrom":null,
+                "timeShift":null,
                 "title":"Wallaby CentOS-9 Components: Days since last promotion",
                 "transform":"table",
                 "type":"table-old"
@@ -2757,11 +2735,14 @@
                 "bars":true,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
-                },
+                "datasource":"telegraf",
                 "description":"Bars represent successful promotions to current-tripleo-rdo for wallaby. Default time is the last 2 weeks.",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -2797,7 +2778,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"9.1.5",
+                "pluginVersion":"7.3.6",
                 "pointradius":2,
                 "points":false,
                 "renderer":"flot",
@@ -2812,10 +2793,6 @@
                 "steppedLine":false,
                 "targets":[
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2854,7 +2831,9 @@
                     }
                 ],
                 "thresholds":[],
+                "timeFrom":null,
                 "timeRegions":[],
+                "timeShift":null,
                 "title":"Promotions for CentOS-9 Wallaby RDO ( current-tripleo-rdo )",
                 "tooltip":{
                     "shared":true,
@@ -2863,7 +2842,9 @@
                 },
                 "type":"graph",
                 "xaxis":{
+                    "buckets":null,
                     "mode":"time",
+                    "name":null,
                     "show":true,
                     "values":[]
                 },
@@ -2874,26 +2855,35 @@
                         "format":"short",
                         "label":"Number of Promotions",
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":true
                     },
                     {
                         "$$hashKey":"object:791",
                         "format":"short",
+                        "label":null,
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":false
                     }
                 ],
                 "yaxis":{
-                    "align":false
+                    "align":false,
+                    "alignLevel":null
                 }
             },
             {
                 "columns":[],
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
-                },
+                "datasource":"telegraf",
                 "description":"List of the latest failing integration / promotion  jobs.",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":8,
@@ -2903,6 +2893,7 @@
                 },
                 "id":49,
                 "links":[],
+                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -2914,6 +2905,7 @@
                         "$$hashKey":"object:280",
                         "alias":"Time",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2931,6 +2923,7 @@
                         "$$hashKey":"object:293",
                         "alias":"job",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -3013,6 +3006,7 @@
                         "$$hashKey":"object:1284",
                         "alias":"logs",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -3030,6 +3024,7 @@
                         "$$hashKey":"object:2071",
                         "alias":"aggregate_hash",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -3050,6 +3045,7 @@
                         "$$hashKey":"object:985",
                         "alias":"",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -3066,10 +3062,6 @@
                 ],
                 "targets":[
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3108,6 +3100,7 @@
                     }
                 ],
                 "timeFrom":"12h",
+                "timeShift":null,
                 "title":"Wallaby CentOS-9 Integration periodic jobs",
                 "transform":"table",
                 "type":"table-old"
@@ -3117,11 +3110,14 @@
                 "bars":true,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
-                },
+                "datasource":"telegraf",
                 "description":"Bars represent successful promotions to current-tripleo for master.\n\n",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -3157,7 +3153,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"9.1.5",
+                "pluginVersion":"7.3.6",
                 "pointradius":2,
                 "points":false,
                 "renderer":"flot",
@@ -3171,10 +3167,6 @@
                 "steppedLine":false,
                 "targets":[
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3213,7 +3205,9 @@
                     }
                 ],
                 "thresholds":[],
+                "timeFrom":null,
                 "timeRegions":[],
+                "timeShift":null,
                 "title":"Promotions for CentOS-8 wallaby tripleo ci ( current-tripleo )",
                 "tooltip":{
                     "shared":true,
@@ -3222,7 +3216,9 @@
                 },
                 "type":"graph",
                 "xaxis":{
+                    "buckets":null,
                     "mode":"time",
+                    "name":null,
                     "show":true,
                     "values":[]
                 },
@@ -3232,23 +3228,32 @@
                         "format":"short",
                         "label":"Number of Promotions",
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":true
                     },
                     {
                         "format":"short",
+                        "label":null,
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":false
                     }
                 ],
                 "yaxis":{
-                    "align":false
+                    "align":false,
+                    "alignLevel":null
                 }
             },
             {
                 "columns":[],
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
+                "datasource":"telegraf",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
                 },
                 "fontSize":"100%",
                 "gridPos":{
@@ -3259,6 +3264,7 @@
                 },
                 "id":70,
                 "links":[],
+                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -3270,6 +3276,7 @@
                         "$$hashKey":"object:2120",
                         "alias":"Time since last build",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -3287,6 +3294,7 @@
                         "$$hashKey":"object:2136",
                         "alias":"promotion details",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -3308,6 +3316,7 @@
                         "$$hashKey":"object:2403",
                         "alias":"",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -3325,6 +3334,7 @@
                         "$$hashKey":"object:2424",
                         "alias":"Date of last promotion",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -3342,10 +3352,6 @@
                 "targets":[
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3384,10 +3390,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3426,10 +3428,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3468,10 +3466,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3510,10 +3504,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3552,10 +3542,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3594,10 +3580,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3636,10 +3618,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3678,10 +3656,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3720,10 +3694,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3762,10 +3732,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3804,10 +3770,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3846,10 +3808,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3888,10 +3846,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3930,10 +3884,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3972,10 +3922,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -4013,6 +3959,8 @@
                         "tags":[]
                     }
                 ],
+                "timeFrom":null,
+                "timeShift":null,
                 "title":"Wallaby Components: Days since last promotion",
                 "transform":"table",
                 "type":"table-old"
@@ -4022,11 +3970,14 @@
                 "bars":true,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
-                },
+                "datasource":"telegraf",
                 "description":"Bars represent successful promotions to current-tripleo-rdo for wallaby. Default time is the last 2 weeks.",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -4062,7 +4013,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"9.1.5",
+                "pluginVersion":"7.3.6",
                 "pointradius":2,
                 "points":false,
                 "renderer":"flot",
@@ -4077,10 +4028,6 @@
                 "steppedLine":false,
                 "targets":[
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -4119,7 +4066,9 @@
                     }
                 ],
                 "thresholds":[],
+                "timeFrom":null,
                 "timeRegions":[],
+                "timeShift":null,
                 "title":"Promotions for CentOS-8 Wallaby RDO ( current-tripleo-rdo )",
                 "tooltip":{
                     "shared":true,
@@ -4128,7 +4077,9 @@
                 },
                 "type":"graph",
                 "xaxis":{
+                    "buckets":null,
                     "mode":"time",
+                    "name":null,
                     "show":true,
                     "values":[]
                 },
@@ -4139,26 +4090,35 @@
                         "format":"short",
                         "label":"Number of Promotions",
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":true
                     },
                     {
                         "$$hashKey":"object:791",
                         "format":"short",
+                        "label":null,
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":false
                     }
                 ],
                 "yaxis":{
-                    "align":false
+                    "align":false,
+                    "alignLevel":null
                 }
             },
             {
                 "columns":[],
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
-                },
+                "datasource":"telegraf",
                 "description":"List of the latest failing integration / promotion  jobs.",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":8,
@@ -4168,6 +4128,7 @@
                 },
                 "id":71,
                 "links":[],
+                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -4179,6 +4140,7 @@
                         "$$hashKey":"object:280",
                         "alias":"Time",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -4196,6 +4158,7 @@
                         "$$hashKey":"object:293",
                         "alias":"job",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -4278,6 +4241,7 @@
                         "$$hashKey":"object:1284",
                         "alias":"logs",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -4295,6 +4259,7 @@
                         "$$hashKey":"object:2071",
                         "alias":"aggregate_hash",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -4315,6 +4280,7 @@
                         "$$hashKey":"object:985",
                         "alias":"",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -4331,10 +4297,6 @@
                 ],
                 "targets":[
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -4373,6 +4335,7 @@
                     }
                 ],
                 "timeFrom":"12h",
+                "timeShift":null,
                 "title":"Wallaby CentOS-8 Integration periodic jobs",
                 "transform":"table",
                 "type":"table-old"
@@ -4382,11 +4345,14 @@
                 "bars":true,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
-                },
+                "datasource":"telegraf",
                 "description":"Bars represent successful promotions to current-tripleo for master.\n\n",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -4396,7 +4362,7 @@
                     "y":81
                 },
                 "hiddenSeries":false,
-                "id":63,
+                "id":59,
                 "legend":{
                     "alignAsTable":true,
                     "avg":false,
@@ -4422,7 +4388,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"9.1.5",
+                "pluginVersion":"7.3.6",
                 "pointradius":2,
                 "points":false,
                 "renderer":"flot",
@@ -4436,10 +4402,6 @@
                 "steppedLine":false,
                 "targets":[
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -4456,7 +4418,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'victoria' AND \"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -4478,8 +4440,10 @@
                     }
                 ],
                 "thresholds":[],
+                "timeFrom":null,
                 "timeRegions":[],
-                "title":"Promotions for CentOS-8 train tripleo ci ( current-tripleo )",
+                "timeShift":null,
+                "title":"Promotions for CentOS-8 victoria tripleo ci ( current-tripleo )",
                 "tooltip":{
                     "shared":true,
                     "sort":0,
@@ -4487,7 +4451,9 @@
                 },
                 "type":"graph",
                 "xaxis":{
+                    "buckets":null,
                     "mode":"time",
+                    "name":null,
                     "show":true,
                     "values":[]
                 },
@@ -4497,25 +4463,34 @@
                         "format":"short",
                         "label":"Number of Promotions",
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":true
                     },
                     {
                         "format":"short",
+                        "label":null,
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":false
                     }
                 ],
                 "yaxis":{
-                    "align":false
+                    "align":false,
+                    "alignLevel":null
                 }
             },
             {
                 "columns":[],
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
-                },
+                "datasource":"telegraf",
                 "description":"",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":16,
@@ -4523,8 +4498,9 @@
                     "x":12,
                     "y":81
                 },
-                "id":62,
+                "id":58,
                 "links":[],
+                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -4536,6 +4512,7 @@
                         "$$hashKey":"object:2120",
                         "alias":"Time since last build",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -4553,6 +4530,7 @@
                         "$$hashKey":"object:2136",
                         "alias":"promotion details",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -4574,6 +4552,7 @@
                         "$$hashKey":"object:2403",
                         "alias":"",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -4591,6 +4570,7 @@
                         "$$hashKey":"object:2424",
                         "alias":"Date of last promotion",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -4608,10 +4588,6 @@
                 "targets":[
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -4628,7 +4604,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'baremetal' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'baremetal' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"table",
@@ -4650,10 +4626,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -4670,7 +4642,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'cinder' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'cinder' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"table",
@@ -4692,10 +4664,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -4712,7 +4680,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'clients' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'clients' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"table",
@@ -4734,10 +4702,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -4754,7 +4718,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'cloudops' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'cloudops' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"D",
                         "resultFormat":"table",
@@ -4776,10 +4740,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -4796,7 +4756,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'common' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'common' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"E",
                         "resultFormat":"table",
@@ -4818,10 +4778,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -4838,7 +4794,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'compute' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'compute' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"F",
                         "resultFormat":"table",
@@ -4860,10 +4816,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -4880,7 +4832,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'glance' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'glance' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"G",
                         "resultFormat":"table",
@@ -4902,10 +4854,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -4922,7 +4870,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'manila' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'manila' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"H",
                         "resultFormat":"table",
@@ -4944,10 +4892,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -4964,7 +4908,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'network' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'network' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"I",
                         "resultFormat":"table",
@@ -4986,10 +4930,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -5006,7 +4946,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'octavia' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'octavia' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"J",
                         "resultFormat":"table",
@@ -5028,10 +4968,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -5048,7 +4984,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'security' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'security' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"K",
                         "resultFormat":"table",
@@ -5070,10 +5006,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -5090,7 +5022,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'swift' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'swift' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"L",
                         "resultFormat":"table",
@@ -5112,10 +5044,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -5132,7 +5060,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'tempest' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'tempest' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"M",
                         "resultFormat":"table",
@@ -5154,10 +5082,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -5174,7 +5098,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'tripleo' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'tripleo' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"N",
                         "resultFormat":"table",
@@ -5196,10 +5120,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -5216,7 +5136,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'ui' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'ui' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"O",
                         "resultFormat":"table",
@@ -5238,10 +5158,6 @@
                     },
                     {
                         "alias":"",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -5258,7 +5174,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'validation' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'victoria' AND \"component\" = 'validation' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
                         "rawQuery":true,
                         "refId":"P",
                         "resultFormat":"table",
@@ -5279,7 +5195,9 @@
                         "tags":[]
                     }
                 ],
-                "title":"Train CentOS-8 Components: Days since last promotion",
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"Victoria Components: Days since last promotion",
                 "transform":"table",
                 "type":"table-old"
             },
@@ -5288,11 +5206,14 @@
                 "bars":true,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
+                "datasource":"telegraf",
+                "description":"Bars represent successful promotions to current-tripleo-rdo for victoria. Default time is the last 2 weeks.",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
                 },
-                "description":"Bars represent successful promotions to current-tripleo for train. ",
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -5302,7 +5223,7 @@
                     "y":89
                 },
                 "hiddenSeries":false,
-                "id":21,
+                "id":38,
                 "legend":{
                     "alignAsTable":true,
                     "avg":false,
@@ -5319,8 +5240,8 @@
                 "links":[
                     {
                         "targetBlank":true,
-                        "title":"train current-tripleo",
-                        "url":"https://trunk.rdoproject.org/centos8-train/current-tripleo-rdo/delorean.repo"
+                        "title":"Victoria current-tripleo-rdo",
+                        "url":"https://trunk.rdoproject.org/centos8-victoria/current-tripleo-rdo/delorean.repo"
                     }
                 ],
                 "nullPointMode":"null",
@@ -5328,13 +5249,13 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"9.1.5",
+                "pluginVersion":"7.3.6",
                 "pointradius":2,
                 "points":false,
                 "renderer":"flot",
                 "seriesOverrides":[
                     {
-                        "$$hashKey":"object:1891",
+                        "$$hashKey":"object:1502",
                         "alias":"dlrn-promotion.count {name: current-tripleo-rdo}"
                     }
                 ],
@@ -5343,10 +5264,6 @@
                 "steppedLine":false,
                 "targets":[
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -5363,7 +5280,7 @@
                         ],
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"promo_name\" = 'current-tripleo-rdo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'victoria' AND \"promo_name\" = 'current-tripleo-rdo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -5385,8 +5302,10 @@
                     }
                 ],
                 "thresholds":[],
+                "timeFrom":null,
                 "timeRegions":[],
-                "title":"Promotions for CentOS-8 train RDO ( current-tripleo-rdo )",
+                "timeShift":null,
+                "title":"Promotions for CentOS-8 Victoria RDO ( current-tripleo-rdo )",
                 "tooltip":{
                     "shared":true,
                     "sort":0,
@@ -5394,37 +5313,48 @@
                 },
                 "type":"graph",
                 "xaxis":{
+                    "buckets":null,
                     "mode":"time",
+                    "name":null,
                     "show":true,
                     "values":[]
                 },
                 "yaxes":[
                     {
-                        "$$hashKey":"object:1896",
+                        "$$hashKey":"object:1507",
                         "decimals":0,
                         "format":"short",
                         "label":"Number of Promotions",
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":true
                     },
                     {
-                        "$$hashKey":"object:1897",
+                        "$$hashKey":"object:1508",
                         "format":"short",
+                        "label":null,
                         "logBase":1,
+                        "max":null,
+                        "min":null,
                         "show":false
                     }
                 ],
                 "yaxis":{
-                    "align":false
+                    "align":false,
+                    "alignLevel":null
                 }
             },
             {
                 "columns":[],
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"G65c4z7Vk"
-                },
+                "datasource":"telegraf",
                 "description":"List of the latest failing integration / promotion  jobs.",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":8,
@@ -5432,8 +5362,9 @@
                     "x":0,
                     "y":97
                 },
-                "id":55,
+                "id":53,
                 "links":[],
+                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -5445,6 +5376,7 @@
                         "$$hashKey":"object:280",
                         "alias":"Time",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -5462,6 +5394,7 @@
                         "$$hashKey":"object:293",
                         "alias":"job",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -5544,6 +5477,1242 @@
                         "$$hashKey":"object:1284",
                         "alias":"logs",
                         "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"logs",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:2570",
+                        "alias":"aggregate_hash",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkUrl":"https://trunk.rdoproject.org/api-centos8-victoria/api/civotes_agg_detail.html?ref_hash=${__cell_7:raw}",
+                        "mappingType":1,
+                        "pattern":"test_hash",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:1251",
+                        "alias":"",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"distro",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"job_name\",\"status\",\"criteria\",\"logs\",\"duration\",\"failure_reason\",\"test_hash\",\"distro\"  FROM \"autogen\".\"jobs_result\" WHERE (\"job_type\" = 'integration' AND \"release\" = 'victoria' AND \"distro\" = 'centos-8') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "timeFrom":"12h",
+                "timeShift":null,
+                "title":"Victoria  Integration periodic jobs",
+                "transform":"table",
+                "type":"table-old"
+            },
+            {
+                "aliasColors":{},
+                "bars":true,
+                "dashLength":10,
+                "dashes":false,
+                "datasource":"telegraf",
+                "description":"Bars represent successful promotions to current-tripleo for master.\n\n",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fill":1,
+                "fillGradient":0,
+                "gridPos":{
+                    "h":8,
+                    "w":12,
+                    "x":0,
+                    "y":105
+                },
+                "hiddenSeries":false,
+                "id":63,
+                "legend":{
+                    "alignAsTable":true,
+                    "avg":false,
+                    "current":true,
+                    "max":false,
+                    "min":false,
+                    "rightSide":true,
+                    "show":false,
+                    "total":false,
+                    "values":true
+                },
+                "lines":false,
+                "linewidth":1,
+                "links":[
+                    {
+                        "targetBlank":true,
+                        "title":"Master current-tripleo link",
+                        "url":"https://trunk.rdoproject.org/centos8-master/current-tripleo/delorean.repo"
+                    }
+                ],
+                "nullPointMode":"null",
+                "options":{
+                    "alertThreshold":true
+                },
+                "percentage":false,
+                "pluginVersion":"7.3.6",
+                "pointradius":2,
+                "points":false,
+                "renderer":"flot",
+                "seriesOverrides":[
+                    {
+                        "alias":"dlrn-promotion.count {name: current-tripleo}"
+                    }
+                ],
+                "spaceLength":10,
+                "stack":false,
+                "steppedLine":false,
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"promo_name\" = 'current-tripleo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "thresholds":[],
+                "timeFrom":null,
+                "timeRegions":[],
+                "timeShift":null,
+                "title":"Promotions for CentOS-8 train tripleo ci ( current-tripleo )",
+                "tooltip":{
+                    "shared":true,
+                    "sort":0,
+                    "value_type":"individual"
+                },
+                "type":"graph",
+                "xaxis":{
+                    "buckets":null,
+                    "mode":"time",
+                    "name":null,
+                    "show":true,
+                    "values":[]
+                },
+                "yaxes":[
+                    {
+                        "decimals":0,
+                        "format":"short",
+                        "label":"Number of Promotions",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    },
+                    {
+                        "format":"short",
+                        "label":null,
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":false
+                    }
+                ],
+                "yaxis":{
+                    "align":false,
+                    "alignLevel":null
+                }
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":16,
+                    "w":12,
+                    "x":12,
+                    "y":105
+                },
+                "id":62,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":false
+                },
+                "styles":[
+                    {
+                        "$$hashKey":"object:2120",
+                        "alias":"Time since last build",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"latest_build_date",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
+                    },
+                    {
+                        "$$hashKey":"object:2136",
+                        "alias":"promotion details",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkUrl":"${__cell_4:raw} ",
+                        "mappingType":1,
+                        "pattern":"last",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:2403",
+                        "alias":"",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"promotion_details",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:2424",
+                        "alias":"Date of last promotion",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"Time",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"dateTimeFromNow"
+                    }
+                ],
+                "targets":[
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'baremetal' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'cinder' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'clients' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'cloudops' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"D",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'common' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"E",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'compute' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"F",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'glance' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"G",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'manila' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"H",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'network' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"I",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'octavia' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"J",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'security' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"K",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'swift' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"L",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'tempest' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"M",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'tripleo' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"N",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'ui' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"O",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    },
+                    {
+                        "alias":"",
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"select component,  promo_name,  latest_build_date, promotion_details, last(aggregate_hash) from \"dlrn-promotion\" where (\"release\" = 'train' AND \"component\" = 'validation' AND \"promo_name\" = 'promoted-components' AND \"distro\" = 'centos-8' ) \n",
+                        "rawQuery":true,
+                        "refId":"P",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "timeFrom":null,
+                "timeShift":null,
+                "title":"Train CentOS-8 Components: Days since last promotion",
+                "transform":"table",
+                "type":"table-old"
+            },
+            {
+                "aliasColors":{},
+                "bars":true,
+                "dashLength":10,
+                "dashes":false,
+                "datasource":"telegraf",
+                "description":"Bars represent successful promotions to current-tripleo for train. ",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fill":1,
+                "fillGradient":0,
+                "gridPos":{
+                    "h":8,
+                    "w":12,
+                    "x":0,
+                    "y":113
+                },
+                "hiddenSeries":false,
+                "id":21,
+                "legend":{
+                    "alignAsTable":true,
+                    "avg":false,
+                    "current":true,
+                    "max":false,
+                    "min":false,
+                    "rightSide":true,
+                    "show":false,
+                    "total":false,
+                    "values":true
+                },
+                "lines":false,
+                "linewidth":1,
+                "links":[
+                    {
+                        "targetBlank":true,
+                        "title":"train current-tripleo",
+                        "url":"https://trunk.rdoproject.org/centos8-train/current-tripleo-rdo/delorean.repo"
+                    }
+                ],
+                "nullPointMode":"null",
+                "options":{
+                    "alertThreshold":true
+                },
+                "percentage":false,
+                "pluginVersion":"7.3.6",
+                "pointradius":2,
+                "points":false,
+                "renderer":"flot",
+                "seriesOverrides":[
+                    {
+                        "$$hashKey":"object:1891",
+                        "alias":"dlrn-promotion.count {name: current-tripleo-rdo}"
+                    }
+                ],
+                "spaceLength":10,
+                "stack":false,
+                "steppedLine":false,
+                "targets":[
+                    {
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT  count(\"aggregate_hash\") FROM \"dlrn-promotion\" WHERE (\"release\" = 'train' AND \"promo_name\" = 'current-tripleo-rdo' AND \"distro\" = 'centos-8') AND $timeFilter GROUP BY time(24h), \"name\" fill(0)",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "thresholds":[],
+                "timeFrom":null,
+                "timeRegions":[],
+                "timeShift":null,
+                "title":"Promotions for CentOS-8 train RDO ( current-tripleo-rdo )",
+                "tooltip":{
+                    "shared":true,
+                    "sort":0,
+                    "value_type":"individual"
+                },
+                "type":"graph",
+                "xaxis":{
+                    "buckets":null,
+                    "mode":"time",
+                    "name":null,
+                    "show":true,
+                    "values":[]
+                },
+                "yaxes":[
+                    {
+                        "$$hashKey":"object:1896",
+                        "decimals":0,
+                        "format":"short",
+                        "label":"Number of Promotions",
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":true
+                    },
+                    {
+                        "$$hashKey":"object:1897",
+                        "format":"short",
+                        "label":null,
+                        "logBase":1,
+                        "max":null,
+                        "min":null,
+                        "show":false
+                    }
+                ],
+                "yaxis":{
+                    "align":false,
+                    "alignLevel":null
+                }
+            },
+            {
+                "columns":[],
+                "datasource":"telegraf",
+                "description":"List of the latest failing integration / promotion  jobs.",
+                "fieldConfig":{
+                    "defaults":{
+                        "custom":{}
+                    },
+                    "overrides":[]
+                },
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":8,
+                    "w":24,
+                    "x":0,
+                    "y":121
+                },
+                "id":55,
+                "links":[],
+                "pageSize":null,
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "$$hashKey":"object:280",
+                        "alias":"Time",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"Time",
+                        "thresholds":[],
+                        "type":"date",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:293",
+                        "alias":"job",
+                        "align":"auto",
+                        "colorMode":null,
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_4:raw}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:319",
+                        "alias":"Duration",
+                        "align":"auto",
+                        "colorMode":"cell",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "$$hashKey":"object:330",
+                        "alias":"result",
+                        "align":"auto",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgb(128, 128, 128)",
+                            "#56A64B"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"status",
+                        "thresholds":[
+                            "1",
+                            "6",
+                            "10"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "$$hashKey":"object:351",
+                                "text":"FAILED",
+                                "value":"0"
+                            },
+                            {
+                                "$$hashKey":"object:353",
+                                "text":"PENDING",
+                                "value":"5"
+                            },
+                            {
+                                "$$hashKey":"object:412",
+                                "text":"SUCCESS",
+                                "value":"9"
+                            }
+                        ]
+                    },
+                    {
+                        "$$hashKey":"object:1284",
+                        "alias":"logs",
+                        "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -5561,6 +6730,7 @@
                         "$$hashKey":"object:2904",
                         "alias":"aggregate_hash",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -5580,6 +6750,7 @@
                         "$$hashKey":"object:2253",
                         "alias":"",
                         "align":"auto",
+                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -5596,10 +6767,6 @@
                 ],
                 "targets":[
                     {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"G65c4z7Vk"
-                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -5638,22 +6805,21 @@
                     }
                 ],
                 "timeFrom":"12h",
+                "timeShift":null,
                 "title":"Train CentOS-8-Stream  Integration periodic jobs",
                 "transform":"table",
                 "type":"table-old"
             }
         ],
         "refresh":false,
-        "schemaVersion":37,
+        "schemaVersion":26,
         "style":"dark",
         "tags":[],
         "templating":{
             "list":[
                 {
-                    "datasource":{
-                        "type":"influxdb",
-                        "uid":"G65c4z7Vk"
-                    },
+                    "datasource":"telegraf",
+                    "error":null,
                     "filters":[],
                     "hide":0,
                     "label":"influxdb_filter",
@@ -5693,7 +6859,6 @@
             ]
         },
         "timezone":"",
-        "title":"Upstream and RDO promotions",
-        "weekStart":""
+        "title":"Upstream and RDO promotions"
     }
 }
