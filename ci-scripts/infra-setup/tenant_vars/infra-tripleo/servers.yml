@@ -26,6 +26,22 @@ servers:
             - git
         package_upgrade: true
         write_files:
+            # TODO: Keep in sync with ci-scripts/infra-setup/roles/base/templates/hosts.j2
+            - path: /etc/ansible/hosts
+              permissions: '0644'
+              content: |
+                # {{ ansible_managed }}
+                all:
+                  vars:
+                    cloud: "{{ cloud | mandatory }}"
+                  children:
+                    {{ cloud | mandatory }}:
+                    hosts:
+                        incockpit
+                        promoter
+                        provisioner
+                        rrcockpit
+                        toolbox
             - path: /root/dlrnapi_secret
               permissions: '0600'
               content: |
@@ -47,9 +63,7 @@ servers:
         runcmd:
           - yum install -y epel-release
           - yum install -y ansible
-          - mkdir -p /etc/ansible/
-          - echo 'promoter ansible_connection=local' >  /etc/ansible/hosts
-          - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+          - ansible-pull -d /tmp/ci-config -i /etc/ansible/ -i ci-scripts/infra-setup/inventory/ --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
           - reboot
 
     - name: rrcockpit
@@ -76,6 +90,22 @@ servers:
             - vim
         package_upgrade: true
         write_files:
+            # TODO: Keep in sync with ci-scripts/infra-setup/roles/base/templates/hosts.j2
+            - path: /etc/ansible/hosts
+              permissions: '0644'
+              content: |
+                # {{ ansible_managed }}
+                all:
+                  vars:
+                    cloud: "{{ cloud | mandatory }}"
+                  children:
+                    {{ cloud | mandatory }}:
+                    hosts:
+                        incockpit
+                        promoter
+                        provisioner
+                        rrcockpit
+                        toolbox
             - path: /root/grafana_admin_password
               permissions: '0600'
               content: "{{ grafana_admin_password }}"
@@ -85,9 +115,7 @@ servers:
         runcmd:
           - yum install -y epel-release
           - yum install -y ansible python-pip
-          - mkdir -p /etc/ansible/
-          - echo 'rrcockpit ansible_connection=local' >  /etc/ansible/hosts
-          - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+          - ansible-pull -d /tmp/ci-config -i /etc/ansible/ -i ci-scripts/infra-setup/inventory/ --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
           - reboot
 
     - name: toolbox
@@ -114,6 +142,22 @@ servers:
             - vim
         package_upgrade: true
         write_files:
+            # TODO: Keep in sync with ci-scripts/infra-setup/roles/base/templates/hosts.j2
+            - path: /etc/ansible/hosts
+              permissions: '0644'
+              content: |
+                # {{ ansible_managed }}
+                all:
+                  vars:
+                    cloud: "{{ cloud | mandatory }}"
+                  children:
+                    {{ cloud | mandatory }}:
+                    hosts:
+                        incockpit
+                        promoter
+                        provisioner
+                        rrcockpit
+                        toolbox
             - path: /etc/nodepoolrc
               permissions: '0600'
               content: "{{ rdo_cloud_nodepool_rc | b64encode }}"
@@ -125,7 +169,5 @@ servers:
         runcmd:
           - dnf install -y epel-release
           - dnf install -y python3 ansible
-          - mkdir -p /etc/ansible/
-          - echo 'toolbox ansible_connection=local' >  /etc/ansible/hosts
-          - ansible-pull -d /tmp/ci-config --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+          - ansible-pull -d /tmp/ci-config -i /etc/ansible/ -i ci-scripts/infra-setup/inventory/ --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
           - reboot
