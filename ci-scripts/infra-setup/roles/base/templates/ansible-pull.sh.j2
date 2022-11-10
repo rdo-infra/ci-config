@@ -13,6 +13,8 @@ fi
 
 flock -n -E 2 /var/lock/ansible-pull \
     ansible-pull -d /var/lib/ansible/local \
+        -i /etc/ansible/hosts \
+        -i ci-scripts/infra-setup/inventory/hosts.yml \
         --clean \
         -U "{{ infra_setup_repo }}" \
         "{{ infra_setup_servers_playbook }}"
