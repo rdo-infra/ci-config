@@ -1,9 +1,11 @@
-- import_playbook: provisioner_prepare.yml
-  tags:
-    - networks
-    - secgroups
-    - keypairs
-    - servers
+- hosts: provisioner
+  gather_facts: no
+  tasks:
+    - name: 'Let provisioner inherit variables from group {{ cloud }}'
+      ansible.builtin.add_host:
+        name: provisioner
+        groups: '{{ cloud | mandatory }}'
+      changed_when: false
 
 - hosts: provisioner
   tasks:
