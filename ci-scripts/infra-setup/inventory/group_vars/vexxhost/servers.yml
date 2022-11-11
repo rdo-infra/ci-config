@@ -35,6 +35,10 @@ servers:
                 all:
                   vars:
                     cloud: "{{ cloud | mandatory }}"
+        {% if infra_setup_repo_fetch_refspec | default(None) != None %}
+                    infra_setup_repo_fetch: "{{ infra_setup_repo_fetch }}"
+                    infra_setup_repo_fetch_refspec: "{{ infra_setup_repo_fetch_refspec }}"
+        {% endif %}
                   children:
                     {{ cloud | mandatory }}:
                       hosts:
@@ -64,7 +68,24 @@ servers:
         runcmd:
           - yum install -y epel-release
           - yum install -y ansible
-          - ansible-pull -d /tmp/ci-config -i /etc/ansible/hosts -i ci-scripts/infra-setup/inventory/hosts.yml --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+          - |
+            set -exu
+            git clone '{{ infra_setup_repo }}' /tmp/ci-config
+            cd /tmp/ci-config
+        {% if infra_setup_repo_fetch_refspec | default(None) != None %}
+            git fetch --force \
+                '{{ infra_setup_repo_fetch }}' \
+                '{{ infra_setup_repo_fetch_refspec }}'
+            git checkout --force FETCH_HEAD
+        {% else %}
+            git checkout --force master
+        {% endif %}
+
+            ansible-playbook -c local -vvv \
+                -i /etc/ansible/hosts \
+                -i ci-scripts/infra-setup/inventory/hosts.yml \
+                -l "localhost,$(hostname --short),$(hostname --fqdn),127.0.0.1" \
+                '{{ infra_setup_servers_playbook }}'
           - reboot
 
     - name: rrcockpit
@@ -100,6 +121,10 @@ servers:
                 all:
                   vars:
                     cloud: "{{ cloud | mandatory }}"
+        {% if infra_setup_repo_fetch_refspec | default(None) != None %}
+                    infra_setup_repo_fetch: "{{ infra_setup_repo_fetch }}"
+                    infra_setup_repo_fetch_refspec: "{{ infra_setup_repo_fetch_refspec }}"
+        {% endif %}
                   children:
                     {{ cloud | mandatory }}:
                       hosts:
@@ -117,7 +142,24 @@ servers:
         runcmd:
           - yum install -y epel-release
           - yum install -y ansible python-pip
-          - ansible-pull -d /tmp/ci-config -i /etc/ansible/hosts -i ci-scripts/infra-setup/inventory/hosts.yml --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+          - |
+            set -exu
+            git clone '{{ infra_setup_repo }}' /tmp/ci-config
+            cd /tmp/ci-config
+        {% if infra_setup_repo_fetch_refspec | default(None) != None %}
+            git fetch --force \
+                '{{ infra_setup_repo_fetch }}' \
+                '{{ infra_setup_repo_fetch_refspec }}'
+            git checkout --force FETCH_HEAD
+        {% else %}
+            git checkout --force master
+        {% endif %}
+
+            ansible-playbook -c local -vvv \
+                -i /etc/ansible/hosts \
+                -i ci-scripts/infra-setup/inventory/hosts.yml \
+                -l "localhost,$(hostname --short),$(hostname --fqdn),127.0.0.1" \
+                '{{ infra_setup_servers_playbook }}'
           - reboot
 
     - name: toolbox
@@ -153,6 +195,10 @@ servers:
                 all:
                   vars:
                     cloud: "{{ cloud | mandatory }}"
+        {% if infra_setup_repo_fetch_refspec | default(None) != None %}
+                    infra_setup_repo_fetch: "{{ infra_setup_repo_fetch }}"
+                    infra_setup_repo_fetch_refspec: "{{ infra_setup_repo_fetch_refspec }}"
+        {% endif %}
                   children:
                     {{ cloud | mandatory }}:
                       hosts:
@@ -172,5 +218,22 @@ servers:
         runcmd:
           - dnf install -y epel-release
           - dnf install -y python3 ansible
-          - ansible-pull -d /tmp/ci-config -i /etc/ansible/hosts -i ci-scripts/infra-setup/inventory/hosts.yml --clean -U {{ infra_setup_repo }} {{ infra_setup_servers_playbook }} 2>&1 | tee /var/log/ansible-pull.log
+          - |
+            set -exu
+            git clone '{{ infra_setup_repo }}' /tmp/ci-config
+            cd /tmp/ci-config
+        {% if infra_setup_repo_fetch_refspec | default(None) != None %}
+            git fetch --force \
+                '{{ infra_setup_repo_fetch }}' \
+                '{{ infra_setup_repo_fetch_refspec }}'
+            git checkout --force FETCH_HEAD
+        {% else %}
+            git checkout --force master
+        {% endif %}
+
+            ansible-playbook -c local -vvv \
+                -i /etc/ansible/hosts \
+                -i ci-scripts/infra-setup/inventory/hosts.yml \
+                -l "localhost,$(hostname --short),$(hostname --fqdn),127.0.0.1" \
+                '{{ infra_setup_servers_playbook }}'
           - reboot
