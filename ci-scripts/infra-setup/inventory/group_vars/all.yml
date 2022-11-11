@@ -25,8 +25,16 @@ rrcockpit_mtu: 1450
 toolbox_internal_network_ip: 192.168.100.241
 toolbox_external_network_ip: 38.102.83.131
 
-infra_setup_repo: https://github.com/rdo-infra/ci-config.git
+infra_setup_repo_default: https://github.com/rdo-infra/ci-config.git
+# Variables infra_setup_repo and infra_setup_repo_refspec allow to override what git will use on checkout and is useful
+# to verify patches in a staging enviroment.
+# NOTE: Do not define infra_setup_repo{,_refspec} here but instead use ansible's -e argument.
+#
+# Example:
+infra_setup_repo: https://review.rdoproject.org/r/rdo-infra/ci-config/
+#infra_setup_repo_refspec: refs/changes/01/46001/4
 infra_setup_servers_playbook: ci-scripts/infra-setup/servers_setup.yml
+infra_setup_inventory: ci-scripts/infra-setup/inventory/
 
 users:
 # NOTE: Do not remove users from this list! Instead expire them, remove their SSH keys and wait for the instances to
