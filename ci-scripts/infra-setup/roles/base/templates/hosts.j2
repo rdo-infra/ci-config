@@ -4,6 +4,10 @@
 all:
   vars:
     cloud: "{{ cloud | mandatory }}"
+    infra_setup_repo: "{{ infra_setup_repo | default(infra_setup_repo_default) }}"
+    {% if infra_setup_repo_refspec | default(None) != None %}
+    infra_setup_repo_refspec: "{{ infra_setup_repo_refspec }}"
+    {% endif %}
   children:
     {{ cloud | mandatory }}:
       hosts:
