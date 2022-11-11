@@ -4,23 +4,36 @@
             "list":[
                 {
                     "builtIn":1,
-                    "datasource":"-- Grafana --",
+                    "datasource":{
+                        "type":"datasource",
+                        "uid":"grafana"
+                    },
                     "enable":true,
                     "hide":true,
                     "iconColor":"rgba(0, 211, 255, 1)",
                     "name":"Annotations & Alerts",
+                    "target":{
+                        "limit":100,
+                        "matchAny":false,
+                        "tags":[],
+                        "type":"dashboard"
+                    },
                     "type":"dashboard"
                 }
             ]
         },
         "editable":true,
-        "gnetId":null,
+        "fiscalYearStartMonth":0,
         "graphTooltip":0,
         "links":[],
+        "liveNow":false,
         "panels":[
             {
                 "collapsed":false,
-                "datasource":null,
+                "datasource":{
+                    "type":"datasource",
+                    "uid":"grafana"
+                },
                 "gridPos":{
                     "h":1,
                     "w":24,
@@ -29,18 +42,24 @@
                 },
                 "id":334,
                 "panels":[],
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"datasource",
+                            "uid":"grafana"
+                        },
+                        "refId":"A"
+                    }
+                ],
                 "title":"Main",
                 "type":"row"
             },
             {
-                "datasource":null,
-                "description":"This is a place to keep some notes and links to current etherpads for ruck rovers.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"datasource",
+                    "uid":"grafana"
                 },
+                "description":"This is a place to keep some notes and links to current etherpads for ruck rovers.",
                 "gridPos":{
                     "h":2,
                     "w":24,
@@ -53,20 +72,26 @@
                     "content":"[Design](https://tree.taiga.io/project/tripleo-ci-board/epic/1271), [Documentation](https://docs.openstack.org/tripleo-docs/latest/ci/third_party_dependencies_ci.html)",
                     "mode":"markdown"
                 },
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"datasource",
+                            "uid":"grafana"
+                        },
+                        "refId":"A"
+                    }
+                ],
                 "title":"Useful Links",
                 "type":"text"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
-                "description":"Running list of all jobs running in the RDO openstack-periodic-weekend\n\nClick on individual job names to go to logs or on the patch number to see the gerrit review.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
+                "description":"Running list of all jobs running in the RDO openstack-periodic-weekend\n\nClick on individual job names to go to logs or on the patch number to see the gerrit review.",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":10,
@@ -81,7 +106,6 @@
                         "url":"https://review.rdoproject.org/zuul/builds?pipeline=openstack-periodic-weekend"
                     }
                 ],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -101,7 +125,6 @@
                         "$$hashKey":"object:765",
                         "alias":"Branch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -119,7 +142,6 @@
                         "$$hashKey":"object:766",
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -142,7 +164,6 @@
                         "$$hashKey":"object:767",
                         "alias":"Pipeline",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -225,7 +246,6 @@
                         "$$hashKey":"object:770",
                         "alias":"Log URL",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -247,7 +267,6 @@
                         "$$hashKey":"object:771",
                         "alias":"Patch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(50, 172, 45, 0.97)",
                             "rgba(237, 129, 40, 0.89)",
@@ -272,7 +291,6 @@
                         "$$hashKey":"object:772",
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -292,7 +310,6 @@
                         "$$hashKey":"object:773",
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -310,7 +327,6 @@
                         "$$hashKey":"object:774",
                         "alias":"Result",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -328,7 +344,6 @@
                         "$$hashKey":"object:775",
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -343,6 +358,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -455,14 +474,11 @@
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
-                "description":"Running list of all jobs running in the RDO openstack-periodic-weekend\n\nClick on individual job names to go to logs or on the patch number to see the gerrit review.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
+                "description":"Running list of all jobs running in the RDO openstack-periodic-weekend\n\nClick on individual job names to go to logs or on the patch number to see the gerrit review.",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":10,
@@ -477,7 +493,6 @@
                         "url":"https://review.rdoproject.org/zuul/builds?pipeline=openstack-periodic-weekend"
                     }
                 ],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -497,7 +512,6 @@
                         "$$hashKey":"object:765",
                         "alias":"Branch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -515,7 +529,6 @@
                         "$$hashKey":"object:766",
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -538,7 +551,6 @@
                         "$$hashKey":"object:767",
                         "alias":"Pipeline",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -621,7 +633,6 @@
                         "$$hashKey":"object:770",
                         "alias":"Log URL",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -643,7 +654,6 @@
                         "$$hashKey":"object:771",
                         "alias":"Patch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(50, 172, 45, 0.97)",
                             "rgba(237, 129, 40, 0.89)",
@@ -668,7 +678,6 @@
                         "$$hashKey":"object:772",
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -688,7 +697,6 @@
                         "$$hashKey":"object:773",
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -706,7 +714,6 @@
                         "$$hashKey":"object:774",
                         "alias":"Result",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -724,7 +731,6 @@
                         "$$hashKey":"object:775",
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -739,6 +745,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -851,7 +861,10 @@
             },
             {
                 "collapsed":false,
-                "datasource":null,
+                "datasource":{
+                    "type":"datasource",
+                    "uid":"grafana"
+                },
                 "gridPos":{
                     "h":1,
                     "w":24,
@@ -860,23 +873,30 @@
                 },
                 "id":51,
                 "panels":[],
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"datasource",
+                            "uid":"grafana"
+                        },
+                        "refId":"A"
+                    }
+                ],
                 "title":"Zuul jobs",
                 "type":"row"
             }
         ],
         "refresh":false,
-        "schemaVersion":26,
+        "schemaVersion":37,
         "style":"dark",
         "tags":[],
         "templating":{
             "list":[
                 {
-                    "allValue":null,
                     "current":{
                         "text":"alert",
                         "value":"alert"
                     },
-                    "error":null,
                     "hide":2,
                     "includeAll":false,
                     "label":"Launchpad tags to show",
@@ -899,12 +919,10 @@
                     "type":"custom"
                 },
                 {
-                    "allValue":null,
                     "current":{
                         "text":"master",
                         "value":"master"
                     },
-                    "error":null,
                     "hide":2,
                     "includeAll":false,
                     "label":"Release",
@@ -942,7 +960,6 @@
                     "type":"custom"
                 },
                 {
-                    "allValue":null,
                     "current":{
                         "text":"current-tripleo + current-tripleo-rdo",
                         "value":[
@@ -950,10 +967,8 @@
                             "current-tripleo-rdo"
                         ]
                     },
-                    "error":null,
                     "hide":2,
                     "includeAll":false,
-                    "label":null,
                     "multi":true,
                     "name":"promotion_names",
                     "options":[
@@ -973,8 +988,10 @@
                     "type":"custom"
                 },
                 {
-                    "datasource":"telegraf",
-                    "error":null,
+                    "datasource":{
+                        "type":"influxdb",
+                        "uid":"6-61eLD4z"
+                    },
                     "filters":[],
                     "hide":0,
                     "label":"Influxdb filter",
@@ -1014,6 +1031,7 @@
             ]
         },
         "timezone":"utc",
-        "title":"Third Party Dependency Check"
+        "title":"Third Party Dependency Check",
+        "weekStart":""
     }
 }

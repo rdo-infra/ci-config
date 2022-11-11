@@ -4,23 +4,36 @@
             "list":[
                 {
                     "builtIn":1,
-                    "datasource":"-- Grafana --",
+                    "datasource":{
+                        "type":"datasource",
+                        "uid":"grafana"
+                    },
                     "enable":true,
                     "hide":true,
                     "iconColor":"rgba(0, 211, 255, 1)",
                     "name":"Annotations & Alerts",
+                    "target":{
+                        "limit":100,
+                        "matchAny":false,
+                        "tags":[],
+                        "type":"dashboard"
+                    },
                     "type":"dashboard"
                 }
             ]
         },
         "editable":true,
-        "gnetId":null,
+        "fiscalYearStartMonth":0,
         "graphTooltip":0,
         "links":[],
+        "liveNow":false,
         "panels":[
             {
                 "collapsed":false,
-                "datasource":null,
+                "datasource":{
+                    "type":"datasource",
+                    "uid":"grafana"
+                },
                 "gridPos":{
                     "h":1,
                     "w":24,
@@ -29,34 +42,63 @@
                 },
                 "id":334,
                 "panels":[],
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"datasource",
+                            "uid":"grafana"
+                        },
+                        "refId":"A"
+                    }
+                ],
                 "title":"Main",
                 "type":"row"
             },
             {
-                "cacheTimeout":null,
-                "colorBackground":false,
-                "colorValue":true,
-                "colors":[
-                    "#299c46",
-                    "rgba(237, 129, 40, 0.89)",
-                    "#d44a3a"
-                ],
-                "datasource":"telegraf",
-                "decimals":1,
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "description":"Upstream zuul *gate* queue.  The time a given patch will wait before running the upstream gate.\n\nClick on the links below to go to the zuul build status.",
                 "fieldConfig":{
                     "defaults":{
-                        "custom":{}
+                        "color":{
+                            "mode":"thresholds"
+                        },
+                        "decimals":1,
+                        "mappings":[
+                            {
+                                "options":{
+                                    "match":"null",
+                                    "result":{
+                                        "text":"N/A"
+                                    }
+                                },
+                                "type":"special"
+                            }
+                        ],
+                        "max":2000,
+                        "min":0,
+                        "thresholds":{
+                            "mode":"absolute",
+                            "steps":[
+                                {
+                                    "color":"#299c46",
+                                    "value":null
+                                },
+                                {
+                                    "color":"rgba(237, 129, 40, 0.89)",
+                                    "value":500
+                                },
+                                {
+                                    "color":"#d44a3a",
+                                    "value":1000
+                                }
+                            ]
+                        },
+                        "unit":"m"
                     },
                     "overrides":[]
-                },
-                "format":"m",
-                "gauge":{
-                    "maxValue":2000,
-                    "minValue":0,
-                    "show":true,
-                    "thresholdLabels":true,
-                    "thresholdMarkers":true
                 },
                 "gridPos":{
                     "h":10,
@@ -65,7 +107,6 @@
                     "y":1
                 },
                 "id":144,
-                "interval":null,
                 "links":[
                     {
                         "targetBlank":true,
@@ -78,40 +119,26 @@
                         "url":"http://zuul.openstack.org/status"
                     }
                 ],
-                "mappingType":1,
-                "mappingTypes":[
-                    {
-                        "name":"value to text",
-                        "value":1
-                    },
-                    {
-                        "name":"range to text",
-                        "value":2
-                    }
-                ],
                 "maxDataPoints":100,
-                "nullPointMode":"connected",
-                "nullText":null,
-                "postfix":"",
-                "postfixFontSize":"50%",
-                "prefix":"",
-                "prefixFontSize":"50%",
-                "rangeMaps":[
-                    {
-                        "from":"null",
-                        "text":"N/A",
-                        "to":"null"
-                    }
-                ],
-                "sparkline":{
-                    "fillColor":"rgba(31, 118, 189, 0.18)",
-                    "full":false,
-                    "lineColor":"rgb(31, 120, 193)",
-                    "show":true
+                "options":{
+                    "orientation":"horizontal",
+                    "reduceOptions":{
+                        "calcs":[
+                            "lastNotNull"
+                        ],
+                        "fields":"",
+                        "values":false
+                    },
+                    "showThresholdLabels":true,
+                    "showThresholdMarkers":true
                 },
-                "tableColumn":"",
+                "pluginVersion":"9.1.5",
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -160,45 +187,54 @@
                         ]
                     }
                 ],
-                "thresholds":"500,1000",
-                "timeFrom":null,
                 "title":"Upstream Zuul queue",
-                "type":"singlestat",
-                "valueFontSize":"50%",
-                "valueMaps":[
-                    {
-                        "op":"=",
-                        "text":"N/A",
-                        "value":"null"
-                    }
-                ],
-                "valueName":"current"
+                "type":"gauge"
             },
             {
-                "cacheTimeout":null,
-                "colorBackground":false,
-                "colorValue":true,
-                "colors":[
-                    "#299c46",
-                    "rgba(237, 129, 40, 0.89)",
-                    "#d44a3a"
-                ],
-                "datasource":"telegraf",
-                "decimals":null,
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "description":"Number of failing upstream *gate* jobs in the last 24 hours.\n\nClick on links below to go to the source zuul builds status.",
                 "fieldConfig":{
                     "defaults":{
-                        "custom":{}
+                        "color":{
+                            "mode":"thresholds"
+                        },
+                        "mappings":[
+                            {
+                                "options":{
+                                    "match":"null",
+                                    "result":{
+                                        "color":"#299c46",
+                                        "text":"0"
+                                    }
+                                },
+                                "type":"special"
+                            }
+                        ],
+                        "max":10,
+                        "min":0,
+                        "thresholds":{
+                            "mode":"absolute",
+                            "steps":[
+                                {
+                                    "color":"#299c46",
+                                    "value":null
+                                },
+                                {
+                                    "color":"rgba(237, 129, 40, 0.89)",
+                                    "value":1
+                                },
+                                {
+                                    "color":"#d44a3a",
+                                    "value":2
+                                }
+                            ]
+                        },
+                        "unit":"none"
                     },
                     "overrides":[]
-                },
-                "format":"none",
-                "gauge":{
-                    "maxValue":10,
-                    "minValue":0,
-                    "show":true,
-                    "thresholdLabels":true,
-                    "thresholdMarkers":true
                 },
                 "gridPos":{
                     "h":10,
@@ -207,7 +243,6 @@
                     "y":1
                 },
                 "id":147,
-                "interval":null,
                 "links":[
                     {
                         "targetBlank":true,
@@ -220,40 +255,26 @@
                         "url":"http://zuul.openstack.org/api/builds?pipeline=gate"
                     }
                 ],
-                "mappingType":1,
-                "mappingTypes":[
-                    {
-                        "name":"value to text",
-                        "value":1
-                    },
-                    {
-                        "name":"range to text",
-                        "value":2
-                    }
-                ],
                 "maxDataPoints":100,
-                "nullPointMode":"connected",
-                "nullText":null,
-                "postfix":" fails",
-                "postfixFontSize":"50%",
-                "prefix":"",
-                "prefixFontSize":"50%",
-                "rangeMaps":[
-                    {
-                        "from":"null",
-                        "text":"N/A",
-                        "to":"null"
-                    }
-                ],
-                "sparkline":{
-                    "fillColor":"rgba(31, 118, 189, 0.18)",
-                    "full":false,
-                    "lineColor":"rgb(31, 120, 193)",
-                    "show":false
+                "options":{
+                    "orientation":"horizontal",
+                    "reduceOptions":{
+                        "calcs":[
+                            "lastNotNull"
+                        ],
+                        "fields":"/^count$/",
+                        "values":false
+                    },
+                    "showThresholdLabels":true,
+                    "showThresholdMarkers":true
                 },
-                "tableColumn":"count",
+                "pluginVersion":"9.1.5",
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -303,38 +324,21 @@
                         ]
                     }
                 ],
-                "thresholds":"1,2,3",
-                "timeFrom":null,
-                "timeShift":null,
                 "title":"Upstream gate jobs",
-                "type":"singlestat",
-                "valueFontSize":"70%",
-                "valueMaps":[
-                    {
-                        "op":"=",
-                        "text":"0",
-                        "value":"null"
-                    }
-                ],
-                "valueName":"current"
+                "type":"gauge"
             },
             {
                 "aliasColors":{},
                 "breakPoint":"50%",
-                "cacheTimeout":null,
                 "combine":{
                     "label":"Others",
                     "threshold":0
                 },
-                "datasource":"telegraf",
-                "decimals":null,
-                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
+                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
@@ -344,7 +348,6 @@
                     "y":1
                 },
                 "id":164,
-                "interval":null,
                 "legend":{
                     "header":"",
                     "percentage":true,
@@ -361,6 +364,10 @@
                 "targets":[
                     {
                         "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -411,6 +418,10 @@
                     },
                     {
                         "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -467,6 +478,10 @@
                     },
                     {
                         "alias":"TIMED_OUT",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -522,21 +537,17 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
                 "title":"Upstream CI stats",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
-                "description":"A running list of failing upstream *gate* jobs. By default this will show the last 3 days.\n\nClick on individual jobs to go to the logs or to the gerrit change.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
+                "description":"A running list of failing upstream *gate* jobs. By default this will show the last 3 days.\n\nClick on individual jobs to go to the logs or to the gerrit change.",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":10,
@@ -547,7 +558,6 @@
                 "hideTimeOverride":false,
                 "id":61,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -565,7 +575,6 @@
                     {
                         "alias":"Branch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -605,7 +614,6 @@
                     {
                         "alias":"Pipeline",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -665,7 +673,6 @@
                     {
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -687,7 +694,6 @@
                     {
                         "alias":"Patch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -708,7 +714,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -723,6 +728,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -811,20 +820,16 @@
                     }
                 ],
                 "timeFrom":"3d",
-                "timeShift":null,
                 "title":"Upstream failing gate jobs",
                 "transform":"table",
                 "type":"table-old"
             },
             {
-                "datasource":null,
-                "description":"This is a place to keep some notes and links to current etherpads for ruck rovers.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"datasource",
+                    "uid":"grafana"
                 },
+                "description":"This is a place to keep some notes and links to current etherpads for ruck rovers.",
                 "gridPos":{
                     "h":2,
                     "w":24,
@@ -837,27 +842,31 @@
                     "content":"[ruck rover etherpad](https://hackmd.io/team/rh-openstack-ci?nav=search&q=ruck_rover) [rhos-release](http://rhos-release.virt.bos.redhat.com:3030/rhosp) ",
                     "mode":"markdown"
                 },
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"datasource",
+                            "uid":"grafana"
+                        },
+                        "refId":"A"
+                    }
+                ],
                 "title":"Useful Links",
                 "type":"text"
             },
             {
                 "aliasColors":{},
                 "breakPoint":"50%",
-                "cacheTimeout":null,
                 "combine":{
                     "label":"Others",
                     "threshold":0
                 },
-                "datasource":"telegraf",
-                "decimals":null,
-                "description":"Percentage of upstream  *gate* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
+                "description":"Percentage of upstream  *gate* jobs that are passing vs failing vs timing out.\n\n",
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
@@ -867,7 +876,6 @@
                     "y":13
                 },
                 "id":365,
-                "interval":null,
                 "legend":{
                     "header":"",
                     "percentage":true,
@@ -884,6 +892,10 @@
                 "targets":[
                     {
                         "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -934,6 +946,10 @@
                     },
                     {
                         "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -990,6 +1006,10 @@
                     },
                     {
                         "alias":"TIMED_OUT",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -1045,7 +1065,6 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
                 "title":"Upgrade MASTER gate",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
@@ -1053,20 +1072,15 @@
             {
                 "aliasColors":{},
                 "breakPoint":"50%",
-                "cacheTimeout":null,
                 "combine":{
                     "label":"Others",
                     "threshold":0
                 },
-                "datasource":"telegraf",
-                "decimals":null,
-                "description":"Percentage of upstream  *check* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
+                "description":"Percentage of upstream  *check* jobs that are passing vs failing vs timing out.\n\n",
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
@@ -1076,7 +1090,6 @@
                     "y":13
                 },
                 "id":372,
-                "interval":null,
                 "legend":{
                     "header":"",
                     "percentage":true,
@@ -1093,6 +1106,10 @@
                 "targets":[
                     {
                         "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -1143,6 +1160,10 @@
                     },
                     {
                         "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -1199,6 +1220,10 @@
                     },
                     {
                         "alias":"TIMED_OUT",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -1254,7 +1279,6 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
                 "title":"MASTER check",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
@@ -1262,20 +1286,15 @@
             {
                 "aliasColors":{},
                 "breakPoint":"50%",
-                "cacheTimeout":null,
                 "combine":{
                     "label":"Others",
                     "threshold":0
                 },
-                "datasource":"telegraf",
-                "decimals":null,
-                "description":"Percentage of upstream  *gate* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
+                "description":"Percentage of upstream  *gate* jobs that are passing vs failing vs timing out.\n\n",
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
@@ -1285,7 +1304,6 @@
                     "y":13
                 },
                 "id":368,
-                "interval":null,
                 "legend":{
                     "header":"",
                     "percentage":true,
@@ -1302,6 +1320,10 @@
                 "targets":[
                     {
                         "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -1352,6 +1374,10 @@
                     },
                     {
                         "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -1408,6 +1434,10 @@
                     },
                     {
                         "alias":"TIMED_OUT",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -1463,7 +1493,6 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
                 "title":"Upgrade TRAIN gate",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
@@ -1471,20 +1500,15 @@
             {
                 "aliasColors":{},
                 "breakPoint":"50%",
-                "cacheTimeout":null,
                 "combine":{
                     "label":"Others",
                     "threshold":0
                 },
-                "datasource":"telegraf",
-                "decimals":null,
-                "description":"Percentage of upstream  *check* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
+                "description":"Percentage of upstream  *check* jobs that are passing vs failing vs timing out.\n\n",
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
@@ -1494,7 +1518,6 @@
                     "y":13
                 },
                 "id":374,
-                "interval":null,
                 "legend":{
                     "header":"",
                     "percentage":true,
@@ -1511,6 +1534,10 @@
                 "targets":[
                     {
                         "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -1561,6 +1588,10 @@
                     },
                     {
                         "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -1617,6 +1648,10 @@
                     },
                     {
                         "alias":"TIMED_OUT",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -1672,21 +1707,17 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
                 "title":"TRAIN check",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
             {
                 "columns":[],
-                "datasource":"mariadb",
-                "description":"List of TripleO promotion-blocker bugs",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"mysql",
+                    "uid":"jx6JeLD4k"
                 },
+                "description":"List of TripleO promotion-blocker bugs",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":10,
@@ -1702,7 +1733,6 @@
                     }
                 ],
                 "maxPerRow":2,
-                "pageSize":null,
                 "repeatDirection":"h",
                 "scroll":true,
                 "showHeader":true,
@@ -1726,7 +1756,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1743,7 +1772,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1759,6 +1787,10 @@
                 "targets":[
                     {
                         "alias":"",
+                        "datasource":{
+                            "type":"mysql",
+                            "uid":"jx6JeLD4k"
+                        },
                         "format":"table",
                         "group":[],
                         "groupBy":[],
@@ -1816,21 +1848,17 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
                 "title":"Upgrade bugs marked \"Alert\" ( CI team monitoring )",
                 "transform":"table",
                 "type":"table-old"
             },
             {
                 "columns":[],
-                "datasource":"mariadb",
-                "description":"List of TripleO promotion-blocker bugs",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"mysql",
+                    "uid":"jx6JeLD4k"
                 },
+                "description":"List of TripleO promotion-blocker bugs",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":10,
@@ -1846,8 +1874,6 @@
                     }
                 ],
                 "maxPerRow":2,
-                "pageSize":null,
-                "repeat":null,
                 "repeatDirection":"h",
                 "scroll":true,
                 "showHeader":true,
@@ -1871,7 +1897,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1888,7 +1913,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1904,6 +1928,10 @@
                 "targets":[
                     {
                         "alias":"",
+                        "datasource":{
+                            "type":"mysql",
+                            "uid":"jx6JeLD4k"
+                        },
                         "format":"table",
                         "group":[],
                         "groupBy":[],
@@ -1961,21 +1989,17 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
                 "title":"Promotion blockers",
                 "transform":"table",
                 "type":"table-old"
             },
             {
                 "columns":[],
-                "datasource":"mariadb",
-                "description":"List of TripleO upgrade bugs",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"mysql",
+                    "uid":"jx6JeLD4k"
                 },
+                "description":"List of TripleO upgrade bugs",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":10,
@@ -1991,7 +2015,6 @@
                     }
                 ],
                 "maxPerRow":2,
-                "pageSize":null,
                 "repeatDirection":"h",
                 "scroll":true,
                 "showHeader":true,
@@ -2015,7 +2038,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2032,7 +2054,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2048,6 +2069,10 @@
                 "targets":[
                     {
                         "alias":"",
+                        "datasource":{
+                            "type":"mysql",
+                            "uid":"jx6JeLD4k"
+                        },
                         "format":"table",
                         "group":[],
                         "groupBy":[],
@@ -2105,21 +2130,17 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
                 "title":"all bugs tagged with \"upgrade\" under 365 days old",
                 "transform":"table",
                 "type":"table-old"
             },
             {
                 "columns":[],
-                "datasource":"mariadb",
-                "description":"List of TripleO bugs opened in the last 5 days",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"mysql",
+                    "uid":"jx6JeLD4k"
                 },
+                "description":"List of TripleO bugs opened in the last 5 days",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":10,
@@ -2135,7 +2156,6 @@
                     }
                 ],
                 "maxPerRow":2,
-                "pageSize":null,
                 "repeatDirection":"h",
                 "scroll":true,
                 "showHeader":true,
@@ -2159,7 +2179,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2176,7 +2195,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2192,6 +2210,10 @@
                 "targets":[
                     {
                         "alias":"",
+                        "datasource":{
+                            "type":"mysql",
+                            "uid":"jx6JeLD4k"
+                        },
                         "format":"table",
                         "group":[],
                         "groupBy":[],
@@ -2249,14 +2271,16 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
                 "title":"TripleO bugs created in the 5 days",
                 "transform":"table",
                 "type":"table-old"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "description":"Running list of MASTER upstream jobs including *check* and *gate* queues.\n\nClick on individual job names to go to logs or on the patch number to see the gerrit review.",
                 "fieldConfig":{
                     "defaults":{
@@ -2273,7 +2297,6 @@
                 },
                 "id":63,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -2291,7 +2314,6 @@
                     {
                         "alias":"Branch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2308,7 +2330,6 @@
                     {
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2330,7 +2351,6 @@
                     {
                         "alias":"Pipeline",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2408,7 +2428,6 @@
                     {
                         "alias":"Log URL",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2429,7 +2448,6 @@
                     {
                         "alias":"Patch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(50, 172, 45, 0.97)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2453,7 +2471,6 @@
                     {
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2472,7 +2489,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2489,7 +2505,6 @@
                     {
                         "alias":"Result",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2506,7 +2521,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2521,6 +2535,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2633,7 +2651,10 @@
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "description":"Running list of TRAIN upstream jobs including *check* and *gate* queues.\n\nClick on individual job names to go to logs or on the patch number to see the gerrit review.",
                 "fieldConfig":{
                     "defaults":{
@@ -2650,7 +2671,6 @@
                 },
                 "id":361,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -2668,7 +2688,6 @@
                     {
                         "alias":"Branch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2685,7 +2704,6 @@
                     {
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2707,7 +2725,6 @@
                     {
                         "alias":"Pipeline",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2785,7 +2802,6 @@
                     {
                         "alias":"Log URL",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2806,7 +2822,6 @@
                     {
                         "alias":"Patch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(50, 172, 45, 0.97)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2830,7 +2845,6 @@
                     {
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2849,7 +2863,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2866,7 +2879,6 @@
                     {
                         "alias":"Result",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2883,7 +2895,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2898,6 +2909,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3013,7 +3028,10 @@
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -3074,6 +3092,10 @@
                 "targets":[
                     {
                         "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3131,6 +3153,10 @@
                     },
                     {
                         "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3217,7 +3243,6 @@
                 ],
                 "timeFrom":"3w",
                 "timeRegions":[],
-                "timeShift":null,
                 "title":"CI stats weekly check jobs",
                 "tooltip":{
                     "shared":true,
@@ -3226,16 +3251,13 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
                 "yaxes":[
                     {
                         "format":"none",
-                        "label":null,
                         "logBase":1,
                         "max":"100",
                         "min":"0",
@@ -3243,16 +3265,12 @@
                     },
                     {
                         "format":"percent",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":false
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             },
             {
@@ -3260,7 +3278,10 @@
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -3321,6 +3342,10 @@
                 "targets":[
                     {
                         "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3378,6 +3403,10 @@
                     },
                     {
                         "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3464,7 +3493,6 @@
                 ],
                 "timeFrom":"3w",
                 "timeRegions":[],
-                "timeShift":null,
                 "title":"CI stats weekly gate jobs",
                 "tooltip":{
                     "shared":true,
@@ -3473,16 +3501,13 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
                 "yaxes":[
                     {
                         "format":"none",
-                        "label":null,
                         "logBase":1,
                         "max":"100",
                         "min":"0",
@@ -3490,16 +3515,12 @@
                     },
                     {
                         "format":"percent",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":false
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             },
             {
@@ -3507,7 +3528,10 @@
                 "bars":true,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -3561,6 +3585,10 @@
                 "targets":[
                     {
                         "alias":"PASSED",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3616,6 +3644,10 @@
                     },
                     {
                         "alias":"FAILED",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3671,9 +3703,7 @@
                     }
                 ],
                 "thresholds":[],
-                "timeFrom":null,
                 "timeRegions":[],
-                "timeShift":null,
                 "title":"Check voting  jobs",
                 "tooltip":{
                     "shared":true,
@@ -3682,9 +3712,7 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
@@ -3694,22 +3722,17 @@
                         "format":"short",
                         "label":"dfgd",
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":false
                     },
                     {
                         "format":"short",
                         "label":"dfgd",
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":false
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             },
             {
@@ -3717,7 +3740,10 @@
                 "bars":true,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -3771,6 +3797,10 @@
                 "targets":[
                     {
                         "alias":"PASSED",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3820,6 +3850,10 @@
                     },
                     {
                         "alias":"FAILED",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3869,9 +3903,7 @@
                     }
                 ],
                 "thresholds":[],
-                "timeFrom":null,
                 "timeRegions":[],
-                "timeShift":null,
                 "title":"Check  jobs",
                 "tooltip":{
                     "shared":true,
@@ -3880,9 +3912,7 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
@@ -3892,38 +3922,31 @@
                         "format":"short",
                         "label":"dfgd",
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":false
                     },
                     {
                         "format":"short",
                         "label":"dfgd",
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":false
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             }
         ],
         "refresh":false,
-        "schemaVersion":26,
+        "schemaVersion":37,
         "style":"dark",
         "tags":[],
         "templating":{
             "list":[
                 {
-                    "allValue":null,
                     "current":{
                         "text":"alert",
                         "value":"alert"
                     },
-                    "error":null,
                     "hide":2,
                     "includeAll":false,
                     "label":"Launchpad tags to show",
@@ -3946,12 +3969,10 @@
                     "type":"custom"
                 },
                 {
-                    "allValue":null,
                     "current":{
                         "text":"master",
                         "value":"master"
                     },
-                    "error":null,
                     "hide":2,
                     "includeAll":false,
                     "label":"Release",
@@ -3989,7 +4010,6 @@
                     "type":"custom"
                 },
                 {
-                    "allValue":null,
                     "current":{
                         "text":"current-tripleo + current-tripleo-rdo",
                         "value":[
@@ -3997,10 +4017,8 @@
                             "current-tripleo-rdo"
                         ]
                     },
-                    "error":null,
                     "hide":2,
                     "includeAll":false,
-                    "label":null,
                     "multi":true,
                     "name":"promotion_names",
                     "options":[
@@ -4020,8 +4038,10 @@
                     "type":"custom"
                 },
                 {
-                    "datasource":"telegraf",
-                    "error":null,
+                    "datasource":{
+                        "type":"influxdb",
+                        "uid":"6-61eLD4z"
+                    },
                     "filters":[],
                     "hide":0,
                     "label":"Influxdb filter",
@@ -4061,6 +4081,7 @@
             ]
         },
         "timezone":"utc",
-        "title":"Upgrades Cockpit"
+        "title":"Upgrades Cockpit",
+        "weekStart":""
     }
 }

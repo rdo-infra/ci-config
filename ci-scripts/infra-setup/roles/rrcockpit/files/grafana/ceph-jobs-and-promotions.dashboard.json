@@ -4,30 +4,37 @@
             "list":[
                 {
                     "builtIn":1,
-                    "datasource":"-- Grafana --",
+                    "datasource":{
+                        "type":"datasource",
+                        "uid":"grafana"
+                    },
                     "enable":true,
                     "hide":true,
                     "iconColor":"rgba(0, 211, 255, 1)",
                     "name":"Annotations & Alerts",
+                    "target":{
+                        "limit":100,
+                        "matchAny":false,
+                        "tags":[],
+                        "type":"dashboard"
+                    },
                     "type":"dashboard"
                 }
             ]
         },
         "editable":true,
-        "gnetId":null,
+        "fiscalYearStartMonth":0,
         "graphTooltip":0,
         "links":[],
+        "liveNow":false,
         "panels":[
             {
                 "columns":[],
-                "datasource":"telegraf",
-                "description":"Click on individual job names to go to logs or on the patch number to see the gerrit review.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
+                "description":"Click on individual job names to go to logs or on the patch number to see the gerrit review.",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":10,
@@ -42,7 +49,6 @@
                         "url":"https://review.rdoproject.org/zuul/builds?pipeline=openstack-periodic-weekend"
                     }
                 ],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -121,7 +127,6 @@
                     {
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -140,7 +145,6 @@
                     {
                         "alias":"Result",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -157,6 +161,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -273,20 +281,15 @@
                     "PASS":"#96D98D"
                 },
                 "breakPoint":"50%",
-                "cacheTimeout":null,
                 "combine":{
                     "label":"Others",
                     "threshold":0
                 },
-                "datasource":"telegraf",
-                "decimals":null,
-                "description":"Percentage of Ceph nightly jobs that are passing vs failing.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
+                "description":"Percentage of Ceph nightly jobs that are passing vs failing.",
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
@@ -296,7 +299,6 @@
                     "y":0
                 },
                 "id":23763571996,
-                "interval":null,
                 "legend":{
                     "header":"",
                     "percentage":true,
@@ -313,6 +315,10 @@
                 "targets":[
                     {
                         "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -363,6 +369,10 @@
                     },
                     {
                         "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -418,21 +428,17 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
                 "title":"Ceph Nightly CI Stats",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
-                "description":"Click on individual job names to go to logs or on the patch number to see the gerrit review.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
+                "description":"Click on individual job names to go to logs or on the patch number to see the gerrit review.",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":8,
@@ -447,7 +453,6 @@
                         "url":"https://review.rdoproject.org/zuul/builds?pipeline=openstack-periodic-weekend"
                     }
                 ],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -526,7 +531,6 @@
                     {
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -545,7 +549,6 @@
                     {
                         "alias":"Result",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -562,6 +565,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -673,16 +680,12 @@
                 "type":"table-old"
             },
             {
-                "cacheTimeout":null,
                 "columns":[],
-                "datasource":"telegraf",
-                "description":"",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
+                "description":"",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":8,
@@ -693,7 +696,6 @@
                 "hideTimeOverride":false,
                 "id":23763572000,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -704,7 +706,6 @@
                     {
                         "alias":"Date of last promotion",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -721,7 +722,6 @@
                     {
                         "alias":"Duration",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -738,7 +738,6 @@
                     {
                         "alias":"Job Name",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -761,7 +760,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -779,6 +777,10 @@
                 "targets":[
                     {
                         "alias":"repo",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -842,21 +844,17 @@
                     }
                 ],
                 "timeFrom":"2w",
-                "timeShift":null,
                 "title":"Ceph Daemon - Latest Promotions - Master",
                 "transform":"table",
                 "type":"table-old"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
-                "description":"Click on individual job names to go to logs or on the patch number to see the gerrit review.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
+                "description":"Click on individual job names to go to logs or on the patch number to see the gerrit review.",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":8,
@@ -871,7 +869,6 @@
                         "url":"https://review.rdoproject.org/zuul/builds?pipeline=openstack-periodic-weekend"
                     }
                 ],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -950,7 +947,6 @@
                     {
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -969,7 +965,6 @@
                     {
                         "alias":"Result",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -986,6 +981,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1097,16 +1096,12 @@
                 "type":"table-old"
             },
             {
-                "cacheTimeout":null,
                 "columns":[],
-                "datasource":"telegraf",
-                "description":"",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
+                "description":"",
                 "fontSize":"100%",
                 "gridPos":{
                     "h":8,
@@ -1117,7 +1112,6 @@
                 "hideTimeOverride":false,
                 "id":23763572004,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -1128,7 +1122,6 @@
                     {
                         "alias":"Date of last promotion",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1145,7 +1138,6 @@
                     {
                         "alias":"Duration",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1162,7 +1154,6 @@
                     {
                         "alias":"Job Name",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1185,7 +1176,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1203,6 +1193,10 @@
                 "targets":[
                     {
                         "alias":"repo",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1266,14 +1260,13 @@
                     }
                 ],
                 "timeFrom":"2w",
-                "timeShift":null,
                 "title":"Ceph Daemon - Latest Promotions - Wallaby",
                 "transform":"table",
                 "type":"table-old"
             }
         ],
         "refresh":false,
-        "schemaVersion":26,
+        "schemaVersion":37,
         "style":"dark",
         "tags":[],
         "templating":{
@@ -1285,6 +1278,7 @@
         },
         "timepicker":{},
         "timezone":"",
-        "title":"Ceph Jobs and Promotions"
+        "title":"Ceph Jobs and Promotions",
+        "weekStart":""
     }
 }

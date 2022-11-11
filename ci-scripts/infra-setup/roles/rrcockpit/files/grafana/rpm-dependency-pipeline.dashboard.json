@@ -4,27 +4,34 @@
             "list":[
                 {
                     "builtIn":1,
-                    "datasource":"-- Grafana --",
+                    "datasource":{
+                        "type":"datasource",
+                        "uid":"grafana"
+                    },
                     "enable":true,
                     "hide":true,
                     "iconColor":"rgba(0, 211, 255, 1)",
                     "name":"Annotations & Alerts",
+                    "target":{
+                        "limit":100,
+                        "matchAny":false,
+                        "tags":[],
+                        "type":"dashboard"
+                    },
                     "type":"dashboard"
                 }
             ]
         },
         "editable":true,
-        "gnetId":null,
+        "fiscalYearStartMonth":0,
         "graphTooltip":0,
         "links":[],
+        "liveNow":false,
         "panels":[
             {
-                "datasource":null,
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"datasource",
+                    "uid":"grafana"
                 },
                 "gridPos":{
                     "h":12,
@@ -48,19 +55,23 @@
                     "content":"\n# RPM Dependency pipeline\n\nTripleO-CI takes the lastest good build of TripleO and deploys on top of unknown depenencies.\n\nPending releases for Example:\n\n- CentOS cr repo [link](https://wiki.centos.org/AdditionalResources/Repositories/CR)\n- Ansible releases\n- Ceph re\n- Openvswitch\n- Pacemaker\n\nMore Details : \nhttps://docs.openstack.org/tripleo-docs/latest/ci/tripleo_dependencies_pipelines.html\n\nRDO Zuul : \nhttps://review.rdoproject.org/zuul/status\n\nPackaging Failures: https://review.rdoproject.org/r/q/topic:rdo-FTBFS\n",
                     "mode":"markdown"
                 },
-                "pluginVersion":"7.3.6",
-                "timeFrom":null,
-                "timeShift":null,
+                "pluginVersion":"9.1.5",
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"datasource",
+                            "uid":"grafana"
+                        },
+                        "refId":"A"
+                    }
+                ],
                 "title":"Intro",
                 "type":"text"
             },
             {
-                "datasource":null,
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"datasource",
+                    "uid":"grafana"
                 },
                 "gridPos":{
                     "h":12,
@@ -84,19 +95,23 @@
                     "content":"\n# How this works\n\nA known good and validated OSP build is executed with specific unkown versions of a particular dependency e.g OpenVSwitch.  \nThe unknown dependencies are injected into the build.\n\nTo find the rpm version difference between the known good build dependency rpm version vs. the dependency being tested refer to the log file for each job.\n\n1. Open the logs link by clicking the job name\n2. Navigate to logs/undercloud/home/zuul/\n3. View control_test_diff_table.log\n\n  * \"Control Package Version\": refers to the known good and validated version of the dependency\n\n  * \"Test Package Version\": refers to the new version of the dependency being tested prior to the packaging teams adding to an OSP build.\n\n```\n+------------+---------------------------------+-------------------------+----------------------+\n|    Node    |           Package_Name          | Control Package Version | Test Package Version |\n+------------+---------------------------------+-------------------------+----------------------+\n| repo_query | network-scripts-openvswitch2.11 |     2.11.3-74.el8fdp    |   2.11.3-85.el8fdp   |\n| repo_query | network-scripts-openvswitch2.12 |     2.12.0-22.el8fdp    |   2.12.0-23.el8fdp   |\n\n```\n\n",
                     "mode":"markdown"
                 },
-                "pluginVersion":"7.3.6",
-                "timeFrom":null,
-                "timeShift":null,
+                "pluginVersion":"9.1.5",
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"datasource",
+                            "uid":"grafana"
+                        },
+                        "refId":"A"
+                    }
+                ],
                 "title":"Intro",
                 "type":"text"
             },
             {
-                "datasource":null,
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"datasource",
+                    "uid":"grafana"
                 },
                 "gridPos":{
                     "h":6,
@@ -109,35 +124,32 @@
                     "content":"# RDOInfo Info\n\n**Purpose:** gerrit checks breaking changes in pinned dependencies.\n\n* [README](https://github.com/redhat-openstack/rdoinfo)\n* **project:** [gerrit project]](https://review.rdoproject.org/r/q/project:rdoinfo)\n\n\n        \n        ",
                     "mode":"markdown"
                 },
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"datasource",
+                            "uid":"grafana"
+                        },
                         "queryType":"randomWalk",
                         "refId":"A"
                     }
                 ],
-                "timeFrom":null,
-                "timeShift":null,
                 "title":"rdoinfo info",
                 "type":"text"
             },
             {
                 "aliasColors":{},
                 "breakPoint":"50%",
-                "cacheTimeout":null,
                 "combine":{
                     "label":"Others",
                     "threshold":0
                 },
-                "datasource":"telegraf",
-                "decimals":null,
-                "description":"Percentage of rdoinfo project jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
+                "description":"Percentage of rdoinfo project jobs that are passing vs failing vs timing out.\n\n",
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
@@ -147,7 +159,6 @@
                     "y":18
                 },
                 "id":12,
-                "interval":null,
                 "legend":{
                     "header":"",
                     "percentage":true,
@@ -164,6 +175,10 @@
                 "targets":[
                     {
                         "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -214,6 +229,10 @@
                     },
                     {
                         "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -270,6 +289,10 @@
                     },
                     {
                         "alias":"TIMED_OUT",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -325,19 +348,15 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
                 "title":"rdoinfo stats",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
                 "fontSize":"100%",
                 "gridPos":{
@@ -349,7 +368,6 @@
                 "hideTimeOverride":false,
                 "id":14,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -414,7 +432,6 @@
                         "$$hashKey":"object:51",
                         "alias":"Count",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -458,7 +475,6 @@
                         "$$hashKey":"object:53",
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -497,7 +513,6 @@
                         "$$hashKey":"object:55",
                         "alias":"Job Time (  aggregate )",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -556,6 +571,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -606,20 +625,15 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
-                "timeShift":null,
                 "title":"rdoinfo Job Pass Rates",
                 "transform":"table",
                 "type":"table-old"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
                 "fontSize":"100%",
                 "gridPos":{
@@ -630,7 +644,6 @@
                 },
                 "id":2,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -650,7 +663,6 @@
                         "$$hashKey":"object:311",
                         "alias":"Branch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -666,7 +678,6 @@
                         "$$hashKey":"object:312",
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -743,7 +754,6 @@
                         "$$hashKey":"object:561",
                         "alias":"Change",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -763,6 +773,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -800,20 +814,15 @@
                         "tags":[]
                     }
                 ],
-                "timeFrom":null,
-                "timeShift":null,
                 "title":"rdoinfo jobs",
                 "transform":"table",
                 "type":"table-old"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
                 },
                 "fontSize":"100%",
                 "gridPos":{
@@ -824,7 +833,6 @@
                 },
                 "id":35,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -844,7 +852,6 @@
                         "$$hashKey":"object:311",
                         "alias":"Branch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -860,7 +867,6 @@
                         "$$hashKey":"object:312",
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -937,7 +943,6 @@
                         "$$hashKey":"object:372",
                         "alias":"Change",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -960,7 +965,6 @@
                         "$$hashKey":"object:774",
                         "alias":"Package Change ( dep_change)",
                         "align":"left",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -979,6 +983,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1016,14 +1024,15 @@
                         "tags":[]
                     }
                 ],
-                "timeFrom":null,
-                "timeShift":null,
                 "title":"rdoinfo jobs with package change",
                 "transform":"table",
                 "type":"table-old"
             },
             {
-                "datasource":null,
+                "datasource":{
+                    "type":"datasource",
+                    "uid":"grafana"
+                },
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -1044,25 +1053,28 @@
                 "pluginVersion":"7.3.6",
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"datasource",
+                            "uid":"grafana"
+                        },
                         "queryType":"randomWalk",
                         "refId":"A"
                     }
                 ],
-                "timeFrom":null,
-                "timeShift":null,
                 "title":"nfvinfo info",
                 "type":"text"
             },
             {
                 "aliasColors":{},
                 "breakPoint":"50%",
-                "cacheTimeout":null,
                 "combine":{
                     "label":"Others",
                     "threshold":0
                 },
-                "datasource":"telegraf",
-                "decimals":null,
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "description":"Percentage of rdoinfo project jobs that are passing vs failing vs timing out.\n\n",
                 "fieldConfig":{
                     "defaults":{
@@ -1079,7 +1091,6 @@
                     "y":51
                 },
                 "id":33,
-                "interval":null,
                 "legend":{
                     "header":"",
                     "percentage":true,
@@ -1096,6 +1107,10 @@
                 "targets":[
                     {
                         "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -1146,6 +1161,10 @@
                     },
                     {
                         "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -1202,6 +1221,10 @@
                     },
                     {
                         "alias":"TIMED_OUT",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -1257,14 +1280,16 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
                 "title":"nfvinfo stats",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -1281,7 +1306,6 @@
                 "hideTimeOverride":false,
                 "id":32,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -1346,7 +1370,6 @@
                         "$$hashKey":"object:51",
                         "alias":"Count",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1390,7 +1413,6 @@
                         "$$hashKey":"object:53",
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1429,7 +1451,6 @@
                         "$$hashKey":"object:55",
                         "alias":"Job Time (  aggregate )",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1488,6 +1509,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1538,15 +1563,16 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
-                "timeShift":null,
                 "title":"nfvinfo Job Pass Rates",
                 "transform":"table",
                 "type":"table-old"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -1562,7 +1588,6 @@
                 },
                 "id":34,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -1582,7 +1607,6 @@
                         "$$hashKey":"object:311",
                         "alias":"Branch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1598,7 +1622,6 @@
                         "$$hashKey":"object:312",
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1675,7 +1698,6 @@
                         "$$hashKey":"object:1182",
                         "alias":"Change",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1694,6 +1716,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1731,15 +1757,16 @@
                         "tags":[]
                     }
                 ],
-                "timeFrom":null,
-                "timeShift":null,
                 "title":"nfvinfo jobs",
                 "transform":"table",
                 "type":"table-old"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -1755,7 +1782,6 @@
                 },
                 "id":36,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -1775,7 +1801,6 @@
                         "$$hashKey":"object:311",
                         "alias":"Branch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1791,7 +1816,6 @@
                         "$$hashKey":"object:312",
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1868,7 +1892,6 @@
                         "$$hashKey":"object:1182",
                         "alias":"Change",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1888,7 +1911,6 @@
                         "$$hashKey":"object:1444",
                         "alias":"Package Change ( dep_change)",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -1905,6 +1927,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1942,14 +1968,15 @@
                         "tags":[]
                     }
                 ],
-                "timeFrom":null,
-                "timeShift":null,
                 "title":"nfvinfo jobs with package changes",
                 "transform":"table",
                 "type":"table-old"
             },
             {
-                "datasource":null,
+                "datasource":{
+                    "type":"datasource",
+                    "uid":"grafana"
+                },
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -1970,25 +1997,28 @@
                 "pluginVersion":"7.3.6",
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"datasource",
+                            "uid":"grafana"
+                        },
                         "queryType":"randomWalk",
                         "refId":"A"
                     }
                 ],
-                "timeFrom":null,
-                "timeShift":null,
                 "title":"openstack-dependencies-containertools info",
                 "type":"text"
             },
             {
                 "aliasColors":{},
                 "breakPoint":"50%",
-                "cacheTimeout":null,
                 "combine":{
                     "label":"Others",
                     "threshold":0
                 },
-                "datasource":"telegraf",
-                "decimals":null,
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "description":"Percentage of internal  *containertools* jobs that are passing vs failing vs timing out.\n\n",
                 "fieldConfig":{
                     "defaults":{
@@ -2005,7 +2035,6 @@
                     "y":82
                 },
                 "id":18,
-                "interval":null,
                 "legend":{
                     "header":"",
                     "percentage":true,
@@ -2022,6 +2051,10 @@
                 "targets":[
                     {
                         "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -2072,6 +2105,10 @@
                     },
                     {
                         "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -2128,6 +2165,10 @@
                     },
                     {
                         "alias":"TIMED_OUT",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -2183,14 +2224,16 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
                 "title":"openstack-dependencies-containertools stats",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -2207,7 +2250,6 @@
                 "hideTimeOverride":false,
                 "id":20,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -2268,7 +2310,6 @@
                     {
                         "alias":"Count",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2310,7 +2351,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2347,7 +2387,6 @@
                     {
                         "alias":"Job Time (  aggregate )",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2404,6 +2443,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2454,15 +2497,16 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
-                "timeShift":null,
                 "title":"openstack-dependencies-containertools Job Pass Rates",
                 "transform":"table",
                 "type":"table-old"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -2478,7 +2522,6 @@
                 },
                 "id":22,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -2496,7 +2539,6 @@
                     {
                         "alias":"Branch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2511,7 +2553,6 @@
                     {
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2583,6 +2624,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2620,14 +2665,15 @@
                         "tags":[]
                     }
                 ],
-                "timeFrom":null,
-                "timeShift":null,
                 "title":"openstack-dependencies-containertools",
                 "transform":"table",
                 "type":"table-old"
             },
             {
-                "datasource":null,
+                "datasource":{
+                    "type":"datasource",
+                    "uid":"grafana"
+                },
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -2648,25 +2694,28 @@
                 "pluginVersion":"7.3.6",
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"datasource",
+                            "uid":"grafana"
+                        },
                         "queryType":"randomWalk",
                         "refId":"A"
                     }
                 ],
-                "timeFrom":null,
-                "timeShift":null,
                 "title":"openstack-dependencies-openvswitch info",
                 "type":"text"
             },
             {
                 "aliasColors":{},
                 "breakPoint":"50%",
-                "cacheTimeout":null,
                 "combine":{
                     "label":"Others",
                     "threshold":0
                 },
-                "datasource":"telegraf",
-                "decimals":null,
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "description":"Percentage of internal  *openvswitch* jobs that are passing vs failing vs timing out.\n\n",
                 "fieldConfig":{
                     "defaults":{
@@ -2683,7 +2732,6 @@
                     "y":102
                 },
                 "id":26,
-                "interval":null,
                 "legend":{
                     "header":"",
                     "percentage":true,
@@ -2700,6 +2748,10 @@
                 "targets":[
                     {
                         "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -2750,6 +2802,10 @@
                     },
                     {
                         "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -2806,6 +2862,10 @@
                     },
                     {
                         "alias":"TIMED_OUT",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -2861,14 +2921,16 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
                 "title":"openstack-dependencies-openvswitch stats",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -2885,7 +2947,6 @@
                 "hideTimeOverride":false,
                 "id":28,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -2946,7 +3007,6 @@
                     {
                         "alias":"Count",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -2988,7 +3048,6 @@
                     {
                         "alias":"",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -3025,7 +3084,6 @@
                     {
                         "alias":"Job Time (  aggregate )",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -3082,6 +3140,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3132,15 +3194,16 @@
                         ]
                     }
                 ],
-                "timeFrom":null,
-                "timeShift":null,
                 "title":"openstack-dependencies-openvswitch Job Pass Rates",
                 "transform":"table",
                 "type":"table-old"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fieldConfig":{
                     "defaults":{
                         "custom":{}
@@ -3156,7 +3219,6 @@
                 },
                 "id":30,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -3174,7 +3236,6 @@
                     {
                         "alias":"Branch",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -3189,7 +3250,6 @@
                     {
                         "alias":"Job",
                         "align":"auto",
-                        "colorMode":null,
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -3261,6 +3321,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -3298,14 +3362,12 @@
                         "tags":[]
                     }
                 ],
-                "timeFrom":null,
-                "timeShift":null,
                 "title":"openstack-dependencies-openvswitch",
                 "transform":"table",
                 "type":"table-old"
             }
         ],
-        "schemaVersion":26,
+        "schemaVersion":37,
         "style":"dark",
         "tags":[],
         "templating":{
@@ -3341,6 +3403,7 @@
             ]
         },
         "timezone":"",
-        "title":"RPM Dependency Pipeline"
+        "title":"RPM Dependency Pipeline",
+        "weekStart":""
     }
 }

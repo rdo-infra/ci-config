@@ -4,24 +4,37 @@
             "list":[
                 {
                     "builtIn":1,
-                    "datasource":"-- Grafana --",
+                    "datasource":{
+                        "type":"datasource",
+                        "uid":"grafana"
+                    },
                     "enable":true,
                     "hide":true,
                     "iconColor":"rgba(0, 211, 255, 1)",
                     "name":"Annotations & Alerts",
+                    "target":{
+                        "limit":100,
+                        "matchAny":false,
+                        "tags":[],
+                        "type":"dashboard"
+                    },
                     "type":"dashboard"
                 }
             ]
         },
         "description":"Monitoring of vexxhost",
         "editable":true,
-        "gnetId":null,
+        "fiscalYearStartMonth":0,
         "graphTooltip":0,
         "links":[],
+        "liveNow":false,
         "panels":[
             {
                 "columns":[],
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "description":"A running list of RDO jobs that are in the openstack-periodic-daily openstack-periodic-latest-released zuul pipelines.\n\nNOTE: this does *not* necessarily mean the jobs here listed here are also  in the promotion criteria. \n\nUse the links below to see the RDO zuul builds or the promotion criteria.",
                 "fontSize":"100%",
                 "gridPos":{
@@ -33,21 +46,16 @@
                 "id":22,
                 "links":[
                     {
-                        "dashboard":"",
                         "targetBlank":true,
                         "title":"RDO Zuul builds status",
-                        "type":"absolute",
                         "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
                     },
                     {
-                        "dashboard":"",
                         "targetBlank":true,
                         "title":"Promotion Criteria",
-                        "type":"absolute",
                         "url":"https://github.com/rdo-infra/ci-config/tree/master/ci-scripts/dlrnapi_promoter/config"
                     }
                 ],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -57,13 +65,14 @@
                 "styles":[
                     {
                         "alias":"Time",
+                        "align":"auto",
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "pattern":"Time",
                         "type":"date"
                     },
                     {
                         "alias":"Branch",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -79,7 +88,7 @@
                     },
                     {
                         "alias":"Job",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -100,7 +109,7 @@
                     },
                     {
                         "alias":"Pipeline",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -116,6 +125,7 @@
                     },
                     {
                         "alias":"Duration",
+                        "align":"auto",
                         "colorMode":"cell",
                         "colors":[
                             "#2f575e",
@@ -135,6 +145,7 @@
                     },
                     {
                         "alias":"Passed",
+                        "align":"auto",
                         "colorMode":"row",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
@@ -175,7 +186,7 @@
                     },
                     {
                         "alias":"Log URL",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -195,7 +206,7 @@
                     },
                     {
                         "alias":"Patch",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(50, 172, 45, 0.97)",
                             "rgba(237, 129, 40, 0.89)",
@@ -218,7 +229,7 @@
                     },
                     {
                         "alias":"Job",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -236,7 +247,7 @@
                     },
                     {
                         "alias":"",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -252,7 +263,7 @@
                     },
                     {
                         "alias":"Result",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -268,7 +279,7 @@
                     },
                     {
                         "alias":"Reason",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -284,7 +295,7 @@
                     },
                     {
                         "alias":"",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -299,6 +310,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -390,11 +405,14 @@
                 ],
                 "title":"Vexxhost RDO promotion jobs",
                 "transform":"table",
-                "type":"table"
+                "type":"table-old"
             },
             {
                 "columns":[],
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "description":"A running list of RDO jobs that are in the openstack-periodic-daily openstack-periodic-latest-released zuul pipelines.\n\nNOTE: this does *not* necessarily mean the jobs here listed here are also  in the promotion criteria. \n\nUse the links below to see the RDO zuul builds or the promotion criteria.",
                 "fontSize":"100%",
                 "gridPos":{
@@ -406,21 +424,16 @@
                 "id":23,
                 "links":[
                     {
-                        "dashboard":"",
                         "targetBlank":true,
                         "title":"RDO Zuul builds status",
-                        "type":"absolute",
                         "url":"https://softwarefactory-project.io/zuul/t/rdoproject.org/status"
                     },
                     {
-                        "dashboard":"",
                         "targetBlank":true,
                         "title":"Promotion Criteria",
-                        "type":"absolute",
                         "url":"https://github.com/rdo-infra/ci-config/tree/master/ci-scripts/dlrnapi_promoter/config"
                     }
                 ],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -430,13 +443,14 @@
                 "styles":[
                     {
                         "alias":"Time",
+                        "align":"auto",
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "pattern":"Time",
                         "type":"date"
                     },
                     {
                         "alias":"Branch",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -452,7 +466,7 @@
                     },
                     {
                         "alias":"Job",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -473,7 +487,7 @@
                     },
                     {
                         "alias":"Pipeline",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -489,6 +503,7 @@
                     },
                     {
                         "alias":"Duration",
+                        "align":"auto",
                         "colorMode":"cell",
                         "colors":[
                             "#2f575e",
@@ -508,6 +523,7 @@
                     },
                     {
                         "alias":"Passed",
+                        "align":"auto",
                         "colorMode":"row",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
@@ -548,7 +564,7 @@
                     },
                     {
                         "alias":"Log URL",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -568,7 +584,7 @@
                     },
                     {
                         "alias":"Patch",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(50, 172, 45, 0.97)",
                             "rgba(237, 129, 40, 0.89)",
@@ -591,7 +607,7 @@
                     },
                     {
                         "alias":"Job",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -609,7 +625,7 @@
                     },
                     {
                         "alias":"",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -625,7 +641,7 @@
                     },
                     {
                         "alias":"Result",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -641,7 +657,7 @@
                     },
                     {
                         "alias":"Reason",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -657,7 +673,7 @@
                     },
                     {
                         "alias":"",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -672,6 +688,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build",
                         "orderByTime":"ASC",
@@ -753,21 +773,26 @@
                 ],
                 "title":"Vexxhost RDO check jobs",
                 "transform":"table",
-                "type":"table"
+                "type":"table-old"
             },
             {
                 "aliasColors":{},
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fill":1,
+                "fillGradient":0,
                 "gridPos":{
                     "h":7,
                     "w":11,
                     "x":0,
                     "y":18
                 },
+                "hiddenSeries":false,
                 "id":8,
                 "legend":{
                     "avg":false,
@@ -782,7 +807,11 @@
                 "linewidth":1,
                 "links":[],
                 "nullPointMode":"null",
+                "options":{
+                    "alertThreshold":true
+                },
                 "percentage":false,
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -793,6 +822,10 @@
                 "targets":[
                     {
                         "alias":"CREATE_COMPLETE",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -830,6 +863,10 @@
                     },
                     {
                         "alias":"CREATE_FAILED",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -867,6 +904,10 @@
                     },
                     {
                         "alias":"CREATE_IN_PROGRESS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -904,6 +945,10 @@
                     },
                     {
                         "alias":"DELETE_COMPLETE",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -941,6 +986,10 @@
                     },
                     {
                         "alias":"DELETE_FAILED",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -978,6 +1027,10 @@
                     },
                     {
                         "alias":"DELETE_IN_PROGRESS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1015,9 +1068,7 @@
                     }
                 ],
                 "thresholds":[],
-                "timeFrom":null,
                 "timeRegions":[],
-                "timeShift":null,
                 "title":"Stacks",
                 "tooltip":{
                     "shared":true,
@@ -1026,33 +1077,24 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
                 "yaxes":[
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     },
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             },
             {
@@ -1121,14 +1163,19 @@
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fill":1,
+                "fillGradient":0,
                 "gridPos":{
                     "h":7,
                     "w":7,
                     "x":11,
                     "y":18
                 },
+                "hiddenSeries":false,
                 "id":10,
                 "legend":{
                     "avg":false,
@@ -1143,7 +1190,11 @@
                 "linewidth":1,
                 "links":[],
                 "nullPointMode":"null",
+                "options":{
+                    "alertThreshold":true
+                },
                 "percentage":false,
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -1154,6 +1205,10 @@
                 "targets":[
                     {
                         "alias":"Old stacks",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1191,6 +1246,10 @@
                     },
                     {
                         "alias":"Failed to delete",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1236,9 +1295,7 @@
                         "value":1
                     }
                 ],
-                "timeFrom":null,
                 "timeRegions":[],
-                "timeShift":null,
                 "title":"Problematic stacks",
                 "tooltip":{
                     "shared":true,
@@ -1247,9 +1304,7 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
@@ -1259,22 +1314,17 @@
                         "format":"short",
                         "label":"Number of stacks",
                         "logBase":1,
-                        "max":null,
                         "min":"0",
                         "show":true
                     },
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             },
             {
@@ -1282,15 +1332,20 @@
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "description":"This shows the number of heat stacks in CREATE_FAILED, DELETE_FAILED, ERROR",
                 "fill":1,
+                "fillGradient":0,
                 "gridPos":{
                     "h":7,
                     "w":6,
                     "x":18,
                     "y":18
                 },
+                "hiddenSeries":false,
                 "id":2,
                 "legend":{
                     "avg":false,
@@ -1307,12 +1362,15 @@
                     {
                         "targetBlank":true,
                         "title":"Stack may need to be cleaned up",
-                        "type":"absolute",
                         "url":"https://github.com/rdo-infra/ci-config/blob/master/ci-scripts/infra-cleanup/ovb-tenant-cleanup.sh"
                     }
                 ],
                 "nullPointMode":"null",
+                "options":{
+                    "alertThreshold":true
+                },
                 "percentage":false,
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -1323,6 +1381,10 @@
                 "targets":[
                     {
                         "alias":"Old stacks",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1360,6 +1422,10 @@
                     },
                     {
                         "alias":"Failed to delete",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1397,9 +1463,7 @@
                     }
                 ],
                 "thresholds":[],
-                "timeFrom":null,
                 "timeRegions":[],
-                "timeShift":null,
                 "title":"Number of problematic heat stacks",
                 "tooltip":{
                     "shared":true,
@@ -1408,9 +1472,7 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
@@ -1420,22 +1482,17 @@
                         "format":"short",
                         "label":"Number of stacks",
                         "logBase":1,
-                        "max":null,
                         "min":"0",
                         "show":true
                     },
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             },
             {
@@ -1443,14 +1500,19 @@
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fill":1,
+                "fillGradient":0,
                 "gridPos":{
                     "h":6,
                     "w":11,
                     "x":0,
                     "y":25
                 },
+                "hiddenSeries":false,
                 "id":6,
                 "legend":{
                     "avg":false,
@@ -1465,7 +1527,11 @@
                 "linewidth":1,
                 "links":[],
                 "nullPointMode":"null",
+                "options":{
+                    "alertThreshold":true
+                },
                 "percentage":false,
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -1476,6 +1542,10 @@
                 "targets":[
                     {
                         "alias":"BMC node",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1513,6 +1583,10 @@
                     },
                     {
                         "alias":"Undercloud",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1550,6 +1624,10 @@
                     },
                     {
                         "alias":"OVB BM node",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1587,6 +1665,10 @@
                     },
                     {
                         "alias":"Other",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1624,9 +1706,7 @@
                     }
                 ],
                 "thresholds":[],
-                "timeFrom":null,
                 "timeRegions":[],
-                "timeShift":null,
                 "title":"Instances types",
                 "tooltip":{
                     "shared":true,
@@ -1635,33 +1715,24 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
                 "yaxes":[
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     },
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             },
             {
@@ -1669,14 +1740,19 @@
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fill":1,
+                "fillGradient":0,
                 "gridPos":{
                     "h":6,
                     "w":13,
                     "x":11,
                     "y":25
                 },
+                "hiddenSeries":false,
                 "id":4,
                 "legend":{
                     "alignAsTable":false,
@@ -1692,7 +1768,11 @@
                 "linewidth":1,
                 "links":[],
                 "nullPointMode":"null",
+                "options":{
+                    "alertThreshold":true
+                },
                 "percentage":false,
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -1702,6 +1782,10 @@
                 "steppedLine":false,
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1799,9 +1883,7 @@
                     }
                 ],
                 "thresholds":[],
-                "timeFrom":null,
                 "timeRegions":[],
-                "timeShift":null,
                 "title":"Nodes status",
                 "tooltip":{
                     "shared":true,
@@ -1810,33 +1892,24 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
                 "yaxes":[
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     },
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             },
             {
@@ -1844,14 +1917,19 @@
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fill":1,
+                "fillGradient":0,
                 "gridPos":{
                     "h":6,
                     "w":7,
                     "x":0,
                     "y":31
                 },
+                "hiddenSeries":false,
                 "id":12,
                 "legend":{
                     "avg":true,
@@ -1866,7 +1944,11 @@
                 "linewidth":1,
                 "links":[],
                 "nullPointMode":"null",
+                "options":{
+                    "alertThreshold":true
+                },
                 "percentage":false,
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -1877,6 +1959,10 @@
                 "targets":[
                     {
                         "alias":"CPU cores",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -1914,9 +2000,7 @@
                     }
                 ],
                 "thresholds":[],
-                "timeFrom":null,
                 "timeRegions":[],
-                "timeShift":null,
                 "title":"CPU cores",
                 "tooltip":{
                     "shared":true,
@@ -1925,33 +2009,24 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
                 "yaxes":[
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     },
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             },
             {
@@ -1959,14 +2034,19 @@
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fill":1,
+                "fillGradient":0,
                 "gridPos":{
                     "h":6,
                     "w":9,
                     "x":7,
                     "y":31
                 },
+                "hiddenSeries":false,
                 "id":14,
                 "legend":{
                     "avg":true,
@@ -1981,7 +2061,11 @@
                 "linewidth":1,
                 "links":[],
                 "nullPointMode":"null",
+                "options":{
+                    "alertThreshold":true
+                },
                 "percentage":false,
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -1992,6 +2076,10 @@
                 "targets":[
                     {
                         "alias":"RAM",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2029,9 +2117,7 @@
                     }
                 ],
                 "thresholds":[],
-                "timeFrom":null,
                 "timeRegions":[],
-                "timeShift":null,
                 "title":"Memory",
                 "tooltip":{
                     "shared":true,
@@ -2040,33 +2126,24 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
                 "yaxes":[
                     {
                         "format":"decmbytes",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     },
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             },
             {
@@ -2074,14 +2151,19 @@
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fill":1,
+                "fillGradient":0,
                 "gridPos":{
                     "h":6,
                     "w":8,
                     "x":16,
                     "y":31
                 },
+                "hiddenSeries":false,
                 "id":16,
                 "legend":{
                     "avg":false,
@@ -2096,7 +2178,11 @@
                 "linewidth":1,
                 "links":[],
                 "nullPointMode":"null",
+                "options":{
+                    "alertThreshold":true
+                },
                 "percentage":false,
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -2107,6 +2193,10 @@
                 "targets":[
                     {
                         "alias":"Servers",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2144,9 +2234,7 @@
                     }
                 ],
                 "thresholds":[],
-                "timeFrom":null,
                 "timeRegions":[],
-                "timeShift":null,
                 "title":"Instances",
                 "tooltip":{
                     "shared":true,
@@ -2155,33 +2243,24 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
                 "yaxes":[
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     },
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             },
             {
@@ -2228,7 +2307,10 @@
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "description":"Ports in DOWN state in RDO cloud, which should be deleted by cleaning scripts.",
                 "fill":1,
                 "gridPos":{
@@ -2264,6 +2346,10 @@
                 "steppedLine":false,
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2309,9 +2395,7 @@
                         "value":1000
                     }
                 ],
-                "timeFrom":null,
                 "timeRegions":[],
-                "timeShift":null,
                 "title":"Ports in DOWN state",
                 "tooltip":{
                     "shared":true,
@@ -2320,9 +2404,7 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
@@ -2331,22 +2413,17 @@
                         "format":"short",
                         "label":"Ports in DOWN",
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     },
                     {
                         "format":"short",
                         "label":"",
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             },
             {
@@ -2354,7 +2431,10 @@
                 "bars":true,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fill":1,
                 "gridPos":{
                     "h":7,
@@ -2387,6 +2467,10 @@
                 "targets":[
                     {
                         "alias":"Failures every 30 minutes",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -2436,9 +2520,7 @@
                     }
                 ],
                 "thresholds":[],
-                "timeFrom":null,
                 "timeRegions":[],
-                "timeShift":null,
                 "title":"RDO node failures",
                 "tooltip":{
                     "shared":true,
@@ -2447,9 +2529,7 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
@@ -2458,32 +2538,29 @@
                         "format":"short",
                         "label":"Number of failures",
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     },
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             }
         ],
-        "schemaVersion":18,
+        "schemaVersion":37,
         "style":"dark",
         "tags":[],
         "templating":{
             "list":[
                 {
-                    "datasource":"telegraf",
+                    "datasource":{
+                        "type":"influxdb",
+                        "uid":"6-61eLD4z"
+                    },
                     "filters":[],
                     "hide":0,
                     "label":"influxdb_filter",
@@ -2523,6 +2600,7 @@
             ]
         },
         "timezone":"",
-        "title":"Vexxhost"
+        "title":"Vexxhost",
+        "weekStart":""
     }
 }

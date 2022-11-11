@@ -4,23 +4,36 @@
             "list":[
                 {
                     "builtIn":1,
-                    "datasource":"-- Grafana --",
+                    "datasource":{
+                        "type":"datasource",
+                        "uid":"grafana"
+                    },
                     "enable":true,
                     "hide":true,
                     "iconColor":"rgba(0, 211, 255, 1)",
                     "name":"Annotations & Alerts",
+                    "target":{
+                        "limit":100,
+                        "matchAny":false,
+                        "tags":[],
+                        "type":"dashboard"
+                    },
                     "type":"dashboard"
                 }
             ]
         },
         "editable":true,
-        "gnetId":null,
+        "fiscalYearStartMonth":0,
         "graphTooltip":0,
         "links":[],
+        "liveNow":false,
         "panels":[
             {
                 "columns":[],
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":9,
@@ -30,7 +43,6 @@
                 },
                 "id":2,
                 "links":[],
-                "pageSize":null,
                 "scroll":true,
                 "showHeader":true,
                 "sort":{
@@ -40,13 +52,14 @@
                 "styles":[
                     {
                         "alias":"Time",
+                        "align":"auto",
                         "dateFormat":"YYYY-MM-DD HH:mm:ss",
                         "pattern":"Time",
                         "type":"date"
                     },
                     {
                         "alias":"",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -62,7 +75,7 @@
                     },
                     {
                         "alias":"",
-                        "colorMode":null,
+                        "align":"auto",
                         "colors":[
                             "rgba(245, 54, 54, 0.9)",
                             "rgba(237, 129, 40, 0.89)",
@@ -77,6 +90,10 @@
                 ],
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[],
                         "measurement":"build-task",
                         "orderByTime":"ASC",
@@ -138,21 +155,26 @@
                 ],
                 "title":"Task",
                 "transform":"table",
-                "type":"table"
+                "type":"table-old"
             },
             {
                 "aliasColors":{},
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fill":1,
+                "fillGradient":0,
                 "gridPos":{
                     "h":10,
                     "w":24,
                     "x":0,
                     "y":9
                 },
+                "hiddenSeries":false,
                 "id":4,
                 "legend":{
                     "alignAsTable":true,
@@ -169,7 +191,11 @@
                 "linewidth":1,
                 "links":[],
                 "nullPointMode":"null",
+                "options":{
+                    "alertThreshold":true
+                },
                 "percentage":false,
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -179,6 +205,10 @@
                 "steppedLine":false,
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -212,8 +242,7 @@
                     }
                 ],
                 "thresholds":[],
-                "timeFrom":null,
-                "timeShift":null,
+                "timeRegions":[],
                 "title":"Global Tasks Duration",
                 "tooltip":{
                     "shared":true,
@@ -222,33 +251,24 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
                 "yaxes":[
                     {
                         "format":"dtdurations",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     },
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":false
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             },
             {
@@ -256,14 +276,19 @@
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fill":1,
+                "fillGradient":0,
                 "gridPos":{
                     "h":10,
                     "w":24,
                     "x":0,
                     "y":19
                 },
+                "hiddenSeries":false,
                 "id":6,
                 "legend":{
                     "alignAsTable":true,
@@ -280,7 +305,11 @@
                 "linewidth":1,
                 "links":[],
                 "nullPointMode":"null",
+                "options":{
+                    "alertThreshold":true
+                },
                 "percentage":false,
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -290,6 +319,10 @@
                 "steppedLine":false,
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -323,8 +356,7 @@
                     }
                 ],
                 "thresholds":[],
-                "timeFrom":null,
-                "timeShift":null,
+                "timeRegions":[],
                 "title":"Undercloud Tasks Duration",
                 "tooltip":{
                     "shared":true,
@@ -333,33 +365,24 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
                 "yaxes":[
                     {
                         "format":"dtdurations",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     },
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":false
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             },
             {
@@ -367,14 +390,19 @@
                 "bars":false,
                 "dashLength":10,
                 "dashes":false,
-                "datasource":"telegraf",
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
                 "fill":1,
+                "fillGradient":0,
                 "gridPos":{
                     "h":10,
                     "w":24,
                     "x":0,
                     "y":29
                 },
+                "hiddenSeries":false,
                 "id":5,
                 "legend":{
                     "alignAsTable":true,
@@ -391,7 +419,11 @@
                 "linewidth":1,
                 "links":[],
                 "nullPointMode":"null",
+                "options":{
+                    "alertThreshold":true
+                },
                 "percentage":false,
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -401,6 +433,10 @@
                 "steppedLine":false,
                 "targets":[
                     {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
                         "groupBy":[
                             {
                                 "params":[
@@ -434,8 +470,7 @@
                     }
                 ],
                 "thresholds":[],
-                "timeFrom":null,
-                "timeShift":null,
+                "timeRegions":[],
                 "title":"Overcloud Tasks Duration",
                 "tooltip":{
                     "shared":true,
@@ -444,47 +479,41 @@
                 },
                 "type":"graph",
                 "xaxis":{
-                    "buckets":null,
                     "mode":"time",
-                    "name":null,
                     "show":true,
                     "values":[]
                 },
                 "yaxes":[
                     {
                         "format":"dtdurations",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":true
                     },
                     {
                         "format":"short",
-                        "label":null,
                         "logBase":1,
-                        "max":null,
-                        "min":null,
                         "show":false
                     }
                 ],
                 "yaxis":{
-                    "align":false,
-                    "alignLevel":null
+                    "align":false
                 }
             }
         ],
-        "schemaVersion":16,
+        "schemaVersion":37,
         "style":"dark",
         "tags":[],
         "templating":{
             "list":[
                 {
-                    "datasource":"telegraf",
+                    "datasource":{
+                        "type":"influxdb",
+                        "uid":"6-61eLD4z"
+                    },
                     "filters":[],
                     "hide":0,
-                    "label":null,
                     "name":"influxdb_filter",
+                    "skipUrlSync":false,
                     "type":"adhoc"
                 }
             ]
@@ -519,6 +548,7 @@
             ]
         },
         "timezone":"utc",
-        "title":"Ansible Exploration"
+        "title":"Ansible Exploration",
+        "weekStart":""
     }
 }
