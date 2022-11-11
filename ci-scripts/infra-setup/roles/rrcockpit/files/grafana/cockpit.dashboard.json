@@ -2239,6 +2239,262 @@
                     "x":4,
                     "y":29
                 },
+                "id":451,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"Under graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True'  AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-zed.*/) AND $timeFilter\n",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-zed.*/ AND  result !~ /SKIPPED|NODE_FAILURE|TIMED_OUT|CANCELED|ABORTED|RETRY|RETRY_LIMIT|LOST|ERROR/ ) and $timeFilter\n",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-zed.*/ AND \"result\" = 'TIMED_OUT') AND $timeFilter\n",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"DISK_FULL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "$__interval"
+                                ],
+                                "type":"time"
+                            },
+                            {
+                                "params":[
+                                    "null"
+                                ],
+                                "type":"fill"
+                            }
+                        ],
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"type\" = 'upstream' AND \"pipeline\" = 'periodic' and \"job_name\" =~ /tripleo-ci.*-zed.*/ AND \"result\" = 'DISK_FULL') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"D",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "value"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"mean"
+                                }
+                            ]
+                        ],
+                        "tags":[]
+                    }
+                ],
+                "title":"Upstream Zed Periodic CI stats",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
+                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":4,
+                    "x":8,
+                    "y":29
+                },
                 "id":493,
                 "legend":{
                     "header":"",
@@ -2472,262 +2728,6 @@
                     }
                 ],
                 "title":"Upstream Wallaby Periodic CI stats",
-                "type":"grafana-piechart-panel",
-                "valueName":"current"
-            },
-            {
-                "aliasColors":{},
-                "breakPoint":"50%",
-                "combine":{
-                    "label":"Others",
-                    "threshold":0
-                },
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"6-61eLD4z"
-                },
-                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
-                "fontSize":"120%",
-                "format":"none",
-                "gridPos":{
-                    "h":6,
-                    "w":4,
-                    "x":8,
-                    "y":29
-                },
-                "id":451,
-                "legend":{
-                    "header":"",
-                    "percentage":true,
-                    "percentageDecimals":1,
-                    "show":true,
-                    "values":false
-                },
-                "legendType":"Under graph",
-                "links":[],
-                "maxDataPoints":3,
-                "nullPointMode":"connected",
-                "pieType":"pie",
-                "strokeWidth":"2",
-                "targets":[
-                    {
-                        "alias":"PASS",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"6-61eLD4z"
-                        },
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True'  AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-victoria.*/) AND $timeFilter\n",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"True"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"FAIL",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"6-61eLD4z"
-                        },
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-victoria.*/ AND  result !~ /SKIPPED|NODE_FAILURE|TIMED_OUT|CANCELED|ABORTED|RETRY|RETRY_LIMIT|LOST|ERROR/ ) and $timeFilter\n",
-                        "rawQuery":true,
-                        "refId":"B",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"False"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"TIMED_OUT"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"TIMED_OUT",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"6-61eLD4z"
-                        },
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"type\" = 'upstream' AND \"pipeline\"='periodic' AND \"job_name\" =~ /tripleo-ci.*-victoria.*/ AND \"result\" = 'TIMED_OUT') AND $timeFilter\n",
-                        "rawQuery":true,
-                        "refId":"C",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"False"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"=",
-                                "value":"TIMED_OUT"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"DISK_FULL",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"6-61eLD4z"
-                        },
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "$__interval"
-                                ],
-                                "type":"time"
-                            },
-                            {
-                                "params":[
-                                    "null"
-                                ],
-                                "type":"fill"
-                            }
-                        ],
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"type\" = 'upstream' AND \"pipeline\" = 'periodic' and \"job_name\" =~ /tripleo-ci.*-victoria.*/ AND \"result\" = 'DISK_FULL') AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"D",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "value"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"mean"
-                                }
-                            ]
-                        ],
-                        "tags":[]
-                    }
-                ],
-                "title":"Upstream Victoria Periodic CI stats",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
@@ -3261,12 +3261,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"CentOS-Stream-9 wallaby / xena test jobs",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":8,
@@ -3442,12 +3436,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
@@ -3662,18 +3650,226 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
                     "h":6,
                     "w":4,
                     "x":4,
+                    "y":51
+                },
+                "id":430,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"Under graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'CANCELED' AND \"branch\" = 'stable/zed'  AND \"pipeline\" = 'gate' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'CANCELED' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/zed'  AND \"pipeline\" = 'gate' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'CANCELED' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/zed' AND \"pipeline\" = 'gate' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "title":"Zed Branch, Upstream Gate",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
+                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":4,
+                    "x":8,
                     "y":51
                 },
                 "id":484,
@@ -3882,232 +4078,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
-                "fontSize":"120%",
-                "format":"none",
-                "gridPos":{
-                    "h":6,
-                    "w":4,
-                    "x":8,
-                    "y":51
-                },
-                "id":430,
-                "legend":{
-                    "header":"",
-                    "percentage":true,
-                    "percentageDecimals":1,
-                    "show":true,
-                    "values":false
-                },
-                "legendType":"Under graph",
-                "links":[],
-                "maxDataPoints":3,
-                "nullPointMode":"connected",
-                "pieType":"pie",
-                "strokeWidth":"2",
-                "targets":[
-                    {
-                        "alias":"PASS",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"6-61eLD4z"
-                        },
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'CANCELED' AND \"branch\" = 'stable/victoria'  AND \"pipeline\" = 'gate' AND \"result\" != 'ABORTED') AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"True"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"FAIL",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"6-61eLD4z"
-                        },
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'CANCELED' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/victoria'  AND \"pipeline\" = 'gate' AND \"result\" != 'ABORTED') AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"B",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"False"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"TIMED_OUT"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"TIMED_OUT",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"6-61eLD4z"
-                        },
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'CANCELED' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/victoria' AND \"pipeline\" = 'gate' AND \"result\" != 'ABORTED') AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"C",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"False"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"=",
-                                "value":"TIMED_OUT"
-                            }
-                        ]
-                    }
-                ],
-                "title":"Victoria Branch, Upstream Gate",
-                "type":"grafana-piechart-panel",
-                "valueName":"current"
-            },
-            {
-                "aliasColors":{},
-                "breakPoint":"50%",
-                "combine":{
-                    "label":"Others",
-                    "threshold":0
-                },
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"6-61eLD4z"
-                },
-                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
@@ -4316,12 +4286,6 @@
                 "datasource":{
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
-                },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
                 },
                 "fontSize":"100%",
                 "gridPos":{
@@ -4596,12 +4560,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
@@ -4816,18 +4774,226 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
                     "h":6,
                     "w":4,
                     "x":4,
+                    "y":69
+                },
+                "id":433,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"Under graph",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'stable/zed'  AND \"pipeline\" = 'check' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/zed'   AND \"pipeline\" = 'check' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/zed'  AND \"pipeline\" = 'check' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "title":"Zed Branch, Upstream Check",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
+                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
+                "fontSize":"120%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":4,
+                    "x":8,
                     "y":69
                 },
                 "id":486,
@@ -5036,232 +5202,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
-                "fontSize":"120%",
-                "format":"none",
-                "gridPos":{
-                    "h":6,
-                    "w":4,
-                    "x":8,
-                    "y":69
-                },
-                "id":433,
-                "legend":{
-                    "header":"",
-                    "percentage":true,
-                    "percentageDecimals":1,
-                    "show":true,
-                    "values":false
-                },
-                "legendType":"Under graph",
-                "links":[],
-                "maxDataPoints":3,
-                "nullPointMode":"connected",
-                "pieType":"pie",
-                "strokeWidth":"2",
-                "targets":[
-                    {
-                        "alias":"PASS",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"6-61eLD4z"
-                        },
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"branch\" = 'stable/victoria'  AND \"pipeline\" = 'check' AND \"result\" != 'ABORTED') AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"True"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"FAIL",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"6-61eLD4z"
-                        },
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"branch\" = 'stable/victoria'   AND \"pipeline\" = 'check' AND \"result\" != 'ABORTED') AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"B",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"False"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"TIMED_OUT"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"TIMED_OUT",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"6-61eLD4z"
-                        },
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"branch\" = 'stable/victoria'  AND \"pipeline\" = 'check' AND \"result\" != 'ABORTED') AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"C",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"False"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"=",
-                                "value":"TIMED_OUT"
-                            }
-                        ]
-                    }
-                ],
-                "title":"Victoria Branch, Upstream Check",
-                "type":"grafana-piechart-panel",
-                "valueName":"current"
-            },
-            {
-                "aliasColors":{},
-                "breakPoint":"50%",
-                "combine":{
-                    "label":"Others",
-                    "threshold":0
-                },
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"6-61eLD4z"
-                },
-                "description":"Percentage of upstream  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"120%",
                 "format":"none",
                 "gridPos":{
@@ -5469,12 +5409,6 @@
                 "datasource":{
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
-                },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
                 },
                 "fontSize":"100%",
                 "gridPos":{
@@ -5759,12 +5693,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Percentage of RDO  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"110%",
                 "format":"none",
                 "gridPos":{
@@ -5798,7 +5726,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-centos-8-ovb.*/ AND \"branch\" = 'master' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-centos-9-ovb.*/ AND \"branch\" = 'master' AND \"result\" != 'ABORTED') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -5846,7 +5774,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-8-ovb.*/ AND \"branch\" = 'master' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-9-ovb.*/ AND \"branch\" = 'master' AND \"result\" != 'ABORTED') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -5906,7 +5834,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-8-ovb.*/ AND \"branch\" = 'master' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-9-ovb.*/ AND \"branch\" = 'master' AND \"result\" != 'ABORTED') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -5957,7 +5885,7 @@
                         ]
                     }
                 ],
-                "title":"OVB CentOS-8 Master jobs",
+                "title":"OVB CentOS-9 Master jobs",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
@@ -5973,234 +5901,12 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Percentage of RDO  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"110%",
                 "format":"none",
                 "gridPos":{
                     "h":6,
                     "w":5,
                     "x":5,
-                    "y":86
-                },
-                "hideTimeOverride":true,
-                "id":488,
-                "legend":{
-                    "header":"",
-                    "percentage":true,
-                    "percentageDecimals":1,
-                    "show":true,
-                    "values":false
-                },
-                "legendType":"Right side",
-                "links":[],
-                "maxDataPoints":3,
-                "nullPointMode":"connected",
-                "pieType":"pie",
-                "pluginVersion":"6.1.1",
-                "strokeWidth":"2",
-                "targets":[
-                    {
-                        "alias":"PASS",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"6-61eLD4z"
-                        },
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-centos-8-ovb.*/ AND \"branch\" = 'stable/wallaby' AND \"result\" != 'ABORTED') AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"True"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"rdo"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"FAIL",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"6-61eLD4z"
-                        },
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-8-ovb.*/ AND \"branch\" = 'stable/wallaby' AND \"result\" != 'ABORTED') AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"B",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"False"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"rdo"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"TIMED_OUT"
-                            }
-                        ]
-                    },
-                    {
-                        "alias":"TIMED_OUT",
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"6-61eLD4z"
-                        },
-                        "groupBy":[],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-8-ovb.*/ AND \"branch\" = 'stable/wallaby' AND \"result\" != 'ABORTED') AND $timeFilter",
-                        "rawQuery":true,
-                        "refId":"C",
-                        "resultFormat":"time_series",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"passed",
-                                "operator":"=",
-                                "value":"False"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"rdo"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"=",
-                                "value":"TIMED_OUT"
-                            }
-                        ]
-                    }
-                ],
-                "title":"OVB CentOS-8 Wallaby jobs",
-                "type":"grafana-piechart-panel",
-                "valueName":"current"
-            },
-            {
-                "aliasColors":{},
-                "breakPoint":"50%",
-                "combine":{
-                    "label":"Others",
-                    "threshold":0
-                },
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"6-61eLD4z"
-                },
-                "description":"Percentage of RDO  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
-                "fontSize":"110%",
-                "format":"none",
-                "gridPos":{
-                    "h":6,
-                    "w":5,
-                    "x":10,
                     "y":86
                 },
                 "hideTimeOverride":true,
@@ -6230,7 +5936,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-centos-8-ovb.*/ AND \"branch\" = 'stable/victoria' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-centos-9-ovb.*/ AND \"branch\" = 'stable/zed' AND \"result\" != 'ABORTED') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"A",
                         "resultFormat":"time_series",
@@ -6278,7 +5984,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-8-ovb.*/ AND \"branch\" = 'stable/victoria' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-9-ovb.*/ AND \"branch\" = 'stable/zed' AND \"result\" != 'ABORTED') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"B",
                         "resultFormat":"time_series",
@@ -6338,7 +6044,7 @@
                         "measurement":"build",
                         "orderByTime":"ASC",
                         "policy":"default",
-                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-8-ovb.*/ AND \"branch\" = 'stable/victoria' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-9-ovb.*/ AND \"branch\" = 'stable/zed' AND \"result\" != 'ABORTED') AND $timeFilter",
                         "rawQuery":true,
                         "refId":"C",
                         "resultFormat":"time_series",
@@ -6389,7 +6095,7 @@
                         ]
                     }
                 ],
-                "title":"OVB CentOS-8 Victoria jobs",
+                "title":"OVB CentOS-9 Zed jobs",
                 "type":"grafana-piechart-panel",
                 "valueName":"current"
             },
@@ -6405,12 +6111,216 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Percentage of RDO  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
+                "fontSize":"110%",
+                "format":"none",
+                "gridPos":{
+                    "h":6,
+                    "w":5,
+                    "x":10,
+                    "y":86
                 },
+                "hideTimeOverride":true,
+                "id":488,
+                "legend":{
+                    "header":"",
+                    "percentage":true,
+                    "percentageDecimals":1,
+                    "show":true,
+                    "values":false
+                },
+                "legendType":"Right side",
+                "links":[],
+                "maxDataPoints":3,
+                "nullPointMode":"connected",
+                "pieType":"pie",
+                "pluginVersion":"6.1.1",
+                "strokeWidth":"2",
+                "targets":[
+                    {
+                        "alias":"PASS",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'True' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"job_name\" =~ /tripleo-ci.*-centos-9-ovb.*/ AND \"branch\" = 'stable/wallaby' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"True"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"FAIL",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" != 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-9-ovb.*/ AND \"branch\" = 'stable/wallaby' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"B",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    },
+                    {
+                        "alias":"TIMED_OUT",
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "groupBy":[],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT count(\"result_num\") FROM \"build\" WHERE (\"passed\" = 'False' AND \"result\" != 'SKIPPED' AND \"type\" = 'rdo' AND \"result\" != 'NODE_FAILURE' AND \"result\" = 'TIMED_OUT' AND \"job_name\" =~ /tripleo-ci.*-centos-9-ovb.*/ AND \"branch\" = 'stable/wallaby' AND \"result\" != 'ABORTED') AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"C",
+                        "resultFormat":"time_series",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"passed",
+                                "operator":"=",
+                                "value":"False"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"rdo"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"=",
+                                "value":"TIMED_OUT"
+                            }
+                        ]
+                    }
+                ],
+                "title":"OVB CentOS-9 Wallaby jobs",
+                "type":"grafana-piechart-panel",
+                "valueName":"current"
+            },
+            {
+                "aliasColors":{},
+                "breakPoint":"50%",
+                "combine":{
+                    "label":"Others",
+                    "threshold":0
+                },
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
+                "description":"Percentage of RDO  *gate and check* jobs that are passing vs failing vs timing out.\n\n",
                 "fontSize":"110%",
                 "format":"none",
                 "gridPos":{
@@ -6613,12 +6523,6 @@
                 "datasource":{
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
-                },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
                 },
                 "fontSize":"100%",
                 "gridPos":{
@@ -6888,12 +6792,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Running list of *upstream* periodic jobs",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":9,
@@ -7257,12 +7155,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Running list of all upstream jobs including *check* and *gate* queues.\n\nClick on individual job names to go to logs or on the patch number to see the gerrit review.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":10,
@@ -7630,12 +7522,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":11,
@@ -7914,12 +7800,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Running list of all upstream jobs including *check* and *gate* queues.\n\nClick on individual job names to go to logs or on the patch number to see the gerrit review.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":10,
@@ -8287,18 +8167,671 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":11,
                     "w":24,
                     "x":0,
                     "y":143
+                },
+                "hideTimeOverride":false,
+                "id":496,
+                "links":[],
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":2,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "$$hashKey":"object:2056",
+                        "alias":"Time",
+                        "align":"auto",
+                        "dateFormat":"YYYY-MM-DD",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "$$hashKey":"object:2057",
+                        "alias":"Job",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Statistics",
+                        "linkUrl":"http://zuul.openstack.org/builds?job_name=${__cell}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "thresholds":[
+                            "A"
+                        ],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:2058",
+                        "alias":"Job Time ( mean )",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "#73BF69",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"mean",
+                        "thresholds":[
+                            "10000",
+                            "10800"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "$$hashKey":"object:2059",
+                        "alias":"Count",
+                        "align":"auto",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "link":false,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"count",
+                        "sanitize":false,
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:2060",
+                        "alias":"Success rate",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"sum_count",
+                        "thresholds":[
+                            "80",
+                            "90"
+                        ],
+                        "type":"number",
+                        "unit":"percent"
+                    },
+                    {
+                        "$$hashKey":"object:2061",
+                        "alias":"",
+                        "align":"auto",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:2062",
+                        "alias":"Job Time ( max )",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"max",
+                        "thresholds":[
+                            "10000",
+                            "10800"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "$$hashKey":"object:2063",
+                        "alias":"Job Time (  aggregate )",
+                        "align":"auto",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"sum",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "$$hashKey":"object:2064",
+                        "alias":"Container Prep ( mean)",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"mean_1",
+                        "thresholds":[
+                            "1400",
+                            "1500"
+                        ],
+                        "type":"number",
+                        "unit":"s"
+                    },
+                    {
+                        "$$hashKey":"object:2065",
+                        "alias":"Container Prep (max)",
+                        "align":"auto",
+                        "colorMode":"value",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":0,
+                        "mappingType":1,
+                        "pattern":"max_1",
+                        "thresholds":[
+                            "1400",
+                            "1500"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    }
+                ],
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "job_name"
+                                ],
+                                "type":"tag"
+                            }
+                        ],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"autogen",
+                        "query":"SELECT count(\"result_num\"), mean(\"duration\"), max(\"duration\"), sum(\"duration\"), sum(\"result_num\")*100/count(\"result_num\") FROM \"autogen\".\"build\" WHERE (\"type\" = 'upstream' AND pipeline = 'check' AND \"branch\" = 'stable/zed'   ) AND $timeFilter GROUP BY \"job_name\"",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"count"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                },
+                                {
+                                    "params":[],
+                                    "type":"sum"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            }
+                        ]
+                    }
+                ],
+                "title":"Zed Check Job Pass Rates",
+                "transform":"table",
+                "type":"table-old"
+            },
+            {
+                "columns":[],
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
+                "description":"Running list of all upstream jobs including *check* and *gate* queues.\n\nClick on individual job names to go to logs or on the patch number to see the gerrit review.",
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":10,
+                    "w":24,
+                    "x":0,
+                    "y":154
+                },
+                "id":492,
+                "links":[],
+                "scroll":true,
+                "showHeader":true,
+                "sort":{
+                    "col":0,
+                    "desc":true
+                },
+                "styles":[
+                    {
+                        "$$hashKey":"object:964",
+                        "alias":"Time",
+                        "align":"auto",
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "pattern":"Time",
+                        "type":"date"
+                    },
+                    {
+                        "$$hashKey":"object:965",
+                        "alias":"Branch",
+                        "align":"auto",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"branch",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:966",
+                        "alias":"Job",
+                        "align":"auto",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_3}",
+                        "mappingType":1,
+                        "pattern":"job_name",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:967",
+                        "alias":"Pipeline",
+                        "align":"auto",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"pipeline",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:968",
+                        "alias":"Duration",
+                        "align":"auto",
+                        "colorMode":"cell",
+                        "colors":[
+                            "#2f575e",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":1,
+                        "mappingType":1,
+                        "pattern":"duration",
+                        "thresholds":[
+                            "10000",
+                            "10600"
+                        ],
+                        "type":"number",
+                        "unit":"dtdurations"
+                    },
+                    {
+                        "$$hashKey":"object:969",
+                        "alias":"Passed",
+                        "align":"auto",
+                        "colorMode":"row",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "#e24d42",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"result_num",
+                        "rangeMaps":[
+                            {
+                                "from":"",
+                                "text":"",
+                                "to":""
+                            }
+                        ],
+                        "thresholds":[
+                            "-1",
+                            "1"
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[
+                            {
+                                "$$hashKey":"object:1108",
+                                "text":"YES",
+                                "value":"1"
+                            },
+                            {
+                                "$$hashKey":"object:1109",
+                                "text":"NO",
+                                "value":"0"
+                            }
+                        ]
+                    },
+                    {
+                        "$$hashKey":"object:970",
+                        "alias":"Log URL",
+                        "align":"auto",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Logs",
+                        "linkUrl":"${__cell_7}",
+                        "mappingType":1,
+                        "pattern":"log_url",
+                        "thresholds":[],
+                        "type":"hidden",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:971",
+                        "alias":"Patch",
+                        "align":"auto",
+                        "colors":[
+                            "rgba(50, 172, 45, 0.97)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(245, 54, 54, 0.9)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":true,
+                        "linkTargetBlank":true,
+                        "linkTooltip":"Gerrit",
+                        "linkUrl":"https://review.opendev.org/${__cell}",
+                        "mappingType":1,
+                        "pattern":"change",
+                        "thresholds":[
+                            ""
+                        ],
+                        "type":"string",
+                        "unit":"short",
+                        "valueMaps":[]
+                    },
+                    {
+                        "$$hashKey":"object:972",
+                        "alias":"Job",
+                        "align":"auto",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "link":false,
+                        "mappingType":1,
+                        "pattern":"log_link",
+                        "sanitize":true,
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:973",
+                        "alias":"",
+                        "align":"auto",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"passed",
+                        "thresholds":[],
+                        "type":"string",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:974",
+                        "alias":"Result",
+                        "align":"auto",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
+                        "decimals":2,
+                        "mappingType":1,
+                        "pattern":"result",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    },
+                    {
+                        "$$hashKey":"object:975",
+                        "alias":"",
+                        "align":"auto",
+                        "colors":[
+                            "rgba(245, 54, 54, 0.9)",
+                            "rgba(237, 129, 40, 0.89)",
+                            "rgba(50, 172, 45, 0.97)"
+                        ],
+                        "decimals":2,
+                        "pattern":"/.*/",
+                        "thresholds":[],
+                        "type":"number",
+                        "unit":"short"
+                    }
+                ],
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "groupBy":[
+                            {
+                                "params":[
+                                    "project"
+                                ],
+                                "type":"tag"
+                            }
+                        ],
+                        "measurement":"build",
+                        "orderByTime":"ASC",
+                        "policy":"default",
+                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\", \"pipeline\", \"voting\" FROM \"build\" WHERE (\"branch\" =~ /.*zed.*/ AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /.*tripleo-.*/ ) AND $timeFilter GROUP BY \"project\"",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table",
+                        "select":[
+                            [
+                                {
+                                    "params":[
+                                        "branch"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "change"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "log_link"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "duration"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "result_num"
+                                    ],
+                                    "type":"field"
+                                }
+                            ],
+                            [
+                                {
+                                    "params":[
+                                        "voting"
+                                    ],
+                                    "type":"field"
+                                }
+                            ]
+                        ],
+                        "tags":[
+                            {
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"SKIPPED"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"type",
+                                "operator":"=",
+                                "value":"upstream"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"result",
+                                "operator":"!=",
+                                "value":"NODE_FAILURE"
+                            },
+                            {
+                                "condition":"AND",
+                                "key":"job_name",
+                                "operator":"=~",
+                                "value":"/.*tripleo-.*/"
+                            },
+                            {
+                                "condition":"OR",
+                                "key":"job_name",
+                                "operator":"=~",
+                                "value":"/.*molecule.*/"
+                            }
+                        ]
+                    }
+                ],
+                "title":"Upstream Zed last jobs",
+                "transform":"table",
+                "type":"table-old"
+            },
+            {
+                "columns":[],
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
+                "fontSize":"100%",
+                "gridPos":{
+                    "h":11,
+                    "w":24,
+                    "x":0,
+                    "y":164
                 },
                 "hideTimeOverride":false,
                 "id":495,
@@ -8571,18 +9104,12 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Running list of all upstream jobs including *check* and *gate* queues.\n\nClick on individual job names to go to logs or on the patch number to see the gerrit review.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":10,
                     "w":24,
                     "x":0,
-                    "y":154
+                    "y":175
                 },
                 "id":490,
                 "links":[],
@@ -8944,683 +9471,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
-                "fontSize":"100%",
-                "gridPos":{
-                    "h":11,
-                    "w":24,
-                    "x":0,
-                    "y":164
-                },
-                "hideTimeOverride":false,
-                "id":496,
-                "links":[],
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":2,
-                    "desc":true
-                },
-                "styles":[
-                    {
-                        "$$hashKey":"object:2056",
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "$$hashKey":"object:2057",
-                        "alias":"Job",
-                        "align":"auto",
-                        "colorMode":"value",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Statistics",
-                        "linkUrl":"http://zuul.openstack.org/builds?job_name=${__cell}",
-                        "mappingType":1,
-                        "pattern":"job_name",
-                        "thresholds":[
-                            "A"
-                        ],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "$$hashKey":"object:2058",
-                        "alias":"Job Time ( mean )",
-                        "align":"auto",
-                        "colorMode":"value",
-                        "colors":[
-                            "#73BF69",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"mean",
-                        "thresholds":[
-                            "10000",
-                            "10800"
-                        ],
-                        "type":"number",
-                        "unit":"s"
-                    },
-                    {
-                        "$$hashKey":"object:2059",
-                        "alias":"Count",
-                        "align":"auto",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":0,
-                        "link":false,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"count",
-                        "sanitize":false,
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    },
-                    {
-                        "$$hashKey":"object:2060",
-                        "alias":"Success rate",
-                        "align":"auto",
-                        "colorMode":"value",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":0,
-                        "mappingType":1,
-                        "pattern":"sum_count",
-                        "thresholds":[
-                            "80",
-                            "90"
-                        ],
-                        "type":"number",
-                        "unit":"percent"
-                    },
-                    {
-                        "$$hashKey":"object:2061",
-                        "alias":"",
-                        "align":"auto",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    },
-                    {
-                        "$$hashKey":"object:2062",
-                        "alias":"Job Time ( max )",
-                        "align":"auto",
-                        "colorMode":"value",
-                        "colors":[
-                            "rgba(50, 172, 45, 0.97)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"max",
-                        "thresholds":[
-                            "10000",
-                            "10800"
-                        ],
-                        "type":"number",
-                        "unit":"s"
-                    },
-                    {
-                        "$$hashKey":"object:2063",
-                        "alias":"Job Time (  aggregate )",
-                        "align":"auto",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"sum",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"s"
-                    },
-                    {
-                        "$$hashKey":"object:2064",
-                        "alias":"Container Prep ( mean)",
-                        "align":"auto",
-                        "colorMode":"value",
-                        "colors":[
-                            "rgba(50, 172, 45, 0.97)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":0,
-                        "mappingType":1,
-                        "pattern":"mean_1",
-                        "thresholds":[
-                            "1400",
-                            "1500"
-                        ],
-                        "type":"number",
-                        "unit":"s"
-                    },
-                    {
-                        "$$hashKey":"object:2065",
-                        "alias":"Container Prep (max)",
-                        "align":"auto",
-                        "colorMode":"value",
-                        "colors":[
-                            "rgba(50, 172, 45, 0.97)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":0,
-                        "mappingType":1,
-                        "pattern":"max_1",
-                        "thresholds":[
-                            "1400",
-                            "1500"
-                        ],
-                        "type":"number",
-                        "unit":"dtdurations"
-                    }
-                ],
-                "targets":[
-                    {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"6-61eLD4z"
-                        },
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "job_name"
-                                ],
-                                "type":"tag"
-                            }
-                        ],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"autogen",
-                        "query":"SELECT count(\"result_num\"), mean(\"duration\"), max(\"duration\"), sum(\"duration\"), sum(\"result_num\")*100/count(\"result_num\") FROM \"autogen\".\"build\" WHERE (\"type\" = 'upstream' AND pipeline = 'check' AND \"branch\" = 'stable/victoria'   ) AND $timeFilter GROUP BY \"job_name\"",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"count"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "duration"
-                                    ],
-                                    "type":"field"
-                                },
-                                {
-                                    "params":[],
-                                    "type":"sum"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            }
-                        ]
-                    }
-                ],
-                "title":"Victoria Check Job Pass Rates",
-                "transform":"table",
-                "type":"table-old"
-            },
-            {
-                "columns":[],
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"6-61eLD4z"
-                },
-                "description":"Running list of all upstream jobs including *check* and *gate* queues.\n\nClick on individual job names to go to logs or on the patch number to see the gerrit review.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
-                "fontSize":"100%",
-                "gridPos":{
-                    "h":10,
-                    "w":24,
-                    "x":0,
-                    "y":175
-                },
-                "id":492,
-                "links":[],
-                "scroll":true,
-                "showHeader":true,
-                "sort":{
-                    "col":0,
-                    "desc":true
-                },
-                "styles":[
-                    {
-                        "$$hashKey":"object:964",
-                        "alias":"Time",
-                        "align":"auto",
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "pattern":"Time",
-                        "type":"date"
-                    },
-                    {
-                        "$$hashKey":"object:965",
-                        "alias":"Branch",
-                        "align":"auto",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"branch",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "$$hashKey":"object:966",
-                        "alias":"Job",
-                        "align":"auto",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_3}",
-                        "mappingType":1,
-                        "pattern":"job_name",
-                        "sanitize":true,
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "$$hashKey":"object:967",
-                        "alias":"Pipeline",
-                        "align":"auto",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"pipeline",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "$$hashKey":"object:968",
-                        "alias":"Duration",
-                        "align":"auto",
-                        "colorMode":"cell",
-                        "colors":[
-                            "#2f575e",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":1,
-                        "mappingType":1,
-                        "pattern":"duration",
-                        "thresholds":[
-                            "10000",
-                            "10600"
-                        ],
-                        "type":"number",
-                        "unit":"dtdurations"
-                    },
-                    {
-                        "$$hashKey":"object:969",
-                        "alias":"Passed",
-                        "align":"auto",
-                        "colorMode":"row",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "#e24d42",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"result_num",
-                        "rangeMaps":[
-                            {
-                                "from":"",
-                                "text":"",
-                                "to":""
-                            }
-                        ],
-                        "thresholds":[
-                            "-1",
-                            "1"
-                        ],
-                        "type":"string",
-                        "unit":"short",
-                        "valueMaps":[
-                            {
-                                "$$hashKey":"object:1108",
-                                "text":"YES",
-                                "value":"1"
-                            },
-                            {
-                                "$$hashKey":"object:1109",
-                                "text":"NO",
-                                "value":"0"
-                            }
-                        ]
-                    },
-                    {
-                        "$$hashKey":"object:970",
-                        "alias":"Log URL",
-                        "align":"auto",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Logs",
-                        "linkUrl":"${__cell_7}",
-                        "mappingType":1,
-                        "pattern":"log_url",
-                        "thresholds":[],
-                        "type":"hidden",
-                        "unit":"short"
-                    },
-                    {
-                        "$$hashKey":"object:971",
-                        "alias":"Patch",
-                        "align":"auto",
-                        "colors":[
-                            "rgba(50, 172, 45, 0.97)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(245, 54, 54, 0.9)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":true,
-                        "linkTargetBlank":true,
-                        "linkTooltip":"Gerrit",
-                        "linkUrl":"https://review.opendev.org/${__cell}",
-                        "mappingType":1,
-                        "pattern":"change",
-                        "thresholds":[
-                            ""
-                        ],
-                        "type":"string",
-                        "unit":"short",
-                        "valueMaps":[]
-                    },
-                    {
-                        "$$hashKey":"object:972",
-                        "alias":"Job",
-                        "align":"auto",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "link":false,
-                        "mappingType":1,
-                        "pattern":"log_link",
-                        "sanitize":true,
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "$$hashKey":"object:973",
-                        "alias":"",
-                        "align":"auto",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"passed",
-                        "thresholds":[],
-                        "type":"string",
-                        "unit":"short"
-                    },
-                    {
-                        "$$hashKey":"object:974",
-                        "alias":"Result",
-                        "align":"auto",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "dateFormat":"YYYY-MM-DD HH:mm:ss",
-                        "decimals":2,
-                        "mappingType":1,
-                        "pattern":"result",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    },
-                    {
-                        "$$hashKey":"object:975",
-                        "alias":"",
-                        "align":"auto",
-                        "colors":[
-                            "rgba(245, 54, 54, 0.9)",
-                            "rgba(237, 129, 40, 0.89)",
-                            "rgba(50, 172, 45, 0.97)"
-                        ],
-                        "decimals":2,
-                        "pattern":"/.*/",
-                        "thresholds":[],
-                        "type":"number",
-                        "unit":"short"
-                    }
-                ],
-                "targets":[
-                    {
-                        "datasource":{
-                            "type":"influxdb",
-                            "uid":"6-61eLD4z"
-                        },
-                        "groupBy":[
-                            {
-                                "params":[
-                                    "project"
-                                ],
-                                "type":"tag"
-                            }
-                        ],
-                        "measurement":"build",
-                        "orderByTime":"ASC",
-                        "policy":"default",
-                        "query":"SELECT \"branch\", \"change\", \"log_link\", \"duration\", \"result\", \"result_num\", \"pipeline\", \"voting\" FROM \"build\" WHERE (\"branch\" =~ /.*victoria.*/ AND \"result\" != 'SKIPPED' AND \"type\" = 'upstream' AND \"result\" != 'NODE_FAILURE' AND \"job_name\" =~ /.*tripleo-.*/ ) AND $timeFilter GROUP BY \"project\"",
-                        "rawQuery":true,
-                        "refId":"A",
-                        "resultFormat":"table",
-                        "select":[
-                            [
-                                {
-                                    "params":[
-                                        "branch"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "change"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "log_link"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "duration"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "result"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "result_num"
-                                    ],
-                                    "type":"field"
-                                }
-                            ],
-                            [
-                                {
-                                    "params":[
-                                        "voting"
-                                    ],
-                                    "type":"field"
-                                }
-                            ]
-                        ],
-                        "tags":[
-                            {
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"SKIPPED"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"type",
-                                "operator":"=",
-                                "value":"upstream"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"result",
-                                "operator":"!=",
-                                "value":"NODE_FAILURE"
-                            },
-                            {
-                                "condition":"AND",
-                                "key":"job_name",
-                                "operator":"=~",
-                                "value":"/.*tripleo-.*/"
-                            },
-                            {
-                                "condition":"OR",
-                                "key":"job_name",
-                                "operator":"=~",
-                                "value":"/.*molecule.*/"
-                            }
-                        ]
-                    }
-                ],
-                "title":"Upstream victoria last jobs",
-                "transform":"table",
-                "type":"table-old"
-            },
-            {
-                "columns":[],
-                "datasource":{
-                    "type":"influxdb",
-                    "uid":"6-61eLD4z"
-                },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":11,
@@ -9899,12 +9749,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Running list of all upstream jobs including *check* and *gate* queues.\n\nClick on individual job names to go to logs or on the patch number to see the gerrit review.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":10,
@@ -10273,12 +10117,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Running list of all RDO *check* jobs. Click on a particular job name to go to the logs or on the gerrit change number to see the review.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":11,
@@ -10685,12 +10523,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"80%",
                 "format":"short",
                 "gridPos":{
@@ -10809,12 +10641,6 @@
                 "datasource":{
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
-                },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
                 },
                 "fontSize":"80%",
                 "format":"short",
@@ -10935,12 +10761,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"80%",
                 "format":"short",
                 "gridPos":{
@@ -11059,12 +10879,6 @@
                 "datasource":{
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
-                },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
                 },
                 "fontSize":"80%",
                 "format":"short",
@@ -11185,12 +10999,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"80%",
                 "format":"short",
                 "gridPos":{
@@ -11304,12 +11112,6 @@
                 "datasource":{
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
-                },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
                 },
                 "fontSize":"100%",
                 "gridPos":{
@@ -11672,12 +11474,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"tox jobs running in periodic:\n\nhttps://review.rdoproject.org/zuul/builds?pipeline=periodic-ci-config-molecule-python",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":5,
@@ -12135,12 +11931,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Promoter check jobs running in periodic:\n\nhttps://review.rdoproject.org/zuul/builds?pipeline=periodic-ci-config-molecule-python",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fontSize":"100%",
                 "gridPos":{
                     "h":5,
@@ -12628,7 +12418,6 @@
                         "color":{
                             "mode":"thresholds"
                         },
-                        "custom":{},
                         "mappings":[],
                         "max":"20",
                         "min":0,
@@ -12681,7 +12470,7 @@
                     "showThresholdLabels":true,
                     "showThresholdMarkers":true
                 },
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "targets":[
                     {
                         "datasource":{
@@ -12728,7 +12517,6 @@
                         "color":{
                             "mode":"thresholds"
                         },
-                        "custom":{},
                         "mappings":[],
                         "max":"20",
                         "min":0,
@@ -12781,7 +12569,7 @@
                     "showThresholdLabels":true,
                     "showThresholdMarkers":true
                 },
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "targets":[
                     {
                         "datasource":{
@@ -12828,7 +12616,6 @@
                         "color":{
                             "mode":"thresholds"
                         },
-                        "custom":{},
                         "mappings":[],
                         "max":"40",
                         "min":0,
@@ -12881,7 +12668,7 @@
                     "showThresholdLabels":true,
                     "showThresholdMarkers":true
                 },
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "targets":[
                     {
                         "datasource":{
@@ -12922,12 +12709,6 @@
                     "type":"datasource",
                     "uid":"grafana"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "gridPos":{
                     "h":7,
                     "w":12,
@@ -12939,7 +12720,7 @@
                     "content":"\n# BUG DATA\n\nCIX: [cix google sheet](https://docs.google.com/spreadsheets/d/1M1U-ekjEsec-bRjRq7q5rzjbJWKE2uT-ESX4SkeC0Uc/edit#gid=0&fvid=1778061576)\n\nAlert bugs [alert bugs](https://docs.google.com/spreadsheets/d/16rqgaSSoQrYNjsI4q0YInJxrOOJL3xyP3t3D6ZpluFY/)\n\n",
                     "mode":"markdown"
                 },
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "targets":[
                     {
                         "datasource":{
@@ -13205,12 +12986,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -13241,7 +13016,7 @@
                     "alertThreshold":true
                 },
                 "percentage":true,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -13455,12 +13230,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -13491,7 +13260,7 @@
                     "alertThreshold":true
                 },
                 "percentage":true,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -13701,12 +13470,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -13735,7 +13498,7 @@
                     "alertThreshold":true
                 },
                 "percentage":true,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":2,
                 "points":false,
                 "renderer":"flot",
@@ -13966,12 +13729,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":4,
                 "fillGradient":0,
                 "gridPos":{
@@ -13999,7 +13756,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -14148,12 +13905,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -14181,7 +13932,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -14325,12 +14076,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -14358,7 +14103,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -14557,12 +14302,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -14590,7 +14329,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -14769,12 +14508,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -14802,7 +14535,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -14970,12 +14703,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"This panel measures the length of time jobs are waiting or in the upstream zuul queue.  Less time is best. ",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":2,
                 "fillGradient":0,
                 "gridPos":{
@@ -15009,7 +14736,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":2,
                 "points":false,
                 "renderer":"flot",
@@ -15153,12 +14880,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"This panel measures the length of time jobs are waiting or in the RDO zuul queue. Less time is best.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -15192,7 +14913,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":2,
                 "points":false,
                 "renderer":"flot",
@@ -16120,12 +15841,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -16154,7 +15869,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":true,
                 "renderer":"flot",
@@ -16239,12 +15954,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -16272,7 +15981,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -16587,12 +16296,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -16620,7 +16323,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -16762,12 +16465,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -16796,7 +16493,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -16945,12 +16642,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -16978,7 +16669,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -17068,12 +16759,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -17101,7 +16786,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -17396,12 +17081,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -17429,7 +17108,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -17519,12 +17198,6 @@
                     "type":"influxdb",
                     "uid":"6-61eLD4z"
                 },
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -17552,7 +17225,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":5,
                 "points":false,
                 "renderer":"flot",
@@ -17682,12 +17355,6 @@
                     "uid":"6-61eLD4z"
                 },
                 "description":"Ports in DOWN state in RDO cloud, which should be deleted by cleaning scripts.",
-                "fieldConfig":{
-                    "defaults":{
-                        "custom":{}
-                    },
-                    "overrides":[]
-                },
                 "fill":1,
                 "fillGradient":0,
                 "gridPos":{
@@ -17718,7 +17385,7 @@
                     "alertThreshold":true
                 },
                 "percentage":false,
-                "pluginVersion":"7.3.6",
+                "pluginVersion":"9.1.5",
                 "pointradius":2,
                 "points":false,
                 "renderer":"flot",
