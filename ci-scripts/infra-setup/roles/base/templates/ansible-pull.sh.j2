@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Allow to skip running ansible-pull e.g. from cron
 # which is useful during development and debugging.
 # Use e.g. touch /tmp/skip-ansible-pull before running
@@ -11,10 +13,25 @@ if [ -e /tmp/skip-ansible-pull ]; then
     exit 1
 fi
 
-flock -n -E 2 /var/lock/ansible-pull \
-    ansible-pull -d /var/lib/ansible/local \
+(
+    set -e
+    flock -n 9 || exit 2
+
+    cd /var/lib/ansible/local
+
+{% if infra_setup_repo_fetch_refspec | default(None) != None %}
+    git fetch --force \
+        '{{ infra_setup_repo_fetch }}' \
+        '{{ infra_setup_repo_fetch_refspec }}'
+    git checkout --force FETCH_HEAD
+{% else %}
+    git fetch --force '{{ infra_setup_repo }}'
+    git checkout --force master
+{% endif %}
+
+    ansible-playbook -c local -vvv \
         -i /etc/ansible/hosts \
         -i ci-scripts/infra-setup/inventory/hosts.yml \
-        --clean \
-        -U "{{ infra_setup_repo }}" \
-        "{{ infra_setup_servers_playbook }}"
+        -l "localhost,$(hostname --short),$(hostname --fqdn),127.0.0.1" \
+        '{{ infra_setup_servers_playbook }}'
+) 9>/var/lock/ansible-pull
