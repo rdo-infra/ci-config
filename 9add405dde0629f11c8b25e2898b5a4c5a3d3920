@@ -16,6 +16,29 @@
       "message": "Once our playbooks etc. have been properly refactored, we should be able to define server_name and cockpit_server_name specific to our staging env. This will allow us to move the default_server parameter to the server{} block below the currently changed server{} blocks. Then, when a user connects to the cockpit using an ip address or an unknown (to nginx) server name, the user will be redirected to the correct (from nginx pov) url, e.g. from http://10.1.2.3 to http://dashboard-ci.tripleo.org.",
       "revId": "9add405dde0629f11c8b25e2898b5a4c5a3d3920",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a7b84e2e_7a660b83",
+        "filename": "ci-scripts/infra-setup/roles/rrcockpit/files/nginx.conf.local",
+        "patchSetId": 3
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 716
+      },
+      "writtenOn": "2022-11-21T14:31:23Z",
+      "side": 1,
+      "message": "So this will be over written as we are using the jinja variable to the actual server name for all the envs right?\nAnd the \"default_server\" will make sure that all traffics (to the IP/alternate hostname..) will be routed to this {{ server_name }} so that we dont need to add all the domain names/IPs to the conf file?\n\nI tested the following on the dev vm (.235 VM):\n...\n        listen       80 default_server;\n        server_name  \u003cinternal_ip_of_the_vm\u003e;\n...\n\nIn my local machine\u0027s /etc/hosts I added an entry mapping this vm (.235) to hostname cpt\n\nUsing the above conf (with default_server) I can access the grafana at http://cpt\n\nBut using  a conf without default_server like so:\n...\n        listen       80;\n        server_name  \u003cinternal_ip_of_the_vm\u003e;\n...\nI can access the grafana only with http://IP and not http://cpt\n\nSo this looks good to me!",
+      "range": {
+        "startLine": 38,
+        "startChar": 21,
+        "endLine": 38,
+        "endChar": 45
+      },
+      "revId": "9add405dde0629f11c8b25e2898b5a4c5a3d3920",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
   ]
 }
