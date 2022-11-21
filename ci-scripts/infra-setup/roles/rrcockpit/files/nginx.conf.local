@@ -32,8 +32,8 @@ http {
     include /etc/nginx/conf.d/*.conf;
 
     server {
-        listen       80;
-        server_name  dashboard-ci.tripleo.org;
+        listen       *:80;
+        server_name  "";
 
                 location / {
                     proxy_set_header Host $host;
@@ -76,8 +76,8 @@ http {
     }
 
     server {
-        listen       80;
-        server_name  cockpit-ci.tripleo.org;
+        listen       *:80;
+        server_name  "";
 
                 location / {
                     rewrite / http://dashboard-ci.tripleo.org/d/Z4vLSmOGk/cockpit/ break;
