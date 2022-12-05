@@ -1,0 +1,12 @@
+---
+- become: true
+  block:
+  - name: Create a tripleo group
+    ansible.builtin.group:
+      name: tripleo
+
+  - name: Allow 'tripleo' group to have passwordless sudo
+    ansible.builtin.lineinfile:
+      dest: /etc/sudoers
+      line: '%tripleo ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'
