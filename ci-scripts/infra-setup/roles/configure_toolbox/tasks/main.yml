@@ -1,0 +1,69 @@
+---
+- become: true
+  block:
+  - name: Set web directory
+    ansible.builtin.set_fact:
+      web_directory: /var/www/html
+
+  - name: Install DLRN repos for OpenStack clients
+    get_url:
+      url: "{{ item }}"
+      dest: "/etc/yum.repos.d/{{ item.split('/')[-1] }}"
+    with_items:
+      - https://trunk.rdoproject.org/centos9-wallaby/current-tripleo/delorean.repo
+      - https://trunk.rdoproject.org/centos9/delorean-deps.repo
+
+  - name: Install required OpenStack clients and logrotate
+    ansible.builtin.dnf:
+      name:
+        - logrotate
+        - python-heatclient
+        - python-neutronclient
+        - python-novaclient
+        - python-swiftclient
+        - python-openstackclient
+
+  - name: Create logrotate for cron jobs
+    copy:
+      dest: /etc/logrotate.d/cron_clean_logs
+      content: |
+        {{ web_directory }}/clean_* {
+            daily
+            missingok
+            dateext
+            dateyesterday
+            notifempty
+            delaycompress
+            rotate 20
+            nomail
+            create 0600 root root
+        }
+
+  - name: Create cron job to cleanup keypairs  # How is vexxhostrc-ovb provided?
+    cron:
+      name: 'Cleaning keypairs'
+      minute: "{{ toolbox_cleanup_keypairs_minutes }}"
+      job: >-
+        source /etc/vexxhostrc-ovb &&
+        bash /var/lib/ansible/local/ci-scripts/infra-cleanup/cleanup-keys.sh
+        &>> "{{ web_directory }}/clean_keypairs.log.txt"
+
+  - name: Create cron job to clean OVB old and failed stacks on different clouds
+    cron:
+      minute: "{{ toolbox_cleanup_failed_stacks_minutes }}"
+      name: "Cleaning old OVB stacks on {{ item.name }} Cloud"
+      job: >-
+        python /var/lib/ansible/local/ci-scripts/infra-cleanup/tenant_cleanup/ovb_tenant_cleanup.py
+        -c "{{ item.job }}" -l "{{ web_directory }}/clean_stacks_{{ item.job }}.log.txt"
+    with_items:
+      - { job: 'vexx_cloud', name: "Vexxhost" }
+      - { job: 'ibm-bm3-nodepool', name: "IBM-BM3" }
+
+  - name: Create cron job to get influxdb stats on vexxhost
+    cron:
+      name: 'Get influxdb stats vexx'
+      minute: "{{ toolbox_vexxhost_stats_minutes }}"
+      job: >-
+        python /var/lib/ansible/local/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/vexxhost.py
+        --webdir "{{ web_directory }}"
+        &>/var/log/influxdb_stats_vexx.log
