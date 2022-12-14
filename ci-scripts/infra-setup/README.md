@@ -98,7 +98,7 @@ It is copy of upstream file, which is part of [ansible-collections-openstack](ht
 Updated deployment process
 ====================================
 
-TripleO Infrastructure is built on top of an OpenStack Environment. Infrastructure is installed with an use of Ansible playbooks.
+TripleO Infrastructure is built on top of an OpenStack Environment. Infrastructure is installed with the use of Ansible playbooks.
 To allow for decoupling of cloud configuration (creating networks, servers, etc.) from servers configuration (installation of packages,
 deploying services, etc.), "rhos_dev_stage" environment is being changed to accomodate necessary updates. When updated deployment process will be proven working, it will become default deployment strategy.
 
