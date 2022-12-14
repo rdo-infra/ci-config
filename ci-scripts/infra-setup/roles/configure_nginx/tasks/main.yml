@@ -1,0 +1,29 @@
+---
+- become: true
+  block:
+
+  - name: Set web directory
+    ansible.builtin.set_fact:
+      web_directory: /var/www/html
+
+  - name: Install required packages
+    dnf:
+      name:
+        - nginx
+
+  - name: Create web directory
+    ansible.builtin.file:
+      path: "[[ web_directory }}"
+      state: directory
+      mode: u+rwX,g+rX,o+rX
+
+  - name: Allow apache to modify files in /srv/git_repos
+    community.general.sefcontext:
+      target: "{{ web_directory }}"
+      setype: httpd_sys_content_t
+
+  - name: Create toolbox site
+    template:
+      src: toolbox.conf.j2
+      dest: /etc/nginx/conf.d/toolbox.conf
+    notify: nginx-restart
