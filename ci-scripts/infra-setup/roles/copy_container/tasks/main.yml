@@ -31,6 +31,7 @@
     src: "{{ temporary_copy_container_dir.path }}/copy-quay"
     dest: /usr/local/bin
     mode: '0755'
+    remote_src: true
   become: true
   when: go_build.rc == 0
 
@@ -41,5 +42,4 @@
 
 - name: Install cron jobs
   include_tasks: cron.yml
-  # become: true
   when: enable_cron|default(true)|bool
