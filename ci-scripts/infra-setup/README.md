@@ -77,3 +77,10 @@ For appropriate RC files, please refer to appropriate cloud environments.
 Deployment can be performed with:
 
     ansible-playbook -vvv -i inventory/ -e cloud="rhos_dev_stage" provision-all.yml
+
+
+OpenStack Inventory
+===================
+
+To interact with OpenStack Inventory we're using [`openstack_inventory.py`](https://docs.ansible.com/ansible/latest/inventory_guide/intro_dynamic_inventory.html#explicit-use-of-openstack-inventory-script) script.
+It is copy of upstream file, which is part of [ansible-collections-openstach](https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack_inventory.py)
