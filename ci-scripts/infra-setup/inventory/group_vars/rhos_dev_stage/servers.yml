@@ -21,32 +21,7 @@ servers:
         - "{{ promoter_external_network_ip }}"
       userdata: |
         #cloud-config
-        packages:
-            - epel-release
-            - git
-        package_upgrade: true
         write_files:
-            # TODO: Keep in sync with ci-scripts/infra-setup/roles/base/templates/hosts.j2
-            - path: /etc/ansible/hosts
-              permissions: '0644'
-              content: |
-                ---
-                # This file is managed by Ansible.
-                all:
-                  vars:
-                    cloud: "{{ cloud | mandatory }}"
-        {% if infra_setup_repo_fetch_refspec | default(None) != None %}
-                    infra_setup_repo_fetch: "{{ infra_setup_repo_fetch }}"
-                    infra_setup_repo_fetch_refspec: "{{ infra_setup_repo_fetch_refspec }}"
-        {% endif %}
-                  children:
-                    {{ cloud | mandatory }}:
-                      hosts:
-                        incockpit:
-                        promoter:
-                        provisioner:
-                        rrcockpit:
-                        toolbox:
             - path: /root/dlrnapi_secret
               permissions: '0600'
               content: |
@@ -65,27 +40,6 @@ servers:
               permissions: '0600'
               content: |
         {{ uploader_ssh_priv_key | indent(10, true) }}
-        runcmd:
-          - yum install -y ansible
-          - |
-            set -exu
-            git clone '{{ infra_setup_repo }}' /tmp/ci-config
-            cd /tmp/ci-config
-        {% if infra_setup_repo_fetch_refspec | default(None) != None %}
-            git fetch --force \
-                '{{ infra_setup_repo_fetch }}' \
-                '{{ infra_setup_repo_fetch_refspec }}'
-            git checkout --force FETCH_HEAD
-        {% else %}
-            git checkout --force master
-        {% endif %}
-
-            ansible-playbook -c local -vvv \
-                -i /etc/ansible/hosts \
-                -i ci-scripts/infra-setup/inventory/hosts.yml \
-                -l "localhost,$(hostname --short),$(hostname --fqdn),127.0.0.1" \
-                '{{ infra_setup_servers_playbook }}'
-          - reboot
 
     - name: incockpit
       image: "{{ default_image }}"
@@ -105,61 +59,13 @@ servers:
         - "{{ incockpit_external_network_ip }}"
       userdata: |
         #cloud-config
-        packages:
-            - git
-            - epel-release
-            - python-pip
-            - vim
-        package_upgrade: true
         write_files:
-            # TODO: Keep in sync with ci-scripts/infra-setup/roles/base/templates/hosts.j2
-            - path: /etc/ansible/hosts
-              permissions: '0644'
-              content: |
-                ---
-                # This file is managed by Ansible.
-                all:
-                  vars:
-                    cloud: "{{ cloud | mandatory }}"
-        {% if infra_setup_repo_fetch_refspec | default(None) != None %}
-                    infra_setup_repo_fetch: "{{ infra_setup_repo_fetch }}"
-                    infra_setup_repo_fetch_refspec: "{{ infra_setup_repo_fetch_refspec }}"
-        {% endif %}
-                  children:
-                    {{ cloud | mandatory }}:
-                      hosts:
-                        incockpit:
-                        promoter:
-                        provisioner:
-                        rrcockpit:
-                        toolbox:
             - path: /root/grafana_admin_password
               permissions: '0600'
               content: "{{ grafana_admin_password }}"
             - path: /root/grafana_smtp_password
               permissions: '0600'
               content: "{{ grafana_smtp_password }}"
-        runcmd:
-          - yum install -y ansible
-          - |
-            set -exu
-            git clone '{{ infra_setup_repo }}' /tmp/ci-config
-            cd /tmp/ci-config
-        {% if infra_setup_repo_fetch_refspec | default(None) != None %}
-            git fetch --force \
-                '{{ infra_setup_repo_fetch }}' \
-                '{{ infra_setup_repo_fetch_refspec }}'
-            git checkout --force FETCH_HEAD
-        {% else %}
-            git checkout --force master
-        {% endif %}
-
-            ansible-playbook -c local -vvv \
-                -i /etc/ansible/hosts \
-                -i ci-scripts/infra-setup/inventory/hosts.yml \
-                -l "localhost,$(hostname --short),$(hostname --fqdn),127.0.0.1" \
-                '{{ infra_setup_servers_playbook }}'
-          - reboot
 
     - name: rrcockpit
       image: "{{ default_image }}"
@@ -179,64 +85,16 @@ servers:
         - "{{ rrcockpit_external_network_ip }}"
       userdata: |
         #cloud-config
-        packages:
-            - git
-            - epel-release
-            - python-pip
-            - vim
-        package_upgrade: true
         write_files:
-            # TODO: Keep in sync with ci-scripts/infra-setup/roles/base/templates/hosts.j2
-            - path: /etc/ansible/hosts
-              permissions: '0644'
-              content: |
-                ---
-                # This file is managed by Ansible.
-                all:
-                  vars:
-                    cloud: "{{ cloud | mandatory }}"
-        {% if infra_setup_repo_fetch_refspec | default(None) != None %}
-                    infra_setup_repo_fetch: "{{ infra_setup_repo_fetch }}"
-                    infra_setup_repo_fetch_refspec: "{{ infra_setup_repo_fetch_refspec }}"
-        {% endif %}
-                  children:
-                    {{ cloud | mandatory }}:
-                      hosts:
-                        incockpit:
-                        promoter:
-                        provisioner:
-                        rrcockpit:
-                        toolbox:
             - path: /root/grafana_admin_password
               permissions: '0600'
               content: "{{ grafana_admin_password }}"
             - path: /root/grafana_smtp_password
               permissions: '0600'
               content: "{{ grafana_smtp_password }}"
-        runcmd:
-          - yum install -y ansible
-          - |
-            set -exu
-            git clone '{{ infra_setup_repo }}' /tmp/ci-config
-            cd /tmp/ci-config
-        {% if infra_setup_repo_fetch_refspec | default(None) != None %}
-            git fetch --force \
-                '{{ infra_setup_repo_fetch }}' \
-                '{{ infra_setup_repo_fetch_refspec }}'
-            git checkout --force FETCH_HEAD
-        {% else %}
-            git checkout --force master
-        {% endif %}
-
-            ansible-playbook -c local -vvv \
-                -i /etc/ansible/hosts \
-                -i ci-scripts/infra-setup/inventory/hosts.yml \
-                -l "localhost,$(hostname --short),$(hostname --fqdn),127.0.0.1" \
-                '{{ infra_setup_servers_playbook }}'
-          - reboot
 
     - name: toolbox
-      image: "{{ centos8_image }}"
+      image: "{{ default_image }}"
       flavor: "{{ default_flavor }}"
       key_name: "{{ default_keypair_name }}"
       security_groups:
@@ -253,35 +111,7 @@ servers:
         - "{{ toolbox_external_network_ip }}"
       userdata: |
         #cloud-config
-        packages:
-            - epel-release
-            - epel-next-release
-            - git
-            - python3
-            - vim
-        package_upgrade: true
         write_files:
-            # TODO: Keep in sync with ci-scripts/infra-setup/roles/base/templates/hosts.j2
-            - path: /etc/ansible/hosts
-              permissions: '0644'
-              content: |
-                ---
-                # This file is managed by Ansible.
-                all:
-                  vars:
-                    cloud: "{{ cloud | mandatory }}"
-        {% if infra_setup_repo_fetch_refspec | default(None) != None %}
-                    infra_setup_repo_fetch: "{{ infra_setup_repo_fetch }}"
-                    infra_setup_repo_fetch_refspec: "{{ infra_setup_repo_fetch_refspec }}"
-        {% endif %}
-                  children:
-                    {{ cloud | mandatory }}:
-                      hosts:
-                        incockpit:
-                        promoter:
-                        provisioner:
-                        rrcockpit:
-                        toolbox:
             - path: /etc/nodepoolrc
               permissions: '0600'
               content: "{{ rdo_cloud_nodepool_rc | b64encode }}"
@@ -290,24 +120,3 @@ servers:
               permissions: '0600'
               content: "{{ vexxhost_nodepool_rc | b64encode }}"
               encoding: b64
-        runcmd:
-          - dnf install -y ansible
-          - |
-            set -exu
-            git clone '{{ infra_setup_repo }}' /tmp/ci-config
-            cd /tmp/ci-config
-        {% if infra_setup_repo_fetch_refspec | default(None) != None %}
-            git fetch --force \
-                '{{ infra_setup_repo_fetch }}' \
-                '{{ infra_setup_repo_fetch_refspec }}'
-            git checkout --force FETCH_HEAD
-        {% else %}
-            git checkout --force master
-        {% endif %}
-
-            ansible-playbook -c local -vvv \
-                -i /etc/ansible/hosts \
-                -i ci-scripts/infra-setup/inventory/hosts.yml \
-                -l "localhost,$(hostname --short),$(hostname --fqdn),127.0.0.1" \
-                '{{ infra_setup_servers_playbook }}'
-          - reboot

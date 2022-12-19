@@ -1,0 +1,20 @@
+---
+- name: Create a deployment keypair
+  openstack.cloud.keypair:
+    name: ansible_key
+    state: replace
+  register: keypair
+
+- name: Create a local public key
+  delegate_to: localhost
+  ansible.builtin.copy:
+    content: "{{ keypair.key.public_key }}"
+    dest: "~/.ssh/{{ keypair.key.name }}.pub"
+    mode: "0600"
+
+- name: Create a local private key
+  delegate_to: localhost
+  ansible.builtin.copy:
+    content: "{{ keypair.key.private_key }}"
+    dest: "~/.ssh/{{ keypair.key.name }}"
+    mode: "0600"
