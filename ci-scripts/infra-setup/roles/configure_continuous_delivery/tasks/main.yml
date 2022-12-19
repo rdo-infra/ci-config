@@ -1,0 +1,37 @@
+---
+- become: true
+  block:
+  - name: Create Ansible config directory
+    ansible.builtin.file:
+      path: "/etc/ansible"
+      state: directory
+
+  - name: Create Ansible inventory
+    template:
+      src: hosts.j2
+      dest: "/etc/ansible/hosts"
+      mode: u=rw,g=r,o=r
+      owner: root
+      group: root
+
+  - name: Create CI directory
+    ansible.builtin.file:
+      path: "/var/lib/ansible"
+      state: directory
+
+  - name: Pull CI repository
+    ansible.builtin.git: # noqa: git-latest latest
+      repo: "{{ infra_setup_repo }}"
+      dest: "/var/lib/ansible/local"
+
+  - name: Create continuous delivery script
+    template:
+      src: ansible-pull.sh.j2
+      dest: "/usr/local/bin/ansible_pull.sh"
+      mode: "u+x"
+
+  - name: Add cron job for ansible pull
+    cron:
+      name: "Run ansible-pull for continuous delivery"
+      minute: "*/5"
+      job: "systemd-cat -t ansible-pull /usr/local/bin/ansible_pull.sh"
