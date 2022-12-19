@@ -38,6 +38,7 @@ Roles
   - configure_continuous_delivery: setup continuous delivery script, which is going to pull necessary updates
   - configure_journalctl: enables persistent journalctl
   - configure_groups: configures default "tripleo" group
+  - configure_users: creates users and adds their ssh keys
 
 User SSH Keys
 =============
