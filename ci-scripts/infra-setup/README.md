@@ -34,6 +34,8 @@ Roles
   - setup_docker_compose: Setup docker compose on remote host
   - tenant_networks: To create networks and subnets in openstack.
 
+  - configure_ssh: removes ssh access to default user: `cloud-user`
+
 User SSH Keys
 =============
 
