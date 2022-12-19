@@ -1,0 +1,27 @@
+---
+- hosts: promoter,rrcockpit,toolbox
+  tasks:
+    - name: Upgrade all packages
+      become: true
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+  roles:
+    - configure_users
+
+- hosts: promoter
+  roles:
+    - promoter
+
+- hosts: rrcockpit
+  roles:
+    - rrcockpit
+
+- hosts: incockpit
+  roles:
+    - incockpit
+
+- hosts: toolbox
+  roles:
+    - toolbox
+    - copy_container
