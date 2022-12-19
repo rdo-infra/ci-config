@@ -1,0 +1,16 @@
+---
+- become: true
+  block:
+  - name: Create a persistent journal directory
+    ansible.builtin.file:
+      path: /var/log/journal/
+      state: directory
+
+  - name: Enable journald persistence
+    community.general.ini_file:
+      dest: "/etc/systemd/journald.conf"
+      section: Journal
+      option: Storage
+      value: "Persistent"
+      no_extra_spaces: yes
+    notify: journalctl-restart

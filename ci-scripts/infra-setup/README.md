@@ -36,6 +36,7 @@ Roles
 
   - configure_ssh: removes ssh access to default user: `cloud-user`
   - configure_continuous_delivery: setup continuous delivery script, which is going to pull necessary updates
+  - configure_journalctl: enables persistent journalctl
 
 User SSH Keys
 =============
