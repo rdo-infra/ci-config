@@ -1,0 +1,24 @@
+---
+- become: true
+  block:
+  - name: Upgrade all packages
+    ansible.builtin.dnf:
+      name: "*"
+      state: latest  # noqa package-latest
+
+  - name: Install required packages
+    ansible.builtin.dnf:
+      name:
+        - epel-release
+        - git
+        - python
+        - python-devel
+        - python-pip
+        - vim
+      state: present
+
+  - name: Install ansible packages
+    ansible.builtin.dnf:
+      name:
+        - ansible
+      state: present

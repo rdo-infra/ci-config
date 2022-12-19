@@ -39,6 +39,7 @@ Roles
   - configure_journalctl: enables persistent journalctl
   - configure_groups: configures default "tripleo" group
   - configure_users: creates users and adds their ssh keys
+  - configure_packages: installs required packages on newly provisioned servers
 
 User SSH Keys
 =============
