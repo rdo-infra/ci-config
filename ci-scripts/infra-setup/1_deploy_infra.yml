@@ -1,0 +1,11 @@
+---
+- import_playbook: 0_cloud_hosts.yml
+
+- hosts: provisioner
+  roles:
+    - tenant_networks
+    - security_groups
+    - configure_deployment_keypair
+    - server_provision
+  post_tasks:
+    - meta: refresh_inventory

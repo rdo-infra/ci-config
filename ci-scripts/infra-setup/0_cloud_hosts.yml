@@ -1,0 +1,10 @@
+---
+- hosts: provisioner
+  gather_facts: no
+  tasks:
+    - name: 'Let provisioner inherit variables from group {{ cloud }}'
+      ansible.builtin.add_host:
+        name: '{{ item }}'
+        groups: '{{ cloud | mandatory }}'
+      with_items: "{{ groups['all'] }}"
+      changed_when: false

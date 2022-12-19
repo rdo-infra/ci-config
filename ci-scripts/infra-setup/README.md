@@ -41,6 +41,8 @@ Roles
   - configure_users: creates users and adds their ssh keys
   - configure_packages: installs required packages on newly provisioned servers
 
+  - configure_deployment_keypair: creates temporary deployment keypair for provisioning purposes
+
 User SSH Keys
 =============
 
@@ -83,11 +85,28 @@ Currently there are two configurations:
 For appropriate RC files, please refer to appropriate cloud environments.
 Deployment can be performed with:
 
-    ansible-playbook -vvv -i inventory/ -e cloud="rhos_dev_stage" provision-all.yml
+    ansible-playbook -vvv -i inventory/ -e cloud="vexxhost" provision-all.yml
 
 
 OpenStack Inventory
 ===================
 
 To interact with OpenStack Inventory we're using [`openstack_inventory.py`](https://docs.ansible.com/ansible/latest/inventory_guide/intro_dynamic_inventory.html#explicit-use-of-openstack-inventory-script) script.
-It is copy of upstream file, which is part of [ansible-collections-openstach](https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack_inventory.py)
+It is copy of upstream file, which is part of [ansible-collections-openstack](https://github.com/openstack/ansible-collections-openstack/blob/master/scripts/inventory/openstack_inventory.py)
+
+
+Updated deployment process
+====================================
+
+TripleO Infrastructure is built on top of an OpenStack Environment. Infrastructure is installed with an use of Ansible playbooks.
+To allow for decoupling of cloud configuration (creating networks, servers, etc.) from servers configuration (installation of packages,
+deploying services, etc.), "rhos_dev_stage" environment is being changed to accomodate necessary updates. When updated deployment process will be proven working, it will become default deployment strategy.
+
+Each configuration step is described by a separate playbook:
+  - 1_deploy_infra.yml: configures required cloud environment, deploys necessary servers
+  - 2_configure_infra.yml: runs installation and initial configuration of servers
+  - 3_continuous_infra.yml: playbook which is being executed on the servers, to provide continuous updates.
+
+Deployment can be performed with:
+
+    ansible-playbook -i openstack_inventory.py -i inventory/ -e cloud="rhos_dev_stage" 1_deploy_infra.yml 2_configure_infra.yml
