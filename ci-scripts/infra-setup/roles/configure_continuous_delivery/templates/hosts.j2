@@ -1,0 +1,18 @@
+---
+# {{ ansible_managed }}
+# NOTE(dasm): Keep in sync with ci-scripts/infra-setup/tenant_vars/*/servers.yml
+all:
+  vars:
+    cloud: "{{ cloud | mandatory }}"
+    ansible_connection: local
+{% if infra_setup_repo_fetch_refspec | default(None) != None %}
+    infra_setup_repo_fetch: "{{ infra_setup_repo_fetch }}"
+    infra_setup_repo_fetch_refspec: "{{ infra_setup_repo_fetch_refspec }}"
+{% endif %}
+  children:
+    {{ cloud | mandatory }}:
+      hosts:
+        incockpit:
+        promoter:
+        rrcockpit:
+        toolbox:
