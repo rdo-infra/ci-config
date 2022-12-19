@@ -1,0 +1,29 @@
+---
+- become: true
+  block:
+  - name: Uninstall ansible if exists
+    ansible.builtin.dnf:
+      name:
+        - ansible
+        - epel-next-release
+      state: absent
+
+  - name: Upgrade all packages
+    ansible.builtin.dnf:
+      name: "*"
+      state: latest  # noqa package-latest
+
+  - name: Install required packages
+    ansible.builtin.dnf:
+      name:
+        - epel-release
+        - git
+        - python
+        - python-devel
+        - python-pip
+        - vim
+
+  - name: Install ansible packages
+    ansible.builtin.dnf:
+      name:
+        - ansible
