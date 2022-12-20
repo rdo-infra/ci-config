@@ -19,6 +19,11 @@
     src: copy-quay/
     dest: "{{ temporary_copy_container_dir.path }}"
 
+- name: Copy copy-quay config to home dir
+  copy:
+    src: copy-quay/config.yaml
+    dest: "{{ ansible_user_dir }}/"
+
 - name: Build the copy-container
   command:
     cmd: go build

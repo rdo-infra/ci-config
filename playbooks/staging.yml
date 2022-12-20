@@ -64,6 +64,7 @@
             name: promoter
 
         - name: Stage setup
+          become_user: "{{ promoter_user }}"
           include_role:
             name: promoter
             tasks_from: setup_staging
@@ -92,7 +93,6 @@
       become_user: "{{ promoter_user }}"
       shell:
         cmd: |
-          export DOCKER_HOST=unix:///var/docker.sock
           source ~/{{ promoter_virtualenv }}/bin/activate
           python3 ~/ci-config/ci-scripts/dlrnapi_promoter/promoter_integration_checks.py \
                   --stage-info-file /tmp/stage-info.yaml
