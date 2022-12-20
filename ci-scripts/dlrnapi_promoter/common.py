@@ -4,12 +4,14 @@ This file contains general functions and classes
 import logging
 import logging.handlers
 import os
+import pwd
 import socket
 import subprocess
 import sys
 import time
 
 import jinja2
+import podman
 import yaml
 
 try:
@@ -234,3 +236,11 @@ def get_release_map(release):
         return downstream_release_map[release]
     else:
         return release
+
+
+def get_podman_client():
+    """
+    Return podman client
+    """
+    socket_uri = f"unix:///run/podman/podman.sock"
+    return podman.PodmanClient(base_url=socket_uri)
