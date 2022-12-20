@@ -1,6 +1,12 @@
 ---
 - become: true
   block:
+  - name: Create /etc/ansible dir
+    file:
+      path: /etc/ansible
+      state: directory
+      owner: root
+      group: root
 
   - name: Create Ansible inventory
     template:
@@ -62,9 +68,8 @@
 
   - name: Install required packages
     yum:
-      name: "{{ item }}"
+      name: "{{ packages }}"
       state: present
-    with_items: "{{ packages }}"
 
   - name: Remove PasswordAuthentication if exists
     lineinfile:
@@ -100,7 +105,7 @@
 
 - name: Add timestamps to bash history
   lineinfile:
-    path: /home/centos/.bashrc
+    path: "/home/{{ promoter_user }}/.bashrc"
     line: "export HISTTIMEFORMAT='%F %T '"
   become: true
-  become_user: centos
+  become_user: "{{ promoter_user }}"
