@@ -3,7 +3,7 @@ rrcockpit_internal_network_ip: 127.0.0.1
 promoter_user: promoter
 docker_device: /dev/vdb
 docker_partition: /dev/vdb1
-ci_config_local_src_dir: "{{ role_path }}/../../"
+ci_config_local_src_dir: "{{ playbook_dir }}/../../"
 ci_config_remote_src_dir: "/home/{{ promoter_user }}/ci-config"
 promoter_virtualenv: promoter_venv
 promoter_logs: "web/promoter_logs"
@@ -46,10 +46,10 @@ promoter_type: "upstream"
 
 release: master
 distro_name: centos
-distro_version: 7
+distro_version: 9
 
 container_name_prefix: >-
-  {% if release in ['queens','stein','train','ussuri']) -%}
+  {% if release in ['train']) -%}
   {{ ansible_distribution|lower }}-binary
   {%- else -%}
   openstack

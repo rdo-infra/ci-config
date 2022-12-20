@@ -23,10 +23,17 @@
   include_tasks: install_packages.yml
 
 #
-# Configure docker
+# Configure podman
 #
-- name: Setup docker
-  include_tasks: ensure_docker.yml
+- name: "Configure Podman"
+  include_tasks: configure_podman.yml
+
+
+- name: "Configure copy-quay"
+  include_role:
+    name: copy_container
+  vars:
+    enable_corn: false
 
 #
 # Promoter logs and httpd service setup
@@ -174,6 +181,15 @@
 #
 # Clone ci-config repo
 #
+#
+
+- name: Role path
+  debug:
+    var: role_path
+
+- name: Playbook path
+  debug:
+    var: playbook_dir
 
 - name: clone promoter dir from local dir if present
   become: true
