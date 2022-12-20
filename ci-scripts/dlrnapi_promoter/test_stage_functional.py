@@ -10,9 +10,9 @@ Uses standard pytest fixture as a setup/teardown method
 import logging
 import os
 
-import docker
+import podman
 import pytest
-from common import get_log_file, setup_logging
+from common import get_log_file, get_podman_client, setup_logging
 from config import PromoterConfigFactory
 
 try:
@@ -98,12 +98,12 @@ def staged_env(request):
     # Check that teardown works properly
     if "registries" in stage_info['main']['scenes']:
         # Check registries are correctly cleared after teardown
-        docker_client = docker.from_env()
+        docker_client = get_podman_client()
         for registry in config.registries:
             try:
                 docker_client.containers.get(registry['name'])
                 assert False, "Registry {} not removed".format(registry['name'])
-            except docker.errors.NotFound:
+            except podman.errors.NotFound:
                 assert True
         # There are other resources the staging environment creates
         # We should make sure that the rest of teardown works correctly:
@@ -187,7 +187,7 @@ def test_registries(staged_env):
     :return: None
     """
 
-    docker_client = docker.from_env()
+    docker_client = get_podman_client()
     config, stage_info = staged_env
 
     # Check registries
@@ -214,7 +214,7 @@ def test_registries(staged_env):
                                 dockercfg_path="/dev/null",
                                 reauth=True
                             )
-                        except docker.errors.APIError:
+                        except podman.errors.APIError:
                             assert False, "Login failed"
             assert found
         # Check that the registries are up and running
