@@ -36,9 +36,29 @@
       - lvm2
       - openssh
       - parted
+      - podman
       - policycoreutils
       - "{{ python_virtualenv }}"
       - setools-console
       - telegraf
       - xfsprogs
     state: present
+
+
+#
+# Start podman service
+#
+- name: Reload, enable and start podman
+  become: true
+  block:
+    - name: Reload podman if config was changed
+      service:
+        name: podman
+        state: reloaded
+
+    - name: Start and enable Podman
+      service:
+        name: podman
+        state: started
+        enabled: yes
+
