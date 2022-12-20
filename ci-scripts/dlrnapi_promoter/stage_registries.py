@@ -4,7 +4,7 @@ import os
 import shutil
 import tempfile
 
-import docker
+import podman
 
 # Key for the secure registry
 domain_key = '''
@@ -36,7 +36,6 @@ ROqmK1Dhcd2F0NUvAevJMhWDj5Cy6rehMBRlhgfCYZs9tMAlG6mCm6q9
 -----END CERTIFICATE-----
 '''
 
-
 # Credentials for the secure registries
 # in the format "username":"password"
 htpasswd = ("username:"
@@ -66,7 +65,11 @@ class LocalRegistry(object):
         """
         self.port = port
         self.name = name
-        self.docker_client = docker.from_env()
+        self.userid = os.getuid()
+        self.docker_socket_uri = f"unix:///run/user/{self.userid}/" \
+                                 f"podman/podman.sock"
+        self.docker_client = podman.PodmanClient(
+            base_url=self.docker_socket_uri)
         self.docker_containers = self.docker_client.containers
         self.docker_images = self.docker_client.images
         self.container = None
@@ -90,10 +93,10 @@ class LocalRegistry(object):
         try:
             registry_image = self.docker_images.get(
                 self.base_image)
-        except docker.errors.ImageNotFound:
+        except podman.errors.ImageNotFound:
             self.log.info("Downloading registry image")
             registry_image = self.docker_images.pull(
-                "docker.io/{}".format(self.base_image))
+                "podman.io/{}".format(self.base_image))
 
         return registry_image
 
@@ -105,7 +108,7 @@ class LocalRegistry(object):
         try:
             registry_image = self.docker_images.get(
                 self.base_secure_image)
-        except docker.errors.ImageNotFound:
+        except podman.errors.ImageNotFound:
             self.get_base_image()
             registry_image = self.build_secure_image()
 
@@ -150,7 +153,7 @@ class LocalRegistry(object):
         try:
             self.container = self.docker_containers.get(self.name)
             return True
-        except docker.errors.NotFound:
+        except podman.errors.NotFound:
             self.container = None
             return False
 
@@ -170,7 +173,7 @@ class LocalRegistry(object):
                 'Name': 'always',
             },
             'ports': {
-                '5000/tcp': self.port
+                '5000/tcp': self.port,
             },
         }
         if self.secure:
@@ -182,7 +185,10 @@ class LocalRegistry(object):
                 "REGISTRY_HTTP_TLS_KEY": "/certs/domain.key",
             }
         self.container = self.docker_containers.run(self.registry_image.id,
-                                                    **kwargs)
+                                                    detach=True,
+                                                    ports={
+                                                        '5000/tcp': self.port},
+                                                    name=self.name, **kwargs)
         self.log.info("Created registry %s", self.name)
 
     def stop(self):

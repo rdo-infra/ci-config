@@ -10,6 +10,7 @@ import shutil
 import tempfile
 
 import docker
+import requests
 import yaml
 from dlrn_hash import DlrnHash
 
@@ -23,11 +24,21 @@ container_images:
 
 - imagename: "docker.io/tripleomaster/centos-binary-nova-compute:current-tripleo"
   image_source: kolla
-''' # noqa
+'''  # noqa
 
 # template that emulates the tripleo-common/tripleo_containers.yaml
 # definitions
-tripleo_containers_template = '''
+try:
+    text = requests.get(
+        'https://opendev.org/openstack/tripleo-common/raw/branch/stable/train/'
+        'container-images/tripleo_containers.yaml').text
+except ValueError:
+    print("Failed to get url")
+    text = containers_template
+tripleo_containers_template = text
+tripleo_containers_template = yaml.safe_load(tripleo_containers_template)
+containers_template = tripleo_containers_template
+'''
 container_images:
 
 - imagename: "quay.io/tripleomaster/openstack-neutron-server:current-tripleo"
@@ -35,7 +46,7 @@ container_images:
 
 - imagename: "quay.io/tripleomaster/openstack-nova-compute:current-tripleo"
   image_source: tripleo
-''' # noqa
+'''  # noqa
 
 
 class BaseImage(object):
@@ -157,15 +168,11 @@ class StagingContainers(object):
             except ValueError:
                 self.log.debug("Not excluding container %s", excluded)
 
-        for image_name in suffixes:
-            if self.config['release'] in ['queens', 'stein',
-                                          'train', 'ussuri']:
-                target_image_name = "{}-binary-{}".format(
-                    self.distro_name, image_name)
-            else:
-                target_image_name = "openstack-{}".format(image_name)
+        container_names = [i['imagename'].split(":")[0].split("/")[-1] for i in
+                           tripleo_containers_template['container_images']]
+        for image_name in container_names:
             for tag in tags:
-                image = "{}/{}".format(self.namespace, target_image_name)
+                image = "{}/{}".format(self.config.source_namespace, image_name)
                 full_image = "localhost:{}/{}".format(
                     self.source_registry['port'], image)
                 self.log.debug("Pushing container %s:%s"
@@ -227,10 +234,6 @@ class StagingContainers(object):
             os.makedirs(os.path.dirname(containers_list_path))
         except OSError:
             self.log.debug("Directory exists")
-        # Current template supports only two images, 0 and 1 in our list are
-        # base and openstack-base, they are hardcoded and are not needed here
-        with open(containers_list_path, "w") as containers_file:
-            containers_file.write(containers_template)
 
         # Generate tripleo_containers.yaml file
         tripleo_containers_path = \
@@ -238,7 +241,7 @@ class StagingContainers(object):
                          self.tripleo_commit_sha,
                          'container-images/tripleo_containers.yaml')
         with open(tripleo_containers_path, "w") as tripleo_file:
-            tripleo_file.write(tripleo_containers_template)
+            tripleo_file.write(yaml.dump(tripleo_containers_template))
 
         exclude_config = {
             'exclude_containers': {
