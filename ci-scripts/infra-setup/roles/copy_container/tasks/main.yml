@@ -26,6 +26,11 @@
     src: copy-quay/
     dest: "{{ temporary_copy_container_dir.path }}"
 
+- name: Copy copy-quay config to home dir
+  copy:
+    src: copy-quay/config.yaml
+    dest: "{{ ansible_user_dir }}/"
+
 - name: Build the copy-container
   command:
     cmd: go build
@@ -38,6 +43,7 @@
     src: "{{ temporary_copy_container_dir.path }}/copy-quay"
     dest: /usr/local/bin
     mode: '0755'
+    remote_src: true
   become: true
   when: go_build.rc == 0 and ansible_distribution == 'CentOS' and ansible_distribution_version < '9'
 
