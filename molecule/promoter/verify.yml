@@ -4,33 +4,33 @@
     - functional
   tasks:
 
-    - name: Check docker version
-      command: docker version --format {% raw %} '{{ .Client.Version }}' {% endraw %}
-      register: docker_version
-      failed_when: docker_version.stdout | length == 0
+    - name: Check podman version
+      command: podman version --format {% raw %} '{{ .Client.Version }}' {% endraw %}
+      register: podman_version
+      failed_when: podman_version.stdout | length == 0
       changed_when: false
 
     # Manifest command introduced in version 18.02.0
-    - name: Ensure Docker version is recent enough
+    - name: Ensure Podman version is recent enough
       assert:
-        that: docker_version.stdout is version("18.02.0", ">")
-        success_msg: "Docker version installed in > 18.02.0"
-        fail_msg: "Docker version installed is not recent enough"
+        that: podman_version.stdout is version("4.2.0", ">=")
+        success_msg: "Podman version installed in >= 4.2.0"
+        fail_msg: "Podman version installed is not recent enough"
 
-    - name: Call docker manifest help
+    - name: Call podman manifest help
       become: true
       become_user: "{{ promoter_user }}"
-      command: docker manifest --help
-      register: docker_manifest
+      command: podman manifest --help
+      register: podman_manifest
       changed_when: false
 
-    - name: Ensure docker manifest command is enabled by default
+    - name: Ensure podman manifest command is enabled by default
       become: true
       become_user: "{{ promoter_user }}"
       assert:
-        that: '"docker manifest is only supported on a Docker cli with experimental cli features enabled" not in docker_manifest.stderr'
-        success_msg: "Docker manifest enabled by default"
-        fail_msg: "Docker manifest command is present but not enabled by default"
+        that: '"podman manifest is only supported on a Podman cli with experimental cli features enabled" not in podman_manifest.stderr'
+        success_msg: "Podman manifest enabled by default"
+        fail_msg: "Podman manifest command is present but not enabled by default"
 
     - name: Ensure influxdb repo is present and configured correctly
       become: true
@@ -40,28 +40,28 @@
         warn: false
       changed_when: false
 
-    - name: Ensure /var/lib/docker is from a different partition
-      command: findmnt -P /var/lib/docker
+    - name: Ensure /var/lib/podman is from a different partition
+      command: findmnt -P /var/lib/podman
       changed_when: false
 
     # We can't run the daemon in molecule without virsh driver for now
-    - name: Ensure docker deamon is using the overlay driver
-      command: "docker info --format {% raw %} '{{ json .Driver  }}' {% endraw %}"
+    - name: Ensure podman deamon is using the overlay driver
+      command: "podman info --format {% raw %} '{{ json .Driver  }}' {% endraw %}"
       failed_when: false
       changed_when: false
 
-    - name: Attempt to use docker command as normal user
+    - name: Attempt to use podman command as normal user
       become: true
       become_user: "{{ promoter_user }}"
-      command: "docker info"
-      register: docker_info_user
+      command: "podman info"
+      register: podman_info_user
       changed_when: false
 
-    - name: Ensure promoter user can access docker socket
+    - name: Ensure promoter user can access podman socket
       assert:
-        that: '"permission denied" not in docker_info_user.stderr'
-        fail_msg: "Promoter user can't use docker commands"
-        success_msg: "Promoter user can correctly use docker"
+        that: '"permission denied" not in podman_info_user.stderr'
+        fail_msg: "Promoter user can't use podman commands"
+        success_msg: "Promoter user can correctly use podman"
 
     - name: Ensure we can access logs from apache
       become: true
