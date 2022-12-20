@@ -50,14 +50,21 @@ registries:
   # you can add multiple targets, but only the first source will win
   - type: source
     name: local-source-registry
-    port: 6000
+    port: 3000
     secure: False
     schema: v2_s2
   - type: target
     name: local-target-registry-1
-    port: 6500
+    port: 3500
     secure: False
     schema: v2_s2
+
+source_registry: localhost:3000
+
+target_registries:
+  - name: target
+    url: localhost:3500
+
 containers:
   # When modfying the suffixes, please follow these hints
   # - specify at least three values
@@ -96,3 +103,6 @@ dlrn:
     repo_root: data/repos/
     db_file: commits.sqlite
     db_data_file: single-pipeline.yaml
+# copy-quay config
+copy_quay_bin: ../infra-setup/roles/copy_container/files/copy-quay/copy-quay
+copy_quay_config: ../infra-setup/roles/copy_container/files/copy-quay/config.yaml

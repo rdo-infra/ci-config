@@ -19,8 +19,8 @@
   shell: |
     source ~/{{ promoter_virtualenv }}/bin/activate
     # Export the path to the mounted docker socket so all docker client commands will use it
-    if [ -S /var/docker.sock ]; then
-        export DOCKER_HOST=unix:///var/docker.sock
+    if [ -S /run/podman/podman.sock ]; then
+        export DOCKER_HOST=unix:///run/podman/podman.sock
         export DOCKER_OPTS="--insecure-registry localhost:{{ initial_registry['port'] }}"
     fi
     cd {{ ci_config_remote_src_dir }}

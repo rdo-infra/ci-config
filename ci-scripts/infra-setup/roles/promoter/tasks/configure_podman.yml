@@ -1,0 +1,40 @@
+---
+#
+# Start podman service
+#
+
+- name: Make sure /etc/docker present
+  become: true
+  block:
+    - name: Create /etc/docker dir
+      file:
+        path: '/etc/docker'
+        state: directory
+        owner: root
+        group: root
+
+    - name: Configure insecure registries
+      become: true
+      copy:
+        dest: "/etc/docker/daemon.json"
+        content: '{"insecure-registries":["localhost:3000", "localhost:3500"]}'
+
+- name: Reload, enable and start podman
+  become: true
+  block:
+    - name: Reload podman if config was changed
+      service:
+        name: podman
+        state: reloaded
+
+    - name: Start and enable Podman
+      service:
+        name: podman
+        state: started
+        enabled: yes
+
+    - name: Configure podman socket
+      file:
+        path: "/run/podman/podman.sock"
+        owner: "{{ promoter_user }}"
+        mode: "0755"
