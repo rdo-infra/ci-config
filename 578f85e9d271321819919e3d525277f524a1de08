@@ -104,6 +104,24 @@
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f765f924_96ae1bac",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 19
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 547
+      },
+      "writtenOn": "2023-01-10T07:57:32Z",
+      "side": 1,
+      "message": "so basically, we\u0027d get this:\n- hosts: foo\n  gather_facts: false\n  - tasks:\n    - name: Gather limited subset of needed facts\n      ansible.builtin.setup:\n        gather_subset:\n          - !all\n          - !min\n          - \u003csome specific facts\u003e\n  - roles:\n    - bar\n    - baz\n    - ...\n\nNote that we can \"just\" use \"min\", that\u0027s usually sufficient. The main pain point being the \"networking\" facts, especially on environment with a lot of interfaces (think: compute in OSP).\nWe\u0027d also want to ensure fact are actually cached for future uses, but that\u0027s an optimization we can look later on.\n\nWe can work on a follow-up if you want - I\u0027m available :)",
+      "parentUuid": "419797e7_fd0ccd96",
+      "revId": "578f85e9d271321819919e3d525277f524a1de08",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f30196f9_b1c90440",
