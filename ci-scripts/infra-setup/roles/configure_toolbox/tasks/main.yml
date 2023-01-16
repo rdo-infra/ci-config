@@ -45,7 +45,7 @@
       minute: "{{ toolbox_cleanup_keypairs_minutes }}"
       job: >-
         source /etc/vexxhostrc-ovb &&
-        bash /var/lib/ansible/local/ci-scripts/infra-cleanup/cleanup-keys.sh
+        bash "{{ ci_repository_path }}/ci-scripts/infra-cleanup/cleanup-keys.sh"
         &>> "{{ web_directory }}/clean_keypairs.log.txt"
 
   - name: Create cron job to clean OVB old and failed stacks on different clouds
@@ -53,7 +53,7 @@
       minute: "{{ toolbox_cleanup_failed_stacks_minutes }}"
       name: "Cleaning old OVB stacks on {{ item.name }} Cloud"
       job: >-
-        python /var/lib/ansible/local/ci-scripts/infra-cleanup/tenant_cleanup/ovb_tenant_cleanup.py
+        python "{{ ci_repository_path }}/ci-scripts/infra-cleanup/tenant_cleanup/ovb_tenant_cleanup.py"
         -c "{{ item.job }}" -l "{{ web_directory }}/clean_stacks_{{ item.job }}.log.txt"
     with_items:
       - { job: 'vexx_cloud', name: "Vexxhost" }
@@ -64,6 +64,6 @@
       name: 'Get influxdb stats vexx'
       minute: "{{ toolbox_vexxhost_stats_minutes }}"
       job: >-
-        python /var/lib/ansible/local/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/vexxhost.py
+        python "{{ ci_repository_path }}/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/vexxhost.py"
         --webdir "{{ web_directory }}"
         &>/var/log/influxdb_stats_vexx.log

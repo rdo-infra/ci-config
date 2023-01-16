@@ -1,0 +1,58 @@
+---
+- become: yes
+  block:
+  - name: Create docker volumes
+    community.docker.docker_volume:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - influxdb-volume
+      - grafana-volume
+      - telegraf-volume
+
+  - name: Copy password files
+    become: yes
+    copy:
+      remote_src: true
+      src: "/root/{{ item }}"
+      dest: "/home/cloud-user/"
+      owner: cloud-user
+      group: cloud-user
+    with_items:
+      - grafana_admin_password
+      - grafana_smtp_password
+
+  - name: Generate custom nginx.conf
+    ansible.builtin.template:
+      src: "nginx.conf.j2"
+      dest: "/var/lib/ansible/local/ci-scripts/infra-setup/roles/rrcockpit/files/nginx.conf"
+
+  - name: Read grafana admin password file
+    slurp:
+      src: /home/cloud-user/grafana_admin_password
+    register: gf_admin_password
+
+  - name: Read grafana smtp password file
+    slurp:
+      src: /home/cloud-user/grafana_smtp_password
+    register: gf_smtp_password
+
+  - name: Stop services
+    environment:
+      GRAFANA_ADMIN_PASSWORD: "{{ gf_admin_password['content'] | b64decode }}"
+      GRAFANA_SMTP_PASSWORD: "{{ gf_smtp_password['content'] | b64decode }}"
+      MTU: "{{ mtu }}"
+    community.docker.docker_compose:
+      project_src: "{{ ci_repository_path }}/ci-scripts/infra-setup/roles/rrcockpit/files/"
+      state: absent
+
+  - name: Start services
+    environment:
+      GRAFANA_ADMIN_PASSWORD: "{{ gf_admin_password['content'] | b64decode }}"
+      GRAFANA_SMTP_PASSWORD: "{{ gf_smtp_password['content'] | b64decode }}"
+      MTU: "{{ mtu }}"
+    community.docker.docker_compose:
+      project_src: "{{ ci_repository_path }}/ci-scripts/infra-setup/roles/rrcockpit/files/"
+      pull: true
+      build: true
+      stats: present
