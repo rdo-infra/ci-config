@@ -20,4 +20,11 @@ RUN mkdir -p /usr/local/bin/templates
 COPY templates/* /usr/local/bin/templates/
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
+# NOTE(dasm): Install RHEL certs inside the container
+# If the command failed, ignore it by '|| true'
+RUN cd /etc/pki/ca-trust/source/anchors && \
+    curl -O https://password.corp.redhat.com/RH-IT-Root-CA.crt && \
+    curl -O https://password.corp.redhat.com/pki-ca-chain.crt && \
+    update-ca-trust extract && update-ca-trust enable || true
+
 CMD ["telegraf", "--debug", "--config-directory","/etc/telegraf/telegraf.d/","--input-filter", "exec"]

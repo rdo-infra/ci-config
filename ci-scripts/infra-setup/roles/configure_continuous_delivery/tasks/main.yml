@@ -16,13 +16,13 @@
 
   - name: Create CI directory
     ansible.builtin.file:
-      path: "/var/lib/ansible"
+      path: "{{ ci_directory_path }}"
       state: directory
 
   - name: Pull CI repository
     ansible.builtin.git: # noqa: git-latest latest
       repo: "{{ infra_setup_repo }}"
-      dest: "/var/lib/ansible/local"
+      dest: "{{ ci_repository_path }}"
 
   - name: Create continuous delivery script
     template:
