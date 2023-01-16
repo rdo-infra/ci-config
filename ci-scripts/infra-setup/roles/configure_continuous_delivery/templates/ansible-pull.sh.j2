@@ -17,11 +17,11 @@ fi
     set -e
     flock -n 9 || exit 2
 
-    if [ ! -d /var/lib/ansible/local ]; then
-        git clone '{{ infra_setup_repo }}' /var/lib/ansible/local
+    if [ ! -d "{{ ci_repository_path }}" ]; then
+        git clone '{{ infra_setup_repo }}' "{{ ci_repository_path }}"
     fi
 
-    cd /var/lib/ansible/local
+    cd "{{ ci_repository_path }}"
 
 {% if infra_setup_repo_fetch_refspec | default(None) != None %}
     git fetch --force \
