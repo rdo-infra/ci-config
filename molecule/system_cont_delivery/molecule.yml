@@ -1,0 +1,33 @@
+---
+# Molecule test to configure continues delivery script
+# This test includes configure_continuous_delivery role with the following:
+
+
+driver:
+  name: delegated
+
+platforms:
+  - name: instance  # must be able to `ssh host`, edit your ~/.ssh/config
+    options:
+      managed: False
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      fact_caching: jsonfile
+      fact_caching_connection: /tmp/molecule/facts
+  inventory:
+    host_vars:
+      instance:
+        infra_setup_repo: "https://github.com/rdo-infra/ci-config.git"
+        infra_setup_servers_playbook: "ci-scripts/infra-setup/3_continuous_infra.yml"
+        promoter_user: "promoter"
+        cloud: "localhost"
+
+
+scenario:
+  test_sequence:
+    - prepare
+    - verify
+    - cleanup

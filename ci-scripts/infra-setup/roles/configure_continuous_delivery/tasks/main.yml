@@ -1,6 +1,11 @@
 ---
 - become: true
   block:
+  - name: Check mandatory variables are defined
+    assert:
+      that:
+        - infra_setup_repo is defined
+
   - name: Create Ansible config directory
     ansible.builtin.file:
       path: "/etc/ansible"
