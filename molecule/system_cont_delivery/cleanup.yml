@@ -1,0 +1,29 @@
+# Teardown staging environment
+- hosts: instance
+  tasks:
+    - name: "Removing setup"
+      become: true
+      block:
+        - name: Remove cron jobs
+          command: >-
+            crontab -r
+          register: crontab_res
+
+        - name: Remove user
+          user:
+            name: promoter
+            state: absent
+
+        - name: Remove group
+          group:
+            name: tripleo
+            state: absent
+
+        - name: Removing setup
+          file:
+            state: absent
+            path: "{{ item }}"
+          with_items:
+            - "/etc/ansible/hosts"
+            - "/etc/ansible/"
+            - "/var/lib/ansible/local/*"
