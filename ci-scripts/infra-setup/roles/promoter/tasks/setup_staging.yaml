@@ -11,6 +11,14 @@
         - "--no-motd"
         - "--exclude=.tox"
 
+- name: "Make sure cloned dir owned by {{ promoter_user }}"
+  become: true
+  ansible.builtin.file:
+    path: "{{ ci_config_remote_src_dir }}"
+    owner: "{{ promoter_user }}"
+    mode: u=rwx,g=rx,o=rx
+    recurse: true
+
 # This block is the setup / run
 - become: true
   become_user: "{{ promoter_user }}"
