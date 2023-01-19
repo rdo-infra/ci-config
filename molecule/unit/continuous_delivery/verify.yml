@@ -1,0 +1,45 @@
+---
+- hosts: instance
+  become: true
+  become_user: "{{ promoter_user }}"
+  tasks:
+    - name: "Ensure /etc/ansible/hosts exists"
+      stat:
+        path: "/etc/ansible/hosts"
+      register: file_etc_hosts
+
+    - name: "Check file status"
+      assert:
+        that:
+          - file_etc_hosts.stat.exists
+
+    - name: "Ensure that Infra setup repo is exists"
+      stat:
+        path: "/var/lib/ansible/local/ci-scripts/infra-setup"
+      register: repo_ci_config
+
+    - name: "Ensure repo exists"
+      assert:
+        that:
+          - repo_ci_config.stat.exists
+
+    - name: "Check continuous delivery script is configured"
+      stat:
+        path: "/usr/local/bin/ansible_pull.sh"
+      register: file_ansible_pull
+
+    - name: "Assert ansible_pull.sh is exists"
+      assert:
+        that:
+          - file_ansible_pull.stat.exists
+
+    - name: "Check cron job is added for ansible pull"
+      command: >-
+        crontab -l
+      register: crontab_out
+      changed_when: crontab_out.rc != 0
+
+    - name: "Check Crontab job exists"
+      assert:
+        that:
+          - "'systemd-cat -t ansible-pull /usr/local/bin/ansible_pull.sh' in crontab_out.stdout"

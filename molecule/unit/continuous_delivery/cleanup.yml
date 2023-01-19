@@ -1,0 +1,14 @@
+# Teardown staging environment
+- hosts: instance
+  tasks:
+    - name: "Removing setup"
+      become: true
+      block:
+        - name: Removing setup
+          file:
+            state: absent
+            path: "{{ item }}"
+          with_items:
+            - "/etc/ansible/hosts"
+            - "/etc/ansible/"
+            - "/var/lib/ansible/local/*"
