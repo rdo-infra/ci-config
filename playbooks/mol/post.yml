@@ -7,6 +7,11 @@
         state: directory
       delegate_to: localhost
 
+    - name: Check for molecule dir
+      stat:
+        path: "{{ zuul_work_dir }}/.tox/molecule/log"
+      register: molecule_log_result
+
     - name: Copy files from tox log dir on node
       failed_when: false
       synchronize:
@@ -18,6 +23,25 @@
         rsync_opts:
           - --include=reports.html
           - --exclude=*
+      when: molecule_log_result.stat.exists
+
+    - name: Check for molecule_unit dir
+      stat:
+        path: "{{ zuul_work_dir }}/.tox/molecule_unit/log"
+      register: molecule_result
+
+    - name: Copy reports.html
+      failed_when: false
+      synchronize:
+        src: "{{ zuul_work_dir }}/.tox/molecule_unit/log/"
+        dest: '{{ zuul.executor.log_root }}/tox'
+        mode: pull
+        copy_links: true
+        verify_host: true
+        rsync_opts:
+          - --include=reports.html
+          - --exclude=*
+      when: molecule_result.stat.exists
 
     - name: Verify that successful job produced expected artifacts
       when:
