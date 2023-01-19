@@ -188,6 +188,13 @@
         # avoid spamming our logs
         - "--quiet"
 
+- name: "Make sure cloned dir owned by {{ promoter_user }}"
+  become: true
+  ansible.builtin.file:
+    path: "{{ ci_config_remote_src_dir }}"
+    owner: "{{ promoter_user }}"
+    mode: u=rw,g=r,o=r
+
 #
 # Enable certs for when downstream
 #
