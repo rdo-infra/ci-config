@@ -138,3 +138,20 @@
       - ^tox.ini$
       - ^zuul.d/layout.yaml
       - ^playbooks/mol/.*
+
+- job:
+    name: mol-unit_molecule_test
+    parent: mol
+    nodeset: rdo-centos-9-stream
+    vars:
+      tox_envlist: molecule_unit
+      mol_scenario: ""
+    roles:
+      - zuul: opendev.org/zuul/zuul-jobs
+    files:
+      - .*molecule.*
+      - ^ci-scripts/infra-setup/roles/.*$
+      - ^molecule-requirements.txt
+      - ^tox.ini$
+      - ^playbooks/mol/.*
+      - ^zuul.d/layout.yaml

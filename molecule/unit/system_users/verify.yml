@@ -1,0 +1,32 @@
+---
+- hosts: instance
+  become: true
+  tasks:
+    - name: "Check Users are exists"
+      getent:
+        database: passwd
+        key: "{{ item.name }}"
+      register: check_group
+      with_items:
+        - "{{ users }}"
+
+    - name: "Check users are exists"
+      assert:
+        that: "not {{ item.changed }}"
+      with_items:
+        - "{{ check_group }}"
+
+    - name: "Check authorized keys"
+      command: >-
+        grep -ir "{{ item.authorized_keys if item.authorized_keys is defined }}" /home/{{ item.name }}/.ssh/authorized_keys
+      register: auth_key_out
+      with_items:
+        - "{{ users }}"
+      changed_when: item.authorized_kyes is defined
+
+    - name: "Assert that key is present"
+      assert:
+        that:
+          - "{{ item.authorized_keys if item.authorized_keys is defined else item.expires }} in auth_key_out.stdout"
+      with_items:
+        - "{{ users[0] }}"
