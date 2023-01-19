@@ -1,8 +1,12 @@
 ---
 - hosts: all
+  vars:
+    tox_venv_path: "{{ ansible_user_dir }}/.local/tox"
+  roles:
+    - ensure-tox
   tasks:
     - name: Running tox jjb
-      command: tox -e {{ toxenv | default("jjb-v2") }}
+      command: '{{ tox_venv_path }}/bin/tox -e {{ toxenv | default("jjb-v2") }}'
       args:
         chdir: "{{ zuul.project.src_dir }}"
       changed_when: false
