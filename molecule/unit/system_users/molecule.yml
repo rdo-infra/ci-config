@@ -1,0 +1,33 @@
+---
+
+driver:
+  name: delegated
+
+platforms:
+  - name: instance
+    options:
+      managed: False
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      fact_caching: jsonfile
+      fact_chaching_connection: /tmp/molecule/facts
+  inventory:
+    host_vars:
+      instance:
+        promoter_user: "promoter"
+        ansible_user: "redhat"
+        default_remote_user: "centos"
+        users:
+          - name: "testuser1"
+            authorized_keys: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCx5OjiavtGHZZyi3uNc2zIQHqoCFK3LUiDT/N4jdYYLmmpP4ao8DcDLRvWFaF8Yk1r6kKtMx0uM5wPUTXZ5MJaOjXClzSszNj/V6GfRJkL0VLfKkMIX6pPNrYK2BLSW8pEEQUNPXJ3fLF8/YoNFJiJANuSBmnXhzQgo+h1iZueXOoyyMNj1sarzkWjyaA+0tlzQUNNOg4/cGoXoY5SDFJITAzW1K/03rCjHCm0MpsQtS/YtR1UulvqeQLxpVYIGqWGyUOg91Q4wHt6tgghhpgc2OLCCZxsdEgXvLWW5GXDmM/nTNF6LRpDuKx+kOX0QJhNbAK3Ex4oq+9x9U1N+7NtMnM4T9Z07uz95OBDCdIR6VLzhizVTU8vunoBBOU7cFP85lKi7H6B9Z3gzD4FTBAe1+hcVAYO6EGpxMt2R3razJXRztxqZ97zQXTyf4qmoECxrPXRFQx70TpubZ15uq4ZMswT2eSGbEhKoYrmW4RtotTiUyJcw8C9CqMvmpbI5zU= testuser1@example.com"
+          - name: "testuser2"
+            expires: 1
+            password_lock: 1
+
+scenario:
+  test_sequence:
+#    - prepare
+    - verify
