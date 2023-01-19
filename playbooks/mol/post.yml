@@ -19,6 +19,24 @@
           - --include=reports.html
           - --exclude=*
 
+    - name: Check for molecule_unit dir
+      stat:
+        path: "{{ zuul_work_dir }}/.tox/molecule_unit/log"
+      register: molecule_result
+
+    - name: Copy reports.html
+      failed_when: false
+      synchronize:
+        src: "{{ zuul_work_dir }}/.tox/molecule_unit/log/"
+        dest: '{{ zuul.executor.log_root }}/tox'
+        mode: pull
+        copy_links: true
+        verify_host: true
+        rsync_opts:
+          - --include=reports.html
+          - --exclude=*
+      when: molecule_result.stat.exists
+
     - name: Verify that successful job produced expected artifacts
       when:
         - zuul_success | bool
