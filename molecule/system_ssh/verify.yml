@@ -1,0 +1,25 @@
+---
+- hosts: instance
+  become: true
+  tasks:
+    - name: "Check password authentication is disabled"
+      command: >-
+        grep -ir '^PasswordAuthentication.*' /etc/ssh/sshd_config
+      register: password_auth
+      changed_when: password_auth.rc != 0
+
+    - name: "Verify PasswordAuthentication no set"
+      assert:
+        that:
+          - "'PasswordAuthentication no' in password_auth.stdout"
+
+    - name: "Check DenyUser for {{ default_remote_user }}"
+      command: >-
+        grep -ir "DenyUsers {{ default_remote_user }}" /etc/ssh/sshd_config
+      register: deny_user
+      changed_when: deny_user.rc != 0
+
+    - name: "Verify DenyUser"
+      assert:
+        that:
+          - "'DenyUsers {{ default_remote_user }}' in deny_user.stdout"
