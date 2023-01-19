@@ -26,7 +26,10 @@
     run: playbooks/mol/run.yml
     # custom post will make reports.html visible in zuul UI
     post-run: playbooks/mol/post.yml
-
+    required-projects:
+      - opendev.org/zuul/zuul-jobs
+    roles:
+      - zuul: opendev.org/zuul/zuul-jobs
 - job:
     name: mol-promoter
     description: Tests promoter deployment role.
@@ -138,3 +141,17 @@
       - ^tox.ini$
       - ^zuul.d/layout.yaml
       - ^playbooks/mol/.*
+
+- job:
+    name: mol-unit_molecule_test
+    parent: mol
+    vars:
+      tox_envlist: molecule_unit
+      mol_scenario: ""
+    files:
+      - .*molecule.*
+      - ^ci-scripts/infra-setup/roles/.*$
+      - ^molecule-requirements.txt
+      - ^tox.ini$
+      - ^playbooks/mol/.*
+      - ^zuul.d/layout.yaml

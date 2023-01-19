@@ -2,19 +2,37 @@
 #
 # User setup
 #
-- name: Ensure promoter user exists
-  become: true
-  user:
-    name: "{{ promoter_user }}"
-    system: true
-    create_home: true
 
-- name: Fix home directory permissions
+- name: Ensure user,group, permission
   become: true
-  become_user: "{{ promoter_user }}"
-  file:
-    path: "/home/{{ promoter_user }}"
-    mode: 0755
+  block:
+    - name: Ensure tripleo group
+      group:
+        name: tripleo
+        state: present
+
+    - name: Ensure promoter user exists
+      user:
+        name: "{{ promoter_user }}"
+        system: true
+        shell: /bin/bash
+        append: yes
+        groups: tripleo
+        create_home: true
+
+    - name: Allow tripleo group to have passwordless permission
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        line: '%tripleo ALL=(ALL) NOPASSWD: ALL'
+        validate: 'visudo -cf %s'
+
+    - name: Fix home directory permissions
+      become_user: "{{ promoter_user }}"
+      file:
+        path: "/home/{{ promoter_user }}"
+        mode: 0755
+        recurse: true
 
 #
 # Install system packages
@@ -187,6 +205,14 @@
         - "--exclude=.tox"
         # avoid spamming our logs
         - "--quiet"
+
+- name: "Make sure cloned dir owned by {{ promoter_user }}"
+  become: true
+  ansible.builtin.file:
+    path: "{{ ci_config_remote_src_dir }}"
+    owner: "{{ promoter_user }}"
+    mode: u=rwx,g=rx,o=rx
+    recurse: true
 
 #
 # Enable certs for when downstream
