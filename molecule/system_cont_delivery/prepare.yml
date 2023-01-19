@@ -1,0 +1,25 @@
+- hosts: instance
+  tasks:
+    - name: Add users and group
+      become: true
+      block:
+        - name: Add tripleo group
+          group:
+            name: tripleo
+    
+        - name: Add promoter user
+          user:
+            name: "promoter"
+            shell: /bin/bash
+            groups: tripleo
+    
+        - name: Add promoter to admins
+          lineinfile:
+            dest: /etc/sudoers
+            state: present
+            line: "promoter ALL=(ALL) NOPASSWD: ALL"
+            validate: 'visudo -cf %s'
+
+    - name: Include role configure continuous_delivery
+      include_role:
+        name: configure_continuous_delivery
