@@ -1,0 +1,27 @@
+---
+
+driver:
+  name: delegated
+
+platforms:
+  - name: instance
+    options:
+      managed: False
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      fact_caching: jsonfile
+      fact_chaching_connection: /tmp/molecule/facts
+  inventory:
+    host_vars:
+      instance:
+        promoter_user: "promoter"
+        ansible_user: "redhat"
+        default_remote_user: "centos"
+
+scenario:
+  test_sequence:
+    - prepare
+    - verify
