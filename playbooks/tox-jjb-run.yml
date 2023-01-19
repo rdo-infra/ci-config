@@ -1,6 +1,10 @@
 ---
 - hosts: all
   tasks:
+    - name: "Ensure tox"
+      include_role:
+        name: ensure-tox
+
     - name: Running tox jjb
       command: tox -e {{ toxenv | default("jjb-v2") }}
       args:
