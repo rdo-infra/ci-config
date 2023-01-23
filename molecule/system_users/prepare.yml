@@ -1,0 +1,13 @@
+---
+- hosts: instance
+  tasks:
+    - name: Add users and group
+      become: true
+      block:
+        - name: Add tripleo group
+          group:
+            name: tripleo
+
+    - name: "Run configure_users role"
+      include_role:
+        name: configure_users
