@@ -1,0 +1,10 @@
+---
+- hosts: instance
+  tasks:
+    - name: "Remove users"
+      become: true
+      ansible.builtin.user:
+        name: "{{ item.name }}"
+        state: absent
+      with_items:
+        - "{{ users }}"

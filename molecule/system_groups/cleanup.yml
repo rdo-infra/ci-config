@@ -1,0 +1,13 @@
+---
+- hosts: instance
+  tasks:
+    - name: "Remove group tripleo"
+      ansible.builtin.group:
+        name: tripleo
+        state: absent
+
+    - name: "Remove tripleo group from sudoers"
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers
+        line: '%tripleo ALL=(ALL) NOPASSWD: ALL'
+        state: absent
