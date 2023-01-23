@@ -1,0 +1,18 @@
+---
+- hosts: instance
+  become: true
+  tasks:
+    - name: "stop nginx service"
+      service:
+        name: nginx
+        state: stopped
+
+    - name: "Remove NGINX package"
+      dnf:
+        name: nginx
+        state: absent
+
+    - name: "Remove toolbox.conf file"
+      file:
+        path: "/etc/nginx/conf.d/toolbox.conf"
+        state: absent
