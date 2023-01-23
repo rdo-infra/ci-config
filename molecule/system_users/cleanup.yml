@@ -1,0 +1,17 @@
+---
+- hosts: instance
+  tasks:
+    - name: "Clean up"
+      become: true
+      block:
+        - name: "Remove users"
+          ansible.builtin.user:
+            name: "{{ item.name }}"
+            state: absent
+          with_items:
+            - "{{ users }}"
+
+        - name: "Remove group"
+          ansible.builtin.group:
+            name: "tripleo"
+            state: absent
