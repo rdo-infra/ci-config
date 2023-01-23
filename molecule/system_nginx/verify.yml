@@ -1,0 +1,40 @@
+---
+- hosts: instance
+  become: true
+  tasks:
+    - name: "Check web directory stats"
+      stat:
+        path: "/var/www/html"
+      register: web_dir_path
+
+    - name: "Verify web directory"
+      assert:
+        that:
+          - web_dir_path.stat.exists
+
+    - name: "Check if NGINX is installed"
+      package_facts:
+        manager: auto
+
+    - name: "Verify NGINX is installed"
+      assert:
+        that: "'nginx' in ansible_facts.packages"
+
+    - name: "Check if toolbox conf is created"
+      stat:
+        path: "/etc/nginx/conf.d/toolbox.conf"
+      register: toolbox_conf
+
+    - name: "Verify toolbox.conf is created"
+      assert:
+        that: toolbox_conf.stat.exists
+
+    - name: "Check if service is running"
+      service_facts:
+
+    - name: "Check if NGINX is running"
+      assert:
+        that:
+          - "'nginx.service' in ansible_facts.services"
+          - "'{{ ansible_facts.services['nginx.service']['state'] }}' == 'running'"
+          - "'{{ ansible_facts.services['nginx.service']['status'] }}' == 'enabled'"
