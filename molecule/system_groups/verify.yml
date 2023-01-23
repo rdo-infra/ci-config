@@ -1,0 +1,25 @@
+---
+- hosts: instance
+  become: true
+  tasks:
+    - name: "Check tripleo group present"
+      command: >-
+        grep -ir 'tripleo' /etc/group
+      register: check_group
+      changed_when: check_group.rc != 0
+
+    - name: "Verify tripleo group present"
+      assert:
+        that:
+          - "'tripleo' in check_group.stdout"
+
+    - name: "Check password less sudo for tripleo group"
+      command: >-
+        grep -ir "%tripleo" /etc/sudoers
+      register: passwordless_sudo
+      changed_when: passwordless_sudo.rc != 0
+
+    - name: "Verify Passwordless sudo"
+      assert:
+        that:
+          - "'%tripleo ALL=(ALL) NOPASSWD: ALL' in passwordless_sudo.stdout"
