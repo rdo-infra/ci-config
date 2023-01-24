@@ -5,8 +5,8 @@
   shell: |
     echo "cleaning up environment"
     source ~/{{ promoter_virtualenv }}/bin/activate
-    if [ -S /var/run/docker.sock ]; then
-        export DOCKER_HOST=unix:///var/run/docker.sock
+    if [ -S /var/run/podman.sock ]; then
+        export DOCKER_HOST=unix:///var/run/podman.sock
     fi
     python {{ ci_config_remote_src_dir }}/ci-scripts/dlrnapi_promoter/stage.py teardown
   args:

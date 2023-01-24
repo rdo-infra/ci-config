@@ -4,7 +4,8 @@ import os
 import shutil
 import tempfile
 
-import docker
+import podman
+from common import get_podman_client
 
 # Key for the secure registry
 domain_key = '''
@@ -66,7 +67,7 @@ class LocalRegistry(object):
         """
         self.port = port
         self.name = name
-        self.docker_client = docker.from_env()
+        self.docker_client = get_podman_client()
         self.docker_containers = self.docker_client.containers
         self.docker_images = self.docker_client.images
         self.container = None
@@ -90,7 +91,7 @@ class LocalRegistry(object):
         try:
             registry_image = self.docker_images.get(
                 self.base_image)
-        except docker.errors.ImageNotFound:
+        except podman.errors.ImageNotFound:
             self.log.info("Downloading registry image")
             registry_image = self.docker_images.pull(
                 "docker.io/{}".format(self.base_image))
@@ -105,7 +106,7 @@ class LocalRegistry(object):
         try:
             registry_image = self.docker_images.get(
                 self.base_secure_image)
-        except docker.errors.ImageNotFound:
+        except podman.errors.ImageNotFound:
             self.get_base_image()
             registry_image = self.build_secure_image()
 
@@ -150,7 +151,7 @@ class LocalRegistry(object):
         try:
             self.container = self.docker_containers.get(self.name)
             return True
-        except docker.errors.NotFound:
+        except podman.errors.NotFound:
             self.container = None
             return False
 
@@ -170,7 +171,7 @@ class LocalRegistry(object):
                 'Name': 'always',
             },
             'ports': {
-                '5000/tcp': self.port
+                '5000/tcp': self.port,
             },
         }
         if self.secure:

@@ -9,8 +9,9 @@ import os
 import shutil
 import tempfile
 
-import docker
+import podman
 import yaml
+from common import get_podman_client
 from dlrn_hash import DlrnHash
 
 # template that emulates the tripleo-common/overcloud_containers.yaml
@@ -51,7 +52,7 @@ class BaseImage(object):
         Initialize base image info
         :param build_tag: the full build tag for docker (host/image/tag)
         """
-        self.client = docker.from_env()
+        self.client = get_podman_client()
         self.build_tag = build_tag
         self.image = None
 
@@ -63,14 +64,16 @@ class BaseImage(object):
         """
         try:
             self.image = self.client.images.get(self.build_tag)
-        except docker.errors.ImageNotFound:
+        except podman.errors.ImageNotFound:
             temp_dir = tempfile.mkdtemp()
             with open(os.path.join(temp_dir, "nothing"), "w"):
                 pass
             with open(os.path.join(temp_dir, "Dockerfile"), "w") as df:
-                df.write("FROM scratch\nCOPY nothing /\n")
-            self.image, _ = self.client.images.build(path=temp_dir,
-                                                     tag=self.build_tag)
+                df.write("FROM scratch\nCOPY nothing /\nCMD /bin/bash")
+            self.image, _ = self.client.images.build(
+                path=temp_dir,
+                dockerfile=f"{temp_dir}/Dockerfile",
+                tag=self.build_tag)
             shutil.rmtree(temp_dir)
 
         return self.image
@@ -95,7 +98,7 @@ class StagingContainers(object):
         """
         self.config = config
         self.dry_run = self.config['dry_run']
-        self.docker_client = docker.from_env()
+        self.docker_client = get_podman_client()
         # Select only the stagedhash with the promotion candidate
         candidate_hash_dict = \
             self.config.dlrn['promotions']['promotion_candidate']
@@ -158,8 +161,7 @@ class StagingContainers(object):
                 self.log.debug("Not excluding container %s", excluded)
 
         for image_name in suffixes:
-            if self.config['release'] in ['queens', 'stein',
-                                          'train', 'ussuri']:
+            if self.config['release'] in ['train']:
                 target_image_name = "{}-binary-{}".format(
                     self.distro_name, image_name)
             else:
