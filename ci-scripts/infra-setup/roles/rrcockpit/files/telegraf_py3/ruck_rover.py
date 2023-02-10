@@ -36,7 +36,7 @@ MATRIX = {
     "centos-8": ["wallaby", "train"],
     "centos-9": ["master", "zed", "wallaby"],
     "rhel-8": ["osp17-1", "osp16-2"],
-    "rhel-9": ["osp17", "osp17-1"]
+    "rhel-9": ["osp17", "osp17-1", "osp18"]
 }
 REVERSED_MATRIX = {}
 for key, values in MATRIX.items():
@@ -968,7 +968,7 @@ def main(release, distro, config_file, promotion_name, aggregate_hash,
         logging.basicConfig(format=fmt, encoding='utf-8', level=logging.DEBUG)
 
     stream = 'upstream'
-    if release in ('osp16-2', 'osp17', 'osp17-1'):
+    if release in ('osp16-2', 'osp17', 'osp17-1', 'osp18'):
         stream = 'downstream'
         if config_file != os.path.dirname(__file__) + '/conf_ruck_rover.yaml':
             print('using custom config file: {}'.format(config_file))
