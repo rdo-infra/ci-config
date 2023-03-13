@@ -384,7 +384,8 @@ def get_job_history(jobs, url):
             'job_name': jobs,
             'limit': ZUUL_JOBS_LIMIT,
         },
-        headers={'Accept': 'application/json'}
+        headers={'Accept': 'application/json'},
+        verify=CERT_PATH
     )
     logging.debug(response.url)
 
