@@ -15,6 +15,7 @@
         - python-devel
         - python-pip
         - vim
+        - yum-utils
       state: present
 
   - name: Install ansible packages
@@ -22,3 +23,8 @@
       name:
         - ansible
       state: present
+
+  - name: Install influxdb repository to get telegraf
+    template:
+      src: influxdb.repo.j2
+      dest: /etc/yum.repos.d/influxdb.repo
