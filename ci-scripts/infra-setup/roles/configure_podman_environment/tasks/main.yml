@@ -12,6 +12,13 @@
     name: podman
     state: started
 
+- name: Symlink between podman and docker to simplify usage
+  become: yes
+  ansible.builtin.file:
+    src: "/run/podman/podman.sock"
+    dest: "/var/run/docker.sock"
+    state: link
+
 - name: Verify the service running
   become: yes
   ansible.builtin.uri:
@@ -20,6 +27,13 @@
       Content-Type: "application/json"
     unix_socket: "/var/run/docker.sock"
     return_content: yes
+
+- name: Install docker script
+  become: yes
+  ansible.builtin.template:
+    src: "docker.j2"
+    dest: "/usr/bin/docker"
+    mode: "0755"
 
 - name: Emulate Docker CLI using podman. Quiet the msg.
   become: yes
