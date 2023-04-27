@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a7d6053e_5f981238",
+        "filename": "ci-scripts/infra-setup/roles/configure_promoter/templates/dlrn-promoter.conf.j2",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2023-04-27T14:38:44Z",
+      "side": 1,
+      "message": "It\u0027s a copy-paste from [1].\nI did not explore implications of that yet. I might need to verify that in a future.\n\n[1]: https://github.com/rdo-infra/ci-config/blob/master/ci-scripts/infra-setup/roles/promoter/files/dlrn-promoter.telegraf.conf#L2",
+      "parentUuid": "ff5df375_e89f57bf",
+      "range": {
+        "startLine": 2,
+        "startChar": 53,
+        "endLine": 2,
+        "endChar": 54
+      },
+      "revId": "2a47b59b55353858140ce7711d445732cd5ff9cc",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "eba0b3f3_99fa1152",
         "filename": "ci-scripts/infra-setup/roles/configure_promoter/templates/promoter_logrotate.j2",
         "patchSetId": 2
@@ -37,6 +61,24 @@
       "writtenOn": "2023-04-27T06:40:08Z",
       "side": 1,
       "message": "https://github.com/rdo-infra/ci-config/blob/3f6a7920d25c97a28f59d0caffc52daf6cabfe91/ci-scripts/infra-setup/roles/promoter/tasks/main.yml#L94-L100\n\ncompared to original this skips the su option\n\n           su {{ promoter_user }} {{ promoter_user }}\n\ni had to go find that in the man page. Anyway, it defaults to \"default user/group (usually root).\" do we need to explicitly set the promoter_user?\n\n(man page)\nsu user group\n              Rotate log files set under this user and group instead of using default user/group (usually root).  user specifies the user used for rotation and group specifies the group  used  for  rotation",
+      "revId": "2a47b59b55353858140ce7711d445732cd5ff9cc",
+      "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fe0b4fbe_b2888bf3",
+        "filename": "ci-scripts/infra-setup/roles/configure_promoter/templates/promoter_logrotate.j2",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 756
+      },
+      "writtenOn": "2023-04-27T14:38:44Z",
+      "side": 1,
+      "message": "Yes. I\u0027m deliberately removing dependency on creating \"promoter_user\".\nIt allows to ditch custom SELinux policies (dropping logs to ~/web/promoter_logs), relying on default settings for docker, like root user.",
+      "parentUuid": "eba0b3f3_99fa1152",
       "revId": "2a47b59b55353858140ce7711d445732cd5ff9cc",
       "serverId": "270e2033-b340-4cff-9539-693957ebf0e7"
     }
