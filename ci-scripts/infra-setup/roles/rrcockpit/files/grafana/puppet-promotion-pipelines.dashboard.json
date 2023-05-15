@@ -1,1481 +1,1654 @@
 {
-  "annotations": {
-    "list": [
-      {
-        "builtIn": 1,
-        "datasource": {
-          "type": "datasource",
-          "uid": "grafana"
-        },
-        "enable": true,
-        "hide": true,
-        "iconColor": "rgba(0, 211, 255, 1)",
-        "name": "Annotations & Alerts",
-        "target": {
-          "limit": 100,
-          "matchAny": false,
-          "tags": [],
-          "type": "dashboard"
-        },
-        "type": "dashboard"
-      }
-    ]
-  },
-  "description": "This dashboard shows status of Master, Zed, Yoga, Xena, Wallaby puppet promotion pipelines",
-  "editable": true,
-  "fiscalYearStartMonth": 0,
-  "graphTooltip": 0,
-  "id": 21,
-  "links": [],
-  "liveNow": false,
-  "panels": [
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "6-61eLD4z"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "displayMode": "auto",
-            "filterable": true,
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              },
-              {
-                "color": "#EAB839",
-                "value": 90
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 100
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "result"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "FAILURE": {
-                        "color": "dark-red",
-                        "index": 0
-                      },
-                      "SUCCESS": {
-                        "color": "dark-green",
-                        "index": 1
-                      }
+    "dashboard":{
+        "annotations":{
+            "list":[
+                {
+                    "builtIn":1,
+                    "datasource":{
+                        "type":"datasource",
+                        "uid":"grafana"
                     },
-                    "type": "value"
-                  }
-                ]
-              },
-              {
-                "id": "custom.width",
-                "value": 106
-              },
-              {
-                "id": "custom.displayMode",
-                "value": "color-background-solid"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "duration"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "dtdurations"
-              },
-              {
-                "id": "custom.width",
-                "value": 128
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Time"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 167
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 322
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "job_name"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 481
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "id": 2,
-      "options": {
-        "footer": {
-          "enablePagination": true,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "frameIndex": 0,
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Time"
-          }
-        ]
-      },
-      "pluginVersion": "9.1.5",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "6-61eLD4z"
-          },
-          "query": "SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-antelope-promote-*/) AND $timeFilter",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "table"
-        }
-      ],
-      "title": "Promotions Antelope",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [],
-            "fields": {}
-          }
-        }
-      ],
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "6-61eLD4z"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "displayMode": "auto",
-            "filterable": true,
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              },
-              {
-                "color": "#EAB839",
-                "value": 90
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 100
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "result"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "FAILURE": {
-                        "color": "dark-red",
-                        "index": 0
-                      },
-                      "SUCCESS": {
-                        "color": "dark-green",
-                        "index": 1
-                      }
+                    "enable":true,
+                    "hide":true,
+                    "iconColor":"rgba(0, 211, 255, 1)",
+                    "name":"Annotations & Alerts",
+                    "target":{
+                        "limit":100,
+                        "matchAny":false,
+                        "tags":[],
+                        "type":"dashboard"
                     },
-                    "type": "value"
-                  }
-                ]
-              },
-              {
-                "id": "custom.width",
-                "value": 106
-              },
-              {
-                "id": "custom.displayMode",
-                "value": "color-background-solid"
-              }
+                    "type":"dashboard"
+                }
             ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "duration"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "dtdurations"
-              },
-              {
-                "id": "custom.width",
-                "value": 128
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Time"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 167
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 323
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "job_name"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 481
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 24,
-        "x": 0,
-        "y": 12
-      },
-      "id": 10,
-      "options": {
-        "footer": {
-          "enablePagination": true,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
         },
-        "frameIndex": 0,
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Time"
-          }
-        ]
-      },
-      "pluginVersion": "9.1.5",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "6-61eLD4z"
-          },
-          "query": "SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-zed-promote-*/) AND $timeFilter ",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "table"
-        }
-      ],
-      "title": "Promotions Zed",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [],
-            "fields": {}
-          }
-        }
-      ],
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "6-61eLD4z"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "displayMode": "auto",
-            "filterable": true,
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              },
-              {
-                "color": "#EAB839",
-                "value": 90
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 100
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "result"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "FAILURE": {
-                        "color": "dark-red",
-                        "index": 0
-                      },
-                      "SUCCESS": {
-                        "color": "dark-green",
-                        "index": 1
-                      }
+        "description":"This dashboard shows status of Master, Zed, Yoga, Xena, Wallaby puppet promotion pipelines",
+        "editable":true,
+        "fiscalYearStartMonth":0,
+        "graphTooltip":0,
+        "links":[],
+        "liveNow":false,
+        "panels":[
+            {
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
+                "description":"",
+                "fieldConfig":{
+                    "defaults":{
+                        "color":{
+                            "mode":"thresholds"
+                        },
+                        "custom":{
+                            "align":"left",
+                            "displayMode":"auto",
+                            "filterable":true,
+                            "inspect":false
+                        },
+                        "mappings":[],
+                        "thresholds":{
+                            "mode":"absolute",
+                            "steps":[
+                                {
+                                    "color":"green",
+                                    "value":null
+                                },
+                                {
+                                    "color":"red",
+                                    "value":80
+                                },
+                                {
+                                    "color":"#EAB839",
+                                    "value":90
+                                },
+                                {
+                                    "color":"#6ED0E0",
+                                    "value":100
+                                }
+                            ]
+                        }
                     },
-                    "type": "value"
-                  }
-                ]
-              },
-              {
-                "id": "custom.width",
-                "value": 106
-              },
-              {
-                "id": "custom.displayMode",
-                "value": "color-background-solid"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "duration"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "dtdurations"
-              },
-              {
-                "id": "custom.width",
-                "value": 128
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Time"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 167
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 323
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "job_name"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 481
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 24,
-        "x": 0,
-        "y": 24
-      },
-      "id": 11,
-      "options": {
-        "footer": {
-          "enablePagination": true,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "frameIndex": 0,
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Time"
-          }
-        ]
-      },
-      "pluginVersion": "9.1.5",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "6-61eLD4z"
-          },
-          "query": "SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-yoga-promote-*/ AND \"job_name\" =~ /stream-9/ ) AND $timeFilter ",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "table"
-        }
-      ],
-      "title": "Promotions Yoga CS9",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [],
-            "fields": {}
-          }
-        }
-      ],
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "6-61eLD4z"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "displayMode": "auto",
-            "filterable": true,
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              },
-              {
-                "color": "#EAB839",
-                "value": 90
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 100
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "result"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "FAILURE": {
-                        "color": "dark-red",
-                        "index": 0
-                      },
-                      "SUCCESS": {
-                        "color": "dark-green",
-                        "index": 1
-                      }
+                    "overrides":[
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"result"
+                            },
+                            "properties":[
+                                {
+                                    "id":"mappings",
+                                    "value":[
+                                        {
+                                            "options":{
+                                                "FAILURE":{
+                                                    "color":"dark-red",
+                                                    "index":0
+                                                },
+                                                "SUCCESS":{
+                                                    "color":"dark-green",
+                                                    "index":1
+                                                }
+                                            },
+                                            "type":"value"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":106
+                                },
+                                {
+                                    "id":"custom.displayMode",
+                                    "value":"color-background-solid"
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"duration"
+                            },
+                            "properties":[
+                                {
+                                    "id":"unit",
+                                    "value":"dtdurations"
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":128
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"Time"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":167
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"pipeline"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":322
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"job_name"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":481
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "gridPos":{
+                    "h":12,
+                    "w":24,
+                    "x":0,
+                    "y":0
+                },
+                "id":2,
+                "options":{
+                    "footer":{
+                        "enablePagination":true,
+                        "fields":"",
+                        "reducer":[
+                            "sum"
+                        ],
+                        "show":false
                     },
-                    "type": "value"
-                  }
-                ]
-              },
-              {
-                "id": "custom.width",
-                "value": 106
-              },
-              {
-                "id": "custom.displayMode",
-                "value": "color-background-solid"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "duration"
+                    "frameIndex":0,
+                    "showHeader":true,
+                    "sortBy":[
+                        {
+                            "desc":true,
+                            "displayName":"Time"
+                        }
+                    ]
+                },
+                "pluginVersion":"9.1.5",
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "query":"SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-bobcat-promote-*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table"
+                    }
+                ],
+                "title":"Promotions Bobcat",
+                "transformations":[
+                    {
+                        "id":"convertFieldType",
+                        "options":{
+                            "conversions":[],
+                            "fields":{}
+                        }
+                    }
+                ],
+                "type":"table"
             },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "dtdurations"
-              },
-              {
-                "id": "custom.width",
-                "value": 128
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Time"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 167
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 323
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "job_name"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 481
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 24,
-        "x": 0,
-        "y": 36
-      },
-      "id": 12,
-      "options": {
-        "footer": {
-          "enablePagination": true,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "frameIndex": 0,
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Time"
-          }
-        ]
-      },
-      "pluginVersion": "9.1.5",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "6-61eLD4z"
-          },
-          "query": "SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-yoga-promote-*/ AND \"job_name\" =~ /stream-8/ ) AND $timeFilter ",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "table"
-        }
-      ],
-      "title": "Promotions Yoga CS8",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [],
-            "fields": {}
-          }
-        }
-      ],
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "6-61eLD4z"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "displayMode": "auto",
-            "filterable": true,
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              },
-              {
-                "color": "#EAB839",
-                "value": 90
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 100
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "result"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "FAILURE": {
-                        "color": "dark-red",
-                        "index": 0
-                      },
-                      "SUCCESS": {
-                        "color": "dark-green",
-                        "index": 1
-                      }
+            {
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
+                "description":"",
+                "fieldConfig":{
+                    "defaults":{
+                        "color":{
+                            "mode":"thresholds"
+                        },
+                        "custom":{
+                            "align":"left",
+                            "displayMode":"auto",
+                            "filterable":true,
+                            "inspect":false
+                        },
+                        "mappings":[],
+                        "thresholds":{
+                            "mode":"absolute",
+                            "steps":[
+                                {
+                                    "color":"green",
+                                    "value":null
+                                },
+                                {
+                                    "color":"red",
+                                    "value":80
+                                },
+                                {
+                                    "color":"#EAB839",
+                                    "value":90
+                                },
+                                {
+                                    "color":"#6ED0E0",
+                                    "value":100
+                                }
+                            ]
+                        }
                     },
-                    "type": "value"
-                  }
-                ]
-              },
-              {
-                "id": "custom.width",
-                "value": 106
-              },
-              {
-                "id": "custom.displayMode",
-                "value": "color-background-solid"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "duration"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "dtdurations"
-              },
-              {
-                "id": "custom.width",
-                "value": 128
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Time"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 167
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 323
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "job_name"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 481
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 24,
-        "x": 0,
-        "y": 48
-      },
-      "id": 13,
-      "options": {
-        "footer": {
-          "enablePagination": true,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "frameIndex": 0,
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Time"
-          }
-        ]
-      },
-      "pluginVersion": "9.1.5",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "6-61eLD4z"
-          },
-          "query": "SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-xena-promote-*/ AND \"job_name\" =~ /stream-9/ ) AND $timeFilter ",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "table"
-        }
-      ],
-      "title": "Promotions Xena CS9",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [],
-            "fields": {}
-          }
-        }
-      ],
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "6-61eLD4z"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "displayMode": "auto",
-            "filterable": true,
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              },
-              {
-                "color": "#EAB839",
-                "value": 90
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 100
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "result"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "FAILURE": {
-                        "color": "dark-red",
-                        "index": 0
-                      },
-                      "SUCCESS": {
-                        "color": "dark-green",
-                        "index": 1
-                      }
+                    "overrides":[
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"result"
+                            },
+                            "properties":[
+                                {
+                                    "id":"mappings",
+                                    "value":[
+                                        {
+                                            "options":{
+                                                "FAILURE":{
+                                                    "color":"dark-red",
+                                                    "index":0
+                                                },
+                                                "SUCCESS":{
+                                                    "color":"dark-green",
+                                                    "index":1
+                                                }
+                                            },
+                                            "type":"value"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":106
+                                },
+                                {
+                                    "id":"custom.displayMode",
+                                    "value":"color-background-solid"
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"duration"
+                            },
+                            "properties":[
+                                {
+                                    "id":"unit",
+                                    "value":"dtdurations"
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":128
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"Time"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":167
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"pipeline"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":322
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"job_name"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":481
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "gridPos":{
+                    "h":12,
+                    "w":24,
+                    "x":0,
+                    "y":12
+                },
+                "id":17,
+                "options":{
+                    "footer":{
+                        "enablePagination":true,
+                        "fields":"",
+                        "reducer":[
+                            "sum"
+                        ],
+                        "show":false
                     },
-                    "type": "value"
-                  }
-                ]
-              },
-              {
-                "id": "custom.width",
-                "value": 106
-              },
-              {
-                "id": "custom.displayMode",
-                "value": "color-background-solid"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "duration"
+                    "frameIndex":0,
+                    "showHeader":true,
+                    "sortBy":[
+                        {
+                            "desc":true,
+                            "displayName":"Time"
+                        }
+                    ]
+                },
+                "pluginVersion":"9.1.5",
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "query":"SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-antelope-promote-*/) AND $timeFilter",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table"
+                    }
+                ],
+                "title":"Promotions Antelope",
+                "transformations":[
+                    {
+                        "id":"convertFieldType",
+                        "options":{
+                            "conversions":[],
+                            "fields":{}
+                        }
+                    }
+                ],
+                "type":"table"
             },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "dtdurations"
-              },
-              {
-                "id": "custom.width",
-                "value": 128
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Time"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 167
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 323
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "job_name"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 481
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 24,
-        "x": 0,
-        "y": 60
-      },
-      "id": 14,
-      "options": {
-        "footer": {
-          "enablePagination": true,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "frameIndex": 0,
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Time"
-          }
-        ]
-      },
-      "pluginVersion": "9.1.5",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "6-61eLD4z"
-          },
-          "query": "SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-xena-promote-*/ AND \"job_name\" =~ /stream-8/ ) AND $timeFilter ",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "table"
-        }
-      ],
-      "title": "Promotions Xena CS8",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [],
-            "fields": {}
-          }
-        }
-      ],
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "6-61eLD4z"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "displayMode": "auto",
-            "filterable": true,
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              },
-              {
-                "color": "#EAB839",
-                "value": 90
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 100
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "result"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "FAILURE": {
-                        "color": "dark-red",
-                        "index": 0
-                      },
-                      "SUCCESS": {
-                        "color": "dark-green",
-                        "index": 1
-                      }
+            {
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
+                "description":"",
+                "fieldConfig":{
+                    "defaults":{
+                        "color":{
+                            "mode":"thresholds"
+                        },
+                        "custom":{
+                            "align":"left",
+                            "displayMode":"auto",
+                            "filterable":true,
+                            "inspect":false
+                        },
+                        "mappings":[],
+                        "thresholds":{
+                            "mode":"absolute",
+                            "steps":[
+                                {
+                                    "color":"green",
+                                    "value":null
+                                },
+                                {
+                                    "color":"red",
+                                    "value":80
+                                },
+                                {
+                                    "color":"#EAB839",
+                                    "value":90
+                                },
+                                {
+                                    "color":"#6ED0E0",
+                                    "value":100
+                                }
+                            ]
+                        }
                     },
-                    "type": "value"
-                  }
-                ]
-              },
-              {
-                "id": "custom.width",
-                "value": 106
-              },
-              {
-                "id": "custom.displayMode",
-                "value": "color-background-solid"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "duration"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "dtdurations"
-              },
-              {
-                "id": "custom.width",
-                "value": 128
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Time"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 167
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 323
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "job_name"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 481
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 24,
-        "x": 0,
-        "y": 72
-      },
-      "id": 15,
-      "options": {
-        "footer": {
-          "enablePagination": true,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "frameIndex": 0,
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Time"
-          }
-        ]
-      },
-      "pluginVersion": "9.1.5",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "6-61eLD4z"
-          },
-          "query": "SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-wallaby-promote-*/ AND \"job_name\" =~ /stream-9/ ) AND $timeFilter ",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "table"
-        }
-      ],
-      "title": "Promotions Wallaby CS9",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [],
-            "fields": {}
-          }
-        }
-      ],
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "influxdb",
-        "uid": "6-61eLD4z"
-      },
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "left",
-            "displayMode": "auto",
-            "filterable": true,
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              },
-              {
-                "color": "#EAB839",
-                "value": 90
-              },
-              {
-                "color": "#6ED0E0",
-                "value": 100
-              }
-            ]
-          }
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "result"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "FAILURE": {
-                        "color": "dark-red",
-                        "index": 0
-                      },
-                      "SUCCESS": {
-                        "color": "dark-green",
-                        "index": 1
-                      }
+                    "overrides":[
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"result"
+                            },
+                            "properties":[
+                                {
+                                    "id":"mappings",
+                                    "value":[
+                                        {
+                                            "options":{
+                                                "FAILURE":{
+                                                    "color":"dark-red",
+                                                    "index":0
+                                                },
+                                                "SUCCESS":{
+                                                    "color":"dark-green",
+                                                    "index":1
+                                                }
+                                            },
+                                            "type":"value"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":106
+                                },
+                                {
+                                    "id":"custom.displayMode",
+                                    "value":"color-background-solid"
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"duration"
+                            },
+                            "properties":[
+                                {
+                                    "id":"unit",
+                                    "value":"dtdurations"
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":128
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"Time"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":167
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"pipeline"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":323
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"job_name"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":481
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "gridPos":{
+                    "h":12,
+                    "w":24,
+                    "x":0,
+                    "y":24
+                },
+                "id":10,
+                "options":{
+                    "footer":{
+                        "enablePagination":true,
+                        "fields":"",
+                        "reducer":[
+                            "sum"
+                        ],
+                        "show":false
                     },
-                    "type": "value"
-                  }
-                ]
-              },
-              {
-                "id": "custom.width",
-                "value": 106
-              },
-              {
-                "id": "custom.displayMode",
-                "value": "color-background-solid"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "duration"
+                    "frameIndex":0,
+                    "showHeader":true,
+                    "sortBy":[
+                        {
+                            "desc":true,
+                            "displayName":"Time"
+                        }
+                    ]
+                },
+                "pluginVersion":"9.1.5",
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "query":"SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-zed-promote-*/) AND $timeFilter ",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table"
+                    }
+                ],
+                "title":"Promotions Zed",
+                "transformations":[
+                    {
+                        "id":"convertFieldType",
+                        "options":{
+                            "conversions":[],
+                            "fields":{}
+                        }
+                    }
+                ],
+                "type":"table"
             },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "dtdurations"
-              },
-              {
-                "id": "custom.width",
-                "value": 128
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Time"
+            {
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
+                "description":"",
+                "fieldConfig":{
+                    "defaults":{
+                        "color":{
+                            "mode":"thresholds"
+                        },
+                        "custom":{
+                            "align":"left",
+                            "displayMode":"auto",
+                            "filterable":true,
+                            "inspect":false
+                        },
+                        "mappings":[],
+                        "thresholds":{
+                            "mode":"absolute",
+                            "steps":[
+                                {
+                                    "color":"green"
+                                },
+                                {
+                                    "color":"red",
+                                    "value":80
+                                },
+                                {
+                                    "color":"#EAB839",
+                                    "value":90
+                                },
+                                {
+                                    "color":"#6ED0E0",
+                                    "value":100
+                                }
+                            ]
+                        }
+                    },
+                    "overrides":[
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"result"
+                            },
+                            "properties":[
+                                {
+                                    "id":"mappings",
+                                    "value":[
+                                        {
+                                            "options":{
+                                                "FAILURE":{
+                                                    "color":"dark-red",
+                                                    "index":0
+                                                },
+                                                "SUCCESS":{
+                                                    "color":"dark-green",
+                                                    "index":1
+                                                }
+                                            },
+                                            "type":"value"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":106
+                                },
+                                {
+                                    "id":"custom.displayMode",
+                                    "value":"color-background-solid"
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"duration"
+                            },
+                            "properties":[
+                                {
+                                    "id":"unit",
+                                    "value":"dtdurations"
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":128
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"Time"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":167
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"pipeline"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":323
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"job_name"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":481
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "gridPos":{
+                    "h":12,
+                    "w":24,
+                    "x":0,
+                    "y":36
+                },
+                "id":11,
+                "options":{
+                    "footer":{
+                        "enablePagination":true,
+                        "fields":"",
+                        "reducer":[
+                            "sum"
+                        ],
+                        "show":false
+                    },
+                    "frameIndex":0,
+                    "showHeader":true,
+                    "sortBy":[
+                        {
+                            "desc":true,
+                            "displayName":"Time"
+                        }
+                    ]
+                },
+                "pluginVersion":"9.1.5",
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "query":"SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-yoga-promote-*/ AND \"job_name\" =~ /stream-9/ ) AND $timeFilter ",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table"
+                    }
+                ],
+                "title":"Promotions Yoga CS9",
+                "transformations":[
+                    {
+                        "id":"convertFieldType",
+                        "options":{
+                            "conversions":[],
+                            "fields":{}
+                        }
+                    }
+                ],
+                "type":"table"
             },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 167
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "pipeline"
+            {
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
+                "description":"",
+                "fieldConfig":{
+                    "defaults":{
+                        "color":{
+                            "mode":"thresholds"
+                        },
+                        "custom":{
+                            "align":"left",
+                            "displayMode":"auto",
+                            "filterable":true,
+                            "inspect":false
+                        },
+                        "mappings":[],
+                        "thresholds":{
+                            "mode":"absolute",
+                            "steps":[
+                                {
+                                    "color":"green"
+                                },
+                                {
+                                    "color":"red",
+                                    "value":80
+                                },
+                                {
+                                    "color":"#EAB839",
+                                    "value":90
+                                },
+                                {
+                                    "color":"#6ED0E0",
+                                    "value":100
+                                }
+                            ]
+                        }
+                    },
+                    "overrides":[
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"result"
+                            },
+                            "properties":[
+                                {
+                                    "id":"mappings",
+                                    "value":[
+                                        {
+                                            "options":{
+                                                "FAILURE":{
+                                                    "color":"dark-red",
+                                                    "index":0
+                                                },
+                                                "SUCCESS":{
+                                                    "color":"dark-green",
+                                                    "index":1
+                                                }
+                                            },
+                                            "type":"value"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":106
+                                },
+                                {
+                                    "id":"custom.displayMode",
+                                    "value":"color-background-solid"
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"duration"
+                            },
+                            "properties":[
+                                {
+                                    "id":"unit",
+                                    "value":"dtdurations"
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":128
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"Time"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":167
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"pipeline"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":323
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"job_name"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":481
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "gridPos":{
+                    "h":12,
+                    "w":24,
+                    "x":0,
+                    "y":48
+                },
+                "id":12,
+                "options":{
+                    "footer":{
+                        "enablePagination":true,
+                        "fields":"",
+                        "reducer":[
+                            "sum"
+                        ],
+                        "show":false
+                    },
+                    "frameIndex":0,
+                    "showHeader":true,
+                    "sortBy":[
+                        {
+                            "desc":true,
+                            "displayName":"Time"
+                        }
+                    ]
+                },
+                "pluginVersion":"9.1.5",
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "query":"SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-yoga-promote-*/ AND \"job_name\" =~ /stream-8/ ) AND $timeFilter ",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table"
+                    }
+                ],
+                "title":"Promotions Yoga CS8",
+                "transformations":[
+                    {
+                        "id":"convertFieldType",
+                        "options":{
+                            "conversions":[],
+                            "fields":{}
+                        }
+                    }
+                ],
+                "type":"table"
             },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 323
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "job_name"
+            {
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
+                "description":"",
+                "fieldConfig":{
+                    "defaults":{
+                        "color":{
+                            "mode":"thresholds"
+                        },
+                        "custom":{
+                            "align":"left",
+                            "displayMode":"auto",
+                            "filterable":true,
+                            "inspect":false
+                        },
+                        "mappings":[],
+                        "thresholds":{
+                            "mode":"absolute",
+                            "steps":[
+                                {
+                                    "color":"green"
+                                },
+                                {
+                                    "color":"red",
+                                    "value":80
+                                },
+                                {
+                                    "color":"#EAB839",
+                                    "value":90
+                                },
+                                {
+                                    "color":"#6ED0E0",
+                                    "value":100
+                                }
+                            ]
+                        }
+                    },
+                    "overrides":[
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"result"
+                            },
+                            "properties":[
+                                {
+                                    "id":"mappings",
+                                    "value":[
+                                        {
+                                            "options":{
+                                                "FAILURE":{
+                                                    "color":"dark-red",
+                                                    "index":0
+                                                },
+                                                "SUCCESS":{
+                                                    "color":"dark-green",
+                                                    "index":1
+                                                }
+                                            },
+                                            "type":"value"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":106
+                                },
+                                {
+                                    "id":"custom.displayMode",
+                                    "value":"color-background-solid"
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"duration"
+                            },
+                            "properties":[
+                                {
+                                    "id":"unit",
+                                    "value":"dtdurations"
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":128
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"Time"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":167
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"pipeline"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":323
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"job_name"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":481
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "gridPos":{
+                    "h":12,
+                    "w":24,
+                    "x":0,
+                    "y":60
+                },
+                "id":13,
+                "options":{
+                    "footer":{
+                        "enablePagination":true,
+                        "fields":"",
+                        "reducer":[
+                            "sum"
+                        ],
+                        "show":false
+                    },
+                    "frameIndex":0,
+                    "showHeader":true,
+                    "sortBy":[
+                        {
+                            "desc":true,
+                            "displayName":"Time"
+                        }
+                    ]
+                },
+                "pluginVersion":"9.1.5",
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "query":"SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-xena-promote-*/ AND \"job_name\" =~ /stream-9/ ) AND $timeFilter ",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table"
+                    }
+                ],
+                "title":"Promotions Xena CS9",
+                "transformations":[
+                    {
+                        "id":"convertFieldType",
+                        "options":{
+                            "conversions":[],
+                            "fields":{}
+                        }
+                    }
+                ],
+                "type":"table"
             },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 481
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 24,
-        "x": 0,
-        "y": 84
-      },
-      "id": 16,
-      "options": {
-        "footer": {
-          "enablePagination": true,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
+            {
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
+                "description":"",
+                "fieldConfig":{
+                    "defaults":{
+                        "color":{
+                            "mode":"thresholds"
+                        },
+                        "custom":{
+                            "align":"left",
+                            "displayMode":"auto",
+                            "filterable":true,
+                            "inspect":false
+                        },
+                        "mappings":[],
+                        "thresholds":{
+                            "mode":"absolute",
+                            "steps":[
+                                {
+                                    "color":"green"
+                                },
+                                {
+                                    "color":"red",
+                                    "value":80
+                                },
+                                {
+                                    "color":"#EAB839",
+                                    "value":90
+                                },
+                                {
+                                    "color":"#6ED0E0",
+                                    "value":100
+                                }
+                            ]
+                        }
+                    },
+                    "overrides":[
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"result"
+                            },
+                            "properties":[
+                                {
+                                    "id":"mappings",
+                                    "value":[
+                                        {
+                                            "options":{
+                                                "FAILURE":{
+                                                    "color":"dark-red",
+                                                    "index":0
+                                                },
+                                                "SUCCESS":{
+                                                    "color":"dark-green",
+                                                    "index":1
+                                                }
+                                            },
+                                            "type":"value"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":106
+                                },
+                                {
+                                    "id":"custom.displayMode",
+                                    "value":"color-background-solid"
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"duration"
+                            },
+                            "properties":[
+                                {
+                                    "id":"unit",
+                                    "value":"dtdurations"
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":128
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"Time"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":167
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"pipeline"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":323
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"job_name"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":481
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "gridPos":{
+                    "h":12,
+                    "w":24,
+                    "x":0,
+                    "y":72
+                },
+                "id":14,
+                "options":{
+                    "footer":{
+                        "enablePagination":true,
+                        "fields":"",
+                        "reducer":[
+                            "sum"
+                        ],
+                        "show":false
+                    },
+                    "frameIndex":0,
+                    "showHeader":true,
+                    "sortBy":[
+                        {
+                            "desc":true,
+                            "displayName":"Time"
+                        }
+                    ]
+                },
+                "pluginVersion":"9.1.5",
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "query":"SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-xena-promote-*/ AND \"job_name\" =~ /stream-8/ ) AND $timeFilter ",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table"
+                    }
+                ],
+                "title":"Promotions Xena CS8",
+                "transformations":[
+                    {
+                        "id":"convertFieldType",
+                        "options":{
+                            "conversions":[],
+                            "fields":{}
+                        }
+                    }
+                ],
+                "type":"table"
+            },
+            {
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
+                "description":"",
+                "fieldConfig":{
+                    "defaults":{
+                        "color":{
+                            "mode":"thresholds"
+                        },
+                        "custom":{
+                            "align":"left",
+                            "displayMode":"auto",
+                            "filterable":true,
+                            "inspect":false
+                        },
+                        "mappings":[],
+                        "thresholds":{
+                            "mode":"absolute",
+                            "steps":[
+                                {
+                                    "color":"green"
+                                },
+                                {
+                                    "color":"red",
+                                    "value":80
+                                },
+                                {
+                                    "color":"#EAB839",
+                                    "value":90
+                                },
+                                {
+                                    "color":"#6ED0E0",
+                                    "value":100
+                                }
+                            ]
+                        }
+                    },
+                    "overrides":[
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"result"
+                            },
+                            "properties":[
+                                {
+                                    "id":"mappings",
+                                    "value":[
+                                        {
+                                            "options":{
+                                                "FAILURE":{
+                                                    "color":"dark-red",
+                                                    "index":0
+                                                },
+                                                "SUCCESS":{
+                                                    "color":"dark-green",
+                                                    "index":1
+                                                }
+                                            },
+                                            "type":"value"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":106
+                                },
+                                {
+                                    "id":"custom.displayMode",
+                                    "value":"color-background-solid"
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"duration"
+                            },
+                            "properties":[
+                                {
+                                    "id":"unit",
+                                    "value":"dtdurations"
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":128
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"Time"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":167
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"pipeline"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":323
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"job_name"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":481
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "gridPos":{
+                    "h":12,
+                    "w":24,
+                    "x":0,
+                    "y":84
+                },
+                "id":15,
+                "options":{
+                    "footer":{
+                        "enablePagination":true,
+                        "fields":"",
+                        "reducer":[
+                            "sum"
+                        ],
+                        "show":false
+                    },
+                    "frameIndex":0,
+                    "showHeader":true,
+                    "sortBy":[
+                        {
+                            "desc":true,
+                            "displayName":"Time"
+                        }
+                    ]
+                },
+                "pluginVersion":"9.1.5",
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "query":"SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-wallaby-promote-*/ AND \"job_name\" =~ /stream-9/ ) AND $timeFilter ",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table"
+                    }
+                ],
+                "title":"Promotions Wallaby CS9",
+                "transformations":[
+                    {
+                        "id":"convertFieldType",
+                        "options":{
+                            "conversions":[],
+                            "fields":{}
+                        }
+                    }
+                ],
+                "type":"table"
+            },
+            {
+                "datasource":{
+                    "type":"influxdb",
+                    "uid":"6-61eLD4z"
+                },
+                "description":"",
+                "fieldConfig":{
+                    "defaults":{
+                        "color":{
+                            "mode":"thresholds"
+                        },
+                        "custom":{
+                            "align":"left",
+                            "displayMode":"auto",
+                            "filterable":true,
+                            "inspect":false
+                        },
+                        "mappings":[],
+                        "thresholds":{
+                            "mode":"absolute",
+                            "steps":[
+                                {
+                                    "color":"green"
+                                },
+                                {
+                                    "color":"red",
+                                    "value":80
+                                },
+                                {
+                                    "color":"#EAB839",
+                                    "value":90
+                                },
+                                {
+                                    "color":"#6ED0E0",
+                                    "value":100
+                                }
+                            ]
+                        }
+                    },
+                    "overrides":[
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"result"
+                            },
+                            "properties":[
+                                {
+                                    "id":"mappings",
+                                    "value":[
+                                        {
+                                            "options":{
+                                                "FAILURE":{
+                                                    "color":"dark-red",
+                                                    "index":0
+                                                },
+                                                "SUCCESS":{
+                                                    "color":"dark-green",
+                                                    "index":1
+                                                }
+                                            },
+                                            "type":"value"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":106
+                                },
+                                {
+                                    "id":"custom.displayMode",
+                                    "value":"color-background-solid"
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"duration"
+                            },
+                            "properties":[
+                                {
+                                    "id":"unit",
+                                    "value":"dtdurations"
+                                },
+                                {
+                                    "id":"custom.width",
+                                    "value":128
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"Time"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":167
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"pipeline"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":323
+                                }
+                            ]
+                        },
+                        {
+                            "matcher":{
+                                "id":"byName",
+                                "options":"job_name"
+                            },
+                            "properties":[
+                                {
+                                    "id":"custom.width",
+                                    "value":481
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "gridPos":{
+                    "h":12,
+                    "w":24,
+                    "x":0,
+                    "y":96
+                },
+                "id":16,
+                "options":{
+                    "footer":{
+                        "enablePagination":true,
+                        "fields":"",
+                        "reducer":[
+                            "sum"
+                        ],
+                        "show":false
+                    },
+                    "frameIndex":0,
+                    "showHeader":true,
+                    "sortBy":[
+                        {
+                            "desc":true,
+                            "displayName":"Time"
+                        }
+                    ]
+                },
+                "pluginVersion":"9.1.5",
+                "targets":[
+                    {
+                        "datasource":{
+                            "type":"influxdb",
+                            "uid":"6-61eLD4z"
+                        },
+                        "query":"SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-wallaby-promote-*/ AND \"job_name\" =~ /stream-9/ ) AND $timeFilter ",
+                        "rawQuery":true,
+                        "refId":"A",
+                        "resultFormat":"table"
+                    }
+                ],
+                "title":"Promotions Wallaby CS8",
+                "transformations":[
+                    {
+                        "id":"convertFieldType",
+                        "options":{
+                            "conversions":[],
+                            "fields":{}
+                        }
+                    }
+                ],
+                "type":"table"
+            }
+        ],
+        "refresh":false,
+        "schemaVersion":37,
+        "style":"dark",
+        "tags":[],
+        "templating":{
+            "list":[]
         },
-        "frameIndex": 0,
-        "showHeader": true,
-        "sortBy": [
-          {
-            "desc": true,
-            "displayName": "Time"
-          }
-        ]
-      },
-      "pluginVersion": "9.1.5",
-      "targets": [
-        {
-          "datasource": {
-            "type": "influxdb",
-            "uid": "6-61eLD4z"
-          },
-          "query": "SELECT \"job_name\", \"result\", \"duration\", \"pipeline\",  \"log_url\" FROM \"build\" WHERE (\"project\" = 'rdoinfo' AND \"job_name\" =~ /weirdo-wallaby-promote-*/ AND \"job_name\" =~ /stream-9/ ) AND $timeFilter ",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "table"
-        }
-      ],
-      "title": "Promotions Wallaby CS8",
-      "transformations": [
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [],
-            "fields": {}
-          }
-        }
-      ],
-      "type": "table"
+        "time":{
+            "from":"now-24h",
+            "to":"now"
+        },
+        "timepicker":{},
+        "timezone":"",
+        "title":"Puppet Promotion Pipelines",
+        "weekStart":""
     }
-  ],
-  "schemaVersion": 37,
-  "style": "dark",
-  "tags": [],
-  "templating": {
-    "list": []
-  },
-  "time": {
-    "from": "now-24h",
-    "to": "now"
-  },
-  "timepicker": {},
-  "timezone": "",
-  "title": "Puppet Promotion Pipelines",
-  "uid": "wplmDxdVz",
-  "version": 13,
-  "weekStart": ""
 }
