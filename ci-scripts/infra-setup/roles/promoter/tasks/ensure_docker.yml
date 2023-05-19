@@ -20,6 +20,8 @@
     - name: Install required packages {{ ansible_distribution }} 8
       command: dnf install docker-ce --nobest -y
       when: ansible_distribution_major_version|int >= 8
+      required:
+        runtime: docker-ce=3:23.0.5-1.el8
 
 - name: Set up external partition
   become: true
