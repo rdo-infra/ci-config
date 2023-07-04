@@ -9,6 +9,8 @@
       export COMMIT_HASH="{{ commit_hash | default('') }}"
       export DISTRO_HASH="{{ distro_hash | default('') }}"
       export COMPONENT_NAME="{{ component | default('') }}"
+      export DLRNAPI_SERVER_PRINCIPAL="{{ dlrnapi_host_principal | default('') }}"
+
 
 - name: add extended hash to hash_info file if it exists
   lineinfile:
@@ -16,3 +18,4 @@
     state: present
     line: 'export EXTENDED_HASH="{{ extended_hash }}"'
   when: extended_hash is defined
+
