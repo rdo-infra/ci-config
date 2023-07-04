@@ -16,3 +16,10 @@
     state: present
     line: 'export EXTENDED_HASH="{{ extended_hash }}"'
   when: extended_hash is defined
+
+- name: add dlrnapi_host_principal to hash_info file if it exists
+  lineinfile:
+    path: "{{ workspace }}/{{ hash_info_file_name | default('hash_info.sh') }}"
+    state: present
+    line: 'export DLRNAPI_SERVER_PRINCIPAL="{{ dlrnapi_host_principal }}"'
+  when: dlrnapi_host_principal is defined
