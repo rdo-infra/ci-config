@@ -9,7 +9,12 @@ function activate_dlrnapi_venv {
         fi
     fi
     source "$WORKSPACE"/dlrnapi_venv/bin/activate
-    pip install -U dlrnapi-client[kerberos] shyaml
+
+    if [[ $KERBEROS_AUTH = true ]]; then
+        pip install -U dlrnapi-client[kerberos] shyaml
+    else
+        pip install -U dlrnapi_client shyaml
+    fi
 }
 
 function deactivate_dlrnapi_venv {
