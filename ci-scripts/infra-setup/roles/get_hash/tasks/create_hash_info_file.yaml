@@ -28,5 +28,5 @@
   lineinfile:
     path: "{{ workspace }}/{{ hash_info_file_name | default('hash_info.sh') }}"
     state: present
-    line: 'export KERBEROS_AUTH="{{ kerberos_auth | default(false) | bool }}"'
+    line: 'export KERBEROS_AUTH="{{ kerberos_auth | default(false) | bool | lower }}"'
   when: dlrnapi_host_principal is defined
