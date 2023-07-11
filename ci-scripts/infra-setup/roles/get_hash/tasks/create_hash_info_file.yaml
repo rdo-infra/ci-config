@@ -21,12 +21,10 @@
   lineinfile:
     path: "{{ workspace }}/{{ hash_info_file_name | default('hash_info.sh') }}"
     state: present
-    line: 'export DLRNAPI_SERVER_PRINCIPAL="{{ dlrnapi_host_principal }}"'
-  when: dlrnapi_host_principal is defined
+    line: 'export DLRNAPI_SERVER_PRINCIPAL="{{ dlrnapi_host_principal | default("") }}"'
 
 - name: add kerberos_auth bool to hash_info file if dlrnapi_host_principal exists
   lineinfile:
     path: "{{ workspace }}/{{ hash_info_file_name | default('hash_info.sh') }}"
     state: present
     line: 'export KERBEROS_AUTH="{{ kerberos_auth | default(false) | bool | lower }}"'
-  when: dlrnapi_host_principal is defined
