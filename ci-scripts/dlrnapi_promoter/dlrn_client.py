@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 This file contains classes and methods to interact with dlrn server
 dlrn configuration options, dlrn repos
@@ -44,7 +45,9 @@ class DlrnClientConfig(object):
     """
 
     def __init__(self, **kwargs):
-        args = ['dlrnauth_username', 'dlrnauth_password', 'api_url', 'repo_url']
+        args = ['dlrnauth_username', 'dlrnauth_password', 'api_url',
+                'repo_url', 'dlrnauth_auth_method', 'dlrnauth_force_auth',
+                'dlrnauth_server_principal']
         for arg in args:
             try:
                 setattr(self, arg, kwargs[arg])
@@ -69,9 +72,23 @@ class DlrnClient(object):
         """
         self.config = config
         # TODO(gcerami): fix credentials gathering
-        dlrnapi_client.configuration.password = self.config.dlrnauth_password
-        dlrnapi_client.configuration.username = self.config.dlrnauth_username
-        api_client = dlrnapi_client.ApiClient(host=self.config.api_url)
+        if hasattr(self.config, 'dlrnauth_server_principal'):
+            dlrnapi_client.configuration.server_principal = self.config.\
+                dlrnauth_server_principal
+        else:
+            dlrnapi_client.configuration.password = self.config.\
+                dlrnauth_password
+            dlrnapi_client.configuration.username = self.config.\
+                dlrnauth_username
+        if not hasattr(self.config, 'dlrnauth_auth_method'):
+            self.config.dlrnauth_auth_method = "basicAuth"
+        if not hasattr(self.config, 'dlrnauth_force_auth'):
+            self.config.dlrnauth_force_auth = False
+        api_client = dlrnapi_client.ApiClient(host=self.config.api_url,
+                                              auth_method=self.config.
+                                              dlrnauth_auth_method,
+                                              force_auth=self.config.
+                                              dlrnauth_force_auth)
         self.api_instance = dlrnapi_client.DefaultApi(api_client=api_client)
         self.last_promotions = {}
 
