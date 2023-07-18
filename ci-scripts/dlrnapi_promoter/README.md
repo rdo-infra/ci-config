@@ -70,6 +70,9 @@ Ansible Roles
 - `dlrn_api_endpoint`: DLRN endpoint (optional if base_url is speificed)
 - `dlrn_api_scheme`: DLRN scheme (‘http/https’) (optional if base_url is specified)
 - `dlrn_api_port`: DLRN host port (optional if base_url is specified)
+- `dlrnauth_auth_method`: DLRN auth method to be used, available: kerberosAuth, basicAuth. Default basicAuth
+- `dlrnauth_server_principal`: Server principal to be used when kerberosAuth is selected
+- `dlrnauth_force_auth`: Use force_auth in dlrnapi_client, so it also adds the auth header in GET HTTP actions. Default False. 
 - `promotions`: This section will define promotion source, target and criteria
   - `current-tripleo`: Target name.
   - `candidate-label`: Source label, this will be promotion candidate.
