@@ -280,30 +280,6 @@ class TestPromoterConfig(ConfigTestCases):
             self.assertIn(layer_name, config._layers)
             self.assertIsInstance(config._layers[layer_name], dict)
 
-    def test_constructor_dlrnauth_password_present(self):
-        os.environ["DLRNAPI_PASSWORD"] = "test"
-        self.assertEqual(self.config_empty.dlrnauth_password, "test")
-        del(os.environ['DLRNAPI_PASSWORD'])
-
-    def test_constructor_dlrnauth_password_absent(self):
-        try:
-            del(os.environ['DLRNAPI_PASSWORD'])
-        except KeyError:
-            pass
-        self.assertIsNone(self.config_empty.dlrnauth_password)
-
-    def test_constructor_dlrnauth_username_present(self):
-        os.environ["DLRNAPI_USERNAME"] = "testuser"
-        self.assertEqual(self.config_empty.dlrnauth_username, "testuser")
-        del(os.environ["DLRNAPI_USERNAME"])
-
-    def test_constructor_dlrnauth_username_absent(self):
-        try:
-            del(os.environ["DLRNAPI_USERNAME"])
-        except KeyError:
-            pass
-        self.assertIsNone(self.config_empty.dlrnauth_username)
-
     def test_constructor_qcow_server_default(self):
         server_info = self.config_master.qcow_server
         self.assertIsInstance(server_info, dict)
@@ -388,6 +364,69 @@ class TestPromoterConfig(ConfigTestCases):
     def test_constructor_namespace_notussuri(self):
         self.assertEqual(self.config_master.source_namespace, "tripleomaster")
         self.assertEqual(self.config_master.target_namespace, "tripleomaster")
+
+
+class TestPromoterConfigAuth(TestPromoterConfig):
+    def test_constructor_dlrnauth_password_present(self):
+        os.environ["DLRNAPI_PASSWORD"] = "test"
+        self.assertEqual(self.config_empty.dlrnauth_password, "test")
+        del(os.environ['DLRNAPI_PASSWORD'])
+
+    def test_constructor_dlrnauth_password_absent(self):
+        try:
+            del(os.environ['DLRNAPI_PASSWORD'])
+        except KeyError:
+            pass
+        self.assertIsNone(self.config_empty.dlrnauth_password)
+
+    def test_constructor_dlrnauth_username_present(self):
+        os.environ["DLRNAPI_USERNAME"] = "testuser"
+        self.assertEqual(self.config_empty.dlrnauth_username, "testuser")
+        del(os.environ["DLRNAPI_USERNAME"])
+
+    def test_constructor_dlrnauth_username_absent(self):
+        try:
+            del(os.environ["DLRNAPI_USERNAME"])
+        except KeyError:
+            pass
+        self.assertIsNone(self.config_empty.dlrnauth_username)
+
+    def test_constructor_dlrnauth_server_principal_present(self):
+        os.environ["DLRNAPI_PRINCIPAL"] = "test_principal"
+        self.assertEqual(self.config_empty.dlrnauth_server_principal,
+                         "test_principal")
+        del(os.environ['DLRNAPI_PRINCIPAL'])
+
+    def test_constructor_dlrnauth_server_principal_absent(self):
+        try:
+            del(os.environ['DLRNAPI_PRINCIPAL'])
+        except KeyError:
+            pass
+        self.assertIsNone(self.config_empty.dlrnauth_server_principal)
+
+    def test_constructor_dlrnauth_auth_method_present(self):
+        os.environ["DLRNAPI_AUTHMETHOD"] = "basicAuth"
+        self.assertEqual(self.config_empty.dlrnauth_auth_method, "basicAuth")
+        del(os.environ['DLRNAPI_AUTHMETHOD'])
+
+    def test_constructor_dlrnauth_auth_method_absent(self):
+        try:
+            del(os.environ['DLRNAPI_AUTHMETHOD'])
+        except KeyError:
+            pass
+        self.assertEqual(self.config_empty.dlrnauth_auth_method, 'basicAuth')
+
+    def test_constructor_dlrnauth_force_auth_present(self):
+        os.environ["DLRNAPI_FORCE_AUTH"] = "True"
+        self.assertEqual(bool(self.config_empty.dlrnauth_force_auth), True)
+        del(os.environ['DLRNAPI_FORCE_AUTH'])
+
+    def test_constructor_dlrnauth_force_auth_absent(self):
+        try:
+            del(os.environ['DLRNAPI_FORCE_AUTH'])
+        except KeyError:
+            pass
+        self.assertEqual(self.config_empty.dlrnauth_force_auth, False)
 
 
 class TestPromoterConfigFactory(ConfigTestCases):

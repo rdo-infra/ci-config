@@ -1022,3 +1022,26 @@ class TestVotes(DlrnSetup):
     @pytest.mark.xfail(reason="Do we need to check this ?")
     def test_vote_invalid_api_response(self):
         assert False
+
+
+class TestAuth(DlrnSetup):
+    def test_default_basicAuth(self):
+        api_client = self.client.api_instance.api_client
+
+        self.assertEqual(api_client.auth_method, "basicAuth")
+        self.assertEqual(api_client.force_auth, False)
+
+    def test_kerberosAuth(self):
+        config = DlrnClientConfig(dlrnauth_username='foo',
+                                  dlrnauth_password='bar',
+                                  api_url="http://api.url",
+                                  repo_url="file:///tmp",
+                                  dlrnauth_auth_method="kerberosAuth",
+                                  dlrnauth_force_auth=True,
+                                  dlrnauth_server_principal="test_server_principal")  # noqa
+        client = DlrnClient(config)
+        api_client = client.api_instance.api_client
+        self.assertEqual(api_client.auth_method, "kerberosAuth")
+        self.assertEqual(client.config.dlrnauth_server_principal,
+                         "test_server_principal")
+        self.assertEqual(api_client.force_auth, True)
