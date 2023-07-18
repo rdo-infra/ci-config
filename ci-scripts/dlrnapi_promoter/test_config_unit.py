@@ -380,6 +380,43 @@ class TestPromoterConfig(ConfigTestCases):
             mock.call("Assigning api_url %s", expected_url)
         ])
 
+    def test_constructor_dlrnauth_server_principal_present(self):
+        os.environ["DLRNAPI_PRINCIPAL"] = "test_principal"
+        self.assertEqual(self.config_empty.dlrnauth_server_principal,
+                         "test_principal")
+        del(os.environ['DLRNAPI_PRINCIPAL'])
+
+    def test_constructor_dlrnauth_server_principal_absent(self):
+        try:
+            del(os.environ['DLRNAPI_PRINCIPAL'])
+        except KeyError:
+            pass
+        self.assertIsNone(self.config_empty.dlrnauth_server_principal)
+
+    def test_constructor_dlrnauth_auth_method_present(self):
+        os.environ["DLRNAPI_AUTHMETHOD"] = "basicAuth"
+        self.assertEqual(self.config_empty.dlrnauth_auth_method, "basicAuth")
+        del(os.environ['DLRNAPI_AUTHMETHOD'])
+
+    def test_constructor_dlrnauth_auth_method_absent(self):
+        try:
+            del(os.environ['DLRNAPI_AUTHMETHOD'])
+        except KeyError:
+            pass
+        self.assertIsNone(self.config_empty.dlrnauth_auth_method)
+
+    def test_constructor_dlrnauth_force_auth_present(self):
+        os.environ["DLRNAPI_FORCE_AUTH"] = "True"
+        self.assertEqual(bool(self.config_empty.dlrnauth_force_auth), True)
+        del(os.environ['DLRNAPI_FORCE_AUTH'])
+
+    def test_constructor_dlrnauth_force_auth_absent(self):
+        try:
+            del(os.environ['DLRNAPI_FORCE_AUTH'])
+        except KeyError:
+            pass
+        self.assertEqual(self.config_empty.dlrnauth_force_auth, False)
+
     def test_constructor_namespace_ussuri(self):
         self.config_stablebranch.release = "ussuri"
         self.assertEqual(self.config_stablebranch.source_namespace, "tripleou")
