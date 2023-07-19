@@ -69,6 +69,7 @@ class LocalRegistry(object):
         self.docker_client = docker.from_env()
         self.docker_containers = self.docker_client.containers
         self.docker_images = self.docker_client.images
+        self.default_registry = "quay.rdoproject.org/tripleo"
         self.container = None
         self.secure = secure
         self.schema = schema
@@ -93,7 +94,7 @@ class LocalRegistry(object):
         except docker.errors.ImageNotFound:
             self.log.info("Downloading registry image")
             registry_image = self.docker_images.pull(
-                "docker.io/{}".format(self.base_image))
+                "{}/{}".format(self.default_registry, self.base_image))
 
         return registry_image
 
