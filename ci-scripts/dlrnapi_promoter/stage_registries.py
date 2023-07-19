@@ -93,7 +93,7 @@ class LocalRegistry(object):
         except docker.errors.ImageNotFound:
             self.log.info("Downloading registry image")
             registry_image = self.docker_images.pull(
-                "docker.io/{}".format(self.base_image))
+                "quay.rdoproject.org/openstack-k8s-operators/{}".format(self.base_image))
 
         return registry_image
 
