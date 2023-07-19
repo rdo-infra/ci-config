@@ -20,11 +20,12 @@
 
 - job:
     name: tripleo-ci-promotion-staging-base
-    parent: base
+    parent: base-minimal-container-login
     nodeset: rdo-centos-8-stream
     run: playbooks/staging.yml
     post-run: playbooks/staging-post.yml
     vars:
+      release: master
       test_release: CentOS-8/master
       zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
 
