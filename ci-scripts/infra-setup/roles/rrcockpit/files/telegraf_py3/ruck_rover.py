@@ -32,6 +32,12 @@ CERT_PATH = os.environ.get(
                 '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt')
 dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
 
+# DLRN client configurations
+DLRN_AUTH_METHOD_BASIC = "basicAuth"
+DLRN_AUTH_METHOD_KRB = "kerberosAuth"
+dlrn_auth_method = DLRN_AUTH_METHOD_BASIC
+dlrn_force_auth = False
+
 MATRIX = {
     "centos-8": ["wallaby", "train"],
     "centos-9": ["master", "zed", "wallaby"],
@@ -58,7 +64,6 @@ INFLUX_FAILED = 0
 ZUUL_JOBS_LIMIT = 1000
 ZUUL_JOB_HISTORY_THRESHOLD = 5
 ZUUL_JOB_REGEX = re.compile(r"periodic-(?P<job_name>.*)-\w*")
-
 
 def download_file(url):
     logging.debug("Download a file: %s", url)
@@ -161,7 +166,9 @@ def fetch_hashes_from_commit_yaml(criteria):
 
 
 def find_results_from_dlrn_agg(api_url, test_hash):
-    api_client = dlrnapi_client.ApiClient(host=api_url)
+    api_client = dlrnapi_client.ApiClient(host=api_url,
+                                          auth_method=dlrn_auth_method,
+                                          force_auth=dlrn_force_auth)
     api_instance = dlrnapi_client.DefaultApi(api_client)
     params = dlrnapi_client.AggQuery(aggregate_hash=test_hash)
     api_response = api_instance.api_agg_status_get(params=params)
@@ -259,8 +266,9 @@ def get_dlrn_promotions(api_url, promotion_name, component=None):
     [2]: https://dlrn.readthedocs.io/en/latest/api.html#get-api-promotions
     """
     logging.debug("Getting promotion %s for %s", promotion_name, api_url)
-
-    api_client = dlrnapi_client.ApiClient(host=api_url)
+    api_client = dlrnapi_client.ApiClient(host=api_url,
+                                          auth_method=dlrn_auth_method,
+                                          force_auth=dlrn_force_auth)
     api_instance = dlrnapi_client.DefaultApi(api_client)
     query = dlrnapi_client.PromotionQuery(
         promote_name=promotion_name,
@@ -288,7 +296,9 @@ def find_results_from_dlrn_repo_status(api_url, commit_hash,
         :return api_response: from dlrnapi server containing result of
          passing/failing jobs
     """
-    api_client = dlrnapi_client.ApiClient(host=api_url)
+    api_client = dlrnapi_client.ApiClient(host=api_url,
+                                          auth_method=dlrn_auth_method,
+                                          force_auth=dlrn_force_auth)
     api_instance = dlrnapi_client.DefaultApi(api_client)
     params = dlrnapi_client.Params2(commit_hash=commit_hash,
                                     distro_hash=distro_hash,
@@ -963,14 +973,19 @@ def component_influx(config, distro, release, stream, test_component):
 @click.command()
 def main(release, distro, config_file, promotion_name, aggregate_hash,
          component, influx, verbose):
+    global dlrn_auth_method
+    global dlrn_force_auth
 
     if verbose:
         fmt = '%(asctime)s:%(levelname)s - %(funcName)s:%(lineno)s %(message)s'
         logging.basicConfig(format=fmt, encoding='utf-8', level=logging.DEBUG)
 
     stream = 'upstream'
-    if release in ('osp16-2', 'osp17', 'osp17-1', 'osp18'):
+    if release.startswith('osp'):
         stream = 'downstream'
+        # Downstream DLRN is KerberosAuth only
+        dlrn_auth_method = DLRN_AUTH_METHOD_KRB
+        dlrn_force_auth = True
         if config_file != os.path.dirname(__file__) + '/conf_ruck_rover.yaml':
             print('using custom config file: {}'.format(config_file))
         else:
