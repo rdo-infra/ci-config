@@ -426,7 +426,9 @@ class TestRuckRoverComponent(unittest.TestCase):
 
         result = ruck_rover.get_dlrn_promotions("api_url", "promotion", None)
 
-        m_api_client.assert_called_with(host="api_url")
+        m_api_client.assert_called_with(host="api_url",
+                                        auth_method='basicAuth',
+                                        force_auth=False)
         m_promo_query.assert_called_with(
             promote_name="promotion", limit=1, component=None)
 
