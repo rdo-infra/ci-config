@@ -30,4 +30,4 @@ RUN cd /etc/pki/ca-trust/source/anchors && \
     curl -O https://password.corp.redhat.com/pki-ca-chain.crt && \
     update-ca-trust extract && update-ca-trust enable || true
 
-CMD ["telegraf", "--debug", "--config-directory","/etc/telegraf/telegraf.d/","--input-filter", "exec"]
+CMD ["telegraf", "--debug", "--config-directory","/etc/telegraf/","--input-filter", "exec"]
