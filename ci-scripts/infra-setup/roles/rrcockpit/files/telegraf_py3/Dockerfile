@@ -2,8 +2,11 @@ FROM quay.io/centos/centos:stream8
 
 RUN dnf clean all && dnf update -y  && dnf install -y \
                         python3 \
+                        python3-devel \
                         python3-pip \
-                        python3-setuptools
+                        python3-setuptools \
+                        krb5-devel \
+                        gcc
 
 COPY requirements.txt /
 COPY influxdb.repo /etc/yum.repos.d/influxdb.repo
@@ -27,4 +30,4 @@ RUN cd /etc/pki/ca-trust/source/anchors && \
     curl -O https://password.corp.redhat.com/pki-ca-chain.crt && \
     update-ca-trust extract && update-ca-trust enable || true
 
-CMD ["telegraf", "--debug", "--config-directory","/etc/telegraf/telegraf.d/","--input-filter", "exec"]
+CMD ["telegraf", "--debug", "--config-directory","/etc/telegraf/","--input-filter", "exec"]
