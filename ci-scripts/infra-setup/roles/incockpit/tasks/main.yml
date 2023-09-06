@@ -1,9 +1,15 @@
 ---
 - name: Run preparation with regular role
   include_role:
-    name: rrcockpit
+    name: configure_cockpit
   vars:
     start_services: false
+
+- name: Install downstream cert
+  ansible.builtin.command: sudo dnf install -y http://hdn.corp.redhat.com/rhel8-csb/RPMS/noarch/redhat-internal-cert-install-0.1-31.el7.noarch.rpm
+
+- name: Install downstream cert
+  ansible.builtin.command: sudo update-ca-trust
 
 - name: Clone downstream repo if possible
   git:
@@ -22,7 +28,7 @@
 
 - name: Start cockpit services
   include_role:
-    name: rrcockpit
+    name: configure_cockpit
     tasks_from: start_services
   vars:
     start_services: true

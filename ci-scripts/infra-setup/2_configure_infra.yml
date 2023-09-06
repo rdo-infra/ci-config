@@ -1,7 +1,7 @@
 ---
 - import_playbook: 0_cloud_hosts.yml
 
-- hosts: promoter,rrcockpit,toolbox
+- hosts: incockpit
   remote_user: "{{ default_remote_user }}"
   roles:
     - configure_packages
@@ -12,17 +12,22 @@
     - configure_continuous_delivery
     - configure_ssh
 
-- hosts: toolbox
-  roles:
-    - configure_nginx
-    - configure_toolbox
-    - copy_container
+#- hosts: toolbox
+#  roles:
+#    - configure_nginx
+#    - configure_toolbox
+#    - copy_container
+#
+#- hosts: rrcockpit
+#  roles:
+#    - configure_podman_environment
+#    - configure_cockpit
 
-- hosts: rrcockpit
+- hosts: incockpit
   roles:
     - configure_podman_environment
-    - configure_cockpit
+    - incockpit
 
-- hosts: promoter
-  roles:
-    - configure_promoter
+#- hosts: promoter
+#  roles:
+#    - configure_promoter
