@@ -1,0 +1,58 @@
+---
+- name: Download downstream Root CA
+  become: yes
+  ansible.builtin.uri:
+    force: true
+    url: https://password.corp.redhat.com/RH-IT-Root-CA.crt
+    dest: /etc/pki/ca-trust/source/anchors
+
+- name: Download downstream PKI CA Chain
+  become: yes
+  ansible.builtin.uri:
+    force: true
+    url: https://password.corp.redhat.com/pki-ca-chain.crt
+    dest: /etc/pki/ca-trust/source/anchors
+
+- name: Update CA trust
+  become: yes
+  ansible.builtin.command: update-ca-trust extract && update-ca-trust enable
+
+- name: Clone downstream repo if possible
+  git:
+    dest: "{{ downstream_repo_path }}"
+    repo: "{{ downstream_repo_url }}"
+    force: yes
+    clone: yes
+    update: yes
+    version: "{{ downstream_repo_branch }}"
+
+- name: Copy files
+  ansible.posix.synchronize:
+    src: "{{ downstream_repo_path }}/files/"
+    dest: "{{ ci_repository_path }}/ci-scripts/infra-setup/roles/rrcockpit/files/"
+  delegate_to: rrcockpit
+
+- name: Setting ruck_rover configuration file paths
+  set_fact:
+    rr_conf_file_path: "{{ ci_repository_path }}/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/conf_ruck_rover.yaml"
+    rr_internal_conf_file_path: "{{ ci_repository_path }}/ci-scripts/infra-setup/roles/rrcockpit/files/telegraf_py3/conf_ruck_rover_internal.yaml"
+
+- name: Read ruck rover conf file
+  slurp:
+    path: "{{ rr_conf_file_path }}"
+  register: rr_conf
+
+- name: Read ruck rover internal conf file
+  slurp:
+    path: "{{ rr_internal_conf_file_path }}"
+  register: rr_internal_conf
+
+- name: Extract the data from yaml
+  set_fact:
+    rr_conf_data: "{{ rr_conf['content'] | b64decode | from_yaml }}"
+    rr_internal_conf_data: "{{ rr_internal_conf['content'] | b64decode | from_yaml }}"
+
+- name: Combine both files and write back to default configuration file
+  copy:
+    content: "{{ rr_conf_data | combine(rr_internal_conf_data) | to_nice_yaml }}"
+    dest: "{{ rr_conf_file_path }}"

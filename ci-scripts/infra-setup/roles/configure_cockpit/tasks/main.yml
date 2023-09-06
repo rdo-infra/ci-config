@@ -37,6 +37,10 @@
       src: /home/cloud-user/grafana_smtp_password
     register: gf_smtp_password
 
+  - name: Run internal tasks
+    ignore_errors: true
+    ansible.builtin.import_tasks: internal.yml
+
   - name: Stop services
     environment:
       GRAFANA_ADMIN_PASSWORD: "{{ gf_admin_password['content'] | b64decode }}"
