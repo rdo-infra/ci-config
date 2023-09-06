@@ -4,7 +4,7 @@ RUN dnf clean all && dnf update -y  && dnf install -y \
                         python3 \
                         python3-devel \
                         python3-pip \
-                        python3-setuptools
+                        python3-setuptools \
                         krb5-devel \
                         gcc
 
