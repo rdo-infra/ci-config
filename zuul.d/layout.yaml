@@ -40,7 +40,7 @@
               - ^requirements.txt
               - ^test-requirements.txt
               - ^tox.ini
-        - tox-py36-ci-config: &py36
+        - tox-py39-ci-config: &py39
             files: &pyfiles
               - .*\.py
               - .*\.ini
@@ -61,6 +61,8 @@
               - ^zuul.d/layout.yaml$
               - ^playbooks/pre-run-docker.yml$
               - ^ci-scripts/container-push/roles/containers-promote/*$
+        - tox-py36-ci-config:
+            <<: *py39
     gate:
       jobs:
         - tox-jjb-v2:
@@ -76,8 +78,10 @@
         - mol-unit_molecule_test
         - tripleo-ci-shellcheck:
             <<: *shellcheck_files
+        - tox-py39-ci-config:
+            <<: *py39
         - tox-py36-ci-config:
-            <<: *py36
+            <<: *py39
     periodic:
       jobs:
         - mol-get_hash-centos-8
