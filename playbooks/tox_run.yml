@@ -1,4 +1,15 @@
 ---
 - hosts: all
-  roles:
-    - tox
+  tasks:
+    - name: Install GSSAPI required packages
+      become: true
+      ansible.builtin.package:
+        name:
+          - gcc
+          - krb5-devel
+          - python3-devel
+          - python3-libselinux
+        state: present
+
+    - import_role:
+        name: tox
