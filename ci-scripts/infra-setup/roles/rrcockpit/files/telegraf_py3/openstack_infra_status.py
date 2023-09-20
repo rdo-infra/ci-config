@@ -13,7 +13,7 @@ infra_status_regexp = re.compile(
 infra_status_url = 'https://wiki.openstack.org/wiki/Infrastructure_Status'
 infra_status_utc_format = '%Y-%m-%d %H:%M:%S'
 
-pd.set_option('display.max_colwidth', -1)
+pd.set_option('display.max_colwidth', None)
 
 
 def to_infra_date(date_str):
