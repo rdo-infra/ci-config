@@ -41,19 +41,6 @@
       pipeline_type: integration
 
 - job:
-    name: tox-py36-ci-config
-    parent: tox-py36
-    pre-run: playbooks/pre-run-docker.yml
-    run: playbooks/tox_run.yml
-    post-run: playbooks/post-run.yml
-    timeout: 3400
-    voting: false
-    vars:
-      tox_environment:
-        PYTEST_REQPASS: 188
-      zuul_work_dir: "{{ zuul.projects['review.rdoproject.org/rdo-infra/ci-config'].src_dir }}"
-
-- job:
     name: tox-py39-ci-config
     parent: tox-py39
     nodeset: rdo-centos-9-stream
