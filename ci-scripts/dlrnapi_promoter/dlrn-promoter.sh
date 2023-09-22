@@ -19,8 +19,7 @@ PROMOTER_CONFIG_ROOT="${PROMOTER_CONFIG_ROOT:=staging}"
 PROMOTER_TYPE="${PROMOTER_TYPE:=upstream}"
 
 if [[ $PROMOTER_TYPE == "upstream" ]]; then
-    DEFAULT_RELEASES=( "CentOS-8/wallaby" \
-                       "CentOS-8/train" \
+    DEFAULT_RELEASES=( "CentOS-8/train" \
                        "CentOS-9/wallaby" )
 else
     DEFAULT_RELEASES=( "RedHat-8/rhos-16.2" "RedHat-8/rhos-17.1" \
