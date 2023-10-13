@@ -5,7 +5,7 @@ go 1.15
 require (
 	github.com/containers/image/v5 v5.12.0
 	github.com/containers/storage v1.31.3
-	github.com/docker/docker v20.10.6+incompatible // indirect
+	github.com/docker/docker v20.10.24+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
