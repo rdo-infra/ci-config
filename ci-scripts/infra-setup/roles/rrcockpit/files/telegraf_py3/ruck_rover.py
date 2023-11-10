@@ -38,8 +38,6 @@ dlrn_auth_method = DLRN_AUTH_METHOD_BASIC
 dlrn_force_auth = False
 
 MATRIX = {
-    "centos-8": ["wallaby", "train"],
-    "centos-9": ["master", "zed", "wallaby"],
     "rhel-8": ["osp17-1", "osp16-2"],
     "rhel-9": ["osp17", "osp17-1", "osp18"]
 }
