@@ -38,10 +38,8 @@ dlrn_auth_method = DLRN_AUTH_METHOD_BASIC
 dlrn_force_auth = False
 
 MATRIX = {
-    "centos-8": ["wallaby", "train"],
-    "centos-9": ["master", "zed", "wallaby"],
+    "rhel-9": ["osp17", "osp17-1", "osp18"],
     "rhel-8": ["osp17-1", "osp16-2"],
-    "rhel-9": ["osp17", "osp17-1", "osp18"]
 }
 REVERSED_MATRIX = {}
 for key, values in MATRIX.items():
@@ -968,8 +966,8 @@ def component_influx(config, distro, release, stream, test_component):
               type=click.Choice(["current-tripleo", "current-tripleo-rdo"]))
 @click.option("--config_file", default=os.path.dirname(__file__)
               + '/conf_ruck_rover.yaml')
-@click.option("--distro", default='centos-9', type=click.Choice(DISTROS))
-@click.option("--release", default='master', type=click.Choice(RELEASES))
+@click.option("--distro", default=DISTROS[0], type=click.Choice(DISTROS))
+@click.option("--release", default=RELEASES[0], type=click.Choice(RELEASES))
 @click.command()
 def main(release, distro, config_file, promotion_name, aggregate_hash,
          component, influx, verbose):
