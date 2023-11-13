@@ -295,7 +295,7 @@ class TestRuckRover(unittest.TestCase):
 class TestRuckRoverComponent(unittest.TestCase):
     def setUp(self):
         self.config = {
-            'upstream': {
+            'downstream': {
                 'testproject_url':
                 'https://review.rdoproject.org/r/q/project:testproject',
                 'periodic_builds_url':
@@ -332,7 +332,7 @@ class TestRuckRoverComponent(unittest.TestCase):
         m_csv.side_effect = ["first", "second"]
 
         ruck_rover.component_influx(
-            self.config, 'centos-8', 'wallaby', 'upstream', 'all')
+            self.config, 'centos-8', 'wallaby', 'all')
 
         m_yaml.assert_any_call("http://wallaby_comp")
         m_dlrn.assert_not_called()
@@ -372,7 +372,7 @@ class TestRuckRoverComponent(unittest.TestCase):
         m_promo.return_value = promotion
 
         ruck_rover.component_influx(
-            self.config, 'centos-8', 'wallaby', 'upstream', component)
+            self.config, 'centos-8', 'wallaby', component)
 
         m_yaml.assert_any_call("http://wallaby_comp")
         m_results.assert_called_with(
@@ -427,8 +427,8 @@ class TestRuckRoverComponent(unittest.TestCase):
         result = ruck_rover.get_dlrn_promotions("api_url", "promotion", None)
 
         m_api_client.assert_called_with(host="api_url",
-                                        auth_method='basicAuth',
-                                        force_auth=False)
+                                        auth_method='kerberosAuth',
+                                        force_auth=True)
         m_promo_query.assert_called_with(
             promote_name="promotion", limit=1, component=None)
 
@@ -500,7 +500,7 @@ class TestRuckRoverWithCommonSetup(unittest.TestCase):
 class TestInfluxDBMeasurements(unittest.TestCase):
     def setUp(self):
         self.config = {
-            'upstream': {
+            'downstream': {
                 'testproject_url':
                 'https://review.rdoproject.org/r/q/project:testproject',
                 'periodic_builds_url':
@@ -519,7 +519,6 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         self.distro = "centos-8"
         self.release = "wallaby"
         self.influx = True
-        self.stream = "upstream"
 
     def test_component(
             self, m_gather, m_get_comp, m_get_promo, m_consistent, m_fetch_hash,
@@ -576,7 +575,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         m_latest_job.return_value = {}
 
         ruck_rover.component_influx(
-            self.config, self.distro, self.release, self.stream, component)
+            self.config, self.distro, self.release, component)
 
         job1 = ('jobs_result,job_type=component,job_name=failed'
                 ',release=wallaby name="promoted-components",test_hash="c6_03"'
@@ -660,7 +659,7 @@ class TestInfluxDBMeasurements(unittest.TestCase):
         m_latest_job.return_value = {}
 
         ruck_rover.integration_influx(
-            self.config, self.distro, self.release, self.stream, promotion_name)
+            self.config, self.distro, self.release, promotion_name)
 
         job1 = ('jobs_result,job_type=integration,job_name=failed'
                 ',release=wallaby name="promote_name",test_hash="test_hash"'

@@ -32,10 +32,8 @@ CERT_PATH = os.environ.get(
                 '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt')
 dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
 # DLRN client configurations
-DLRN_AUTH_METHOD_BASIC = "basicAuth"
-DLRN_AUTH_METHOD_KRB = "kerberosAuth"
-dlrn_auth_method = DLRN_AUTH_METHOD_BASIC
-dlrn_force_auth = False
+DLRN_AUTH_METHOD = "kerberosAuth"
+DLRN_FORCE_AUTH = True
 
 MATRIX = {
     "rhel-9": ["osp17", "osp17-1", "osp18"],
@@ -165,8 +163,8 @@ def fetch_hashes_from_commit_yaml(criteria):
 
 def find_results_from_dlrn_agg(api_url, test_hash):
     api_client = dlrnapi_client.ApiClient(host=api_url,
-                                          auth_method=dlrn_auth_method,
-                                          force_auth=dlrn_force_auth)
+                                          auth_method=DLRN_AUTH_METHOD,
+                                          force_auth=DLRN_FORCE_AUTH)
     api_instance = dlrnapi_client.DefaultApi(api_client)
     params = dlrnapi_client.AggQuery(aggregate_hash=test_hash)
     api_response = api_instance.api_agg_status_get(params=params)
@@ -265,8 +263,8 @@ def get_dlrn_promotions(api_url, promotion_name, component=None):
     """
     logging.debug("Getting promotion %s for %s", promotion_name, api_url)
     api_client = dlrnapi_client.ApiClient(host=api_url,
-                                          auth_method=dlrn_auth_method,
-                                          force_auth=dlrn_force_auth)
+                                          auth_method=DLRN_AUTH_METHOD,
+                                          force_auth=DLRN_FORCE_AUTH)
     api_instance = dlrnapi_client.DefaultApi(api_client)
     query = dlrnapi_client.PromotionQuery(
         promote_name=promotion_name,
@@ -295,8 +293,8 @@ def find_results_from_dlrn_repo_status(api_url, commit_hash,
          passing/failing jobs
     """
     api_client = dlrnapi_client.ApiClient(host=api_url,
-                                          auth_method=dlrn_auth_method,
-                                          force_auth=dlrn_force_auth)
+                                          auth_method=DLRN_AUTH_METHOD,
+                                          force_auth=DLRN_FORCE_AUTH)
     api_instance = dlrnapi_client.DefaultApi(api_client)
     params = dlrnapi_client.Params2(commit_hash=commit_hash,
                                     distro_hash=distro_hash,
@@ -713,11 +711,10 @@ def integration(
 
 
 def track_integration_promotion(
-        config, distro, release, stream, promotion_name,
-        aggregate_hash):
+        config, distro, release, promotion_name, aggregate_hash):
 
     logging.debug("Starting integration track")
-    url = config[stream]['criteria'][distro][release]['int_url']
+    url = config['downstream']['criteria'][distro][release]['int_url']
     criteria = url_response_in_yaml(url)
     api_url, base_url = gather_basic_info_from_criteria(criteria)
 
@@ -728,9 +725,9 @@ def track_integration_promotion(
 
     component = None
 
-    periodic_builds_url = config[stream]['periodic_builds_url']
-    upstream_builds_url = config[stream]['upstream_builds_url']
-    testproject_url = config[stream]['testproject_url']
+    periodic_builds_url = config['downstream']['periodic_builds_url']
+    upstream_builds_url = config['downstream']['upstream_builds_url']
+    testproject_url = config['downstream']['testproject_url']
     timestamp = datetime.utcfromtimestamp(promotion.timestamp)
 
     components, pkg_diff = get_components_diff(
@@ -780,11 +777,10 @@ def get_components_diff(
     return components, pkg_diff
 
 
-def track_component_promotion(
-        config, distro, release, stream, test_component):
+def track_component_promotion(config, distro, release, test_component):
     logging.debug("Starting component track")
 
-    url = config[stream]['criteria'][distro][release]['comp_url']
+    url = config['downstream']['criteria'][distro][release]['comp_url']
     criteria = url_response_in_yaml(url)
     api_url, base_url = gather_basic_info_from_criteria(criteria)
     api_suffix = "api/civotes_detail.html?commit_hash="
@@ -794,9 +790,9 @@ def track_component_promotion(
     components, pkg_diff = get_components_diff(
         base_url, test_component, promotion_name, aggregate_hash)
 
-    periodic_builds_url = config[stream]['periodic_builds_url']
-    upstream_builds_url = config[stream]['upstream_builds_url']
-    testproject_url = config[stream]['testproject_url']
+    periodic_builds_url = config['downstream']['periodic_builds_url']
+    upstream_builds_url = config['downstream']['upstream_builds_url']
+    testproject_url = config['downstream']['testproject_url']
 
     for component in components:
         logging.debug("Fetching component: %s data", component)
@@ -830,8 +826,8 @@ def track_component_promotion(
     logging.debug("Finshed component track")
 
 
-def integration_influx(config, distro, release, stream, promotion_name):
-    url = config[stream]['criteria'][distro][release]['int_url']
+def integration_influx(config, distro, release, promotion_name):
+    url = config['downstream']['criteria'][distro][release]['int_url']
     criteria = url_response_in_yaml(url)
     api_url, base_url = gather_basic_info_from_criteria(criteria)
 
@@ -873,8 +869,8 @@ def integration_influx(config, distro, release, stream, promotion_name):
     render_influxdb(jobs, job_extra, promotion, promotion_extra)
 
 
-def component_influx(config, distro, release, stream, test_component):
-    url = config[stream]['criteria'][distro][release]['comp_url']
+def component_influx(config, distro, release, test_component):
+    url = config['downstream']['criteria'][distro][release]['comp_url']
     criteria = url_response_in_yaml(url)
     api_url, base_url = gather_basic_info_from_criteria(criteria)
 
@@ -971,30 +967,22 @@ def component_influx(config, distro, release, stream, test_component):
 @click.command()
 def main(release, distro, config_file, promotion_name, aggregate_hash,
          component, influx, verbose):
-    global dlrn_auth_method
-    global dlrn_force_auth
 
     if verbose:
         fmt = '%(asctime)s:%(levelname)s - %(funcName)s:%(lineno)s %(message)s'
         logging.basicConfig(format=fmt, encoding='utf-8', level=logging.DEBUG)
 
-    stream = 'upstream'
-    if release.startswith('osp'):
-        stream = 'downstream'
-        # Downstream DLRN is KerberosAuth only
-        dlrn_auth_method = DLRN_AUTH_METHOD_KRB
-        dlrn_force_auth = True
-        if config_file != os.path.dirname(__file__) + '/conf_ruck_rover.yaml':
-            print('using custom config file: {}'.format(config_file))
-        else:
-            downstream_urls = 'https://url.corp.redhat.com/ruck-rover-0'
-            config_file = download_file(downstream_urls)
+    # Downstream DLRN is KerberosAuth only
+    if config_file != os.path.dirname(__file__) + '/conf_ruck_rover.yaml':
+        print('using custom config file: {}'.format(config_file))
+    else:
+        downstream_urls = 'https://url.corp.redhat.com/ruck-rover-0'
+        config_file = download_file(downstream_urls)
     config = load_conf_file(config_file)
 
-    if dlrn_auth_method == DLRN_AUTH_METHOD_KRB:
-        dlrnapi_client.configuration.server_principal = (
-            config[stream]['dlrnapi_krb_principal']
-        )
+    dlrnapi_client.configuration.server_principal = (
+        config['downstream']['dlrnapi_krb_principal']
+    )
 
     distros = REVERSED_MATRIX[release]
     releases = MATRIX[distro]
@@ -1004,14 +992,14 @@ def main(release, distro, config_file, promotion_name, aggregate_hash,
 
     logging.info("Starting script: %s - %s", distro, release)
     if influx and component:
-        component_influx(config, distro, release, stream, component)
+        component_influx(config, distro, release, component)
     elif influx and not component:
-        integration_influx(config, distro, release, stream, promotion_name)
+        integration_influx(config, distro, release, promotion_name)
     elif not influx and component:
-        track_component_promotion(config, distro, release, stream, component)
+        track_component_promotion(config, distro, release, component)
     elif not influx and not component:
         track_integration_promotion(
-            config, distro, release, stream, promotion_name, aggregate_hash)
+            config, distro, release, promotion_name, aggregate_hash)
     else:
         raise Exception("Unsupported")
     logging.info("Finished script: %s - %s", distro, release)
