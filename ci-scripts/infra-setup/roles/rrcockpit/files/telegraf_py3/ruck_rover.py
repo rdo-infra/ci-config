@@ -346,33 +346,6 @@ def get_dlrn_results(api_response):
     return jobs
 
 
-def upstream_job(job_name):
-    """Get upstream job name from midstream job.
-
-    :param job_name (str): midstream job name
-    :return name_matched (str): upstream job name or empty string
-    """
-    name_matched = ""
-    if 'featureset' in job_name:
-        # NOTE(dasm): Featureset jobs do not exist upstream
-        return name_matched
-
-    job_matched = ZUUL_JOB_REGEX.match(job_name)
-    if job_matched:
-        name_matched = job_matched.group('job_name')
-        logging.debug("Matched name: %s -> %s", job_name, name_matched)
-    return name_matched
-
-
-def get_upstream_jobs(jobs):
-    job_names_upstream = set()
-    for job_name in jobs:
-        name_matched = upstream_job(job_name)
-        job_names_upstream.add(name_matched)
-
-    return job_names_upstream
-
-
 def get_job_history(jobs, url):
     """Fetch jobs history from provided URL.
 
@@ -441,10 +414,10 @@ def print_a_set_in_table(jobs, header="Job name"):
     console.print(table)
 
 
-def print_failed_in_criteria(jobs, upstream_history):
+def print_failed_in_criteria(jobs):
     """Print jobs history.
 
-    : param jobs (dict): History of jobs running upstream and midstream.
+    : param jobs (dict): History of jobs running midstream.
     : return None
     """
 
@@ -457,28 +430,13 @@ def print_failed_in_criteria(jobs, upstream_history):
     table.add_column("Pass", width=15)
     table.add_column("Failure", width=15)
     table.add_column("Others", width=15)
-    table.add_column("Upstream Pass", width=15)
-    table.add_column("Upstream Failure", width=15)
-    table.add_column("Upstream Others", width=15)
 
-    no_upstream_job_stats = {
-        "SUCCESS": "-",
-        "FAILURE": "-",
-        "OTHER": "-",
-    }
     for job_name, job_stats in sorted(jobs.items()):
-        upstream_job_name = upstream_job(job_name)
-        upstream_job_stats = upstream_history.get(
-            upstream_job_name, no_upstream_job_stats)
-
         table.add_row(
             job_name,
             str(job_stats['SUCCESS']),
             str(job_stats['FAILURE']),
             str(job_stats['OTHER']),
-            str(upstream_job_stats['SUCCESS']),
-            str(upstream_job_stats['FAILURE']),
-            str(upstream_job_stats['OTHER'])
         )
     console.print(table)
 
@@ -624,7 +582,7 @@ def render_influxdb(jobs, job_extra, promotion, promotion_extra):
 
 def render_tables(jobs, timestamp, under_test_url, component,
                   components, api_response, pkg_diff, test_hash,
-                  periodic_builds_url, upstream_builds_url, testproject_url):
+                  periodic_builds_url, testproject_url):
     """
     jobs_to_promote are any job that hasn't registered
     success w/ dlrn. jobs_pending are any jobs in pending.
@@ -671,11 +629,9 @@ def render_tables(jobs, timestamp, under_test_url, component,
     print_a_set_in_table(failed, "Jobs which failed:")
     print_a_set_in_table(no_result, "Pending running jobs")
 
-    upstream_jobs = get_upstream_jobs(to_promote)
     periodic_history = get_job_history(to_promote, periodic_builds_url)
-    upstream_history = get_job_history(upstream_jobs, upstream_builds_url)
 
-    print_failed_in_criteria(periodic_history, upstream_history)
+    print_failed_in_criteria(periodic_history)
 
     log_urls = latest_job_results_url(api_response, failed)
     if log_urls:
@@ -726,7 +682,6 @@ def track_integration_promotion(
     component = None
 
     periodic_builds_url = config['downstream']['periodic_builds_url']
-    upstream_builds_url = config['downstream']['upstream_builds_url']
     testproject_url = config['downstream']['testproject_url']
     timestamp = datetime.utcfromtimestamp(promotion.timestamp)
 
@@ -747,7 +702,7 @@ def track_integration_promotion(
     render_tables(
         jobs, timestamp, under_test_url, component,
         components, api_response, pkg_diff, test_hash,
-        periodic_builds_url, upstream_builds_url, testproject_url)
+        periodic_builds_url, testproject_url)
 
     logging.debug("Finished integration track")
 
@@ -791,7 +746,6 @@ def track_component_promotion(config, distro, release, test_component):
         base_url, test_component, promotion_name, aggregate_hash)
 
     periodic_builds_url = config['downstream']['periodic_builds_url']
-    upstream_builds_url = config['downstream']['upstream_builds_url']
     testproject_url = config['downstream']['testproject_url']
 
     for component in components:
@@ -820,7 +774,7 @@ def track_component_promotion(config, distro, release, test_component):
         render_tables(
             jobs, timestamp, under_test_url, component,
             components, api_response, pkg_diff, test_hash,
-            periodic_builds_url, upstream_builds_url, testproject_url)
+            periodic_builds_url, testproject_url)
         logging.debug("Finished component: %s data", component)
 
     logging.debug("Finshed component track")
@@ -972,7 +926,6 @@ def main(release, distro, config_file, promotion_name, aggregate_hash,
         fmt = '%(asctime)s:%(levelname)s - %(funcName)s:%(lineno)s %(message)s'
         logging.basicConfig(format=fmt, encoding='utf-8', level=logging.DEBUG)
 
-    # Downstream DLRN is KerberosAuth only
     if config_file != os.path.dirname(__file__) + '/conf_ruck_rover.yaml':
         print('using custom config file: {}'.format(config_file))
     else:
