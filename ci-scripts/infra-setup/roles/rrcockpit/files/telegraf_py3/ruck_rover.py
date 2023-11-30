@@ -654,11 +654,11 @@ def integration(
 
 
 def track_integration_promotion(
-        config, distro, release, promotion_name, aggregate_hash):
+        criteria, periodic_builds_url, testproject_url,
+        promotion_name, aggregate_hash):
 
     logging.debug("Starting integration track")
-    url = config['downstream']['criteria'][distro][release]['int_url']
-    criteria = url_response_in_yaml(url)
+
     api_url, base_url = gather_basic_info_from_criteria(criteria)
 
     promotion = get_dlrn_promotions(api_url, promotion_name)
@@ -668,8 +668,6 @@ def track_integration_promotion(
 
     component = None
 
-    periodic_builds_url = config['downstream']['periodic_builds_url']
-    testproject_url = config['downstream']['testproject_url']
     timestamp = datetime.utcfromtimestamp(promotion.timestamp)
 
     components, pkg_diff = get_components_diff(
@@ -718,11 +716,10 @@ def get_components_diff(
     return components, pkg_diff
 
 
-def track_component_promotion(config, distro, release, test_component):
+def track_component_promotion(
+        criteria, periodic_builds_url, testproject_url, test_component):
     logging.debug("Starting component track")
 
-    url = config['downstream']['criteria'][distro][release]['comp_url']
-    criteria = url_response_in_yaml(url)
     api_url, base_url = gather_basic_info_from_criteria(criteria)
     api_suffix = "api/civotes_detail.html?commit_hash="
 
@@ -730,9 +727,6 @@ def track_component_promotion(config, distro, release, test_component):
     aggregate_hash = "component-ci-testing"
     components, pkg_diff = get_components_diff(
         base_url, test_component, promotion_name, aggregate_hash)
-
-    periodic_builds_url = config['downstream']['periodic_builds_url']
-    testproject_url = config['downstream']['testproject_url']
 
     for component in components:
         logging.debug("Fetching component: %s data", component)
@@ -804,11 +798,19 @@ def main(release, distro, config_file, promotion_name, aggregate_hash,
         raise BadParameter(msg)
 
     logging.info("Starting script: %s - %s", distro, release)
+    periodic_builds_url = config['downstream']['periodic_builds_url']
+    testproject_url = config['downstream']['testproject_url']
     if component:
-        track_component_promotion(config, distro, release, component)
+        url = config['downstream']['criteria'][distro][release]['comp_url']
+        criteria = url_response_in_yaml(url)
+        track_component_promotion(
+            criteria, periodic_builds_url, testproject_url, component)
     elif not component:
+        url = config['downstream']['criteria'][distro][release]['int_url']
+        criteria = url_response_in_yaml(url)
         track_integration_promotion(
-            config, distro, release, promotion_name, aggregate_hash)
+            criteria, periodic_builds_url, testproject_url,
+            promotion_name, aggregate_hash)
     else:
         raise Exception("Unsupported")
     logging.info("Finished script: %s - %s", distro, release)
