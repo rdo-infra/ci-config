@@ -474,8 +474,7 @@ def query_zuul_job_details(
 def prepare_jobs(
         jobs_in_criteria,
         jobs_in_alt_criteria,
-        dlrn_jobs,
-        influx):
+        dlrn_jobs):
     """
     InfluxDB follows line protocol [1]
 
@@ -505,15 +504,11 @@ def prepare_jobs(
     :return job_result_list (list of dicts): List of parsed jobs.
     """
 
-    logging.debug("Preparing influxdb")
+    logging.debug("Preparing jobs info")
 
     all_jobs = set(dlrn_jobs).union(jobs_in_criteria)
 
     zuul_jobs = {}
-    if influx:
-        logging.debug("Fetch jobs details")
-        zuul_jobs = query_zuul_job_details(all_jobs)
-
     logging.debug("Parsing jobs")
     job_result_list = []
     for job_name in sorted(all_jobs):
@@ -545,7 +540,7 @@ def prepare_jobs(
                                if status == INFLUX_FAILED else "N/A"),
         }
         job_result_list.append(job_result)
-    logging.debug("Prepared influxdb: %s", job_result_list)
+    logging.debug("Prepared jobs info: %s", job_result_list)
 
     return job_result_list
 
@@ -569,14 +564,6 @@ def render_component_yaml(jobs, testproject_url):
     template = prepare_render_template('component.yaml.j2')
     output = template.render(
         jobs=jobs, testproject_url=testproject_url)
-    print(output)
-
-
-def render_influxdb(jobs, job_extra, promotion, promotion_extra):
-    template = prepare_render_template('influx.j2')
-    output = template.render(
-        jobs=jobs, job_extra=job_extra, promotion=promotion,
-        promotion_extra=promotion_extra)
     print(output)
 
 
@@ -696,8 +683,7 @@ def track_integration_promotion(
     jobs = prepare_jobs(
             jobs_in_criteria,
             jobs_in_alt_criteria,
-            dlrn_jobs,
-            influx=False)
+            dlrn_jobs)
 
     render_tables(
         jobs, timestamp, under_test_url, component,
@@ -768,8 +754,7 @@ def track_component_promotion(config, distro, release, test_component):
 
         jobs_in_criteria = find_jobs_in_component_criteria(criteria, component)
         dlrn_jobs = get_dlrn_results(api_response)
-        jobs = prepare_jobs(jobs_in_criteria, {}, dlrn_jobs,
-                            influx=False)
+        jobs = prepare_jobs(jobs_in_criteria, {}, dlrn_jobs)
 
         render_tables(
             jobs, timestamp, under_test_url, component,
@@ -780,51 +765,7 @@ def track_component_promotion(config, distro, release, test_component):
     logging.debug("Finshed component track")
 
 
-def integration_influx(config, distro, release, promotion_name):
-    url = config['downstream']['criteria'][distro][release]['int_url']
-    criteria = url_response_in_yaml(url)
-    api_url, base_url = gather_basic_info_from_criteria(criteria)
-
-    promotion = get_dlrn_promotions(api_url, promotion_name)
-
-    aggregate_hash = "tripleo-ci-testing"
-    commit_url = f"{base_url}{aggregate_hash}/delorean.repo.md5"
-    test_hash = web_scrape(commit_url)
-    promoted_url = (f"{api_url}/api/civotes_agg_detail.html?"
-                    f"ref_hash={promotion.aggregate_hash}")
-
-    api_response = find_results_from_dlrn_agg(api_url, test_hash)
-
-    component = None
-    last_modified = get_last_modified_date(base_url, component)
-    promotion_extra = {
-        'release': release,
-        'distro': distro,
-        'dlrn_details': promoted_url,
-        'last_modified': last_modified,
-    }
-
-    job_extra = {
-        'distro': distro,
-        'release': release,
-        'component': component,
-        'job_type': "component" if component else "integration",
-        'promote_name': promotion_name,
-        'test_hash': test_hash
-    }
-
-    jobs_in_criteria = find_jobs_in_integration_criteria(
-        criteria, promotion_name)
-    dlrn_jobs = get_dlrn_results(api_response)
-    jobs_in_alt_criteria = find_jobs_in_integration_alt_criteria(
-        criteria, promotion_name)
-    jobs = prepare_jobs(jobs_in_criteria, jobs_in_alt_criteria,
-                        dlrn_jobs, influx=True)
-    render_influxdb(jobs, job_extra, promotion, promotion_extra)
-
-
 @click.option("--verbose", is_flag=True, default=False)
-@click.option("--influx", is_flag=True, default=False)
 @click.option("--component", default=None,
               type=click.Choice(sorted(ALL_COMPONENTS)))
 @click.option("--aggregate_hash", default="tripleo-ci-testing",
@@ -839,7 +780,7 @@ def integration_influx(config, distro, release, promotion_name):
 @click.option("--release", default=RELEASES[0], type=click.Choice(RELEASES))
 @click.command()
 def main(release, distro, config_file, promotion_name, aggregate_hash,
-         component, influx, verbose):
+         component, verbose):
 
     if verbose:
         fmt = '%(asctime)s:%(levelname)s - %(funcName)s:%(lineno)s %(message)s'
@@ -863,11 +804,9 @@ def main(release, distro, config_file, promotion_name, aggregate_hash,
         raise BadParameter(msg)
 
     logging.info("Starting script: %s - %s", distro, release)
-    if influx and not component:
-        integration_influx(config, distro, release, promotion_name)
-    elif not influx and component:
+    if component:
         track_component_promotion(config, distro, release, component)
-    elif not influx and not component:
+    elif not component:
         track_integration_promotion(
             config, distro, release, promotion_name, aggregate_hash)
     else:
