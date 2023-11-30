@@ -823,87 +823,6 @@ def integration_influx(config, distro, release, promotion_name):
     render_influxdb(jobs, job_extra, promotion, promotion_extra)
 
 
-def component_influx(config, distro, release, test_component):
-    url = config['downstream']['criteria'][distro][release]['comp_url']
-    criteria = url_response_in_yaml(url)
-    api_url, base_url = gather_basic_info_from_criteria(criteria)
-
-    if test_component and test_component != "all":
-        components = [test_component]
-    else:
-        components = sorted(ALL_COMPONENTS.difference(["all"]))
-
-    all_dlrn_jobs = {}
-    all_jobs_in_criteria = set()
-
-    job_response = {}
-    component_response = {}
-    for component in components:
-        promotion = get_dlrn_promotions(
-            api_url, "promoted-components", component)
-        component_url = (
-            f"{base_url}component/{component}/component-ci-testing/commit.yaml"
-        )
-
-        promoted_url = (
-            f"{api_url}/api/civotes_detail.html?"
-            f"commit_hash={promotion.commit_hash}&"
-            f"distro_hash={promotion.distro_hash}"
-        )
-        component_criteria = url_response_in_yaml(component_url)
-        commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
-            component_criteria)
-        api_response = find_results_from_dlrn_repo_status(
-            api_url, commit_hash, distro_hash, extended_hash)
-
-        dlrn_jobs = get_dlrn_results(api_response)
-        jobs_in_criteria = find_jobs_in_component_criteria(criteria, component)
-
-        component_response[component] = {
-            'job_extra': {
-                'distro': distro,
-                'release': release,
-                'component': component,
-                'job_type': "component" if component else "integration",
-                'promote_name': 'promoted-components',
-                'test_hash': f"{commit_hash}_{distro_hash[:8]}",
-            },
-            'promotion_extra': {
-                'distro': distro,
-                'release': release,
-                'dlrn_details': promoted_url,
-                'last_modified': get_last_modified_date(base_url, component),
-            },
-            'promotion': promotion,
-        }
-
-        all_jobs = set(dlrn_jobs).union(jobs_in_criteria)
-        for job_name in all_jobs:
-            job_response[job_name] = {
-                'component': component,
-            }
-
-        all_dlrn_jobs.update(dlrn_jobs)
-        all_jobs_in_criteria.update(jobs_in_criteria)
-
-    components = {}
-
-    jobs = prepare_jobs(all_jobs_in_criteria, {},
-                        all_dlrn_jobs, influx=True)
-    # NOTE(dasm): Map job name to component
-    for job in jobs:
-        job_name = job['job_name']
-        component = job_response[job_name]['component']
-        components.setdefault(component, []).append(job)
-
-    for component, jobs in sorted(components.items()):
-        job_extra = component_response[component]['job_extra']
-        promotion = component_response[component]['promotion']
-        promotion_extra = component_response[component]['promotion_extra']
-
-        render_influxdb(jobs, job_extra, promotion, promotion_extra)
-
-
 @click.option("--verbose", is_flag=True, default=False)
 @click.option("--influx", is_flag=True, default=False)
 @click.option("--component", default=None,
@@ -944,9 +863,7 @@ def main(release, distro, config_file, promotion_name, aggregate_hash,
         raise BadParameter(msg)
 
     logging.info("Starting script: %s - %s", distro, release)
-    if influx and component:
-        component_influx(config, distro, release, component)
-    elif influx and not component:
+    if influx and not component:
         integration_influx(config, distro, release, promotion_name)
     elif not influx and component:
         track_component_promotion(config, distro, release, component)
