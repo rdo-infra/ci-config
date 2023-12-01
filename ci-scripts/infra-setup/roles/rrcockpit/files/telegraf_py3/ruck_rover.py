@@ -670,29 +670,25 @@ def track_integration_promotion(
     logging.debug("Finished integration track")
 
 
-def get_components_diff(
-        base_url, component, promotion_name, aggregate_hash):
+def get_components_diff(base_url, component, promotion_name, aggregate_hash):
     logging.debug("Get components diff")
     components = sorted(ALL_COMPONENTS.difference(["all"]))
-    pkg_diff = None
+    diff = None
 
     if component != "all":
         logging.debug("Getting component diff for %s", component)
         # get package diff for the component # control_url
-        control_url = get_dlrn_versions_csv(
-            base_url, component, promotion_name)
+        control_url = get_dlrn_versions_csv(base_url, component, promotion_name)
         control_csv = get_csv(control_url)
 
         # test_url, what is currently getting tested
-        test_url = get_dlrn_versions_csv(
-            base_url, component, aggregate_hash)
+        test_url = get_dlrn_versions_csv(base_url, component, aggregate_hash)
         test_csv = get_csv(test_url)
 
         components = [component]
-        pkg_diff = get_diff(
-            promotion_name, control_csv, aggregate_hash, test_csv)
+        diff = get_diff(promotion_name, control_csv, aggregate_hash, test_csv)
 
-    return components, pkg_diff
+    return components, diff
 
 
 def track_component_promotion(
