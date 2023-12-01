@@ -60,20 +60,7 @@ ZUUL_JOBS_LIMIT = 1000
 ZUUL_JOB_HISTORY_THRESHOLD = 5
 ZUUL_JOB_REGEX = re.compile(r"periodic-(?P<job_name>.*)-\w*")
 
-
-def download_file(url):
-    logging.debug("Download a file: %s", url)
-    response = requests.get(url, stream=True, verify=CERT_PATH)
-    response.raise_for_status()
-    file_descriptor, path = mkstemp(prefix="job-output-")
-    with open(path, "wb") as file:
-        for chunk in response.iter_content(chunk_size=1024):
-            if chunk:
-                file.write(chunk)
-    os.close(file_descriptor)
-
-    logging.debug("Downloaded a file: %s", path)
-    return path
+DOWNSTREAM_URL = 'https://url.corp.redhat.com/ruck-rover-0'
 
 
 def find_failure_reason(url):
@@ -441,13 +428,6 @@ def print_failed_in_criteria(jobs):
     console.print(table)
 
 
-def load_conf_file(config_file):
-    config = {}
-    with open(config_file, "r") as file:
-        config = yaml.safe_load(file)
-    return config
-
-
 def query_zuul_job_details(
         job_names,
         url="https://review.rdoproject.org/zuul/api/builds"):
@@ -768,25 +748,16 @@ def track_component_promotion(
                     "\nexample:tripleo-ci-testing/e6/ad/e6ad..."))
 @click.option("--promotion_name", default="current-tripleo",
               type=click.Choice(["current-tripleo", "current-tripleo-rdo"]))
-@click.option("--config_file", default=os.path.dirname(__file__)
-              + '/conf_ruck_rover.yaml')
 @click.option("--distro", default=DISTROS[0], type=click.Choice(DISTROS))
 @click.option("--release", default=RELEASES[0], type=click.Choice(RELEASES))
 @click.command()
-def main(release, distro, config_file, promotion_name, aggregate_hash,
-         component, verbose):
+def main(release, distro, promotion_name, aggregate_hash, component, verbose):
 
     if verbose:
         fmt = '%(asctime)s:%(levelname)s - %(funcName)s:%(lineno)s %(message)s'
         logging.basicConfig(format=fmt, encoding='utf-8', level=logging.DEBUG)
 
-    if config_file != os.path.dirname(__file__) + '/conf_ruck_rover.yaml':
-        print('using custom config file: {}'.format(config_file))
-    else:
-        downstream_urls = 'https://url.corp.redhat.com/ruck-rover-0'
-        config_file = download_file(downstream_urls)
-    config = load_conf_file(config_file)
-
+    config = yaml.safe_load(requests.get(DOWNSTREAM_URL, verify=CERT_PATH).text)
     dlrnapi_client.configuration.server_principal = (
         config['downstream']['dlrnapi_krb_principal']
     )

@@ -110,16 +110,6 @@ class TestRuckRover(unittest.TestCase):
         expected = ('c6', '03', None)
         self.assertEqual(expected, obtained)
 
-    def test_load_conf_file(self):
-        full_path = os.path.dirname(os.path.abspath(__file__))
-        my_file = full_path + '/data/test_conf_ruck_rover.yaml'
-        obtained = ruck_rover.load_conf_file(my_file)
-        expected = {'upstream': {'zuul_url': 'abc',
-                                 'dlrnapi_url': 'def',
-                                 'promoter_url': 'ghi',
-                                 'git_url': 'jkl'}}
-        self.assertEqual(expected, obtained)
-
     @patch('ruck_rover.requests.get')
     def test_get_last_modified_date_centos9_no_component(self, m_get):
         m_get.return_value.ok = None
