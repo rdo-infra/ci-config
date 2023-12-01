@@ -29,7 +29,6 @@ console = Console()
 CERT_PATH = os.environ.get(
                 'CURL_CA_BUNDLE',
                 '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt')
-dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
 # DLRN client configurations
 DLRN_AUTH_METHOD = "kerberosAuth"
 DLRN_FORCE_AUTH = True
@@ -756,16 +755,17 @@ def main(release, distro, promotion_name, aggregate_hash, component, verbose):
         fmt = '%(asctime)s:%(levelname)s - %(funcName)s:%(lineno)s %(message)s'
         logging.basicConfig(format=fmt, encoding='utf-8', level=logging.DEBUG)
 
-    config = yaml.safe_load(requests.get(DOWNSTREAM_URL, verify=CERT_PATH).text)
-    dlrnapi_client.configuration.server_principal = (
-        config['downstream']['dlrnapi_krb_principal']
-    )
-
     distros = REVERSED_MATRIX[release]
     releases = MATRIX[distro]
     if distro not in distros or release not in releases:
         msg = f'Release {release} is not supported for {distro}.'
         raise BadParameter(msg)
+
+    config = yaml.safe_load(requests.get(DOWNSTREAM_URL, verify=CERT_PATH).text)
+    krb_principal = config['downstream']['dlrnapi_krb_principal']
+
+    dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
+    dlrnapi_client.configuration.server_principal = krb_principal
 
     logging.info("Starting script: %s - %s", distro, release)
     periodic_builds_url = config['downstream']['periodic_builds_url']
