@@ -12,22 +12,6 @@ class TestRuckRover(unittest.TestCase):
     def setUp(self):
         self.maxDiff = None
 
-    def test_short_find_failure_reason(self):
-        obtained = ruck_rover.find_failure_reason('N/A')
-        self.assertEqual("N/A", obtained)
-
-    @patch('ruck_rover.requests.get')
-    def test_find_failure_reason(self, m_get):
-        full_path = os.path.dirname(os.path.abspath(__file__))
-        # to-do correct path when move test file to correct place
-        with open(full_path + "/data/failures_file") as file:
-            data = file.read()
-        m_get.return_value.text = data
-        m_get.return_value.ok = True
-        expected = "Tempest tests failed. Reason: code "
-        obtained = ruck_rover.find_failure_reason('www.demoourl.com')
-        self.assertEqual(expected, obtained)
-
     @patch('ruck_rover.requests.get')
     def test_web_scrape(self, m_get):
         full_path = os.path.dirname(os.path.abspath(__file__))

@@ -62,26 +62,6 @@ DOWNSTREAM_URL = ('https://sf.hosted.upshift.rdu2.redhat.com/'
                   'images/conf_ruck_rover.yaml')
 
 
-def find_failure_reason(url):
-    if url == "N/A":
-        return "N/A"
-
-    url = f'{url}logs/failures_file'
-    logging.debug("Fetch failure reason: %s", url)
-    try:
-        response = requests.get(url, verify=CERT_PATH)
-    except requests.exceptions.RequestException:
-        logging.info("Cannot connect to the url")
-        return "N/A"
-
-    if response.ok:
-        logging.debug("Fetched failure reason")
-        return ' '.join(response.text.split('\n'))
-
-    logging.debug("Failed fetching reason")
-    return "N/A"
-
-
 def web_scrape(url):
     logging.debug("Fetching url: %s", url)
     try:
@@ -492,8 +472,6 @@ def prepare_jobs(
             'logs': log_url,
             'duration': duration,
             'status': status,
-            'failure_reason': (find_failure_reason(log_url)
-                               if status == INFLUX_FAILED else "N/A"),
         }
         job_result_list.append(job_result)
     logging.debug("Prepared jobs info: %s", job_result_list)
