@@ -64,6 +64,11 @@ DOWNSTREAM_URL = ('https://sf.hosted.upshift.rdu2.redhat.com/'
 INTEGRATION_COMMIT_URL = "{url}{aggregate_hash}/delorean.repo.md5"
 INTEGRATION_TEST_URL = "{url}/api/civotes_agg_detail.html?ref_hash={ref_hash}"
 
+COMPONENT_COMMIT_URL = ("{url}/component/{component}/component-ci-testing/"
+                        "commit.yaml")
+COMPONENT_TEST_URL = ("{url}/api/civotes_detail.html?"
+                      "commit_hash={commit_hash}&distro_hash={distro_hash}")
+
 
 def web_scrape(url):
     logging.debug("Fetching url: %s", url)
@@ -652,7 +657,6 @@ def track_component_promotion(
     logging.debug("Starting component track")
 
     api_url, base_url = gather_basic_info_from_criteria(criteria)
-    api_suffix = "api/civotes_detail.html?commit_hash="
 
     promotion_name = "current-tripleo"
     aggregate_hash = "component-ci-testing"
@@ -661,9 +665,11 @@ def track_component_promotion(
 
     for component in components:
         logging.debug("Fetching component: %s data", component)
-        component_url = (f"{base_url}component/{component}/"
-                         "component-ci-testing/commit.yaml")
+
+        component_url = COMPONENT_COMMIT_URL.format(
+            url=base_url, component=component)
         component_criteria = url_response_in_yaml(component_url)
+
         commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
             component_criteria)
         api_response = find_results_from_dlrn_repo_status(
@@ -674,8 +680,8 @@ def track_component_promotion(
         timestamp = datetime.utcfromtimestamp(promotion.timestamp)
 
         test_hash = commit_hash
-        under_test_url = "{}/{}{}&distro_hash={}".format(
-            api_url, api_suffix, commit_hash, distro_hash)
+        under_test_url = COMPONENT_TEST_URL.format(
+            url=api_url, commit_hash=commit_hash, distro_hash=distro_hash)
 
         jobs_in_criteria = find_jobs_in_component_criteria(criteria, component)
         dlrn_jobs = get_dlrn_results(api_response)
