@@ -427,29 +427,6 @@ def print_failed_in_criteria(jobs):
     console.print(table)
 
 
-def query_zuul_job_details(
-        job_names,
-        url="https://review.rdoproject.org/zuul/api/builds"):
-
-    logging.debug("Query ZUUL")
-    logging.debug("Job names: %s", job_names)
-    response = requests.get(
-        url,
-        params={'job_name': job_names, 'limit': ZUUL_JOBS_LIMIT},
-        headers={'Accept': 'application/json'}
-    )
-
-    jobs = {}
-    for job in response.json():
-        log_url = job['log_url']
-        if not log_url:
-            continue
-
-        jobs[log_url] = job
-    logging.debug("Return ZUUL details")
-    return jobs
-
-
 def prepare_jobs(
         jobs_in_criteria,
         jobs_in_alt_criteria,
