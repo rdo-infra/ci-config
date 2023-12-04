@@ -714,7 +714,7 @@ def main(release, distro, promotion_name, aggregate_hash, component, verbose):
         msg = f'Release {release} is not supported for {distro}.'
         raise BadParameter(msg)
 
-    config = yaml.safe_load(requests.get(DOWNSTREAM_URL, verify=CERT_PATH).text)
+    config = yaml.safe_load(web_scrape(DOWNSTREAM_URL))
     krb_principal = config['downstream']['dlrnapi_krb_principal']
 
     dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
