@@ -61,6 +61,9 @@ ZUUL_JOB_REGEX = re.compile(r"periodic-(?P<job_name>.*)-\w*")
 DOWNSTREAM_URL = ('https://sf.hosted.upshift.rdu2.redhat.com/'
                   'images/conf_ruck_rover.yaml')
 
+INTEGRATION_COMMIT_URL = "{url}{aggregate_hash}/delorean.repo.md5"
+INTEGRATION_TEST_URL = "{url}/api/civotes_agg_detail.html?ref_hash={ref_hash}"
+
 
 def web_scrape(url):
     logging.debug("Fetching url: %s", url)
@@ -575,15 +578,13 @@ def render_tables(jobs, timestamp, under_test_url, component,
             render_integration_yaml(tp_jobs, test_hash, testproject_url)
 
 
-def integration(
-        api_url, base_url, aggregate_hash, promo_aggregate_hash):
+def integration(api_url, base_url, ahash, promo_aggregate_hash):
 
-    commit_url = f"{base_url}{aggregate_hash}/delorean.repo.md5"
-    ref_hash = web_scrape(commit_url)
+    commit = INTEGRATION_COMMIT_URL.format(url=base_url, aggregate_hash=ahash)
+    ref_hash = web_scrape(commit)
+
     api_response = find_results_from_dlrn_agg(api_url, ref_hash)
-
-    under_test_url = (f"{api_url}/api/civotes_agg_detail.html?"
-                      f"ref_hash={ref_hash}")
+    under_test_url = INTEGRATION_TEST_URL.format(url=api_url, ref_hash=ref_hash)
     return api_response, ref_hash, under_test_url
 
 
