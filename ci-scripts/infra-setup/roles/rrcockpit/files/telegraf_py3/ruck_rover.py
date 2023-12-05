@@ -56,7 +56,6 @@ INFLUX_FAILED = 0
 
 ZUUL_JOBS_LIMIT = 1000
 ZUUL_JOB_HISTORY_THRESHOLD = 5
-ZUUL_JOB_REGEX = re.compile(r"periodic-(?P<job_name>.*)-\w*")
 
 DOWNSTREAM_URL = ('https://sf.hosted.upshift.rdu2.redhat.com/'
                   'images/conf_ruck_rover.yaml')
