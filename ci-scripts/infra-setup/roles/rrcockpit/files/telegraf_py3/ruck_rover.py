@@ -63,11 +63,13 @@ DOWNSTREAM_URL = ('https://sf.hosted.upshift.rdu2.redhat.com/'
 
 INTEGRATION_COMMIT_URL = "{url}{aggregate_hash}/delorean.repo.md5"
 INTEGRATION_TEST_URL = "{url}/api/civotes_agg_detail.html?ref_hash={ref_hash}"
+INTEGRATION_DLRN_VERSIONS_CSV = "{url}/{tag}/versions.csv"
 
 COMPONENT_COMMIT_URL = ("{url}/component/{component}/component-ci-testing/"
                         "commit.yaml")
 COMPONENT_TEST_URL = ("{url}/api/civotes_detail.html?"
                       "commit_hash={commit_hash}&distro_hash={distro_hash}")
+COMPONENT_DLRN_VERSIONS_CSV = "{url}/component/{component}/{tag}/versions.csv"
 
 
 def web_scrape(url):
@@ -144,11 +146,6 @@ def find_results_from_dlrn_agg(api_url, test_hash):
     api_response = api_instance.api_agg_status_get(params=params)
 
     return api_response
-
-
-def get_dlrn_versions_csv(base_url, component, tag):
-    component_part = f"/component/{component}" if component else ""
-    return f"{base_url}{component_part}/{tag}/versions.csv"
 
 
 def get_csv(url):
@@ -609,12 +606,19 @@ def get_components_diff(base_url, component, promotion_name, aggregate_hash):
 
     if component != "all":
         logging.debug("Getting component diff for %s", component)
-        # get package diff for the component # control_url
-        control_url = get_dlrn_versions_csv(base_url, component, promotion_name)
-        control_csv = get_csv(control_url)
 
-        # test_url, what is currently getting tested
-        test_url = get_dlrn_versions_csv(base_url, component, aggregate_hash)
+        if component:
+            control_url = COMPONENT_DLRN_VERSIONS_CSV.format(
+                url=base_url, component=component, tag=promotion_name)
+            test_url = COMPONENT_DLRN_VERSIONS_CSV.format(
+                url=base_url, component=component, tag=aggregate_hash)
+        else:
+            control_url = INTEGRATION_DLRN_VERSIONS_CSV.format(
+                url=base_url, tag=promotion_name)
+            test_url = INTEGRATION_DLRN_VERSIONS_CSV.format(
+                url=base_url, tag=aggregate_hash)
+
+        control_csv = get_csv(control_url)
         test_csv = get_csv(test_url)
 
         components = [component]
