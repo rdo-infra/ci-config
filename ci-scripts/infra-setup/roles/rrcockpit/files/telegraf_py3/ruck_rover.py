@@ -146,35 +146,6 @@ def find_results_from_dlrn_agg(api_url, test_hash):
     return api_response
 
 
-def format_ts_from_last_modified(ts, pattern='%a, %d %b %Y %H:%M:%S %Z'):
-    ts = datetime.strptime(ts, pattern)
-    return int(time.mktime(ts.timetuple()))
-
-
-def get_last_modified_date(base_url, component=None):
-    """Get the date of the consistent link in dlrn.
-    """
-
-    logging.debug("Get last modified date")
-    repo = "delorean.repo"
-
-    if component is None:
-        # integration build, use last promoted_components date
-        url = f'{base_url}promoted-components/{repo}'
-    else:
-        # TO-DO normalize component and intergration config
-        url = f'{base_url}component/{component}/consistent/{repo}'
-
-    response = requests.get(url, verify=CERT_PATH)
-    if not response.ok:
-        return None
-
-    last_modified = response.headers['Last-Modified']
-    consistent_date = format_ts_from_last_modified(last_modified)
-    logging.debug("Last modified date: %s", last_modified)
-    return consistent_date
-
-
 def get_dlrn_versions_csv(base_url, component, tag):
     component_part = f"/component/{component}" if component else ""
     return f"{base_url}{component_part}/{tag}/versions.csv"

@@ -94,30 +94,6 @@ class TestRuckRover(unittest.TestCase):
         expected = ('c6', '03', None)
         self.assertEqual(expected, obtained)
 
-    @patch('ruck_rover.requests.get')
-    def test_get_last_modified_date_centos9_no_component(self, m_get):
-        m_get.return_value.ok = None
-        cert_path = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
-
-        url = 'https://trunk.rdoproject.org/centos9-master/'
-        ruck_rover.get_last_modified_date(url, component=None)
-        expected = ('https://trunk.rdoproject.org/centos9-master/'
-                    'promoted-components/delorean.repo')
-        m_get.assert_called_with(expected,
-                                 verify=cert_path)
-
-    @patch('ruck_rover.requests.get')
-    def test_get_last_modified_date_centos8_with_component(self, m_get):
-        m_get.return_value.ok = None
-        cert_path = '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt'
-
-        url = 'https://trunk.rdoproject.org/centos8-wallaby/'
-        ruck_rover.get_last_modified_date(url, component="cinder")
-        expected = ('https://trunk.rdoproject.org/centos8-wallaby/component/'
-                    'cinder/consistent/delorean.repo')
-        m_get.assert_called_with(expected,
-                                 verify=cert_path)
-
     def test_get_dlrn_versions_csv_no_component(self):
         base_url = "base_url"
         component = None
@@ -319,13 +295,11 @@ class TestRuckRoverComponent(unittest.TestCase):
         expected = (['cinder'], "pkg_diff")
         self.assertEqual(result, expected)
 
-    @mock.patch('ruck_rover.get_last_modified_date')
     @mock.patch('ruck_rover.dlrnapi_client.PromotionQuery')
     @mock.patch('ruck_rover.dlrnapi_client.DefaultApi')
     @mock.patch('ruck_rover.dlrnapi_client.ApiClient')
     def test_get_dlrn_promotions(
-            self, m_api_client, m_def_api, m_promo_query, m_consistent):
-        m_consistent.return_value = "consistent"
+            self, m_api_client, m_def_api, m_promo_query):
         m_api = mock.MagicMock()
         m_pr = mock.MagicMock()
         m_api.api_promotions_get.return_value = [m_pr]
