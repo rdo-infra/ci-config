@@ -59,7 +59,7 @@ ZUUL_JOB_HISTORY_THRESHOLD = 5
 DOWNSTREAM_URL = ('https://sf.hosted.upshift.rdu2.redhat.com/'
                   'images/conf_ruck_rover.yaml')
 
-INTEGRATION_COMMIT_URL = "{url}{aggregate_hash}/delorean.repo.md5"
+INTEGRATION_COMMIT_URL = "{url}/{aggregate_hash}/delorean.repo.md5"
 INTEGRATION_TEST_URL = "{url}/api/civotes_agg_detail.html?ref_hash={ref_hash}"
 INTEGRATION_DLRN_VERSIONS_CSV = "{url}/{tag}/versions.csv"
 
