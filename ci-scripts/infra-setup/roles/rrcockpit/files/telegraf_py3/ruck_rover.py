@@ -3,7 +3,6 @@
 import csv
 import logging
 import os
-import re
 import time
 from datetime import datetime
 from io import StringIO
@@ -56,7 +55,6 @@ INFLUX_FAILED = 0
 
 ZUUL_JOBS_LIMIT = 1000
 ZUUL_JOB_HISTORY_THRESHOLD = 5
-ZUUL_JOB_REGEX = re.compile(r"periodic-(?P<job_name>.*)-\w*")
 
 DOWNSTREAM_URL = ('https://sf.hosted.upshift.rdu2.redhat.com/'
                   'images/conf_ruck_rover.yaml')
@@ -311,7 +309,7 @@ def get_job_history(jobs, url):
     logging.debug(response.url)
 
     history = {}
-    for index, job in enumerate(response.json()):
+    for _index, job in enumerate(response.json()):
         job_name = job['job_name']
         result = job['result']
 
