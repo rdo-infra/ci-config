@@ -94,24 +94,6 @@ class TestRuckRover(unittest.TestCase):
         expected = ('c6', '03', None)
         self.assertEqual(expected, obtained)
 
-    def test_get_dlrn_versions_csv_no_component(self):
-        base_url = "base_url"
-        component = None
-        tag = "tag"
-
-        output = ruck_rover.get_dlrn_versions_csv(base_url, component, tag)
-        expected = f"{base_url}/{tag}/versions.csv"
-        self.assertEqual(expected, output)
-
-    def test_get_dlrn_versions_csv_component(self):
-        base_url = "base_url"
-        component = "component"
-        tag = "tag"
-
-        output = ruck_rover.get_dlrn_versions_csv(base_url, component, tag)
-        expected = f"{base_url}/component/{component}/{tag}/versions.csv"
-        self.assertEqual(expected, output)
-
     def test_get_diff_the_same(self):
         file_content = ["file1", ([], [0, 0, 0, 0, 0, 0, 0, 0, 0, "abc"], [])]
         output = ruck_rover.get_diff("", file_content, "", file_content)
@@ -273,10 +255,8 @@ class TestRuckRoverComponent(unittest.TestCase):
 
     @mock.patch('ruck_rover.get_diff')
     @mock.patch('ruck_rover.get_csv')
-    @mock.patch('ruck_rover.get_dlrn_versions_csv')
-    def test_get_components_single(self, m_dlrn, m_csv, m_diff):
+    def test_get_components_single(self, m_csv, m_diff):
 
-        m_dlrn.side_effect = ['control_url', 'test_url']
         m_csv.side_effect = ["first", "second"]
         m_diff.return_value = "pkg_diff"
 
@@ -284,11 +264,11 @@ class TestRuckRoverComponent(unittest.TestCase):
             "base_url", "cinder", "current-tripleo",
             "component-ci-testing")
 
-        m_dlrn.assert_has_calls([
-            call('base_url', 'cinder', 'current-tripleo'),
-            call('base_url', 'cinder', 'component-ci-testing')
+        m_csv.assert_has_calls([
+            call('base_url/component/cinder/current-tripleo/versions.csv'),
+            call('base_url/component/cinder/component-ci-testing/versions.csv')
         ])
-        m_csv.assert_has_calls([call('control_url'), call('test_url')])
+
         m_diff.assert_called_with(
             "current-tripleo", "first", "component-ci-testing", "second")
 
