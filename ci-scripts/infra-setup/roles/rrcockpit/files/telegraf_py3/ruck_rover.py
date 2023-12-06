@@ -549,17 +549,6 @@ def render_tables(jobs, timestamp, under_test_url, component,
             render_integration_yaml(tp_jobs, test_hash, testproject_url)
 
 
-def integration(api_url, base_url, aggregate_hash):
-
-    commit_url = INTEGRATION_COMMIT_URL.format(
-        url=base_url, aggregate_hash=aggregate_hash)
-    ref_hash = web_scrape(commit_url)
-
-    api_response = find_results_from_dlrn_agg(api_url, ref_hash)
-    under_test_url = INTEGRATION_TEST_URL.format(url=api_url, ref_hash=ref_hash)
-    return api_response, ref_hash, under_test_url
-
-
 def track_integration_promotion(
         criteria, periodic_builds_url, testproject_url,
         promotion_name, aggregate_hash):
@@ -570,8 +559,12 @@ def track_integration_promotion(
 
     promotion = get_dlrn_promotions(api_url, promotion_name)
 
-    api_response, test_hash, under_test_url = integration(
-        api_url, base_url, aggregate_hash)
+    commit_url = INTEGRATION_COMMIT_URL.format(
+        url=base_url, aggregate_hash=aggregate_hash)
+    ref_hash = web_scrape(commit_url)
+
+    api_response = find_results_from_dlrn_agg(api_url, ref_hash)
+    under_test_url = INTEGRATION_TEST_URL.format(url=api_url, ref_hash=ref_hash)
 
     component = None
 
@@ -592,7 +585,7 @@ def track_integration_promotion(
 
     render_tables(
         jobs, timestamp, under_test_url, component,
-        components, api_response, pkg_diff, test_hash,
+        components, api_response, pkg_diff, ref_hash,
         periodic_builds_url, testproject_url)
 
     logging.debug("Finished integration track")
