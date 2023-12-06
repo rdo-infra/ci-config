@@ -98,27 +98,6 @@ def url_response_in_yaml(url):
     return processed_data
 
 
-def find_jobs_in_integration_criteria(
-        criteria, promotion_name='current-tripleo'):
-    return set(criteria['promotions'][promotion_name]['criteria'])
-
-
-def find_jobs_in_integration_alt_criteria(
-        criteria, promotion_name='current-tripleo'):
-    return criteria['promotions'][promotion_name].get(
-            'alternative_criteria', {})
-
-
-def find_jobs_in_component_criteria(criteria, component):
-    # In component criteria file, when a new pipeline
-    # is developed, We donot add jobs to the criteria file and it will
-    # return empty list. This case needs to be handled to avoid breakage.
-    jobs = criteria['promoted-components'][component]
-    if jobs is None:
-        jobs = []
-    return set(jobs)
-
-
 def fetch_hashes_from_commit_yaml(criteria):
     """
     This function finds commit hash, distro hash, extended_hash from commit.yaml
@@ -380,10 +359,7 @@ def print_failed_in_criteria(jobs):
     console.print(table)
 
 
-def prepare_jobs(
-        jobs_in_criteria,
-        jobs_in_alt_criteria,
-        dlrn_jobs):
+def prepare_jobs(jobs_in_criteria, jobs_in_alt_criteria, dlrn_jobs):
     """
     InfluxDB follows line protocol [1]
 
@@ -568,15 +544,12 @@ def track_integration_promotion(
     components, pkg_diff = get_components_diff(
         base_url, test_component, promotion_name, aggregate_hash)
 
-    jobs_in_criteria = find_jobs_in_integration_criteria(
-        criteria, promotion_name)
-    jobs_in_alt_criteria = find_jobs_in_integration_alt_criteria(
-        criteria, promotion_name)
+    jobs_in_criteria = set(criteria['promotions'][promotion_name]['criteria'])
+    jobs_in_alt_criteria = criteria['promotions'][promotion_name].get(
+            'alternative_criteria', {})
+
     dlrn_jobs = get_dlrn_results(api_response)
-    jobs = prepare_jobs(
-            jobs_in_criteria,
-            jobs_in_alt_criteria,
-            dlrn_jobs)
+    jobs = prepare_jobs(jobs_in_criteria, jobs_in_alt_criteria, dlrn_jobs)
 
     render_tables(
         jobs, timestamp, under_test_url, test_component,
@@ -642,7 +615,9 @@ def track_component_promotion(
         under_test_url = COMPONENT_TEST_URL.format(
             url=api_url, commit_hash=commit_hash, distro_hash=distro_hash)
 
-        jobs_in_criteria = find_jobs_in_component_criteria(criteria, component)
+        jobs_in_criteria = set(criteria['promoted-components'].get(
+            component, []))
+
         dlrn_jobs = get_dlrn_results(api_response)
         jobs = prepare_jobs(jobs_in_criteria, {}, dlrn_jobs)
 
