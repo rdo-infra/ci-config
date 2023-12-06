@@ -70,6 +70,12 @@ COMPONENT_TEST_URL = ("{url}/api/civotes_detail.html?"
 COMPONENT_DLRN_VERSIONS_CSV = "{url}/component/{component}/{tag}/versions.csv"
 
 
+class AttributeDict(dict):
+    def __getattr__(self, name):
+        return (self[name] if not isinstance(self[name], dict)
+                else AttributeDict(self[name]))
+
+
 def web_scrape(url):
     logging.debug("Fetching url: %s", url)
     try:
@@ -694,16 +700,20 @@ def main(release, distro, promotion_name, aggregate_hash, component, verbose):
     dlrnapi_client.configuration.server_principal = krb_principal
 
     logging.info("Starting script: %s - %s", distro, release)
+
     periodic_builds_url = config['downstream']['periodic_builds_url']
     testproject_url = config['downstream']['testproject_url']
+
     if component:
         url = config['downstream']['criteria'][distro][release]['comp_url']
         criteria = url_response_in_yaml(url)
+        criteria = AttributeDict(criteria)
         track_component_promotion(
             criteria, periodic_builds_url, testproject_url, component)
     elif not component:
         url = config['downstream']['criteria'][distro][release]['int_url']
         criteria = url_response_in_yaml(url)
+        criteria = AttributeDict(criteria)
         track_integration_promotion(
             criteria, periodic_builds_url, testproject_url,
             promotion_name, aggregate_hash)
