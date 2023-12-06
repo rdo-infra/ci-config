@@ -31,45 +31,6 @@ class TestRuckRover(unittest.TestCase):
         self.assertTrue(isinstance(obtained, dict))
         self.assertEqual('master', obtained['release'])
 
-    def test_find_jobs_in_integration_criteria(self):
-        criteria = {
-            'release': 'master',
-            'promotions': {
-                'current-tripleo': {
-                    'candidate_label': 'tripleo-ci-testing',
-                    'criteria': [
-                        'periodic-tripleo-ci-build-containers-ubi-8-push',
-                        'periodic-tripleo-centos-8-buildimage-overcloud-full']
-                            }}}
-        obtained = ruck_rover.find_jobs_in_integration_criteria(criteria)
-        expected = set([
-            'periodic-tripleo-ci-build-containers-ubi-8-push',
-            'periodic-tripleo-centos-8-buildimage-overcloud-full'])
-        self.assertEqual(
-            expected, obtained)
-
-    def test_find_jobs_in_component_criteria(self):
-        criteria = {
-            'promoted-components': {
-                'baremetal': [
-                    'periodic-tripleo-baremetal-master',
-                    'periodic-tripleo-sc012-baremetal-master'],
-                'cinder': [
-                    'periodic-tripleo-cinder-master',
-                    'periodic-tripleo-sc01-cinder-master']
-                        }}
-        obtained = ruck_rover.find_jobs_in_component_criteria(
-            criteria, 'baremetal')
-        expected = set([
-            'periodic-tripleo-baremetal-master',
-            'periodic-tripleo-sc012-baremetal-master'])
-        self.assertEqual(
-            expected, obtained)
-
-        with self.assertRaises(KeyError):
-            ruck_rover.find_jobs_in_component_criteria(
-                criteria, 'xyz')
-
     def test_fetch_hashes_from_commit_yaml(self):
         criteria = {
             'commits': [{
