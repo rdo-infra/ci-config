@@ -31,19 +31,6 @@ class TestRuckRover(unittest.TestCase):
         self.assertTrue(isinstance(obtained, dict))
         self.assertEqual('master', obtained['release'])
 
-    @patch('ruck_rover.requests.get')
-    def test_gather_basic_info_from_criteria(self, m_get):
-        criteria = {
-            'api_url': 'https://trunk.rdoproject.org/api-centos8-master-uc',
-            'base_url': 'https://trunk.rdoproject.org/centos8-master/'
-        }
-
-        a_url = 'https://trunk.rdoproject.org/api-centos8-master-uc'
-        b_url = 'https://trunk.rdoproject.org/centos8-master/'
-        expected = (a_url, b_url)
-        obtained = ruck_rover.gather_basic_info_from_criteria(criteria)
-        self.assertEqual(obtained, expected)
-
     def test_find_jobs_in_integration_criteria(self):
         criteria = {
             'release': 'master',
