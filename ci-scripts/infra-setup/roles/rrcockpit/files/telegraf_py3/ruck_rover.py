@@ -556,12 +556,10 @@ def render_tables(jobs, timestamp, under_test_url, component,
 
 
 def track_integration_promotion(
-        criteria, periodic_builds_url, testproject_url,
+        api_url, base_url, criteria, periodic_builds_url, testproject_url,
         promotion_name, aggregate_hash):
 
     logging.debug("Starting integration track")
-
-    api_url, base_url = gather_basic_info_from_criteria(criteria)
 
     promotion = get_dlrn_promotions(api_url, promotion_name)
 
@@ -626,10 +624,9 @@ def get_components_diff(base_url, component, promotion_name, aggregate_hash):
 
 
 def track_component_promotion(
-        criteria, periodic_builds_url, testproject_url, test_component):
+        api_url, base_url, criteria, periodic_builds_url, testproject_url,
+        test_component):
     logging.debug("Starting component track")
-
-    api_url, base_url = gather_basic_info_from_criteria(criteria)
 
     promotion_name = "current-tripleo"
     aggregate_hash = "component-ci-testing"
@@ -709,14 +706,15 @@ def main(release, distro, promotion_name, aggregate_hash, component, verbose):
         criteria = url_response_in_yaml(url)
         criteria = AttributeDict(criteria)
         track_component_promotion(
-            criteria, periodic_builds_url, testproject_url, component)
+            criteria.api_url, criteria.base_url, criteria, periodic_builds_url,
+            testproject_url, component)
     elif not component:
         url = config['downstream']['criteria'][distro][release]['int_url']
         criteria = url_response_in_yaml(url)
         criteria = AttributeDict(criteria)
         track_integration_promotion(
-            criteria, periodic_builds_url, testproject_url,
-            promotion_name, aggregate_hash)
+            criteria.api_url, criteria.base_url, criteria, periodic_builds_url,
+            testproject_url, promotion_name, aggregate_hash)
     else:
         raise Exception("Unsupported")
     logging.info("Finished script: %s - %s", distro, release)
