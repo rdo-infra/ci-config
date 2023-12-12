@@ -703,8 +703,9 @@ def main(release, distro, promotion_name, aggregate_hash, component, verbose):
         raise BadParameter(msg)
     logging.info("Starting script: %s - %s", distro, release)
 
-    downstream(
-        release, distro, promotion_name, aggregate_hash, component, verbose)
+    # NOTE (dasm): Dynamically select up/downstream function based on distro
+    stream = globals()[STREAM[distro]]
+    stream(release, distro, promotion_name, aggregate_hash, component, verbose)
 
 
 if __name__ == '__main__':
