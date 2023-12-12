@@ -630,20 +630,8 @@ def track_component_promotion(
     logging.debug("Finshed component track")
 
 
-@click.option("--verbose", is_flag=True, default=False)
-@click.option("--component", default=None,
-              type=click.Choice(sorted(ALL_COMPONENTS)))
-@click.option("--aggregate_hash", default="tripleo-ci-testing",
-              # TO-DO w/ tripleo-get-hash
-              help=("default:tripleo-ci-testing"
-                    "\nexample:tripleo-ci-testing/e6/ad/e6ad..."))
-@click.option("--promotion_name", default="current-tripleo",
-              type=click.Choice(["current-tripleo", "current-tripleo-rdo"]))
-@click.option("--distro", default=DISTROS[0], type=click.Choice(DISTROS))
-@click.option("--release", default=RELEASES[0], type=click.Choice(RELEASES))
-@click.command()
-def main(release, distro, promotion_name, aggregate_hash, component, verbose):
-
+def downstream(
+        release, distro, promotion_name, aggregate_hash, component, verbose):
     if verbose:
         fmt = '%(asctime)s:%(levelname)s - %(funcName)s:%(lineno)s %(message)s'
         logging.basicConfig(format=fmt, encoding='utf-8', level=logging.DEBUG)
@@ -686,6 +674,23 @@ def main(release, distro, promotion_name, aggregate_hash, component, verbose):
     else:
         raise Exception("Unsupported")
     logging.info("Finished script: %s - %s", distro, release)
+
+
+@click.option("--verbose", is_flag=True, default=False)
+@click.option("--component", default=None,
+              type=click.Choice(sorted(ALL_COMPONENTS)))
+@click.option("--aggregate_hash", default="tripleo-ci-testing",
+              # TO-DO w/ tripleo-get-hash
+              help=("default:tripleo-ci-testing"
+                    "\nexample:tripleo-ci-testing/e6/ad/e6ad..."))
+@click.option("--promotion_name", default="current-tripleo",
+              type=click.Choice(["current-tripleo", "current-tripleo-rdo"]))
+@click.option("--distro", default=DISTROS[0], type=click.Choice(DISTROS))
+@click.option("--release", default=RELEASES[0], type=click.Choice(RELEASES))
+@click.command()
+def main(release, distro, promotion_name, aggregate_hash, component, verbose):
+    downstream(
+        release, distro, promotion_name, aggregate_hash, component, verbose)
 
 
 if __name__ == '__main__':
