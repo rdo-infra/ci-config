@@ -32,9 +32,15 @@ CERT_PATH = os.environ.get(
 DLRN_AUTH_METHOD = "kerberosAuth"
 DLRN_FORCE_AUTH = True
 
+STREAM = {
+    "centos9": "upstream",
+    "rhel-8": "downstream",
+    "rhel-9": "downstream",
+}
 MATRIX = {
     "rhel-9": ["osp17", "osp17-1", "osp18"],
     "rhel-8": ["osp17-1", "osp16-2"],
+    "centos9": ["master", "antelope"],
 }
 REVERSED_MATRIX = {}
 for key, values in MATRIX.items():
@@ -56,8 +62,11 @@ INFLUX_FAILED = 0
 ZUUL_JOBS_LIMIT = 1000
 ZUUL_JOB_HISTORY_THRESHOLD = 5
 
-DOWNSTREAM_URL = ('https://sf.hosted.upshift.rdu2.redhat.com/'
-                  'images/conf_ruck_rover.yaml')
+UPSTREAM_CRITERIA_URL = (
+    "https://raw.githubusercontent.com/rdo-infra/rdo-jobs/master/"
+    "criteria/{system}/{release}.yaml")
+DOWNSTREAM_CRITERIA_URL = (
+    'https://sf.hosted.upshift.rdu2.redhat.com/images/conf_ruck_rover.yaml')
 
 INTEGRATION_COMMIT_URL = "{url}/{aggregate_hash}/delorean.repo.md5"
 INTEGRATION_TEST_URL = "{url}/api/civotes_agg_detail.html?ref_hash={ref_hash}"
@@ -637,7 +646,7 @@ def upstream(
 
 def downstream(
         release, distro, promotion_name, aggregate_hash, component, verbose):
-    config = yaml.safe_load(web_scrape(DOWNSTREAM_URL))
+    config = yaml.safe_load(web_scrape(DOWNSTREAM_CRITERIA_URL))
     krb_principal = config['downstream']['dlrnapi_krb_principal']
 
     dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
@@ -677,7 +686,8 @@ def downstream(
               help=("default:tripleo-ci-testing"
                     "\nexample:tripleo-ci-testing/e6/ad/e6ad..."))
 @click.option("--promotion_name", default="current-tripleo",
-              type=click.Choice(["current-tripleo", "current-tripleo-rdo"]))
+              type=click.Choice(
+                ["current-tripleo", "current-tripleo-rdo", "current-podified"]))
 @click.option("--distro", default=DISTROS[0], type=click.Choice(DISTROS))
 @click.option("--release", default=RELEASES[0], type=click.Choice(RELEASES))
 @click.command()
