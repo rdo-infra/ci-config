@@ -32,11 +32,6 @@ CERT_PATH = os.environ.get(
 DLRN_AUTH_METHOD = "kerberosAuth"
 DLRN_FORCE_AUTH = True
 
-STREAM = {
-    "centos9": "upstream",
-    "rhel-8": "downstream",
-    "rhel-9": "downstream",
-}
 MATRIX = {
     "rhel-9": ["osp17", "osp17-1", "osp18"],
     "rhel-8": ["osp17-1", "osp16-2"],
@@ -678,6 +673,13 @@ def downstream(
     logging.info("Finished script: %s - %s", distro, release)
 
 
+STREAM = {
+    "centos9": upstream,
+    "rhel-8": downstream,
+    "rhel-9": downstream,
+}
+
+
 @click.option("--verbose", is_flag=True, default=False)
 @click.option("--component", default=None,
               type=click.Choice(sorted(ALL_COMPONENTS)))
@@ -703,8 +705,9 @@ def main(release, distro, promotion_name, aggregate_hash, component, verbose):
         raise BadParameter(msg)
     logging.info("Starting script: %s - %s", distro, release)
 
-    downstream(
-        release, distro, promotion_name, aggregate_hash, component, verbose)
+    # NOTE (dasm): Dynamically select up/downstream function based on distro
+    stream = STREAM[distro]
+    stream(release, distro, promotion_name, aggregate_hash, component, verbose)
 
 
 if __name__ == '__main__':
