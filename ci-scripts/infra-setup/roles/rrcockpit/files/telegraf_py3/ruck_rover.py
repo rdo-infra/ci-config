@@ -630,25 +630,18 @@ def track_component_promotion(
     logging.debug("Finshed component track")
 
 
+def upstream(
+        release, distro, promotion_name, aggregate_hash, component, verbose):
+    pass
+
+
 def downstream(
         release, distro, promotion_name, aggregate_hash, component, verbose):
-    if verbose:
-        fmt = '%(asctime)s:%(levelname)s - %(funcName)s:%(lineno)s %(message)s'
-        logging.basicConfig(format=fmt, encoding='utf-8', level=logging.DEBUG)
-
-    distros = REVERSED_MATRIX[release]
-    releases = MATRIX[distro]
-    if distro not in distros or release not in releases:
-        msg = f'Release {release} is not supported for {distro}.'
-        raise BadParameter(msg)
-
     config = yaml.safe_load(web_scrape(DOWNSTREAM_URL))
     krb_principal = config['downstream']['dlrnapi_krb_principal']
 
     dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
     dlrnapi_client.configuration.server_principal = krb_principal
-
-    logging.info("Starting script: %s - %s", distro, release)
 
     periodic_builds_url = config['downstream']['periodic_builds_url']
     testproject_url = config['downstream']['testproject_url']
@@ -689,6 +682,17 @@ def downstream(
 @click.option("--release", default=RELEASES[0], type=click.Choice(RELEASES))
 @click.command()
 def main(release, distro, promotion_name, aggregate_hash, component, verbose):
+    if verbose:
+        fmt = '%(asctime)s:%(levelname)s - %(funcName)s:%(lineno)s %(message)s'
+        logging.basicConfig(format=fmt, encoding='utf-8', level=logging.DEBUG)
+
+    distros = REVERSED_MATRIX[release]
+    releases = MATRIX[distro]
+    if distro not in distros or release not in releases:
+        msg = f'Release {release} is not supported for {distro}.'
+        raise BadParameter(msg)
+    logging.info("Starting script: %s - %s", distro, release)
+
     downstream(
         release, distro, promotion_name, aggregate_hash, component, verbose)
 
