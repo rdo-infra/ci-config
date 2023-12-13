@@ -57,6 +57,7 @@ INFLUX_FAILED = 0
 ZUUL_JOBS_LIMIT = 1000
 ZUUL_JOB_HISTORY_THRESHOLD = 5
 
+UPSTREAM_HOST_URL = "https://trunk.rdoproject.org/api-{system}-{release}"
 UPSTREAM_CRITERIA_URL = (
     "https://raw.githubusercontent.com/rdo-infra/rdo-jobs/master/"
     "criteria/{system}/{release}.yaml")
@@ -634,13 +635,35 @@ def track_component_promotion(
     logging.debug("Finshed component track")
 
 
-def upstream(
-        release, distro, promotion_name, aggregate_hash, component, verbose):
-    pass
+def upstream(release, system, promote_name, _aggregate_hash, component):
+    url = UPSTREAM_CRITERIA_URL.format(system=system, release=release)
+    config = yaml.safe_load(web_scrape(url))
+
+    host = UPSTREAM_HOST_URL.format(system=system, release=release)
+    api_client = dlrnapi_client.ApiClient(host)
+    api_instance = dlrnapi_client.DefaultApi(api_client)
+
+    params = dlrnapi_client.PromotionQuery(
+        promote_name=promote_name,
+        component=component,
+        limit=1
+    )
+    promotion = api_instance.api_promotions_get(params)[0]
+
+    params = dlrnapi_client.AggQuery(aggregate_hash=promotion.aggregate_hash)
+    aggregate = api_instance.api_agg_status_get(params)
+
+    jobs_in_criteria = config[promote_name]
+    dlrn_jobs = get_dlrn_results(aggregate)
+    jobs = prepare_jobs(jobs_in_criteria, {}, dlrn_jobs)
+
+    timestamp = datetime.utcfromtimestamp(promotion.timestamp)
+    render_tables(
+        jobs, timestamp, "", component, [], aggregate, None,
+        promotion.aggregate_hash, "", "")
 
 
-def downstream(
-        release, distro, promotion_name, aggregate_hash, component, verbose):
+def downstream(release, distro, promotion_name, aggregate_hash, component):
     config = yaml.safe_load(web_scrape(DOWNSTREAM_CRITERIA_URL))
     krb_principal = config['downstream']['dlrnapi_krb_principal']
 
@@ -707,7 +730,7 @@ def main(release, distro, promotion_name, aggregate_hash, component, verbose):
 
     # NOTE (dasm): Dynamically select up/downstream function based on distro
     stream = STREAM[distro]
-    stream(release, distro, promotion_name, aggregate_hash, component, verbose)
+    stream(release, distro, promotion_name, aggregate_hash, component)
 
 
 if __name__ == '__main__':
