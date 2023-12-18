@@ -638,6 +638,11 @@ def track_component_promotion(
     logging.debug("Finshed component track")
 
 
+def render_tables_proxy(jobs, timestamp, aggregate, promotion_hash):
+    render_tables(jobs, timestamp, "", None, [], aggregate, None,
+                  promotion_hash, "", "")
+
+
 def downstream_proxy(system, release):
     config = yaml.safe_load(web_scrape(DOWNSTREAM_CRITERIA_URL))
 
@@ -674,8 +679,7 @@ def downstream_integration(host, jobs_in_criteria, jobs_in_alt_criteria):
     jobs = prepare_jobs(jobs_in_criteria, jobs_in_alt_criteria, dlrn_jobs)
 
     timestamp = datetime.utcfromtimestamp(promotion.timestamp)
-    render_tables(jobs, timestamp, "", None, [], aggregate, None,
-                  promotion.aggregate_hash, "", "")
+    render_tables_proxy(jobs, timestamp, aggregate, promotion.aggregate_hash)
 
 
 def upstream_proxy(release, system, *_args, **_kwargs):
@@ -703,8 +707,7 @@ def upstream_integration(host, jobs_in_criteria, _alt_criteria):
     jobs = prepare_jobs(jobs_in_criteria, {}, dlrn_jobs)
 
     timestamp = datetime.utcfromtimestamp(promotion.timestamp)
-    render_tables(jobs, timestamp, "", None, [], aggregate, None,
-                  promotion.aggregate_hash, "", "")
+    render_tables_proxy(jobs, timestamp, aggregate, promotion.aggregate_hash)
 
 
 def downstream(release, distro, promotion_name, aggregate_hash, component):
@@ -735,6 +738,7 @@ def downstream(release, distro, promotion_name, aggregate_hash, component):
         track_integration_promotion(
             criteria.api_url, criteria.base_url, criteria, periodic_builds_url,
             testproject_url, promotion_name, aggregate_hash, component)
+        downstream_proxy(distro, release)
     else:
         raise Exception("Unsupported")
     logging.info("Finished script: %s - %s", distro, release)
