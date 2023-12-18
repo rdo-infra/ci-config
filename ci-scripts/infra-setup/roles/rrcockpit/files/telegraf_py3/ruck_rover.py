@@ -75,6 +75,7 @@ COMPONENT_TEST_URL = ("{url}/api/civotes_detail.html?"
 COMPONENT_DLRN_VERSIONS_CSV = "{url}/component/{component}/{tag}/versions.csv"
 
 UPSTREAM_PROMOTE_NAME = "current-podified"
+DOWNSTREAM_PROMOTE_NAME = "current-tripleo"
 
 
 class AttributeDict(dict):
@@ -635,6 +636,46 @@ def track_component_promotion(
         logging.debug("Finished component: %s data", component)
 
     logging.debug("Finshed component track")
+
+
+def downstream_proxy(system, release):
+    config = yaml.safe_load(web_scrape(DOWNSTREAM_CRITERIA_URL))
+
+    dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
+    dlrnapi_client.configuration.server_principal = (
+        config['downstream']['dlrnapi_krb_principal'])
+
+    url = config['downstream']['criteria'][system][release]['int_url']
+    criteria = yaml.safe_load(web_scrape(url))
+
+    jobs_in_criteria = set(
+        criteria['promotions'][DOWNSTREAM_PROMOTE_NAME]['criteria'])
+    jobs_in_alt_criteria = (
+        criteria['promotions'][DOWNSTREAM_PROMOTE_NAME].get(
+            'alternative_criteria', {}))
+
+    downstream_integration(
+        criteria['api_url'], jobs_in_criteria, jobs_in_alt_criteria)
+
+
+def downstream_integration(host, jobs_in_criteria, jobs_in_alt_criteria):
+    api_client = dlrnapi_client.ApiClient(
+        host, auth_method="kerberosAuth", force_auth=True)
+    api_instance = dlrnapi_client.DefaultApi(api_client)
+
+    params = dlrnapi_client.PromotionQuery(
+        promote_name=DOWNSTREAM_PROMOTE_NAME, limit=1)
+    promotion = api_instance.api_promotions_get(params)[0]
+
+    params = dlrnapi_client.AggQuery(aggregate_hash=promotion.aggregate_hash)
+    aggregate = api_instance.api_agg_status_get(params)
+
+    dlrn_jobs = get_dlrn_results(aggregate)
+    jobs = prepare_jobs(jobs_in_criteria, jobs_in_alt_criteria, dlrn_jobs)
+
+    timestamp = datetime.utcfromtimestamp(promotion.timestamp)
+    render_tables(jobs, timestamp, "", None, [], aggregate, None,
+                  promotion.aggregate_hash, "", "")
 
 
 def upstream_proxy(release, system, *_args, **_kwargs):
