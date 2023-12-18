@@ -74,6 +74,8 @@ COMPONENT_TEST_URL = ("{url}/api/civotes_detail.html?"
                       "commit_hash={commit_hash}&distro_hash={distro_hash}")
 COMPONENT_DLRN_VERSIONS_CSV = "{url}/component/{component}/{tag}/versions.csv"
 
+UPSTREAM_PROMOTE_NAME = "current-podified"
+
 
 class AttributeDict(dict):
     def __getattr__(self, name):
@@ -635,32 +637,33 @@ def track_component_promotion(
     logging.debug("Finshed component track")
 
 
-def upstream(release, system, promote_name, _aggregate_hash, component):
+def upstream_proxy(release, system, *_args, **_kwargs):
     url = UPSTREAM_CRITERIA_URL.format(system=system, release=release)
+
     config = yaml.safe_load(web_scrape(url))
+    jobs_in_criteria = config[UPSTREAM_PROMOTE_NAME]
 
     host = UPSTREAM_HOST_URL.format(system=system, release=release)
+    upstream_integration(host, jobs_in_criteria, {})
+
+
+def upstream_integration(host, jobs_in_criteria, _alt_criteria):
     api_client = dlrnapi_client.ApiClient(host)
     api_instance = dlrnapi_client.DefaultApi(api_client)
 
     params = dlrnapi_client.PromotionQuery(
-        promote_name=promote_name,
-        component=component,
-        limit=1
-    )
+        promote_name=UPSTREAM_PROMOTE_NAME, limit=1)
     promotion = api_instance.api_promotions_get(params)[0]
 
     params = dlrnapi_client.AggQuery(aggregate_hash=promotion.aggregate_hash)
     aggregate = api_instance.api_agg_status_get(params)
 
-    jobs_in_criteria = config[promote_name]
     dlrn_jobs = get_dlrn_results(aggregate)
     jobs = prepare_jobs(jobs_in_criteria, {}, dlrn_jobs)
 
     timestamp = datetime.utcfromtimestamp(promotion.timestamp)
-    render_tables(
-        jobs, timestamp, "", component, [], aggregate, None,
-        promotion.aggregate_hash, "", "")
+    render_tables(jobs, timestamp, "", None, [], aggregate, None,
+                  promotion.aggregate_hash, "", "")
 
 
 def downstream(release, distro, promotion_name, aggregate_hash, component):
@@ -697,7 +700,7 @@ def downstream(release, distro, promotion_name, aggregate_hash, component):
 
 
 STREAM = {
-    "centos9": upstream,
+    "centos9": upstream_proxy,
     "rhel-8": downstream,
     "rhel-9": downstream,
 }
