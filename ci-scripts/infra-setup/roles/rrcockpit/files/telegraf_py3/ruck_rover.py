@@ -57,6 +57,8 @@ INFLUX_FAILED = 0
 ZUUL_JOBS_LIMIT = 1000
 ZUUL_JOB_HISTORY_THRESHOLD = 5
 
+PROMOTIONS_LIMIT = 1
+
 UPSTREAM_HOST_URL = "https://trunk.rdoproject.org/api-{system}-{release}"
 UPSTREAM_CRITERIA_URL = (
     "https://raw.githubusercontent.com/rdo-infra/rdo-jobs/master/"
@@ -248,6 +250,7 @@ def get_dlrn_results(api_response):
     """
     logging.debug("Fetching DLRN results")
     jobs = {}
+
     for job in api_response:
         if not job.job_id.startswith(("periodic", "pipeline_")):
             # NOTE: Use only periodic jobs and pipeline_ (downstream jenkins)
@@ -638,9 +641,26 @@ def track_component_promotion(
     logging.debug("Finshed component track")
 
 
-def render_tables_proxy(jobs, timestamp, aggregate, promotion_hash):
+def render_tables_proxy(jobs, timestamp, aggregate):
+    promotion_hash = aggregate[0].aggregate_hash
     render_tables(jobs, timestamp, "", None, [], aggregate, None,
                   promotion_hash, "", "")
+
+
+def integration(
+        api_instance, promote_name, jobs_in_criteria, jobs_alt_criteria):
+    params = dlrnapi_client.PromotionQuery(
+        promote_name=promote_name, limit=PROMOTIONS_LIMIT)
+    promotion = api_instance.api_promotions_get(params)[0]
+
+    params = dlrnapi_client.AggQuery(aggregate_hash=promotion.aggregate_hash)
+    aggregate = api_instance.api_agg_status_get(params)
+
+    dlrn_jobs = get_dlrn_results(aggregate)
+    jobs = prepare_jobs(jobs_in_criteria, jobs_alt_criteria, dlrn_jobs)
+
+    timestamp = datetime.utcfromtimestamp(promotion.timestamp)
+    render_tables_proxy(jobs, timestamp, aggregate)
 
 
 def downstream_proxy(system, release):
@@ -655,59 +675,28 @@ def downstream_proxy(system, release):
 
     jobs_in_criteria = set(
         criteria['promotions'][DOWNSTREAM_PROMOTE_NAME]['criteria'])
-    jobs_in_alt_criteria = (
+    jobs_alt_criteria = (
         criteria['promotions'][DOWNSTREAM_PROMOTE_NAME].get(
             'alternative_criteria', {}))
 
-    downstream_integration(
-        criteria['api_url'], jobs_in_criteria, jobs_in_alt_criteria)
-
-
-def downstream_integration(host, jobs_in_criteria, jobs_in_alt_criteria):
     api_client = dlrnapi_client.ApiClient(
-        host, auth_method="kerberosAuth", force_auth=True)
+        criteria['api_url'], auth_method="kerberosAuth", force_auth=True)
     api_instance = dlrnapi_client.DefaultApi(api_client)
 
-    params = dlrnapi_client.PromotionQuery(
-        promote_name=DOWNSTREAM_PROMOTE_NAME, limit=1)
-    promotion = api_instance.api_promotions_get(params)[0]
-
-    params = dlrnapi_client.AggQuery(aggregate_hash=promotion.aggregate_hash)
-    aggregate = api_instance.api_agg_status_get(params)
-
-    dlrn_jobs = get_dlrn_results(aggregate)
-    jobs = prepare_jobs(jobs_in_criteria, jobs_in_alt_criteria, dlrn_jobs)
-
-    timestamp = datetime.utcfromtimestamp(promotion.timestamp)
-    render_tables_proxy(jobs, timestamp, aggregate, promotion.aggregate_hash)
+    integration(api_instance, DOWNSTREAM_PROMOTE_NAME, jobs_in_criteria,
+                jobs_alt_criteria)
 
 
 def upstream_proxy(release, system, *_args, **_kwargs):
     url = UPSTREAM_CRITERIA_URL.format(system=system, release=release)
-
     config = yaml.safe_load(web_scrape(url))
     jobs_in_criteria = config[UPSTREAM_PROMOTE_NAME]
 
     host = UPSTREAM_HOST_URL.format(system=system, release=release)
-    upstream_integration(host, jobs_in_criteria, {})
-
-
-def upstream_integration(host, jobs_in_criteria, _alt_criteria):
     api_client = dlrnapi_client.ApiClient(host)
     api_instance = dlrnapi_client.DefaultApi(api_client)
 
-    params = dlrnapi_client.PromotionQuery(
-        promote_name=UPSTREAM_PROMOTE_NAME, limit=1)
-    promotion = api_instance.api_promotions_get(params)[0]
-
-    params = dlrnapi_client.AggQuery(aggregate_hash=promotion.aggregate_hash)
-    aggregate = api_instance.api_agg_status_get(params)
-
-    dlrn_jobs = get_dlrn_results(aggregate)
-    jobs = prepare_jobs(jobs_in_criteria, {}, dlrn_jobs)
-
-    timestamp = datetime.utcfromtimestamp(promotion.timestamp)
-    render_tables_proxy(jobs, timestamp, aggregate, promotion.aggregate_hash)
+    integration(api_instance, UPSTREAM_PROMOTE_NAME, jobs_in_criteria, {})
 
 
 def downstream(release, distro, promotion_name, aggregate_hash, component):
