@@ -676,7 +676,7 @@ def integration(
             "aggregate": aggregate,
             "aggregate_hash": promotion.aggregate_hash
         }
-    render_tables_proxy(results)
+    return results
 
 
 def downstream_proxy(system, release):
@@ -699,8 +699,9 @@ def downstream_proxy(system, release):
         criteria['api_url'], auth_method="kerberosAuth", force_auth=True)
     api_instance = dlrnapi_client.DefaultApi(api_client)
 
-    integration(api_instance, DOWNSTREAM_PROMOTE_NAME, jobs_in_criteria,
-                jobs_alt_criteria)
+    results = integration(api_instance, DOWNSTREAM_PROMOTE_NAME,
+                          jobs_in_criteria, jobs_alt_criteria)
+    render_tables_proxy(results)
 
 
 def upstream_proxy(release, system, *_args, **_kwargs):
@@ -712,7 +713,9 @@ def upstream_proxy(release, system, *_args, **_kwargs):
     api_client = dlrnapi_client.ApiClient(host)
     api_instance = dlrnapi_client.DefaultApi(api_client)
 
-    integration(api_instance, UPSTREAM_PROMOTE_NAME, jobs_in_criteria, {})
+    results = integration(api_instance, UPSTREAM_PROMOTE_NAME,
+                          jobs_in_criteria, {})
+    render_tables_proxy(results)
 
 
 def downstream(release, distro, promotion_name, aggregate_hash, component):
