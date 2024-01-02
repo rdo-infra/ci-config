@@ -285,6 +285,9 @@ def get_job_history(jobs, url):
     if not jobs:
         return {}
 
+    if not url:
+        return {}
+
     logging.debug("Fetching jobs history")
     response = requests.get(
         url,
@@ -641,26 +644,39 @@ def track_component_promotion(
     logging.debug("Finshed component track")
 
 
-def render_tables_proxy(jobs, timestamp, aggregate):
-    promotion_hash = aggregate[0].aggregate_hash
-    render_tables(jobs, timestamp, "", None, [], aggregate, None,
-                  promotion_hash, "", "")
+def render_tables_proxy(results):
+    for timestamp, result in results.items():
+        timestamp = datetime.utcfromtimestamp(timestamp)
+
+        jobs = result['jobs']
+        aggregate = result['aggregate']
+        promotion_hash = result['aggregate_hash']
+
+        render_tables(jobs, timestamp, promotion_hash, None, [], aggregate,
+                      None, promotion_hash, "", "")
 
 
 def integration(
         api_instance, promote_name, jobs_in_criteria, jobs_alt_criteria):
     params = dlrnapi_client.PromotionQuery(
         promote_name=promote_name, limit=PROMOTIONS_LIMIT)
-    promotion = api_instance.api_promotions_get(params)[0]
+    promotions = api_instance.api_promotions_get(params)
 
-    params = dlrnapi_client.AggQuery(aggregate_hash=promotion.aggregate_hash)
-    aggregate = api_instance.api_agg_status_get(params)
+    results = {}
+    for promotion in promotions:
+        params = dlrnapi_client.AggQuery(
+            aggregate_hash=promotion.aggregate_hash)
+        aggregate = api_instance.api_agg_status_get(params)
 
-    dlrn_jobs = get_dlrn_results(aggregate)
-    jobs = prepare_jobs(jobs_in_criteria, jobs_alt_criteria, dlrn_jobs)
+        dlrn_jobs = get_dlrn_results(aggregate)
+        jobs = prepare_jobs(jobs_in_criteria, jobs_alt_criteria, dlrn_jobs)
 
-    timestamp = datetime.utcfromtimestamp(promotion.timestamp)
-    render_tables_proxy(jobs, timestamp, aggregate)
+        results[promotion.timestamp] = {
+            "jobs": jobs,
+            "aggregate": aggregate,
+            "aggregate_hash": promotion.aggregate_hash
+        }
+    render_tables_proxy(results)
 
 
 def downstream_proxy(system, release):
