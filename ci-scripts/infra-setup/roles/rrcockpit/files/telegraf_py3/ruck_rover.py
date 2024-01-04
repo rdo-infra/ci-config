@@ -28,9 +28,6 @@ console = Console()
 CERT_PATH = os.environ.get(
                 'CURL_CA_BUNDLE',
                 '/etc/pki/ca-trust/extracted/openssl/ca-bundle.trust.crt')
-# DLRN client configurations
-DLRN_AUTH_METHOD = "kerberosAuth"
-DLRN_FORCE_AUTH = True
 
 MATRIX = {
     "rhel-9": ["osp17", "osp17-1", "osp18"],
@@ -125,8 +122,8 @@ def fetch_hashes_from_commit_yaml(criteria):
 
 def find_results_from_dlrn_agg(api_url, test_hash):
     api_client = dlrnapi_client.ApiClient(host=api_url,
-                                          auth_method=DLRN_AUTH_METHOD,
-                                          force_auth=DLRN_FORCE_AUTH)
+                                          auth_method="kerberosAuth",
+                                          force_auth=True)
     api_instance = dlrnapi_client.DefaultApi(api_client)
     params = dlrnapi_client.AggQuery(aggregate_hash=test_hash)
     api_response = api_instance.api_agg_status_get(params=params)
@@ -191,8 +188,8 @@ def get_dlrn_promotions(api_url, promotion_name, component=None):
     """
     logging.debug("Getting promotion %s for %s", promotion_name, api_url)
     api_client = dlrnapi_client.ApiClient(host=api_url,
-                                          auth_method=DLRN_AUTH_METHOD,
-                                          force_auth=DLRN_FORCE_AUTH)
+                                          auth_method="kerberosAuth",
+                                          force_auth=True)
     api_instance = dlrnapi_client.DefaultApi(api_client)
     query = dlrnapi_client.PromotionQuery(
         promote_name=promotion_name,
@@ -221,8 +218,8 @@ def find_results_from_dlrn_repo_status(api_url, commit_hash,
          passing/failing jobs
     """
     api_client = dlrnapi_client.ApiClient(host=api_url,
-                                          auth_method=DLRN_AUTH_METHOD,
-                                          force_auth=DLRN_FORCE_AUTH)
+                                          auth_method="kerberosAuth",
+                                          force_auth=True)
     api_instance = dlrnapi_client.DefaultApi(api_client)
     params = dlrnapi_client.Params2(commit_hash=commit_hash,
                                     distro_hash=distro_hash,
