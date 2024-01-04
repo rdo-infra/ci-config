@@ -658,6 +658,7 @@ def render_tables_proxy(results):
 
 def integration(
         api_instance, promote_name, jobs_in_criteria, jobs_alt_criteria):
+    logging.debug("Fetching integrations for %s", promote_name)
     params = dlrnapi_client.PromotionQuery(
         promote_name=promote_name, limit=PROMOTIONS_LIMIT)
     promotions = api_instance.api_promotions_get(params)
@@ -681,19 +682,25 @@ def integration(
 def downstream_proxy(system, release):
     config = yaml.safe_load(web_scrape(DOWNSTREAM_CRITERIA_URL))
 
+    logging.debug("Configure DLRN API for downstream")
     dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
     dlrnapi_client.configuration.server_principal = (
         config['downstream']['dlrnapi_krb_principal'])
 
     url = config['downstream']['criteria'][system][release]['int_url']
+    logging.debug("Downstream Integration URL: %s", url)
     criteria = yaml.safe_load(web_scrape(url))
 
     jobs_in_criteria = set(
         criteria['promotions'][DOWNSTREAM_PROMOTE_NAME]['criteria'])
+    logging.debug("Downstream jobs in criteria: %s", jobs_in_criteria)
     jobs_alt_criteria = (
         criteria['promotions'][DOWNSTREAM_PROMOTE_NAME].get(
             'alternative_criteria', {}))
+    logging.debug("Downstream jobs in alternative criteria: %s",
+                  jobs_alt_criteria)
 
+    logging.debug("Configure DLRN API client")
     api_client = dlrnapi_client.ApiClient(
         criteria['api_url'], auth_method="kerberosAuth", force_auth=True)
     api_instance = dlrnapi_client.DefaultApi(api_client)
