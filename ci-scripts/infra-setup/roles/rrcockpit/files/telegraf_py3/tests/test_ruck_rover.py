@@ -192,8 +192,8 @@ class TestRuckRoverComponent(unittest.TestCase):
             }
         }
 
-    def test_get_components_diff_all(self):
-        result = ruck_rover.get_components_diff("base_url", "all", "", "")
+    def test_get_package_diff_all(self):
+        result = ruck_rover.get_package_diff("base_url", "all", "", "")
         all_components = ["baremetal", "cinder", "clients", "cloudops",
                           "common", "compute", "glance", "manila",
                           "network", "octavia", "security", "swift",
@@ -208,7 +208,7 @@ class TestRuckRoverComponent(unittest.TestCase):
         m_csv.side_effect = ["first", "second"]
         m_diff.return_value = "pkg_diff"
 
-        result = ruck_rover.get_components_diff(
+        result = ruck_rover.get_package_diff(
             "base_url", "cinder", "current-tripleo",
             "component-ci-testing")
 
