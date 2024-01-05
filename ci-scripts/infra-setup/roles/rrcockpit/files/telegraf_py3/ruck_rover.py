@@ -680,7 +680,7 @@ def upstream_proxy(release, system, *_args, **_kwargs):
     api_client = dlrnapi_client.ApiClient(host)
     api_instance = dlrnapi_client.DefaultApi(api_client)
 
-    results, _ = integration(api_instance, UPSTREAM_PROMOTE_NAME,
+    results = integration(api_instance, UPSTREAM_PROMOTE_NAME,
                              jobs_in_criteria, {})
     render_tables_proxy(results)
 
@@ -710,6 +710,8 @@ def downstream(release, distro, promotion_name, aggregate_hash, component):
         # NOTE(dasm): pkg_diff is currently being used by integration downstream
         # NOTE(dasm): It is a temporary workaround
         # TODO(dasm): Change the way how packages are compared
+        url = config['downstream']['criteria'][distro][release]['int_url']
+        criteria = url_response_in_yaml(url)
         _, pkg_diff = get_package_diff(
             criteria['base_url'], None,
             DOWNSTREAM_PROMOTE_NAME, DOWNSTREAM_TESTING_NAME)
