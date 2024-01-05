@@ -552,7 +552,7 @@ def track_integration_promotion(
 
     timestamp = datetime.utcfromtimestamp(promotion.timestamp)
 
-    components, pkg_diff = get_components_diff(
+    components, pkg_diff = get_package_diff(
         base_url, test_component, promotion_name, aggregate_hash)
 
     jobs_in_criteria = set(criteria['promotions'][promotion_name]['criteria'])
@@ -570,31 +570,33 @@ def track_integration_promotion(
     logging.debug("Finished integration track")
 
 
-def get_components_diff(base_url, component, promotion_name, aggregate_hash):
-    logging.debug("Get components diff")
-    components = sorted(ALL_COMPONENTS.difference(["all"]))
-    diff = None
+def get_package_diff(base_url, component, promotion_name, aggregate_hash):
+    logging.debug("Get diff of tested packages")
 
-    if component != "all":
-        logging.debug("Getting component diff for %s", component)
+    if component == "all":
+        logging.debug("Skip checking packages diff")
+        components = sorted(ALL_COMPONENTS.difference(["all"]))
+        return components, None
 
-        if component:
-            control_url = COMPONENT_DLRN_VERSIONS_CSV.format(
-                url=base_url, component=component, tag=promotion_name)
-            test_url = COMPONENT_DLRN_VERSIONS_CSV.format(
-                url=base_url, component=component, tag=aggregate_hash)
-        else:
-            control_url = INTEGRATION_DLRN_VERSIONS_CSV.format(
-                url=base_url, tag=promotion_name)
-            test_url = INTEGRATION_DLRN_VERSIONS_CSV.format(
-                url=base_url, tag=aggregate_hash)
+    elif not component:
+        logging.debug("Integration diff URL")
+        control_url = INTEGRATION_DLRN_VERSIONS_CSV.format(
+            url=base_url, tag=promotion_name)
+        test_url = INTEGRATION_DLRN_VERSIONS_CSV.format(
+            url=base_url, tag=aggregate_hash)
 
-        control_csv = get_csv(control_url)
-        test_csv = get_csv(test_url)
+    elif component and component != "all":
+        logging.debug("Component diff URL for %s", component)
+        control_url = COMPONENT_DLRN_VERSIONS_CSV.format(
+            url=base_url, component=component, tag=promotion_name)
+        test_url = COMPONENT_DLRN_VERSIONS_CSV.format(
+            url=base_url, component=component, tag=aggregate_hash)
 
-        components = [component]
-        diff = get_diff(promotion_name, control_csv, aggregate_hash, test_csv)
+    control_csv = get_csv(control_url)
+    test_csv = get_csv(test_url)
 
+    components = [component]
+    diff = get_diff(promotion_name, control_csv, aggregate_hash, test_csv)
     return components, diff
 
 
@@ -603,7 +605,7 @@ def track_component_promotion(
         promotion_name, aggregate_hash, test_component):
     logging.debug("Starting component track")
 
-    components, pkg_diff = get_components_diff(
+    components, pkg_diff = get_package_diff(
         base_url, test_component, promotion_name, aggregate_hash)
 
     for component in components:
