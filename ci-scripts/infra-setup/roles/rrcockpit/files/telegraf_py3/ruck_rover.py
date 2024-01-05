@@ -32,6 +32,8 @@ CERT_PATH = os.environ.get(
 MATRIX = {
     "rhel-9": ["osp17", "osp17-1", "osp18"],
     "rhel-8": ["osp17-1", "osp16-2"],
+    "rhel9": ["osp17", "osp17-1", "osp18"],
+    "rhel8": ["osp17-1", "osp16-2"],
     "centos9": ["master", "antelope"],
 }
 REVERSED_MATRIX = {}
@@ -56,10 +58,15 @@ ZUUL_JOB_HISTORY_THRESHOLD = 5
 
 PROMOTIONS_LIMIT = 1
 
-UPSTREAM_HOST_URL = "https://trunk.rdoproject.org/api-{system}-{release}"
+UPSTREAM_API_URL = "https://trunk.rdoproject.org/api-{system}-{release}"
 UPSTREAM_CRITERIA_URL = (
     "https://raw.githubusercontent.com/rdo-infra/rdo-jobs/master/"
     "criteria/{system}/{release}.yaml")
+
+DOWNSTREAM_API_URL = (
+    "https://osp-trunk.hosted.upshift.rdu2.redhat.com/api-{system}-{release}")
+DOWNSTREAM_HOST_URL = (
+    "https://osp-trunk.hosted.upshift.rdu2.redhat.com/{system}-{release}/")
 DOWNSTREAM_CRITERIA_URL = (
     'https://sf.hosted.upshift.rdu2.redhat.com/images/conf_ruck_rover.yaml')
 
@@ -75,6 +82,7 @@ COMPONENT_DLRN_VERSIONS_CSV = "{url}/component/{component}/{tag}/versions.csv"
 
 UPSTREAM_PROMOTE_NAME = "current-podified"
 DOWNSTREAM_PROMOTE_NAME = "current-tripleo"
+DOWNSTREAM_TESTING_NAME = "tripleo-ci-testing"
 
 
 class AttributeDict(dict):
@@ -118,17 +126,6 @@ def fetch_hashes_from_commit_yaml(criteria):
         extended_hash = None
 
     return commit_hash, distro_hash, extended_hash
-
-
-def find_results_from_dlrn_agg(api_url, test_hash):
-    api_client = dlrnapi_client.ApiClient(host=api_url,
-                                          auth_method="kerberosAuth",
-                                          force_auth=True)
-    api_instance = dlrnapi_client.DefaultApi(api_client)
-    params = dlrnapi_client.AggQuery(aggregate_hash=test_hash)
-    api_response = api_instance.api_agg_status_get(params=params)
-
-    return api_response
 
 
 def get_csv(url):
@@ -535,41 +532,6 @@ def render_tables(jobs, timestamp, under_test_url, component,
             render_integration_yaml(tp_jobs, test_hash, testproject_url)
 
 
-def track_integration_promotion(
-        api_url, base_url, criteria, periodic_builds_url, testproject_url,
-        promotion_name, aggregate_hash, test_component):
-
-    logging.debug("Starting integration track")
-
-    promotion = get_dlrn_promotions(api_url, promotion_name)
-
-    commit_url = INTEGRATION_COMMIT_URL.format(
-        url=base_url, aggregate_hash=aggregate_hash)
-    ref_hash = web_scrape(commit_url)
-
-    api_response = find_results_from_dlrn_agg(api_url, ref_hash)
-    under_test_url = INTEGRATION_TEST_URL.format(url=api_url, ref_hash=ref_hash)
-
-    timestamp = datetime.utcfromtimestamp(promotion.timestamp)
-
-    components, pkg_diff = get_package_diff(
-        base_url, test_component, promotion_name, aggregate_hash)
-
-    jobs_in_criteria = set(criteria['promotions'][promotion_name]['criteria'])
-    jobs_in_alt_criteria = criteria['promotions'][promotion_name].get(
-            'alternative_criteria', {})
-
-    dlrn_jobs = get_dlrn_results(api_response)
-    jobs = prepare_jobs(jobs_in_criteria, jobs_in_alt_criteria, dlrn_jobs)
-
-    render_tables(
-        jobs, timestamp, under_test_url, test_component,
-        components, api_response, pkg_diff, ref_hash,
-        periodic_builds_url, testproject_url)
-
-    logging.debug("Finished integration track")
-
-
 def get_package_diff(base_url, component, promotion_name, aggregate_hash):
     logging.debug("Get diff of tested packages")
 
@@ -643,7 +605,7 @@ def track_component_promotion(
     logging.debug("Finshed component track")
 
 
-def render_tables_proxy(results):
+def render_tables_proxy(results, pkg_diff=None):
     for timestamp, result in results.items():
         timestamp = datetime.utcfromtimestamp(timestamp)
 
@@ -652,11 +614,11 @@ def render_tables_proxy(results):
         promotion_hash = result['aggregate_hash']
 
         render_tables(jobs, timestamp, promotion_hash, None, [], aggregate,
-                      None, promotion_hash, "", "")
+                      pkg_diff, promotion_hash, "", "")
 
 
-def integration(
-        api_instance, promote_name, jobs_in_criteria, jobs_alt_criteria):
+def integration(api_instance, promote_name, jobs_in_criteria,
+                jobs_alt_criteria):
     logging.debug("Fetching integrations for %s", promote_name)
     params = dlrnapi_client.PromotionQuery(
         promote_name=promote_name, limit=PROMOTIONS_LIMIT)
@@ -674,12 +636,12 @@ def integration(
         results[promotion.timestamp] = {
             "jobs": jobs,
             "aggregate": aggregate,
-            "aggregate_hash": promotion.aggregate_hash
+            "aggregate_hash": promotion.aggregate_hash,
         }
     return results
 
 
-def downstream_proxy(system, release):
+def downstream_integration(system, release):
     config = yaml.safe_load(web_scrape(DOWNSTREAM_CRITERIA_URL))
 
     logging.debug("Configure DLRN API for downstream")
@@ -705,9 +667,8 @@ def downstream_proxy(system, release):
         criteria['api_url'], auth_method="kerberosAuth", force_auth=True)
     api_instance = dlrnapi_client.DefaultApi(api_client)
 
-    results = integration(api_instance, DOWNSTREAM_PROMOTE_NAME,
-                          jobs_in_criteria, jobs_alt_criteria)
-    render_tables_proxy(results)
+    return integration(api_instance, DOWNSTREAM_PROMOTE_NAME,
+                       jobs_in_criteria, jobs_alt_criteria)
 
 
 def upstream_proxy(release, system, *_args, **_kwargs):
@@ -715,12 +676,12 @@ def upstream_proxy(release, system, *_args, **_kwargs):
     config = yaml.safe_load(web_scrape(url))
     jobs_in_criteria = config[UPSTREAM_PROMOTE_NAME]
 
-    host = UPSTREAM_HOST_URL.format(system=system, release=release)
+    host = UPSTREAM_API_URL.format(system=system, release=release)
     api_client = dlrnapi_client.ApiClient(host)
     api_instance = dlrnapi_client.DefaultApi(api_client)
 
-    results = integration(api_instance, UPSTREAM_PROMOTE_NAME,
-                          jobs_in_criteria, {})
+    results, _ = integration(api_instance, UPSTREAM_PROMOTE_NAME,
+                             jobs_in_criteria, {})
     render_tables_proxy(results)
 
 
@@ -746,13 +707,14 @@ def downstream(release, distro, promotion_name, aggregate_hash, component):
             criteria.api_url, criteria.base_url, criteria, periodic_builds_url,
             testproject_url, promotion_name, aggregate_hash, component)
     elif not component:
-        url = config['downstream']['criteria'][distro][release]['int_url']
-        criteria = url_response_in_yaml(url)
-        criteria = AttributeDict(criteria)
-        track_integration_promotion(
-            criteria.api_url, criteria.base_url, criteria, periodic_builds_url,
-            testproject_url, promotion_name, aggregate_hash, component)
-        downstream_proxy(distro, release)
+        # NOTE(dasm): pkg_diff is currently being used by integration downstream
+        # NOTE(dasm): It is a temporary workaround
+        # TODO(dasm): Change the way how packages are compared
+        _, pkg_diff = get_package_diff(
+            criteria['base_url'], None,
+            DOWNSTREAM_PROMOTE_NAME, DOWNSTREAM_TESTING_NAME)
+        results = downstream_integration(distro, release)
+        render_tables_proxy(results, pkg_diff)
     else:
         raise Exception("Unsupported")
     logging.info("Finished script: %s - %s", distro, release)
@@ -760,6 +722,8 @@ def downstream(release, distro, promotion_name, aggregate_hash, component):
 
 STREAM = {
     "centos9": upstream_proxy,
+    "rhel8": downstream,
+    "rhel9": downstream,
     "rhel-8": downstream,
     "rhel-9": downstream,
 }
