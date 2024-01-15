@@ -83,6 +83,7 @@ COMPONENT_DLRN_VERSIONS_CSV = "{url}/component/{component}/{tag}/versions.csv"
 UPSTREAM_PROMOTE_NAME = "current-podified"
 DOWNSTREAM_PROMOTE_NAME = "current-tripleo"
 DOWNSTREAM_TESTING_NAME = "tripleo-ci-testing"
+DOWNSTREAM_COMPONENT_NAME = "component-ci-testing"
 
 
 class AttributeDict(dict):
@@ -617,17 +618,49 @@ def render_tables_proxy(results, pkg_diff=None):
                       pkg_diff, promotion_hash, "", "")
 
 
+def component(api_instance, component_name, jobs_in_criteria):
+    logging.debug("Fetching component pipeline")
+    params = dlrnapi_client.PromotionQuery(
+        promote_name=DOWNSTREAM_COMPONENT_NAME,
+        component=component_name,
+        limit=PROMOTIONS_LIMIT
+    )
+    promotions = api_instance.api_promotions_get(params)
+
+    results = {}
+    for promotion in promotions:
+        params = dlrnapi_client.Params2(
+            commit_hash=promotion.commit_hash,
+            distro_hash=promotion.distro_hash,
+            extended_hash=promotion.extended_hash
+        )
+        aggregate = api_instance.api_repo_status_get(params)
+
+        dlrn_jobs = get_dlrn_results(aggregate)
+        jobs = prepare_jobs(jobs_in_criteria, {}, dlrn_jobs)
+
+        results[promotion.timestamp] = {
+            "jobs": jobs,
+            "aggregate": aggregate,
+            "aggregate_hash": promotion.aggregate_hash,
+        }
+    return results
+
+
 def integration(api_instance, promote_name, jobs_in_criteria,
                 jobs_alt_criteria):
     logging.debug("Fetching integrations for %s", promote_name)
     params = dlrnapi_client.PromotionQuery(
-        promote_name=promote_name, limit=PROMOTIONS_LIMIT)
+        promote_name=promote_name,
+        limit=PROMOTIONS_LIMIT
+    )
     promotions = api_instance.api_promotions_get(params)
 
     results = {}
     for promotion in promotions:
         params = dlrnapi_client.AggQuery(
-            aggregate_hash=promotion.aggregate_hash)
+            aggregate_hash=promotion.aggregate_hash
+        )
         aggregate = api_instance.api_agg_status_get(params)
 
         dlrn_jobs = get_dlrn_results(aggregate)
@@ -638,6 +671,29 @@ def integration(api_instance, promote_name, jobs_in_criteria,
             "aggregate": aggregate,
             "aggregate_hash": promotion.aggregate_hash,
         }
+    return results
+
+
+def downstream_component(system, release, component_name):
+    config = yaml.safe_load(web_scrape(DOWNSTREAM_CRITERIA_URL))
+
+    logging.debug("Configure DLRN API for downstream")
+    dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
+    dlrnapi_client.configuration.server_principal = (
+        config['downstream']['dlrnapi_krb_principal'])
+
+    url = config['downstream']['criteria'][system][release]['comp_url']
+    logging.debug("Downstream Integration URL: %s", url)
+    criteria = yaml.safe_load(web_scrape(url))
+
+    api_client = dlrnapi_client.ApiClient(
+        criteria['api_url'], auth_method="kerberosAuth", force_auth=True)
+    api_instance = dlrnapi_client.DefaultApi(api_client)
+
+    jobs_in_criteria = set(criteria['promoted-components'].get(
+        component_name, []))
+
+    results = component(api_instance, component_name, jobs_in_criteria)
     return results
 
 
@@ -710,6 +766,7 @@ def downstream(release, distro, promotion_name, aggregate_hash, component):
         track_component_promotion(
             criteria.api_url, criteria.base_url, criteria, periodic_builds_url,
             testproject_url, promotion_name, aggregate_hash, component)
+
     elif not component:
         # NOTE(dasm): pkg_diff is currently being used by integration downstream
         # NOTE(dasm): It is a temporary workaround
@@ -717,8 +774,12 @@ def downstream(release, distro, promotion_name, aggregate_hash, component):
         url = config['downstream']['criteria'][distro][release]['int_url']
         criteria = url_response_in_yaml(url)
         _, pkg_diff = get_package_diff(
-            criteria['base_url'], None,
-            DOWNSTREAM_PROMOTE_NAME, DOWNSTREAM_TESTING_NAME)
+            criteria['base_url'],
+            None,
+            DOWNSTREAM_PROMOTE_NAME,
+            DOWNSTREAM_TESTING_NAME
+        )
+
         results = downstream_integration(distro, release)
         render_tables_proxy(results, pkg_diff)
     else:
