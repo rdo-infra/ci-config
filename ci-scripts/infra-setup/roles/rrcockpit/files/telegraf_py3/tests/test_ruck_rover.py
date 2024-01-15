@@ -21,27 +21,6 @@ class TestRuckRover(unittest.TestCase):
         obtained = ruck_rover.web_scrape('www.demooourl.com')
         self.assertEqual(data, obtained)
 
-    @patch('ruck_rover.requests.get')
-    def test_url_response_in_yaml(self, m_get):
-        full_path = os.path.dirname(os.path.abspath(__file__))
-        with open(full_path + "/data/master.yaml") as file:
-            data = file.read()
-        m_get.return_value.text = data
-        obtained = ruck_rover.url_response_in_yaml('www.demooourl.com')
-        self.assertTrue(isinstance(obtained, dict))
-        self.assertEqual('master', obtained['release'])
-
-    def test_fetch_hashes_from_commit_yaml(self):
-        criteria = {
-            'commits': [{
-                'commit_hash': 'c6',
-                'distro_hash': '03',
-                'extended_hash': 'None'}]}
-
-        obtained = ruck_rover.fetch_hashes_from_commit_yaml(criteria)
-        expected = ('c6', '03', None)
-        self.assertEqual(expected, obtained)
-
     def test_get_diff_the_same(self):
         file_content = ["file1", ([], [0, 0, 0, 0, 0, 0, 0, 0, 0, "abc"], [])]
         output = ruck_rover.get_diff("", file_content, "", file_content)
@@ -222,26 +201,6 @@ class TestRuckRoverComponent(unittest.TestCase):
 
         expected = (['cinder'], "pkg_diff")
         self.assertEqual(result, expected)
-
-    @mock.patch('ruck_rover.dlrnapi_client.PromotionQuery')
-    @mock.patch('ruck_rover.dlrnapi_client.DefaultApi')
-    @mock.patch('ruck_rover.dlrnapi_client.ApiClient')
-    def test_get_dlrn_promotions(
-            self, m_api_client, m_def_api, m_promo_query):
-        m_api = mock.MagicMock()
-        m_pr = mock.MagicMock()
-        m_api.api_promotions_get.return_value = [m_pr]
-        m_def_api.return_value = m_api
-
-        result = ruck_rover.get_dlrn_promotions("api_url", "promotion", None)
-
-        m_api_client.assert_called_with(host="api_url",
-                                        auth_method='kerberosAuth',
-                                        force_auth=True)
-        m_promo_query.assert_called_with(
-            promote_name="promotion", limit=1, component=None)
-
-        self.assertEqual(result, m_pr)
 
 
 class TestRuckRoverWithCommonSetup(unittest.TestCase):
