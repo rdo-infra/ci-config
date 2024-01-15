@@ -105,30 +105,6 @@ def web_scrape(url):
     return response.text
 
 
-def url_response_in_yaml(url):
-    logging.debug("Fetching URL: %s", url)
-    text_response = web_scrape(url)
-    processed_data = yaml.safe_load(text_response)
-
-    logging.debug("Return processed data")
-    return processed_data
-
-
-def fetch_hashes_from_commit_yaml(criteria):
-    """
-    This function finds commit hash, distro hash, extended_hash from commit.yaml
-    :param url for commit.yaml
-    :returns values for commit_hash, distro_hash, extended_hash
-    """
-    commit_hash = criteria['commits'][0]['commit_hash']
-    distro_hash = criteria['commits'][0]['distro_hash']
-    extended_hash = criteria['commits'][0]['extended_hash']
-    if extended_hash == "None":
-        extended_hash = None
-
-    return commit_hash, distro_hash, extended_hash
-
-
 def get_csv(url):
     logging.debug("Fetching CSV from %s", url)
     response = requests.get(url, verify=CERT_PATH)
@@ -155,79 +131,6 @@ def get_diff(control_tag, file1, test_tag, file2):
                 table.add_row(str(f1[9]), str(f2[9]))
         logging.debug("Files compared")
         return table
-
-
-def get_dlrn_promotions(api_url, promotion_name, component=None):
-    """
-    This function gets latest promotion line details [1][2].
-
-    Example response:
-
-    'aggregate_hash': '07de61e27b4e499da58b393bb5e98313',
-    'commit_hash': '4d8e55c5fe0cddaa62008c105d37c5349323f366',
-    'component': 'common',
-    'distro_hash': 'bb0ff4fd97cda359c6947e38a54a7fa5b16d0176',
-    'extended_hash': None,
-    'promote_name': 'current-tripleo',
-    'repo_hash': '4d8e55c5fe0cddaa62008c105d37c5349323f366_bb0ff4fd',
-    'repo_url': 'https://trunk.rdoproject.org/centos9-master/component
-    /common/4d/8e/4d8e55c5fe0cddaa62008c105d37c5349323f366_bb0ff4fd',
-    'timestamp': 1650363176,
-    'user': 'ciuser'
-
-    :param api_url (str): The DLRN API endpoint for the release.
-    :param promotion_name (str): Promotion name for a line.
-    :param component (str) [optional]: Component to be fetched.
-    :return pr (object): Response from API.
-
-    [1]: https://github.com/softwarefactory-project/dlrnapi_client/
-         blob/master/docs/DefaultApi.md#api_promotions_get
-    [2]: https://dlrn.readthedocs.io/en/latest/api.html#get-api-promotions
-    """
-    logging.debug("Getting promotion %s for %s", promotion_name, api_url)
-    api_client = dlrnapi_client.ApiClient(host=api_url,
-                                          auth_method="kerberosAuth",
-                                          force_auth=True)
-    api_instance = dlrnapi_client.DefaultApi(api_client)
-    query = dlrnapi_client.PromotionQuery(
-        promote_name=promotion_name,
-        component=component,
-        limit=1
-    )
-    pr = api_instance.api_promotions_get(query)
-    return pr[0]
-
-
-def find_results_from_dlrn_repo_status(api_url, commit_hash,
-                                       distro_hash, extended_hash):
-    """ This function returns api_response from dlrn for a particular
-        commit_hash, distro_hash, extended_hash.
-        https://github.com/softwarefactory-project/dlrnapi_client/blob/master/
-        docs/DefaultApi.md#api_repo_status_get
-
-        :param api_url: the dlrn api endpoint for a particular release
-        :param commit_hash: For a particular repo, commit.yaml contains this
-         info.
-        :param distro_hash: For a particular repo, commit.yaml contains this
-         info.
-        :param extended_hash: For a particular repo, commit.yaml contains this
-         info.
-        :return api_response: from dlrnapi server containing result of
-         passing/failing jobs
-    """
-    api_client = dlrnapi_client.ApiClient(host=api_url,
-                                          auth_method="kerberosAuth",
-                                          force_auth=True)
-    api_instance = dlrnapi_client.DefaultApi(api_client)
-    params = dlrnapi_client.Params2(commit_hash=commit_hash,
-                                    distro_hash=distro_hash,
-                                    extended_hash=extended_hash)
-    try:
-        api_response = api_instance.api_repo_status_get(params=params)
-    except ApiException as err:
-        print("Exception when calling DefaultApi->api_repo_status_get:"
-              " %s\n" % err)
-    return api_response
 
 
 def get_dlrn_results(api_response):
@@ -527,7 +430,7 @@ def render_tables(jobs, timestamp, under_test_url, component,
 
     tp_jobs = to_promote - no_result
     if tp_jobs:
-        if len(components) != 0 and components[0] is not None:
+        if component:
             render_component_yaml(tp_jobs, testproject_url)
         else:
             render_integration_yaml(tp_jobs, test_hash, testproject_url)
@@ -563,50 +466,7 @@ def get_package_diff(base_url, component, promotion_name, aggregate_hash):
     return components, diff
 
 
-def track_component_promotion(
-        api_url, base_url, criteria, periodic_builds_url, testproject_url,
-        promotion_name, aggregate_hash, test_component):
-    logging.debug("Starting component track")
-
-    components, pkg_diff = get_package_diff(
-        base_url, test_component, promotion_name, aggregate_hash)
-
-    for component in components:
-        logging.debug("Fetching component: %s data", component)
-
-        component_url = COMPONENT_COMMIT_URL.format(
-            url=base_url, component=component)
-        component_criteria = url_response_in_yaml(component_url)
-
-        commit_hash, distro_hash, extended_hash = fetch_hashes_from_commit_yaml(
-            component_criteria)
-        api_response = find_results_from_dlrn_repo_status(
-            api_url, commit_hash, distro_hash, extended_hash)
-
-        promotion = get_dlrn_promotions(
-            api_url, "promoted-components", component)
-        timestamp = datetime.utcfromtimestamp(promotion.timestamp)
-
-        test_hash = commit_hash
-        under_test_url = COMPONENT_TEST_URL.format(
-            url=api_url, commit_hash=commit_hash, distro_hash=distro_hash)
-
-        jobs_in_criteria = set(criteria['promoted-components'].get(
-            component, []))
-
-        dlrn_jobs = get_dlrn_results(api_response)
-        jobs = prepare_jobs(jobs_in_criteria, {}, dlrn_jobs)
-
-        render_tables(
-            jobs, timestamp, under_test_url, component,
-            components, api_response, pkg_diff, test_hash,
-            periodic_builds_url, testproject_url)
-        logging.debug("Finished component: %s data", component)
-
-    logging.debug("Finshed component track")
-
-
-def render_tables_proxy(results, pkg_diff=None):
+def render_tables_proxy(results, pkg_diff=None, component=None):
     for timestamp, result in results.items():
         timestamp = datetime.utcfromtimestamp(timestamp)
 
@@ -614,8 +474,8 @@ def render_tables_proxy(results, pkg_diff=None):
         aggregate = result['aggregate']
         promotion_hash = result['aggregate_hash']
 
-        render_tables(jobs, timestamp, promotion_hash, None, [], aggregate,
-                      pkg_diff, promotion_hash, "", "")
+        render_tables(jobs, timestamp, promotion_hash, component, [],
+                      aggregate, pkg_diff, promotion_hash, "", "")
 
 
 def component(api_instance, component_name, jobs_in_criteria):
@@ -745,34 +605,27 @@ def upstream_proxy(release, system, *_args, **_kwargs):
     render_tables_proxy(results)
 
 
-def downstream(release, distro, promotion_name, aggregate_hash, component):
+def downstream(release, distro, component=None):
     config = yaml.safe_load(web_scrape(DOWNSTREAM_CRITERIA_URL))
-    krb_principal = config['downstream']['dlrnapi_krb_principal']
-
-    dlrnapi_client.configuration.ssl_ca_cert = CERT_PATH
-    dlrnapi_client.configuration.server_principal = krb_principal
-
-    periodic_builds_url = config['downstream']['periodic_builds_url']
-    testproject_url = config['downstream']['testproject_url']
-
     if component:
         url = config['downstream']['criteria'][distro][release]['comp_url']
-        criteria = url_response_in_yaml(url)
-        criteria = AttributeDict(criteria)
+        criteria = yaml.safe_load(web_scrape(url))
+        _, pkg_diff = get_package_diff(
+            criteria['base_url'],
+            component,
+            DOWNSTREAM_PROMOTE_NAME,
+            DOWNSTREAM_COMPONENT_NAME
+        )
 
-        promotion_name = "current-tripleo"
-        aggregate_hash = "component-ci-testing"
-
-        track_component_promotion(
-            criteria.api_url, criteria.base_url, criteria, periodic_builds_url,
-            testproject_url, promotion_name, aggregate_hash, component)
+        results = downstream_component(distro, release, component)
+        render_tables_proxy(results, pkg_diff, component)
 
     elif not component:
         # NOTE(dasm): pkg_diff is currently being used by integration downstream
         # NOTE(dasm): It is a temporary workaround
         # TODO(dasm): Change the way how packages are compared
         url = config['downstream']['criteria'][distro][release]['int_url']
-        criteria = url_response_in_yaml(url)
+        criteria = yaml.safe_load(web_scrape(url))
         _, pkg_diff = get_package_diff(
             criteria['base_url'],
             None,
@@ -781,7 +634,7 @@ def downstream(release, distro, promotion_name, aggregate_hash, component):
         )
 
         results = downstream_integration(distro, release)
-        render_tables_proxy(results, pkg_diff)
+        render_tables_proxy(results, pkg_diff, component)
     else:
         raise Exception("Unsupported")
     logging.info("Finished script: %s - %s", distro, release)
@@ -799,17 +652,10 @@ STREAM = {
 @click.option("--verbose", is_flag=True, default=False)
 @click.option("--component", default=None,
               type=click.Choice(sorted(ALL_COMPONENTS)))
-@click.option("--aggregate_hash", default="tripleo-ci-testing",
-              # TO-DO w/ tripleo-get-hash
-              help=("default:tripleo-ci-testing"
-                    "\nexample:tripleo-ci-testing/e6/ad/e6ad..."))
-@click.option("--promotion_name", default="current-tripleo",
-              type=click.Choice(["current-tripleo", "current-tripleo-rdo",
-                                 "current-podified"]))
 @click.option("--distro", default=DISTROS[0], type=click.Choice(DISTROS))
 @click.option("--release", default=RELEASES[0], type=click.Choice(RELEASES))
 @click.command()
-def main(release, distro, promotion_name, aggregate_hash, component, verbose):
+def main(release, distro, component, verbose):
     if verbose:
         fmt = '%(asctime)s:%(levelname)s - %(funcName)s:%(lineno)s %(message)s'
         logging.basicConfig(format=fmt, encoding='utf-8', level=logging.DEBUG)
@@ -823,7 +669,7 @@ def main(release, distro, promotion_name, aggregate_hash, component, verbose):
 
     # NOTE (dasm): Dynamically select up/downstream function based on distro
     stream = STREAM[distro]
-    stream(release, distro, promotion_name, aggregate_hash, component)
+    stream(release, distro, component)
 
 
 if __name__ == '__main__':
