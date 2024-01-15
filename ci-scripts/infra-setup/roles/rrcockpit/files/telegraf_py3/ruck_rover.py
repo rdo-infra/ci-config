@@ -763,6 +763,19 @@ def downstream(release, distro, promotion_name, aggregate_hash, component):
             criteria.api_url, criteria.base_url, criteria, periodic_builds_url,
             testproject_url, promotion_name, aggregate_hash, component)
 
+        url = config['downstream']['criteria'][distro][release]['comp_url']
+        criteria = url_response_in_yaml(url)
+        _, pkg_diff = get_package_diff(
+            criteria['base_url'],
+            component,
+            DOWNSTREAM_PROMOTE_NAME,
+            DOWNSTREAM_COMPONENT_NAME
+        )
+
+        # NOTE(dasm):
+        results = downstream_component(distro, release, component)
+        render_tables_proxy(results, pkg_diff)
+
     elif not component:
         # NOTE(dasm): pkg_diff is currently being used by integration downstream
         # NOTE(dasm): It is a temporary workaround
