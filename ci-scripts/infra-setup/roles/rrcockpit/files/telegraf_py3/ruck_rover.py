@@ -243,33 +243,6 @@ def print_a_set_in_table(jobs, header="Job name"):
     console.print(table)
 
 
-def print_failed_in_criteria(jobs):
-    """Print jobs history.
-
-    : param jobs (dict): History of jobs running midstream.
-    : return None
-    """
-
-    if not jobs:
-        return
-
-    header = "Jobs in promotion criteria required to promo the hash: "
-    table = Table(show_header=True, header_style="bold")
-    table.add_column(header, width=80)
-    table.add_column("Pass", width=15)
-    table.add_column("Failure", width=15)
-    table.add_column("Others", width=15)
-
-    for job_name, job_stats in sorted(jobs.items()):
-        table.add_row(
-            job_name,
-            str(job_stats['SUCCESS']),
-            str(job_stats['FAILURE']),
-            str(job_stats['OTHER']),
-        )
-    console.print(table)
-
-
 def prepare_jobs(jobs_in_criteria, jobs_in_alt_criteria, dlrn_jobs):
     """
     InfluxDB follows line protocol [1]
@@ -347,23 +320,20 @@ def prepare_render_template(filename):
     return template
 
 
-def render_integration_yaml(jobs, test_hash, testproject_url):
+def render_integration_yaml(jobs, test_hash):
     template = prepare_render_template('integration.yaml.j2')
-    output = template.render(
-        jobs=jobs, hash=test_hash, testproject_url=testproject_url)
+    output = template.render(jobs=jobs, hash=test_hash)
     print(output)
 
 
-def render_component_yaml(jobs, testproject_url):
+def render_component_yaml(jobs):
     template = prepare_render_template('component.yaml.j2')
-    output = template.render(
-        jobs=jobs, testproject_url=testproject_url)
+    output = template.render(jobs=jobs)
     print(output)
 
 
-def render_tables(jobs, timestamp, under_test_url, component,
-                  components, api_response, pkg_diff, test_hash,
-                  periodic_builds_url, testproject_url):
+def render_tables(jobs, timestamp, component, api_response, pkg_diff,
+                  test_hash):
     """
     jobs_to_promote are any job that hasn't registered
     success w/ dlrn. jobs_pending are any jobs in pending.
@@ -400,19 +370,13 @@ def render_tables(jobs, timestamp, under_test_url, component,
     component_ui = f"{component} component" if component else ""
     status_ui = f"status={status}"
     promotion_ui = f"last_promotion={timestamp}"
-    hash_ui = f"Hash_under_test={under_test_url}"
     header_ui = " ".join([component_ui, status_ui, promotion_ui])
 
     console.print(header_ui)
-    console.print(hash_ui)
 
     print_a_set_in_table(passed, "Jobs which passed:")
     print_a_set_in_table(failed, "Jobs which failed:")
     print_a_set_in_table(no_result, "Pending running jobs")
-
-    periodic_history = get_job_history(to_promote, periodic_builds_url)
-
-    print_failed_in_criteria(periodic_history)
 
     log_urls = latest_job_results_url(api_response, failed)
     if log_urls:
@@ -430,9 +394,9 @@ def render_tables(jobs, timestamp, under_test_url, component,
     tp_jobs = to_promote - no_result
     if tp_jobs:
         if component:
-            render_component_yaml(tp_jobs, testproject_url)
+            render_component_yaml(tp_jobs)
         else:
-            render_integration_yaml(tp_jobs, test_hash, testproject_url)
+            render_integration_yaml(tp_jobs, test_hash)
 
 
 def get_package_diff(base_url, component, promotion_name, aggregate_hash):
@@ -473,8 +437,8 @@ def render_tables_proxy(results, pkg_diff=None, component=None):
         aggregate = result['aggregate']
         promotion_hash = result['aggregate_hash']
 
-        render_tables(jobs, timestamp, promotion_hash, component, [],
-                      aggregate, pkg_diff, promotion_hash, "", "")
+        render_tables(jobs, timestamp, component, aggregate, pkg_diff,
+                      promotion_hash)
 
 
 def component(api_instance, component_name, jobs_in_criteria):
