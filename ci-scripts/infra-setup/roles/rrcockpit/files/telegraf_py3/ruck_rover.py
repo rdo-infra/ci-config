@@ -587,7 +587,7 @@ def downstream_integration(system, release):
                        jobs_in_criteria, jobs_alt_criteria)
 
 
-def upstream_proxy(release, system, *_args, **_kwargs):
+def upstream_integration(release, system):
     url = UPSTREAM_CRITERIA_URL.format(system=system, release=release)
     config = yaml.safe_load(web_scrape(url))
     jobs_in_criteria = config[UPSTREAM_PROMOTE_NAME]
@@ -596,12 +596,16 @@ def upstream_proxy(release, system, *_args, **_kwargs):
     api_client = dlrnapi_client.ApiClient(host)
     api_instance = dlrnapi_client.DefaultApi(api_client)
 
-    results = integration(
+    return integration(
         api_instance,
         UPSTREAM_PROMOTE_NAME,
         jobs_in_criteria,
         {}
     )
+
+
+def upstream(release, system, component=None):
+    results = upstream_integration(release, system)
     render_tables_proxy(results)
 
 
@@ -641,7 +645,7 @@ def downstream(release, distro, component=None):
 
 
 STREAM = {
-    "centos9": upstream_proxy,
+    "centos9": upstream,
     "rhel8": downstream,
     "rhel9": downstream,
     "rhel-8": downstream,
