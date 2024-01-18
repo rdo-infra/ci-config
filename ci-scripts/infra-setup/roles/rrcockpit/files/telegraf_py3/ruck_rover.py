@@ -82,12 +82,6 @@ DOWNSTREAM_TESTING_NAME = "tripleo-ci-testing"
 DOWNSTREAM_COMPONENT_NAME = "component-ci-testing"
 
 
-class AttributeDict(dict):
-    def __getattr__(self, name):
-        return (self[name] if not isinstance(self[name], dict)
-                else AttributeDict(self[name]))
-
-
 def web_scrape(url):
     logging.debug("Fetching url: %s", url)
     try:
