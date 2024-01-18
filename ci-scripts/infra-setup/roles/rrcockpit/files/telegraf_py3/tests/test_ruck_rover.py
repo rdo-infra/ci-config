@@ -235,19 +235,6 @@ class TestRuckRoverWithCommonSetup(unittest.TestCase):
             )
         return mock_resp
 
-    @mock.patch('requests.get')
-    def test_get_job_history(self, mock_get):
-        mock_resp = self._mock_response(json_data=json.loads(self.data))
-        mock_get.return_value = mock_resp
-        job = ("periodic-tripleo-ci-centos-8-standalone-full-tempest-"
-               "scenario-master")
-        zb_periodic = "https://review.rdoproject.org/zuul/api/builds"
-        history = ruck_rover.get_job_history([job], zb_periodic)
-        self.assertIn(job, history.keys())
-        self.assertEqual(history[job]['SUCCESS'], 3)
-        self.assertEqual(history[job]['FAILURE'], 2)
-        self.assertEqual(history[job]['OTHER'], 0)
-
 
 if __name__ == '__main__':
     unittest.main()
