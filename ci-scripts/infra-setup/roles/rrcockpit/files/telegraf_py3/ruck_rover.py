@@ -52,9 +52,6 @@ INFLUX_PASSED = 9
 INFLUX_PENDING = 5
 INFLUX_FAILED = 0
 
-ZUUL_JOBS_LIMIT = 1000
-ZUUL_JOB_HISTORY_THRESHOLD = 5
-
 PROMOTIONS_LIMIT = 1
 
 UPSTREAM_API_URL = "https://trunk.rdoproject.org/api-{system}-{release}"
@@ -170,52 +167,6 @@ def get_dlrn_results(api_response):
 
     logging.debug("Fetched DLRN jobs")
     return jobs
-
-
-def get_job_history(jobs, url):
-    """Fetch jobs history from provided URL.
-
-    :param jobs (set): Set of job names
-    :param url (str): URL to fetch job history from.
-    :return history (dict): Summary of history for all jobs.
-    """
-    if not jobs:
-        return {}
-
-    if not url:
-        return {}
-
-    logging.debug("Fetching jobs history")
-    response = requests.get(
-        url,
-        params={
-            'job_name': jobs,
-            'limit': ZUUL_JOBS_LIMIT,
-        },
-        headers={'Accept': 'application/json'},
-        verify=CERT_PATH
-    )
-    logging.debug(response.url)
-
-    history = {}
-    for job in response.json():
-        job_name = job['job_name']
-        result = job['result']
-
-        job_history = history.setdefault(
-            job_name, {'SUCCESS': 0, 'FAILURE': 0, 'OTHER': 0})
-
-        if (job_history['SUCCESS'] + job_history['FAILURE']
-                + job_history['OTHER']) >= ZUUL_JOB_HISTORY_THRESHOLD:
-            continue
-
-        if result in ("SUCCESS", 'FAILURE'):
-            job_history[result] += 1
-        else:
-            job_history['OTHER'] += 1
-
-    logging.debug("Return jobs history")
-    return history
 
 
 def latest_job_results_url(api_response, all_jobs):
