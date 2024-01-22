@@ -518,42 +518,15 @@ def upstream_integration(release, system):
 
 def upstream(release, system, *_args, **_kwargs):
     results = upstream_integration(release, system)
-    render_tables_proxy(results)
+    return results
 
 
-def downstream(release, distro, component=None):
-    config = yaml.safe_load(web_scrape(DOWNSTREAM_CRITERIA_URL))
+def downstream(release, system, component=None):
     if component:
-        url = config['downstream']['criteria'][distro][release]['comp_url']
-        criteria = yaml.safe_load(web_scrape(url))
-        _, pkg_diff = get_package_diff(
-            criteria['base_url'],
-            component,
-            DOWNSTREAM_PROMOTE_NAME,
-            DOWNSTREAM_COMPONENT_NAME
-        )
-
-        results = downstream_component(distro, release, component)
-        render_tables_proxy(results, pkg_diff, component)
-
-    elif not component:
-        # NOTE(dasm): pkg_diff is currently being used by integration downstream
-        # NOTE(dasm): It is a temporary workaround
-        # TODO(dasm): Change the way how packages are compared
-        url = config['downstream']['criteria'][distro][release]['int_url']
-        criteria = yaml.safe_load(web_scrape(url))
-        _, pkg_diff = get_package_diff(
-            criteria['base_url'],
-            None,
-            DOWNSTREAM_PROMOTE_NAME,
-            DOWNSTREAM_TESTING_NAME
-        )
-
-        results = downstream_integration(distro, release)
-        render_tables_proxy(results, pkg_diff, component)
+        results = downstream_component(system, release, component)
     else:
-        raise Exception("Unsupported")
-    logging.info("Finished script: %s - %s", distro, release)
+        results = downstream_integration(system, release)
+    return results
 
 
 STREAM = {
@@ -585,7 +558,8 @@ def main(release, distro, component, verbose):
 
     # NOTE (dasm): Dynamically select up/downstream function based on distro
     stream = STREAM[distro]
-    stream(release, distro, component)
+    results = stream(release, distro, component)
+    render_tables_proxy(results, None, component)
 
 
 if __name__ == '__main__':
