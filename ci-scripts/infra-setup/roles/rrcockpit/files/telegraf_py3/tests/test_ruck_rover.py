@@ -1,7 +1,7 @@
 import os
 import unittest
 from unittest import mock
-from unittest.mock import call, patch
+from unittest.mock import patch
 
 import ruck_rover
 
@@ -19,39 +19,6 @@ class TestRuckRover(unittest.TestCase):
         m_get.return_value.text = data
         obtained = ruck_rover.web_scrape('www.demooourl.com')
         self.assertEqual(data, obtained)
-
-    def test_get_diff_the_same(self):
-        file_content = ["file1", ([], [0, 0, 0, 0, 0, 0, 0, 0, 0, "abc"], [])]
-        output = ruck_rover.get_diff("", file_content, "", file_content)
-        self.assertFalse(output)
-
-    @patch("ruck_rover.Table.add_row")
-    @patch("ruck_rover.Table.add_column")
-    def test_get_diff_different(self, m_column, m_row):
-        file1 = ["file1", ([], [0, 0, 0, 0, 0, 0, 0, 0, 0, "abc"], [])]
-        file2 = ["file2", ([], [0, 0, 0, 0, 0, 0, 0, 0, 0, "xyz"], [])]
-        ruck_rover.get_diff("Control", file1, "Test", file2)
-
-        m_column.assert_has_calls([
-            call("Control", style="dim", width=85),
-            call("Test", style="dim", width=85)
-        ])
-        m_row.assert_called_with(str("abc"), str("xyz"))
-
-    @mock.patch('requests.get')
-    def test_get_csv_not_ok(self, m_get):
-        m_response = mock.MagicMock(ok=False)
-        m_get.return_value = m_response
-        output = ruck_rover.get_csv("")
-        self.assertIsNone(output)
-
-    @mock.patch('csv.reader')
-    @mock.patch('requests.get')
-    def test_get_csv(self, m_get, m_reader):
-        m_response = mock.MagicMock(ok=True, content=b"")
-        m_get.return_value = m_response
-        output = ruck_rover.get_csv("")
-        self.assertEqual(output, ['', m_reader()])
 
     def test_get_dlrn_results(self):
         periodic_passed = mock.MagicMock(
@@ -148,58 +115,6 @@ class TestRuckRover(unittest.TestCase):
             'periodic_job': periodic_failed3,
         }
         self.assertEqual(expected, results)
-
-
-class TestRuckRoverComponent(unittest.TestCase):
-    def setUp(self):
-        self.config = {
-            'downstream': {
-                'testproject_url':
-                'https://review.rdoproject.org/r/q/project:testproject',
-                'periodic_builds_url':
-                'https://review.rdoproject.org/zuul/api/builds',
-                'upstream_builds_url': 'https://zuul.openstack.org/api/builds',
-                'criteria': {
-                    'centos-8': {
-                        'wallaby': {
-                            'comp_url': 'http://wallaby_comp',
-                            'int_url': 'http://int_url'
-                                   }
-                               },
-                }
-            }
-        }
-
-    def test_get_package_diff_all(self):
-        result = ruck_rover.get_package_diff("base_url", "all", "", "")
-        all_components = ["baremetal", "cinder", "clients", "cloudops",
-                          "common", "compute", "glance", "manila",
-                          "network", "octavia", "security", "swift",
-                          "tempest", "tripleo", "ui", "validation"]
-        expected = (all_components, None)
-        self.assertEqual(result, expected)
-
-    @mock.patch('ruck_rover.get_diff')
-    @mock.patch('ruck_rover.get_csv')
-    def test_get_components_single(self, m_csv, m_diff):
-
-        m_csv.side_effect = ["first", "second"]
-        m_diff.return_value = "pkg_diff"
-
-        result = ruck_rover.get_package_diff(
-            "base_url", "cinder", "current-tripleo",
-            "component-ci-testing")
-
-        m_csv.assert_has_calls([
-            call('base_url/component/cinder/current-tripleo/versions.csv'),
-            call('base_url/component/cinder/component-ci-testing/versions.csv')
-        ])
-
-        m_diff.assert_called_with(
-            "current-tripleo", "first", "component-ci-testing", "second")
-
-        expected = (['cinder'], "pkg_diff")
-        self.assertEqual(result, expected)
 
 
 class TestRuckRoverWithCommonSetup(unittest.TestCase):
