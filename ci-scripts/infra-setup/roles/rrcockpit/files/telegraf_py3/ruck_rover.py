@@ -95,34 +95,6 @@ def web_scrape(url):
     return response.text
 
 
-def get_csv(url):
-    logging.debug("Fetching CSV from %s", url)
-    response = requests.get(url, verify=CERT_PATH)
-    if response.ok:
-        content = response.content.decode('utf-8')
-        f = StringIO(content)
-        reader = csv.reader(f, delimiter=',')
-        logging.debug("Fetched CSV from %s", url)
-        return [content, reader]
-
-
-def get_diff(control_tag, file1, test_tag, file2):
-    # compare the raw string
-    if file1[0] == file2[0]:
-        return False
-    else:
-        # for the line by line diff, use csv content
-        table = Table(show_header=True, header_style="bold")
-        table.add_column(control_tag, style="dim", width=85)
-        table.add_column(test_tag, style="dim", width=85)
-        logging.debug("Compare files")
-        for f1, f2 in zip(file1[1], file2[1]):
-            if f1 != f2:
-                table.add_row(str(f1[9]), str(f2[9]))
-        logging.debug("Files compared")
-        return table
-
-
 def get_dlrn_results(api_response):
     """DLRN tests results.
 
@@ -277,8 +249,7 @@ def render_component_yaml(jobs):
     print(output)
 
 
-def render_tables(jobs, timestamp, component, api_response, pkg_diff,
-                  test_hash):
+def render_tables(jobs, timestamp, component, api_response, test_hash):
     """
     jobs_to_promote are any job that hasn't registered
     success w/ dlrn. jobs_pending are any jobs in pending.
@@ -329,10 +300,6 @@ def render_tables(jobs, timestamp, component, api_response, pkg_diff,
     for value in log_urls.values():
         console.print(value)
 
-    if pkg_diff:
-        console.print("\n Packages Tested")
-        rich_print(pkg_diff)
-
     # NOTE: Print new line to separate results
     console.print("\n")
 
@@ -344,37 +311,7 @@ def render_tables(jobs, timestamp, component, api_response, pkg_diff,
             render_integration_yaml(tp_jobs, test_hash)
 
 
-def get_package_diff(base_url, component, promotion_name, aggregate_hash):
-    logging.debug("Get diff of tested packages")
-
-    if component == "all":
-        logging.debug("Skip checking packages diff")
-        components = sorted(ALL_COMPONENTS.difference(["all"]))
-        return components, None
-
-    elif not component:
-        logging.debug("Integration diff URL")
-        control_url = INTEGRATION_DLRN_VERSIONS_CSV.format(
-            url=base_url, tag=promotion_name)
-        test_url = INTEGRATION_DLRN_VERSIONS_CSV.format(
-            url=base_url, tag=aggregate_hash)
-
-    elif component and component != "all":
-        logging.debug("Component diff URL for %s", component)
-        control_url = COMPONENT_DLRN_VERSIONS_CSV.format(
-            url=base_url, component=component, tag=promotion_name)
-        test_url = COMPONENT_DLRN_VERSIONS_CSV.format(
-            url=base_url, component=component, tag=aggregate_hash)
-
-    control_csv = get_csv(control_url)
-    test_csv = get_csv(test_url)
-
-    components = [component]
-    diff = get_diff(promotion_name, control_csv, aggregate_hash, test_csv)
-    return components, diff
-
-
-def render_tables_proxy(results, pkg_diff=None, component=None):
+def render_tables_proxy(results, component=None):
     for timestamp, result in results.items():
         timestamp = datetime.utcfromtimestamp(timestamp)
 
@@ -382,8 +319,7 @@ def render_tables_proxy(results, pkg_diff=None, component=None):
         aggregate = result['aggregate']
         promotion_hash = result['aggregate_hash']
 
-        render_tables(jobs, timestamp, component, aggregate, pkg_diff,
-                      promotion_hash)
+        render_tables(jobs, timestamp, component, aggregate, promotion_hash)
 
 
 def component_function(api_instance, component_name, jobs_in_criteria):
@@ -559,7 +495,7 @@ def main(release, distro, component, verbose):
     # NOTE (dasm): Dynamically select up/downstream function based on distro
     stream = STREAM[distro]
     results = stream(release, distro, component)
-    render_tables_proxy(results, None, component)
+    render_tables_proxy(results, component)
 
 
 if __name__ == '__main__':
