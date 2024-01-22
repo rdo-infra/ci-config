@@ -386,7 +386,7 @@ def render_tables_proxy(results, pkg_diff=None, component=None):
                       promotion_hash)
 
 
-def component(api_instance, component_name, jobs_in_criteria):
+def fetch_component(api_instance, component_name, jobs_in_criteria):
     logging.debug("Fetching component pipeline: %s - %s",
                   DOWNSTREAM_COMPONENT_NAME, component_name)
     params = dlrnapi_client.PromotionQuery(
@@ -416,8 +416,8 @@ def component(api_instance, component_name, jobs_in_criteria):
     return results
 
 
-def integration(api_instance, promote_name, jobs_in_criteria,
-                jobs_alt_criteria):
+def fetch_integration(
+        api_instance, promote_name, jobs_in_criteria, jobs_alt_criteria):
     logging.debug("Fetching integrations for %s", promote_name)
     params = dlrnapi_client.PromotionQuery(
         promote_name=promote_name,
@@ -462,7 +462,7 @@ def downstream_component(system, release, component_name):
     jobs_in_criteria = set(criteria['promoted-components'].get(
         component_name, []))
 
-    results = component(api_instance, component_name, jobs_in_criteria)
+    results = fetch_component(api_instance, component_name, jobs_in_criteria)
     return results
 
 
@@ -492,8 +492,12 @@ def downstream_integration(system, release):
         criteria['api_url'], auth_method="kerberosAuth", force_auth=True)
     api_instance = dlrnapi_client.DefaultApi(api_client)
 
-    return integration(api_instance, DOWNSTREAM_PROMOTE_NAME,
-                       jobs_in_criteria, jobs_alt_criteria)
+    return fetch_integration(
+            api_instance,
+            DOWNSTREAM_PROMOTE_NAME,
+            jobs_in_criteria,
+            jobs_alt_criteria
+    )
 
 
 def upstream_integration(release, system):
@@ -505,7 +509,7 @@ def upstream_integration(release, system):
     api_client = dlrnapi_client.ApiClient(host)
     api_instance = dlrnapi_client.DefaultApi(api_client)
 
-    return integration(
+    return fetch_integration(
         api_instance,
         UPSTREAM_PROMOTE_NAME,
         jobs_in_criteria,
