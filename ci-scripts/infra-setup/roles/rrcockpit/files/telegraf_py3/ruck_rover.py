@@ -121,20 +121,6 @@ def get_dlrn_results(api_response):
     return jobs
 
 
-def latest_job_results_url(api_response, all_jobs):
-    logging.debug("Get latest job url")
-    logs_job = {}
-    for particular_job in all_jobs:
-        latest_log = {}
-        for job in api_response:
-            if job.job_id == particular_job:
-                latest_log[job.timestamp] = job.url
-        logs_job[particular_job] = latest_log[max(latest_log.keys())]
-
-    logging.debug("Return latest jobs: %s", logs_job)
-    return logs_job
-
-
 def print_a_set_in_table(jobs, header="Job name"):
     if not jobs:
         return
@@ -235,7 +221,7 @@ def render_component_yaml(jobs):
     print(output)
 
 
-def render_tables(jobs, timestamp, component, api_response, test_hash):
+def render_tables(jobs, timestamp, component, test_hash):
     """
     jobs_to_promote are any job that hasn't registered
     success w/ dlrn. jobs_pending are any jobs in pending.
@@ -246,6 +232,7 @@ def render_tables(jobs, timestamp, component, api_response, test_hash):
 
     passed = set(k['job_name'] for k in jobs if k['status'] == INFLUX_PASSED)
     failed = set(k['job_name'] for k in jobs if k['status'] == INFLUX_FAILED)
+    failed_urls = set(k['logs'] for k in jobs if k['status'] == INFLUX_FAILED)
     no_result = set(
         k['job_name'] for k in jobs if k['status'] == INFLUX_PENDING)
     in_criteria_dict = {
@@ -280,10 +267,9 @@ def render_tables(jobs, timestamp, component, api_response, test_hash):
     print_a_set_in_table(failed, "Jobs which failed:")
     print_a_set_in_table(no_result, "Pending running jobs")
 
-    log_urls = latest_job_results_url(api_response, failed)
-    if log_urls:
+    if failed_urls:
         console.print("Logs of failing jobs:")
-    for value in log_urls.values():
+    for value in failed_urls:
         console.print(value)
 
     # NOTE: Print new line to separate results
@@ -302,10 +288,9 @@ def render_tables_proxy(results, component=None):
         timestamp = datetime.utcfromtimestamp(timestamp)
 
         jobs = result['jobs']
-        aggregate = result['aggregate']
         promotion_hash = result['aggregate_hash']
 
-        render_tables(jobs, timestamp, component, aggregate, promotion_hash)
+        render_tables(jobs, timestamp, component, promotion_hash)
 
 
 def fetch_component(api_instance, component_name, jobs_in_criteria):
@@ -332,7 +317,6 @@ def fetch_component(api_instance, component_name, jobs_in_criteria):
 
         results[promotion.timestamp] = {
             "jobs": jobs,
-            "aggregate": aggregate,
             "aggregate_hash": promotion.aggregate_hash,
         }
     return results
@@ -359,7 +343,6 @@ def fetch_integration(
 
         results[promotion.timestamp] = {
             "jobs": jobs,
-            "aggregate": aggregate,
             "aggregate_hash": promotion.aggregate_hash,
         }
     return results
