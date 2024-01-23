@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import json
 import logging
 import os
 import time
@@ -137,7 +138,7 @@ def get_dlrn_results(api_response, in_criteria, in_alt_criteria):
             jobs[job.job_id] = job_dict(job, in_criteria, in_alt_criteria)
 
     logging.debug("Fetched DLRN jobs")
-    return jobs.values()
+    return list(jobs.values())
 
 
 def print_a_set_in_table(jobs, header="Job name"):
@@ -390,13 +391,14 @@ STREAM = {
 }
 
 
+@click.option("--jsonize", is_flag=True, default=False)
 @click.option("--verbose", is_flag=True, default=False)
 @click.option("--component", default=None,
               type=click.Choice(sorted(ALL_COMPONENTS)))
 @click.option("--distro", default=DISTROS[0], type=click.Choice(DISTROS))
 @click.option("--release", default=RELEASES[0], type=click.Choice(RELEASES))
 @click.command()
-def main(release, distro, component, verbose):
+def main(release, distro, component, verbose, jsonize):
     if verbose:
         fmt = '%(asctime)s:%(levelname)s - %(funcName)s:%(lineno)s %(message)s'
         logging.basicConfig(format=fmt, encoding='utf-8', level=logging.DEBUG)
@@ -411,7 +413,10 @@ def main(release, distro, component, verbose):
     # NOTE (dasm): Dynamically select up/downstream function based on distro
     stream = STREAM[distro]
     results = stream(release, distro, component)
-    render_tables_proxy(results, component)
+    if jsonize:
+        print(json.dumps(results))
+    else:
+        render_tables_proxy(results, component)
 
 
 if __name__ == '__main__':
