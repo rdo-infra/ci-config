@@ -81,7 +81,26 @@ def web_scrape(url):
     return response.text
 
 
-def get_dlrn_results(api_response):
+def job_dict(job, in_criteria, in_alt_criteria):
+    if job and job.success is True:
+        status = INFLUX_PASSED
+    elif job and job.success is False:
+        status = INFLUX_FAILED
+    else:
+        status = INFLUX_PENDING
+
+    return {
+        'job_name': job.job_id,
+        'criteria': job.job_id in in_criteria,
+        'alt_criteria': in_alt_criteria.get(job.job_id, []),
+        'logs': job.url,
+        'status': status,
+        'timestamp': job.timestamp,
+        'success': job.success
+    }
+
+
+def get_dlrn_results(api_response, in_criteria, in_alt_criteria):
     """DLRN tests results.
 
     DLRN stores tests results in its internal DB.
@@ -90,7 +109,7 @@ def get_dlrn_results(api_response):
     from select api_response.
 
         :param api_response (object): Response from API.
-        :return jobs (dict of objects): It contains all last jobs from
+        :return jobs (dict of dicts): It contains all last jobs from
             response with their appropriate status, timestamp and URL to
             test result.
     """
@@ -105,20 +124,20 @@ def get_dlrn_results(api_response):
 
         existing_job = jobs.get(job.job_id)
         if not existing_job:
-            jobs[job.job_id] = job
             logging.debug("Adding %s: %d", job.job_id, job.timestamp)
+            jobs[job.job_id] = job_dict(job, in_criteria, in_alt_criteria)
             continue
 
-        if job.timestamp > existing_job.timestamp:
-            if existing_job.success and not job.success:
+        if job.timestamp > existing_job['timestamp']:
+            if existing_job['success'] and not job.success:
                 continue
 
             # NOTE(dasm): Overwrite *only* when recent job succeeded.
             logging.debug("Updating %s: %d", job.job_id, job.timestamp)
-            jobs[job.job_id] = job
+            jobs[job.job_id] = job_dict(job, in_criteria, in_alt_criteria)
 
     logging.debug("Fetched DLRN jobs")
-    return jobs
+    return jobs.values()
 
 
 def print_a_set_in_table(jobs, header="Job name"):
@@ -130,75 +149,6 @@ def print_a_set_in_table(jobs, header="Job name"):
     for job in sorted(jobs):
         table.add_row(job)
     console.print(table)
-
-
-def prepare_jobs(jobs_in_criteria, jobs_in_alt_criteria, dlrn_jobs):
-    """
-    InfluxDB follows line protocol [1]
-
-    Syntax:
-    "jobs_result" and "dlrn-promotion" are 'measurement',
-    which describes a "bucket" where data is stored.
-    Next are optional 'tags', represented as key-value pairs.
-    Whitespace divides above from fields.
-    All field key-value pairs are separated by commas.
-    Whitespace separates fields from optional timestamp.
-    <measurement>[,<tag_key>=<tag_value>] <field_key>=<field_value>[
-                                       ,<field_key>=<field_value>] [<timestamp>]
-
-    [1] https://docs.influxdata.com/influxdb/v2.0/reference/syntax/line-protocol
-
-    Grafana
-    It stores colors as numbers, not text:
-    * 0 - failed
-    * 5 - pending
-    * 9 - success
-
-    Epoch is rendered only with *1000
-
-    :param jobs_in_criteria (set): Jobs which are required for promotion.
-    :param jobs_in_alt_criteria (set): Jobs which can be switched for promotion.
-    :param dlrn_jobs (dict of objects): Jobs, registered by DLRN.
-    :return job_result_list (list of dicts): List of parsed jobs.
-    """
-
-    logging.debug("Preparing jobs info")
-
-    all_jobs = set(dlrn_jobs).union(jobs_in_criteria)
-
-    zuul_jobs = {}
-    logging.debug("Parsing jobs")
-    job_result_list = []
-    for job_name in sorted(all_jobs):
-        job = dlrn_jobs.get(job_name)
-        if job and job.success is True:
-            status = INFLUX_PASSED
-        elif job and job.success is False:
-            status = INFLUX_FAILED
-        else:
-            status = INFLUX_PENDING
-
-        # NOTE(dasm): DLRN returns job.url without trailing '/'
-        log_url = job.url + '/' if job else "N/A"
-        zuul_job = zuul_jobs.get(log_url)
-        if not zuul_job:
-            logging.info("Missing job %s", log_url)
-            zuul_job = {}
-
-        d = zuul_job.get('duration', 0)
-        duration = time.strftime("%H hr %M mins %S secs", time.gmtime(d))
-        job_result = {
-            'job_name': job_name,
-            'criteria': job_name in jobs_in_criteria,
-            'alt_criteria': jobs_in_alt_criteria.get(job_name, []),
-            'logs': log_url,
-            'duration': duration,
-            'status': status,
-        }
-        job_result_list.append(job_result)
-    logging.debug("Prepared jobs info: %s", job_result_list)
-
-    return job_result_list
 
 
 def prepare_render_template(filename):
@@ -310,12 +260,10 @@ def component_function(api_instance, component_name, jobs_in_criteria):
             extended_hash=promotion.extended_hash
         )
         aggregate = api_instance.api_repo_status_get(params)
-
-        dlrn_jobs = get_dlrn_results(aggregate)
-        jobs = prepare_jobs(jobs_in_criteria, {}, dlrn_jobs)
+        jobs_dict = get_dlrn_results(aggregate, jobs_in_criteria, {})
 
         results[promotion.timestamp] = {
-            "jobs": jobs,
+            "jobs": jobs_dict,
             "aggregate_hash": promotion.aggregate_hash,
         }
     return results
@@ -336,12 +284,11 @@ def integration_function(
             aggregate_hash=promotion.aggregate_hash
         )
         aggregate = api_instance.api_agg_status_get(params)
-
-        dlrn_jobs = get_dlrn_results(aggregate)
-        jobs = prepare_jobs(jobs_in_criteria, jobs_alt_criteria, dlrn_jobs)
+        jobs_dict = get_dlrn_results(
+            aggregate, jobs_in_criteria, jobs_alt_criteria)
 
         results[promotion.timestamp] = {
-            "jobs": jobs,
+            "jobs": jobs_dict,
             "aggregate_hash": promotion.aggregate_hash,
         }
     return results
