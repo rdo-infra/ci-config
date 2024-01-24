@@ -100,6 +100,30 @@ def job_dict(job, in_criteria, in_alt_criteria):
     }
 
 
+def split_jobs(jobs):
+    passed = {}
+    failed = {}
+    no_result = {}
+    in_criteria = {}
+    failed_urls = set()
+
+    for job in jobs:
+        if job['criteria'] is True:
+            in_criteria[job['job_name']] = job
+
+        if job['status'] == INFLUX_PASSED:
+            passed[job['job_name']] = job
+
+        elif job['status'] == INFLUX_FAILED:
+            failed[job['job_name']] = job
+            failed_urls.add(job['logs'])
+
+        elif job['status'] == INFLUX_PENDING:
+            no_result[job['job_name']] = job
+
+    return passed, failed, no_result, in_criteria
+
+
 def get_dlrn_results(api_response, in_criteria, in_alt_criteria):
     """DLRN tests results.
 
@@ -261,10 +285,15 @@ def fetch_component(api_instance, component_name, jobs_in_criteria):
             extended_hash=promotion.extended_hash
         )
         aggregate = api_instance.api_repo_status_get(params)
-        jobs_dict = get_dlrn_results(aggregate, jobs_in_criteria, {})
+        jobs_list = get_dlrn_results(aggregate, jobs_in_criteria, {})
+        passed, failed, no_result, in_criteria = split_jobs(jobs_list)
 
         results[promotion.timestamp] = {
-            "jobs": jobs_dict,
+            "jobs": jobs_list,
+            "passed": passed,
+            "failed": failed,
+            "no_result": no_result,
+            "in_criteria": in_criteria,
             "aggregate_hash": promotion.aggregate_hash,
         }
     return results
@@ -285,11 +314,16 @@ def fetch_integration(
             aggregate_hash=promotion.aggregate_hash
         )
         aggregate = api_instance.api_agg_status_get(params)
-        jobs_dict = get_dlrn_results(
+        jobs_list = get_dlrn_results(
             aggregate, jobs_in_criteria, jobs_alt_criteria)
+        passed, failed, no_result, in_criteria = split_jobs(jobs_list)
 
         results[promotion.timestamp] = {
-            "jobs": jobs_dict,
+            "jobs": jobs_list,
+            "passed": passed,
+            "failed": failed,
+            "no_result": no_result,
+            "in_criteria": in_criteria,
             "aggregate_hash": promotion.aggregate_hash,
         }
     return results
