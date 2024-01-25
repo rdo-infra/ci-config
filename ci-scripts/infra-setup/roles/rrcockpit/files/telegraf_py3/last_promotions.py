@@ -114,7 +114,7 @@ if __name__ == '__main__':
     promotions = []
     args = parser.parse_args()
 
-    # align args w/ ruck_rover.py
+    # align args w/ monitoring.py  # former ruck_rover.py
     if args.distro == "centos-8":
         args.distro = "CentOS-8"
     elif args.distro == "centos-9":
