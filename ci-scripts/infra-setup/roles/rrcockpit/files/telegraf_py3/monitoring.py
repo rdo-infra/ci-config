@@ -4,6 +4,7 @@ import json
 import logging
 import os
 from datetime import datetime
+from flask import abort, Flask, jsonify
 
 import click
 import dlrnapi_client
@@ -15,6 +16,7 @@ from rich.console import Console
 from rich.table import Table
 
 console = Console()
+app = Flask(__name__)
 
 # Use user-provided CA bundle or fallback to system-provided CA bundle.
 # Ensure that your CA bundle includes Red Hat's certificate authority,
@@ -448,6 +450,37 @@ def main(release, distro, component, verbose, jsonize):
         print(json.dumps(results))
     else:
         render_tables_proxy(results, component)
+
+
+@app.errorhandler(404)
+def internal_error(error):
+    data = {"error": error.description}
+    return jsonify(data), error.code
+
+
+@app.route("/<system>/<release>/<component>")
+@app.route("/<system>/<release>/")
+@app.route("/<system>/<release>")
+def run(system, release, component=None):
+    try:
+        systems = REVERSED_MATRIX[release]
+    except KeyError:
+        abort(404, f"wrong release: {release}")
+
+    try:
+        releases = MATRIX[system]
+    except KeyError:
+        abort(404, f"wrong system: {system}")
+
+    if system not in systems or release not in releases:
+        msg = f'release {release} is not supported for {system}.'
+        abort(404, msg)
+
+    # TODO(dasm): Ensure that we're protected from providing component
+    # to non-component releases
+    stream = STREAM[system]
+    data = stream(release, system, component)
+    return jsonify(data), 200
 
 
 if __name__ == '__main__':
