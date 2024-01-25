@@ -119,7 +119,17 @@ def split_jobs(jobs):
         elif job['status'] == INFLUX_PENDING:
             no_result[job['job_name']] = job
 
-    return passed, failed, no_result, in_criteria
+    to_promote = set(in_criteria).difference(passed)
+    for job_to_promote in set(to_promote):
+        alt_criteria = in_criteria[job_to_promote]['alt_criteria']
+        alt_criteria_passed = set(alt_criteria).intersection(passed)
+
+        if alt_criteria_passed:
+            to_promote.remove(job_to_promote)
+            in_criteria[job_to_promote]['success'] = True
+
+    return (list(passed.values()), list(failed.values()),
+            list(no_result.values()), list(in_criteria.values()))
 
 
 def get_dlrn_results(api_response, in_criteria, in_alt_criteria):
@@ -193,7 +203,8 @@ def render_component_yaml(jobs):
     print(output)
 
 
-def render_tables(jobs, timestamp, component, test_hash):
+def render_tables(passed, failed, no_result, in_criteria, timestamp,
+                  component, test_hash):
     """
     jobs_to_promote are any job that hasn't registered
     success w/ dlrn. jobs_pending are any jobs in pending.
@@ -202,24 +213,11 @@ def render_tables(jobs, timestamp, component, test_hash):
     you are only looking at one component and not all components
     """
 
-    passed = set(k['job_name'] for k in jobs if k['status'] == INFLUX_PASSED)
-    failed = set(k['job_name'] for k in jobs if k['status'] == INFLUX_FAILED)
-    failed_urls = set(k['logs'] for k in jobs if k['status'] == INFLUX_FAILED)
-    no_result = set(
-        k['job_name'] for k in jobs if k['status'] == INFLUX_PENDING)
-    in_criteria_dict = {
-        k['job_name']: k['alt_criteria'] for k in jobs if k['criteria'] is True
-    }
-    in_criteria = set(in_criteria_dict)
-    to_promote = in_criteria.difference(passed)
-
-    for job_to_promote in set(to_promote):
-        alt_criteria = in_criteria_dict[job_to_promote]
-        alt_criteria_passed = set(alt_criteria).intersection(passed)
-
-        if alt_criteria_passed:
-            to_promote.remove(job_to_promote)
-            in_criteria.update(alt_criteria_passed)
+    in_criteria = set([j['job_name'] for j in in_criteria])
+    passed_jobs = set([j['job_name'] for j in passed])
+    failed_jobs = set([j['job_name'] for j in failed])
+    no_result_jobs = set([j['job_name'] for j in no_result])
+    to_promote = in_criteria.difference(passed_jobs)
 
     if failed:
         status = "Red"
@@ -235,34 +233,36 @@ def render_tables(jobs, timestamp, component, test_hash):
 
     console.print(header_ui)
 
-    print_a_set_in_table(passed, "Jobs which passed:")
-    print_a_set_in_table(failed, "Jobs which failed:")
-    print_a_set_in_table(no_result, "Pending running jobs")
+    print_a_set_in_table(passed_jobs, "Jobs which passed:")
+    print_a_set_in_table(failed_jobs, "Jobs which failed:")
+    print_a_set_in_table(no_result_jobs, "Pending running jobs")
 
-    if failed_urls:
+    if failed:
         console.print("Logs of failing jobs:")
-    for value in failed_urls:
-        console.print(value)
+        for value in failed:
+            console.print(value['logs'])
 
-    # NOTE: Print new line to separate results
-    console.print("\n")
-
-    tp_jobs = to_promote - no_result
-    if tp_jobs:
+    if to_promote:
+        # NOTE: Print new line to separate results
+        console.print("\n")
         if component:
-            render_component_yaml(tp_jobs)
+            render_component_yaml(to_promote)
         else:
-            render_integration_yaml(tp_jobs, test_hash)
+            render_integration_yaml(to_promote, test_hash)
 
 
 def render_tables_proxy(results, component=None):
-    for timestamp, result in results.items():
-        timestamp = datetime.utcfromtimestamp(timestamp)
+    for result in results:
+        timestamp = datetime.utcfromtimestamp(result['promotion_date'])
 
-        jobs = result['jobs']
+        passed = result['passed']
+        failed = result['failed']
+        no_result = result['no_result']
+        in_criteria = result['in_criteria']
         promotion_hash = result['aggregate_hash']
 
-        render_tables(jobs, timestamp, component, promotion_hash)
+        render_tables(passed, failed, no_result, in_criteria, timestamp,
+                      component, promotion_hash)
 
 
 def fetch_component(api_instance, component_name, jobs_in_criteria):
@@ -275,7 +275,7 @@ def fetch_component(api_instance, component_name, jobs_in_criteria):
     )
     promotions = api_instance.api_promotions_get(params)
 
-    results = {}
+    results = []
     for promotion in promotions:
         params = dlrnapi_client.Params2(
             commit_hash=promotion.commit_hash,
@@ -286,14 +286,14 @@ def fetch_component(api_instance, component_name, jobs_in_criteria):
         jobs_list = get_dlrn_results(aggregate, jobs_in_criteria, {})
         passed, failed, no_result, in_criteria = split_jobs(jobs_list)
 
-        results[promotion.timestamp] = {
-            "jobs": jobs_list,
+        results.append({
+            "promotion_date": promotion.timestamp,
             "passed": passed,
             "failed": failed,
             "no_result": no_result,
             "in_criteria": in_criteria,
             "aggregate_hash": promotion.aggregate_hash,
-        }
+        })
     return results
 
 
@@ -306,7 +306,7 @@ def fetch_integration(
     )
     promotions = api_instance.api_promotions_get(params)
 
-    results = {}
+    results = []
     for promotion in promotions:
         params = dlrnapi_client.AggQuery(
             aggregate_hash=promotion.aggregate_hash
@@ -316,14 +316,14 @@ def fetch_integration(
             aggregate, jobs_in_criteria, jobs_alt_criteria)
         passed, failed, no_result, in_criteria = split_jobs(jobs_list)
 
-        results[promotion.timestamp] = {
-            "jobs": jobs_list,
+        results.append({
+            "promotion_date": promotion.timestamp,
             "passed": passed,
             "failed": failed,
             "no_result": no_result,
             "in_criteria": in_criteria,
             "aggregate_hash": promotion.aggregate_hash,
-        }
+        })
     return results
 
 
@@ -346,8 +346,7 @@ def downstream_component(system, release, component_name):
     jobs_in_criteria = set(criteria['promoted-components'].get(
         component_name, []))
 
-    results = fetch_component(api_instance, component_name, jobs_in_criteria)
-    return results
+    return fetch_component(api_instance, component_name, jobs_in_criteria)
 
 
 def downstream_integration(system, release):
