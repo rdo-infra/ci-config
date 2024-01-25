@@ -1,21 +1,11 @@
-#!/usr/bin/env python
-
-import json
 import logging
 import os
-from datetime import datetime
 from flask import abort, Flask, jsonify
 
-import click
 import dlrnapi_client
 import requests
 import yaml
-from click.exceptions import BadParameter
-from jinja2 import Environment, FileSystemLoader
-from rich.console import Console
-from rich.table import Table
 
-console = Console()
 app = Flask(__name__)
 
 # Use user-provided CA bundle or fallback to system-provided CA bundle.
@@ -172,99 +162,6 @@ def get_dlrn_results(api_response, in_criteria, in_alt_criteria):
 
     logging.debug("Fetched DLRN jobs")
     return list(jobs.values())
-
-
-def print_a_set_in_table(jobs, header="Job name"):
-    if not jobs:
-        return
-
-    table = Table(show_header=True, header_style="bold")
-    table.add_column(header, style="dim", width=80)
-    for job in sorted(jobs):
-        table.add_row(job)
-    console.print(table)
-
-
-def prepare_render_template(filename):
-    path = os.path.dirname(__file__)
-    file_loader = FileSystemLoader(path + '/templates')
-    env = Environment(loader=file_loader)
-    template = env.get_template(filename)
-    return template
-
-
-def render_integration_yaml(jobs, test_hash):
-    template = prepare_render_template('integration.yaml.j2')
-    output = template.render(jobs=jobs, hash=test_hash)
-    print(output)
-
-
-def render_component_yaml(jobs):
-    template = prepare_render_template('component.yaml.j2')
-    output = template.render(jobs=jobs)
-    print(output)
-
-
-def render_tables(passed, failed, no_result, in_criteria, timestamp,
-                  component, test_hash):
-    """
-    jobs_to_promote are any job that hasn't registered
-    success w/ dlrn. jobs_pending are any jobs in pending.
-    We only want test project config for jobs that have completed.
-    execute if there are failing jobs in criteria and if
-    you are only looking at one component and not all components
-    """
-
-    in_criteria = set([j['job_name'] for j in in_criteria])
-    passed_jobs = set([j['job_name'] for j in passed])
-    failed_jobs = set([j['job_name'] for j in failed])
-    no_result_jobs = set([j['job_name'] for j in no_result])
-    to_promote = in_criteria.difference(passed_jobs)
-
-    if failed:
-        status = "Red"
-    elif not to_promote:
-        status = "Green"
-    else:
-        status = "Yellow"
-
-    component_ui = f"{component} component" if component else ""
-    status_ui = f"status={status}"
-    promotion_ui = f"last_promotion={timestamp}"
-    header_ui = " ".join([component_ui, status_ui, promotion_ui])
-
-    console.print(header_ui)
-
-    print_a_set_in_table(passed_jobs, "Jobs which passed:")
-    print_a_set_in_table(failed_jobs, "Jobs which failed:")
-    print_a_set_in_table(no_result_jobs, "Pending running jobs")
-
-    if failed:
-        console.print("Logs of failing jobs:")
-        for value in failed:
-            console.print(value['logs'])
-
-    if to_promote:
-        # NOTE: Print new line to separate results
-        console.print("\n")
-        if component:
-            render_component_yaml(to_promote)
-        else:
-            render_integration_yaml(to_promote, test_hash)
-
-
-def render_tables_proxy(results, component=None):
-    for result in results:
-        timestamp = datetime.utcfromtimestamp(result['promotion_date'])
-
-        passed = result['passed']
-        failed = result['failed']
-        no_result = result['no_result']
-        in_criteria = result['in_criteria']
-        promotion_hash = result['aggregate_hash']
-
-        render_tables(passed, failed, no_result, in_criteria, timestamp,
-                      component, promotion_hash)
 
 
 def fetch_component(api_instance, component_name, jobs_in_criteria):
@@ -424,34 +321,6 @@ STREAM = {
 }
 
 
-@click.option("--jsonize", is_flag=True, default=False)
-@click.option("--verbose", is_flag=True, default=False)
-@click.option("--component", default=None,
-              type=click.Choice(sorted(ALL_COMPONENTS)))
-@click.option("--distro", default=DISTROS[0], type=click.Choice(DISTROS))
-@click.option("--release", default=RELEASES[0], type=click.Choice(RELEASES))
-@click.command()
-def main(release, distro, component, verbose, jsonize):
-    if verbose:
-        fmt = '%(asctime)s:%(levelname)s - %(funcName)s:%(lineno)s %(message)s'
-        logging.basicConfig(format=fmt, encoding='utf-8', level=logging.DEBUG)
-
-    distros = REVERSED_MATRIX[release]
-    releases = MATRIX[distro]
-    if distro not in distros or release not in releases:
-        msg = f'Release {release} is not supported for {distro}.'
-        raise BadParameter(msg)
-    logging.info("Starting script: %s - %s", distro, release)
-
-    # NOTE (dasm): Dynamically select up/downstream function based on distro
-    stream = STREAM[distro]
-    results = stream(release, distro, component)
-    if jsonize:
-        print(json.dumps(results))
-    else:
-        render_tables_proxy(results, component)
-
-
 @app.errorhandler(404)
 def internal_error(error):
     data = {"error": error.description}
@@ -481,7 +350,3 @@ def run(system, release, component=None):
     stream = STREAM[system]
     data = stream(release, system, component)
     return jsonify(data), 200
-
-
-if __name__ == '__main__':
-    main()  # pylint: disable=no-value-for-parameter
