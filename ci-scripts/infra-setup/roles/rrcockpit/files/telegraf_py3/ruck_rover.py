@@ -107,7 +107,6 @@ def sort_jobs(jobs):
     in_criteria = {}
     failed_urls = set()
 
-    results = {}
     for job in jobs:
         if job['criteria'] is True:
             in_criteria[job['job_name']] = job
@@ -121,6 +120,15 @@ def sort_jobs(jobs):
 
         elif job['status'] == INFLUX_PENDING:
             no_result[job['job_name']] = job
+
+    to_promote = set(in_criteria).difference(passed)
+    for job_to_promote in set(to_promote):
+        alt_criteria = in_criteria[job_to_promote]['alt_criteria']
+        alt_criteria_passed = set(alt_criteria).intersection(passed)
+
+        if alt_criteria_passed:
+            to_promote.remove(job_to_promote)
+            in_criteria[job_to_promote]['success'] = True
 
     return passed, failed, no_result, in_criteria
 
@@ -196,7 +204,8 @@ def render_component_yaml(jobs):
     print(output)
 
 
-def render_tables(jobs, timestamp, component, test_hash):
+def render_tables(passed, failed, no_result, in_criteria, timestamp,
+                  component, test_hash):
     """
     jobs_to_promote are any job that hasn't registered
     success w/ dlrn. jobs_pending are any jobs in pending.
@@ -205,25 +214,7 @@ def render_tables(jobs, timestamp, component, test_hash):
     you are only looking at one component and not all components
     """
 
-    passed = set(k['job_name'] for k in jobs if k['status'] == INFLUX_PASSED)
-    failed = set(k['job_name'] for k in jobs if k['status'] == INFLUX_FAILED)
-    failed_urls = set(k['logs'] for k in jobs if k['status'] == INFLUX_FAILED)
-    no_result = set(
-        k['job_name'] for k in jobs if k['status'] == INFLUX_PENDING)
-    in_criteria_dict = {
-        k['job_name']: k['alt_criteria'] for k in jobs if k['criteria'] is True
-    }
-    in_criteria = set(in_criteria_dict)
-    to_promote = in_criteria.difference(passed)
-
-    for job_to_promote in set(to_promote):
-        alt_criteria = in_criteria_dict[job_to_promote]
-        alt_criteria_passed = set(alt_criteria).intersection(passed)
-
-        if alt_criteria_passed:
-            to_promote.remove(job_to_promote)
-            in_criteria.update(alt_criteria_passed)
-
+    to_promote = set(in_criteria).difference(passed)
     if failed:
         status = "Red"
     elif not to_promote:
@@ -242,30 +233,34 @@ def render_tables(jobs, timestamp, component, test_hash):
     print_a_set_in_table(failed, "Jobs which failed:")
     print_a_set_in_table(no_result, "Pending running jobs")
 
-    if failed_urls:
+    if failed:
         console.print("Logs of failing jobs:")
-    for value in failed_urls:
-        console.print(value)
+        for value in failed.values():
+            console.print(value['logs'])
 
     # NOTE: Print new line to separate results
     console.print("\n")
 
-    tp_jobs = to_promote - no_result
-    if tp_jobs:
+    to_promote_jobs = to_promote - set(no_result)
+    if to_promote_jobs:
         if component:
-            render_component_yaml(tp_jobs)
+            render_component_yaml(to_promote_jobs)
         else:
-            render_integration_yaml(tp_jobs, test_hash)
+            render_integration_yaml(to_promote_jobs, test_hash)
 
 
 def render_tables_proxy(results, component=None):
     for timestamp, result in results.items():
         timestamp = datetime.utcfromtimestamp(timestamp)
 
-        jobs = result['jobs']
+        passed = result['passed']
+        failed = result['failed']
+        no_result = result['no_result']
+        in_criteria = result['in_criteria']
         promotion_hash = result['aggregate_hash']
 
-        render_tables(jobs, timestamp, component, promotion_hash)
+        render_tables(passed, failed, no_result, in_criteria, timestamp,
+                      component, promotion_hash)
 
 
 def component_function(api_instance, component_name, jobs_in_criteria):
@@ -289,7 +284,6 @@ def component_function(api_instance, component_name, jobs_in_criteria):
         passed, failed, no_result, in_criteria = sort_jobs(jobs_list)
 
         results[promotion.timestamp] = {
-            "jobs": jobs_list,
             "passed": passed,
             "failed": failed,
             "no_result": no_result,
@@ -314,11 +308,11 @@ def integration_function(
             aggregate_hash=promotion.aggregate_hash
         )
         aggregate = api_instance.api_agg_status_get(params)
-        jobs_list = get_dlrn_results(aggregate, jobs_in_criteria, jobs_alt_criteria)
+        jobs_list = get_dlrn_results(
+            aggregate, jobs_in_criteria, jobs_alt_criteria)
         passed, failed, no_result, in_criteria = sort_jobs(jobs_list)
 
         results[promotion.timestamp] = {
-            "jobs": jobs_list,
             "passed": passed,
             "failed": failed,
             "no_result": no_result,
@@ -347,7 +341,8 @@ def downstream_component(system, release, component_name):
     jobs_in_criteria = set(criteria['promoted-components'].get(
         component_name, []))
 
-    results = component_function(api_instance, component_name, jobs_in_criteria)
+    results = component_function(
+        api_instance, component_name, jobs_in_criteria)
     return results
 
 
