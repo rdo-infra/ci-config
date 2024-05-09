@@ -10,7 +10,7 @@
         - pollurl:
             cron: "H * * * *"
             urls:
-                - url: https://trunk.rdoproject.org/centos8-train/current-tripleo/delorean.repo
+                - url: https://osp-trunk.hosted.upshift.rdu2.redhat.com/rhel8-osp16-2/current-tripleo/delorean.repo
                   check-content:
                     - simple: true
     defaults: parent-promote-defaults
@@ -41,7 +41,7 @@
     builders:
         - shell:
             !include-raw-escape:
-                - scripts/centos8-train-current-tripleo.sh
+                - scripts/rhel8-osp16-2-current-tripleo.sh
                 - scripts/promote-get-hash.sh
     publishers:
         - tripleo-quickstart-archive-hash-train-centos8-current-tripleo
@@ -109,7 +109,7 @@
                 - log-text: marked build as failure
               script:
                 !include-raw:
-                    - scripts/centos8-train-current-tripleo.sh
+                    - scripts/rhel8-osp16-2-current-tripleo.sh
                     - scripts/export-success-false.sh
                     - scripts/dlrn-api-report.sh
         - post-tasks:
@@ -118,6 +118,6 @@
               run-if-job-successful: true
               script:
                 !include-raw:
-                    - scripts/centos8-train-current-tripleo.sh
+                    - scripts/rhel8-osp16-2-current-tripleo.sh
                     - scripts/export-success-true.sh
                     - scripts/dlrn-api-report.sh
