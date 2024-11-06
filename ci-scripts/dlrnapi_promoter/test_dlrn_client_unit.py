@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import logging
 import os
 import shutil
@@ -78,6 +79,9 @@ class DlrnSetup(unittest.TestCase):
                                    "".format(self.dlrn_hash_commitdistro1,
                                              'tripleo-ci-testing',
                                              'current-tripleo'))
+        self.hashes = ['e358efa489f58062f10dd7316b65649e51ba4811c5b',
+                       '2510c39011c5be704182423e3a695e91e35efa48906',
+                       '865c0c0b4ab0e063e5caa3387c1a8741c5be70695c3']
         # Set up the matrix of api_hashes to test
         commitdistrohash_valid_attrs = ['commit_hash', 'distro_hash',
                                         'timestamp']
@@ -87,9 +91,10 @@ class DlrnSetup(unittest.TestCase):
         self.api_hashes_commitdistro_ordered = []
         for idx in range(3):
             api_hash = Mock(spec=commitdistrohash_valid_attrs)
-            api_hash.commit_hash = "a{}".format(idx)
-            api_hash.distro_hash = "b{}".format(idx)
+            api_hash.commit_hash = "a{}".format(self.hashes[idx])
+            api_hash.distro_hash = "b{}".format(self.hashes[idx])
             api_hash.timestamp = idx
+            api_hash.extended_hash = "a{}_b{}".format(self.hashes[idx], self.hashes[idx])
             self.api_hashes_commitdistro_ordered.append(api_hash)
 
         # Create list with a duplicate by appending the last element in the
@@ -102,9 +107,10 @@ class DlrnSetup(unittest.TestCase):
         self.api_hashes_aggregate_ordered = []
         for idx in range(3):
             api_hash = Mock(spec=aggregatehash_valid_attrs)
-            api_hash.aggregate_hash = "a{}".format(idx)
-            api_hash.commit_hash = "b{}".format(idx)
-            api_hash.distro_hash = "c{}".format(idx)
+            api_hash.aggregate_hash = "a{}".format(self.hashes[idx])
+            api_hash.commit_hash = "b{}".format(self.hashes[idx])
+            api_hash.distro_hash = "c{}".format(self.hashes[idx])
+            api_hash.extended_hash = "a{}_b{}".format(self.hashes[idx], self.hashes[idx])
             api_hash.timestamp = idx
             self.api_hashes_aggregate_ordered.append(api_hash)
 
