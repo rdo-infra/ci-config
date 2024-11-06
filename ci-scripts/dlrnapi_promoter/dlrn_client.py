@@ -236,6 +236,10 @@ class DlrnClient(object):
         """
         hash_list = []
         for hashes in api_hashes:
+            # Some hashes came in the old format, and we don't want that to
+            # block promotion
+            if len(hashes.extended_hash) <= 40:
+                continue
             str_hashes = str(hashes).replace('\n', ' ').replace('\r', ' ')
             hash_obj = DlrnHash(source=hashes)
             # we could use a set, but then we'd lose the order
