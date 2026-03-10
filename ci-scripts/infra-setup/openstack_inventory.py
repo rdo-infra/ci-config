@@ -61,7 +61,7 @@ import time
 from ansible.module_utils.six import raise_from
 
 try:
-    from ansible.module_utils.compat.version import StrictVersion
+    from ansible.module_utils.common.version import LooseVersion as StrictVersion
 except ImportError:
     try:
         from distutils.version import StrictVersion
