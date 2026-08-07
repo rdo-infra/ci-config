@@ -14,7 +14,7 @@ import dlrnapi_client
 import pytest
 
 try:
-    import urllib2 as url_libc  # pylint: disable=unused-import
+    import urllib2 as url_lib
 except ImportError:
     import urllib.request as url_lib
 
