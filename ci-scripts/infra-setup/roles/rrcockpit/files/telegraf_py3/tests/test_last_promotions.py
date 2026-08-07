@@ -61,12 +61,12 @@ class TestLastPromotions(unittest.TestCase):
                                                    "foo",
                                                    "bar")
 
-        self.assertEquals(
+        self.assertEqual(
                           promo['commit_hash'],
                           '02809ef4ec6112adb2bd960cb830503dab9a4c2a'
                          )
-        self.assertEquals(promo['release'], "foo")
-        self.assertEquals(promo['distro'], "bar")
+        self.assertEqual(promo['release'], "foo")
+        self.assertEqual(promo['distro'], "bar")
 
     def test_update_promotion(self):
         imported_promos = self.all_master_promo
@@ -83,5 +83,5 @@ class TestLastPromotions(unittest.TestCase):
         promo = last_promotions.update_promotion(promo,
                                                  promotion_details,
                                                  consistent)
-        self.assertEquals(promo['promotion_details'], promotion_details)
-        self.assertEquals(promo['consistent_date'], consistent)
+        self.assertEqual(promo['promotion_details'], promotion_details)
+        self.assertEqual(promo['consistent_date'], consistent)
