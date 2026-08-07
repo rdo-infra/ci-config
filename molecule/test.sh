@@ -4,7 +4,7 @@
 # This file run molecule unit jobs
 #
 
-if [ $# -gt 1 ]; then
+if [ $# -gt 0 ]; then
     molecule test -s $1 || exit 1
 else
     for i in `ls molecule/`; do
