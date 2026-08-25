@@ -1,0 +1,30 @@
+---
+- name: Install system dependencies
+  yum:
+    name: krb5-workstation
+    state: latest
+  become: true
+
+- name: Register krb data facts
+  when: krb_keytab is defined
+  set_fact:
+    krb_principal: "{{ krb_keytab.principal }}"
+    krb_keytab_path: ".keytab"
+  no_log: true
+
+- name: Save keytab on filesystem
+  when: krb_keytab is defined
+  copy:
+    dest: "{{ krb_keytab_path }}"
+    content: "{{ krb_keytab.keytab | b64decode }}"
+    mode: 0400
+  no_log: true
+
+- name: Comment the default ccache config in krb5.conf
+  command: sed -i s/default_ccache_name/#default_ccache_name/ /etc/krb5.conf
+  become: true
+
+- name: Run kinit
+  command: kinit -k -t {{ krb_keytab_path }} {{ krb_principal }}
+  when: krb_keytab is defined
+  no_log: true
